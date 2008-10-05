@@ -36,5 +36,11 @@ namespace DiscUtils.Iso9660
             get;
             set;
         }
+
+        public BuildParameters()
+        {
+            VolumeIdentifier = "";
+            UseJoliet = true;
+        }
     }
 }

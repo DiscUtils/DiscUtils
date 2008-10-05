@@ -183,7 +183,13 @@ namespace DiscUtils.Iso9660
                 primaryLocationTable.Add(fi, (uint)(focus / 2048));
                 supplementaryLocationTable.Add(fi, (uint)(focus / 2048));
                 FileExtent extent = new FileExtent(fi, focus);
-                fixedRegions.Add(extent);
+
+                // Only remember files of non-zero length (otherwise we'll stomp on a valid file)
+                if (extent.DiskLength != 0)
+                {
+                    fixedRegions.Add(extent);
+                }
+
                 focus += extent.DiskLength;
             }
             return focus;

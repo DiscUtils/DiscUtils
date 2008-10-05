@@ -32,7 +32,7 @@ namespace DiscUtils.Iso9660
         private List<BuildDirectoryInfo> dirs;
         private BuildDirectoryInfo rootDirectory;
 
-        BuildParameters buildParams;
+        private BuildParameters buildParams;
 
         public CDBuilder()
         {
@@ -109,7 +109,7 @@ namespace DiscUtils.Iso9660
 
         public BuildFileInfo AddFile(string name, string sourcePath)
         {
-            string[] nameElements = name.Split('\\');
+            string[] nameElements = name.Split(new char[]{'\\'}, StringSplitOptions.RemoveEmptyEntries);
             BuildDirectoryInfo dir = GetDirectory(nameElements, nameElements.Length - 1, true);
 
             BuildDirectoryMember existing;
@@ -119,7 +119,7 @@ namespace DiscUtils.Iso9660
             }
             else
             {
-                BuildFileInfo fi = new BuildFileInfo(name, dir, sourcePath);
+                BuildFileInfo fi = new BuildFileInfo(nameElements[nameElements.Length - 1], dir, sourcePath);
                 files.Add(fi);
                 dir.Add(fi);
                 return fi;

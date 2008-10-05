@@ -94,7 +94,7 @@ namespace DiscUtils.Iso9660
             Utilities.ToBothFromUInt16(buffer, offset + 28, VolumeSequenceNumber);
             byte lengthOfFileIdentifier;
 
-            lengthOfFileIdentifier = (byte)Utilities.WriteString(buffer, offset + 33, 255, false, FileIdentifier, enc);
+            lengthOfFileIdentifier = (byte)Utilities.WriteString(buffer, offset + 33, (int)(length - 33), false, FileIdentifier, enc);
 #if false
             if ((Flags & FileFlags.Directory) != 0)
             {
