@@ -28,7 +28,7 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
-    public class Utilities
+    internal class Utilities
     {
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {

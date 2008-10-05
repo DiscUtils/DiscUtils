@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Iso9660
 {
-    public class BuildParameters
+    internal class BuildParameters
     {
         public bool UseJoliet
         {
