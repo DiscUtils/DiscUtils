@@ -20,24 +20,37 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
+using System;
+using System.Collections.Generic;
 
-namespace DiscUtils
+namespace DiscUtils.Common
 {
-    public abstract class DiscFileSystem
+    internal class Utilities
     {
-        public abstract bool CanWrite();
-
-        public abstract DiscDirectoryInfo Root
+        public static string[] WordWrap(string text, int width)
         {
-            get;
-        }
+            List<string> lines = new List<string>();
+            int pos = 0;
 
-        public virtual Stream Open(string path, FileMode mode)
-        {
-            return Open(path, mode, (mode == FileMode.Open) ? FileAccess.Read : FileAccess.ReadWrite);
-        }
+            while (pos < text.Length - width)
+            {
+                int start = Math.Min(pos + width, text.Length - 1);
+                int count = start - pos;
 
-        public abstract Stream Open(string path, FileMode mode, FileAccess access);
+                int breakPos = text.LastIndexOf(' ', start, count);
+
+                lines.Add(text.Substring(pos, breakPos - pos).TrimEnd(' '));
+
+                while (breakPos < text.Length && text[breakPos] == ' ')
+                {
+                    breakPos++;
+                }
+                pos = breakPos;
+            }
+
+            lines.Add(text.Substring(pos));
+
+            return lines.ToArray();
+        }
     }
 }

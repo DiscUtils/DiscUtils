@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C# Express 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils", "src\DiscUtils.csproj", "{DBB340F9-2386-43C2-A473-FA496CBE07A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.Common", "utils\DiscUtils.Common\DiscUtils.Common.csproj", "{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISOExtract", "utils\ISOExtract\ISOExtract.csproj", "{15A44DEB-305C-4995-B68E-6BCA4414164D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +17,14 @@ Global
 		{DBB340F9-2386-43C2-A473-FA496CBE07A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBB340F9-2386-43C2-A473-FA496CBE07A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBB340F9-2386-43C2-A473-FA496CBE07A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
