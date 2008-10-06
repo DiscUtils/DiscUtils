@@ -24,20 +24,43 @@ using System.IO;
 
 namespace DiscUtils
 {
+    /// <summary>
+    /// Provides the base class for all file systems.
+    /// </summary>
     public abstract class DiscFileSystem
     {
+        /// <summary>
+        /// Indicates whether the file system is read-only or read-write.
+        /// </summary>
+        /// <returns>true if the file system is read-write.</returns>
         public abstract bool CanWrite();
 
+        /// <summary>
+        /// Gets the root directory of the file system.
+        /// </summary>
         public abstract DiscDirectoryInfo Root
         {
             get;
         }
 
+        /// <summary>
+        /// Opens the specified file.
+        /// </summary>
+        /// <param name="path">The full path of the file to open.</param>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <returns>The new stream.</returns>
         public virtual Stream Open(string path, FileMode mode)
         {
             return Open(path, mode, (mode == FileMode.Open) ? FileAccess.Read : FileAccess.ReadWrite);
         }
 
+        /// <summary>
+        /// Opens the specified file.
+        /// </summary>
+        /// <param name="path">The full path of the file to open.</param>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <param name="access">The access permissions for the created stream.</param>
+        /// <returns>The new stream.</returns>
         public abstract Stream Open(string path, FileMode mode, FileAccess access);
     }
 }

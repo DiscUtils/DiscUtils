@@ -21,60 +21,92 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace DiscUtils
 {
+    /// <summary>
+    /// Provides the base class for both <see cref="DiscFileInfo"/> and <see cref="DiscDirectoryInfo"/> objects.
+    /// </summary>
     public abstract class DiscFileSystemInfo
     {
+        /// <summary>
+        /// Gets the name of the file or directory.
+        /// </summary>
         public abstract string Name
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the full path of the file or directory.
+        /// </summary>
         public abstract string FullName
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the <see cref="System.IO.FileAttributes"/> of the current <see cref="DiscFileSystemInfo"/> object.
+        /// </summary>
         public abstract FileAttributes Attributes
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the <see cref="DiscDirectoryInfo"/> of the directory containing the current <see cref="DiscFileSystemInfo"/> object.
+        /// </summary>
         public abstract DiscDirectoryInfo Parent
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
+        /// </summary>
         public abstract DateTime CreationTime
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the creation time (in UTC) of the current <see cref="DiscFileSystemInfo"/> object.
+        /// </summary>
         public abstract DateTime CreationTimeUtc
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the last time (in local time) the file or directory was accessed.
+        /// </summary>
+        /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
         public abstract DateTime LastAccessTime
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the last time (in UTC) the file or directory was accessed.
+        /// </summary>
+        /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
         public abstract DateTime LastAccessTimeUtc
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the last time (in local time) the file or directory was written to.
+        /// </summary>
         public abstract DateTime LastWriteTime
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the last time (in UTC) the file or directory was written to.
+        /// </summary>
         public abstract DateTime LastWriteTimeUtc
         {
             get;

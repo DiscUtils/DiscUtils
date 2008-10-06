@@ -27,16 +27,24 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
+    /// <summary>
+    /// Class for reading existing ISO images.
+    /// </summary>
     public class CDReader : DiscFileSystem
     {
-        private Stream data;
-        private CommonVolumeDescriptor volDesc;
-        private List<PathTableRecord> pathTable;
-        private Dictionary<int,int> pathTableFirstInParent;
+        private Stream _data;
+        private CommonVolumeDescriptor _volDesc;
+        private List<PathTableRecord> _pathTable;
+        private Dictionary<int,int> _pathTableFirstInParent;
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="data">The stream to read the ISO image from.</param>
+        /// <param name="joliet">Whether to read Joliet extensions.</param>
         public CDReader(Stream data, bool joliet)
         {
-            this.data = data;
+            _data = data;
 
             long vdpos = 0x8000; // Skip lead-in
 
@@ -81,51 +89,65 @@ namespace DiscUtils.Iso9660
             {
                 data.Position = svdPos;
                 data.Read(buffer, 0, 2048);
-                volDesc = new SupplementaryVolumeDescriptor(buffer, 0);
+                _volDesc = new SupplementaryVolumeDescriptor(buffer, 0);
             }
             else
             {
                 data.Position = pvdPos;
                 data.Read(buffer, 0, 2048);
-                volDesc = new PrimaryVolumeDescriptor(buffer, 0);
+                _volDesc = new PrimaryVolumeDescriptor(buffer, 0);
             }
 
             // Skip to Path Table
-            data.Position = volDesc.LogicalBlockSize * volDesc.TypeLPathTableLocation;
-            byte[] pathTableBuffer = new byte[volDesc.PathTableSize];
+            data.Position = _volDesc.LogicalBlockSize * _volDesc.TypeLPathTableLocation;
+            byte[] pathTableBuffer = new byte[_volDesc.PathTableSize];
             data.Read(pathTableBuffer, 0, pathTableBuffer.Length);
 
-            pathTable = new List<PathTableRecord>();
-            pathTableFirstInParent = new Dictionary<int,int>();
+            _pathTable = new List<PathTableRecord>();
+            _pathTableFirstInParent = new Dictionary<int,int>();
             uint pos = 0;
             int lastParent = 0;
-            while (pos < volDesc.PathTableSize)
+            while (pos < _volDesc.PathTableSize)
             {
                 PathTableRecord ptr;
-                int length = PathTableRecord.ReadFrom(pathTableBuffer, (int)pos, false, volDesc.CharacterEncoding, out ptr);
+                int length = PathTableRecord.ReadFrom(pathTableBuffer, (int)pos, false, _volDesc.CharacterEncoding, out ptr);
 
                 if (lastParent != ptr.ParentDirectoryNumber)
                 {
-                    pathTableFirstInParent[ptr.ParentDirectoryNumber] = pathTable.Count;
+                    _pathTableFirstInParent[ptr.ParentDirectoryNumber] = _pathTable.Count;
                     lastParent = ptr.ParentDirectoryNumber;
                 }
 
-                pathTable.Add(ptr);
+                _pathTable.Add(ptr);
 
                 pos += (uint)length;
             }
         }
 
+        /// <summary>
+        /// Indicates ISO files are read-only.
+        /// </summary>
+        /// <returns>Always returns <c>false</c>.</returns>
         public override bool CanWrite()
         {
             return false;
         }
 
+        /// <summary>
+        /// Gets the root directory of the ISO.
+        /// </summary>
         public override DiscDirectoryInfo Root
         {
-            get { return new ReaderDirectoryInfo(this, null, volDesc.RootDirectory, volDesc.CharacterEncoding); }
+            get { return new ReaderDirectoryInfo(this, null, _volDesc.RootDirectory, _volDesc.CharacterEncoding); }
         }
 
+        /// <summary>
+        /// Opens a file on the ISO image.
+        /// </summary>
+        /// <param name="path">The full path to the file.</param>
+        /// <param name="mode">Must be <c>FileMode.Open</c></param>
+        /// <param name="access">Must be <c>FileMode.Read</c></param>
+        /// <returns>The file as a stream.</returns>
         public override Stream Open(string path, FileMode mode, FileAccess access)
         {
             if (mode != FileMode.Open)
@@ -154,7 +176,7 @@ namespace DiscUtils.Iso9660
                 this,
                 null,
                 new DirectoryRecord(ptr.DirectoryIdentifier, FileFlags.Directory, ptr.LocationOfExtent, uint.MaxValue),
-                volDesc.CharacterEncoding);
+                _volDesc.CharacterEncoding);
 
             DiscFileInfo[] fileInfo = dirInfo.GetFiles(file);
             if (fileInfo.Length != 1)
@@ -173,7 +195,7 @@ namespace DiscUtils.Iso9660
             ushort parent = 1;
 
             string partStr = pathParts[part].ToUpperInvariant();
-            PathTableRecord ptr = pathTable[pathTableIdx];
+            PathTableRecord ptr = _pathTable[pathTableIdx];
             while (ptr.ParentDirectoryNumber == parent)
             {
                 if (ptr.DirectoryIdentifier.ToUpperInvariant() == partStr)
@@ -185,7 +207,7 @@ namespace DiscUtils.Iso9660
                         // Found all parts of the path - we're done
                         return ptr;
                     }
-                    else if (pathTableFirstInParent.TryGetValue(pathTableIdx + 1, out newIdx))
+                    else if (_pathTableFirstInParent.TryGetValue(pathTableIdx + 1, out newIdx))
                     {
                         // This dir has sub-dirs, so start searching them, moving on to next part
                         // of the requested path
@@ -205,7 +227,7 @@ namespace DiscUtils.Iso9660
                 {
                     pathTableIdx++;
                 }
-                ptr = pathTable[pathTableIdx];
+                ptr = _pathTable[pathTableIdx];
             }
 
             // Fell off the end of parent's records
@@ -214,7 +236,7 @@ namespace DiscUtils.Iso9660
 
         internal Stream GetExtentStream(DirectoryRecord record)
         {
-            return new ExtentStream(data, record.LocationOfExtent, record.DataLength, record.FileUnitSize, record.InterleaveGapSize);
+            return new ExtentStream(_data, record.LocationOfExtent, record.DataLength, record.FileUnitSize, record.InterleaveGapSize);
         }
     }
 

@@ -20,18 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace DiscUtils
 {
+    /// <summary>
+    /// Provides information about a file on a disc.
+    /// </summary>
     public abstract class DiscFileInfo : DiscFileSystemInfo
     {
+        /// <summary>
+        /// Gets the length of the current file in bytes.
+        /// </summary>
         public abstract long Length { get; }
+
+        /// <summary>
+        /// Opens the current file.
+        /// </summary>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <returns>The newly created stream</returns>
+        /// <remarks>Read-only file systems only support <c>FileMode.Open</c>.</remarks>
         public abstract Stream Open(FileMode mode);
+
+        /// <summary>
+        /// Opens the current file.
+        /// </summary>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <param name="access">The access permissions for the created stream.</param>
+        /// <returns>The newly created stream</returns>
+        /// <remarks>Read-only file systems only support <c>FileMode.Open</c> and <c>FileAccess.Read</c>.</remarks>
         public abstract Stream Open(FileMode mode, FileAccess access);
     }
 }

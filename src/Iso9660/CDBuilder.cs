@@ -26,33 +26,62 @@ using System.IO;
 
 namespace DiscUtils.Iso9660
 {
+    /// <summary>
+    /// Class that creates ISO images.
+    /// </summary>
+    /// <example>
+    /// <code>
+    ///   CDBuilder builder = new CDBuilder();
+    ///   builder.VolumeIdentifier = "MYISO";
+    ///   builder.UseJoliet = true;
+    ///   builder.AddFile("Hello.txt", Encoding.ASCII.GetBytes("hello world!"));
+    ///   builder.Build(@"C:\TEMP\myiso.iso");
+    /// </code>
+    /// </example>
     public class CDBuilder
     {
-        private List<BuildFileInfo> files;
-        private List<BuildDirectoryInfo> dirs;
-        private BuildDirectoryInfo rootDirectory;
+        private List<BuildFileInfo> _files;
+        private List<BuildDirectoryInfo> _dirs;
+        private BuildDirectoryInfo _rootDirectory;
 
-        private BuildParameters buildParams;
+        private BuildParameters _buildParams;
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
         public CDBuilder()
         {
-            files = new List<BuildFileInfo>();
-            dirs = new List<BuildDirectoryInfo>();
-            rootDirectory = new BuildDirectoryInfo("\0", null);
-            dirs.Add(rootDirectory);
+            _files = new List<BuildFileInfo>();
+            _dirs = new List<BuildDirectoryInfo>();
+            _rootDirectory = new BuildDirectoryInfo("\0", null);
+            _dirs.Add(_rootDirectory);
 
-            buildParams = new BuildParameters();
-            buildParams.UseJoliet = true;
+            _buildParams = new BuildParameters();
+            _buildParams.UseJoliet = true;
         }
 
+        /// <summary>
+        /// Initiates a layout of the ISO image, returning a Stream.
+        /// </summary>
+        /// <returns>The stream containing the ISO image.</returns>
+        /// <remarks>
+        /// The ISO is built as it is read and not held in memory or on disk.  To obtain the
+        /// full image read sequentially from the start to the end of the stream.  However
+        /// seeking is supported, so reading arbitrary byte locations from the stream is also
+        /// possible.
+        /// </remarks>
         public Stream Build()
         {
-            return new CDBuildStream(files, dirs, rootDirectory, buildParams);
+            return new CDBuildStream(_files, _dirs, _rootDirectory, _buildParams);
         }
 
+        /// <summary>
+        /// Initiates a layout of the ISO image, returning a Stream.
+        /// </summary>
+        /// <param name="file">The file to write the ISO image to.</param>
         public void Build(string file)
         {
-            using (CDBuildStream cdStream = new CDBuildStream(files, dirs, rootDirectory, buildParams))
+            using (CDBuildStream cdStream = new CDBuildStream(_files, _dirs, _rootDirectory, _buildParams))
             {
                 using (FileStream fileStream = new FileStream(file, FileMode.Create, FileAccess.Write))
                 {
@@ -67,9 +96,16 @@ namespace DiscUtils.Iso9660
             }
         }
 
+        /// <summary>
+        /// The Volume Identifier for the ISO file.
+        /// </summary>
+        /// <remarks>
+        /// Must be a valid identifier, i.e. max 32 characters in the range A-Z, 0-9 or _.
+        /// Lower-case characters are not permitted.
+        /// </remarks>
         public string VolumeIdentifier
         {
-            get { return buildParams.VolumeIdentifier; }
+            get { return _buildParams.VolumeIdentifier; }
             set {
                 if (value.Length > 32 || !Utilities.isValidDString(value))
                 {
@@ -77,17 +113,34 @@ namespace DiscUtils.Iso9660
                 }
                 else
                 {
-                    buildParams.VolumeIdentifier = value;
+                    _buildParams.VolumeIdentifier = value;
                 }
             }
         }
 
+        /// <summary>
+        /// Indicates whether Joliet file-system extensions should be used.
+        /// </summary>
         public bool UseJoliet
         {
-            get { return buildParams.UseJoliet; }
-            set { buildParams.UseJoliet = value; }
+            get { return _buildParams.UseJoliet; }
+            set { _buildParams.UseJoliet = value; }
         }
 
+        /// <summary>
+        /// Adds a byte array to the ISO image as a file.
+        /// </summary>
+        /// <param name="name">The name of the file on the ISO image.</param>
+        /// <param name="content">The contents of the file.</param>
+        /// <returns>The object representing this file.</returns>
+        /// <remarks>
+        /// The name is the full path to the file, for example:
+        /// <example><code>
+        ///   builder.AddFile(@"DIRA\DIRB\FILE.TXT;1", new byte[]{0,1,2});
+        /// </code></example>
+        /// <para>Note the version number at the end of the file name is optional, if not
+        /// specified the default of 1 will be used.</para>
+        /// </remarks>
         public BuildFileInfo AddFile(string name, byte[] content)
         {
             string[] nameElements = name.Split('\\');
@@ -101,12 +154,26 @@ namespace DiscUtils.Iso9660
             else
             {
                 BuildFileInfo fi = new BuildFileInfo(nameElements[nameElements.Length - 1], dir, content);
-                files.Add(fi);
+                _files.Add(fi);
                 dir.Add(fi);
                 return fi;
             }
         }
 
+        /// <summary>
+        /// Adds a disk file to the ISO image as a file.
+        /// </summary>
+        /// <param name="name">The name of the file on the ISO image.</param>
+        /// <param name="sourcePath">The name of the file on disk.</param>
+        /// <returns>The object representing this file.</returns>
+        /// <remarks>
+        /// The name is the full path to the file, for example:
+        /// <example><code>
+        ///   builder.AddFile(@"DIRA\DIRB\FILE.TXT;1", @"C:\temp\tempfile.bin");
+        /// </code></example>
+        /// <para>Note the version number at the end of the file name is optional, if not
+        /// specified the default of 1 will be used.</para>
+        /// </remarks>
         public BuildFileInfo AddFile(string name, string sourcePath)
         {
             string[] nameElements = name.Split(new char[]{'\\'}, StringSplitOptions.RemoveEmptyEntries);
@@ -120,12 +187,26 @@ namespace DiscUtils.Iso9660
             else
             {
                 BuildFileInfo fi = new BuildFileInfo(nameElements[nameElements.Length - 1], dir, sourcePath);
-                files.Add(fi);
+                _files.Add(fi);
                 dir.Add(fi);
                 return fi;
             }
         }
 
+        /// <summary>
+        /// Adds a stream to the ISO image as a file.
+        /// </summary>
+        /// <param name="name">The name of the file on the ISO image.</param>
+        /// <param name="source">The contents of the file.</param>
+        /// <returns>The object representing this file.</returns>
+        /// <remarks>
+        /// The name is the full path to the file, for example:
+        /// <example><code>
+        ///   builder.AddFile(@"DIRA\DIRB\FILE.TXT;1", stream);
+        /// </code></example>
+        /// <para>Note the version number at the end of the file name is optional, if not
+        /// specified the default of 1 will be used.</para>
+        /// </remarks>
         public BuildFileInfo AddFile(string name, Stream source)
         {
             if (!source.CanSeek)
@@ -144,7 +225,7 @@ namespace DiscUtils.Iso9660
             else
             {
                 BuildFileInfo fi = new BuildFileInfo(name, dir, source);
-                files.Add(fi);
+                _files.Add(fi);
                 dir.Add(fi);
                 return fi;
             }
@@ -185,7 +266,7 @@ namespace DiscUtils.Iso9660
 
         private BuildDirectoryInfo TryGetDirectory(string[] path, int pathLength, bool createMissing)
         {
-            BuildDirectoryInfo focus = rootDirectory;
+            BuildDirectoryInfo focus = _rootDirectory;
 
             for (int i = 0; i < pathLength; ++i)
             {
@@ -197,7 +278,7 @@ namespace DiscUtils.Iso9660
                         // This directory doesn't exist, create it...
                         BuildDirectoryInfo di = new BuildDirectoryInfo(path[i], focus);
                         focus.Add(di);
-                        dirs.Add(di);
+                        _dirs.Add(di);
                         focus = di;
                     }
                     else

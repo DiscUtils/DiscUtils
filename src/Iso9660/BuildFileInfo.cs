@@ -26,76 +26,82 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
+    /// <summary>
+    /// Represents a file that will be built into the ISO image.
+    /// </summary>
     public class BuildFileInfo : BuildDirectoryMember
     {
-        private BuildDirectoryInfo parent;
-        private byte[] contentData;
-        private string contentPath;
-        private Stream contentStream;
-        private uint extentStart;
+        private BuildDirectoryInfo _parent;
+        private byte[] _contentData;
+        private string _contentPath;
+        private Stream _contentStream;
+        private uint _extentStart;
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, byte[] content)
             : base(Utilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
-            this.parent = parent;
-            this.contentData = content;
+            _parent = parent;
+            _contentData = content;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, string content)
             : base(Utilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
-            this.parent = parent;
-            this.contentPath = content;
+            _parent = parent;
+            _contentPath = content;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, Stream source)
             : base(Utilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
-            this.parent = parent;
-            this.contentStream = source;
+            _parent = parent;
+            _contentStream = source;
         }
 
+        /// <summary>
+        /// The parent directory, or <c>null</c> if none.
+        /// </summary>
         public override BuildDirectoryInfo Parent
         {
-            get { return parent; }
+            get { return _parent; }
         }
 
         internal uint ExtentStart
         {
-            get { return extentStart; }
-            set { extentStart = value; }
+            get { return _extentStart; }
+            set { _extentStart = value; }
         }
 
         internal override long GetDataSize(Encoding enc)
         {
-            if (contentData != null)
+            if (_contentData != null)
             {
-                return contentData.LongLength;
+                return _contentData.LongLength;
             }
-            else if (contentPath != null)
+            else if (_contentPath != null)
             {
-                System.IO.FileInfo fi = new System.IO.FileInfo(contentPath);
+                System.IO.FileInfo fi = new System.IO.FileInfo(_contentPath);
                 return fi.Length;
             }
             else
             {
-                return contentStream.Length;
+                return _contentStream.Length;
             }
         }
 
         internal Stream OpenStream()
         {
-            if (contentData != null)
+            if (_contentData != null)
             {
-                return new MemoryStream(contentData, false);
+                return new MemoryStream(_contentData, false);
             }
-            else if (contentPath != null)
+            else if (_contentPath != null)
             {
-                return new FileStream(contentPath, FileMode.Open, FileAccess.Read);
+                return new FileStream(_contentPath, FileMode.Open, FileAccess.Read);
             }
             else
             {
-                return contentStream;
+                return _contentStream;
             }
         }
 
@@ -103,7 +109,7 @@ namespace DiscUtils.Iso9660
         {
             // Close and dispose the stream, unless it's one we were given to stream in
             // from (we might need it again).
-            if (contentStream != s)
+            if (_contentStream != s)
             {
                 s.Close();
                 s.Dispose();

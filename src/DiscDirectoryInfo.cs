@@ -28,22 +28,86 @@ using System.IO;
 
 namespace DiscUtils
 {
+    /// <summary>
+    /// Provides information about a directory on a disc.
+    /// </summary>
+    /// <remarks>
+    /// This class allows navigation of the disc directory/file hierarchy.
+    /// </remarks>
     public abstract class DiscDirectoryInfo : DiscFileSystemInfo
     {
+        /// <summary>
+        /// Construction limited to sub classes.
+        /// </summary>
+        protected DiscDirectoryInfo()
+        {
+        }
+
+        /// <summary>
+        /// Gets all child directories.
+        /// </summary>
+        /// <returns>An array of child directories</returns>
         public abstract DiscDirectoryInfo[] GetDirectories();
 
+        /// <summary>
+        /// Gets all child directories matching a search pattern.
+        /// </summary>
+        /// <param name="pattern">The search pattern</param>
+        /// <returns>An array of child directories, or empty if none match</returns>
+        /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
+        /// and ? (matching 1 character).</remarks>
         public abstract DiscDirectoryInfo[] GetDirectories(string pattern);
 
+        /// <summary>
+        /// Gets all descendant directories matching a search pattern.
+        /// </summary>
+        /// <param name="pattern">The search pattern</param>
+        /// <param name="option">Whether to search just this directory, or all children</param>
+        /// <returns>An array of descendant directories, or empty if none match</returns>
+        /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
+        /// and ? (matching 1 character).  The option parameter determines whether only immediate
+        /// children, or all children are returned.</remarks>
         public abstract DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option);
 
+        /// <summary>
+        /// Gets all files.
+        /// </summary>
+        /// <returns>An array of files.</returns>
         public abstract DiscFileInfo[] GetFiles();
 
+        /// <summary>
+        /// Gets all files matching a search pattern.
+        /// </summary>
+        /// <param name="pattern">The search pattern</param>
+        /// <returns>An array of files, or empty if none match</returns>
+        /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
+        /// and ? (matching 1 character).</remarks>
         public abstract DiscFileInfo[] GetFiles(string pattern);
 
+        /// <summary>
+        /// Gets all descendant files matching a search pattern.
+        /// </summary>
+        /// <param name="pattern">The search pattern</param>
+        /// <param name="option">Whether to search just this directory, or all children</param>
+        /// <returns>An array of descendant files, or empty if none match</returns>
+        /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
+        /// and ? (matching 1 character).  The option parameter determines whether only immediate
+        /// children, or all children are returned.</remarks>
         public abstract DiscFileInfo[] GetFiles(string pattern, SearchOption option);
 
+        /// <summary>
+        /// Gets all files and directories in this directory.
+        /// </summary>
+        /// <returns>An array of files and directories.</returns>
         public abstract DiscFileSystemInfo[] GetFileSystemInfos();
 
+        /// <summary>
+        /// Gets all files and directories in this directory.
+        /// </summary>
+        /// <param name="pattern">The search pattern</param>
+        /// <returns>An array of files and directories.</returns>
+        /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
+        /// and ? (matching 1 character).</remarks>
         public abstract DiscFileSystemInfo[] GetFileSystemInfos(string pattern);
 
     }

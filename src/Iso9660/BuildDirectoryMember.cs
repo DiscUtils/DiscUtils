@@ -26,38 +26,63 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
+    /// <summary>
+    /// Provides the base class for <see cref="BuildFileInfo"/> and
+    /// <see cref="BuildDirectoryInfo"/> objects that will be built into an
+    /// ISO image.
+    /// </summary>
+    /// <remarks>Instances of this class have two names, a <see cref="Name"/>,
+    /// which is the full-length Joliet name and a <see cref="ShortName"/>,
+    /// which is the strictly compliant ISO 9660 name.</remarks>
     public abstract class BuildDirectoryMember
     {
-        private string name;
-        private string shortName;
-        private DateTime creationTime;
+        private string _name;
+        private string _shortName;
+        private DateTime _creationTime;
 
-        public BuildDirectoryMember(string name, string shortName)
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="name">The Joliet compliant name of the file or directory</param>
+        /// <param name="shortName">The ISO 9660 compliant name of the file or directory</param>
+        protected BuildDirectoryMember(string name, string shortName)
         {
-            this.name = name;
-            this.shortName = shortName;
-            creationTime = DateTime.UtcNow;
+            this._name = name;
+            this._shortName = shortName;
+            _creationTime = DateTime.UtcNow;
         }
 
+        /// <summary>
+        /// The Joliet compliant name of the file or directory.
+        /// </summary>
         public string Name
         {
-            get { return name; }
+            get { return _name; }
         }
 
+        /// <summary>
+        /// The ISO 9660 compliant name of the file or directory.
+        /// </summary>
         public string ShortName
         {
-            get { return shortName; }
+            get { return _shortName; }
         }
 
+        /// <summary>
+        /// The parent directory, or <c>null</c> if this is the root directory.
+        /// </summary>
         public abstract BuildDirectoryInfo Parent
         {
             get;
         }
 
+        /// <summary>
+        /// The creation date for the file or directory, in UTC.
+        /// </summary>
         public DateTime CreationTime
         {
-            get { return creationTime; }
-            set { creationTime = value; }
+            get { return _creationTime; }
+            set { _creationTime = value; }
         }
 
         internal string PickName(string nameOverride, Encoding enc)

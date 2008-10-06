@@ -27,44 +27,56 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
+    /// <summary>
+    /// Represents a directory that will be built into the ISO image.
+    /// </summary>
     public class BuildDirectoryInfo : BuildDirectoryMember
     {
-        private BuildDirectoryInfo parent;
-        private Dictionary<string, BuildDirectoryMember> members;
-        private int hierarchyDepth;
+        private BuildDirectoryInfo _parent;
+        private Dictionary<string, BuildDirectoryMember> _members;
+        private int _hierarchyDepth;
 
         internal BuildDirectoryInfo(string name, BuildDirectoryInfo parent)
             : base(name, MakeShortDirName(name, parent))
         {
-            this.parent = (parent == null) ? this : parent;
-            this.hierarchyDepth = (parent == null) ? 0 : parent.hierarchyDepth + 1;
-            this.members = new Dictionary<string, BuildDirectoryMember>();
+            this._parent = (parent == null) ? this : parent;
+            this._hierarchyDepth = (parent == null) ? 0 : parent._hierarchyDepth + 1;
+            this._members = new Dictionary<string, BuildDirectoryMember>();
         }
 
         internal void Add(BuildDirectoryMember member)
         {
-            members.Add(member.Name, member);
+            _members.Add(member.Name, member);
         }
 
+        /// <summary>
+        /// The parent directory, or <c>null</c> if none.
+        /// </summary>
         public override BuildDirectoryInfo Parent
         {
-            get { return parent; }
+            get { return _parent; }
         }
 
         internal int HierarchyDepth
         {
-            get { return hierarchyDepth; }
+            get { return _hierarchyDepth; }
         }
 
+        /// <summary>
+        /// Gets the specified child directory or file.
+        /// </summary>
+        /// <param name="name">The name of the file or directory to get.</param>
+        /// <param name="member">The member found (or <c>null</c>).</param>
+        /// <returns><c>true</c> if the specified member was found.</returns>
         public bool TryGetMember(string name, out BuildDirectoryMember member)
         {
-            return members.TryGetValue(name, out member);
+            return _members.TryGetValue(name, out member);
         }
 
         internal override long GetDataSize(Encoding enc)
         {
             long total = 0;
-            foreach (BuildDirectoryMember m in members.Values)
+            foreach (BuildDirectoryMember m in _members.Values)
             {
                 total += m.GetDirectoryRecordSize(enc);
             }
@@ -82,12 +94,12 @@ namespace DiscUtils.Iso9660
         {
             int pos = 0;
 
-            List<BuildDirectoryMember> sorted = members.Values.ToList();
+            List<BuildDirectoryMember> sorted = _members.Values.ToList();
             sorted.Sort(BuildDirectoryMember.SortedComparison);
 
             // Two pseudo entries, effectively '.' and '..'
             pos += WriteMember(this, "\0", buffer, offset + pos, locationTable, Encoding.ASCII);
-            pos += WriteMember(parent, "\x01", buffer, offset + pos, locationTable, Encoding.ASCII);
+            pos += WriteMember(_parent, "\x01", buffer, offset + pos, locationTable, Encoding.ASCII);
 
             foreach (BuildDirectoryMember m in sorted)
             {
