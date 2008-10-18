@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DiscUtils
 {
@@ -13,6 +14,7 @@ namespace DiscUtils
         /// </summary>
         internal const int SectorSize = 512;
 
+        #region Stream Manipulation
         /// <summary>
         /// Read bytes until buffer filled or EOF.
         /// </summary>
@@ -62,6 +64,23 @@ namespace DiscUtils
         {
             return ReadFully(stream, SectorSize);
         }
+        #endregion
 
+        #region Filesystem Support
+        /// <summary>
+        /// Converts a 'standard' wildcard file/path specification into a regular expression.
+        /// </summary>
+        /// <param name="pattern">The wildcard pattern to convert</param>
+        /// <returns>The resultant regular expression</returns>
+        /// <remarks>
+        /// The wildcard * (star) matches zero or more characters (including '.'), and ?
+        /// (question mark) matches precisely one character (except '.').
+        /// </remarks>
+        internal static Regex ConvertWildcardsToRegEx(string pattern)
+        {
+            string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", "[^.]") + "$";
+            return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        }
+        #endregion
     }
 }

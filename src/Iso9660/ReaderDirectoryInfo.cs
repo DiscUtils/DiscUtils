@@ -224,8 +224,7 @@ namespace DiscUtils.Iso9660
                 fullPattern += ";*";
             }
 
-            string query = "^" + Regex.Escape(fullPattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
-            Regex re = new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            Regex re = Utilities.ConvertWildcardsToRegEx(fullPattern);
 
             List<DiscFileInfo> results = new List<DiscFileInfo>();
             DoSearch(results, re, subFolders);
@@ -234,8 +233,7 @@ namespace DiscUtils.Iso9660
 
         private List<DiscDirectoryInfo> SearchDirectories(string pattern, bool subFolders)
         {
-            string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*") + "$";
-            Regex re = new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
 
             List<DiscDirectoryInfo> results = new List<DiscDirectoryInfo>();
             DoSearch(results, re, subFolders);

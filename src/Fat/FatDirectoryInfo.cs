@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DiscUtils.Fat
 {
@@ -33,52 +34,67 @@ namespace DiscUtils.Fat
         private DirectoryEntry _dirEntry;
         private List<DirectoryEntry> _entries;
 
-        internal FatDirectoryInfo(FatFileSystem fileSystem, FatDirectoryInfo parent, DirectoryEntry dirEntry, Stream dirStream)
+        internal FatDirectoryInfo(FatFileSystem fileSystem, FatDirectoryInfo parent, DirectoryEntry dirEntry)
         {
             _fileSystem = fileSystem;
             _parent = parent;
             _dirEntry = dirEntry;
 
-            _entries = new List<DirectoryEntry>();
-            while (dirStream.Position < dirStream.Length)
+            using (Stream s = _fileSystem.OpenExistingStream(FileMode.Open, dirEntry.FirstCluster, (uint)dirEntry.FileSize))
             {
-                DirectoryEntry entry = new DirectoryEntry(dirStream);
-
-                // Long File Name entry
-                if (entry.Attributes == (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
-                {
-                    continue;
-                }
-
-                // E5 = Free Entry
-                if (entry.Name[0] == 0xE5)
-                {
-                    continue;
-                }
-
-                // 00 = Free Entry, no more entries available
-                if (entry.Name[0] == 0x00)
-                {
-                    break;
-                }
-
-                _entries.Add(entry);
+                LoadEntries(s);
             }
+        }
+
+        internal FatDirectoryInfo(FatFileSystem fileSystem, FatDirectoryInfo parent, Stream dirStream)
+        {
+            _fileSystem = fileSystem;
+            _parent = parent;
+            _dirEntry = null;
+            LoadEntries(dirStream);
         }
 
         public override DiscDirectoryInfo[] GetDirectories()
         {
-            throw new NotImplementedException();
+            List<FatDirectoryInfo> dirs = new List<FatDirectoryInfo>(_entries.Count);
+            foreach (DirectoryEntry dirEntry in _entries)
+            {
+                if ((dirEntry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    dirs.Add(new FatDirectoryInfo(_fileSystem, this, dirEntry));
+                }
+            }
+            return dirs.ToArray();
         }
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern)
         {
-            throw new NotImplementedException();
+            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
+
+            List<FatDirectoryInfo> dirs = new List<FatDirectoryInfo>(_entries.Count);
+            foreach (DirectoryEntry dirEntry in _entries)
+            {
+                if ((dirEntry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    if (re.IsMatch(dirEntry.Name))
+                    {
+                        dirs.Add(new FatDirectoryInfo(_fileSystem, this, dirEntry));
+                    }
+                }
+            }
+            return dirs.ToArray();
         }
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option)
         {
-            throw new NotImplementedException();
+            if (option == SearchOption.TopDirectoryOnly)
+            {
+                return GetDirectories(pattern);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public override DiscFileInfo[] GetFiles()
@@ -96,27 +112,76 @@ namespace DiscUtils.Fat
 
         public override DiscFileInfo[] GetFiles(string pattern)
         {
-            throw new NotImplementedException();
+            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
+
+            List<FatFileInfo> files = new List<FatFileInfo>(_entries.Count);
+            foreach (DirectoryEntry dirEntry in _entries)
+            {
+                if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
+                {
+                    if (re.IsMatch(dirEntry.Name))
+                    {
+                        files.Add(new FatFileInfo(_fileSystem, this, dirEntry));
+                    }
+                }
+            }
+            return files.ToArray();
         }
 
         public override DiscFileInfo[] GetFiles(string pattern, SearchOption option)
         {
-            throw new NotImplementedException();
+            if (option == SearchOption.TopDirectoryOnly)
+            {
+                return GetFiles(pattern);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos()
         {
-            throw new NotImplementedException();
+            List<DiscFileSystemInfo> entries = new List<DiscFileSystemInfo>(_entries.Count);
+            foreach (DirectoryEntry dirEntry in _entries)
+            {
+                if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
+                {
+                    entries.Add(new FatFileInfo(_fileSystem, this, dirEntry));
+                }
+                else
+                {
+                    entries.Add(new FatDirectoryInfo(_fileSystem, this, dirEntry));
+                }
+            }
+            return entries.ToArray();
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos(string pattern)
         {
-            throw new NotImplementedException();
+            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
+
+            List<DiscFileSystemInfo> entries = new List<DiscFileSystemInfo>(_entries.Count);
+            foreach (DirectoryEntry dirEntry in _entries)
+            {
+                if (re.IsMatch(dirEntry.Name))
+                {
+                    if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
+                    {
+                        entries.Add(new FatFileInfo(_fileSystem, this, dirEntry));
+                    }
+                    else
+                    {
+                        entries.Add(new FatDirectoryInfo(_fileSystem, this, dirEntry));
+                    }
+                }
+            }
+            return entries.ToArray();
         }
 
         public override string Name
         {
-            get { return (_dirEntry == null) ? "" : _dirEntry.Name; }
+            get { return (_dirEntry == null) ? "" : _dirEntry.Name.TrimEnd('.'); }
         }
 
         public override string FullName
@@ -190,5 +255,35 @@ namespace DiscUtils.Fat
             entry = null;
             return false;
         }
+
+        private void LoadEntries(Stream dirStream)
+        {
+            _entries = new List<DirectoryEntry>();
+            while (dirStream.Position < dirStream.Length)
+            {
+                DirectoryEntry entry = new DirectoryEntry(dirStream);
+
+                // Long File Name entry
+                if (entry.Attributes == (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
+                {
+                    continue;
+                }
+
+                // E5 = Free Entry
+                if (entry.Name[0] == 0xE5)
+                {
+                    continue;
+                }
+
+                // 00 = Free Entry, no more entries available
+                if (entry.Name[0] == 0x00)
+                {
+                    break;
+                }
+
+                _entries.Add(entry);
+            }
+        }
+
     }
 }

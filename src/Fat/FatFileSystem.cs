@@ -26,7 +26,9 @@ using System.Text;
 
 namespace DiscUtils.Fat
 {
-
+    /// <summary>
+    /// Class for accessing FAT file systems.
+    /// </summary>
     public class FatFileSystem : DiscFileSystem
     {
         private Stream _data;
@@ -64,6 +66,9 @@ namespace DiscUtils.Fat
         private ushort _bpbFSInfo;
         private ushort _bpbBkBootSec;
 
+        /// <summary>
+        /// The Epoch for FAT file systems (1st Jan, 1980).
+        /// </summary>
         public static readonly DateTime Epoch = new DateTime(1980, 1, 1);
 
 
@@ -89,7 +94,7 @@ namespace DiscUtils.Fat
             get { return _type; }
         }
 
-        public string FriendlyName
+        public override string FriendlyName
         {
             get
             {
@@ -262,8 +267,7 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    Stream dirStream = new ClusterFileStream(_clusterReader, _fat, entry.FirstCluster, (uint)entry.FileSize);
-                    FatDirectoryInfo dirInfo = new FatDirectoryInfo(this, dir, entry, dirStream);
+                    FatDirectoryInfo dirInfo = new FatDirectoryInfo(this, dir, entry);
                     return FindFile(dirInfo, pathEntries, pathOffset + 1);
                 }
             }
@@ -301,7 +305,7 @@ namespace DiscUtils.Fat
             {
                 fatStream = new ClusterFileStream(_clusterReader, _fat, _bpbRootClus, uint.MaxValue);
             }
-            _rootDir = new FatDirectoryInfo(this, null, null, fatStream);
+            _rootDir = new FatDirectoryInfo(this, null, fatStream);
         }
 
         private void LoadFAT()
