@@ -130,7 +130,7 @@ namespace DiscUtils.Fat
                 numRead += toCopy;
 
                 // Increment the position
-                _position += numRead;
+                _position += toCopy;
 
                 // Abort if we've hit the end of the file
                 if (!TryLoadCurrentCluster())
