@@ -40,7 +40,7 @@ namespace DiscUtils.Fat
             _parent = parent;
             _dirEntry = dirEntry;
 
-            using (Stream s = _fileSystem.OpenExistingStream(FileMode.Open, dirEntry.FirstCluster, (uint)dirEntry.FileSize))
+            using (Stream s = _fileSystem.OpenExistingStream(FileMode.Open, dirEntry.FirstCluster, uint.MaxValue))
             {
                 LoadEntries(s);
             }
@@ -87,14 +87,11 @@ namespace DiscUtils.Fat
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option)
         {
-            if (option == SearchOption.TopDirectoryOnly)
-            {
-                return GetDirectories(pattern);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
+
+            List<DiscDirectoryInfo> dirs = new List<DiscDirectoryInfo>(_entries.Count);
+            DoSearch(dirs, re, option == SearchOption.AllDirectories);
+            return dirs.ToArray();
         }
 
         public override DiscFileInfo[] GetFiles()
@@ -112,32 +109,16 @@ namespace DiscUtils.Fat
 
         public override DiscFileInfo[] GetFiles(string pattern)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
-
-            List<FatFileInfo> files = new List<FatFileInfo>(_entries.Count);
-            foreach (DirectoryEntry dirEntry in _entries)
-            {
-                if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
-                {
-                    if (re.IsMatch(dirEntry.Name))
-                    {
-                        files.Add(new FatFileInfo(_fileSystem, this, dirEntry));
-                    }
-                }
-            }
-            return files.ToArray();
+            return GetFiles(pattern, SearchOption.TopDirectoryOnly);
         }
 
         public override DiscFileInfo[] GetFiles(string pattern, SearchOption option)
         {
-            if (option == SearchOption.TopDirectoryOnly)
-            {
-                return GetFiles(pattern);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
+
+            List<DiscFileInfo> results = new List<DiscFileInfo>();
+            DoSearch(results, re, option == SearchOption.AllDirectories);
+            return results.ToArray();
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos()
@@ -181,12 +162,12 @@ namespace DiscUtils.Fat
 
         public override string Name
         {
-            get { return (_dirEntry == null) ? "" : _dirEntry.Name.TrimEnd('.'); }
+            get { return ((_dirEntry == null) ? "" : _dirEntry.Name.TrimEnd('.')) + "\\"; }
         }
 
         public override string FullName
         {
-            get { return ((_parent == null) ? "" : _parent.FullName) + "\\" + Name; }
+            get { return ((_parent == null) ? "" : _parent.FullName) + Name; }
         }
 
         public override FileAttributes Attributes
@@ -275,6 +256,12 @@ namespace DiscUtils.Fat
                     continue;
                 }
 
+                // Special folders
+                if (entry.Name == "." || entry.Name == "..")
+                {
+                    continue;
+                }
+
                 // 00 = Free Entry, no more entries available
                 if (entry.Name[0] == 0x00)
                 {
@@ -282,6 +269,45 @@ namespace DiscUtils.Fat
                 }
 
                 _entries.Add(entry);
+            }
+        }
+
+        private void DoSearch(List<DiscFileInfo> results, Regex regex, bool subFolders)
+        {
+            foreach (DirectoryEntry de in _entries)
+            {
+                if ((de.Attributes & FatAttributes.Directory) == 0)
+                {
+                    if (regex.IsMatch(de.Name))
+                    {
+                        results.Add(new FatFileInfo(_fileSystem, this, de));
+                    }
+                }
+                else if(subFolders)
+                {
+                    FatDirectoryInfo subFolder = new FatDirectoryInfo(_fileSystem, this, de);
+                    subFolder.DoSearch(results, regex, true);
+                }
+            }
+        }
+
+        private void DoSearch(List<DiscDirectoryInfo> results, Regex regex, bool subFolders)
+        {
+            foreach (DirectoryEntry de in _entries)
+            {
+                if ((de.Attributes & FatAttributes.Directory) != 0)
+                {
+                    if (regex.IsMatch(de.Name))
+                    {
+                        results.Add(new FatDirectoryInfo(_fileSystem, this, de));
+                    }
+                }
+
+                if (subFolders)
+                {
+                    FatDirectoryInfo subFolder = new FatDirectoryInfo(_fileSystem, this, de);
+                    subFolder.DoSearch(results, regex, true);
+                }
             }
         }
 

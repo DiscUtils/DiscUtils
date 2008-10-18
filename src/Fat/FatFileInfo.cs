@@ -60,7 +60,7 @@ namespace DiscUtils.Fat
 
         public override string FullName
         {
-            get { return Parent.FullName + "\\" + Name; }
+            get { return Parent.FullName + Name; }
         }
 
         public override FileAttributes Attributes
