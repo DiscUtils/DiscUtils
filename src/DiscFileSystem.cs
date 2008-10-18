@@ -30,6 +30,14 @@ namespace DiscUtils
     public abstract class DiscFileSystem
     {
         /// <summary>
+        /// Provides a friendly description of the file system type.
+        /// </summary>
+        public abstract string FriendlyName
+        {
+            get;
+        }
+
+        /// <summary>
         /// Indicates whether the file system is read-only or read-write.
         /// </summary>
         /// <returns>true if the file system is read-write.</returns>

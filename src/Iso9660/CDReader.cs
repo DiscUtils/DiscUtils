@@ -125,6 +125,14 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Provides the friendly name for the CD filesystem.
+        /// </summary>
+        public override string FriendlyName
+        {
+            get { return "ISO 9660 (CD-ROM)"; }
+        }
+
+        /// <summary>
         /// Indicates ISO files are read-only.
         /// </summary>
         /// <returns>Always returns <c>false</c>.</returns>
