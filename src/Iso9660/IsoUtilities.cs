@@ -28,7 +28,7 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
-    internal class Utilities
+    internal class IsoUtilities
     {
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {
@@ -414,19 +414,6 @@ namespace DiscUtils.Iso9660
             }
 
             return enc;
-        }
-
-        internal static int ReadFully(Stream stream, byte[] buffer, int offset, int length)
-        {
-            int totalRead = 0;
-            int numRead = stream.Read(buffer, offset, length);
-            while (numRead > 0)
-            {
-                totalRead += numRead;
-                numRead = stream.Read(buffer, offset + totalRead, length - totalRead);
-            }
-
-            return totalRead;
         }
 
         internal static bool IsSpecialDirectory(DirectoryRecord r)

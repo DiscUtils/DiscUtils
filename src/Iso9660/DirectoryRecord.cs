@@ -66,15 +66,15 @@ namespace DiscUtils.Iso9660
         {
             int length = src[offset + 0];
             record.ExtendedAttributeRecordLength = src[offset + 1];
-            record.LocationOfExtent = Utilities.ToUInt32FromBoth(src, offset + 2);
-            record.DataLength = Utilities.ToUInt32FromBoth(src, offset + 10);
-            record.RecordingDateAndTime = Utilities.ToUTCDateTimeFromDirectoryTime(src, offset + 18);
+            record.LocationOfExtent = IsoUtilities.ToUInt32FromBoth(src, offset + 2);
+            record.DataLength = IsoUtilities.ToUInt32FromBoth(src, offset + 10);
+            record.RecordingDateAndTime = IsoUtilities.ToUTCDateTimeFromDirectoryTime(src, offset + 18);
             record.Flags = (FileFlags)src[offset + 25];
             record.FileUnitSize = src[offset + 26];
             record.InterleaveGapSize = src[offset + 27];
-            record.VolumeSequenceNumber = Utilities.ToUInt16FromBoth(src, offset + 28);
+            record.VolumeSequenceNumber = IsoUtilities.ToUInt16FromBoth(src, offset + 28);
             byte lengthOfFileIdentifier = src[offset + 32];
-            record.FileIdentifier = Utilities.ReadChars(src, offset + 33, lengthOfFileIdentifier, enc);
+            record.FileIdentifier = IsoUtilities.ReadChars(src, offset + 33, lengthOfFileIdentifier, enc);
 
             return length;
         }
@@ -85,16 +85,16 @@ namespace DiscUtils.Iso9660
             uint length = CalcLength(FileIdentifier, enc);
             buffer[offset] = (byte)length;
             buffer[offset + 1] = ExtendedAttributeRecordLength;
-            Utilities.ToBothFromUInt32(buffer, offset + 2, LocationOfExtent);
-            Utilities.ToBothFromUInt32(buffer, offset + 10, DataLength);
-            Utilities.ToDirectoryTimeFromUTC(buffer, offset + 18, RecordingDateAndTime);
+            IsoUtilities.ToBothFromUInt32(buffer, offset + 2, LocationOfExtent);
+            IsoUtilities.ToBothFromUInt32(buffer, offset + 10, DataLength);
+            IsoUtilities.ToDirectoryTimeFromUTC(buffer, offset + 18, RecordingDateAndTime);
             buffer[offset + 25] = (byte)Flags;
             buffer[offset + 26] = FileUnitSize;
             buffer[offset + 27] = InterleaveGapSize;
-            Utilities.ToBothFromUInt16(buffer, offset + 28, VolumeSequenceNumber);
+            IsoUtilities.ToBothFromUInt16(buffer, offset + 28, VolumeSequenceNumber);
             byte lengthOfFileIdentifier;
 
-            lengthOfFileIdentifier = (byte)Utilities.WriteString(buffer, offset + 33, (int)(length - 33), false, FileIdentifier, enc);
+            lengthOfFileIdentifier = (byte)IsoUtilities.WriteString(buffer, offset + 33, (int)(length - 33), false, FileIdentifier, enc);
 #if false
             if ((Flags & FileFlags.Directory) != 0)
             {

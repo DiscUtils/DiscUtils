@@ -268,12 +268,12 @@ namespace DiscUtils.Iso9660
             {
                 if ((r.Flags & FileFlags.Directory) == 0)
                 {
-                    if (regex.IsMatch(Utilities.NormalizeFileName(r.FileIdentifier)))
+                    if (regex.IsMatch(IsoUtilities.NormalizeFileName(r.FileIdentifier)))
                     {
                         results.Add(new ReaderFileInfo(reader, this, r));
                     }
                 }
-                else if( subFolders && !Utilities.IsSpecialDirectory(r))
+                else if( subFolders && !IsoUtilities.IsSpecialDirectory(r))
                 {
                     ReaderDirectoryInfo subFolder = new ReaderDirectoryInfo(reader, this, r, enc);
                     subFolder.DoSearch(results, regex, subFolders);
@@ -292,7 +292,7 @@ namespace DiscUtils.Iso9660
                         results.Add(new ReaderDirectoryInfo(reader, this, r, enc));
                     }
 
-                    if (subFolders && !Utilities.IsSpecialDirectory(r))
+                    if (subFolders && !IsoUtilities.IsSpecialDirectory(r))
                     {
                         ReaderDirectoryInfo subFolder = new ReaderDirectoryInfo(reader, this, r, enc);
                         subFolder.DoSearch(results, regex, subFolders);

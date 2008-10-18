@@ -58,7 +58,7 @@ namespace DiscUtils.Iso9660
         {
             Array.Clear(buffer, offset, 2048);
             buffer[offset] = (byte)VolumeDescriptorType;
-            Utilities.WriteAChars(buffer, offset + 1, 5, StandardIdentifier);
+            IsoUtilities.WriteAChars(buffer, offset + 1, 5, StandardIdentifier);
             buffer[offset + 6] = VolumeDescriptorVersion;
         }
     }

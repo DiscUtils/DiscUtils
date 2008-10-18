@@ -38,21 +38,21 @@ namespace DiscUtils.Iso9660
         private uint _extentStart;
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, byte[] content)
-            : base(Utilities.NormalizeFileName(name), MakeShortFileName(name, parent))
+            : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
             _parent = parent;
             _contentData = content;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, string content)
-            : base(Utilities.NormalizeFileName(name), MakeShortFileName(name, parent))
+            : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
             _parent = parent;
             _contentPath = content;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, Stream source)
-            : base(Utilities.NormalizeFileName(name), MakeShortFileName(name, parent))
+            : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
             _parent = parent;
             _contentStream = source;
@@ -118,7 +118,7 @@ namespace DiscUtils.Iso9660
 
         private static string MakeShortFileName(string longName, BuildDirectoryInfo dir)
         {
-            if (Utilities.isValidFileName(longName))
+            if (IsoUtilities.isValidFileName(longName))
             {
                 return longName;
             }
@@ -126,13 +126,13 @@ namespace DiscUtils.Iso9660
             char[] shortNameChars = longName.ToUpper().ToCharArray();
             for (int i = 0; i < shortNameChars.Length; ++i)
             {
-                if (!Utilities.isValidDChar(shortNameChars[i]) && shortNameChars[i] != '.' && shortNameChars[i] != ';')
+                if (!IsoUtilities.isValidDChar(shortNameChars[i]) && shortNameChars[i] != '.' && shortNameChars[i] != ';')
                 {
                     shortNameChars[i] = '_';
                 }
             }
 
-            string[] parts = Utilities.SplitFileName(new string(shortNameChars));
+            string[] parts = IsoUtilities.SplitFileName(new string(shortNameChars));
 
             if (parts[0].Length + parts[1].Length > 30)
             {

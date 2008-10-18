@@ -122,7 +122,7 @@ namespace DiscUtils.Iso9660
 
         private static string MakeShortDirName(string longName, BuildDirectoryInfo dir)
         {
-            if (Utilities.isValidDirectoryName(longName))
+            if (IsoUtilities.isValidDirectoryName(longName))
             {
                 return longName;
             }
@@ -130,7 +130,7 @@ namespace DiscUtils.Iso9660
             char[] shortNameChars = longName.ToUpper().ToCharArray();
             for (int i = 0; i < shortNameChars.Length; ++i)
             {
-                if (!Utilities.isValidDChar(shortNameChars[i]) && shortNameChars[i] != '.' && shortNameChars[i] != ';')
+                if (!IsoUtilities.isValidDChar(shortNameChars[i]) && shortNameChars[i] != '.' && shortNameChars[i] != ';')
                 {
                     shortNameChars[i] = '_';
                 }

@@ -30,7 +30,7 @@ namespace DiscUtils.Iso9660
         public byte VolumeFlags;
 
         public SupplementaryVolumeDescriptor(byte[] src, int offset)
-            : base(src, offset, Utilities.EncodingFromBytes(src, offset + 88))
+            : base(src, offset, IsoUtilities.EncodingFromBytes(src, offset + 88))
         {
             // Note indication of encoding is in structure after some fields that use it, so pull decode to here
             VolumeFlags = src[offset + 7];
@@ -53,30 +53,30 @@ namespace DiscUtils.Iso9660
         internal override void WriteTo(byte[] buffer, int offset)
         {
             base.WriteTo(buffer, offset);
-            Utilities.WriteA1Chars(buffer, offset + 8, 32, SystemIdentifier, CharacterEncoding);
-            Utilities.WriteA1Chars(buffer, offset + 40, 32, VolumeIdentifier, CharacterEncoding);
-            Utilities.ToBothFromUInt32(buffer, offset + 80, VolumeSpaceSize);
-            Utilities.EncodingToBytes(CharacterEncoding, buffer, offset + 88);
-            Utilities.ToBothFromUInt16(buffer, offset + 120, VolumeSetSize);
-            Utilities.ToBothFromUInt16(buffer, offset + 124, VolumeSequenceNumber);
-            Utilities.ToBothFromUInt16(buffer, offset + 128, LogicalBlockSize);
-            Utilities.ToBothFromUInt32(buffer, offset + 132, PathTableSize);
-            Utilities.ToBytesFromUInt32(buffer, offset + 140, TypeLPathTableLocation);
-            Utilities.ToBytesFromUInt32(buffer, offset + 144, OptionalTypeLPathTableLocation);
-            Utilities.ToBytesFromUInt32(buffer, offset + 148, Utilities.ByteSwap(TypeMPathTableLocation));
-            Utilities.ToBytesFromUInt32(buffer, offset + 152, Utilities.ByteSwap(OptionalTypeMPathTableLocation));
+            IsoUtilities.WriteA1Chars(buffer, offset + 8, 32, SystemIdentifier, CharacterEncoding);
+            IsoUtilities.WriteA1Chars(buffer, offset + 40, 32, VolumeIdentifier, CharacterEncoding);
+            IsoUtilities.ToBothFromUInt32(buffer, offset + 80, VolumeSpaceSize);
+            IsoUtilities.EncodingToBytes(CharacterEncoding, buffer, offset + 88);
+            IsoUtilities.ToBothFromUInt16(buffer, offset + 120, VolumeSetSize);
+            IsoUtilities.ToBothFromUInt16(buffer, offset + 124, VolumeSequenceNumber);
+            IsoUtilities.ToBothFromUInt16(buffer, offset + 128, LogicalBlockSize);
+            IsoUtilities.ToBothFromUInt32(buffer, offset + 132, PathTableSize);
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 140, TypeLPathTableLocation);
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 144, OptionalTypeLPathTableLocation);
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 148, IsoUtilities.ByteSwap(TypeMPathTableLocation));
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 152, IsoUtilities.ByteSwap(OptionalTypeMPathTableLocation));
             RootDirectory.WriteTo(buffer, offset + 156, CharacterEncoding);
-            Utilities.WriteD1Chars(buffer, offset + 190, 129, VolumeSetIdentifier, CharacterEncoding);
-            Utilities.WriteA1Chars(buffer, offset + 318, 129, PublisherIdentifier, CharacterEncoding);
-            Utilities.WriteA1Chars(buffer, offset + 446, 129, DataPreparerIdentifier, CharacterEncoding);
-            Utilities.WriteA1Chars(buffer, offset + 574, 129, ApplicationIdentifier, CharacterEncoding);
-            Utilities.WriteD1Chars(buffer, offset + 702, 37, CopyrightFileIdentifier, CharacterEncoding); // FIXME!!
-            Utilities.WriteD1Chars(buffer, offset + 739, 37, AbstractFileIdentifier, CharacterEncoding); // FIXME!!
-            Utilities.WriteD1Chars(buffer, offset + 776, 37, BibliographicFileIdentifier, CharacterEncoding); // FIXME!!
-            Utilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 813, CreationDateAndTime);
-            Utilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 830, ModificationDateAndTime);
-            Utilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 847, ExpirationDateAndTime);
-            Utilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 864, EffectiveDateAndTime);
+            IsoUtilities.WriteD1Chars(buffer, offset + 190, 129, VolumeSetIdentifier, CharacterEncoding);
+            IsoUtilities.WriteA1Chars(buffer, offset + 318, 129, PublisherIdentifier, CharacterEncoding);
+            IsoUtilities.WriteA1Chars(buffer, offset + 446, 129, DataPreparerIdentifier, CharacterEncoding);
+            IsoUtilities.WriteA1Chars(buffer, offset + 574, 129, ApplicationIdentifier, CharacterEncoding);
+            IsoUtilities.WriteD1Chars(buffer, offset + 702, 37, CopyrightFileIdentifier, CharacterEncoding); // FIXME!!
+            IsoUtilities.WriteD1Chars(buffer, offset + 739, 37, AbstractFileIdentifier, CharacterEncoding); // FIXME!!
+            IsoUtilities.WriteD1Chars(buffer, offset + 776, 37, BibliographicFileIdentifier, CharacterEncoding); // FIXME!!
+            IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 813, CreationDateAndTime);
+            IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 830, ModificationDateAndTime);
+            IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 847, ExpirationDateAndTime);
+            IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 864, EffectiveDateAndTime);
             buffer[offset + 881] = FileStructureVersion;
         }
     }

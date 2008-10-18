@@ -39,12 +39,12 @@ namespace DiscUtils.Iso9660
             record.ExtendedAttributeRecordLength = src[offset + 1];
             record.LocationOfExtent = BitConverter.ToUInt32(src, offset + 2);
             record.ParentDirectoryNumber = BitConverter.ToUInt16(src, offset + 6);
-            record.DirectoryIdentifier = Utilities.ReadChars(src, offset + 8, directoryIdentifierLength, enc);
+            record.DirectoryIdentifier = IsoUtilities.ReadChars(src, offset + 8, directoryIdentifierLength, enc);
 
             if (byteSwap)
             {
-                record.LocationOfExtent = Utilities.ByteSwap(record.LocationOfExtent);
-                record.ParentDirectoryNumber = Utilities.ByteSwap(record.ParentDirectoryNumber);
+                record.LocationOfExtent = IsoUtilities.ByteSwap(record.LocationOfExtent);
+                record.ParentDirectoryNumber = IsoUtilities.ByteSwap(record.ParentDirectoryNumber);
             }
 
             return directoryIdentifierLength + 8 + (((directoryIdentifierLength & 1) == 1) ? 1 : 0);
@@ -70,9 +70,9 @@ namespace DiscUtils.Iso9660
 
             buffer[offset + 0] = (byte)nameBytes;
             buffer[offset + 1] = ExtendedAttributeRecordLength;
-            Utilities.ToBytesFromUInt32(buffer, offset + 2, byteSwap ? Utilities.ByteSwap(LocationOfExtent) : LocationOfExtent);
-            Utilities.ToBytesFromUInt16(buffer, offset + 6, byteSwap ? Utilities.ByteSwap(ParentDirectoryNumber) : ParentDirectoryNumber);
-            Utilities.WriteString(buffer, offset + 8, nameBytes, false, DirectoryIdentifier, enc);
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 2, byteSwap ? IsoUtilities.ByteSwap(LocationOfExtent) : LocationOfExtent);
+            IsoUtilities.ToBytesFromUInt16(buffer, offset + 6, byteSwap ? IsoUtilities.ByteSwap(ParentDirectoryNumber) : ParentDirectoryNumber);
+            IsoUtilities.WriteString(buffer, offset + 8, nameBytes, false, DirectoryIdentifier, enc);
             if ((nameBytes & 1) == 1)
             {
                 buffer[offset + 33 + nameBytes] = 0;

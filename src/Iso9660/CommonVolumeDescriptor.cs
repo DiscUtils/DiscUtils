@@ -59,29 +59,29 @@ namespace DiscUtils.Iso9660
         {
             CharacterEncoding = enc;
 
-            SystemIdentifier = Utilities.ReadChars(src, offset + 8, 32, CharacterEncoding);
-            VolumeIdentifier = Utilities.ReadChars(src, offset + 40, 32, CharacterEncoding);
-            VolumeSpaceSize = Utilities.ToUInt32FromBoth(src, offset + 80);
-            VolumeSetSize = Utilities.ToUInt16FromBoth(src, offset + 120);
-            VolumeSequenceNumber = Utilities.ToUInt16FromBoth(src, offset + 124);
-            LogicalBlockSize = Utilities.ToUInt16FromBoth(src, offset + 128);
-            PathTableSize = Utilities.ToUInt32FromBoth(src, offset + 132);
+            SystemIdentifier = IsoUtilities.ReadChars(src, offset + 8, 32, CharacterEncoding);
+            VolumeIdentifier = IsoUtilities.ReadChars(src, offset + 40, 32, CharacterEncoding);
+            VolumeSpaceSize = IsoUtilities.ToUInt32FromBoth(src, offset + 80);
+            VolumeSetSize = IsoUtilities.ToUInt16FromBoth(src, offset + 120);
+            VolumeSequenceNumber = IsoUtilities.ToUInt16FromBoth(src, offset + 124);
+            LogicalBlockSize = IsoUtilities.ToUInt16FromBoth(src, offset + 128);
+            PathTableSize = IsoUtilities.ToUInt32FromBoth(src, offset + 132);
             TypeLPathTableLocation = BitConverter.ToUInt32(src, offset + 140);
             OptionalTypeLPathTableLocation = BitConverter.ToUInt32(src, offset + 144);
-            TypeMPathTableLocation = Utilities.ByteSwap(BitConverter.ToUInt32(src, offset + 148));
-            OptionalTypeMPathTableLocation = Utilities.ByteSwap(BitConverter.ToUInt32(src, offset + 152));
+            TypeMPathTableLocation = IsoUtilities.ByteSwap(BitConverter.ToUInt32(src, offset + 148));
+            OptionalTypeMPathTableLocation = IsoUtilities.ByteSwap(BitConverter.ToUInt32(src, offset + 152));
             DirectoryRecord.ReadFrom(src, offset + 156, CharacterEncoding, out RootDirectory);
-            VolumeSetIdentifier = Utilities.ReadChars(src, offset + 190, 318 - 190, CharacterEncoding);
-            PublisherIdentifier = Utilities.ReadChars(src, offset + 318, 446 - 318, CharacterEncoding);
-            DataPreparerIdentifier = Utilities.ReadChars(src, offset + 446, 574 - 446, CharacterEncoding);
-            ApplicationIdentifier = Utilities.ReadChars(src, offset + 574, 702 - 574, CharacterEncoding);
-            CopyrightFileIdentifier = Utilities.ReadChars(src, offset + 702, 739 - 702, CharacterEncoding);
-            AbstractFileIdentifier = Utilities.ReadChars(src, offset + 739, 776 - 739, CharacterEncoding);
-            BibliographicFileIdentifier = Utilities.ReadChars(src, offset + 776, 813 - 776, CharacterEncoding);
-            CreationDateAndTime = Utilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 813);
-            ModificationDateAndTime = Utilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 830);
-            ExpirationDateAndTime = Utilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 847);
-            EffectiveDateAndTime = Utilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 864);
+            VolumeSetIdentifier = IsoUtilities.ReadChars(src, offset + 190, 318 - 190, CharacterEncoding);
+            PublisherIdentifier = IsoUtilities.ReadChars(src, offset + 318, 446 - 318, CharacterEncoding);
+            DataPreparerIdentifier = IsoUtilities.ReadChars(src, offset + 446, 574 - 446, CharacterEncoding);
+            ApplicationIdentifier = IsoUtilities.ReadChars(src, offset + 574, 702 - 574, CharacterEncoding);
+            CopyrightFileIdentifier = IsoUtilities.ReadChars(src, offset + 702, 739 - 702, CharacterEncoding);
+            AbstractFileIdentifier = IsoUtilities.ReadChars(src, offset + 739, 776 - 739, CharacterEncoding);
+            BibliographicFileIdentifier = IsoUtilities.ReadChars(src, offset + 776, 813 - 776, CharacterEncoding);
+            CreationDateAndTime = IsoUtilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 813);
+            ModificationDateAndTime = IsoUtilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 830);
+            ExpirationDateAndTime = IsoUtilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 847);
+            EffectiveDateAndTime = IsoUtilities.ToDateTimeFromVolumeDescriptorTime(src, offset + 864);
             FileStructureVersion = src[offset + 881];
         }
 
