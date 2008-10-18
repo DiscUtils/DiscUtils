@@ -31,6 +31,7 @@ namespace DiscUtils.Fat
     /// </summary>
     public class FatFileSystem : DiscFileSystem
     {
+        private TimeZoneInfo _timeZone;
         private Stream _data;
         private byte[] _bootSector;
         private FileAllocationTable _fat;
@@ -71,29 +72,37 @@ namespace DiscUtils.Fat
         /// </summary>
         public static readonly DateTime Epoch = new DateTime(1980, 1, 1);
 
-
+        /// <summary>
+        /// Creates a new instance, with local time as effective timezone
+        /// </summary>
+        /// <param name="data">The stream containing the file system.</param>
         public FatFileSystem(Stream data)
         {
-            this._data = data;
-            data.Position = 0;
-            _bootSector = Utilities.ReadSector(data);
-
-            _type = DetectFATType(_bootSector);
-
-            ReadBPB();
-
-            LoadFAT();
-
-            LoadClusterReader();
-
-            LoadRootDirectory();
+            _timeZone = TimeZoneInfo.Local;
+            Initialize(data);
         }
 
+        /// <summary>
+        /// Creates a new instance, with a specific timezone
+        /// </summary>
+        /// <param name="data">The stream containing the file system.</param>
+        public FatFileSystem(Stream data, TimeZoneInfo timeZone)
+        {
+            _timeZone = timeZone;
+            Initialize(data);
+        }
+
+        /// <summary>
+        /// Gets the FAT variant of the file system.
+        /// </summary>
         public FatType FATVariant
         {
             get { return _type; }
         }
 
+        /// <summary>
+        /// Gets the friendly name for the file system, including FAT variant.
+        /// </summary>
         public override string FriendlyName
         {
             get
@@ -108,132 +117,215 @@ namespace DiscUtils.Fat
             }
         }
 
+        /// <summary>
+        /// Gets the OEM name from the file system.
+        /// </summary>
         public string OEMName
         {
             get { return _bpbOEMName; }
         }
 
+        /// <summary>
+        /// Gets the number of bytes per sector (as stored in the file-system meta data).
+        /// </summary>
         public ushort BytesPerSector
         {
             get { return _bpbBytesPerSec; }
         }
 
+        /// <summary>
+        /// Gets the number of contiguous sectors that make up one cluster.
+        /// </summary>
         public byte SectorsPerCluster
         {
             get { return _bpbSecPerClus; }
         }
 
+        /// <summary>
+        /// Gets the number of reserved sectors at the start of the disk.
+        /// </summary>
         public ushort ReservedSectorCount
         {
             get { return _bpbRsvdSecCnt; }
         }
 
+        /// <summary>
+        /// Gets the number of FATs present.
+        /// </summary>
         public byte NumFATs
         {
             get { return _bpbNumFATs; }
         }
 
+        /// <summary>
+        /// Gets the maximum number of root directory entries (on FAT variants that have a limit).
+        /// </summary>
         public ushort MaxRootDirectoryEntries
         {
             get { return _bpbRootEntCnt; }
         }
 
+        /// <summary>
+        /// Gets the total number of sectors on the disk.
+        /// </summary>
         public uint TotalSectors
         {
             get { return (_bpbTotSec16 != 0) ? _bpbTotSec16 : _bpbTotSec32; }
         }
 
+        /// <summary>
+        /// Gets the Media marker byte, which indicates fixed or removable media.
+        /// </summary>
         public byte Media
         {
             get { return _bpbMedia; }
         }
 
+        /// <summary>
+        /// Gets the size of a single FAT, in sectors.
+        /// </summary>
         public uint FATSize
         {
             get { return (_bpbFATSz16 != 0) ? _bpbFATSz16 : _bpbFATSz32; }
         }
 
+        /// <summary>
+        /// Gets the number of sectors per logical track.
+        /// </summary>
         public ushort SectorsPerTrack
         {
             get { return _bpbSecPerTrk; }
         }
 
+        /// <summary>
+        /// Gets the number of logical heads.
+        /// </summary>
         public ushort NumHeads
         {
             get { return _bpbNumHeads; }
         }
 
+        /// <summary>
+        /// Gets the number of hidden sectors, hiding partition tables, etc.
+        /// </summary>
         public uint HiddenSectors
         {
             get { return _bpbHiddSec; }
         }
 
+        /// <summary>
+        /// BIOS drive number for BIOS Int 13h calls.
+        /// </summary>
         public byte BIOSDriveNumber
         {
             get { return _bsDrvNum; }
         }
 
+        /// <summary>
+        /// Indicates if the VolumeId, VolumeLabel and FileSystemType fields are valid.
+        /// </summary>
         public bool ExtendedBootSignaturePresent
         {
             get { return _bsBootSig == 0x29; }
         }
 
+        /// <summary>
+        /// Gets the volume serial number.
+        /// </summary>
         public uint VolumeId
         {
             get { return _bsVolId; }
         }
 
+        /// <summary>
+        /// Gets the volume label.
+        /// </summary>
         public string VolumeLabel
         {
             get { return _bsVolLab; }
         }
 
+        /// <summary>
+        /// Gets the (informational only) file system type recorded in the meta-data.
+        /// </summary>
         public string FileSystemType
         {
             get { return _bsFilSysType; }
         }
 
+        /// <summary>
+        /// Gets the active FAT (zero-based index).
+        /// </summary>
         public byte ActiveFAT
         {
             get { return (byte)(((_bpbExtFlags & 0x08) != 0) ? _bpbExtFlags & 0x7 : 0); }
         }
 
+        /// <summary>
+        /// Gets whether FAT changes are mirrored to all copies of the FAT.
+        /// </summary>
         public bool MirrorFAT
         {
             get { return ((_bpbExtFlags & 0x08) == 0); }
         }
 
+        /// <summary>
+        /// Gets the file-system version (usually 0)
+        /// </summary>
         public ushort Version
         {
             get { return _bpbFSVer; }
         }
 
+        /// <summary>
+        /// Gets the cluster number of the first cluster of the root directory (FAT32 only).
+        /// </summary>
         public uint RootDirectoryCluster
         {
             get { return _bpbRootClus; }
         }
 
+        /// <summary>
+        /// Gets the sector location of the FSINFO structure (FAT32 only).
+        /// </summary>
         public ushort FSInfoSector
         {
             get { return _bpbFSInfo; }
         }
 
+        /// <summary>
+        /// Sector location of the backup boot sector (FAT32 only).
+        /// </summary>
         public ushort BackupBootSector
         {
             get { return _bpbBkBootSec; }
         }
 
+        /// <summary>
+        /// Indicates if this file system is read-only or read-write.
+        /// </summary>
+        /// <returns></returns>
         public override bool CanWrite()
         {
             // Read-only (for now)
             return false;
         }
 
+        /// <summary>
+        /// Gets the root directory of the file system.
+        /// </summary>
         public override DiscDirectoryInfo Root
         {
             get { return _rootDir; }
         }
 
+        /// <summary>
+        /// Opens a file for reading and/or writing.
+        /// </summary>
+        /// <param name="path">The full path to the file</param>
+        /// <param name="mode">The file mode</param>
+        /// <param name="access">The desired access</param>
+        /// <returns>The stream to the opened file</returns>
         public override Stream Open(string path, FileMode mode, FileAccess access)
         {
             if (mode != FileMode.Open)
@@ -253,6 +345,23 @@ namespace DiscUtils.Fat
             }
 
             return OpenExistingStream(mode, dirEntry.FirstCluster, (uint)dirEntry.FileSize);
+        }
+
+        private void Initialize(Stream data)
+        {
+            _data = data;
+            data.Position = 0;
+            _bootSector = Utilities.ReadSector(data);
+
+            _type = DetectFATType(_bootSector);
+
+            ReadBPB();
+
+            LoadFAT();
+
+            LoadClusterReader();
+
+            LoadRootDirectory();
         }
 
         private DirectoryEntry FindFile(FatDirectoryInfo dir, string[] pathEntries, int pathOffset)
@@ -415,6 +524,11 @@ namespace DiscUtils.Fat
             }
 
             return fs;
+        }
+
+        internal DateTime ConvertToUtc(DateTime dateTime)
+        {
+            return TimeZoneInfo.ConvertTimeToUtc(dateTime, _timeZone);
         }
     }
 }

@@ -213,32 +213,32 @@ namespace DiscUtils.Fat
 
         public override DateTime CreationTime
         {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _dirEntry.CreationTime; }
+            get { return CreationTimeUtc.ToLocalTime(); }
         }
 
         public override DateTime CreationTimeUtc
         {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _dirEntry.CreationTime.ToUniversalTime(); }
+            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.CreationTime); }
         }
 
         public override DateTime LastAccessTime
         {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _dirEntry.LastAccessTime; }
+            get { return LastAccessTimeUtc.ToLocalTime(); }
         }
 
         public override DateTime LastAccessTimeUtc
         {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _dirEntry.LastAccessTime.ToUniversalTime(); }
+            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.LastAccessTime); }
         }
 
         public override DateTime LastWriteTime
         {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _dirEntry.LastWriteTime; }
+            get { return LastWriteTimeUtc.ToLocalTime(); }
         }
 
         public override DateTime LastWriteTimeUtc
         {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _dirEntry.LastWriteTime.ToUniversalTime(); }
+            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.LastWriteTime); }
         }
 
         internal bool TryGetDirectoryEntry(string name, out DirectoryEntry entry)
