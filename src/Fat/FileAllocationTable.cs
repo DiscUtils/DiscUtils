@@ -24,18 +24,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace DiscUtils.Fat
 {
     internal class FileAllocationTable
     {
         private FatType _type;
+        private Stream _stream;
+        private int _start;
+        private int _length;
         private byte[] _cache;
 
-        public FileAllocationTable(FatType type, byte[] buffer)
+        public FileAllocationTable(FatType type, Stream stream, int start, int length)
         {
             _type = type;
-            _cache = buffer;
+            _stream = stream;
+            _start = start;
+            _length = length;
+
+            _stream.Position = _start;
+            _cache = Utilities.ReadFully(_stream, _length);
+        }
+
+        internal bool IsFree(uint val)
+        {
+            return val == 0;
         }
 
         internal bool IsEndOfChain(uint val)
@@ -81,6 +95,89 @@ namespace DiscUtils.Fat
                     return (uint)(BitConverter.ToUInt16(_cache, (int)(cluster + (cluster / 2))) & 0x0FFF);
                 }
             }
+        }
+
+        internal void SetEndOfChain(uint cluster)
+        {
+            SetNext(cluster, 0xFFFFFFF8);
+        }
+
+        internal void SetBadCluster(uint cluster)
+        {
+            SetNext(cluster, 0xFFFFFFF7);
+        }
+
+        internal void SetNext(uint cluster, uint next)
+        {
+            if (_type == FatType.FAT16)
+            {
+                Array.Copy(BitConverter.GetBytes((ushort)next), 0, _cache, (int)(cluster * 2), 2);
+            }
+            else if (_type == FatType.FAT32)
+            {
+                uint oldVal = BitConverter.ToUInt32(_cache, (int)(cluster * 4));
+                uint newVal = (oldVal & 0xF0000000) | (next & 0x0FFFFFFF);
+                Array.Copy(BitConverter.GetBytes((uint)newVal), 0, _cache, (int)(cluster * 4), 4);
+            }
+            else
+            {
+                int offset = (int)(cluster + (cluster / 2));
+
+                ushort maskedOldVal;
+                if ((cluster & 1) != 0)
+                {
+                    next = next << 4;
+                    maskedOldVal = (ushort)(BitConverter.ToUInt16(_cache, offset) & 0x000F);
+                }
+                else
+                {
+                    next = next & 0x0FFF;
+                    maskedOldVal = (ushort)(BitConverter.ToUInt16(_cache, offset) & 0xF000);
+                }
+
+                ushort newVal = (ushort)(maskedOldVal | next);
+
+                Array.Copy(BitConverter.GetBytes(newVal), 0, _cache, offset, 2);
+            }
+        }
+
+        internal void Flush()
+        {
+            _stream.Position = _start;
+            _stream.Write(_cache, 0, _cache.Length);
+        }
+
+        internal int NumEntries
+        {
+            get
+            {
+                switch (_type)
+                {
+                    case FatType.FAT12:
+                        return (_cache.Length / 3) * 2;
+                    case FatType.FAT16:
+                        return _cache.Length / 2;
+                    default: // FAT32
+                        return _cache.Length / 4;
+                }
+            }
+        }
+
+        internal bool TryGetFreeCluster(out uint cluster)
+        {
+            // Simple scan - don't hold a free list...
+            uint numEntries = (uint)NumEntries;
+            for (uint i = 0; i < numEntries; i++)
+            {
+                if (IsFree(GetNext(i)))
+                {
+                    cluster = i;
+                    return true;
+                }
+            }
+
+            cluster = 0;
+            return false;
         }
     }
 }

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -36,7 +37,8 @@ namespace DiscUtils.Fat
         private byte[] _bootSector;
         private FileAllocationTable _fat;
         private ClusterReader _clusterReader;
-        private FatDirectoryInfo _rootDir;
+        private Directory _rootDir;
+        private Dictionary<uint, Directory> _dirCache;
 
 
         private FatType _type;
@@ -78,6 +80,7 @@ namespace DiscUtils.Fat
         /// <param name="data">The stream containing the file system.</param>
         public FatFileSystem(Stream data)
         {
+            _dirCache = new Dictionary<uint, Directory>();
             _timeZone = TimeZoneInfo.Local;
             Initialize(data);
         }
@@ -88,6 +91,7 @@ namespace DiscUtils.Fat
         /// <param name="data">The stream containing the file system.</param>
         public FatFileSystem(Stream data, TimeZoneInfo timeZone)
         {
+            _dirCache = new Dictionary<uint, Directory>();
             _timeZone = timeZone;
             Initialize(data);
         }
@@ -316,7 +320,7 @@ namespace DiscUtils.Fat
         /// </summary>
         public override DiscDirectoryInfo Root
         {
-            get { return _rootDir; }
+            get { return new FatDirectoryInfo(this, ""); }
         }
 
         /// <summary>
@@ -330,21 +334,17 @@ namespace DiscUtils.Fat
         {
             if (mode != FileMode.Open)
             {
-                throw new NotImplementedException("No read-write support yet");
+                throw new NotImplementedException("No support for creating files (yet)");
             }
 
-            if (access != FileAccess.Read)
-            {
-                throw new NotImplementedException("No read-write support yet");
-            }
-
-            DirectoryEntry dirEntry = FindFile(_rootDir, path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries), 0);
+            Directory parent;
+            DirectoryEntry dirEntry = FindFile(_rootDir, path, out parent);
             if (dirEntry == null)
             {
                 throw new FileNotFoundException("Could not locate file", path);
             }
 
-            return OpenExistingStream(mode, dirEntry.FirstCluster, (uint)dirEntry.FileSize);
+            return parent.OpenFile(dirEntry.NormalizedName, mode, access);
         }
 
         private void Initialize(Stream data)
@@ -362,28 +362,6 @@ namespace DiscUtils.Fat
             LoadClusterReader();
 
             LoadRootDirectory();
-        }
-
-        private DirectoryEntry FindFile(FatDirectoryInfo dir, string[] pathEntries, int pathOffset)
-        {
-            DirectoryEntry entry;
-
-            if (dir.TryGetDirectoryEntry(FatUtilities.NormalizeFileName(pathEntries[pathOffset]), out entry))
-            {
-                if (pathOffset == pathEntries.Length - 1)
-                {
-                    return entry;
-                }
-                else
-                {
-                    FatDirectoryInfo dirInfo = new FatDirectoryInfo(this, dir, entry);
-                    return FindFile(dirInfo, pathEntries, pathOffset + 1);
-                }
-            }
-            else
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -412,23 +390,23 @@ namespace DiscUtils.Fat
             }
             else
             {
-                fatStream = new ClusterFileStream(_clusterReader, _fat, _bpbRootClus, uint.MaxValue);
+                fatStream = new ClusterStream(FileAccess.Read, _clusterReader, _fat, _bpbRootClus, uint.MaxValue);
             }
-            _rootDir = new FatDirectoryInfo(this, null, fatStream);
+            _rootDir = new Directory(this, fatStream);
         }
 
         private void LoadFAT()
         {
+            int fatStart;
             if (_type == FatType.FAT32)
             {
-                _data.Position = (_bpbRsvdSecCnt + (ActiveFAT * FATSize)) * BytesPerSector;
+                fatStart = (int)((_bpbRsvdSecCnt + (ActiveFAT * FATSize)) * BytesPerSector);
             }
             else
             {
-                _data.Position = _bpbRsvdSecCnt * BytesPerSector;
+                fatStart = _bpbRsvdSecCnt * BytesPerSector;
             }
-            byte[] buffer = Utilities.ReadFully(_data, (int)(FATSize * BytesPerSector));
-            _fat = new FileAllocationTable(_type, buffer);
+            _fat = new FileAllocationTable(_type, _data, fatStart, (int)(FATSize * BytesPerSector));
         }
 
         private void ReadBPB()
@@ -505,14 +483,14 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal Stream OpenExistingStream(FileMode mode, uint firstCluster, uint length)
+        internal Stream OpenExistingStream(FileMode mode, FileAccess access, uint firstCluster, uint length)
         {
             if (mode == FileMode.Create || mode == FileMode.CreateNew)
             {
                 throw new ArgumentOutOfRangeException("mode", "Attempt to use a Create mode on an existing stream");
             }
 
-            ClusterFileStream fs = new ClusterFileStream(_clusterReader, _fat, firstCluster, length);
+            ClusterStream fs = new ClusterStream(access, _clusterReader, _fat, firstCluster, length);
 
             if (mode == FileMode.Append)
             {
@@ -530,5 +508,94 @@ namespace DiscUtils.Fat
         {
             return TimeZoneInfo.ConvertTimeToUtc(dateTime, _timeZone);
         }
+
+        internal DateTime ConvertFromUtc(DateTime dateTime)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(dateTime, _timeZone);
+        }
+
+        internal Stream OpenFile(Directory dir, string name, FileAccess fileAccess)
+        {
+            return new FatFileStream(dir, name, fileAccess, _clusterReader, _fat);
+        }
+
+        internal Directory GetDirectory(string _path)
+        {
+            Directory parent;
+            DirectoryEntry entry;
+
+            if (string.IsNullOrEmpty(_path) || _path == "\\")
+            {
+                return _rootDir;
+            }
+
+            entry = FindFile(_rootDir, _path, out parent);
+            if (entry != null)
+            {
+                return GetDirectory(entry, parent);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        internal Directory GetDirectory(DirectoryEntry dirEntry, Directory parent)
+        {
+            if (dirEntry == null)
+            {
+                return _rootDir;
+            }
+
+            // If we have this one cached, return it
+            Directory result;
+            if (_dirCache.TryGetValue(dirEntry.FirstCluster, out result))
+            {
+                return result;
+            }
+
+            // Not cached - create a new one.
+            result = new Directory(this, parent, dirEntry);
+            _dirCache.Add(dirEntry.FirstCluster, result);
+            return result;
+        }
+
+        internal DirectoryEntry GetDirectoryEntry(string _path)
+        {
+            Directory parent;
+
+            return FindFile(_rootDir, _path, out parent);
+        }
+
+        private DirectoryEntry FindFile(Directory dir, string path, out Directory parent)
+        {
+            string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            return FindFile(dir, pathElements, 0, out parent);
+        }
+
+        private DirectoryEntry FindFile(Directory dir, string[] pathEntries, int pathOffset, out Directory parent)
+        {
+            DirectoryEntry entry;
+
+            entry = dir.GetEntry(FatUtilities.NormalizeFileName(pathEntries[pathOffset]));
+            if (entry != null)
+            {
+                if (pathOffset == pathEntries.Length - 1)
+                {
+                    parent = dir;
+                    return entry;
+                }
+                else
+                {
+                    return FindFile(GetDirectory(entry, dir), pathEntries, pathOffset + 1, out parent);
+                }
+            }
+            else
+            {
+                parent = null;
+                return null;
+            }
+        }
+
     }
 }

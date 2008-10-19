@@ -27,40 +27,54 @@ namespace DiscUtils.Fat
 {
     internal class FatFileInfo : DiscFileInfo
     {
-        private FatDirectoryInfo _parent;
-        private DirectoryEntry _dirEntry;
         private FatFileSystem _fileSystem;
+        private string _path;
 
-        internal FatFileInfo(FatFileSystem fileSystem, FatDirectoryInfo parent, DirectoryEntry dirEntry)
+        public FatFileInfo(FatFileSystem fileSystem, string path)
         {
+            if (string.IsNullOrEmpty(path) || path.EndsWith("\\"))
+            {
+                throw new ArgumentException("Invalid file path", "path");
+            }
+
             _fileSystem = fileSystem;
-            _parent = parent;
-            _dirEntry = dirEntry;
+            _path = path.TrimStart('\\');
         }
 
         public override long Length
         {
-            get { return _dirEntry.FileSize; }
+            get { return GetDirEntry().FileSize; }
         }
 
         public override Stream Open(FileMode mode)
         {
-            return _fileSystem.OpenExistingStream(mode, _dirEntry.FirstCluster, (uint)_dirEntry.FileSize);
+            return _fileSystem.Open(_path, mode);
         }
 
         public override Stream Open(FileMode mode, FileAccess access)
         {
-            throw new NotImplementedException();
+            return _fileSystem.Open(_path, mode, access);
         }
 
         public override string Name
         {
-            get { return _dirEntry.Name; }
+            get
+            {
+                int sepIdx = _path.LastIndexOf('\\');
+                if (sepIdx < 0)
+                {
+                    return _path;
+                }
+                else
+                {
+                    return _path.Substring(sepIdx);
+                }
+            }
         }
 
         public override string FullName
         {
-            get { return Parent.FullName + Name; }
+            get { return _path; }
         }
 
         public override FileAttributes Attributes
@@ -68,13 +82,24 @@ namespace DiscUtils.Fat
             get {
                 // Conveniently, .NET filesystem attributes have identical values to
                 // FAT filesystem attributes...
-                return (FileAttributes)_dirEntry.Attributes;
+                return (FileAttributes)GetDirEntry().Attributes;
             }
         }
 
         public override DiscDirectoryInfo Parent
         {
-            get { return _parent; }
+            get
+            {
+                int sepIdx = _path.LastIndexOf('\\');
+                if (sepIdx < 0)
+                {
+                    return new FatDirectoryInfo(_fileSystem, "");
+                }
+                else
+                {
+                    return new FatDirectoryInfo(_fileSystem, _path.Substring(0, sepIdx));
+                }
+            }
         }
 
         public override DateTime CreationTime
@@ -84,7 +109,7 @@ namespace DiscUtils.Fat
 
         public override DateTime CreationTimeUtc
         {
-            get { return _fileSystem.ConvertToUtc(_dirEntry.CreationTime); }
+            get { return _fileSystem.ConvertToUtc(GetDirEntry().CreationTime); }
         }
 
         public override DateTime LastAccessTime
@@ -94,7 +119,7 @@ namespace DiscUtils.Fat
 
         public override DateTime LastAccessTimeUtc
         {
-            get { return _fileSystem.ConvertToUtc(_dirEntry.LastAccessTime); }
+            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastAccessTime); }
         }
 
         public override DateTime LastWriteTime
@@ -104,7 +129,17 @@ namespace DiscUtils.Fat
 
         public override DateTime LastWriteTimeUtc
         {
-            get { return _fileSystem.ConvertToUtc(_dirEntry.LastWriteTime); }
+            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastWriteTime); }
+        }
+
+        private DirectoryEntry GetDirEntry()
+        {
+            DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", _path);
+            }
+            return dirEntry;
         }
     }
 }

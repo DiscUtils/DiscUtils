@@ -66,11 +66,30 @@ namespace DiscUtils.Fat
             _fileSize = BitConverter.ToUInt32(data, offset + 28);
         }
 
+        internal void WriteTo(Stream stream)
+        {
+            byte[] buffer = new byte[32];
+
+            Array.Copy(Encoding.ASCII.GetBytes(_name), 0, buffer, 0, 11);
+            buffer[11] = _attr;
+            buffer[13] = _creationTimeTenth;
+            Array.Copy(BitConverter.GetBytes((ushort)_creationTime), 0, buffer, 14, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)_creationDate), 0, buffer, 16, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)_lastAccessDate), 0, buffer, 18, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)_firstClusterHi), 0, buffer, 20, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)_lastWriteTime), 0, buffer, 22, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)_lastWriteDate), 0, buffer, 24, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)_firstClusterLo), 0, buffer, 26, 2);
+            Array.Copy(BitConverter.GetBytes((uint)_fileSize), 0, buffer, 28, 4);
+
+            stream.Write(buffer, 0, buffer.Length);
+        }
+
         public string Name
         {
             get
             {
-                return _name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ');
+                return (_name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ')).TrimEnd('.');
             }
         }
 
@@ -100,11 +119,13 @@ namespace DiscUtils.Fat
         public DateTime LastWriteTime
         {
             get { return FileTimeToDateTime(_lastWriteDate, _lastWriteTime, 0); }
+            set { DateTimeToFileTime(value, ref _lastWriteDate, ref _lastWriteTime); }
         }
 
         public int FileSize
         {
             get { return (int)_fileSize; }
+            set { _fileSize = (uint)value; }
         }
 
         public uint FirstCluster
@@ -117,7 +138,7 @@ namespace DiscUtils.Fat
             if (date == 0 || date == 0xFFFF)
             {
                 // Return Epoch - this is an invalid date
-                return new DateTime(1980, 1, 1);
+                return FatFileSystem.Epoch;
             }
 
             int year = 1980 + ((date & 0xFE00) >> 9);
@@ -130,5 +151,17 @@ namespace DiscUtils.Fat
 
             return new DateTime(year, month, day, hour, minute, second, millis);
         }
+
+        private void DateTimeToFileTime(DateTime value, ref ushort date, ref ushort time)
+        {
+            if (value.Year < 1980)
+            {
+                value = FatFileSystem.Epoch;
+            }
+
+            date = (ushort)(((value.Year - 1980 << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
+            time = (ushort)(((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second / 2) & 0x001F));
+        }
+
     }
 }

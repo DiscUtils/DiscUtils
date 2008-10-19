@@ -52,10 +52,12 @@
     <Compile Include="DiscDirectoryInfo.cs" />
     <Compile Include="DiscFileSystem.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
+    <Compile Include="Fat\Directory.cs" />
     <Compile Include="Fat\FatDirectoryInfo.cs" />
     <Compile Include="Fat\FatFileInfo.cs" />
     <Compile Include="Fat\FatAttributes.cs" />
-    <Compile Include="Fat\ClusterFileStream.cs" />
+    <Compile Include="Fat\ClusterStream.cs" />
+    <Compile Include="Fat\FatFileStream.cs" />
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
