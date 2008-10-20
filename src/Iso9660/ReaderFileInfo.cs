@@ -63,6 +63,12 @@ namespace DiscUtils.Iso9660
             get { return _parent; }
         }
 
+        public override bool Exists
+        {
+            // We don't support arbitrary FileInfo's (yet) - they always represent a real file.
+            get { return true; }
+        }
+
         public override DateTime CreationTime
         {
             get { return _record.RecordingDateAndTime.ToLocalTime(); }

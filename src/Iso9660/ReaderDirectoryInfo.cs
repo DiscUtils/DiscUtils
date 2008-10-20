@@ -118,6 +118,12 @@ namespace DiscUtils.Iso9660
             get { return parent; }
         }
 
+        public override bool Exists
+        {
+            // We don't support arbitrary DirectoryInfo's (yet) - they always represent a real dir.
+            get { return true; }
+        }
+
         public override DateTime CreationTime
         {
             get { return record.RecordingDateAndTime.ToLocalTime(); }
@@ -146,6 +152,11 @@ namespace DiscUtils.Iso9660
         public override DateTime LastWriteTimeUtc
         {
             get { return CreationTimeUtc; }
+        }
+
+        public override void Create()
+        {
+            throw new NotSupportedException();
         }
 
         public override DiscDirectoryInfo[] GetDirectories()

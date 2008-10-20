@@ -63,6 +63,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets a value indicating whether the file system object exists.
+        /// </summary>
+        public abstract bool Exists
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
         public abstract DateTime CreationTime

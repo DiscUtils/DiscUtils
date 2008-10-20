@@ -347,6 +347,28 @@ namespace DiscUtils.Fat
             return parent.OpenFile(dirEntry.NormalizedName, mode, access);
         }
 
+        /// <summary>
+        /// Creates a directory.
+        /// </summary>
+        /// <param name="path">The directory to create.</param>
+        public void CreateDirectory(string path)
+        {
+            string[] pathElements = path.Split(new char[]{'\\'}, StringSplitOptions.RemoveEmptyEntries);
+
+            Directory focusDir = _rootDir;
+
+            for (int i = 0; i < pathElements.Length; ++i)
+            {
+                string normalizedName = FatUtilities.NormalizeFileName(pathElements[i]);
+                Directory child = focusDir.GetChildDirectory(normalizedName);
+                if (child == null)
+                {
+                    child = focusDir.CreateChildDirectory(normalizedName);
+                }
+                focusDir = child;
+            }
+        }
+
         private void Initialize(Stream data)
         {
             _data = data;
@@ -364,14 +386,9 @@ namespace DiscUtils.Fat
             LoadRootDirectory();
         }
 
-        /// <summary>
-        /// Gets the value of a cluster's entry in the FAT (i.e. the next cluster)
-        /// </summary>
-        /// <param name="cluster">The cluster to lookup</param>
-        /// <returns>The next cluster, or EOC or BAD marker</returns>
-        private uint GetNextCluster(uint cluster)
+        internal FileAllocationTable FAT
         {
-            return _fat.GetNext(cluster);
+            get { return _fat; }
         }
 
         private void LoadClusterReader()
@@ -519,17 +536,17 @@ namespace DiscUtils.Fat
             return new FatFileStream(dir, name, fileAccess, _clusterReader, _fat);
         }
 
-        internal Directory GetDirectory(string _path)
+        internal Directory GetDirectory(string path)
         {
             Directory parent;
             DirectoryEntry entry;
 
-            if (string.IsNullOrEmpty(_path) || _path == "\\")
+            if (string.IsNullOrEmpty(path) || path == "\\")
             {
                 return _rootDir;
             }
 
-            entry = FindFile(_rootDir, _path, out parent);
+            entry = FindFile(_rootDir, path, out parent);
             if (entry != null)
             {
                 return GetDirectory(entry, parent);
@@ -596,6 +613,5 @@ namespace DiscUtils.Fat
                 return null;
             }
         }
-
     }
 }

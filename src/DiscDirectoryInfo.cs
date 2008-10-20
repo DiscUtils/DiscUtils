@@ -44,6 +44,11 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Creates a directory.
+        /// </summary>
+        public abstract void Create();
+
+        /// <summary>
         /// Gets all child directories.
         /// </summary>
         /// <returns>An array of child directories</returns>

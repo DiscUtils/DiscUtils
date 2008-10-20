@@ -51,6 +51,13 @@ namespace DiscUtils.Fat
             Load(data, offset);
         }
 
+        internal DirectoryEntry(string name, FatAttributes attrs)
+        {
+            _name = name;
+            _attr = (byte)attrs;
+
+        }
+
         private void Load(byte[] data, int offset)
         {
             _name = Encoding.ASCII.GetString(data, offset, 11);
@@ -91,6 +98,18 @@ namespace DiscUtils.Fat
             {
                 return (_name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ')).TrimEnd('.');
             }
+            set
+            {
+                FatUtilities.NormalizeFileName(value);
+            }
+        }
+
+        internal string SearchName
+        {
+            get
+            {
+                return (_name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' '));
+            }
         }
 
         public string NormalizedName
@@ -99,27 +118,41 @@ namespace DiscUtils.Fat
             {
                 return _name;
             }
+            set
+            {
+                if (value.Length == 11)
+                {
+                    _name = value;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid normalized name");
+                }
+            }
         }
 
         public FatAttributes Attributes
         {
             get { return (FatAttributes)_attr; }
+            set { _attr = (byte)value; }
         }
 
         public DateTime CreationTime
         {
             get { return FileTimeToDateTime(_creationDate, _creationTime, _creationTimeTenth); }
+            set { DateTimeToFileTime(value, out _creationDate, out _creationTime, out _creationTimeTenth); }
         }
 
         public DateTime LastAccessTime
         {
             get { return FileTimeToDateTime(_lastAccessDate, 0, 0); }
+            set { DateTimeToFileTime(value, out _lastAccessDate); }
         }
 
         public DateTime LastWriteTime
         {
             get { return FileTimeToDateTime(_lastWriteDate, _lastWriteTime, 0); }
-            set { DateTimeToFileTime(value, ref _lastWriteDate, ref _lastWriteTime); }
+            set { DateTimeToFileTime(value, out _lastWriteDate, out _lastWriteTime); }
         }
 
         public int FileSize
@@ -131,6 +164,11 @@ namespace DiscUtils.Fat
         public uint FirstCluster
         {
             get { return (uint)(_firstClusterHi << 16) | _firstClusterLo; }
+            set
+            {
+                _firstClusterHi = (ushort)((value >> 16) & 0xFFFF);
+                _firstClusterLo = (ushort)(value & 0xFFFF);
+            }
         }
 
         private DateTime FileTimeToDateTime(ushort date, ushort time, byte tenths)
@@ -152,7 +190,20 @@ namespace DiscUtils.Fat
             return new DateTime(year, month, day, hour, minute, second, millis);
         }
 
-        private void DateTimeToFileTime(DateTime value, ref ushort date, ref ushort time)
+        private void DateTimeToFileTime(DateTime value, out ushort date)
+        {
+            byte tenths;
+            ushort time;
+            DateTimeToFileTime(value, out date, out time, out tenths);
+        }
+
+        private void DateTimeToFileTime(DateTime value, out ushort date, out ushort time)
+        {
+            byte tenths;
+            DateTimeToFileTime(value, out date, out time, out tenths);
+        }
+
+        private void DateTimeToFileTime(DateTime value, out ushort date, out ushort time, out byte tenths)
         {
             if (value.Year < 1980)
             {
@@ -161,6 +212,7 @@ namespace DiscUtils.Fat
 
             date = (ushort)(((value.Year - 1980 << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
             time = (ushort)(((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second / 2) & 0x001F));
+            tenths = (byte)(((value.Second % 2) * 100) + (value.Millisecond / 10));
         }
 
     }

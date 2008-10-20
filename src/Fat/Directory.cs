@@ -35,13 +35,15 @@ namespace DiscUtils.Fat
 
         private List<DirectoryEntry> _entries;
         private Dictionary<int,long> _entryStreamPos;
+        private List<long> _freeEntries;
+        private long _endOfEntries;
 
         internal Directory(FatFileSystem fileSystem, Directory parent, DirectoryEntry dirEntry)
         {
             _fileSystem = fileSystem;
             _parent = parent;
             _dirEntry = dirEntry;
-            _dirStream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.Read, dirEntry.FirstCluster, uint.MaxValue);
+            _dirStream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, dirEntry.FirstCluster, uint.MaxValue);
 
             LoadEntries();
         }
@@ -112,9 +114,59 @@ namespace DiscUtils.Fat
             {
                 return null;
             }
+            else if ((_entries[idx].Attributes & FatAttributes.Directory) == 0)
+            {
+                return null;
+            }
             else
             {
                 return _fileSystem.GetDirectory(_entries[idx], this);
+            }
+        }
+
+        internal Directory CreateChildDirectory(string normalizedName)
+        {
+            int idx = FindEntryByNormalizedName(normalizedName);
+            if (idx >= 0)
+            {
+                if ((_entries[idx].Attributes & FatAttributes.Directory) == 0)
+                {
+                    throw new IOException("A file exists with the same name");
+                }
+                else
+                {
+                    return _fileSystem.GetDirectory(_entries[idx], this);
+                }
+            }
+            else
+            {
+                try
+                {
+                    // Get a free cluster
+                    uint freeCluster;
+                    if (!_fileSystem.FAT.TryGetFreeCluster(out freeCluster))
+                    {
+                        throw new IOException("Out of disk space");
+                    }
+                    _fileSystem.FAT.SetEndOfChain(freeCluster);
+
+                    DirectoryEntry newEntry = new DirectoryEntry(normalizedName, FatAttributes.Directory);
+                    newEntry.FirstCluster = freeCluster;
+                    newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
+                    newEntry.LastWriteTime = newEntry.CreationTime;
+
+                    AddEntry(newEntry);
+
+                    PopulateNewChildDirectory(newEntry);
+
+                    // Rather than just creating a new instance, pull it through the fileSystem cache
+                    // to ensure the cache model is preserved.
+                    return _fileSystem.GetDirectory(newEntry, this);
+                }
+                finally
+                {
+                    _fileSystem.FAT.Flush();
+                }
             }
         }
 
@@ -143,60 +195,45 @@ namespace DiscUtils.Fat
             get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.LastWriteTime); }
         }
 
-        public void UpdateEntry(DirectoryEntry entry)
-        {
-            int idx = FindEntryByNormalizedName(entry.NormalizedName);
-
-            if (idx < 0)
-            {
-                throw new IOException("Couldn't find entry to update");
-            }
-
-            _dirStream.Position = _entryStreamPos[idx];
-            entry.WriteTo(_dirStream);
-            _entries[idx] = entry;
-        }
-
         private void LoadEntries()
         {
             _entryStreamPos = new Dictionary<int, long>();
             _entries = new List<DirectoryEntry>();
+            _freeEntries = new List<long>();
 
             while (_dirStream.Position < _dirStream.Length)
             {
                 long streamPos = _dirStream.Position;
                 DirectoryEntry entry = new DirectoryEntry(_dirStream);
 
-                // Long File Name entry
                 if (entry.Attributes == (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
                 {
-                    continue;
+                    // Long File Name entry
                 }
-
-                // E5 = Free Entry
-                if (entry.NormalizedName[0] == 0xE5)
+                else if (entry.NormalizedName[0] == 0xE5)
                 {
-                    continue;
+                    // E5 = Free Entry
+                    _freeEntries.Add(streamPos);
                 }
-
-                // Special folders
-                if (entry.NormalizedName[0] == '.')
+                else if (entry.NormalizedName[0] == '.')
                 {
-                    continue;
+                    // Special folders
                 }
-
-                // 00 = Free Entry, no more entries available
-                if (entry.NormalizedName[0] == 0x00)
+                else if (entry.NormalizedName[0] == 0x00)
                 {
+                    // 00 = Free Entry, no more entries available
+                    _endOfEntries = streamPos;
                     break;
                 }
-
-                _entryStreamPos[_entryStreamPos.Count] = streamPos;
-                _entries.Add(entry);
+                else
+                {
+                    _entryStreamPos[_entryStreamPos.Count] = streamPos;
+                    _entries.Add(entry);
+                }
             }
         }
 
-        public int FindEntryByNormalizedName(string name)
+        internal int FindEntryByNormalizedName(string name)
         {
             for (int i = 0; i < _entries.Count; ++i)
             {
@@ -219,5 +256,67 @@ namespace DiscUtils.Fat
 
             return _fileSystem.OpenFile(this, name, fileAccess);
         }
+
+        private void AddEntry(DirectoryEntry newEntry)
+        {
+            // Unlink an entry from the free list (or add to the end of the existing directory)
+            long pos;
+            if (_freeEntries.Count > 0)
+            {
+                pos = _freeEntries[0];
+                _freeEntries.RemoveAt(0);
+            }
+            else
+            {
+                pos = _endOfEntries;
+                _endOfEntries += 32;
+            }
+
+            // Put the new entry into it's slot
+            _dirStream.Position = pos;
+            newEntry.WriteTo(_dirStream);
+
+            // Update internal structures to reflect new entry (as if read from disk)
+            _entryStreamPos[_entryStreamPos.Count] = pos;
+            _entries.Add(newEntry);
+        }
+
+        internal void UpdateEntry(DirectoryEntry entry)
+        {
+            int idx = FindEntryByNormalizedName(entry.NormalizedName);
+
+            if (idx < 0)
+            {
+                throw new IOException("Couldn't find entry to update");
+            }
+
+            _dirStream.Position = _entryStreamPos[idx];
+            entry.WriteTo(_dirStream);
+            _entries[idx] = entry;
+        }
+
+        private void PopulateNewChildDirectory(DirectoryEntry newEntry)
+        {
+            // Populate new directory with initial (special) entries.  First one is easy, just change the name!
+            using (Stream stream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, newEntry.FirstCluster, uint.MaxValue))
+            {
+                newEntry.NormalizedName = ".          ";
+                newEntry.WriteTo(stream);
+
+                // Second one is a clone of ours, or if we're the root, then mostly empty...
+                DirectoryEntry newParent = new DirectoryEntry("..         ", FatAttributes.Directory);
+                if (_dirEntry != null)
+                {
+                    newParent.Attributes = _dirEntry.Attributes;
+                    newParent.CreationTime = _dirEntry.CreationTime;
+                    newParent.FileSize = _dirEntry.FileSize;
+                    newParent.FirstCluster = _dirEntry.FirstCluster;
+                    newParent.LastAccessTime = _dirEntry.LastAccessTime;
+                    newParent.LastWriteTime = _dirEntry.LastWriteTime;
+                }
+                newParent.WriteTo(stream);
+            }
+        }
+
     }
 }

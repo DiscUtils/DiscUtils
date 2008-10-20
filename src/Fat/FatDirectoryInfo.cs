@@ -38,6 +38,11 @@ namespace DiscUtils.Fat
             _path = path.Trim('\\');
         }
 
+        public override void Create()
+        {
+            _fileSystem.CreateDirectory(_path);
+        }
+
         public override DiscDirectoryInfo[] GetDirectories()
         {
             Directory dir = _fileSystem.GetDirectory(_path);
@@ -122,7 +127,7 @@ namespace DiscUtils.Fat
             List<DiscFileSystemInfo> result = new List<DiscFileSystemInfo>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                if (re.IsMatch(dirEntry.Name))
+                if (re.IsMatch(dirEntry.SearchName))
                 {
                     if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
                     {
@@ -198,6 +203,15 @@ namespace DiscUtils.Fat
             }
         }
 
+        public override bool Exists
+        {
+            get
+            {
+                DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path);
+                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) != 0);
+            }
+        }
+
         public override DateTime CreationTime
         {
             get { return CreationTimeUtc.ToLocalTime(); }
@@ -270,7 +284,7 @@ namespace DiscUtils.Fat
             {
                 if ((de.Attributes & FatAttributes.Directory) == 0)
                 {
-                    if (regex.IsMatch(de.Name))
+                    if (regex.IsMatch(de.SearchName))
                     {
                         results.Add(new FatFileInfo(_fileSystem, path + de.Name));
                     }
@@ -287,7 +301,7 @@ namespace DiscUtils.Fat
             Directory dir = _fileSystem.GetDirectory(path);
             foreach (DirectoryEntry de in dir.GetDirectories())
             {
-                if (regex.IsMatch(de.Name))
+                if (regex.IsMatch(de.SearchName))
                 {
                     results.Add(new FatDirectoryInfo(_fileSystem, path + de.Name));
                 }

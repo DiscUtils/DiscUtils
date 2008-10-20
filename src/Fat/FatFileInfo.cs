@@ -102,6 +102,15 @@ namespace DiscUtils.Fat
             }
         }
 
+        public override bool Exists
+        {
+            get
+            {
+                DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path);
+                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) == 0);
+            }
+        }
+
         public override DateTime CreationTime
         {
             get { return CreationTimeUtc.ToLocalTime(); }
