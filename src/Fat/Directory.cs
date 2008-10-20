@@ -300,21 +300,22 @@ namespace DiscUtils.Fat
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
             using (Stream stream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, newEntry.FirstCluster, uint.MaxValue))
             {
-                newEntry.NormalizedName = ".          ";
-                newEntry.WriteTo(stream);
+                DirectoryEntry selfEntry = new DirectoryEntry(newEntry);
+                selfEntry.NormalizedName = ".          ";
+                selfEntry.WriteTo(stream);
 
                 // Second one is a clone of ours, or if we're the root, then mostly empty...
-                DirectoryEntry newParent = new DirectoryEntry("..         ", FatAttributes.Directory);
                 if (_dirEntry != null)
                 {
-                    newParent.Attributes = _dirEntry.Attributes;
-                    newParent.CreationTime = _dirEntry.CreationTime;
-                    newParent.FileSize = _dirEntry.FileSize;
-                    newParent.FirstCluster = _dirEntry.FirstCluster;
-                    newParent.LastAccessTime = _dirEntry.LastAccessTime;
-                    newParent.LastWriteTime = _dirEntry.LastWriteTime;
+                    DirectoryEntry parentEntry = new DirectoryEntry(_dirEntry);
+                    parentEntry.NormalizedName = "..         ";
+                    parentEntry.WriteTo(stream);
                 }
-                newParent.WriteTo(stream);
+                else
+                {
+                    DirectoryEntry newParent = new DirectoryEntry("..         ", FatAttributes.Directory);
+                    newParent.WriteTo(stream);
+                }
             }
         }
 

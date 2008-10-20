@@ -78,6 +78,10 @@ namespace DiscUtils
         /// </remarks>
         internal static Regex ConvertWildcardsToRegEx(string pattern)
         {
+            if (!pattern.Contains('.'))
+            {
+                pattern += ".";
+            }
             string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", "[^.]") + "$";
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         }

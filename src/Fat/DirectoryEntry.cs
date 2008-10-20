@@ -58,6 +58,20 @@ namespace DiscUtils.Fat
 
         }
 
+        internal DirectoryEntry(DirectoryEntry toCopy)
+        {
+            _name = toCopy._name;
+            _attr = toCopy._attr;
+            _creationTimeTenth = toCopy._creationTimeTenth;
+            _creationTime = toCopy._creationTime;
+            _creationDate = toCopy._creationDate;
+            _lastAccessDate = toCopy._lastAccessDate;
+            _firstClusterHi = toCopy._firstClusterHi;
+            _lastWriteTime = toCopy._lastWriteTime;
+            _firstClusterLo = toCopy._firstClusterLo;
+            _fileSize = toCopy._fileSize;
+        }
+
         private void Load(byte[] data, int offset)
         {
             _name = Encoding.ASCII.GetString(data, offset, 11);
