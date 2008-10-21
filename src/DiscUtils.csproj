@@ -53,6 +53,7 @@
     <Compile Include="DiscFileSystem.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
     <Compile Include="Fat\Directory.cs" />
+    <Compile Include="Fat\FatBuffer.cs" />
     <Compile Include="Fat\FatDirectoryInfo.cs" />
     <Compile Include="Fat\FatFileInfo.cs" />
     <Compile Include="Fat\FatAttributes.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
+    <Compile Include="Fat\FloppyDiskType.cs" />
     <Compile Include="Iso9660\BaseVolumeDescriptor.cs" />
     <Compile Include="Iso9660\BuildParameters.cs" />
     <Compile Include="Iso9660\CDBuilder.cs" />

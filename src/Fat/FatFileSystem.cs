@@ -369,6 +369,196 @@ namespace DiscUtils.Fat
             }
         }
 
+        #region Disk Formatting
+        /// <summary>
+        /// Creates a formatted floppy disk image in a stream.
+        /// </summary>
+        /// <param name="stream">The stream to write the blank image to</param>
+        /// <param name="type">The type of floppy to create</param>
+        /// <param name="label">The volume label for the floppy (or null)</param>
+        /// <returns>An object that provides access to the newly created floppy disk image</returns>
+        public static FatFileSystem FormatFloppy(Stream stream, FloppyDiskType type, string label)
+        {
+            long pos = stream.Position;
+
+            long ticks = DateTime.UtcNow.Ticks;
+            uint volId = (uint)((ticks & 0xFFFF) | (ticks >> 32));
+
+            // Write the BIOS Parameter Block (BPB) - a single sector
+            byte[] bpb = new byte[512];
+            uint sectors;
+            if (type == FloppyDiskType.DoubleDensity)
+            {
+                sectors = 1440;
+                WriteBPB(bpb, sectors, FatType.FAT12, 224, 0, 1, 1, 9, 2, true, volId, label);
+            }
+            else if (type == FloppyDiskType.HighDensity)
+            {
+                sectors = 2880;
+                WriteBPB(bpb, sectors, FatType.FAT12, 224, 0, 1, 1, 18, 2, true, volId, label);
+            }
+            else if (type == FloppyDiskType.Extended)
+            {
+                sectors = 5760;
+                WriteBPB(bpb, sectors, FatType.FAT12, 224, 0, 1, 1, 36, 2, true, volId, label);
+            }
+            else
+            {
+                throw new ArgumentException("Unrecognised Floppy Disk type", "type");
+            }
+            stream.Write(bpb, 0, bpb.Length);
+
+            // Write both FAT copies
+            uint fatSize = CalcFatSize(sectors, FatType.FAT12, 1);
+            byte[] fat = new byte[fatSize * Utilities.SectorSize];
+            FatBuffer fatBuffer = new FatBuffer(FatType.FAT12, fat);
+            fatBuffer.SetNext(0, 0xFFFFFFF0);
+            fatBuffer.SetEndOfChain(1);
+            stream.Write(fat, 0, fat.Length);
+            stream.Write(fat, 0, fat.Length);
+
+            // Write the (empty) root directory
+            uint rootDirSectors = ((224 * 32) + Utilities.SectorSize - 1) / Utilities.SectorSize;
+            byte[] rootDir = new byte[rootDirSectors * Utilities.SectorSize];
+            stream.Write(rootDir, 0, rootDir.Length);
+
+            // Write a single byte at the end of the disk to ensure the stream is at least as big
+            // as needed for this disk image.
+            stream.Position = pos + (sectors * Utilities.SectorSize) - 1;
+            stream.WriteByte(0);
+
+            // Give the caller access to the new file system
+            stream.Position = pos;
+            return new FatFileSystem(stream);
+        }
+
+        /// <summary>
+        /// Creates a formatted hard disk partition in a stream.
+        /// </summary>
+        /// <param name="stream">The stream to write the blank image to</param>
+        /// <param name="label">The volume label for the floppy (or null)</param>
+        /// <param name="cylinders">The size of the partition in cylinders</param>
+        /// <param name="headsPerCylinder">The number of heads per cylinder in the disk geometry</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track in the disk geometry</param>
+        /// <param name="hiddenSectors">The starting sector number of this partition (hide's sectors in other partitions)</param>
+        /// <param name="reservedSectors">The number of reserved sectors at the start of the partition</param>
+        /// <returns>An object that provides access to the newly created floppy disk image</returns>
+        public static FatFileSystem FormatPartition(
+            Stream stream,
+            string label,
+            uint   cylinders,
+            ushort headsPerCylinder,
+            ushort sectorsPerTrack,
+            uint   hiddenSectors,
+            ushort reservedSectors)
+        {
+            long pos = stream.Position;
+
+            long ticks = DateTime.UtcNow.Ticks;
+            uint volId = (uint)((ticks & 0xFFFF) | (ticks >> 32));
+
+            uint totalSectors = cylinders * headsPerCylinder * sectorsPerTrack;
+            byte sectorsPerCluster;
+            FatType fatType;
+            ushort maxRootEntries;
+
+            // Write the BIOS Parameter Block (BPB) - a single sector
+            byte[] bpb = new byte[512];
+            if(totalSectors <= 8400)
+            {
+                throw new ArgumentOutOfRangeException("sectors", totalSectors, "Requested size is too small for a partition");
+            }
+            else if(totalSectors < 1024 * 1024)
+            {
+                fatType = FatType.FAT16;
+                maxRootEntries = 512;
+                if (totalSectors <= 32680)
+                {
+                    sectorsPerCluster = 2;
+                }
+                else if (totalSectors <= 262144)
+                {
+                    sectorsPerCluster = 4;
+                }
+                else if (totalSectors <= 524288)
+                {
+                    sectorsPerCluster = 8;
+                }
+                else
+                {
+                    sectorsPerCluster = 16;
+                }
+            }
+            else
+            {
+                fatType = FatType.FAT32;
+                maxRootEntries = 0;
+                if (totalSectors <= 532480)
+                {
+                    sectorsPerCluster = 1;
+                }
+                else if (totalSectors <= 16777216)
+                {
+                    sectorsPerCluster = 8;
+                }
+                else if (totalSectors <= 33554432)
+                {
+                    sectorsPerCluster = 16;
+                }
+                else if (totalSectors <= 67108864)
+                {
+                    sectorsPerCluster = 32;
+                }
+                else
+                {
+                    sectorsPerCluster = 64;
+                }
+            }
+            WriteBPB(bpb, totalSectors, fatType, maxRootEntries, hiddenSectors, reservedSectors, sectorsPerCluster, sectorsPerTrack, headsPerCylinder, false, volId, label);
+            stream.Write(bpb, 0, bpb.Length);
+
+            // Skip the reserved sectors
+            stream.Position = pos + (reservedSectors * Utilities.SectorSize);
+
+            // Write both FAT copies
+            byte[] fat = new byte[CalcFatSize(totalSectors, fatType, 1) * Utilities.SectorSize];
+            FatBuffer fatBuffer = new FatBuffer(fatType, fat);
+            fatBuffer.SetNext(0, 0xFFFFFFF8);
+            fatBuffer.SetEndOfChain(1);
+            if (fatType >= FatType.FAT32)
+            {
+                // Mark cluster 2 as End-of-chain (i.e. root directory
+                // is a single cluster in length)
+                fatBuffer.SetEndOfChain(2);
+            }
+            stream.Write(fat, 0, fat.Length);
+            stream.Write(fat, 0, fat.Length);
+
+            // Write the (empty) root directory
+            uint rootDirSectors;
+            if (fatType < FatType.FAT32)
+            {
+                rootDirSectors = (uint)(((maxRootEntries * 32) + Utilities.SectorSize - 1) / Utilities.SectorSize);
+            }
+            else
+            {
+                rootDirSectors = sectorsPerCluster;
+            }
+            byte[] rootDir = new byte[rootDirSectors * Utilities.SectorSize];
+            stream.Write(rootDir, 0, rootDir.Length);
+
+            // Write a single byte at the end of the disk to ensure the stream is at least as big
+            // as needed for this disk image.
+            stream.Position = pos + (totalSectors * (long)Utilities.SectorSize) - 1;
+            stream.WriteByte(0);
+
+            // Give the caller access to the new file system
+            stream.Position = pos;
+            return new FatFileSystem(stream);
+        }
+        #endregion
+
+
         private void Initialize(Stream data)
         {
             _data = data;
@@ -423,7 +613,7 @@ namespace DiscUtils.Fat
             {
                 fatStart = _bpbRsvdSecCnt * BytesPerSector;
             }
-            _fat = new FileAllocationTable(_type, _data, fatStart, (int)(FATSize * BytesPerSector));
+            _fat = new FileAllocationTable(_type, _data, _bpbRsvdSecCnt, FATSize, NumFATs, ActiveFAT);
         }
 
         private void ReadBPB()
@@ -458,6 +648,122 @@ namespace DiscUtils.Fat
             }
         }
 
+        /// <summary>
+        /// Writes a FAT12/FAT16 BPB.
+        /// </summary>
+        /// <param name="bootSector">The buffer to fill</param>
+        /// <param name="sectors">The total capacity of the disk (in sectors)</param>
+        /// <param name="fatType">The number of bits in each FAT entry</param>
+        /// <param name="maxRootEntries">The maximum number of root directory entries</param>
+        /// <param name="hiddenSectors">The number of hidden sectors before this file system (i.e. partition offset)</param>
+        /// <param name="reservedSectors">The number of reserved sectors before the FAT</param>
+        /// <param name="sectorsPerCluster">The number of sectors per cluster</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track</param>
+        /// <param name="headsPerCylinder">The number of heads per cylinder</param>
+        /// <param name="isFloppy">Indicates if the disk is a removable media (a floppy disk)</param>
+        /// <param name="volId">The disk's volume Id</param>
+        /// <param name="label">The disk's label (or null)</param>
+        private static void WriteBPB(
+            byte[] bootSector,
+            uint sectors,
+            FatType fatType,
+            ushort maxRootEntries,
+            uint hiddenSectors,
+            ushort reservedSectors,
+            byte sectorsPerCluster,
+            ushort sectorsPerTrack,
+            ushort headsPerCylinder,
+            bool isFloppy,
+            uint volId,
+            string label)
+        {
+            uint fatSectors = CalcFatSize(sectors, fatType, sectorsPerCluster);
+
+            bootSector[0] = 0xEB;
+            bootSector[1] = 0x3C;
+            bootSector[2] = 0x90;
+
+            // OEM Name
+            Array.Copy(Encoding.ASCII.GetBytes("DISCUTIL"), 0, bootSector, 3, 8);
+
+            // Bytes Per Sector (512)
+            bootSector[11] = 0;
+            bootSector[12] = 2;
+
+            // Sectors Per Cluster
+            bootSector[13] = sectorsPerCluster;
+
+            // Reserved Sector Count
+            Array.Copy(BitConverter.GetBytes(reservedSectors), 0, bootSector, 14, 2);
+
+            // Number of FATs
+            bootSector[16] = 2;
+
+            // Number of Entries in the root directory
+            Array.Copy(BitConverter.GetBytes((ushort)maxRootEntries), 0, bootSector, 17, 2);
+
+            // Total number of sectors (small)
+            Array.Copy(BitConverter.GetBytes((ushort)(sectors < 0x10000 ? sectors : 0)), 0, bootSector, 19, 2);
+
+            // Media
+            bootSector[21] = (byte)(isFloppy ? 0xF0 : 0xF8);
+
+            // FAT size (FAT12/FAT16)
+            Array.Copy(BitConverter.GetBytes((ushort)(fatType < FatType.FAT32 ? fatSectors : 0)), 0, bootSector, 22, 2);
+
+            // Sectors Per Track
+            Array.Copy(BitConverter.GetBytes((ushort)sectorsPerTrack), 0, bootSector, 24, 2);
+
+            // Sectors Per Track
+            Array.Copy(BitConverter.GetBytes((ushort)headsPerCylinder), 0, bootSector, 26, 2);
+
+            // Hidden Sectors
+            Array.Copy(BitConverter.GetBytes((uint)hiddenSectors), 0, bootSector, 28, 4);
+
+            // Total number of sectors (large)
+            Array.Copy(BitConverter.GetBytes((uint)(sectors >= 0x10000 ? sectors : 0)), 0, bootSector, 32, 4);
+
+            if (fatType < FatType.FAT32)
+            {
+                WriteBS(bootSector, 36, isFloppy, volId, label, fatType);
+            }
+            else
+            {
+                // FAT size (FAT32)
+                Array.Copy(BitConverter.GetBytes((uint)fatSectors), 0, bootSector, 36, 4);
+
+                // Ext flags: 0x80 = FAT 1 (i.e. Zero) active, no mirroring
+                bootSector[40] = 0x80;
+                bootSector[41] = 0x00;
+
+                // Filesystem version (0.0)
+                bootSector[42] = 0;
+                bootSector[43] = 0;
+
+                // First cluster of the root directory, always 2 since we don't do bad sectors...
+                Array.Copy(BitConverter.GetBytes((uint)2), 0, bootSector, 44, 4);
+
+                // Sector number of FSINFO
+                Array.Copy(BitConverter.GetBytes((uint)1), 0, bootSector, 48, 4);
+
+                // Sector number of the Backup Boot Sector
+                Array.Copy(BitConverter.GetBytes((uint)6), 0, bootSector, 50, 4);
+
+                // Reserved area - must be set to 0
+                Array.Clear(bootSector, 52, 12);
+
+                WriteBS(bootSector, 64, isFloppy, volId, label, fatType);
+            }
+
+        }
+
+        private static uint CalcFatSize(uint sectors, FatType fatType, byte sectorsPerCluster)
+        {
+            ushort numClusters = (ushort)(sectors / sectorsPerCluster);
+            ushort fatBytes = (ushort)((numClusters * (ushort)fatType) / 8);
+            return (uint)((fatBytes + Utilities.SectorSize - 1) / Utilities.SectorSize);
+        }
+
         private void ReadBS(int offset)
         {
             _bsDrvNum = _bootSector[offset];
@@ -465,6 +771,42 @@ namespace DiscUtils.Fat
             _bsVolId = BitConverter.ToUInt32(_bootSector, offset + 3);
             _bsVolLab = Encoding.ASCII.GetString(_bootSector, offset + 7, 11);
             _bsFilSysType = Encoding.ASCII.GetString(_bootSector, offset + 18, 8);
+        }
+
+        private static void WriteBS(byte[] bootSector, int offset, bool isFloppy, uint volId, string label, FatType fatType)
+        {
+            if (string.IsNullOrEmpty(label))
+            {
+                label = "NO NAME    ";
+            }
+
+            string fsType = "FAT     ";
+            if (fatType == FatType.FAT12)
+            {
+                fsType = "FAT12   ";
+            }
+            else if (fatType == FatType.FAT16)
+            {
+                fsType = "FAT16   ";
+            }
+
+            // Drive Number (for BIOS)
+            bootSector[offset + 0] = (byte)(isFloppy ? 0x00 : 0x80);
+
+            // Reserved
+            bootSector[offset + 1] = 0;
+
+            // Boot Signature (indicates next 3 fields present)
+            bootSector[offset + 2] = 0x29;
+
+            // Volume Id
+            Array.Copy(BitConverter.GetBytes(volId), 0, bootSector, offset + 3, 4);
+
+            // Volume Label
+            Array.Copy(Encoding.ASCII.GetBytes(label), 0, bootSector, offset + 7, 11);
+
+            // File System Type
+            Array.Copy(Encoding.ASCII.GetBytes(fsType), 0, bootSector, offset + 18, 8);
         }
 
         private static FatType DetectFATType(byte[] bpb)

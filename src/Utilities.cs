@@ -86,5 +86,67 @@ namespace DiscUtils
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         }
         #endregion
+
+        #region LBA / CHS Calculations
+        internal static ulong CHSToLBA(uint cylinder, uint head, uint sector, uint headsPerCylinder, uint sectorsPerTrack)
+        {
+            return ((((ulong)cylinder * (ulong)headsPerCylinder) + head) * (ulong)sectorsPerTrack) + sector - 1;
+        }
+
+        internal static void LBAToCHS(ulong LBA, uint headsPerCylinder, uint sectorsPerTrack, out uint cylinder, out uint head, out uint sector)
+        {
+            cylinder = (uint)(LBA / ((ulong)headsPerCylinder * (ulong)sectorsPerTrack));
+            uint temp = (uint)(LBA % ((ulong)headsPerCylinder * (ulong)sectorsPerTrack));
+            head = temp / sectorsPerTrack;
+            sector = temp % sectorsPerTrack - 1;
+        }
+
+        internal static void CalcDefaultVHDGeometry(uint totalSectors, out ushort cylinders, out byte headsPerCylinder, out byte sectorsPerTrack )
+        {
+            // If more than ~128GB truncate at ~128GB
+            if (totalSectors > 65535 * 16 * 255)
+            {
+                totalSectors = 65535 * 16 * 255;
+            }
+
+            // If more than ~32GB, break partition table compatibility.
+            // Partition table has max 63 sectors per track.  Otherwise
+            // we're looking for a geometry that's valid for both BIOS
+            // and ATA.
+            if (totalSectors > 65535 * 16 * 63)
+            {
+                sectorsPerTrack = 255;
+                headsPerCylinder = 16;
+            }
+            else
+            {
+                sectorsPerTrack = 17;
+                uint cylindersTimesHeads = totalSectors / sectorsPerTrack;
+                headsPerCylinder = (byte)((cylindersTimesHeads + 1023) / 1024);
+
+                if (headsPerCylinder < 4)
+                {
+                    headsPerCylinder = 4;
+                }
+
+                // If we need more than 1023 cylinders, or 16 heads, try more sectors per track
+                if (cylindersTimesHeads >= (headsPerCylinder * 1024U) || headsPerCylinder > 16)
+                {
+                    sectorsPerTrack = 31;
+                    headsPerCylinder = 16;
+                    cylindersTimesHeads = totalSectors / sectorsPerTrack;
+                }
+
+                // We need 63 sectors per track to keep the cylinder count down
+                if (cylindersTimesHeads >= (headsPerCylinder * 1024U))
+                {
+                    sectorsPerTrack = 63;
+                    headsPerCylinder = 16;
+                }
+
+            }
+            cylinders = (ushort)((totalSectors / sectorsPerTrack) / headsPerCylinder);
+        }
+        #endregion
     }
 }

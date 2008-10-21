@@ -20,13 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace DiscUtils.Fat
 {
-    public enum FatType
+    /// <summary>
+    /// The supported Floppy Disk logical formats.
+    /// </summary>
+    public enum FloppyDiskType
     {
-        FAT12 = 12,
-        FAT16 = 16,
-        FAT32 = 32
+        /// <summary>
+        /// 720KiB capacity disk.
+        /// </summary>
+        DoubleDensity = 0,
+
+        /// <summary>
+        /// 1440KiB capacity disk.
+        /// </summary>
+        HighDensity = 1,
+
+        /// <summary>
+        /// 2880KiB capacity disk.
+        /// </summary>
+        Extended = 2
     }
 }

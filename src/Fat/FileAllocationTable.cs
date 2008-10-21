@@ -21,9 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace DiscUtils.Fat
@@ -32,152 +29,81 @@ namespace DiscUtils.Fat
     {
         private FatType _type;
         private Stream _stream;
-        private int _start;
-        private int _length;
-        private byte[] _cache;
+        private ushort _firstFatSector;
+        private uint _fatSize;
+        private byte _numFats;
 
-        public FileAllocationTable(FatType type, Stream stream, int start, int length)
+        private FatBuffer _buffer;
+
+        public FileAllocationTable(FatType type, Stream stream, ushort firstFatSector, uint fatSize, byte numFats, byte activeFat)
         {
             _type = type;
             _stream = stream;
-            _start = start;
-            _length = length;
+            _firstFatSector = firstFatSector;
+            _fatSize = fatSize;
+            _numFats = numFats;
 
-            _stream.Position = _start;
-            _cache = Utilities.ReadFully(_stream, _length);
+            _stream.Position = (firstFatSector + (fatSize * activeFat)) * Utilities.SectorSize;
+            _buffer = new FatBuffer(type, Utilities.ReadFully(_stream, (int)(fatSize * Utilities.SectorSize)));
         }
 
         internal bool IsFree(uint val)
         {
-            return val == 0;
+            return _buffer.IsFree(val);
         }
 
         internal bool IsEndOfChain(uint val)
         {
-            switch (_type)
-            {
-                case FatType.FAT12: return val >= 0x0FF8;
-                case FatType.FAT16: return val >= 0xFFF8;
-                case FatType.FAT32: return val >= 0x0FFFFFF8;
-                default: throw new Exception("Unknown FAT type");
-            }
+            return _buffer.IsEndOfChain(val);
         }
 
         internal bool IsBadCluster(uint val)
         {
-            switch (_type)
-            {
-                case FatType.FAT12: return val == 0x0FF7;
-                case FatType.FAT16: return val == 0xFFF7;
-                case FatType.FAT32: return val == 0x0FFFFFF7;
-                default: throw new Exception("Unknown FAT type");
-            }
+            return _buffer.IsBadCluster(val);
         }
 
         internal uint GetNext(uint cluster)
         {
-            if (_type == FatType.FAT16)
-            {
-                return BitConverter.ToUInt16(_cache, (int)(cluster * 2));
-            }
-            else if (_type == FatType.FAT32)
-            {
-                return BitConverter.ToUInt32(_cache, (int)(cluster * 4)) & 0x0FFFFFFF;
-            }
-            else // FAT12
-            {
-                if ((cluster & 1) != 0)
-                {
-                    return (uint)((BitConverter.ToUInt16(_cache, (int)(cluster + (cluster / 2))) >> 4) & 0x0FFF);
-                }
-                else
-                {
-                    return (uint)(BitConverter.ToUInt16(_cache, (int)(cluster + (cluster / 2))) & 0x0FFF);
-                }
-            }
+            return _buffer.GetNext(cluster);
         }
 
         internal void SetEndOfChain(uint cluster)
         {
-            SetNext(cluster, 0xFFFFFFF8);
+            _buffer.SetEndOfChain(cluster);
         }
 
         internal void SetBadCluster(uint cluster)
         {
-            SetNext(cluster, 0xFFFFFFF7);
+            _buffer.SetBadCluster(cluster);
         }
 
         internal void SetNext(uint cluster, uint next)
         {
-            if (_type == FatType.FAT16)
-            {
-                Array.Copy(BitConverter.GetBytes((ushort)next), 0, _cache, (int)(cluster * 2), 2);
-            }
-            else if (_type == FatType.FAT32)
-            {
-                uint oldVal = BitConverter.ToUInt32(_cache, (int)(cluster * 4));
-                uint newVal = (oldVal & 0xF0000000) | (next & 0x0FFFFFFF);
-                Array.Copy(BitConverter.GetBytes((uint)newVal), 0, _cache, (int)(cluster * 4), 4);
-            }
-            else
-            {
-                int offset = (int)(cluster + (cluster / 2));
-
-                ushort maskedOldVal;
-                if ((cluster & 1) != 0)
-                {
-                    next = next << 4;
-                    maskedOldVal = (ushort)(BitConverter.ToUInt16(_cache, offset) & 0x000F);
-                }
-                else
-                {
-                    next = next & 0x0FFF;
-                    maskedOldVal = (ushort)(BitConverter.ToUInt16(_cache, offset) & 0xF000);
-                }
-
-                ushort newVal = (ushort)(maskedOldVal | next);
-
-                Array.Copy(BitConverter.GetBytes(newVal), 0, _cache, offset, 2);
-            }
+            _buffer.SetNext(cluster, next);
         }
 
         internal void Flush()
         {
-            _stream.Position = _start;
-            _stream.Write(_cache, 0, _cache.Length);
+            byte[] data = _buffer.GetBytes();
+
+            _stream.Position = _firstFatSector * Utilities.SectorSize;
+            for (int i = 0; i < _numFats; ++i)
+            {
+                _stream.Write(data, 0, data.Length);
+            }
         }
 
         internal int NumEntries
         {
             get
             {
-                switch (_type)
-                {
-                    case FatType.FAT12:
-                        return (_cache.Length / 3) * 2;
-                    case FatType.FAT16:
-                        return _cache.Length / 2;
-                    default: // FAT32
-                        return _cache.Length / 4;
-                }
+                return _buffer.NumEntries;
             }
         }
 
         internal bool TryGetFreeCluster(out uint cluster)
         {
-            // Simple scan - don't hold a free list...
-            uint numEntries = (uint)NumEntries;
-            for (uint i = 0; i < numEntries; i++)
-            {
-                if (IsFree(GetNext(i)))
-                {
-                    cluster = i;
-                    return true;
-                }
-            }
-
-            cluster = 0;
-            return false;
+            return _buffer.TryGetFreeCluster(out cluster);
         }
     }
 }
