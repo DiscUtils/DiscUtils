@@ -32,7 +32,7 @@ namespace LibraryTests
         static void Main(string[] args)
         {
             AppDomainSetup domSetup = new AppDomainSetup();
-            domSetup.ApplicationBase = @"C:\Program Files\NUnit 2.4.8\";// @"C:\";
+            domSetup.ApplicationBase = @"C:\Program Files\NUnit 2.4.8\";
             domSetup.PrivateBinPath = @"C:\Program Files\NUnit 2.4.8\bin\";
 
             AppDomain dom = AppDomain.CreateDomain("Test Run", null, domSetup);

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISOCreate", "utils\ISOCreat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FATExtract", "utils\FATExtract\FATExtract.csproj", "{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryTests", "unittests\LibraryTests\LibraryTests.csproj", "{A33BA1D9-BBEA-4513-9180-D392436F62FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
