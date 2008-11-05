@@ -309,10 +309,9 @@ namespace DiscUtils.Fat
         /// Indicates if this file system is read-only or read-write.
         /// </summary>
         /// <returns></returns>
-        public override bool CanWrite()
+        public override bool CanWrite
         {
-            // Read-only (for now)
-            return false;
+            get { return _data.CanWrite; }
         }
 
         /// <summary>
@@ -558,12 +557,44 @@ namespace DiscUtils.Fat
         }
         #endregion
 
+        /// <summary>
+        /// Gets an object representing a possible file.
+        /// </summary>
+        /// <param name="path">The file path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
+        public override DiscFileInfo GetFileInfo(string path)
+        {
+            return new FatFileInfo(this, path);
+        }
+
+        /// <summary>
+        /// Gets an object representing a possible directory.
+        /// </summary>
+        /// <param name="path">The directory path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The directory does not need to exist</remarks>
+        public override DiscDirectoryInfo GetDirectoryInfo(string path)
+        {
+            return new FatDirectoryInfo(this, path);
+        }
+
+        /// <summary>
+        /// Gets an object representing a possible file system object (file or directory).
+        /// </summary>
+        /// <param name="path">The file system path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file system object does not need to exist</remarks>
+        public override DiscFileSystemInfo GetFileSystemInfo(string path)
+        {
+            return new FatFileSystemInfo(this, path);
+        }
 
         private void Initialize(Stream data)
         {
             _data = data;
-            data.Position = 0;
-            _bootSector = Utilities.ReadSector(data);
+            _data.Position = 0;
+            _bootSector = Utilities.ReadSector(_data);
 
             _type = DetectFATType(_bootSector);
 

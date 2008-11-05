@@ -136,9 +136,9 @@ namespace DiscUtils.Iso9660
         /// Indicates ISO files are read-only.
         /// </summary>
         /// <returns>Always returns <c>false</c>.</returns>
-        public override bool CanWrite()
+        public override bool CanWrite
         {
-            return false;
+            get { return false; }
         }
 
         /// <summary>
@@ -245,6 +245,21 @@ namespace DiscUtils.Iso9660
         internal Stream GetExtentStream(DirectoryRecord record)
         {
             return new ExtentStream(_data, record.LocationOfExtent, record.DataLength, record.FileUnitSize, record.InterleaveGapSize);
+        }
+
+        public override DiscFileInfo GetFileInfo(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override DiscDirectoryInfo GetDirectoryInfo(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override DiscFileSystemInfo GetFileSystemInfo(string path)
+        {
+            throw new NotImplementedException();
         }
     }
 

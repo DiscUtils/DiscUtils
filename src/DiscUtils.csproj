@@ -59,6 +59,7 @@
     <Compile Include="Fat\FatAttributes.cs" />
     <Compile Include="Fat\ClusterStream.cs" />
     <Compile Include="Fat\FatFileStream.cs" />
+    <Compile Include="Fat\FatFileSystemInfo.cs" />
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />

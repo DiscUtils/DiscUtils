@@ -41,7 +41,7 @@ namespace DiscUtils
         /// Indicates whether the file system is read-only or read-write.
         /// </summary>
         /// <returns>true if the file system is read-write.</returns>
-        public abstract bool CanWrite();
+        public abstract bool CanWrite { get; }
 
         /// <summary>
         /// Gets the root directory of the file system.
@@ -70,5 +70,29 @@ namespace DiscUtils
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
         public abstract Stream Open(string path, FileMode mode, FileAccess access);
+
+        /// <summary>
+        /// Gets an object representing a possible file.
+        /// </summary>
+        /// <param name="path">The file path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
+        public abstract DiscFileInfo GetFileInfo(string path);
+
+        /// <summary>
+        /// Gets an object representing a possible directory.
+        /// </summary>
+        /// <param name="path">The directory path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
+        public abstract DiscDirectoryInfo GetDirectoryInfo(string path);
+
+        /// <summary>
+        /// Gets an object representing a possible file system object (file or directory).
+        /// </summary>
+        /// <param name="path">The file system path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
+        public abstract DiscFileSystemInfo GetFileSystemInfo(string path);
     }
 }
