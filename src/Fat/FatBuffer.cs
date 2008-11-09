@@ -26,7 +26,21 @@ namespace DiscUtils.Fat
 {
     internal class FatBuffer
     {
+        /// <summary>
+        /// The End-of-chain marker to WRITE (SetNext).  Don't use this value to test for end of chain.
+        /// </summary>
+        /// <remarks>
+        /// The actual end-of-chain marker bits on disk vary by FAT type, and can end ...F8 through ...FF.
+        /// </remarks>
         public const uint EndOfChain = 0xFFFFFFFF;
+
+        /// <summary>
+        /// The Bad-Cluster marker to WRITE (SetNext).  Don't use this value to test for bad clusters.
+        /// </summary>
+        /// <remarks>
+        /// The actual bad-cluster marker bits on disk vary by FAT type.
+        /// </remarks>
+        public const uint BadCluster = 0xFFFFFFF7;
 
         private FatType _type;
         private byte[] _buffer;
@@ -51,9 +65,9 @@ namespace DiscUtils.Fat
         {
             switch (_type)
             {
-                case FatType.FAT12: return val >= 0x0FF8;
-                case FatType.FAT16: return val >= 0xFFF8;
-                case FatType.FAT32: return val >= 0x0FFFFFF8;
+                case FatType.FAT12: return (val & 0x0FFF) >= 0x0FF8;
+                case FatType.FAT16: return (val & 0xFFFF) >= 0xFFF8;
+                case FatType.FAT32: return (val & 0x0FFFFFF8) >= 0x0FFFFFF8;
                 default: throw new Exception("Unknown FAT type");
             }
         }
@@ -62,9 +76,9 @@ namespace DiscUtils.Fat
         {
             switch (_type)
             {
-                case FatType.FAT12: return val == 0x0FF7;
-                case FatType.FAT16: return val == 0xFFF7;
-                case FatType.FAT32: return val == 0x0FFFFFF7;
+                case FatType.FAT12: return (val & 0x0FFF) == 0x0FF7;
+                case FatType.FAT16: return (val & 0xFFFF) == 0xFFF7;
+                case FatType.FAT32: return (val & 0x0FFFFFF8) == 0x0FFFFFF7;
                 default: throw new Exception("Unknown FAT type");
             }
         }
@@ -99,7 +113,7 @@ namespace DiscUtils.Fat
 
         internal void SetBadCluster(uint cluster)
         {
-            SetNext(cluster, 0xFFFFFFF7);
+            SetNext(cluster, BadCluster);
         }
 
         internal void SetNext(uint cluster, uint next)
