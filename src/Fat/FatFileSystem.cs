@@ -630,7 +630,7 @@ namespace DiscUtils.Fat
             {
                 fatStream = new ClusterStream(FileAccess.Read, _clusterReader, _fat, _bpbRootClus, uint.MaxValue);
             }
-            _rootDir = new Directory(this, fatStream);
+            _rootDir = new Directory(this, fatStream, new DirectoryEntry("", FatAttributes.Directory));
         }
 
         private void LoadFAT()
@@ -967,23 +967,31 @@ namespace DiscUtils.Fat
         {
             DirectoryEntry entry;
 
-            entry = dir.GetEntry(FatUtilities.NormalizeFileName(pathEntries[pathOffset]));
-            if (entry != null)
+            if (pathEntries.Length <= pathOffset)
             {
-                if (pathOffset == pathEntries.Length - 1)
-                {
-                    parent = dir;
-                    return entry;
-                }
-                else
-                {
-                    return FindFile(GetDirectory(entry, dir), pathEntries, pathOffset + 1, out parent);
-                }
+                parent = null;
+                return dir.Self;
             }
             else
             {
-                parent = null;
-                return null;
+                entry = dir.GetEntry(FatUtilities.NormalizeFileName(pathEntries[pathOffset]));
+                if (entry != null)
+                {
+                    if (pathOffset == pathEntries.Length - 1)
+                    {
+                        parent = dir;
+                        return entry;
+                    }
+                    else
+                    {
+                        return FindFile(GetDirectory(entry, dir), pathEntries, pathOffset + 1, out parent);
+                    }
+                }
+                else
+                {
+                    parent = null;
+                    return null;
+                }
             }
         }
     }

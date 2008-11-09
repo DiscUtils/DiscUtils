@@ -48,11 +48,11 @@ namespace DiscUtils.Fat
             LoadEntries();
         }
 
-        internal Directory(FatFileSystem fileSystem, Stream dirStream)
+        internal Directory(FatFileSystem fileSystem, Stream dirStream, DirectoryEntry dirEntry)
         {
             _fileSystem = fileSystem;
             _parent = null;
-            _dirEntry = null;
+            _dirEntry = dirEntry;
             _dirStream = dirStream;
 
             LoadEntries();

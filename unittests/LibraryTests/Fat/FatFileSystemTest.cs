@@ -93,8 +93,6 @@ namespace DiscUtils.Fat
         public void FileInfo()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.AreEqual("FLOPPY_IMG ", fs.VolumeLabel);
-
             DiscFileInfo fi = fs.GetFileInfo(@"SOMEDIR\SOMEFILE.TXT");
             Assert.IsNotNull(fi);
         }
@@ -103,8 +101,6 @@ namespace DiscUtils.Fat
         public void DirectoryInfo()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.AreEqual("FLOPPY_IMG ", fs.VolumeLabel);
-
             DiscDirectoryInfo fi = fs.GetDirectoryInfo(@"SOMEDIR");
             Assert.IsNotNull(fi);
         }
@@ -113,10 +109,17 @@ namespace DiscUtils.Fat
         public void FileSystemInfo()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.AreEqual("FLOPPY_IMG ", fs.VolumeLabel);
-
             DiscFileSystemInfo fi = fs.GetFileSystemInfo(@"SOMEDIR\SOMEFILE");
             Assert.IsNotNull(fi);
+        }
+
+        [Test]
+        public void Root()
+        {
+            FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
+            Assert.IsNotNull(fs.Root);
+            Assert.IsTrue(fs.Root.Exists);
+            Assert.IsEmpty(fs.Root.Name);
         }
 
         internal static void CalcDefaultVHDGeometry(uint totalSectors, out ushort cylinders, out byte headsPerCylinder, out byte sectorsPerTrack)
