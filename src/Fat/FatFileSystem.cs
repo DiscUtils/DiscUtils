@@ -333,12 +333,22 @@ namespace DiscUtils.Fat
         {
             Directory parent;
             DirectoryEntry dirEntry = FindFile(_rootDir, path, out parent);
-            if (dirEntry == null)
+
+            if (parent == null)
             {
                 throw new FileNotFoundException("Could not locate file", path);
             }
 
-            return parent.OpenFile(dirEntry.NormalizedName, mode, access);
+            if (dirEntry == null)
+            {
+                string[] pathEntries = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
+                string normFileName = FatUtilities.NormalizeFileName(pathEntries[pathEntries.Length - 1]);
+                return parent.OpenFile(normFileName, mode, access);
+            }
+            else
+            {
+                return parent.OpenFile(dirEntry.NormalizedName, mode, access);
+            }
         }
 
         /// <summary>
@@ -877,25 +887,14 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal ClusterStream OpenExistingStream(FileMode mode, FileAccess access, uint firstCluster, uint length)
+        internal ClusterStream OpenExistingStream(uint firstCluster, uint length)
         {
-            if (mode == FileMode.Create || mode == FileMode.CreateNew)
-            {
-                throw new ArgumentOutOfRangeException("mode", "Attempt to use a Create mode on an existing stream");
-            }
+            return new ClusterStream(FileAccess.ReadWrite, _clusterReader, _fat, firstCluster, length);
+        }
 
-            ClusterStream fs = new ClusterStream(access, _clusterReader, _fat, firstCluster, length);
-
-            if (mode == FileMode.Append)
-            {
-                fs.Seek(0, SeekOrigin.End);
-            }
-            if (mode == FileMode.Truncate)
-            {
-                fs.SetLength(0);
-            }
-
-            return fs;
+        internal Stream OpenExistingFile(Directory dir, string name, FileAccess fileAccess)
+        {
+            return new FatFileStream(dir, name, fileAccess, _clusterReader, _fat);
         }
 
         internal DateTime ConvertToUtc(DateTime dateTime)
@@ -906,11 +905,6 @@ namespace DiscUtils.Fat
         internal DateTime ConvertFromUtc(DateTime dateTime)
         {
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, _timeZone);
-        }
-
-        internal Stream OpenFile(Directory dir, string name, FileAccess fileAccess)
-        {
-            return new FatFileStream(dir, name, fileAccess, _clusterReader, _fat);
         }
 
         internal Directory GetDirectory(string path)
@@ -990,6 +984,11 @@ namespace DiscUtils.Fat
                     {
                         return FindFile(GetDirectory(entry, dir), pathEntries, pathOffset + 1, out parent);
                     }
+                }
+                else if (pathOffset == pathEntries.Length - 1)
+                {
+                    parent = dir;
+                    return null;
                 }
                 else
                 {

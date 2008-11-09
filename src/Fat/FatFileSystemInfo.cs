@@ -94,8 +94,7 @@ namespace DiscUtils.Fat
         {
             get
             {
-                DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path);
-                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) == 0);
+                return _fileSystem.GetDirectoryEntry(_path) != null;
             }
         }
 

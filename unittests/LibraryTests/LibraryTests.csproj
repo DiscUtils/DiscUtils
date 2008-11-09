@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Fat\FatDirectoryInfoTest.cs" />
+    <Compile Include="Fat\FatFileInfoTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Fat\FatFileSystemTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

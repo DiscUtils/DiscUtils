@@ -43,7 +43,7 @@ namespace DiscUtils.Fat
             _fileSystem = fileSystem;
             _parent = parent;
             _dirEntry = dirEntry;
-            _dirStream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, dirEntry.FirstCluster, uint.MaxValue);
+            _dirStream = _fileSystem.OpenExistingStream(dirEntry.FirstCluster, uint.MaxValue);
 
             LoadEntries();
         }
@@ -241,12 +241,47 @@ namespace DiscUtils.Fat
 
         internal Stream OpenFile(string name, FileMode mode, FileAccess fileAccess)
         {
-            if (mode != FileMode.Open)
+            if (mode == FileMode.Append || mode == FileMode.Truncate)
             {
                 throw new NotImplementedException();
             }
 
-            return _fileSystem.OpenFile(this, name, fileAccess);
+            bool exists = FindEntryByNormalizedName(name) != -1;
+
+            if (mode == FileMode.CreateNew && exists)
+            {
+                throw new IOException("File already exists");
+            }
+            else if (mode == FileMode.Open && !exists)
+            {
+                throw new FileNotFoundException("File not found", name);
+            }
+            else if ((mode == FileMode.Open || mode == FileMode.OpenOrCreate || mode == FileMode.Create) && exists)
+            {
+                Stream stream = _fileSystem.OpenExistingFile(this, name, fileAccess);
+                if (mode == FileMode.Create)
+                {
+                    stream.SetLength(0);
+                }
+                return stream;
+            }
+            else if ((mode == FileMode.OpenOrCreate || mode == FileMode.CreateNew || mode == FileMode.Create) && !exists)
+            {
+                // Create new file
+                DirectoryEntry newEntry = new DirectoryEntry(name, FatAttributes.Archive);
+                newEntry.FirstCluster = 0; // i.e. Zero-length
+                newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
+                newEntry.LastWriteTime = newEntry.CreationTime;
+
+                AddEntry(newEntry);
+
+                return _fileSystem.OpenExistingFile(this, name, fileAccess);
+            }
+            else
+            {
+                // Should never get here...
+                throw new NotImplementedException();
+            }
         }
 
         private void AddEntry(DirectoryEntry newEntry)
@@ -290,7 +325,7 @@ namespace DiscUtils.Fat
         private void PopulateNewChildDirectory(DirectoryEntry newEntry)
         {
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
-            using (ClusterStream stream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, newEntry.FirstCluster, uint.MaxValue))
+            using (ClusterStream stream = _fileSystem.OpenExistingStream(newEntry.FirstCluster, uint.MaxValue))
             {
                 // Update the entry for the child when the first cluster is actually allocated
                 stream.FirstClusterAllocated += (cluster) => {
