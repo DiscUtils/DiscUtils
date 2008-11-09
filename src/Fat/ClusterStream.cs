@@ -26,6 +26,8 @@ using System.IO;
 
 namespace DiscUtils.Fat
 {
+    internal delegate void FirstClusterAllocatedDelegate(uint cluster);
+
     internal class ClusterStream : Stream
     {
         private FileAccess _access;
@@ -39,6 +41,8 @@ namespace DiscUtils.Fat
         private uint _currentCluster = 0;
         private byte[] _clusterBuffer;
 
+        private bool _atEOF;
+
         internal ClusterStream(FileAccess access, ClusterReader reader, FileAllocationTable fat, uint firstCluster, uint length)
         {
             _access = access;
@@ -47,12 +51,22 @@ namespace DiscUtils.Fat
             _length = length;
 
             _knownClusters = new List<uint>();
-            _knownClusters.Add(firstCluster);
+            if (firstCluster != 0)
+            {
+                _knownClusters.Add(firstCluster);
+            }
+            else
+            {
+                _knownClusters.Add(FatBuffer.EndOfChain);
+            }
+
             _position = 0;
 
             _currentCluster = uint.MaxValue;
             _clusterBuffer = new byte[_reader.ClusterSize];
         }
+
+        public event FirstClusterAllocatedDelegate FirstClusterAllocated;
 
         public override bool CanRead
         {
@@ -123,7 +137,15 @@ namespace DiscUtils.Fat
 
             if (!TryLoadCurrentCluster())
             {
-                throw new IOException("Attempt to read beyond known clusters");
+                if (_position == _length || _position == DetectLength() && !_atEOF)
+                {
+                    _atEOF = true;
+                    return 0;
+                }
+                else
+                {
+                    throw new IOException("Attempt to read beyond known clusters");
+                }
             }
 
             int numRead = 0;
@@ -146,6 +168,11 @@ namespace DiscUtils.Fat
                 }
             }
 
+            if (numRead == 0)
+            {
+                _atEOF = true;
+            }
+
             return numRead;
         }
 
@@ -161,6 +188,7 @@ namespace DiscUtils.Fat
                 newPos += Length;
             }
             _position = newPos;
+            _atEOF = false;
             return newPos;
         }
 
@@ -216,6 +244,8 @@ namespace DiscUtils.Fat
             {
                 _fat.Flush();
             }
+
+            _atEOF = false;
         }
 
         /// <summary>
@@ -275,11 +305,26 @@ namespace DiscUtils.Fat
             }
 
             _fat.SetEndOfChain(cluster);
-            _fat.SetNext(_knownClusters[_knownClusters.Count - 2], cluster);
+            if (_knownClusters.Count == 1)
+            {
+                FireFirstClusterAllocated(cluster);
+            }
+            else
+            {
+                _fat.SetNext(_knownClusters[_knownClusters.Count - 2], cluster);
+            }
             _knownClusters[_knownClusters.Count - 1] = cluster;
             _knownClusters.Add(_fat.GetNext(cluster));
 
             return cluster;
+        }
+
+        private void FireFirstClusterAllocated(uint cluster)
+        {
+            if (FirstClusterAllocated != null)
+            {
+                FirstClusterAllocated(cluster);
+            }
         }
 
         private bool TryLoadCurrentCluster()
@@ -371,5 +416,19 @@ namespace DiscUtils.Fat
 
             return _knownClusters.Count > index;
         }
+
+        private long DetectLength()
+        {
+            while (!_fat.IsEndOfChain(_knownClusters[_knownClusters.Count - 1]))
+            {
+                if (!TryPopulateKnownClusters(_knownClusters.Count))
+                {
+                    throw new IOException("Corrupt file stream - unable to discover end of cluster chain");
+                }
+            }
+
+            return (long)(_knownClusters.Count - 1) * (long)(_reader.ClusterSize);
+        }
+
     }
 }

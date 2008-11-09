@@ -331,11 +331,6 @@ namespace DiscUtils.Fat
         /// <returns>The stream to the opened file</returns>
         public override Stream Open(string path, FileMode mode, FileAccess access)
         {
-            if (mode != FileMode.Open)
-            {
-                throw new NotImplementedException("No support for creating files (yet)");
-            }
-
             Directory parent;
             DirectoryEntry dirEntry = FindFile(_rootDir, path, out parent);
             if (dirEntry == null)
@@ -882,7 +877,7 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal Stream OpenExistingStream(FileMode mode, FileAccess access, uint firstCluster, uint length)
+        internal ClusterStream OpenExistingStream(FileMode mode, FileAccess access, uint firstCluster, uint length)
         {
             if (mode == FileMode.Create || mode == FileMode.CreateNew)
             {

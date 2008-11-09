@@ -40,6 +40,7 @@ namespace DiscUtils.Fat
 
             DirectoryEntry dirEntry = _dir.GetEntry(_name);
             _stream = new ClusterStream(access, reader, fat, (uint)dirEntry.FirstCluster, (uint)dirEntry.FileSize);
+            _stream.FirstClusterAllocated += FirstClusterAllocatedHandler;
         }
 
         public override void Close()
@@ -106,6 +107,13 @@ namespace DiscUtils.Fat
         public override long Seek(long offset, SeekOrigin origin)
         {
             return _stream.Seek(offset, origin);
+        }
+
+        private void FirstClusterAllocatedHandler(uint cluster)
+        {
+            DirectoryEntry dirEntry = _dir.GetEntry(_name);
+            dirEntry.FirstCluster = cluster;
+            _dir.UpdateEntry(dirEntry);
         }
     }
 }

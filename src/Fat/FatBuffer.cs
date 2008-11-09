@@ -26,6 +26,8 @@ namespace DiscUtils.Fat
 {
     internal class FatBuffer
     {
+        public const uint EndOfChain = 0xFFFFFFFF;
+
         private FatType _type;
         private byte[] _buffer;
 
@@ -92,7 +94,7 @@ namespace DiscUtils.Fat
 
         internal void SetEndOfChain(uint cluster)
         {
-            SetNext(cluster, 0xFFFFFFFF);
+            SetNext(cluster, EndOfChain);
         }
 
         internal void SetBadCluster(uint cluster)

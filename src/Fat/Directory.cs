@@ -142,16 +142,8 @@ namespace DiscUtils.Fat
             {
                 try
                 {
-                    // Get a free cluster
-                    uint freeCluster;
-                    if (!_fileSystem.FAT.TryGetFreeCluster(out freeCluster))
-                    {
-                        throw new IOException("Out of disk space");
-                    }
-                    _fileSystem.FAT.SetEndOfChain(freeCluster);
-
                     DirectoryEntry newEntry = new DirectoryEntry(normalizedName, FatAttributes.Directory);
-                    newEntry.FirstCluster = freeCluster;
+                    newEntry.FirstCluster = 0; // i.e. Zero-length
                     newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                     newEntry.LastWriteTime = newEntry.CreationTime;
 
@@ -298,8 +290,14 @@ namespace DiscUtils.Fat
         private void PopulateNewChildDirectory(DirectoryEntry newEntry)
         {
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
-            using (Stream stream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, newEntry.FirstCluster, uint.MaxValue))
+            using (ClusterStream stream = _fileSystem.OpenExistingStream(FileMode.Open, FileAccess.ReadWrite, newEntry.FirstCluster, uint.MaxValue))
             {
+                // Update the entry for the child when the first cluster is actually allocated
+                stream.FirstClusterAllocated += (cluster) => {
+                    newEntry.FirstCluster = cluster;
+                    UpdateEntry(newEntry);
+                };
+
                 DirectoryEntry selfEntry = new DirectoryEntry(newEntry);
                 selfEntry.NormalizedName = ".          ";
                 selfEntry.WriteTo(stream);
