@@ -358,7 +358,16 @@ namespace DiscUtils.Fat
 
             for (int i = 0; i < pathElements.Length; ++i)
             {
-                string normalizedName = FatUtilities.NormalizeFileName(pathElements[i]);
+                string normalizedName;
+                try
+                {
+                    normalizedName = FatUtilities.NormalizeFileName(pathElements[i]);
+                }
+                catch (ArgumentException ae)
+                {
+                    throw new IOException("Invalid path", ae);
+                }
+
                 Directory child = focusDir.GetChildDirectory(normalizedName);
                 if (child == null)
                 {

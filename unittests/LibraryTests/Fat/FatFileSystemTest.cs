@@ -120,6 +120,7 @@ namespace DiscUtils.Fat
             Assert.IsNotNull(fs.Root);
             Assert.IsTrue(fs.Root.Exists);
             Assert.IsEmpty(fs.Root.Name);
+            Assert.IsNull(fs.Root.Parent);
         }
 
         internal static void CalcDefaultVHDGeometry(uint totalSectors, out ushort cylinders, out byte headsPerCylinder, out byte sectorsPerTrack)

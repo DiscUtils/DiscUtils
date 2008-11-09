@@ -21,26 +21,48 @@
 //
 
 using System;
+using System.Text;
 
 namespace DiscUtils.Fat
 {
     internal class FatUtilities
     {
+        private const string SpecialPrivateChars = "$%'-_@~`!(){}^#&";
+
         public static string NormalizeFileName(string name)
         {
-            string[] parts = name.Split('.');
+            // Put it through a conversion round-trip, to catch invalid characters
+            string roundTripped = Encoding.Default.GetString(Encoding.Default.GetBytes(name));
 
+            // Divide the name from extension
+            string[] parts = roundTripped.Split('.');
             if (parts.Length < 1 || parts.Length > 2)
             {
                 throw new ArgumentException("Invalid file name", "name");
             }
-
             string namePart = parts[0];
             string extPart = (parts.Length == 2 ? parts[1] : "");
 
+            // Check lengths
             if (namePart.Length > 8 || extPart.Length > 3)
             {
                 throw new ArgumentException("Invalid file name", "name");
+            }
+
+            foreach (char ch in namePart)
+            {
+                if (!(Char.IsLetterOrDigit(ch) || ch > 127 || SpecialPrivateChars.IndexOf(ch) >= 0))
+                {
+                    throw new ArgumentException(string.Format("Invalid character '{0}' not allowed in file names", ch), "name");
+                }
+            }
+
+            foreach (char ch in extPart)
+            {
+                if (!(Char.IsLetterOrDigit(ch) || ch > 127 || SpecialPrivateChars.IndexOf(ch) >= 0))
+                {
+                    throw new ArgumentException(string.Format("Invalid character '{0}' not allowed in file extensions", ch), "name");
+                }
             }
 
             return String.Format("{0,-8}{1,-3}", namePart.ToUpperInvariant(), extPart.ToUpperInvariant());

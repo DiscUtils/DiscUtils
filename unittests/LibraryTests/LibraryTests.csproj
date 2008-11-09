@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fat\FatDirectoryInfoTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Fat\FatFileSystemTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
