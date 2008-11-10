@@ -170,6 +170,11 @@ namespace DiscUtils.Iso9660
             throw new NotSupportedException();
         }
 
+        public override void MoveTo(string destDirName)
+        {
+            throw new NotSupportedException();
+        }
+
         public override DiscDirectoryInfo[] GetDirectories()
         {
             List<DiscDirectoryInfo> dirs = new List<DiscDirectoryInfo>();

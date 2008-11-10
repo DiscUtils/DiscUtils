@@ -112,6 +112,9 @@ namespace DiscUtils.Fat
 
             fs.Root.GetDirectories(@"Fred")[0].Delete();
             Assert.AreEqual(0, fs.Root.GetDirectories().Length);
+
+            fs = new FatFileSystem(ms);
+            Assert.AreEqual(0, fs.Root.GetDirectories().Length);
         }
 
         [Test]
@@ -172,6 +175,21 @@ namespace DiscUtils.Fat
                 fs.CreateDirectory(@"SOMEDIR\Fred");
                 dirInfo.GetDirectories(@"Fred")[0].Delete();
             }
+        }
+
+        [Test]
+        public void Move()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
+            fs.GetDirectoryInfo(@"SOMEDIR\CHILD").MoveTo("NEWDIR");
+
+            fs = new FatFileSystem(ms);
+
+            Assert.AreEqual(2, fs.Root.GetDirectories().Length);
+            Assert.AreEqual(0, fs.Root.GetDirectories("SOMEDIR")[0].GetDirectories().Length);
         }
 
         [Test]

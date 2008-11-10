@@ -55,6 +55,12 @@ namespace DiscUtils
         public abstract void Delete(bool recursive);
 
         /// <summary>
+        /// Moves a directory and it's contents to a new path.
+        /// </summary>
+        /// <param name="destDirName">The</param>
+        public abstract void MoveTo(string destDirName);
+
+        /// <summary>
         /// Gets all child directories.
         /// </summary>
         /// <returns>An array of child directories</returns>

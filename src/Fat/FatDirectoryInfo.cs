@@ -86,6 +86,40 @@ namespace DiscUtils.Fat
             Delete();
         }
 
+        public override void MoveTo(string destDirName)
+        {
+            if( destDirName == null )
+            {
+                throw new ArgumentNullException("destDirName");
+            }
+
+            if(destDirName == "")
+            {
+                throw new ArgumentException("Invalid destination name (empty string)");
+            }
+
+            Directory destParent;
+            long destId = _fileSystem.GetDirectoryEntry(destDirName, out destParent);
+            if (destParent == null)
+            {
+                throw new DirectoryNotFoundException("Target directory doesn't exist");
+            }
+            else if (destId >= 0)
+            {
+                throw new IOException("Target directory already exists");
+            }
+
+            Directory sourceParent;
+            long sourceId = _fileSystem.GetDirectoryEntry(_path, out sourceParent);
+            if (sourceParent == null || sourceId < 0)
+            {
+                throw new IOException("Source directory doesn't exist");
+            }
+
+            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destDirName), sourceParent.GetEntry(sourceId));
+            sourceParent.DeleteEntry(sourceId);
+        }
+
         public override DiscDirectoryInfo[] GetDirectories()
         {
             Directory dir = _fileSystem.GetDirectory(_path);

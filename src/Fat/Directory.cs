@@ -164,6 +164,19 @@ namespace DiscUtils.Fat
             }
         }
 
+        internal void AttachChildDirectory(string normalizedName, DirectoryEntry directoryEntry)
+        {
+            long id = FindEntryByNormalizedName(normalizedName);
+            if (id >= 0)
+            {
+                throw new IOException("Directory entry already exists");
+            }
+
+            DirectoryEntry newEntry = new DirectoryEntry(directoryEntry);
+            newEntry.NormalizedName = normalizedName;
+            AddEntry(newEntry);
+        }
+
         private void LoadEntries()
         {
             _entries = new Dictionary<long,DirectoryEntry>();
@@ -296,24 +309,31 @@ namespace DiscUtils.Fat
                 throw new IOException("Attempt to delete unknown directory entry");
             }
 
-            DirectoryEntry entry = _entries[id];
-
-            DirectoryEntry copy = new DirectoryEntry(entry);
-            copy.NormalizedName = "\xE5" + entry.NormalizedName.Substring(1);
-            _dirStream.Position = id;
-            copy.WriteTo(_dirStream);
-
-            _fileSystem.FAT.FreeChain(entry.FirstCluster);
-
-            if ((entry.Attributes & FatAttributes.Directory) != 0)
+            try
             {
-                _fileSystem.ForgetDirectory(entry);
+                DirectoryEntry entry = _entries[id];
+
+                DirectoryEntry copy = new DirectoryEntry(entry);
+                copy.NormalizedName = "\xE5" + entry.NormalizedName.Substring(1);
+                _dirStream.Position = id;
+                copy.WriteTo(_dirStream);
+
+                _fileSystem.FAT.FreeChain(entry.FirstCluster);
+
+                if ((entry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    _fileSystem.ForgetDirectory(entry);
+                }
+
+                _entries.Remove(id);
+                _freeEntries.Add(id);
+
+                HandleAccessed(true);
             }
-
-            _entries.Remove(id);
-            _freeEntries.Add(id);
-
-            HandleAccessed(true);
+            finally
+            {
+                _fileSystem.FAT.Flush();
+            }
         }
 
         internal void UpdateEntry(long id, DirectoryEntry entry)
