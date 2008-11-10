@@ -274,6 +274,23 @@ namespace DiscUtils.Fat
             set { UpdateDirEntry((e) => { e.LastWriteTime = _fileSystem.ConvertFromUtc(value); }); }
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            FatDirectoryInfo other = (FatDirectoryInfo)obj;
+
+            return _fileSystem == other._fileSystem && _path == other._path;
+        }
+
+        public override int GetHashCode()
+        {
+            return _fileSystem.GetHashCode() ^ _path.GetHashCode();
+        }
+
         private void DoSearch(List<DiscFileInfo> results, string path, Regex regex, bool subFolders)
         {
             Directory dir = _fileSystem.GetDirectory(path);

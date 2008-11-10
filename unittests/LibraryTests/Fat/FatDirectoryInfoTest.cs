@@ -232,5 +232,43 @@ namespace DiscUtils.Fat
 
             Assert.AreEqual(0, fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories).Length);
         }
+
+        [Test]
+        public void GetFileSystemInfos()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+            fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
+            fs.CreateDirectory(@"AAA.EXT");
+            using (Stream s = fs.Open(@"FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.Open(@"SOMEDIR\CHILD.EXT", FileMode.Create)) { }
+            using (Stream s = fs.Open(@"SOMEDIR\FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.Open(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", FileMode.Create)) { }
+
+            fs = new FatFileSystem(ms);
+            Assert.AreEqual(3, fs.Root.GetFileSystemInfos().Length);
+
+            Assert.AreEqual(1, fs.Root.GetFileSystemInfos("*.EXT").Length);
+            Assert.AreEqual(2, fs.Root.GetFileSystemInfos("*.?XT").Length);
+        }
+
+        [Test]
+        public void Parent()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+            fs.CreateDirectory("SOMEDIR");
+
+            Assert.AreEqual(fs.Root, fs.Root.GetDirectories("SOMEDIR")[0].Parent);
+        }
+
+        [Test]
+        public void Parent_Root()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            Assert.IsNull(fs.Root.Parent);
+        }
     }
 }
