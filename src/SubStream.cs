@@ -38,7 +38,6 @@ namespace DiscUtils
             this.parent = parent;
             this.first = first;
             this.length = length;
-            this.position = 0;
         }
 
 

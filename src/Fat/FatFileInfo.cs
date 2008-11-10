@@ -32,7 +32,7 @@ namespace DiscUtils.Fat
 
         public FatFileInfo(FatFileSystem fileSystem, string path)
         {
-            if (string.IsNullOrEmpty(path) || path.EndsWith("\\"))
+            if (string.IsNullOrEmpty(path) || path.EndsWith("\\", StringComparison.Ordinal))
             {
                 throw new ArgumentException("Invalid file path", "path");
             }

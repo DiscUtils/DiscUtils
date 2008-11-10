@@ -60,8 +60,6 @@ namespace DiscUtils.Fat
                 _knownClusters.Add(FatBuffer.EndOfChain);
             }
 
-            _position = 0;
-
             _currentCluster = uint.MaxValue;
             _clusterBuffer = new byte[_reader.ClusterSize];
         }
@@ -213,7 +211,7 @@ namespace DiscUtils.Fat
 
             if (offset > buffer.Length || (offset + count) > buffer.Length)
             {
-                throw new IndexOutOfRangeException("Attempt to write bytes outside of the buffer");
+                throw new ArgumentException("Attempt to write bytes outside of the buffer");
             }
 
             // TODO: Free space check...
@@ -357,14 +355,6 @@ namespace DiscUtils.Fat
             {
                 _reader.ReadCluster(cluster, _clusterBuffer, 0);
                 _currentCluster = cluster;
-            }
-        }
-
-        private void LoadClusterByPosition(long pos)
-        {
-            if (!TryLoadClusterByPosition(pos))
-            {
-                throw new IOException(string.Format("Failed to read existing cluster at 0x{0:X}", pos));
             }
         }
 

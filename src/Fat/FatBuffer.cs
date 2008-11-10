@@ -74,10 +74,10 @@ namespace DiscUtils.Fat
         {
             switch (_type)
             {
-                case FatType.FAT12: return (val & 0x0FFF) >= 0x0FF8;
-                case FatType.FAT16: return (val & 0xFFFF) >= 0xFFF8;
-                case FatType.FAT32: return (val & 0x0FFFFFF8) >= 0x0FFFFFF8;
-                default: throw new Exception("Unknown FAT type");
+                case FatType.Fat12: return (val & 0x0FFF) >= 0x0FF8;
+                case FatType.Fat16: return (val & 0xFFFF) >= 0xFFF8;
+                case FatType.Fat32: return (val & 0x0FFFFFF8) >= 0x0FFFFFF8;
+                default: throw new ArgumentException("Unknown FAT type");
             }
         }
 
@@ -85,20 +85,20 @@ namespace DiscUtils.Fat
         {
             switch (_type)
             {
-                case FatType.FAT12: return (val & 0x0FFF) == 0x0FF7;
-                case FatType.FAT16: return (val & 0xFFFF) == 0xFFF7;
-                case FatType.FAT32: return (val & 0x0FFFFFF8) == 0x0FFFFFF7;
-                default: throw new Exception("Unknown FAT type");
+                case FatType.Fat12: return (val & 0x0FFF) == 0x0FF7;
+                case FatType.Fat16: return (val & 0xFFFF) == 0xFFF7;
+                case FatType.Fat32: return (val & 0x0FFFFFF8) == 0x0FFFFFF7;
+                default: throw new ArgumentException("Unknown FAT type");
             }
         }
 
         internal uint GetNext(uint cluster)
         {
-            if (_type == FatType.FAT16)
+            if (_type == FatType.Fat16)
             {
                 return BitConverter.ToUInt16(_buffer, (int)(cluster * 2));
             }
-            else if (_type == FatType.FAT32)
+            else if (_type == FatType.Fat32)
             {
                 return BitConverter.ToUInt32(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
             }
@@ -132,11 +132,11 @@ namespace DiscUtils.Fat
 
         internal void SetNext(uint cluster, uint next)
         {
-            if (_type == FatType.FAT16)
+            if (_type == FatType.Fat16)
             {
                 Array.Copy(BitConverter.GetBytes((ushort)next), 0, _buffer, (int)(cluster * 2), 2);
             }
-            else if (_type == FatType.FAT32)
+            else if (_type == FatType.Fat32)
             {
                 uint oldVal = BitConverter.ToUInt32(_buffer, (int)(cluster * 4));
                 uint newVal = (oldVal & 0xF0000000) | (next & 0x0FFFFFFF);
@@ -170,9 +170,9 @@ namespace DiscUtils.Fat
             {
                 switch (_type)
                 {
-                    case FatType.FAT12:
+                    case FatType.Fat12:
                         return (_buffer.Length / 3) * 2;
-                    case FatType.FAT16:
+                    case FatType.Fat16:
                         return _buffer.Length / 2;
                     default: // FAT32
                         return _buffer.Length / 4;

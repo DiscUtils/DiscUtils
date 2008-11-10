@@ -29,7 +29,6 @@ namespace DiscUtils.Fat
     internal class Directory
     {
         private FatFileSystem _fileSystem;
-        private Directory _parent;
         private DirectoryEntry _dirEntry;
         private Stream _dirStream;
 
@@ -38,10 +37,9 @@ namespace DiscUtils.Fat
         private List<long> _freeEntries;
         private long _endOfEntries;
 
-        internal Directory(FatFileSystem fileSystem, Directory parent, DirectoryEntry dirEntry)
+        internal Directory(FatFileSystem fileSystem, DirectoryEntry dirEntry)
         {
             _fileSystem = fileSystem;
-            _parent = parent;
             _dirEntry = dirEntry;
             _dirStream = _fileSystem.OpenExistingStream(dirEntry.FirstCluster, uint.MaxValue);
 
@@ -51,7 +49,6 @@ namespace DiscUtils.Fat
         internal Directory(FatFileSystem fileSystem, Stream dirStream, DirectoryEntry dirEntry)
         {
             _fileSystem = fileSystem;
-            _parent = null;
             _dirEntry = dirEntry;
             _dirStream = dirStream;
 
@@ -125,7 +122,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                return _fileSystem.GetDirectory(_entries[idx], this);
+                return _fileSystem.GetDirectory(_entries[idx]);
             }
         }
 
@@ -140,7 +137,7 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    return _fileSystem.GetDirectory(_entries[idx], this);
+                    return _fileSystem.GetDirectory(_entries[idx]);
                 }
             }
             else
@@ -158,18 +155,13 @@ namespace DiscUtils.Fat
 
                     // Rather than just creating a new instance, pull it through the fileSystem cache
                     // to ensure the cache model is preserved.
-                    return _fileSystem.GetDirectory(newEntry, this);
+                    return _fileSystem.GetDirectory(newEntry);
                 }
                 finally
                 {
                     _fileSystem.FAT.Flush();
                 }
             }
-        }
-
-        public Directory Parent
-        {
-            get { return _parent; }
         }
 
         private void LoadEntries()

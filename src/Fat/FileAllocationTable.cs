@@ -27,20 +27,16 @@ namespace DiscUtils.Fat
 {
     internal class FileAllocationTable
     {
-        private FatType _type;
         private Stream _stream;
         private ushort _firstFatSector;
-        private uint _fatSize;
         private byte _numFats;
 
         private FatBuffer _buffer;
 
         public FileAllocationTable(FatType type, Stream stream, ushort firstFatSector, uint fatSize, byte numFats, byte activeFat)
         {
-            _type = type;
             _stream = stream;
             _firstFatSector = firstFatSector;
-            _fatSize = fatSize;
             _numFats = numFats;
 
             _stream.Position = (firstFatSector + (fatSize * activeFat)) * Utilities.SectorSize;
@@ -90,14 +86,6 @@ namespace DiscUtils.Fat
             for (int i = 0; i < _numFats; ++i)
             {
                 _stream.Write(data, 0, data.Length);
-            }
-        }
-
-        internal int NumEntries
-        {
-            get
-            {
-                return _buffer.NumEntries;
             }
         }
 

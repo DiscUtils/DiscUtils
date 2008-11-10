@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Text;
 
 namespace DiscUtils.Fat
@@ -28,6 +29,11 @@ namespace DiscUtils.Fat
     internal class FatUtilities
     {
         private const string SpecialPrivateChars = "$%'-_@~`!(){}^#&";
+
+        /// <summary>
+        /// Prevent instantiation.
+        /// </summary>
+        private FatUtilities() { }
 
         public static string NormalizeFileName(string name)
         {
@@ -53,7 +59,7 @@ namespace DiscUtils.Fat
             {
                 if (!(Char.IsLetterOrDigit(ch) || ch > 127 || SpecialPrivateChars.IndexOf(ch) >= 0))
                 {
-                    throw new ArgumentException(string.Format("Invalid character '{0}' not allowed in file names", ch), "name");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid character '{0}' not allowed in file names", ch), "name");
                 }
             }
 
@@ -61,11 +67,11 @@ namespace DiscUtils.Fat
             {
                 if (!(Char.IsLetterOrDigit(ch) || ch > 127 || SpecialPrivateChars.IndexOf(ch) >= 0))
                 {
-                    throw new ArgumentException(string.Format("Invalid character '{0}' not allowed in file extensions", ch), "name");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid character '{0}' not allowed in file extensions", ch), "name");
                 }
             }
 
-            return String.Format("{0,-8}{1,-3}", namePart.ToUpperInvariant(), extPart.ToUpperInvariant());
+            return String.Format(CultureInfo.InvariantCulture, "{0,-8}{1,-3}", namePart.ToUpperInvariant(), extPart.ToUpperInvariant());
         }
     }
 }

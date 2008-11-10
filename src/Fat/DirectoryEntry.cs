@@ -46,11 +46,6 @@ namespace DiscUtils.Fat
             Load(buffer, 0);
         }
 
-        internal DirectoryEntry(byte[] data, int offset)
-        {
-            Load(data, offset);
-        }
-
         internal DirectoryEntry(string name, FatAttributes attrs)
         {
             _name = name;
@@ -114,7 +109,7 @@ namespace DiscUtils.Fat
             }
             set
             {
-                FatUtilities.NormalizeFileName(value);
+                NormalizedName = FatUtilities.NormalizeFileName(value);
             }
         }
 
@@ -185,7 +180,7 @@ namespace DiscUtils.Fat
             }
         }
 
-        private DateTime FileTimeToDateTime(ushort date, ushort time, byte tenths)
+        private static DateTime FileTimeToDateTime(ushort date, ushort time, byte tenths)
         {
             if (date == 0 || date == 0xFFFF)
             {
@@ -204,20 +199,20 @@ namespace DiscUtils.Fat
             return new DateTime(year, month, day, hour, minute, second, millis);
         }
 
-        private void DateTimeToFileTime(DateTime value, out ushort date)
+        private static void DateTimeToFileTime(DateTime value, out ushort date)
         {
             byte tenths;
             ushort time;
             DateTimeToFileTime(value, out date, out time, out tenths);
         }
 
-        private void DateTimeToFileTime(DateTime value, out ushort date, out ushort time)
+        private static void DateTimeToFileTime(DateTime value, out ushort date, out ushort time)
         {
             byte tenths;
             DateTimeToFileTime(value, out date, out time, out tenths);
         }
 
-        private void DateTimeToFileTime(DateTime value, out ushort date, out ushort time, out byte tenths)
+        private static void DateTimeToFileTime(DateTime value, out ushort date, out ushort time, out byte tenths)
         {
             if (value.Year < 1980)
             {

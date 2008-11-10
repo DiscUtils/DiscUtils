@@ -247,16 +247,34 @@ namespace DiscUtils.Iso9660
             return new ExtentStream(_data, record.LocationOfExtent, record.DataLength, record.FileUnitSize, record.InterleaveGapSize);
         }
 
+        /// <summary>
+        /// Gets an object representing a possible file.
+        /// </summary>
+        /// <param name="path">The file path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets an object representing a possible directory.
+        /// </summary>
+        /// <param name="path">The directory path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The directory does not need to exist</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets an object representing a possible file system object (file or directory).
+        /// </summary>
+        /// <param name="path">The file system path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file system object does not need to exist</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             throw new NotImplementedException();

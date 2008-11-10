@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -210,7 +211,7 @@ namespace DiscUtils.Fat
         {
             get
             {
-                if (_path == "")
+                if (String.IsNullOrEmpty(_path))
                 {
                     return null;
                 }
@@ -338,7 +339,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                throw new DirectoryNotFoundException(String.Format("No such directory: {0}", _path));
+                throw new DirectoryNotFoundException(String.Format(CultureInfo.InvariantCulture, "No such directory: {0}", _path));
             }
         }
 

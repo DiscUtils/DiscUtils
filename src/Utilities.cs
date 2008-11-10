@@ -14,6 +14,11 @@ namespace DiscUtils
         /// </summary>
         internal const int SectorSize = 512;
 
+        /// <summary>
+        /// Prevent instantiation.
+        /// </summary>
+        private Utilities() { }
+
         #region Stream Manipulation
         /// <summary>
         /// Read bytes until buffer filled or EOF.

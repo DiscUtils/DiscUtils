@@ -73,12 +73,12 @@ namespace DiscUtils
         /// Gets all descendant directories matching a search pattern.
         /// </summary>
         /// <param name="pattern">The search pattern</param>
-        /// <param name="option">Whether to search just this directory, or all children</param>
+        /// <param name="searchOption">Whether to search just this directory, or all children</param>
         /// <returns>An array of descendant directories, or empty if none match</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).  The option parameter determines whether only immediate
         /// children, or all children are returned.</remarks>
-        public abstract DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option);
+        public abstract DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption searchOption);
 
         /// <summary>
         /// Gets all files.
@@ -99,12 +99,12 @@ namespace DiscUtils
         /// Gets all descendant files matching a search pattern.
         /// </summary>
         /// <param name="pattern">The search pattern</param>
-        /// <param name="option">Whether to search just this directory, or all children</param>
+        /// <param name="searchOption">Whether to search just this directory, or all children</param>
         /// <returns>An array of descendant files, or empty if none match</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).  The option parameter determines whether only immediate
         /// children, or all children are returned.</remarks>
-        public abstract DiscFileInfo[] GetFiles(string pattern, SearchOption option);
+        public abstract DiscFileInfo[] GetFiles(string pattern, SearchOption searchOption);
 
         /// <summary>
         /// Gets all files and directories in this directory.
