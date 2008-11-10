@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 using NUnit.Framework;
 
@@ -81,6 +82,7 @@ namespace DiscUtils.Fat
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR");
             dirInfo.Create();
 
+            Assert.IsTrue(fs.GetDirectoryInfo(@"\").Exists);
             Assert.IsTrue(fs.GetDirectoryInfo(@"SOMEDIR").Exists);
             Assert.IsTrue(fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").Exists);
             Assert.IsTrue(fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR\").Exists);
@@ -269,6 +271,64 @@ namespace DiscUtils.Fat
             FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
 
             Assert.IsNull(fs.Root.Parent);
+        }
+
+        [Test]
+        public void CreationTimeUtc()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory("DIR");
+
+            Assert.GreaterOrEqual(DateTime.UtcNow, fs.Root.GetDirectories("DIR")[0].CreationTimeUtc);
+            Assert.LessOrEqual(DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(10)), fs.Root.GetDirectories("DIR")[0].CreationTimeUtc);
+        }
+
+        [Test]
+        public void CreationTime()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory("DIR");
+
+            Assert.GreaterOrEqual(DateTime.Now, fs.Root.GetDirectories("DIR")[0].CreationTime);
+            Assert.LessOrEqual(DateTime.Now.Subtract(TimeSpan.FromSeconds(10)), fs.Root.GetDirectories("DIR")[0].CreationTime);
+        }
+
+        [Test]
+        public void LastAccessTime()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory("DIR");
+            DiscDirectoryInfo di = fs.GetDirectoryInfo("DIR");
+
+            DateTime baseTime = DateTime.Now - TimeSpan.FromDays(2);
+            di.LastAccessTime = baseTime;
+
+            fs.CreateDirectory(@"DIR\CHILD");
+
+            Assert.Less(baseTime, di.LastAccessTime);
+        }
+
+        [Test]
+        public void LastWriteTime()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory("DIR");
+            DiscDirectoryInfo di = fs.GetDirectoryInfo("DIR");
+
+            DateTime baseTime = DateTime.Now - TimeSpan.FromMinutes(10);
+            di.LastWriteTime = baseTime;
+
+            fs.CreateDirectory(@"DIR\CHILD");
+
+            Assert.Less(baseTime, di.LastWriteTime);
         }
     }
 }

@@ -26,8 +26,6 @@ using System.IO;
 
 namespace DiscUtils.Fat
 {
-    internal delegate void DirectoryAccessedHandler(Directory dir, bool forWrite);
-
     internal class Directory
     {
         private FatFileSystem _fileSystem;
@@ -63,8 +61,6 @@ namespace DiscUtils.Fat
 
             LoadEntries();
         }
-
-        public event DirectoryAccessedHandler Accessed;
 
         public FatFileSystem FileSystem
         {
@@ -243,7 +239,7 @@ namespace DiscUtils.Fat
                     stream.SetLength(0);
                 }
 
-                FireAccessed(false);
+                HandleAccessed(false);
 
                 return stream;
             }
@@ -288,7 +284,7 @@ namespace DiscUtils.Fat
             // Update internal structures to reflect new entry (as if read from disk)
             _entries.Add(pos, newEntry);
 
-            FireAccessed(true);
+            HandleAccessed(true);
 
             return pos;
         }
@@ -317,7 +313,7 @@ namespace DiscUtils.Fat
             _entries.Remove(id);
             _freeEntries.Add(id);
 
-            FireAccessed(true);
+            HandleAccessed(true);
         }
 
         internal void UpdateEntry(long id, DirectoryEntry entry)
@@ -330,8 +326,29 @@ namespace DiscUtils.Fat
             _dirStream.Position = id;
             entry.WriteTo(_dirStream);
             _entries[id] = entry;
+        }
 
-            FireAccessed(true);
+        private void HandleAccessed(bool forWrite)
+        {
+            if (_parent != null && _parentId >= 0)
+            {
+                DateTime now = DateTime.Now;
+                DirectoryEntry entry = _parent.GetEntry(_parentId);
+
+                DateTime oldAccessTime = entry.LastAccessTime;
+                DateTime oldWriteTime = entry.LastWriteTime;
+
+                entry.LastAccessTime = now;
+                if( forWrite)
+                {
+                    entry.LastWriteTime = now;
+                }
+
+                if (entry.LastAccessTime != oldAccessTime || entry.LastWriteTime != oldWriteTime)
+                {
+                    _parent.UpdateEntry(_parentId, entry);
+                }
+            }
         }
 
         private void PopulateNewChildDirectory(long newEntryId, DirectoryEntry newEntry)
@@ -361,14 +378,6 @@ namespace DiscUtils.Fat
                     DirectoryEntry newParent = new DirectoryEntry("..         ", FatAttributes.Directory);
                     newParent.WriteTo(stream);
                 }
-            }
-        }
-
-        private void FireAccessed(bool forWrite)
-        {
-            if (Accessed != null)
-            {
-                Accessed(this, forWrite);
             }
         }
     }
