@@ -50,7 +50,6 @@ namespace DiscUtils.Fat
             {
                 Assert.AreEqual(1, s.ReadByte());
             }
-
         }
     }
 }

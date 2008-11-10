@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 namespace DiscUtils.Fat
 {
@@ -41,6 +42,14 @@ namespace DiscUtils.Fat
         /// The actual bad-cluster marker bits on disk vary by FAT type.
         /// </remarks>
         public const uint BadCluster = 0xFFFFFFF7;
+
+        /// <summary>
+        /// The Free-Cluster marker to WRITE (SetNext).  Don't use this value to test for free clusters.
+        /// </summary>
+        /// <remarks>
+        /// The actual free-cluster marker bits on disk vary by FAT type.
+        /// </remarks>
+        public const uint FreeCluster = 0;
 
         private FatType _type;
         private byte[] _buffer;
@@ -116,6 +125,11 @@ namespace DiscUtils.Fat
             SetNext(cluster, BadCluster);
         }
 
+        internal void SetFree(uint cluster)
+        {
+            SetNext(cluster, FreeCluster);
+        }
+
         internal void SetNext(uint cluster, uint next)
         {
             if (_type == FatType.FAT16)
@@ -181,6 +195,28 @@ namespace DiscUtils.Fat
 
             cluster = 0;
             return false;
+        }
+
+        internal void FreeChain(uint head)
+        {
+            foreach (uint cluster in GetChain(head))
+            {
+                SetFree(cluster);
+            }
+        }
+
+        internal List<uint> GetChain(uint head)
+        {
+            List<uint> result = new List<uint>();
+
+            uint focus = head;
+            while (!IsEndOfChain(focus))
+            {
+                result.Add(focus);
+                focus = GetNext(focus);
+            }
+
+            return result;
         }
     }
 }

@@ -111,6 +111,11 @@ namespace DiscUtils.Iso9660
                 if ((record.Flags & FileFlags.Hidden) != 0) { attrs |= FileAttributes.Hidden; }
                 return attrs;
             }
+
+            set
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public override DiscDirectoryInfo Parent
@@ -127,31 +132,37 @@ namespace DiscUtils.Iso9660
         public override DateTime CreationTime
         {
             get { return record.RecordingDateAndTime.ToLocalTime(); }
+            set { throw new NotSupportedException(); }
         }
 
         public override DateTime CreationTimeUtc
         {
             get { return record.RecordingDateAndTime; }
+            set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastAccessTime
         {
             get { return CreationTime; }
+            set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastAccessTimeUtc
         {
             get { return CreationTimeUtc; }
+            set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastWriteTime
         {
             get { return CreationTime; }
+            set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastWriteTimeUtc
         {
             get { return CreationTimeUtc; }
+            set { throw new NotSupportedException(); }
         }
 
         public override void Create()
@@ -308,6 +319,16 @@ namespace DiscUtils.Iso9660
                     }
                 }
             }
+        }
+
+        public override void Delete()
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void Delete(bool recursive)
+        {
+            throw new NotSupportedException();
         }
     }
 }

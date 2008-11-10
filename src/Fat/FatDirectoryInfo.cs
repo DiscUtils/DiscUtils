@@ -43,6 +43,44 @@ namespace DiscUtils.Fat
             _fileSystem.CreateDirectory(_path);
         }
 
+        public override void Delete()
+        {
+            Directory self = GetDirectory();
+            if (!self.IsEmpty)
+            {
+                throw new IOException("Unable to delete non-empty directory");
+            }
+
+            Directory parent;
+            DirectoryEntry selfEntry = GetDirEntry(out parent);
+            if (parent == null)
+            {
+                throw new IOException("Unable to delete root directory");
+            }
+            else
+            {
+                parent.DeleteEntry(selfEntry);
+            }
+        }
+
+        public override void Delete(bool recursive)
+        {
+            if (recursive)
+            {
+                foreach (DiscDirectoryInfo di in GetDirectories())
+                {
+                    di.Delete(true);
+                }
+
+                foreach (DiscFileInfo fi in GetFiles())
+                {
+                    fi.Delete();
+                }
+            }
+
+            Delete();
+        }
+
         public override DiscDirectoryInfo[] GetDirectories()
         {
             Directory dir = _fileSystem.GetDirectory(_path);
@@ -164,20 +202,8 @@ namespace DiscUtils.Fat
 
         public override FileAttributes Attributes
         {
-            get
-            {
-                Directory dir = _fileSystem.GetDirectory(_path);
-                if (dir.Self == null)
-                {
-                    return FileAttributes.Directory;
-                }
-                else
-                {
-                    // Conveniently, .NET filesystem attributes have identical values to
-                    // FAT filesystem attributes...
-                    return (FileAttributes)dir.Self.Attributes;
-                }
-            }
+            get { return (FileAttributes)GetDirEntry().Attributes;}
+            set { UpdateDirEntry((e) => { e.Attributes = (FatAttributes)value; }); }
         }
 
         public override DiscDirectoryInfo Parent
@@ -215,64 +241,37 @@ namespace DiscUtils.Fat
         public override DateTime CreationTime
         {
             get { return CreationTimeUtc.ToLocalTime(); }
+            set { CreationTimeUtc = value.ToUniversalTime(); }
         }
 
         public override DateTime CreationTimeUtc
         {
-            get
-            {
-                Directory dir = _fileSystem.GetDirectory(_path);
-                if (dir != null)
-                {
-                    return dir.CreationTimeUtc;
-                }
-                else
-                {
-                    throw new DirectoryNotFoundException(String.Format("No such directory: {0}", _path));
-                }
-            }
+            get { return _fileSystem.ConvertToUtc(GetDirEntry().CreationTime); }
+            set { UpdateDirEntry((e) => { e.CreationTime = _fileSystem.ConvertFromUtc(value); }); }
         }
 
         public override DateTime LastAccessTime
         {
             get { return LastAccessTimeUtc.ToLocalTime(); }
+            set { LastAccessTimeUtc = value.ToUniversalTime(); }
         }
 
         public override DateTime LastAccessTimeUtc
         {
-            get
-            {
-                Directory dir = _fileSystem.GetDirectory(_path);
-                if (dir != null)
-                {
-                    return dir.LastAccessTimeUtc;
-                }
-                else
-                {
-                    throw new DirectoryNotFoundException(String.Format("No such directory: {0}", _path));
-                }
-            }
+            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastAccessTime); }
+            set { UpdateDirEntry((e) => { e.LastAccessTime = _fileSystem.ConvertFromUtc(value); }); }
         }
 
         public override DateTime LastWriteTime
         {
             get { return LastWriteTimeUtc.ToLocalTime(); }
+            set { LastWriteTimeUtc = value.ToUniversalTime(); }
         }
 
         public override DateTime LastWriteTimeUtc
         {
-            get
-            {
-                Directory dir = _fileSystem.GetDirectory(_path);
-                if (dir != null)
-                {
-                    return dir.LastWriteTimeUtc;
-                }
-                else
-                {
-                    throw new DirectoryNotFoundException(String.Format("No such directory: {0}", _path));
-                }
-            }
+            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastWriteTime); }
+            set { UpdateDirEntry((e) => { e.LastWriteTime = _fileSystem.ConvertFromUtc(value); }); }
         }
 
         private void DoSearch(List<DiscFileInfo> results, string path, Regex regex, bool subFolders)
@@ -313,5 +312,43 @@ namespace DiscUtils.Fat
             }
         }
 
+        private Directory GetDirectory()
+        {
+            Directory dir = _fileSystem.GetDirectory(_path);
+            if (dir != null)
+            {
+                return dir;
+            }
+            else
+            {
+                throw new DirectoryNotFoundException(String.Format("No such directory: {0}", _path));
+            }
+        }
+
+        private DirectoryEntry GetDirEntry()
+        {
+            Directory parent;
+            return GetDirEntry(out parent);
+        }
+
+        private DirectoryEntry GetDirEntry(out Directory parent)
+        {
+            DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path, out parent);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", _path);
+            }
+            return dirEntry;
+        }
+
+        private delegate void EntryUpdateAction(DirectoryEntry entry);
+
+        private void UpdateDirEntry(EntryUpdateAction action)
+        {
+            Directory parent;
+            DirectoryEntry entry = GetDirEntry(out parent);
+            action(entry);
+            parent.UpdateEntry(entry);
+        }
     }
 }

@@ -63,6 +63,11 @@ namespace DiscUtils.Fat
             get { return _fileSystem; }
         }
 
+        public bool IsEmpty
+        {
+            get { return _entries.Count == 0; }
+        }
+
         public DirectoryEntry[] GetDirectories()
         {
             List<DirectoryEntry> dirs = new List<DirectoryEntry>(_entries.Count);
@@ -162,29 +167,9 @@ namespace DiscUtils.Fat
             }
         }
 
-        public DirectoryEntry Self
-        {
-            get { return _dirEntry; }
-        }
-
         public Directory Parent
         {
             get { return _parent; }
-        }
-
-        public DateTime CreationTimeUtc
-        {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.CreationTime); }
-        }
-
-        public DateTime LastAccessTimeUtc
-        {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.LastAccessTime); }
-        }
-
-        public DateTime LastWriteTimeUtc
-        {
-            get { return (_dirEntry == null) ? FatFileSystem.Epoch : _fileSystem.ConvertToUtc(_dirEntry.LastWriteTime); }
         }
 
         private void LoadEntries()
@@ -306,6 +291,34 @@ namespace DiscUtils.Fat
             // Update internal structures to reflect new entry (as if read from disk)
             _entryStreamPos[_entryStreamPos.Count] = pos;
             _entries.Add(newEntry);
+        }
+
+        internal void DeleteEntry(DirectoryEntry entry)
+        {
+            int idx = FindEntryByNormalizedName(entry.NormalizedName);
+
+            if (idx < 0)
+            {
+                throw new IOException("Couldn't find entry to delete");
+            }
+
+            long dirEntryPos = _entryStreamPos[idx];
+
+            DirectoryEntry copy = new DirectoryEntry(entry);
+            copy.NormalizedName = "\xE5" + entry.NormalizedName.Substring(1);
+            _dirStream.Position = dirEntryPos;
+            copy.WriteTo(_dirStream);
+
+            _fileSystem.FAT.FreeChain(entry.FirstCluster);
+
+            if ((entry.Attributes & FatAttributes.Directory) != 0)
+            {
+                _fileSystem.ForgetDirectory(entry);
+            }
+
+            _entryStreamPos.Remove(idx);
+            _entries.RemoveAt(idx);
+            _freeEntries.Add(dirEntryPos);
         }
 
         internal void UpdateEntry(DirectoryEntry entry)

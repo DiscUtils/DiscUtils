@@ -35,6 +35,8 @@ namespace DiscUtils.Fat
             FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOMEDIR");
             dirInfo.Create();
+
+            Assert.AreEqual(1, fs.Root.GetDirectories().Length);
         }
 
         [Test]
@@ -95,6 +97,140 @@ namespace DiscUtils.Fat
             Assert.AreEqual(@"\", fs.Root.FullName);
             Assert.AreEqual(@"SOMEDIR\", fs.GetDirectoryInfo(@"SOMEDIR").FullName);
             Assert.AreEqual(@"SOMEDIR\CHILDDIR\", fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").FullName);
+        }
+
+        [Test]
+        public void Delete()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            fs.CreateDirectory(@"Fred");
+            Assert.AreEqual(1, fs.Root.GetDirectories().Length);
+
+            fs.Root.GetDirectories(@"Fred")[0].Delete();
+            Assert.AreEqual(0, fs.Root.GetDirectories().Length);
+        }
+
+        [Test]
+        public void DeleteRecursive()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            fs.CreateDirectory(@"Fred\child");
+            Assert.AreEqual(1, fs.Root.GetDirectories().Length);
+
+            fs.Root.GetDirectories(@"Fred")[0].Delete(true);
+            Assert.AreEqual(0, fs.Root.GetDirectories().Length);
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void DeleteRoot()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            fs.Root.Delete();
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void DeleteNonEmpty_NonRecursive()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            fs.CreateDirectory(@"Fred\child");
+            fs.Root.GetDirectories(@"Fred")[0].Delete();
+        }
+
+        [Test]
+        [Category("SlowTest")]
+        public void CreateDeleteLeakTest()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            for (int i = 0; i < 2000; ++i)
+            {
+                fs.CreateDirectory(@"Fred");
+                fs.Root.GetDirectories(@"Fred")[0].Delete();
+            }
+
+            fs.CreateDirectory(@"SOMEDIR");
+            DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(@"SOMEDIR");
+            Assert.IsNotNull(dirInfo);
+
+            for (int i = 0; i < 2000; ++i)
+            {
+                fs.CreateDirectory(@"SOMEDIR\Fred");
+                dirInfo.GetDirectories(@"Fred")[0].Delete();
+            }
+        }
+
+        [Test]
+        public void Extension()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            Assert.AreEqual("dir", fs.GetDirectoryInfo("fred.dir").Extension);
+            Assert.AreEqual("", fs.GetDirectoryInfo("fred").Extension);
+        }
+
+        [Test]
+        public void GetDirectories()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+            fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
+            fs.CreateDirectory(@"A.DIR");
+
+            fs = new FatFileSystem(ms);
+            Assert.AreEqual(2, fs.Root.GetDirectories().Length);
+
+            DiscDirectoryInfo someDir = fs.Root.GetDirectories(@"SoMeDir")[0];
+            Assert.AreEqual(1, fs.Root.GetDirectories("SOMEDIR").Length);
+            Assert.AreEqual("SOMEDIR", someDir.Name);
+
+            Assert.AreEqual(1, someDir.GetDirectories("*.*").Length);
+            Assert.AreEqual("CHILD", someDir.GetDirectories("*.*")[0].Name);
+            Assert.AreEqual(2, someDir.GetDirectories("*.*", SearchOption.AllDirectories).Length);
+
+            Assert.AreEqual(4, fs.Root.GetDirectories("*.*", SearchOption.AllDirectories).Length);
+            Assert.AreEqual(2, fs.Root.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length);
+
+            Assert.AreEqual(1, fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories).Length);
+            Assert.AreEqual(@"A.DIR\", fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories)[0].FullName);
+
+            Assert.AreEqual(1, fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories).Length);
+            Assert.AreEqual(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
+        }
+
+        [Test]
+        public void GetFiles()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+            fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
+            fs.CreateDirectory(@"AAA.DIR");
+            using (Stream s = fs.Open(@"FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.Open(@"SOMEDIR\CHILD.TXT", FileMode.Create)) { }
+            using (Stream s = fs.Open(@"SOMEDIR\FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.Open(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", FileMode.Create)) { }
+
+            fs = new FatFileSystem(ms);
+            Assert.AreEqual(1, fs.Root.GetFiles().Length);
+            Assert.AreEqual("FOO.TXT", fs.Root.GetFiles()[0].FullName);
+
+            Assert.AreEqual(2, fs.Root.GetDirectories("SOMEDIR")[0].GetFiles("*.TXT").Length);
+            Assert.AreEqual(4, fs.Root.GetFiles("*.TXT", SearchOption.AllDirectories).Length);
+
+            Assert.AreEqual(0, fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories).Length);
         }
     }
 }

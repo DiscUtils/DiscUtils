@@ -105,5 +105,10 @@ namespace DiscUtils.Fat
         {
             return _buffer.TryGetFreeCluster(out cluster);
         }
+
+        internal void FreeChain(uint head)
+        {
+            _buffer.FreeChain(head);
+        }
     }
 }

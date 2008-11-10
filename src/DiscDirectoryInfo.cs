@@ -49,6 +49,12 @@ namespace DiscUtils
         public abstract void Create();
 
         /// <summary>
+        /// Deletes a directory, even if it's not empty.
+        /// </summary>
+        /// <param name="recursive">Controls whether to recursively delete contents</param>
+        public abstract void Delete(bool recursive);
+
+        /// <summary>
         /// Gets all child directories.
         /// </summary>
         /// <returns>An array of child directories</returns>

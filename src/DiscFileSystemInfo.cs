@@ -47,11 +47,29 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the <see cref="System.IO.FileAttributes"/> of the current <see cref="DiscFileSystemInfo"/> object.
+        /// Gets the extension part of the file or directory name.
+        /// </summary>
+        public virtual string Extension
+        {
+            get
+            {
+                string name = Name;
+                int sepIdx = name.LastIndexOf('.');
+                if (sepIdx >= 0)
+                {
+                    return name.Substring(sepIdx + 1);
+                }
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="System.IO.FileAttributes"/> of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
         public abstract FileAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -71,53 +89,64 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
+        /// Gets or sets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
         public abstract DateTime CreationTime
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the creation time (in UTC) of the current <see cref="DiscFileSystemInfo"/> object.
+        /// Gets or sets the creation time (in UTC) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
         public abstract DateTime CreationTimeUtc
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the last time (in local time) the file or directory was accessed.
+        /// Gets or sets the last time (in local time) the file or directory was accessed.
         /// </summary>
         /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
         public abstract DateTime LastAccessTime
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the last time (in UTC) the file or directory was accessed.
+        /// Gets or sets the last time (in UTC) the file or directory was accessed.
         /// </summary>
         /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
         public abstract DateTime LastAccessTimeUtc
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the last time (in local time) the file or directory was written to.
+        /// Gets or sets the last time (in local time) the file or directory was written to.
         /// </summary>
         public abstract DateTime LastWriteTime
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the last time (in UTC) the file or directory was written to.
+        /// Gets or sets the last time (in UTC) the file or directory was written to.
         /// </summary>
         public abstract DateTime LastWriteTimeUtc
         {
             get;
+            set;
         }
+
+        /// <summary>
+        /// Deletes a file or directory.
+        /// </summary>
+        public abstract void Delete();
     }
 }
