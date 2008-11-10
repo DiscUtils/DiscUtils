@@ -262,26 +262,6 @@ namespace DiscUtils.Iso9660
             return results;
         }
 
-        private List<DiscFileSystemInfo> SearchAll(string pattern, bool subFolders)
-        {
-            List<DiscDirectoryInfo> dirs = SearchDirectories(pattern, subFolders);
-            List<DiscFileInfo> files = SearchFiles(pattern, subFolders);
-
-            List<DiscFileSystemInfo> results = new List<DiscFileSystemInfo>(dirs.Count + files.Count);
-
-            foreach (DiscFileSystemInfo d in dirs)
-            {
-                results.Add(d);
-            }
-
-            foreach (DiscFileSystemInfo f in files)
-            {
-                results.Add(f);
-            }
-
-            return results;
-        }
-
         private void DoSearch(List<DiscFileInfo> results, Regex regex, bool subFolders)
         {
             foreach (DirectoryRecord r in records)

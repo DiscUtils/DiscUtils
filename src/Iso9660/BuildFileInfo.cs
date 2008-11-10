@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Globalization;
 
 namespace DiscUtils.Iso9660
 {
@@ -35,7 +36,6 @@ namespace DiscUtils.Iso9660
         private byte[] _contentData;
         private string _contentPath;
         private Stream _contentStream;
-        private uint _extentStart;
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, byte[] content)
             : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
@@ -64,12 +64,6 @@ namespace DiscUtils.Iso9660
         public override BuildDirectoryInfo Parent
         {
             get { return _parent; }
-        }
-
-        internal uint ExtentStart
-        {
-            get { return _extentStart; }
-            set { _extentStart = value; }
         }
 
         internal override long GetDataSize(Encoding enc)
@@ -123,7 +117,7 @@ namespace DiscUtils.Iso9660
                 return longName;
             }
 
-            char[] shortNameChars = longName.ToUpper().ToCharArray();
+            char[] shortNameChars = longName.ToUpper(CultureInfo.InvariantCulture).ToCharArray();
             for (int i = 0; i < shortNameChars.Length; ++i)
             {
                 if (!IsoUtilities.isValidDChar(shortNameChars[i]) && shortNameChars[i] != '.' && shortNameChars[i] != ';')

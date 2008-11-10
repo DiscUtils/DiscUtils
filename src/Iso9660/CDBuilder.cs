@@ -149,7 +149,7 @@ namespace DiscUtils.Iso9660
             BuildDirectoryMember existing;
             if (dir.TryGetMember(nameElements[nameElements.Length - 1], out existing))
             {
-                throw new Exception("File already exists");
+                throw new IOException("File already exists");
             }
             else
             {
@@ -182,7 +182,7 @@ namespace DiscUtils.Iso9660
             BuildDirectoryMember existing;
             if (dir.TryGetMember(nameElements[nameElements.Length - 1], out existing))
             {
-                throw new Exception("File already exists");
+                throw new IOException("File already exists");
             }
             else
             {
@@ -220,7 +220,7 @@ namespace DiscUtils.Iso9660
             BuildDirectoryMember existing;
             if (dir.TryGetMember(nameElements[nameElements.Length - 1], out existing))
             {
-                throw new Exception("File already exists");
+                throw new IOException("File already exists");
             }
             else
             {
@@ -231,34 +231,13 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        private BuildFileInfo TryGetFile(string[] path)
-        {
-            BuildDirectoryInfo di = TryGetDirectory(path, path.Length - 1, false);
-            if (di == null)
-            {
-                return null;
-            }
-
-            BuildDirectoryMember dirMember;
-            if (di.TryGetMember(path[path.Length - 1], out dirMember))
-            {
-                if (!(dirMember is BuildFileInfo))
-                {
-                    throw new Exception("Member is not a file");
-                }
-                return (BuildFileInfo)dirMember;
-            }
-
-            return null;
-        }
-
         private BuildDirectoryInfo GetDirectory(string[] path, int pathLength, bool createMissing)
         {
             BuildDirectoryInfo di = TryGetDirectory(path, pathLength, createMissing);
 
             if (di == null)
             {
-                throw new Exception("Directory not found");
+                throw new DirectoryNotFoundException("Directory not found");
             }
 
             return di;
@@ -286,13 +265,17 @@ namespace DiscUtils.Iso9660
                         return null;
                     }
                 }
-                else if (!(next is BuildDirectoryInfo))
-                {
-                    throw new Exception("File with conflicting name exists");
-                }
                 else
                 {
-                    focus = (BuildDirectoryInfo)next;
+                    BuildDirectoryInfo nextAsBuildDirectoryInfo = next as BuildDirectoryInfo;
+                    if (nextAsBuildDirectoryInfo == null)
+                    {
+                        throw new IOException("File with conflicting name exists");
+                    }
+                    else
+                    {
+                        focus = nextAsBuildDirectoryInfo;
+                    }
                 }
             }
 

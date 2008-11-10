@@ -27,13 +27,9 @@ namespace DiscUtils.Iso9660
 {
     internal class SupplementaryVolumeDescriptor : CommonVolumeDescriptor
     {
-        public byte VolumeFlags;
-
         public SupplementaryVolumeDescriptor(byte[] src, int offset)
             : base(src, offset, IsoUtilities.EncodingFromBytes(src, offset + 88))
         {
-            // Note indication of encoding is in structure after some fields that use it, so pull decode to here
-            VolumeFlags = src[offset + 7];
         }
 
         public SupplementaryVolumeDescriptor(
@@ -47,7 +43,6 @@ namespace DiscUtils.Iso9660
             Encoding enc)
             : base( VolumeDescriptorType.Supplementary, 1, volumeSpaceSize, pathTableSize, typeLPathTableLocation, typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, enc )
         {
-            VolumeFlags = 0;
         }
 
         internal override void WriteTo(byte[] buffer, int offset)

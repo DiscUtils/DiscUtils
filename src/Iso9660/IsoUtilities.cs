@@ -30,6 +30,11 @@ namespace DiscUtils.Iso9660
 {
     internal class IsoUtilities
     {
+        /// <summary>
+        /// Prevent instatiation.
+        /// </summary>
+        private IsoUtilities() { }
+
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {
             return BitConverter.ToUInt32(data, offset);
@@ -150,6 +155,7 @@ namespace DiscUtils.Iso9660
             return new string(chars).TrimEnd(' ');
         }
 
+#if false
         public static byte WriteFileName(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
         {
             if (numBytes > 255 || numBytes < 0)
@@ -181,6 +187,7 @@ namespace DiscUtils.Iso9660
 
             return (byte)WriteString(buffer, offset, numBytes, false, str, enc);
         }
+#endif
 
         public static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, String str, Encoding enc)
         {
@@ -303,7 +310,7 @@ namespace DiscUtils.Iso9660
             {
                 ver = 1;
             }
-            parts[2] = String.Format("{0}", ver);
+            parts[2] = String.Format(CultureInfo.InvariantCulture, "{0}", ver);
 
             return parts;
         }
@@ -399,7 +406,7 @@ namespace DiscUtils.Iso9660
             }
             else
             {
-                throw new ArgumentOutOfRangeException("Unrecognized character encoding");
+                throw new ArgumentException("Unrecognized character encoding");
             }
         }
 

@@ -50,20 +50,6 @@ namespace DiscUtils.Iso9660
             return directoryIdentifierLength + 8 + (((directoryIdentifierLength & 1) == 1) ? 1 : 0);
         }
 
-        internal void WriteTo(Stream stream, bool byteSwap, Encoding enc)
-        {
-            int nameBytes = enc.GetByteCount(DirectoryIdentifier);
-            byte[] data = new byte[8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0)];
-            Write(byteSwap, enc, data, 0);
-            stream.Write(data, 0, data.Length);
-        }
-
-        internal static uint CalcLength(string name, Encoding enc)
-        {
-            int nameBytes = enc.GetByteCount(name);
-            return (uint)(8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0));
-        }
-
         internal int Write(bool byteSwap, Encoding enc, byte[] buffer, int offset)
         {
             int nameBytes = enc.GetByteCount(DirectoryIdentifier);

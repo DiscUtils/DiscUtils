@@ -37,7 +37,6 @@ namespace DiscUtils.Iso9660
         internal long DiskStart
         {
             get { return start; }
-            set { start = value; }
         }
 
         internal long DiskLength

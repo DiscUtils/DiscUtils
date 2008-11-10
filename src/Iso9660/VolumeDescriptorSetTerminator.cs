@@ -29,10 +29,5 @@ namespace DiscUtils.Iso9660
             : base(VolumeDescriptorType.SetTerminator, 1)
         {
         }
-
-        public VolumeDescriptorSetTerminator(byte[] src, int offset)
-            : base(src, offset)
-        {
-        }
     }
 }

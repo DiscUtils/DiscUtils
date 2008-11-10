@@ -41,7 +41,6 @@ namespace DiscUtils.Iso9660
 
         public ExtentStream(Stream isoStream, uint startBlock, uint dataLength, byte fileUnitSize, byte interleaveGapSize)
         {
-            _position = 0;
             _isoStream = isoStream;
             _startBlock = startBlock;
             _dataLength = dataLength;

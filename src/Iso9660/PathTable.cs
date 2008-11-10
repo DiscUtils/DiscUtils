@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace DiscUtils.Iso9660
 {
@@ -78,11 +79,6 @@ namespace DiscUtils.Iso9660
                 ptr.ParentDirectoryNumber = dirNumbers[di.Parent];
 
                 pos += ptr.Write(byteSwap, enc, readCache, pos);
-            }
-
-            if (pos != dataLength)
-            {
-                throw new Exception("Internal consistency check failed - bytes written != length calculated");
             }
         }
 

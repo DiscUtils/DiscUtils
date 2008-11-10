@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -127,7 +128,7 @@ namespace DiscUtils.Iso9660
                 return longName;
             }
 
-            char[] shortNameChars = longName.ToUpper().ToCharArray();
+            char[] shortNameChars = longName.ToUpper(CultureInfo.InvariantCulture).ToCharArray();
             for (int i = 0; i < shortNameChars.Length; ++i)
             {
                 if (!IsoUtilities.isValidDChar(shortNameChars[i]) && shortNameChars[i] != '.' && shortNameChars[i] != ';')
