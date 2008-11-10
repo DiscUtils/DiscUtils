@@ -26,34 +26,45 @@ using System.IO;
 
 namespace DiscUtils.Fat
 {
+    internal delegate void DirectoryAccessedHandler(Directory dir, bool forWrite);
+
     internal class Directory
     {
         private FatFileSystem _fileSystem;
-        private DirectoryEntry _dirEntry;
+        private Directory _parent;
+        private long _parentId;
         private Stream _dirStream;
 
-        private List<DirectoryEntry> _entries;
-        private Dictionary<int,long> _entryStreamPos;
+        private Dictionary<long,DirectoryEntry> _entries;
         private List<long> _freeEntries;
         private long _endOfEntries;
 
-        internal Directory(FatFileSystem fileSystem, DirectoryEntry dirEntry)
+        internal Directory(Directory parent, long parentId)
         {
-            _fileSystem = fileSystem;
-            _dirEntry = dirEntry;
+            _fileSystem = parent._fileSystem;
+            _parent = parent;
+            _parentId = parentId;
+
+            DirectoryEntry dirEntry = _parent.GetEntry(parentId);
             _dirStream = _fileSystem.OpenExistingStream(dirEntry.FirstCluster, uint.MaxValue);
 
             LoadEntries();
         }
 
-        internal Directory(FatFileSystem fileSystem, Stream dirStream, DirectoryEntry dirEntry)
+        /// <summary>
+        /// Loads the root directory of a file system
+        /// </summary>
+        /// <param name="fileSystem">The file system</param>
+        /// <param name="dirStream">The stream containing the directory info</param>
+        internal Directory(FatFileSystem fileSystem, Stream dirStream)
         {
             _fileSystem = fileSystem;
-            _dirEntry = dirEntry;
             _dirStream = dirStream;
 
             LoadEntries();
         }
+
+        public event DirectoryAccessedHandler Accessed;
 
         public FatFileSystem FileSystem
         {
@@ -68,7 +79,7 @@ namespace DiscUtils.Fat
         public DirectoryEntry[] GetDirectories()
         {
             List<DirectoryEntry> dirs = new List<DirectoryEntry>(_entries.Count);
-            foreach (DirectoryEntry dirEntry in _entries)
+            foreach (DirectoryEntry dirEntry in _entries.Values)
             {
                 if ((dirEntry.Attributes & FatAttributes.Directory) != 0)
                 {
@@ -81,7 +92,7 @@ namespace DiscUtils.Fat
         public DirectoryEntry[] GetFiles()
         {
             List<DirectoryEntry> files = new List<DirectoryEntry>(_entries.Count);
-            foreach (DirectoryEntry dirEntry in _entries)
+            foreach (DirectoryEntry dirEntry in _entries.Values)
             {
                 if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
                 {
@@ -93,51 +104,44 @@ namespace DiscUtils.Fat
 
         public DirectoryEntry[] Entries
         {
-            get { return _entries.ToArray(); }
+            get { return new List<DirectoryEntry>(_entries.Values).ToArray(); }
         }
 
-        public DirectoryEntry GetEntry(string name)
+        public DirectoryEntry GetEntry(long id)
         {
-            int idx = FindEntryByNormalizedName(name);
-            if (idx < 0)
-            {
-                return null;
-            }
-            else
-            {
-                return _entries[idx];
-            }
+            return (id < 0) ? null : _entries[id];
         }
+
 
         public Directory GetChildDirectory(string name)
         {
-            int idx = FindEntryByNormalizedName(name);
-            if (idx < 0)
+            long id = FindEntryByNormalizedName(name);
+            if (id < 0)
             {
                 return null;
             }
-            else if ((_entries[idx].Attributes & FatAttributes.Directory) == 0)
+            else if ((_entries[id].Attributes & FatAttributes.Directory) == 0)
             {
                 return null;
             }
             else
             {
-                return _fileSystem.GetDirectory(_entries[idx]);
+                return _fileSystem.GetDirectory(this, id);
             }
         }
 
         internal Directory CreateChildDirectory(string normalizedName)
         {
-            int idx = FindEntryByNormalizedName(normalizedName);
-            if (idx >= 0)
+            long id = FindEntryByNormalizedName(normalizedName);
+            if (id >= 0)
             {
-                if ((_entries[idx].Attributes & FatAttributes.Directory) == 0)
+                if ((_entries[id].Attributes & FatAttributes.Directory) == 0)
                 {
                     throw new IOException("A file exists with the same name");
                 }
                 else
                 {
-                    return _fileSystem.GetDirectory(_entries[idx]);
+                    return _fileSystem.GetDirectory(this, id);
                 }
             }
             else
@@ -149,13 +153,13 @@ namespace DiscUtils.Fat
                     newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                     newEntry.LastWriteTime = newEntry.CreationTime;
 
-                    AddEntry(newEntry);
+                    id = AddEntry(newEntry);
 
-                    PopulateNewChildDirectory(newEntry);
+                    PopulateNewChildDirectory(id, newEntry);
 
                     // Rather than just creating a new instance, pull it through the fileSystem cache
                     // to ensure the cache model is preserved.
-                    return _fileSystem.GetDirectory(newEntry);
+                    return _fileSystem.GetDirectory(this, id);
                 }
                 finally
                 {
@@ -166,8 +170,7 @@ namespace DiscUtils.Fat
 
         private void LoadEntries()
         {
-            _entryStreamPos = new Dictionary<int, long>();
-            _entries = new List<DirectoryEntry>();
+            _entries = new Dictionary<long,DirectoryEntry>();
             _freeEntries = new List<long>();
 
             while (_dirStream.Position < _dirStream.Length)
@@ -196,20 +199,19 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    _entryStreamPos[_entryStreamPos.Count] = streamPos;
-                    _entries.Add(entry);
+                    _entries.Add(streamPos, entry);
                 }
             }
         }
 
-        internal int FindEntryByNormalizedName(string name)
+        internal long FindEntryByNormalizedName(string name)
         {
-            for (int i = 0; i < _entries.Count; ++i)
+            foreach(long id in _entries.Keys)
             {
-                DirectoryEntry focus = _entries[i];
+                DirectoryEntry focus = _entries[id];
                 if (focus.NormalizedName == name)
                 {
-                    return i;
+                    return id;
                 }
             }
 
@@ -240,6 +242,9 @@ namespace DiscUtils.Fat
                 {
                     stream.SetLength(0);
                 }
+
+                FireAccessed(false);
+
                 return stream;
             }
             else if ((mode == FileMode.OpenOrCreate || mode == FileMode.CreateNew || mode == FileMode.Create) && !exists)
@@ -261,7 +266,7 @@ namespace DiscUtils.Fat
             }
         }
 
-        private void AddEntry(DirectoryEntry newEntry)
+        private long AddEntry(DirectoryEntry newEntry)
         {
             // Unlink an entry from the free list (or add to the end of the existing directory)
             long pos;
@@ -281,24 +286,25 @@ namespace DiscUtils.Fat
             newEntry.WriteTo(_dirStream);
 
             // Update internal structures to reflect new entry (as if read from disk)
-            _entryStreamPos[_entryStreamPos.Count] = pos;
-            _entries.Add(newEntry);
+            _entries.Add(pos, newEntry);
+
+            FireAccessed(true);
+
+            return pos;
         }
 
-        internal void DeleteEntry(DirectoryEntry entry)
+        internal void DeleteEntry(long id)
         {
-            int idx = FindEntryByNormalizedName(entry.NormalizedName);
-
-            if (idx < 0)
+            if (id < 0)
             {
-                throw new IOException("Couldn't find entry to delete");
+                throw new IOException("Attempt to delete unknown directory entry");
             }
 
-            long dirEntryPos = _entryStreamPos[idx];
+            DirectoryEntry entry = _entries[id];
 
             DirectoryEntry copy = new DirectoryEntry(entry);
             copy.NormalizedName = "\xE5" + entry.NormalizedName.Substring(1);
-            _dirStream.Position = dirEntryPos;
+            _dirStream.Position = id;
             copy.WriteTo(_dirStream);
 
             _fileSystem.FAT.FreeChain(entry.FirstCluster);
@@ -308,26 +314,27 @@ namespace DiscUtils.Fat
                 _fileSystem.ForgetDirectory(entry);
             }
 
-            _entryStreamPos.Remove(idx);
-            _entries.RemoveAt(idx);
-            _freeEntries.Add(dirEntryPos);
+            _entries.Remove(id);
+            _freeEntries.Add(id);
+
+            FireAccessed(true);
         }
 
-        internal void UpdateEntry(DirectoryEntry entry)
+        internal void UpdateEntry(long id, DirectoryEntry entry)
         {
-            int idx = FindEntryByNormalizedName(entry.NormalizedName);
-
-            if (idx < 0)
+            if (id < 0)
             {
-                throw new IOException("Couldn't find entry to update");
+                throw new IOException("Attempt to update unknown directory entry");
             }
 
-            _dirStream.Position = _entryStreamPos[idx];
+            _dirStream.Position = id;
             entry.WriteTo(_dirStream);
-            _entries[idx] = entry;
+            _entries[id] = entry;
+
+            FireAccessed(true);
         }
 
-        private void PopulateNewChildDirectory(DirectoryEntry newEntry)
+        private void PopulateNewChildDirectory(long newEntryId, DirectoryEntry newEntry)
         {
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
             using (ClusterStream stream = _fileSystem.OpenExistingStream(newEntry.FirstCluster, uint.MaxValue))
@@ -335,7 +342,7 @@ namespace DiscUtils.Fat
                 // Update the entry for the child when the first cluster is actually allocated
                 stream.FirstClusterAllocated += (cluster) => {
                     newEntry.FirstCluster = cluster;
-                    UpdateEntry(newEntry);
+                    UpdateEntry(newEntryId, newEntry);
                 };
 
                 DirectoryEntry selfEntry = new DirectoryEntry(newEntry);
@@ -343,9 +350,9 @@ namespace DiscUtils.Fat
                 selfEntry.WriteTo(stream);
 
                 // Second one is a clone of ours, or if we're the root, then mostly empty...
-                if (_dirEntry != null)
+                if (_parent != null)
                 {
-                    DirectoryEntry parentEntry = new DirectoryEntry(_dirEntry);
+                    DirectoryEntry parentEntry = new DirectoryEntry(_parent.GetEntry(_parentId));
                     parentEntry.NormalizedName = "..         ";
                     parentEntry.WriteTo(stream);
                 }
@@ -357,5 +364,12 @@ namespace DiscUtils.Fat
             }
         }
 
+        private void FireAccessed(bool forWrite)
+        {
+            if (Accessed != null)
+            {
+                Accessed(this, forWrite);
+            }
+        }
     }
 }

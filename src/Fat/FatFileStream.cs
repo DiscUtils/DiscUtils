@@ -28,7 +28,7 @@ namespace DiscUtils.Fat
     internal class FatFileStream : Stream
     {
         private Directory _dir;
-        private string _name;
+        private long _dirId;
         private ClusterStream _stream;
 
         private bool didWrite = false;
@@ -36,9 +36,9 @@ namespace DiscUtils.Fat
         public FatFileStream(Directory dir, string name, FileAccess access, ClusterReader reader, FileAllocationTable fat)
         {
             _dir = dir;
-            _name = name;
 
-            DirectoryEntry dirEntry = _dir.GetEntry(_name);
+            _dirId = _dir.FindEntryByNormalizedName(name);
+            DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
             _stream = new ClusterStream(access, reader, fat, (uint)dirEntry.FirstCluster, (uint)dirEntry.FileSize);
             _stream.FirstClusterAllocated += FirstClusterAllocatedHandler;
         }
@@ -49,10 +49,10 @@ namespace DiscUtils.Fat
 
             if (didWrite)
             {
-                DirectoryEntry dirEntry = _dir.GetEntry(_name);
+                DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
                 dirEntry.FileSize = (int)_stream.Length;
                 dirEntry.LastWriteTime = _dir.FileSystem.ConvertFromUtc(DateTime.UtcNow);
-                _dir.UpdateEntry(dirEntry);
+                _dir.UpdateEntry(_dirId, dirEntry);
             }
         }
 
@@ -111,9 +111,9 @@ namespace DiscUtils.Fat
 
         private void FirstClusterAllocatedHandler(uint cluster)
         {
-            DirectoryEntry dirEntry = _dir.GetEntry(_name);
+            DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
             dirEntry.FirstCluster = cluster;
-            _dir.UpdateEntry(dirEntry);
+            _dir.UpdateEntry(_dirId, dirEntry);
         }
     }
 }

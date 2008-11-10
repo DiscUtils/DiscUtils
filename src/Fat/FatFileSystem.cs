@@ -333,20 +333,23 @@ namespace DiscUtils.Fat
         public override Stream Open(string path, FileMode mode, FileAccess access)
         {
             Directory parent;
-            DirectoryEntry dirEntry = GetDirectoryEntry(_rootDir, path, out parent);
+            long entryId = GetDirectoryEntry(_rootDir, path, out parent);
 
             if (parent == null)
             {
                 throw new FileNotFoundException("Could not locate file", path);
             }
 
-            if (dirEntry == null)
+            if (entryId < 0)
             {
                 string[] pathEntries = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
                 string normFileName = FatUtilities.NormalizeFileName(pathEntries[pathEntries.Length - 1]);
                 return parent.OpenFile(normFileName, mode, access);
             }
-            else if ((dirEntry.Attributes & FatAttributes.Directory) != 0)
+
+            DirectoryEntry dirEntry = parent.GetEntry(entryId);
+
+            if ((dirEntry.Attributes & FatAttributes.Directory) != 0)
             {
                 throw new IOException("Attempt to open directory as a file");
             }
@@ -649,7 +652,7 @@ namespace DiscUtils.Fat
             {
                 fatStream = new ClusterStream(FileAccess.Read, _clusterReader, _fat, _bpbRootClus, uint.MaxValue);
             }
-            _rootDir = new Directory(this, fatStream, new DirectoryEntry("", FatAttributes.Directory));
+            _rootDir = new Directory(this, fatStream);
         }
 
         private void LoadFAT()
@@ -915,17 +918,16 @@ namespace DiscUtils.Fat
         internal Directory GetDirectory(string path)
         {
             Directory parent;
-            DirectoryEntry entry;
 
             if (string.IsNullOrEmpty(path) || path == "\\")
             {
                 return _rootDir;
             }
 
-            entry = GetDirectoryEntry(_rootDir, path, out parent);
-            if (entry != null)
+            long id = GetDirectoryEntry(_rootDir, path, out parent);
+            if (id >= 0)
             {
-                return GetDirectory(entry);
+                return GetDirectory(parent, id);
             }
             else
             {
@@ -933,12 +935,14 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal Directory GetDirectory(DirectoryEntry dirEntry)
+        internal Directory GetDirectory(Directory parent, long parentId)
         {
-            if (dirEntry == null)
+            if (parent == null)
             {
                 return _rootDir;
             }
+
+            DirectoryEntry dirEntry = parent.GetEntry(parentId);
 
             // If we have this one cached, return it
             Directory result;
@@ -948,7 +952,7 @@ namespace DiscUtils.Fat
             }
 
             // Not cached - create a new one.
-            result = new Directory(this, dirEntry);
+            result = new Directory(parent, parentId);
             _dirCache[dirEntry.FirstCluster] = result;
             return result;
         }
@@ -966,54 +970,60 @@ namespace DiscUtils.Fat
         {
             Directory parent;
 
-            return GetDirectoryEntry(_rootDir, _path, out parent);
+            long id = GetDirectoryEntry(_rootDir, _path, out parent);
+            if (parent == null || id < 0)
+            {
+                return null;
+            }
+
+            return parent.GetEntry(id);
         }
 
-        internal DirectoryEntry GetDirectoryEntry(string _path, out Directory parent)
+        internal long GetDirectoryEntry(string _path, out Directory parent)
         {
             return GetDirectoryEntry(_rootDir, _path, out parent);
         }
 
-        private DirectoryEntry GetDirectoryEntry(Directory dir, string path, out Directory parent)
+        private long GetDirectoryEntry(Directory dir, string path, out Directory parent)
         {
             string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             return GetDirectoryEntry(dir, pathElements, 0, out parent);
         }
 
-        private DirectoryEntry GetDirectoryEntry(Directory dir, string[] pathEntries, int pathOffset, out Directory parent)
+        private long GetDirectoryEntry(Directory dir, string[] pathEntries, int pathOffset, out Directory parent)
         {
-            DirectoryEntry entry;
+            long entryId;
 
             if (pathEntries.Length == 0)
             {
                 // Looking for root directory, simulate the directory entry in its parent...
                 parent = null;
-                return new DirectoryEntry("", FatAttributes.Directory);
+                return 0;
             }
             else
             {
-                entry = dir.GetEntry(FatUtilities.NormalizeFileName(pathEntries[pathOffset]));
-                if (entry != null)
+                entryId = dir.FindEntryByNormalizedName(FatUtilities.NormalizeFileName(pathEntries[pathOffset]));
+                if (entryId >= 0)
                 {
                     if (pathOffset == pathEntries.Length - 1)
                     {
                         parent = dir;
-                        return entry;
+                        return entryId;
                     }
                     else
                     {
-                        return GetDirectoryEntry(GetDirectory(entry), pathEntries, pathOffset + 1, out parent);
+                        return GetDirectoryEntry(GetDirectory(dir, entryId), pathEntries, pathOffset + 1, out parent);
                     }
                 }
                 else if (pathOffset == pathEntries.Length - 1)
                 {
                     parent = dir;
-                    return null;
+                    return -1;
                 }
                 else
                 {
                     parent = null;
-                    return null;
+                    return -1;
                 }
             }
         }

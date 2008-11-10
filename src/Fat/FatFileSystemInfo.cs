@@ -153,12 +153,12 @@ namespace DiscUtils.Fat
 
         private DirectoryEntry GetDirEntry(out Directory parent)
         {
-            DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path, out parent);
-            if (dirEntry == null)
+            long id = _fileSystem.GetDirectoryEntry(_path, out parent);
+            if (id < 0)
             {
                 throw new FileNotFoundException("File not found", _path);
             }
-            return dirEntry;
+            return parent.GetEntry(id);
         }
 
         private delegate void EntryUpdateAction(DirectoryEntry entry);
@@ -166,9 +166,13 @@ namespace DiscUtils.Fat
         private void UpdateDirEntry(EntryUpdateAction action)
         {
             Directory parent;
-            DirectoryEntry entry = GetDirEntry(out parent);
-            action(entry);
-            parent.UpdateEntry(entry);
+            long id = _fileSystem.GetDirectoryEntry(_path, out parent);
+            if (parent != null && id >= 0)
+            {
+                DirectoryEntry entry = parent.GetEntry(id);
+                action(entry);
+                parent.UpdateEntry(id, entry);
+            }
         }
     }
 }
