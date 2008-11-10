@@ -69,7 +69,7 @@ namespace DiscUtils.Fat
 
         private void Load(byte[] data, int offset)
         {
-            _name = Encoding.ASCII.GetString(data, offset, 11);
+            _name = FatUtilities.BytesToString(data, offset, 11);
             _attr = data[offset + 11];
             _creationTimeTenth = data[offset + 13];
             _creationTime = BitConverter.ToUInt16(data, offset + 14);
@@ -86,7 +86,7 @@ namespace DiscUtils.Fat
         {
             byte[] buffer = new byte[32];
 
-            Array.Copy(Encoding.ASCII.GetBytes(_name), 0, buffer, 0, 11);
+            FatUtilities.StringToBytes(_name, buffer, 0, 11);
             buffer[11] = _attr;
             buffer[13] = _creationTimeTenth;
             Array.Copy(BitConverter.GetBytes((ushort)_creationTime), 0, buffer, 14, 2);
