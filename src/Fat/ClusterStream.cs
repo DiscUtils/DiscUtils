@@ -26,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Fat
 {
-    internal delegate void FirstClusterAllocatedDelegate(uint cluster);
+    internal delegate void FirstClusterChangedDelegate(uint cluster);
 
     internal class ClusterStream : Stream
     {
@@ -64,7 +64,7 @@ namespace DiscUtils.Fat
             _clusterBuffer = new byte[_reader.ClusterSize];
         }
 
-        public event FirstClusterAllocatedDelegate FirstClusterAllocated;
+        public event FirstClusterChangedDelegate FirstClusterChanged;
 
         public override bool CanRead
         {
@@ -319,9 +319,9 @@ namespace DiscUtils.Fat
 
         private void FireFirstClusterAllocated(uint cluster)
         {
-            if (FirstClusterAllocated != null)
+            if (FirstClusterChanged != null)
             {
-                FirstClusterAllocated(cluster);
+                FirstClusterChanged(cluster);
             }
         }
 

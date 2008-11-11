@@ -40,7 +40,7 @@ namespace DiscUtils.Fat
             _dirId = _dir.FindEntryByNormalizedName(name);
             DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
             _stream = new ClusterStream(access, reader, fat, (uint)dirEntry.FirstCluster, (uint)dirEntry.FileSize);
-            _stream.FirstClusterAllocated += FirstClusterAllocatedHandler;
+            _stream.FirstClusterChanged += FirstClusterAllocatedHandler;
         }
 
         public override void Close()

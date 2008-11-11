@@ -28,6 +28,9 @@ namespace DiscUtils.Fat
 {
     internal class Directory
     {
+        private const string SelfEntryNormalizedName = ".          ";
+        private const string ParentEntryNormalizedName = "..         ";
+
         private FatFileSystem _fileSystem;
         private Directory _parent;
         private long _parentId;
@@ -37,20 +40,30 @@ namespace DiscUtils.Fat
         private List<long> _freeEntries;
         private long _endOfEntries;
 
+        private DirectoryEntry _selfEntry;
+        private long _selfEntryLocation;
+        private DirectoryEntry _parentEntry;
+        private long _parentEntryLocation;
+
+        /// <summary>
+        /// Creates an instance of Directory representing a non-root directory.
+        /// </summary>
+        /// <param name="parent">The parent directory</param>
+        /// <param name="parentId">The identity of the entry representing this directory in the parent</param>
         internal Directory(Directory parent, long parentId)
         {
             _fileSystem = parent._fileSystem;
             _parent = parent;
             _parentId = parentId;
 
-            DirectoryEntry dirEntry = _parent.GetEntry(parentId);
+            DirectoryEntry dirEntry = ParentsChildEntry;
             _dirStream = _fileSystem.OpenExistingStream(dirEntry.FirstCluster, uint.MaxValue);
 
             LoadEntries();
         }
 
         /// <summary>
-        /// Loads the root directory of a file system
+        /// Creates and instance representing the root directory of a file system.
         /// </summary>
         /// <param name="fileSystem">The file system</param>
         /// <param name="dirStream">The stream containing the directory info</param>
@@ -164,7 +177,7 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal void AttachChildDirectory(string normalizedName, DirectoryEntry directoryEntry)
+        internal void AttachChildDirectory(string normalizedName, Directory newChild)
         {
             long id = FindEntryByNormalizedName(normalizedName);
             if (id >= 0)
@@ -172,15 +185,92 @@ namespace DiscUtils.Fat
                 throw new IOException("Directory entry already exists");
             }
 
-            DirectoryEntry newEntry = new DirectoryEntry(directoryEntry);
+            DirectoryEntry newEntry = new DirectoryEntry(newChild.ParentsChildEntry);
             newEntry.NormalizedName = normalizedName;
             AddEntry(newEntry);
+
+            DirectoryEntry newParentEntry = new DirectoryEntry(SelfEntry);
+            newParentEntry.NormalizedName = ParentEntryNormalizedName;
+            newChild.ParentEntry = newParentEntry;
         }
+
+        #region Convenient accessors for special entries
+        internal DirectoryEntry ParentsChildEntry
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    return new DirectoryEntry(ParentEntryNormalizedName, FatAttributes.Directory);
+                }
+                else
+                {
+                    return _parent.GetEntry(_parentId);
+                }
+            }
+
+            set
+            {
+                if (_parent != null)
+                {
+                    _parent.UpdateEntry(_parentId, value);
+                }
+            }
+        }
+
+        internal DirectoryEntry SelfEntry
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    // If we're the root directory, simulate the parent entry with a dummy record
+                    return new DirectoryEntry("", FatAttributes.Directory);
+                }
+                else
+                {
+                    return _selfEntry;
+                }
+            }
+
+            set
+            {
+                if (_selfEntryLocation >= 0)
+                {
+                    _dirStream.Position = _selfEntryLocation;
+                    value.WriteTo(_dirStream);
+                    _selfEntry = value;
+                }
+            }
+        }
+
+        internal DirectoryEntry ParentEntry
+        {
+            get
+            {
+                return _parentEntry;
+            }
+
+            set
+            {
+                if (_parentEntryLocation < 0)
+                {
+                    throw new IOException("No parent entry on disk to update");
+                }
+                _dirStream.Position = _parentEntryLocation;
+                value.WriteTo(_dirStream);
+                _parentEntry = value;
+            }
+        }
+        #endregion
 
         private void LoadEntries()
         {
             _entries = new Dictionary<long,DirectoryEntry>();
             _freeEntries = new List<long>();
+
+            _selfEntryLocation = -1;
+            _parentEntryLocation = -1;
 
             while (_dirStream.Position < _dirStream.Length)
             {
@@ -199,6 +289,16 @@ namespace DiscUtils.Fat
                 else if (entry.NormalizedName[0] == '.')
                 {
                     // Special folders
+                    if (entry.NormalizedName == SelfEntryNormalizedName)
+                    {
+                        _selfEntry = entry;
+                        _selfEntryLocation = streamPos;
+                    }
+                    else if (entry.NormalizedName == ParentEntryNormalizedName)
+                    {
+                        _parentEntry = entry;
+                        _parentEntryLocation = streamPos;
+                    }
                 }
                 else if (entry.NormalizedName[0] == 0x00)
                 {
@@ -275,7 +375,7 @@ namespace DiscUtils.Fat
             }
         }
 
-        private long AddEntry(DirectoryEntry newEntry)
+        internal long AddEntry(DirectoryEntry newEntry)
         {
             // Unlink an entry from the free list (or add to the end of the existing directory)
             long pos;
@@ -353,7 +453,7 @@ namespace DiscUtils.Fat
             if (_parent != null && _parentId >= 0)
             {
                 DateTime now = DateTime.Now;
-                DirectoryEntry entry = _parent.GetEntry(_parentId);
+                DirectoryEntry entry = SelfEntry;
 
                 DateTime oldAccessTime = entry.LastAccessTime;
                 DateTime oldWriteTime = entry.LastWriteTime;
@@ -366,7 +466,12 @@ namespace DiscUtils.Fat
 
                 if (entry.LastAccessTime != oldAccessTime || entry.LastWriteTime != oldWriteTime)
                 {
-                    _parent.UpdateEntry(_parentId, entry);
+                    SelfEntry = entry;
+
+                    DirectoryEntry parentEntry = ParentsChildEntry;
+                    entry.LastAccessTime = entry.LastAccessTime;
+                    entry.LastWriteTime = entry.LastWriteTime;
+                    ParentsChildEntry = parentEntry;
                 }
             }
         }
@@ -376,28 +481,21 @@ namespace DiscUtils.Fat
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
             using (ClusterStream stream = _fileSystem.OpenExistingStream(newEntry.FirstCluster, uint.MaxValue))
             {
-                // Update the entry for the child when the first cluster is actually allocated
-                stream.FirstClusterAllocated += (cluster) => {
+                // Update our entry for the child when the first cluster is actually allocated
+                stream.FirstClusterChanged += (cluster) => {
                     newEntry.FirstCluster = cluster;
                     UpdateEntry(newEntryId, newEntry);
                 };
 
+                // First is the self-referencing entry...
                 DirectoryEntry selfEntry = new DirectoryEntry(newEntry);
-                selfEntry.NormalizedName = ".          ";
+                selfEntry.NormalizedName = SelfEntryNormalizedName;
                 selfEntry.WriteTo(stream);
 
-                // Second one is a clone of ours, or if we're the root, then mostly empty...
-                if (_parent != null)
-                {
-                    DirectoryEntry parentEntry = new DirectoryEntry(_parent.GetEntry(_parentId));
-                    parentEntry.NormalizedName = "..         ";
-                    parentEntry.WriteTo(stream);
-                }
-                else
-                {
-                    DirectoryEntry newParent = new DirectoryEntry("..         ", FatAttributes.Directory);
-                    newParent.WriteTo(stream);
-                }
+                // Second is a clone of our self entry (i.e. parent)...
+                DirectoryEntry parentEntry = new DirectoryEntry(SelfEntry);
+                parentEntry.NormalizedName = ParentEntryNormalizedName;
+                parentEntry.WriteTo(stream);
             }
         }
     }

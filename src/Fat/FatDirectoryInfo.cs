@@ -86,20 +86,22 @@ namespace DiscUtils.Fat
             Delete();
         }
 
-        public override void MoveTo(string destDirName)
+        public override void MoveTo(string destinationDirName)
         {
-            if( destDirName == null )
+            if(string.IsNullOrEmpty(destinationDirName))
             {
-                throw new ArgumentNullException("destDirName");
-            }
-
-            if(destDirName == "")
-            {
-                throw new ArgumentException("Invalid destination name (empty string)");
+                if (destinationDirName == null)
+                {
+                    throw new ArgumentNullException("destinationDirName");
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid destination name (empty string)");
+                }
             }
 
             Directory destParent;
-            long destId = _fileSystem.GetDirectoryEntry(destDirName, out destParent);
+            long destId = _fileSystem.GetDirectoryEntry(destinationDirName, out destParent);
             if (destParent == null)
             {
                 throw new DirectoryNotFoundException("Target directory doesn't exist");
@@ -116,7 +118,7 @@ namespace DiscUtils.Fat
                 throw new IOException("Source directory doesn't exist");
             }
 
-            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destDirName), sourceParent.GetEntry(sourceId));
+            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destinationDirName), GetDirectory());
             sourceParent.DeleteEntry(sourceId);
         }
 
@@ -391,19 +393,14 @@ namespace DiscUtils.Fat
 
         private DirectoryEntry GetDirEntry()
         {
-            Directory parent;
-            long id = GetDirEntry(out parent);
-            if (parent == null && id == 0)
+            Directory dir = _fileSystem.GetDirectory(_path);
+            if (dir == null)
             {
-                return new DirectoryEntry("", FatAttributes.Directory);
-            }
-            else if (parent != null && id >= 0)
-            {
-                return parent.GetEntry(id);
+                throw new FileNotFoundException("No such file: " + _path);
             }
             else
             {
-                throw new FileNotFoundException("No such file: " + _path);
+                return dir.SelfEntry;
             }
         }
 
@@ -416,13 +413,16 @@ namespace DiscUtils.Fat
 
         private void UpdateDirEntry(EntryUpdateAction action)
         {
-            Directory parent;
-            long entryId = GetDirEntry(out parent);
-            if (entryId >= 0 && parent != null)
+            Directory dir = _fileSystem.GetDirectory(_path);
+            if (dir != null)
             {
-                DirectoryEntry entry = parent.GetEntry(entryId);
-                action(entry);
-                parent.UpdateEntry(entryId, entry);
+                DirectoryEntry parentsEntry = dir.ParentsChildEntry;
+                action(parentsEntry);
+                dir.ParentsChildEntry = parentsEntry;
+
+                DirectoryEntry selfEntry = dir.SelfEntry;
+                action(selfEntry);
+                dir.SelfEntry = selfEntry;
             }
         }
     }

@@ -68,6 +68,46 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Fat">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-10 13:17:45Z">
+      <Issue>
+       <Item>DiscUtils.Fat</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="11" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Fat</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="10" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
+   <Namespace Name="DiscUtils.Iso9660">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Iso9660</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="19" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
   </Namespaces>
   <Targets>
    <Target Name="$(ProjectDir)/src/bin/Release/DiscUtils.dll">
@@ -96,6 +136,206 @@
         </Notes>
        </Message>
       </Messages>
+      <Namespaces>
+       <Namespace Name="DiscUtils">
+        <Types>
+         <Type Name="DiscDirectoryInfo">
+          <Members>
+           <Member Name="#GetFileSystemInfos()">
+            <Messages>
+             <Message Id="Infos" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue Name="Member">
+               <Item>Infos</Item>
+               <Item>'DiscDirectoryInfo.GetFileSystemInfos()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="8" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetFileSystemInfos(System.String)">
+            <Messages>
+             <Message Id="Infos" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue Name="Member">
+               <Item>Infos</Item>
+               <Item>'DiscDirectoryInfo.GetFileSystemInfos(string)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Fat">
+        <Types>
+         <Type Name="DirectoryEntry">
+          <Members>
+           <Member Name="#Name">
+            <Accessors>
+             <Accessor Name="#set_Name(System.String)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
+                <Issue>
+                 <Item>'DirectoryEntry.Name.set(string)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="15" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FatBuffer">
+          <Members>
+           <Member Name="#IsBadCluster(System.UInt32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue>
+               <Item>'FatBuffer.IsBadCluster(uint)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="17" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#IsFree(System.UInt32)">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2008-11-10 13:17:45Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'FatBuffer.IsFree(uint)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="18" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SetBadCluster(System.UInt32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue>
+               <Item>'FatBuffer.SetBadCluster(uint)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="16" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FileAllocationTable">
+          <Members>
+           <Member Name="#IsBadCluster(System.UInt32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue>
+               <Item>'FileAllocationTable.IsBadCluster(uint)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="13" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#IsFree(System.UInt32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue>
+               <Item>'FileAllocationTable.IsFree(uint)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="14" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SetBadCluster(System.UInt32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
+              <Issue>
+               <Item>'FileAllocationTable.SetBadCluster(uint)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="12" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Iso9660">
+        <Types>
+         <Type Name="BuildDirectoryInfo">
+          <Members>
+           <Member Name="#MakeShortDirName(System.String,DiscUtils.Iso9660.BuildDirectoryInfo)">
+            <Messages>
+             <Message Id="dir" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Status="Excluded" Created="2008-11-10 13:17:45Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'dir'</Item>
+               <Item>'BuildDirectoryInfo.MakeShortDirName(string, BuildDirectoryInfo)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="21" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="BuildFileInfo">
+          <Members>
+           <Member Name="#MakeShortFileName(System.String,DiscUtils.Iso9660.BuildDirectoryInfo)">
+            <Messages>
+             <Message Id="dir" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Status="Excluded" Created="2008-11-10 13:17:45Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'dir'</Item>
+               <Item>'BuildFileInfo.MakeShortFileName(string, BuildDirectoryInfo)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="20" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
      </Module>
     </Modules>
    </Target>
@@ -106,6 +346,20 @@
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="6" Modified="2008-11-10 13:18:45Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="7" Modified="2008-11-10 13:18:54Z">DiscUtils is the top-level namespace</Note>
+    <Note Id="8" Modified="2008-11-10 13:24:01Z">Reflects name of member in CLR's DirectoryInfo class.</Note>
+    <Note Id="9" Modified="2008-11-10 13:22:31Z">Reflects the GetFileSystemInfos member of CLR's DirectoryInfo class.</Note>
+    <Note Id="10" Modified="2008-11-10 13:24:14Z">DiscUtils is the fixed project name</Note>
+    <Note Id="11" Modified="2008-11-10 13:25:34Z">Namespace used to partition different file systems</Note>
+    <Note Id="12" Modified="2008-11-10 13:34:14Z">Included for completeness</Note>
+    <Note Id="13" Modified="2008-11-10 13:35:20Z">Included for completeness</Note>
+    <Note Id="14" Modified="2008-11-10 13:35:58Z">Included for completeness</Note>
+    <Note Id="15" Modified="2008-11-10 13:40:13Z">Included for completeness</Note>
+    <Note Id="16" Modified="2008-11-10 13:41:25Z">Included for completeness</Note>
+    <Note Id="17" Modified="2008-11-10 13:41:33Z">Included for completeness</Note>
+    <Note Id="18" Modified="2008-11-10 13:42:06Z">non-static to match similar methods</Note>
+    <Note Id="19" Modified="2008-11-10 14:21:03Z">DiscUtils is the fixed name of the project</Note>
+    <Note Id="20" Modified="2008-11-10 15:23:21Z">Will use parameter to generate unique short name in future...</Note>
+    <Note Id="21" Modified="2008-11-10 15:30:33Z">Will use parameter later to create unique names</Note>
    </User>
   </Notes>
   <Rules>
@@ -115,10 +369,19 @@
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
    </Rule>
+   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
+    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
+   </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
     <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
+    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
+   </Rule>
+   <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
+    <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

@@ -57,8 +57,8 @@ namespace DiscUtils
         /// <summary>
         /// Moves a directory and it's contents to a new path.
         /// </summary>
-        /// <param name="destDirName">The</param>
-        public abstract void MoveTo(string destDirName);
+        /// <param name="destinationDirName">The</param>
+        public abstract void MoveTo(string destinationDirName);
 
         /// <summary>
         /// Gets all child directories.
