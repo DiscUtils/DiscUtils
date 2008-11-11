@@ -53,7 +53,7 @@ namespace DiscUtils.Fat
             }
 
             Directory parent;
-            long id = GetDirEntry(out parent);
+            long id = _fileSystem.GetDirectoryEntry(_path, out parent);
             if (parent == null && id == 0)
             {
                 throw new IOException("Unable to delete root directory");
@@ -340,6 +340,7 @@ namespace DiscUtils.Fat
             return _fileSystem.GetHashCode() ^ _path.GetHashCode();
         }
 
+        #region Support Functions
         private void DoSearch(List<DiscFileInfo> results, string path, Regex regex, bool subFolders)
         {
             Directory dir = _fileSystem.GetDirectory(path);
@@ -381,32 +382,19 @@ namespace DiscUtils.Fat
         private Directory GetDirectory()
         {
             Directory dir = _fileSystem.GetDirectory(_path);
-            if (dir != null)
+            if (dir == null)
             {
-                return dir;
+                throw new DirectoryNotFoundException(String.Format(CultureInfo.InvariantCulture, "No such directory: {0}", _path));
             }
             else
             {
-                throw new DirectoryNotFoundException(String.Format(CultureInfo.InvariantCulture, "No such directory: {0}", _path));
+                return dir;
             }
         }
 
         private DirectoryEntry GetDirEntry()
         {
-            Directory dir = _fileSystem.GetDirectory(_path);
-            if (dir == null)
-            {
-                throw new FileNotFoundException("No such file: " + _path);
-            }
-            else
-            {
-                return dir.SelfEntry;
-            }
-        }
-
-        private long GetDirEntry(out Directory parent)
-        {
-            return _fileSystem.GetDirectoryEntry(_path, out parent);
+            return GetDirectory().SelfEntry;
         }
 
         private delegate void EntryUpdateAction(DirectoryEntry entry);
@@ -425,5 +413,6 @@ namespace DiscUtils.Fat
                 dir.SelfEntry = selfEntry;
             }
         }
+        #endregion
     }
 }

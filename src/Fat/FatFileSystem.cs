@@ -390,6 +390,39 @@ namespace DiscUtils.Fat
             }
         }
 
+        /// <summary>
+        /// Gets an object representing a possible file.
+        /// </summary>
+        /// <param name="path">The file path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
+        public override DiscFileInfo GetFileInfo(string path)
+        {
+            return new FatFileInfo(this, path);
+        }
+
+        /// <summary>
+        /// Gets an object representing a possible directory.
+        /// </summary>
+        /// <param name="path">The directory path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The directory does not need to exist</remarks>
+        public override DiscDirectoryInfo GetDirectoryInfo(string path)
+        {
+            return new FatDirectoryInfo(this, path);
+        }
+
+        /// <summary>
+        /// Gets an object representing a possible file system object (file or directory).
+        /// </summary>
+        /// <param name="path">The file system path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file system object does not need to exist</remarks>
+        public override DiscFileSystemInfo GetFileSystemInfo(string path)
+        {
+            return new FatFileSystemInfo(this, path);
+        }
+
         #region Disk Formatting
         /// <summary>
         /// Creates a formatted floppy disk image in a stream.
@@ -579,37 +612,9 @@ namespace DiscUtils.Fat
         }
         #endregion
 
-        /// <summary>
-        /// Gets an object representing a possible file.
-        /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
-        public override DiscFileInfo GetFileInfo(string path)
+        internal FileAllocationTable FAT
         {
-            return new FatFileInfo(this, path);
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible directory.
-        /// </summary>
-        /// <param name="path">The directory path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The directory does not need to exist</remarks>
-        public override DiscDirectoryInfo GetDirectoryInfo(string path)
-        {
-            return new FatDirectoryInfo(this, path);
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible file system object (file or directory).
-        /// </summary>
-        /// <param name="path">The file system path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file system object does not need to exist</remarks>
-        public override DiscFileSystemInfo GetFileSystemInfo(string path)
-        {
-            return new FatFileSystemInfo(this, path);
+            get { return _fat; }
         }
 
         private void Initialize(Stream data)
@@ -627,11 +632,6 @@ namespace DiscUtils.Fat
             LoadClusterReader();
 
             LoadRootDirectory();
-        }
-
-        internal FileAllocationTable FAT
-        {
-            get { return _fat; }
         }
 
         private void LoadClusterReader()
