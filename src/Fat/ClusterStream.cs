@@ -43,11 +43,11 @@ namespace DiscUtils.Fat
 
         private bool _atEOF;
 
-        internal ClusterStream(FileAccess access, ClusterReader reader, FileAllocationTable fat, uint firstCluster, uint length)
+        internal ClusterStream(FatFileSystem fileSystem, FileAccess access, uint firstCluster, uint length)
         {
             _access = access;
-            _reader = reader;
-            _fat = fat;
+            _reader = fileSystem.ClusterReader;
+            _fat = fileSystem.Fat;
             _length = length;
 
             _knownClusters = new List<uint>();

@@ -30,7 +30,7 @@ namespace DiscUtils.Fat
     /// <summary>
     /// Class for accessing FAT file systems.
     /// </summary>
-    public class FatFileSystem : DiscFileSystem
+    public class FatFileSystem : DiscFileSystem, IDisposable
     {
         private TimeZoneInfo _timeZone;
         private Stream _data;
@@ -612,9 +612,14 @@ namespace DiscUtils.Fat
         }
         #endregion
 
-        internal FileAllocationTable FAT
+        internal FileAllocationTable Fat
         {
             get { return _fat; }
+        }
+
+        internal ClusterReader ClusterReader
+        {
+            get { return _clusterReader; }
         }
 
         private void Initialize(Stream data)
@@ -650,7 +655,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                fatStream = new ClusterStream(FileAccess.Read, _clusterReader, _fat, _bpbRootClus, uint.MaxValue);
+                fatStream = new ClusterStream(this, FileAccess.Read, _bpbRootClus, uint.MaxValue);
             }
             _rootDir = new Directory(this, fatStream);
         }
@@ -895,16 +900,6 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal ClusterStream OpenExistingStream(uint firstCluster, uint length)
-        {
-            return new ClusterStream(FileAccess.ReadWrite, _clusterReader, _fat, firstCluster, length);
-        }
-
-        internal Stream OpenExistingFile(Directory dir, string name, FileAccess fileAccess)
-        {
-            return new FatFileStream(dir, name, fileAccess, _clusterReader, _fat);
-        }
-
         internal DateTime ConvertToUtc(DateTime dateTime)
         {
             return TimeZoneInfo.ConvertTimeToUtc(dateTime, _timeZone);
@@ -962,7 +957,9 @@ namespace DiscUtils.Fat
             uint index = entry.FirstCluster;
             if (index != 0 && _dirCache.ContainsKey(index))
             {
+                Directory dir = _dirCache[index];
                 _dirCache.Remove(index);
+                dir.Dispose();
             }
         }
 
@@ -1026,6 +1023,24 @@ namespace DiscUtils.Fat
                     return -1;
                 }
             }
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        /// <param name="disposing">true if Disposing</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                foreach (Directory dir in _dirCache.Values)
+                {
+                    dir.Dispose();
+                }
+                _rootDir.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

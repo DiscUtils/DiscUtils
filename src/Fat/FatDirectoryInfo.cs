@@ -60,7 +60,9 @@ namespace DiscUtils.Fat
             }
             else if (parent != null && id >= 0)
             {
+                DirectoryEntry deadEntry = parent.GetEntry(id);
                 parent.DeleteEntry(id);
+                _fileSystem.ForgetDirectory(deadEntry);
             }
             else
             {

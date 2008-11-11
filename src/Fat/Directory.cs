@@ -26,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Fat
 {
-    internal class Directory
+    internal class Directory : IDisposable
     {
         private const string SelfEntryNormalizedName = ".          ";
         private const string ParentEntryNormalizedName = "..         ";
@@ -57,7 +57,7 @@ namespace DiscUtils.Fat
             _parentId = parentId;
 
             DirectoryEntry dirEntry = ParentsChildEntry;
-            _dirStream = _fileSystem.OpenExistingStream(dirEntry.FirstCluster, uint.MaxValue);
+            _dirStream = new ClusterStream(_fileSystem, FileAccess.ReadWrite, dirEntry.FirstCluster, uint.MaxValue);
 
             LoadEntries();
         }
@@ -172,7 +172,7 @@ namespace DiscUtils.Fat
                 }
                 finally
                 {
-                    _fileSystem.FAT.Flush();
+                    _fileSystem.Fat.Flush();
                 }
             }
         }
@@ -334,7 +334,8 @@ namespace DiscUtils.Fat
                 throw new NotImplementedException();
             }
 
-            bool exists = FindEntryByNormalizedName(name) != -1;
+            long fileId = FindEntryByNormalizedName(name);
+            bool exists = fileId != -1;
 
             if (mode == FileMode.CreateNew && exists)
             {
@@ -346,7 +347,7 @@ namespace DiscUtils.Fat
             }
             else if ((mode == FileMode.Open || mode == FileMode.OpenOrCreate || mode == FileMode.Create) && exists)
             {
-                Stream stream = _fileSystem.OpenExistingFile(this, name, fileAccess);
+                Stream stream = new FatFileStream(_fileSystem, this, fileId, fileAccess);
                 if (mode == FileMode.Create)
                 {
                     stream.SetLength(0);
@@ -364,9 +365,9 @@ namespace DiscUtils.Fat
                 newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                 newEntry.LastWriteTime = newEntry.CreationTime;
 
-                AddEntry(newEntry);
+                fileId = AddEntry(newEntry);
 
-                return _fileSystem.OpenExistingFile(this, name, fileAccess);
+                return new FatFileStream(_fileSystem, this, fileId, fileAccess);
             }
             else
             {
@@ -418,12 +419,7 @@ namespace DiscUtils.Fat
                 _dirStream.Position = id;
                 copy.WriteTo(_dirStream);
 
-                _fileSystem.FAT.FreeChain(entry.FirstCluster);
-
-                if ((entry.Attributes & FatAttributes.Directory) != 0)
-                {
-                    _fileSystem.ForgetDirectory(entry);
-                }
+                _fileSystem.Fat.FreeChain(entry.FirstCluster);
 
                 _entries.Remove(id);
                 _freeEntries.Add(id);
@@ -432,7 +428,7 @@ namespace DiscUtils.Fat
             }
             finally
             {
-                _fileSystem.FAT.Flush();
+                _fileSystem.Fat.Flush();
             }
         }
 
@@ -479,7 +475,7 @@ namespace DiscUtils.Fat
         private void PopulateNewChildDirectory(long newEntryId, DirectoryEntry newEntry)
         {
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
-            using (ClusterStream stream = _fileSystem.OpenExistingStream(newEntry.FirstCluster, uint.MaxValue))
+            using (ClusterStream stream = new ClusterStream(_fileSystem, FileAccess.Write, newEntry.FirstCluster, uint.MaxValue))
             {
                 // Update our entry for the child when the first cluster is actually allocated
                 stream.FirstClusterChanged += (cluster) => {
@@ -498,5 +494,23 @@ namespace DiscUtils.Fat
                 parentEntry.WriteTo(stream);
             }
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _dirStream.Dispose();
+            }
+        }
+
+        #endregion
     }
 }

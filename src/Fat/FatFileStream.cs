@@ -33,13 +33,13 @@ namespace DiscUtils.Fat
 
         private bool didWrite = false;
 
-        public FatFileStream(Directory dir, string name, FileAccess access, ClusterReader reader, FileAllocationTable fat)
+        public FatFileStream(FatFileSystem fileSystem, Directory dir, long fileId, FileAccess access)
         {
             _dir = dir;
+            _dirId = fileId;
 
-            _dirId = _dir.FindEntryByNormalizedName(name);
             DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
-            _stream = new ClusterStream(access, reader, fat, (uint)dirEntry.FirstCluster, (uint)dirEntry.FileSize);
+            _stream = new ClusterStream(fileSystem, access, (uint)dirEntry.FirstCluster, (uint)dirEntry.FileSize);
             _stream.FirstClusterChanged += FirstClusterAllocatedHandler;
         }
 

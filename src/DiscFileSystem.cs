@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils
@@ -27,8 +28,16 @@ namespace DiscUtils
     /// <summary>
     /// Provides the base class for all file systems.
     /// </summary>
-    public abstract class DiscFileSystem
+    public abstract class DiscFileSystem : IDisposable
     {
+        /// <summary>
+        /// Destructor.
+        /// </summary>
+        ~DiscFileSystem()
+        {
+            Dispose(false);
+        }
+
         /// <summary>
         /// Provides a friendly description of the file system type.
         /// </summary>
@@ -94,5 +103,26 @@ namespace DiscUtils
         /// <returns>The representing object</returns>
         /// <remarks>The file does not need to exist</remarks>
         public abstract DiscFileSystemInfo GetFileSystemInfo(string path);
+
+        #region IDisposable Members
+
+        /// <summary>
+        /// Disposes of this instance, releasing all resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        /// <param name="disposing">true if Disposing</param>
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+
+        #endregion
     }
 }
