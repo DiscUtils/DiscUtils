@@ -46,7 +46,7 @@ namespace DiscUtils.Fat
             Assert.AreEqual(FileAttributes.Archive, fi.Attributes);
             Assert.AreEqual(1, fi.Length);
 
-            using (Stream s = fs.Open("Foo.txt", FileMode.Open, FileAccess.Read))
+            using (Stream s = fs.OpenFile("Foo.txt", FileMode.Open, FileAccess.Read))
             {
                 Assert.AreEqual(1, s.ReadByte());
             }

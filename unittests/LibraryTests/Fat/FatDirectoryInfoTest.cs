@@ -238,10 +238,10 @@ namespace DiscUtils.Fat
             FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
             fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
             fs.CreateDirectory(@"AAA.DIR");
-            using (Stream s = fs.Open(@"FOO.TXT", FileMode.Create)) { }
-            using (Stream s = fs.Open(@"SOMEDIR\CHILD.TXT", FileMode.Create)) { }
-            using (Stream s = fs.Open(@"SOMEDIR\FOO.TXT", FileMode.Create)) { }
-            using (Stream s = fs.Open(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"SOMEDIR\CHILD.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"SOMEDIR\FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", FileMode.Create)) { }
 
             fs = new FatFileSystem(ms);
             Assert.AreEqual(1, fs.Root.GetFiles().Length);
@@ -260,10 +260,10 @@ namespace DiscUtils.Fat
             FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
             fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
             fs.CreateDirectory(@"AAA.EXT");
-            using (Stream s = fs.Open(@"FOO.TXT", FileMode.Create)) { }
-            using (Stream s = fs.Open(@"SOMEDIR\CHILD.EXT", FileMode.Create)) { }
-            using (Stream s = fs.Open(@"SOMEDIR\FOO.TXT", FileMode.Create)) { }
-            using (Stream s = fs.Open(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"SOMEDIR\CHILD.EXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"SOMEDIR\FOO.TXT", FileMode.Create)) { }
+            using (Stream s = fs.OpenFile(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", FileMode.Create)) { }
 
             fs = new FatFileSystem(ms);
             Assert.AreEqual(3, fs.Root.GetFileSystemInfos().Length);

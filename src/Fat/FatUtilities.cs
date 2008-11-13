@@ -75,6 +75,24 @@ namespace DiscUtils.Fat
             return new String(result);
         }
 
+        /// <summary>
+        /// Converts between two arrays.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the source array</typeparam>
+        /// <typeparam name="U">The type of the elements of the destination array</typeparam>
+        /// <param name="source">The source array</param>
+        /// <param name="func">The function to map from source type to destination type</param>
+        /// <returns>The resultant array</returns>
+        public static U[] Map<T, U>(T[] source, Func<T, U> func)
+        {
+            U[] result = new U[source.Length];
+            for (int i = 0; i < source.Length; ++i)
+            {
+                result[i] = func(source[i]);
+            }
+            return result;
+        }
+
         public static string NormalizedFileNameFromPath(string path)
         {
             string[] elems = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);

@@ -48,12 +48,12 @@ namespace DiscUtils.Fat
 
         public override Stream Open(FileMode mode)
         {
-            return _fileSystem.Open(_path, mode);
+            return _fileSystem.OpenFile(_path, mode);
         }
 
         public override Stream Open(FileMode mode, FileAccess access)
         {
-            return _fileSystem.Open(_path, mode, access);
+            return _fileSystem.OpenFile(_path, mode, access);
         }
 
         public override string Name

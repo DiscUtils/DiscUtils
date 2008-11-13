@@ -465,8 +465,8 @@ namespace DiscUtils.Fat
                     SelfEntry = entry;
 
                     DirectoryEntry parentEntry = ParentsChildEntry;
-                    entry.LastAccessTime = entry.LastAccessTime;
-                    entry.LastWriteTime = entry.LastWriteTime;
+                    parentEntry.LastAccessTime = entry.LastAccessTime;
+                    parentEntry.LastWriteTime = entry.LastWriteTime;
                     ParentsChildEntry = parentEntry;
                 }
             }

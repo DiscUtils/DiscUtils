@@ -24,6 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace DiscUtils.Fat
 {
@@ -330,7 +332,7 @@ namespace DiscUtils.Fat
         /// <param name="mode">The file mode</param>
         /// <param name="access">The desired access</param>
         /// <returns>The stream to the opened file</returns>
-        public override Stream Open(string path, FileMode mode, FileAccess access)
+        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
             Directory parent;
             long entryId = GetDirectoryEntry(_rootDir, path, out parent);
@@ -360,10 +362,172 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
+        /// Gets the attributes of a file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect</param>
+        /// <returns>The attributes of the file or directory</returns>
+        public override FileAttributes GetAttributes(string path)
+        {
+            // Luckily, FAT and .NET FileAttributes match, bit-for-bit
+            return (FileAttributes)GetDirectoryEntry(path).Attributes;
+        }
+
+        /// <summary>
+        /// Sets the attributes of a file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to change</param>
+        /// <param name="newValue">The new attributes of the file or directory</param>
+        public override void SetAttributes(string path, FileAttributes newValue)
+        {
+            Directory parent;
+            long id = GetDirectoryEntry(path, out parent);
+            DirectoryEntry dirEntry = parent.GetEntry(id);
+
+            FatAttributes newFatAttr = (FatAttributes)newValue;
+
+            if ((newFatAttr & FatAttributes.Directory) != (dirEntry.Attributes & FatAttributes.Directory))
+            {
+                throw new ArgumentException("Attempted to change the directory attribute");
+            }
+
+            dirEntry.Attributes = newFatAttr;
+            parent.UpdateEntry(id, dirEntry);
+
+            // For directories, need to update their 'self' entry also
+            if ((dirEntry.Attributes & FatAttributes.Directory) != 0)
+            {
+                Directory dir = GetDirectory(path);
+                dirEntry = dir.SelfEntry;
+                dirEntry.Attributes = newFatAttr;
+                dir.SelfEntry = dirEntry;
+            }
+        }
+
+        /// <summary>
+        /// Gets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The creation time.</returns>
+        public override DateTime GetCreationTime(string path)
+        {
+            return GetDirectoryEntry(path).CreationTime;
+        }
+
+        /// <summary>
+        /// Sets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetCreationTime(string path, DateTime newTime)
+        {
+            UpdateDirEntry(path, (e) => { e.CreationTime = newTime; });
+        }
+
+        /// <summary>
+        /// Gets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The creation time.</returns>
+        public override DateTime GetCreationTimeUtc(string path)
+        {
+            return ConvertToUtc(GetDirectoryEntry(path).CreationTime);
+        }
+
+        /// <summary>
+        /// Sets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetCreationTimeUtc(string path, DateTime newTime)
+        {
+            UpdateDirEntry(path, (e) => { e.CreationTime = ConvertFromUtc(newTime); });
+        }
+
+        /// <summary>
+        /// Gets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastAccessTime(string path)
+        {
+            return GetDirectoryEntry(path).LastAccessTime;
+        }
+
+        /// <summary>
+        /// Sets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastAccessTime(string path, DateTime newTime)
+        {
+            UpdateDirEntry(path, (e) => { e.LastAccessTime = newTime; });
+        }
+
+        /// <summary>
+        /// Gets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastAccessTimeUtc(string path)
+        {
+            return ConvertToUtc(GetDirectoryEntry(path).LastAccessTime);
+        }
+
+        /// <summary>
+        /// Sets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastAccessTimeUtc(string path, DateTime newTime)
+        {
+            UpdateDirEntry(path, (e) => { e.LastAccessTime = ConvertFromUtc(newTime); });
+        }
+
+        /// <summary>
+        /// Gets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastWriteTime(string path)
+        {
+            return GetDirectoryEntry(path).LastWriteTime;
+        }
+
+        /// <summary>
+        /// Sets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastWriteTime(string path, DateTime newTime)
+        {
+            UpdateDirEntry(path, (e) => { e.LastWriteTime = newTime; });
+        }
+
+        /// <summary>
+        /// Gets the last modification time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastWriteTimeUtc(string path)
+        {
+            return ConvertToUtc(GetDirectoryEntry(path).LastWriteTime);
+        }
+
+        /// <summary>
+        /// Sets the last modification time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastWriteTimeUtc(string path, DateTime newTime)
+        {
+            UpdateDirEntry(path, (e) => { e.LastWriteTime = ConvertFromUtc(newTime); });
+        }
+
+        /// <summary>
         /// Creates a directory.
         /// </summary>
         /// <param name="path">The directory to create.</param>
-        public void CreateDirectory(string path)
+        public override void CreateDirectory(string path)
         {
             string[] pathElements = path.Split(new char[]{'\\'}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -388,6 +552,269 @@ namespace DiscUtils.Fat
                 }
                 focusDir = child;
             }
+        }
+
+        /// <summary>
+        /// Deletes a directory.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        public override void DeleteDirectory(string path)
+        {
+            Directory dir = GetDirectory(path);
+            if (dir == null)
+            {
+                throw new DirectoryNotFoundException(String.Format(CultureInfo.InvariantCulture, "No such directory: {0}", path));
+            }
+
+            if (!dir.IsEmpty)
+            {
+                throw new IOException("Unable to delete non-empty directory");
+            }
+
+            Directory parent;
+            long id = GetDirectoryEntry(path, out parent);
+            if (parent == null && id == 0)
+            {
+                throw new IOException("Unable to delete root directory");
+            }
+            else if (parent != null && id >= 0)
+            {
+                DirectoryEntry deadEntry = parent.GetEntry(id);
+                parent.DeleteEntry(id);
+                ForgetDirectory(deadEntry);
+            }
+            else
+            {
+                throw new DirectoryNotFoundException("No such directory: " + path);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a directory, optionally with all descendants.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        public override void DeleteDirectory(string path, bool recursive)
+        {
+            if (recursive)
+            {
+                foreach (string dir in GetDirectories(path))
+                {
+                    DeleteDirectory(dir, true);
+                }
+
+                foreach (string file in GetFiles(path))
+                {
+                    DeleteFile(file);
+                }
+            }
+
+            DeleteDirectory(path);
+        }
+
+        /// <summary>
+        /// Deletes a file.
+        /// </summary>
+        /// <param name="path">The path of the file to delete.</param>
+        public override void DeleteFile(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Indicates if a directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the directory exists</returns>
+        public override bool DirectoryExists(string path)
+        {
+            // Special case - root directory
+            if (String.IsNullOrEmpty(path))
+            {
+                return true;
+            }
+            else
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) != 0);
+            }
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of directories.</returns>
+        public override string[] GetDirectories(string path)
+        {
+            Directory dir = GetDirectory(path);
+            DirectoryEntry[] entries = dir.GetDirectories();
+            List<string> dirs = new List<string>(entries.Length);
+            foreach (DirectoryEntry dirEntry in entries)
+            {
+                dirs.Add(Path.Combine(path, dirEntry.Name));
+            }
+            return dirs.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public override string[] GetDirectories(string path, string searchPattern)
+        {
+            return GetDirectories(path, searchPattern, SearchOption.TopDirectoryOnly);
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern, using a value to determine whether to search subdirectories.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <param name="searchOption">Indicates whether to search subdirectories.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
+        {
+            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+
+            List<string> dirs = new List<string>();
+            DoSearch(dirs, path, re, searchOption == SearchOption.AllDirectories, true, false);
+            return dirs.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files.</returns>
+        public override string[] GetFiles(string path)
+        {
+            Directory dir = GetDirectory(path);
+            DirectoryEntry[] entries = dir.GetFiles();
+
+            List<string> files = new List<string>(entries.Length);
+            foreach (DirectoryEntry dirEntry in entries)
+            {
+                files.Add(Path.Combine(path, dirEntry.Name));
+            }
+
+            return files.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public override string[] GetFiles(string path, string searchPattern)
+        {
+            return GetFiles(path, searchPattern, SearchOption.TopDirectoryOnly);
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory matching a specified
+        /// search pattern, using a value to determine whether to search subdirectories.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <param name="searchOption">Indicates whether to search subdirectories.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
+        {
+            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+
+            List<string> results = new List<string>();
+            DoSearch(results, path, re, searchOption == SearchOption.AllDirectories, false, true);
+            return results.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the names of all files and subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files and subdirectories matching the search pattern.</returns>
+        public override string[] GetFileSystemEntries(string path)
+        {
+            Directory dir = GetDirectory(path);
+            DirectoryEntry[] entries = dir.Entries;
+
+            List<string> result = new List<string>(entries.Length);
+            foreach (DirectoryEntry dirEntry in entries)
+            {
+                result.Add(Path.Combine(path, dirEntry.Name));
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the names of files and subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files and subdirectories matching the search pattern.</returns>
+        public override string[] GetFileSystemEntries(string path, string searchPattern)
+        {
+            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+
+            Directory dir = GetDirectory(path);
+            DirectoryEntry[] entries = dir.Entries;
+
+            List<string> result = new List<string>(entries.Length);
+            foreach (DirectoryEntry dirEntry in entries)
+            {
+                if (re.IsMatch(dirEntry.SearchName))
+                {
+                    result.Add(Path.Combine(path, dirEntry.Name));
+                }
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// Moves a directory.
+        /// </summary>
+        /// <param name="sourceDirectoryName">The directory to move.</param>
+        /// <param name="destinationDirectoryName">The target directory name.</param>
+        public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
+        {
+            if (string.IsNullOrEmpty(destinationDirectoryName))
+            {
+                if (destinationDirectoryName == null)
+                {
+                    throw new ArgumentNullException("destinationDirectoryName");
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid destination name (empty string)");
+                }
+            }
+
+            Directory destParent;
+            long destId = GetDirectoryEntry(destinationDirectoryName, out destParent);
+            if (destParent == null)
+            {
+                throw new DirectoryNotFoundException("Target directory doesn't exist");
+            }
+            else if (destId >= 0)
+            {
+                throw new IOException("Target directory already exists");
+            }
+
+            Directory sourceParent;
+            long sourceId = GetDirectoryEntry(sourceDirectoryName, out sourceParent);
+            if (sourceParent == null || sourceId < 0)
+            {
+                throw new IOException("Source directory doesn't exist");
+            }
+
+            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destinationDirectoryName), GetDirectory(sourceDirectoryName));
+            sourceParent.DeleteEntry(sourceId);
         }
 
         /// <summary>
@@ -963,11 +1390,11 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal DirectoryEntry GetDirectoryEntry(string _path)
+        internal DirectoryEntry GetDirectoryEntry(string path)
         {
             Directory parent;
 
-            long id = GetDirectoryEntry(_rootDir, _path, out parent);
+            long id = GetDirectoryEntry(_rootDir, path, out parent);
             if (parent == null || id < 0)
             {
                 return null;
@@ -976,9 +1403,9 @@ namespace DiscUtils.Fat
             return parent.GetEntry(id);
         }
 
-        internal long GetDirectoryEntry(string _path, out Directory parent)
+        internal long GetDirectoryEntry(string path, out Directory parent)
         {
-            return GetDirectoryEntry(_rootDir, _path, out parent);
+            return GetDirectoryEntry(_rootDir, path, out parent);
         }
 
         private long GetDirectoryEntry(Directory dir, string path, out Directory parent)
@@ -1022,6 +1449,49 @@ namespace DiscUtils.Fat
                     parent = null;
                     return -1;
                 }
+            }
+        }
+
+        private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
+        {
+            Directory dir = GetDirectory(path);
+            DirectoryEntry[] entries = dir.Entries;
+
+            foreach (DirectoryEntry de in entries)
+            {
+                bool isDir = ((de.Attributes & FatAttributes.Directory) != 0);
+
+                if ((isDir && dirs) || (!isDir && files))
+                {
+                    if (regex.IsMatch(de.SearchName))
+                    {
+                        results.Add(Path.Combine(path, de.Name));
+                    }
+                }
+
+                if (subFolders && isDir)
+                {
+                    DoSearch(results, Path.Combine(path, de.Name), regex, subFolders, dirs, files);
+                }
+            }
+        }
+
+        private delegate void EntryUpdateAction(DirectoryEntry entry);
+
+        private void UpdateDirEntry(string path, EntryUpdateAction action)
+        {
+            Directory parent;
+            long id = GetDirectoryEntry(path, out parent);
+            DirectoryEntry entry = parent.GetEntry(id);
+            action(entry);
+            parent.UpdateEntry(id, entry);
+
+            if ((entry.Attributes & FatAttributes.Directory) != 0)
+            {
+                Directory dir = GetDirectory(path);
+                DirectoryEntry selfEntry = dir.SelfEntry;
+                action(selfEntry);
+                dir.SelfEntry = selfEntry;
             }
         }
 

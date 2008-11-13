@@ -61,14 +61,120 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Creates a directory.
+        /// </summary>
+        /// <param name="path">The path of the new directory</param>
+        public abstract void CreateDirectory(string path);
+
+        /// <summary>
+        /// Deletes a directory.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        public abstract void DeleteDirectory(string path);
+
+        /// <summary>
+        /// Deletes a directory, optionally with all descendants.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        public abstract void DeleteDirectory(string path, bool recursive);
+
+        /// <summary>
+        /// Deletes a file.
+        /// </summary>
+        /// <param name="path">The path of the file to delete.</param>
+        public abstract void DeleteFile(string path);
+
+        /// <summary>
+        /// Indicates if a directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the directory exists</returns>
+        public abstract bool DirectoryExists(string path);
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of directories.</returns>
+        public abstract string[] GetDirectories(string path);
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public abstract string[] GetDirectories(string path, string searchPattern);
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern, using a value to determine whether to search subdirectories.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <param name="searchOption">Indicates whether to search subdirectories.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public abstract string[] GetDirectories(string path, string searchPattern, SearchOption searchOption);
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files.</returns>
+        public abstract string[] GetFiles(string path);
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public abstract string[] GetFiles(string path, string searchPattern);
+
+        /// <summary>
+        /// Gets the names of files in a specified directory matching a specified
+        /// search pattern, using a value to determine whether to search subdirectories.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <param name="searchOption">Indicates whether to search subdirectories.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public abstract string[] GetFiles(string path, string searchPattern, SearchOption searchOption);
+
+        /// <summary>
+        /// Gets the names of all files and subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files and subdirectories matching the search pattern.</returns>
+        public abstract string[] GetFileSystemEntries(string path);
+
+        /// <summary>
+        /// Gets the names of files and subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files and subdirectories matching the search pattern.</returns>
+        public abstract string[] GetFileSystemEntries(string path, string searchPattern);
+
+        /// <summary>
+        /// Moves a directory.
+        /// </summary>
+        /// <param name="sourceDirectoryName">The directory to move.</param>
+        /// <param name="destinationDirectoryName">The target directory name.</param>
+        public abstract void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName);
+
+        /// <summary>
         /// Opens the specified file.
         /// </summary>
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public virtual Stream Open(string path, FileMode mode)
+        public virtual Stream OpenFile(string path, FileMode mode)
         {
-            return Open(path, mode, (mode == FileMode.Open) ? FileAccess.Read : FileAccess.ReadWrite);
+            return OpenFile(path, mode, (mode == FileMode.Open) ? FileAccess.Read : FileAccess.ReadWrite);
         }
 
         /// <summary>
@@ -78,7 +184,105 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public abstract Stream Open(string path, FileMode mode, FileAccess access);
+        public abstract Stream OpenFile(string path, FileMode mode, FileAccess access);
+
+        /// <summary>
+        /// Gets the attributes of a file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect</param>
+        /// <returns>The attributes of the file or directory</returns>
+        public abstract FileAttributes GetAttributes(string path);
+
+        /// <summary>
+        /// Sets the attributes of a file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to change</param>
+        /// <param name="newValue">The new attributes of the file or directory</param>
+        public abstract void SetAttributes(string path, FileAttributes newValue);
+
+        /// <summary>
+        /// Gets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The creation time.</returns>
+        public abstract DateTime GetCreationTime(string path);
+
+        /// <summary>
+        /// Sets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public abstract void SetCreationTime(string path, DateTime newTime);
+
+        /// <summary>
+        /// Gets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The creation time.</returns>
+        public abstract DateTime GetCreationTimeUtc(string path);
+
+        /// <summary>
+        /// Sets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public abstract void SetCreationTimeUtc(string path, DateTime newTime);
+
+        /// <summary>
+        /// Gets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public abstract DateTime GetLastAccessTime(string path);
+
+        /// <summary>
+        /// Sets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public abstract void SetLastAccessTime(string path, DateTime newTime);
+
+        /// <summary>
+        /// Gets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public abstract DateTime GetLastAccessTimeUtc(string path);
+
+        /// <summary>
+        /// Sets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public abstract void SetLastAccessTimeUtc(string path, DateTime newTime);
+
+        /// <summary>
+        /// Gets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public abstract DateTime GetLastWriteTime(string path);
+
+        /// <summary>
+        /// Sets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public abstract void SetLastWriteTime(string path, DateTime newTime);
+
+        /// <summary>
+        /// Gets the last modification time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public abstract DateTime GetLastWriteTimeUtc(string path);
+
+        /// <summary>
+        /// Sets the last modification time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public abstract void SetLastWriteTimeUtc(string path, DateTime newTime);
 
         /// <summary>
         /// Gets an object representing a possible file.

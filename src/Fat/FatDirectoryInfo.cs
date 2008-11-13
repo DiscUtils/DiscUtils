@@ -21,10 +21,8 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace DiscUtils.Fat
 {
@@ -46,181 +44,104 @@ namespace DiscUtils.Fat
 
         public override void Delete()
         {
-            Directory self = GetDirectory();
-            if (!self.IsEmpty)
-            {
-                throw new IOException("Unable to delete non-empty directory");
-            }
-
-            Directory parent;
-            long id = _fileSystem.GetDirectoryEntry(_path, out parent);
-            if (parent == null && id == 0)
-            {
-                throw new IOException("Unable to delete root directory");
-            }
-            else if (parent != null && id >= 0)
-            {
-                DirectoryEntry deadEntry = parent.GetEntry(id);
-                parent.DeleteEntry(id);
-                _fileSystem.ForgetDirectory(deadEntry);
-            }
-            else
-            {
-                throw new DirectoryNotFoundException("No such directory: " + _path);
-            }
+            _fileSystem.DeleteDirectory(_path);
         }
 
         public override void Delete(bool recursive)
         {
-            if (recursive)
-            {
-                foreach (DiscDirectoryInfo di in GetDirectories())
-                {
-                    di.Delete(true);
-                }
-
-                foreach (DiscFileInfo fi in GetFiles())
-                {
-                    fi.Delete();
-                }
-            }
-
-            Delete();
+            _fileSystem.DeleteDirectory(_path, recursive);
         }
 
         public override void MoveTo(string destinationDirName)
         {
-            if(string.IsNullOrEmpty(destinationDirName))
-            {
-                if (destinationDirName == null)
-                {
-                    throw new ArgumentNullException("destinationDirName");
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid destination name (empty string)");
-                }
-            }
-
-            Directory destParent;
-            long destId = _fileSystem.GetDirectoryEntry(destinationDirName, out destParent);
-            if (destParent == null)
-            {
-                throw new DirectoryNotFoundException("Target directory doesn't exist");
-            }
-            else if (destId >= 0)
-            {
-                throw new IOException("Target directory already exists");
-            }
-
-            Directory sourceParent;
-            long sourceId = _fileSystem.GetDirectoryEntry(_path, out sourceParent);
-            if (sourceParent == null || sourceId < 0)
-            {
-                throw new IOException("Source directory doesn't exist");
-            }
-
-            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destinationDirName), GetDirectory());
-            sourceParent.DeleteEntry(sourceId);
+            _fileSystem.MoveDirectory(_path, destinationDirName);
         }
 
         public override DiscDirectoryInfo[] GetDirectories()
         {
-            Directory dir = _fileSystem.GetDirectory(_path);
-            DirectoryEntry[] entries = dir.GetDirectories();
-            List<FatDirectoryInfo> dirs = new List<FatDirectoryInfo>(entries.Length);
-            foreach (DirectoryEntry dirEntry in entries)
-            {
-                dirs.Add(new FatDirectoryInfo(_fileSystem, FullName + dirEntry.Name));
-            }
-            return dirs.ToArray();
+            return FatUtilities.Map<string,DiscDirectoryInfo>(_fileSystem.GetDirectories(_path), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern)
         {
-            return GetDirectories(pattern, SearchOption.TopDirectoryOnly);
+            return FatUtilities.Map<string, DiscDirectoryInfo>(_fileSystem.GetDirectories(_path, pattern), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
-
-            List<DiscDirectoryInfo> dirs = new List<DiscDirectoryInfo>();
-            DoSearch(dirs, FullName, re, option == SearchOption.AllDirectories);
-            return dirs.ToArray();
+            return FatUtilities.Map<string, DiscDirectoryInfo>(_fileSystem.GetDirectories(_path, pattern, option), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscFileInfo[] GetFiles()
         {
-            Directory dir = _fileSystem.GetDirectory(_path);
-            DirectoryEntry[] entries = dir.GetFiles();
-
-            List<FatFileInfo> files = new List<FatFileInfo>(entries.Length);
-            foreach (DirectoryEntry dirEntry in entries)
-            {
-                files.Add(new FatFileInfo(_fileSystem, FullName + dirEntry.Name));
-            }
-
-            return files.ToArray();
+            return FatUtilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileInfo[] GetFiles(string pattern)
         {
-            return GetFiles(pattern, SearchOption.TopDirectoryOnly);
+            return FatUtilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path, pattern), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileInfo[] GetFiles(string pattern, SearchOption option)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
-
-            List<DiscFileInfo> results = new List<DiscFileInfo>();
-            DoSearch(results, FullName, re, option == SearchOption.AllDirectories);
-            return results.ToArray();
+            return FatUtilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path, pattern, option), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos()
         {
-            Directory dir = _fileSystem.GetDirectory(_path);
-            DirectoryEntry[] entries = dir.Entries;
-
-            List<DiscFileSystemInfo> result = new List<DiscFileSystemInfo>(entries.Length);
-            foreach (DirectoryEntry dirEntry in entries)
-            {
-                if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
-                {
-                    result.Add(new FatFileInfo(_fileSystem, FullName + dirEntry.Name));
-                }
-                else
-                {
-                    result.Add(new FatDirectoryInfo(_fileSystem, FullName + dirEntry.Name));
-                }
-            }
-            return result.ToArray();
+            return FatUtilities.Map<string, DiscFileSystemInfo>(_fileSystem.GetFileSystemEntries(_path), ConvertPathToDiscFileSystemInfo);
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos(string pattern)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
+            return FatUtilities.Map<string, DiscFileSystemInfo>(_fileSystem.GetFileSystemEntries(_path, pattern), ConvertPathToDiscFileSystemInfo);
+        }
 
-            Directory dir = _fileSystem.GetDirectory(_path);
-            DirectoryEntry[] entries = dir.Entries;
+        public override FileAttributes Attributes
+        {
+            get { return _fileSystem.GetAttributes(_path); }
+            set { _fileSystem.SetAttributes(_path, value); }
+        }
 
-            List<DiscFileSystemInfo> result = new List<DiscFileSystemInfo>(entries.Length);
-            foreach (DirectoryEntry dirEntry in entries)
-            {
-                if (re.IsMatch(dirEntry.SearchName))
-                {
-                    if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
-                    {
-                        result.Add(new FatFileInfo(_fileSystem, FullName + dirEntry.Name));
-                    }
-                    else
-                    {
-                        result.Add(new FatDirectoryInfo(_fileSystem, FullName + dirEntry.Name));
-                    }
-                }
-            }
-            return result.ToArray();
+        public override bool Exists
+        {
+            get { return _fileSystem.DirectoryExists(_path); }
+        }
+
+        public override DateTime CreationTime
+        {
+            get { return _fileSystem.GetCreationTime(_path); }
+            set { _fileSystem.SetCreationTime(_path, value); }
+        }
+
+        public override DateTime CreationTimeUtc
+        {
+            get { return _fileSystem.GetCreationTimeUtc(_path); }
+            set { _fileSystem.SetCreationTimeUtc(_path, value); }
+        }
+
+        public override DateTime LastAccessTime
+        {
+            get { return _fileSystem.GetLastAccessTime(_path); }
+            set { _fileSystem.SetLastAccessTime(_path, value); }
+        }
+
+        public override DateTime LastAccessTimeUtc
+        {
+            get { return _fileSystem.GetLastAccessTimeUtc(_path); }
+            set { _fileSystem.SetLastAccessTimeUtc(_path, value); }
+        }
+
+        public override DateTime LastWriteTime
+        {
+            get { return _fileSystem.GetLastWriteTime(_path); }
+            set { _fileSystem.SetLastWriteTime(_path, value); }
+        }
+
+        public override DateTime LastWriteTimeUtc
+        {
+            get { return _fileSystem.GetLastWriteTimeUtc(_path); }
+            set { _fileSystem.SetLastWriteTimeUtc(_path, value); }
         }
 
         public override string Name
@@ -241,12 +162,6 @@ namespace DiscUtils.Fat
         public override string FullName
         {
             get { return _path + "\\"; }
-        }
-
-        public override FileAttributes Attributes
-        {
-            get { return (FileAttributes)GetDirEntry().Attributes;}
-            set { UpdateDirEntry((e) => { e.Attributes = (FatAttributes)value; }); }
         }
 
         public override DiscDirectoryInfo Parent
@@ -272,59 +187,6 @@ namespace DiscUtils.Fat
             }
         }
 
-        public override bool Exists
-        {
-            get
-            {
-                // Special case - root directory
-                if (String.IsNullOrEmpty(_path))
-                {
-                    return true;
-                }
-                else
-                {
-                    DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path);
-                    return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) != 0);
-                }
-            }
-        }
-
-        public override DateTime CreationTime
-        {
-            get { return CreationTimeUtc.ToLocalTime(); }
-            set { CreationTimeUtc = value.ToUniversalTime(); }
-        }
-
-        public override DateTime CreationTimeUtc
-        {
-            get { return _fileSystem.ConvertToUtc(GetDirEntry().CreationTime); }
-            set { UpdateDirEntry((e) => { e.CreationTime = _fileSystem.ConvertFromUtc(value); }); }
-        }
-
-        public override DateTime LastAccessTime
-        {
-            get { return LastAccessTimeUtc.ToLocalTime(); }
-            set { LastAccessTimeUtc = value.ToUniversalTime(); }
-        }
-
-        public override DateTime LastAccessTimeUtc
-        {
-            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastAccessTime); }
-            set { UpdateDirEntry((e) => { e.LastAccessTime = _fileSystem.ConvertFromUtc(value); }); }
-        }
-
-        public override DateTime LastWriteTime
-        {
-            get { return LastWriteTimeUtc.ToLocalTime(); }
-            set { LastWriteTimeUtc = value.ToUniversalTime(); }
-        }
-
-        public override DateTime LastWriteTimeUtc
-        {
-            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastWriteTime); }
-            set { UpdateDirEntry((e) => { e.LastWriteTime = _fileSystem.ConvertFromUtc(value); }); }
-        }
-
         public override bool Equals(object obj)
         {
             if (obj == null || obj.GetType() != GetType())
@@ -343,77 +205,19 @@ namespace DiscUtils.Fat
         }
 
         #region Support Functions
-        private void DoSearch(List<DiscFileInfo> results, string path, Regex regex, bool subFolders)
+        private DiscDirectoryInfo ConvertPathToDiscDirectoryInfo(string path)
         {
-            Directory dir = _fileSystem.GetDirectory(path);
-            DirectoryEntry[] entries = subFolders ? dir.Entries : dir.GetFiles();
-
-            foreach (DirectoryEntry de in entries)
-            {
-                if ((de.Attributes & FatAttributes.Directory) == 0)
-                {
-                    if (regex.IsMatch(de.SearchName))
-                    {
-                        results.Add(new FatFileInfo(_fileSystem, path + de.Name));
-                    }
-                }
-                else if(subFolders)
-                {
-                    DoSearch(results, path + de.Name + "\\", regex, true);
-                }
-            }
+            return new FatDirectoryInfo(_fileSystem, path);
         }
 
-        private void DoSearch(List<DiscDirectoryInfo> results, string path, Regex regex, bool subFolders)
+        private DiscFileInfo ConvertPathToDiscFileInfo(string path)
         {
-            Directory dir = _fileSystem.GetDirectory(path);
-            foreach (DirectoryEntry de in dir.GetDirectories())
-            {
-                if (regex.IsMatch(de.SearchName))
-                {
-                    results.Add(new FatDirectoryInfo(_fileSystem, path + de.Name));
-                }
-
-                if (subFolders)
-                {
-                    DoSearch(results, path + de.Name + "\\", regex, true);
-                }
-            }
+            return new FatFileInfo(_fileSystem, path);
         }
 
-        private Directory GetDirectory()
+        private DiscFileSystemInfo ConvertPathToDiscFileSystemInfo(string path)
         {
-            Directory dir = _fileSystem.GetDirectory(_path);
-            if (dir == null)
-            {
-                throw new DirectoryNotFoundException(String.Format(CultureInfo.InvariantCulture, "No such directory: {0}", _path));
-            }
-            else
-            {
-                return dir;
-            }
-        }
-
-        private DirectoryEntry GetDirEntry()
-        {
-            return GetDirectory().SelfEntry;
-        }
-
-        private delegate void EntryUpdateAction(DirectoryEntry entry);
-
-        private void UpdateDirEntry(EntryUpdateAction action)
-        {
-            Directory dir = _fileSystem.GetDirectory(_path);
-            if (dir != null)
-            {
-                DirectoryEntry parentsEntry = dir.ParentsChildEntry;
-                action(parentsEntry);
-                dir.ParentsChildEntry = parentsEntry;
-
-                DirectoryEntry selfEntry = dir.SelfEntry;
-                action(selfEntry);
-                dir.SelfEntry = selfEntry;
-            }
+            return new FatFileSystemInfo(_fileSystem, path);
         }
         #endregion
     }

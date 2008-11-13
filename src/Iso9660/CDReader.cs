@@ -150,13 +150,161 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Creates a directory, not supported for ISO file systems.
+        /// </summary>
+        /// <param name="path">The path of the new directory</param>
+        public override void CreateDirectory(string path)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Deletes a directory, not supported for ISO file systems.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        public override void DeleteDirectory(string path)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Deletes a directory, optionally with all descendants - not supported for ISO file systems.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        public override void DeleteDirectory(string path, bool recursive)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Deletes a file - not supported for ISO file systems.
+        /// </summary>
+        /// <param name="path">The path of the file to delete.</param>
+        public override void DeleteFile(string path)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Indicates if a directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the directory exists</returns>
+        public override bool DirectoryExists(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of directories.</returns>
+        public override string[] GetDirectories(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public override string[] GetDirectories(string path, string searchPattern)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern, using a value to determine whether to search subdirectories.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <param name="searchOption">Indicates whether to search subdirectories.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files.</returns>
+        public override string[] GetFiles(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public override string[] GetFiles(string path, string searchPattern)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory matching a specified
+        /// search pattern, using a value to determine whether to search subdirectories.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <param name="searchOption">Indicates whether to search subdirectories.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of all files and subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files and subdirectories matching the search pattern.</returns>
+        public override string[] GetFileSystemEntries(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the names of files and subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files and subdirectories matching the search pattern.</returns>
+        public override string[] GetFileSystemEntries(string path, string searchPattern)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Moves a directory.
+        /// </summary>
+        /// <param name="sourceDirectoryName">The directory to move.</param>
+        /// <param name="destinationDirectoryName">The target directory name.</param>
+        public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Opens a file on the ISO image.
         /// </summary>
         /// <param name="path">The full path to the file.</param>
         /// <param name="mode">Must be <c>FileMode.Open</c></param>
         /// <param name="access">Must be <c>FileMode.Read</c></param>
         /// <returns>The file as a stream.</returns>
-        public override Stream Open(string path, FileMode mode, FileAccess access)
+        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
             if (mode != FileMode.Open)
             {
@@ -193,6 +341,147 @@ namespace DiscUtils.Iso9660
             }
 
             return fileInfo[0].Open(mode);
+        }
+
+        /// <summary>
+        /// Gets the attributes of a file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect</param>
+        /// <returns>The attributes of the file or directory</returns>
+        public override FileAttributes GetAttributes(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the attributes of a file or directory - not supported for ISO file systems.
+        /// </summary>
+        /// <param name="path">The file or directory to change</param>
+        /// <param name="newValue">The new attributes of the file or directory</param>
+        public override void SetAttributes(string path, FileAttributes newValue)
+        {
+            throw new NotSupportedException();
+        }
+
+
+        /// <summary>
+        /// Gets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The creation time.</returns>
+        public override DateTime GetCreationTime(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetCreationTime(string path, DateTime newTime)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The creation time.</returns>
+        public override DateTime GetCreationTimeUtc(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetCreationTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastAccessTime(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastAccessTime(string path, DateTime newTime)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastAccessTimeUtc(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastAccessTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastWriteTime(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastWriteTime(string path, DateTime newTime)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the last modification time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns></returns>
+        public override DateTime GetLastWriteTimeUtc(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the last modification time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastWriteTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotSupportedException();
         }
 
         private PathTableRecord SearchPathTable(string path)
