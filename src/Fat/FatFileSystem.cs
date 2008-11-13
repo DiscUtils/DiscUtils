@@ -618,7 +618,20 @@ namespace DiscUtils.Fat
         /// <param name="path">The path of the file to delete.</param>
         public override void DeleteFile(string path)
         {
-            throw new NotImplementedException();
+            Directory parent;
+            long id = GetDirectoryEntry(path, out parent);
+            if (parent == null || id < 0)
+            {
+                throw new IOException("No such file: " + path);
+            }
+
+            DirectoryEntry entry = parent.GetEntry(id);
+            if (entry == null || (entry.Attributes & FatAttributes.Directory) != 0)
+            {
+                throw new IOException("No such file: " + path);
+            }
+
+            parent.DeleteEntry(id);
         }
 
         /// <summary>
@@ -637,6 +650,43 @@ namespace DiscUtils.Fat
             {
                 DirectoryEntry dirEntry = GetDirectoryEntry(path);
                 return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) != 0);
+            }
+        }
+
+        /// <summary>
+        /// Indicates if a file exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file exists</returns>
+        public override bool FileExists(string path)
+        {
+            // Special case - root directory
+            if (String.IsNullOrEmpty(path))
+            {
+                return true;
+            }
+            else
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) == 0);
+            }
+        }
+
+        /// <summary>
+        /// Indicates if a file or directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file or directory exists</returns>
+        public override bool Exists(string path)
+        {
+            // Special case - root directory
+            if (String.IsNullOrEmpty(path))
+            {
+                return true;
+            }
+            else
+            {
+                return GetDirectoryEntry(path) != null;
             }
         }
 

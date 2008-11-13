@@ -79,17 +79,8 @@ namespace DiscUtils.Fat
 
         public override FileAttributes Attributes
         {
-            get
-            {
-                // Conveniently, .NET filesystem attributes have identical values to
-                // FAT filesystem attributes...
-                return (FileAttributes)GetDirEntry().Attributes;
-            }
-
-            set
-            {
-                UpdateDirEntry((e) => { e.Attributes = (FatAttributes)value; });
-            }
+            get { return _fileSystem.GetAttributes(_path); }
+            set { _fileSystem.SetAttributes(_path, value); }
         }
 
         public override DiscDirectoryInfo Parent
@@ -110,52 +101,48 @@ namespace DiscUtils.Fat
 
         public override bool Exists
         {
-            get
-            {
-                DirectoryEntry dirEntry = _fileSystem.GetDirectoryEntry(_path);
-                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) == 0);
-            }
+            get { return _fileSystem.FileExists(_path); }
         }
 
         public override DateTime CreationTime
         {
-            get { return CreationTimeUtc.ToLocalTime(); }
-            set { CreationTimeUtc = value.ToUniversalTime(); }
+            get { return _fileSystem.GetCreationTime(_path); }
+            set { _fileSystem.SetCreationTime(_path, value); }
         }
 
         public override DateTime CreationTimeUtc
         {
-            get { return _fileSystem.ConvertToUtc(GetDirEntry().CreationTime); }
-            set { UpdateDirEntry((e) => { e.CreationTime = _fileSystem.ConvertFromUtc(value); }); }
+            get { return _fileSystem.GetCreationTimeUtc(_path); }
+            set { _fileSystem.SetCreationTimeUtc(_path, value); }
         }
 
         public override DateTime LastAccessTime
         {
-            get { return LastAccessTimeUtc.ToLocalTime(); }
-            set { LastAccessTimeUtc = value.ToUniversalTime(); }
+            get { return _fileSystem.GetLastAccessTime(_path); }
+            set { _fileSystem.SetLastAccessTime(_path, value); }
         }
 
         public override DateTime LastAccessTimeUtc
         {
-            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastAccessTime); }
-            set { UpdateDirEntry((e) => { e.LastAccessTime = _fileSystem.ConvertFromUtc(value); }); }
+            get { return _fileSystem.GetLastAccessTimeUtc(_path); }
+            set { _fileSystem.SetLastAccessTimeUtc(_path, value); }
         }
 
         public override DateTime LastWriteTime
         {
-            get { return LastWriteTimeUtc.ToLocalTime(); }
-            set { LastWriteTimeUtc = value.ToUniversalTime(); }
+            get { return _fileSystem.GetLastWriteTime(_path); }
+            set { _fileSystem.SetLastWriteTime(_path, value); }
         }
 
         public override DateTime LastWriteTimeUtc
         {
-            get { return _fileSystem.ConvertToUtc(GetDirEntry().LastWriteTime); }
-            set { UpdateDirEntry((e) => { e.LastWriteTime = _fileSystem.ConvertFromUtc(value); }); }
+            get { return _fileSystem.GetLastWriteTimeUtc(_path); }
+            set { _fileSystem.SetLastWriteTimeUtc(_path, value); }
         }
 
         public override void Delete()
         {
-            throw new NotImplementedException();
+            _fileSystem.DeleteFile(_path);
         }
 
         private DirectoryEntry GetDirEntry()
@@ -166,20 +153,6 @@ namespace DiscUtils.Fat
                 throw new FileNotFoundException("File not found", _path);
             }
             return dirEntry;
-        }
-
-        private delegate void EntryUpdateAction(DirectoryEntry entry);
-
-        private void UpdateDirEntry(EntryUpdateAction action)
-        {
-            Directory parent;
-            long id = _fileSystem.GetDirectoryEntry(_path, out parent);
-            if (parent != null && id >= 0)
-            {
-                DirectoryEntry entry = parent.GetEntry(id);
-                action(entry);
-                parent.UpdateEntry(id, entry);
-            }
         }
     }
 }

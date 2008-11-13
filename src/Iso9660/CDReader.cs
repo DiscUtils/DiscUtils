@@ -197,6 +197,26 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Indicates if a file exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file exists</returns>
+        public override bool FileExists(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Indicates if a file or directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file or directory exists</returns>
+        public override bool Exists(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the names of subdirectories in a specified directory.
         /// </summary>
         /// <param name="path">The path to search.</param>

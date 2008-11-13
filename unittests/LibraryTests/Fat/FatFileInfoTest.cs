@@ -51,5 +51,23 @@ namespace DiscUtils.Fat
                 Assert.AreEqual(1, s.ReadByte());
             }
         }
+
+        [Test]
+        public void DeleteFile()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite)) { }
+
+            Assert.AreEqual(1, fs.Root.GetFiles().Length);
+
+            fs = new FatFileSystem(ms);
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+
+            fi.Delete();
+
+            Assert.AreEqual(0, fs.Root.GetFiles().Length);
+        }
     }
 }

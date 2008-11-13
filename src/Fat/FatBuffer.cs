@@ -209,11 +209,14 @@ namespace DiscUtils.Fat
         {
             List<uint> result = new List<uint>();
 
-            uint focus = head;
-            while (!IsEndOfChain(focus))
+            if (head != 0)
             {
-                result.Add(focus);
-                focus = GetNext(focus);
+                uint focus = head;
+                while (!IsEndOfChain(focus))
+                {
+                    result.Add(focus);
+                    focus = GetNext(focus);
+                }
             }
 
             return result;

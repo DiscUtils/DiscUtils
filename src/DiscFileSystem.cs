@@ -93,6 +93,20 @@ namespace DiscUtils
         public abstract bool DirectoryExists(string path);
 
         /// <summary>
+        /// Indicates if a file exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file exists</returns>
+        public abstract bool FileExists(string path);
+
+        /// <summary>
+        /// Indicates if a file or directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file or directory exists</returns>
+        public abstract bool Exists(string path);
+
+        /// <summary>
         /// Gets the names of subdirectories in a specified directory.
         /// </summary>
         /// <param name="path">The path to search.</param>
