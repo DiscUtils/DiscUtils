@@ -79,7 +79,7 @@ namespace FATExtract
 
                 using (FileStream outFile = new FileStream(destDir + "\\" + fileName, FileMode.Create, FileAccess.ReadWrite))
                 {
-                    using (Stream inFile = floppy.Open(_targetFileParam.Value, FileMode.Open))
+                    using (Stream inFile = floppy.OpenFile(_targetFileParam.Value, FileMode.Open))
                     {
                         PumpStreams(inFile, outFile);
                     }
