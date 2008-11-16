@@ -21,147 +21,90 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace DiscUtils.Iso9660
 {
     internal class ReaderDirectoryInfo : DiscDirectoryInfo
     {
-        private CDReader reader;
-        private Encoding enc;
-        private ReaderDirectoryInfo parent;
+        private CDReader _reader;
+        private string _path;
 
-        private DirectoryRecord record;
-        private List<DirectoryRecord> records;
-
-        public ReaderDirectoryInfo(CDReader reader, ReaderDirectoryInfo parent, DirectoryRecord record, Encoding enc)
+        public ReaderDirectoryInfo(CDReader reader, string path)
         {
-            this.reader = reader;
-            this.parent = parent;
-            this.record = record;
-            this.enc = enc;
-
-            byte[] buffer = new byte[2048];
-            Stream extent = reader.GetExtentStream(record);
-
-            uint totalLength = record.DataLength;
-            uint totalRead = 0;
-            while (totalRead < totalLength)
-            {
-                uint bytesRead = (uint)Utilities.ReadFully(extent, buffer, 0, buffer.Length);
-                if (bytesRead != Math.Min(buffer.Length, totalLength - totalRead))
-                {
-                    throw new IOException("Failed to read whole directory");
-                }
-                totalRead += (uint)bytesRead;
-
-                records = new List<DirectoryRecord>();
-                uint pos = 0;
-                while (pos < buffer.Length && buffer[pos] != 0)
-                {
-                    DirectoryRecord dr;
-                    uint length = (uint)DirectoryRecord.ReadFrom(buffer, (int)pos, enc, out dr);
-
-                    // If this is the 'self' entry, then use it to limit the amount of data written.
-                    // The only time this matters is when this instance has been created from a PathTableRecord,
-                    // in which case record.DataLength is uint.MaxValue!
-                    if (dr.FileIdentifier == "\0")
-                    {
-                        totalLength = Math.Min(totalLength, dr.DataLength);
-                    }
-
-                    records.Add(dr);
-
-                    pos += length;
-                }
-            }
+            _reader = reader;
+            _path = path.Trim('\\');
         }
 
         public override string Name
         {
-            get
-            {
-                return (record.FileIdentifier == "\0") ? @"\" : record.FileIdentifier;
-            }
+            get { return Utilities.GetFileFromPath(_path); }
         }
 
         public override string FullName
         {
-            get
-            {
-                if (record.FileIdentifier == "\0")
-                {
-                    return @"\";
-                }
-                else
-                {
-                    return Parent.FullName + record.FileIdentifier + @"\";
-                }
-            }
+            get { return _path + '\\'; }
         }
 
         public override FileAttributes Attributes
         {
-            get
-            {
-                FileAttributes attrs = FileAttributes.Directory | FileAttributes.ReadOnly;
-                if ((record.Flags & FileFlags.Hidden) != 0) { attrs |= FileAttributes.Hidden; }
-                return attrs;
-            }
-
-            set
-            {
-                throw new NotSupportedException();
-            }
+            get { return _reader.GetAttributes(_path); }
+            set { throw new NotSupportedException(); }
         }
 
         public override DiscDirectoryInfo Parent
         {
-            get { return parent; }
+            get
+            {
+                if (string.IsNullOrEmpty(_path))
+                {
+                    return null;
+                }
+                else
+                {
+                    return new ReaderDirectoryInfo(_reader, Utilities.GetDirectoryFromPath(_path));
+                }
+            }
         }
 
         public override bool Exists
         {
-            // We don't support arbitrary DirectoryInfo's (yet) - they always represent a real dir.
-            get { return true; }
+            get { return _reader.DirectoryExists(_path); }
         }
 
         public override DateTime CreationTime
         {
-            get { return record.RecordingDateAndTime.ToLocalTime(); }
+            get { return _reader.GetCreationTime(_path); }
             set { throw new NotSupportedException(); }
         }
 
         public override DateTime CreationTimeUtc
         {
-            get { return record.RecordingDateAndTime; }
+            get { return _reader.GetCreationTimeUtc(_path); }
             set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastAccessTime
         {
-            get { return CreationTime; }
+            get { return _reader.GetLastAccessTime(_path); }
             set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastAccessTimeUtc
         {
-            get { return CreationTimeUtc; }
+            get { return _reader.GetLastAccessTimeUtc(_path); }
             set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastWriteTime
         {
-            get { return CreationTime; }
+            get { return _reader.GetLastWriteTime(_path); }
             set { throw new NotSupportedException(); }
         }
 
         public override DateTime LastWriteTimeUtc
         {
-            get { return CreationTimeUtc; }
+            get { return _reader.GetLastWriteTimeUtc(_path); }
             set { throw new NotSupportedException(); }
         }
 
@@ -177,133 +120,35 @@ namespace DiscUtils.Iso9660
 
         public override DiscDirectoryInfo[] GetDirectories()
         {
-            List<DiscDirectoryInfo> dirs = new List<DiscDirectoryInfo>();
-            foreach (DirectoryRecord r in records)
-            {
-                if ((r.Flags & FileFlags.Directory) != 0 && r.FileIdentifier != "\0" && r.FileIdentifier != "\x01")
-                {
-                    dirs.Add(new ReaderDirectoryInfo(reader, this, r, enc));
-                }
-            }
-            return dirs.ToArray();
-        }
-
-        public override DiscDirectoryInfo[] GetDirectories(string pattern)
-        {
-            return SearchDirectories(pattern, false).ToArray();
+            return Utilities.Map<string, DiscDirectoryInfo>(_reader.GetDirectories(_path), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option)
         {
-            return SearchDirectories(pattern, option == SearchOption.AllDirectories).ToArray();
+            return Utilities.Map<string, DiscDirectoryInfo>(_reader.GetDirectories(_path, pattern, option), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscFileInfo[] GetFiles()
         {
-            List<DiscFileInfo> files = new List<DiscFileInfo>();
-            foreach (DirectoryRecord r in records)
-            {
-                if ((r.Flags & FileFlags.Directory) == 0)
-                {
-                    files.Add(new ReaderFileInfo(reader, this, r));
-                }
-            }
-            return files.ToArray();
-        }
-
-        public override DiscFileInfo[] GetFiles(string pattern)
-        {
-            return SearchFiles(pattern, false).ToArray();
+            return Utilities.Map<string, DiscFileInfo>(_reader.GetFiles(_path), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileInfo[] GetFiles(string pattern, SearchOption option)
         {
-            return SearchFiles(pattern, option == SearchOption.AllDirectories).ToArray();
+            ReaderDirectory dir = _reader.GetDirectory(_path);
+            return Utilities.Map<string, DiscFileInfo>(dir.SearchFiles(pattern, option == SearchOption.AllDirectories), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos()
         {
-            List<DiscFileSystemInfo> results = new List<DiscFileSystemInfo>();
-            foreach (DirectoryRecord r in records)
-            {
-                if ((r.Flags & FileFlags.Directory) == 0)
-                {
-                    results.Add(new ReaderFileInfo(reader, this, r));
-                }
-                else
-                {
-                    results.Add(new ReaderDirectoryInfo(reader, this, r, enc));
-                }
-            }
-            return results.ToArray();
+            ReaderDirectory dir = _reader.GetDirectory(_path);
+            return Utilities.Map<string, DiscFileSystemInfo>(_reader.GetFileSystemEntries(_path), ConvertPathToDiscFileSystemInfo);
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos(string pattern)
         {
-            throw new NotImplementedException();
-        }
-
-        private List<DiscFileInfo> SearchFiles(string pattern, bool subFolders)
-        {
-            string fullPattern = pattern;
-            if (!pattern.Contains(";"))
-            {
-                fullPattern += ";*";
-            }
-
-            Regex re = Utilities.ConvertWildcardsToRegEx(fullPattern);
-
-            List<DiscFileInfo> results = new List<DiscFileInfo>();
-            DoSearch(results, re, subFolders);
-            return results;
-        }
-
-        private List<DiscDirectoryInfo> SearchDirectories(string pattern, bool subFolders)
-        {
-            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
-
-            List<DiscDirectoryInfo> results = new List<DiscDirectoryInfo>();
-            DoSearch(results, re, subFolders);
-            return results;
-        }
-
-        private void DoSearch(List<DiscFileInfo> results, Regex regex, bool subFolders)
-        {
-            foreach (DirectoryRecord r in records)
-            {
-                if ((r.Flags & FileFlags.Directory) == 0)
-                {
-                    if (regex.IsMatch(IsoUtilities.NormalizeFileName(r.FileIdentifier)))
-                    {
-                        results.Add(new ReaderFileInfo(reader, this, r));
-                    }
-                }
-                else if( subFolders && !IsoUtilities.IsSpecialDirectory(r))
-                {
-                    ReaderDirectoryInfo subFolder = new ReaderDirectoryInfo(reader, this, r, enc);
-                    subFolder.DoSearch(results, regex, subFolders);
-                }
-            }
-        }
-
-        private void DoSearch(List<DiscDirectoryInfo> results, Regex regex, bool subFolders)
-        {
-            foreach (DirectoryRecord r in records)
-            {
-                if ((r.Flags & FileFlags.Directory) != 0)
-                {
-                    if (regex.IsMatch(r.FileIdentifier))
-                    {
-                        results.Add(new ReaderDirectoryInfo(reader, this, r, enc));
-                    }
-
-                    if (subFolders && !IsoUtilities.IsSpecialDirectory(r))
-                    {
-                        ReaderDirectoryInfo subFolder = new ReaderDirectoryInfo(reader, this, r, enc);
-                        subFolder.DoSearch(results, regex, subFolders);
-                    }
-                }
-            }
+            ReaderDirectory dir = _reader.GetDirectory(_path);
+            return Utilities.Map<string, DiscFileSystemInfo>(dir.SearchFileInfos(pattern, false), ConvertPathToDiscFileSystemInfo);
         }
 
         public override void Delete()
@@ -314,6 +159,45 @@ namespace DiscUtils.Iso9660
         public override void Delete(bool recursive)
         {
             throw new NotSupportedException();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            ReaderDirectoryInfo other = (ReaderDirectoryInfo)obj;
+
+            return _reader == other._reader && _path == other._path;
+        }
+
+        public override int GetHashCode()
+        {
+            return _reader.GetHashCode() ^ _path.GetHashCode();
+        }
+
+        private DiscDirectoryInfo ConvertPathToDiscDirectoryInfo(string path)
+        {
+            return new ReaderDirectoryInfo(_reader, path);
+        }
+
+        private DiscFileInfo ConvertPathToDiscFileInfo(string path)
+        {
+            return new ReaderFileInfo(_reader, path);
+        }
+
+        private DiscFileSystemInfo ConvertPathToDiscFileSystemInfo(string path)
+        {
+            if (path.EndsWith("\\", StringComparison.Ordinal))
+            {
+                return new ReaderDirectoryInfo(_reader, path);
+            }
+            else
+            {
+                return new ReaderFileInfo(_reader, path);
+            }
         }
     }
 }

@@ -59,42 +59,32 @@ namespace DiscUtils.Fat
 
         public override DiscDirectoryInfo[] GetDirectories()
         {
-            return FatUtilities.Map<string,DiscDirectoryInfo>(_fileSystem.GetDirectories(_path), ConvertPathToDiscDirectoryInfo);
-        }
-
-        public override DiscDirectoryInfo[] GetDirectories(string pattern)
-        {
-            return FatUtilities.Map<string, DiscDirectoryInfo>(_fileSystem.GetDirectories(_path, pattern), ConvertPathToDiscDirectoryInfo);
+            return Utilities.Map<string,DiscDirectoryInfo>(_fileSystem.GetDirectories(_path), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption option)
         {
-            return FatUtilities.Map<string, DiscDirectoryInfo>(_fileSystem.GetDirectories(_path, pattern, option), ConvertPathToDiscDirectoryInfo);
+            return Utilities.Map<string, DiscDirectoryInfo>(_fileSystem.GetDirectories(_path, pattern, option), ConvertPathToDiscDirectoryInfo);
         }
 
         public override DiscFileInfo[] GetFiles()
         {
-            return FatUtilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path), ConvertPathToDiscFileInfo);
-        }
-
-        public override DiscFileInfo[] GetFiles(string pattern)
-        {
-            return FatUtilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path, pattern), ConvertPathToDiscFileInfo);
+            return Utilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileInfo[] GetFiles(string pattern, SearchOption option)
         {
-            return FatUtilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path, pattern, option), ConvertPathToDiscFileInfo);
+            return Utilities.Map<string, DiscFileInfo>(_fileSystem.GetFiles(_path, pattern, option), ConvertPathToDiscFileInfo);
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos()
         {
-            return FatUtilities.Map<string, DiscFileSystemInfo>(_fileSystem.GetFileSystemEntries(_path), ConvertPathToDiscFileSystemInfo);
+            return Utilities.Map<string, DiscFileSystemInfo>(_fileSystem.GetFileSystemEntries(_path), ConvertPathToDiscFileSystemInfo);
         }
 
         public override DiscFileSystemInfo[] GetFileSystemInfos(string pattern)
         {
-            return FatUtilities.Map<string, DiscFileSystemInfo>(_fileSystem.GetFileSystemEntries(_path, pattern), ConvertPathToDiscFileSystemInfo);
+            return Utilities.Map<string, DiscFileSystemInfo>(_fileSystem.GetFileSystemEntries(_path, pattern), ConvertPathToDiscFileSystemInfo);
         }
 
         public override FileAttributes Attributes

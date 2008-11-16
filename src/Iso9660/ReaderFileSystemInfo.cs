@@ -21,16 +21,20 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DiscUtils.Iso9660
 {
-    internal class ReaderFileInfo : DiscFileInfo
+    internal class ReaderFileSystemInfo : DiscFileSystemInfo
     {
         private CDReader _reader;
         private string _path;
 
-        public ReaderFileInfo(CDReader reader, string path)
+        public ReaderFileSystemInfo(CDReader reader, string path)
         {
             _reader = reader;
             _path = path.Trim('\\');
@@ -43,7 +47,7 @@ namespace DiscUtils.Iso9660
 
         public override string FullName
         {
-            get { return _path; }
+            get { return _path + '\\'; }
         }
 
         public override FileAttributes Attributes
@@ -54,17 +58,22 @@ namespace DiscUtils.Iso9660
 
         public override DiscDirectoryInfo Parent
         {
-            get { return _reader.GetDirectoryInfo(Utilities.GetDirectoryFromPath(_path)); }
+            get
+            {
+                if (string.IsNullOrEmpty(_path))
+                {
+                    return null;
+                }
+                else
+                {
+                    return new ReaderDirectoryInfo(_reader, Utilities.GetDirectoryFromPath(_path));
+                }
+            }
         }
 
         public override bool Exists
         {
-            get { return _reader.FileExists(_path); }
-        }
-
-        public override void CopyTo(string destinationFileName, bool overwrite)
-        {
-            throw new NotSupportedException();
+            get { return _reader.DirectoryExists(_path); }
         }
 
         public override DateTime CreationTime
@@ -103,36 +112,6 @@ namespace DiscUtils.Iso9660
             set { throw new NotSupportedException(); }
         }
 
-        public override long Length
-        {
-            get { return _reader.GetDirectoryRecord(_path).DataLength; }
-        }
-
-        public override Stream Open(FileMode mode)
-        {
-            return Open(mode, FileAccess.Read);
-        }
-
-        public override Stream Open(FileMode mode, FileAccess access)
-        {
-            if (mode != FileMode.Open)
-            {
-                throw new NotSupportedException("Only existing files can be opened");
-            }
-
-            if (access != FileAccess.Read)
-            {
-                throw new NotSupportedException("Files cannot be opened for write");
-            }
-
-            return _reader.GetExtentStream(_reader.GetDirectoryRecord(_path));
-        }
-
-        public override void MoveTo(string destinationFileName)
-        {
-            throw new NotSupportedException();
-        }
-
         public override void Delete()
         {
             throw new NotSupportedException();
@@ -145,7 +124,7 @@ namespace DiscUtils.Iso9660
                 return false;
             }
 
-            ReaderFileInfo other = (ReaderFileInfo)obj;
+            ReaderFileSystemInfo other = (ReaderFileSystemInfo)obj;
 
             return _reader == other._reader && _path == other._path;
         }
@@ -154,6 +133,5 @@ namespace DiscUtils.Iso9660
         {
             return _reader.GetHashCode() ^ _path.GetHashCode();
         }
-
     }
 }

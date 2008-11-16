@@ -130,6 +130,23 @@ namespace DiscUtils.Fat
             }
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            FatFileSystemInfo other = (FatFileSystemInfo)obj;
+
+            return _fileSystem == other._fileSystem && _path == other._path;
+        }
+
+        public override int GetHashCode()
+        {
+            return _fileSystem.GetHashCode() ^ _path.GetHashCode();
+        }
+
         private DirectoryEntry GetDirEntry()
         {
             Directory parent;

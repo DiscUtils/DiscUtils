@@ -19,6 +19,27 @@ namespace DiscUtils
         /// </summary>
         private Utilities() { }
 
+        /// <summary>
+        /// Converts between two arrays.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the source array</typeparam>
+        /// <typeparam name="U">The type of the elements of the destination array</typeparam>
+        /// <param name="source">The source array</param>
+        /// <param name="func">The function to map from source type to destination type</param>
+        /// <returns>The resultant array</returns>
+        public static U[] Map<T, U>(ICollection<T> source, Func<T, U> func)
+        {
+            U[] result = new U[source.Count];
+            int i = 0;
+
+            foreach (T sVal in source)
+            {
+                result[i++] = func(sVal);
+            }
+
+            return result;
+        }
+
         #region Path Manipulation
         public static string GetDirectoryFromPath(string path)
         {

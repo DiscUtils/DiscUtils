@@ -146,7 +146,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         public override DiscDirectoryInfo Root
         {
-            get { return new ReaderDirectoryInfo(this, null, _volDesc.RootDirectory, _volDesc.CharacterEncoding); }
+            get { return new ReaderDirectoryInfo(this, @""); }
         }
 
         /// <summary>
@@ -156,7 +156,10 @@ namespace DiscUtils.Iso9660
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
-            throw new NotImplementedException();
+            string trimmed = path.Trim('\\');
+
+            PathTableRecord ptr;
+            return TrySearchPathTable(trimmed, out ptr);
         }
 
         /// <summary>
@@ -166,17 +169,8 @@ namespace DiscUtils.Iso9660
         /// <returns>true if the file exists</returns>
         public override bool FileExists(string path)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Indicates if a file or directory exists.
-        /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file or directory exists</returns>
-        public override bool Exists(string path)
-        {
-            throw new NotImplementedException();
+            DirectoryRecord record;
+            return TryGetFileDirectoryRecord(path, out record);
         }
 
         /// <summary>
@@ -186,7 +180,16 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of directories.</returns>
         public override string[] GetDirectories(string path)
         {
-            throw new NotImplementedException();
+            ReaderDirectory dir = GetDirectory(path);
+            List<string> dirs = new List<string>();
+            foreach (DirectoryRecord r in dir.GetRecords())
+            {
+                if ((r.Flags & FileFlags.Directory) != 0 && !IsoUtilities.IsSpecialDirectory(r))
+                {
+                    dirs.Add(Utilities.CombinePaths(path, r.FileIdentifier) + "\\");
+                }
+            }
+            return dirs.ToArray();
         }
 
         /// <summary>
@@ -199,7 +202,8 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            throw new NotImplementedException();
+            ReaderDirectory dir = GetDirectory(path);
+            return dir.SearchDirectories(searchPattern, searchOption == SearchOption.AllDirectories).ToArray();
         }
 
         /// <summary>
@@ -209,7 +213,16 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of files.</returns>
         public override string[] GetFiles(string path)
         {
-            throw new NotImplementedException();
+            ReaderDirectory dir = GetDirectory(Utilities.GetDirectoryFromPath(path));
+            List<string> files = new List<string>();
+            foreach (DirectoryRecord r in dir.GetRecords())
+            {
+                if ((r.Flags & FileFlags.Directory) == 0)
+                {
+                    files.Add(Utilities.CombinePaths(path, r.FileIdentifier));
+                }
+            }
+            return files.ToArray();
         }
 
         /// <summary>
@@ -222,7 +235,8 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            throw new NotImplementedException();
+            ReaderDirectory dir = GetDirectory(path);
+            return dir.SearchFiles(searchPattern, searchOption == SearchOption.AllDirectories).ToArray();
         }
 
         /// <summary>
@@ -232,7 +246,20 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            throw new NotImplementedException();
+            ReaderDirectory dir = GetDirectory(Utilities.GetDirectoryFromPath(path));
+            List<string> results = new List<string>();
+            foreach (DirectoryRecord r in dir.GetRecords())
+            {
+                if ((r.Flags & FileFlags.Directory) == 0)
+                {
+                    results.Add(Utilities.CombinePaths(path, r.FileIdentifier) + "\\");
+                }
+                else if (!IsoUtilities.IsSpecialDirectory(r))
+                {
+                    results.Add(Utilities.CombinePaths(path, r.FileIdentifier));
+                }
+            }
+            return results.ToArray();
         }
 
         /// <summary>
@@ -244,7 +271,8 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            throw new NotImplementedException();
+            ReaderDirectory dir = GetDirectory(path);
+            return dir.SearchFileInfos(searchPattern, false).ToArray();
         }
 
         /// <summary>
@@ -266,30 +294,15 @@ namespace DiscUtils.Iso9660
                 throw new NotSupportedException("Files cannot be opened for write");
             }
 
-            int pos = path.LastIndexOf('\\');
-            if (pos == path.Length - 1)
+            DirectoryRecord fileRecord;
+            if (TryGetFileDirectoryRecord(path, out fileRecord))
             {
-                throw new FileNotFoundException("Invalid path", path);
+                return GetExtentStream(fileRecord);
             }
-
-            string dir = (pos <= 0) ? "\0" : path.Substring(0, pos);
-            string file = path.Substring(pos + 1);
-
-            PathTableRecord ptr = SearchPathTable(dir);
-
-            ReaderDirectoryInfo dirInfo = new ReaderDirectoryInfo(
-                this,
-                null,
-                new DirectoryRecord(ptr.DirectoryIdentifier, FileFlags.Directory, ptr.LocationOfExtent, uint.MaxValue),
-                _volDesc.CharacterEncoding);
-
-            DiscFileInfo[] fileInfo = dirInfo.GetFiles(file);
-            if (fileInfo.Length != 1)
+            else
             {
-                throw new FileNotFoundException("Ambiguous file, or no such file", path);
+                throw new FileNotFoundException("No such file", path);
             }
-
-            return fileInfo[0].Open(mode);
         }
 
         /// <summary>
@@ -299,7 +312,11 @@ namespace DiscUtils.Iso9660
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
-            throw new NotImplementedException();
+            DirectoryRecord record = GetDirectoryRecord(path);
+            FileAttributes attrs = FileAttributes.ReadOnly;
+            if ((record.Flags & FileFlags.Directory) != 0) { attrs |= FileAttributes.Directory; }
+            if ((record.Flags & FileFlags.Hidden) != 0) { attrs |= FileAttributes.Hidden; }
+            return attrs;
         }
 
         /// <summary>
@@ -309,7 +326,7 @@ namespace DiscUtils.Iso9660
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
-            throw new NotImplementedException();
+            return GetCreationTimeUtc(path).ToLocalTime();
         }
 
         /// <summary>
@@ -319,7 +336,7 @@ namespace DiscUtils.Iso9660
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            throw new NotImplementedException();
+            return GetDirectoryRecord(path).RecordingDateAndTime;
         }
 
         /// <summary>
@@ -329,7 +346,7 @@ namespace DiscUtils.Iso9660
         /// <returns></returns>
         public override DateTime GetLastAccessTime(string path)
         {
-            throw new NotImplementedException();
+            return GetCreationTime(path);
         }
 
         /// <summary>
@@ -339,7 +356,7 @@ namespace DiscUtils.Iso9660
         /// <returns></returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            throw new NotImplementedException();
+            return GetCreationTimeUtc(path);
         }
 
         /// <summary>
@@ -349,7 +366,7 @@ namespace DiscUtils.Iso9660
         /// <returns></returns>
         public override DateTime GetLastWriteTime(string path)
         {
-            throw new NotImplementedException();
+            return GetCreationTime(path);
         }
 
         /// <summary>
@@ -359,12 +376,101 @@ namespace DiscUtils.Iso9660
         /// <returns></returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            throw new NotImplementedException();
+            return GetCreationTimeUtc(path);
         }
 
-        private PathTableRecord SearchPathTable(string path)
+        /// <summary>
+        /// Gets an object representing a possible file.
+        /// </summary>
+        /// <param name="path">The file path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file does not need to exist</remarks>
+        public override DiscFileInfo GetFileInfo(string path)
         {
-            string[] pathParts = path.Split(new char[]{'\\'},StringSplitOptions.RemoveEmptyEntries);
+            return new ReaderFileInfo(this, path);
+        }
+
+        /// <summary>
+        /// Gets an object representing a possible directory.
+        /// </summary>
+        /// <param name="path">The directory path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The directory does not need to exist</remarks>
+        public override DiscDirectoryInfo GetDirectoryInfo(string path)
+        {
+            return new ReaderDirectoryInfo(this, path);
+        }
+
+        /// <summary>
+        /// Gets an object representing a possible file system object (file or directory).
+        /// </summary>
+        /// <param name="path">The file system path</param>
+        /// <returns>The representing object</returns>
+        /// <remarks>The file system object does not need to exist</remarks>
+        public override DiscFileSystemInfo GetFileSystemInfo(string path)
+        {
+            return new ReaderFileSystemInfo(this, path);
+        }
+
+        internal DirectoryRecord GetDirectoryRecord(string path)
+        {
+            DirectoryRecord result = new DirectoryRecord();
+            PathTableRecord ptr;
+            if (TrySearchPathTable(Utilities.GetDirectoryFromPath(path), out ptr))
+            {
+                ReaderDirectory dir = new ReaderDirectory(this, ptr, _volDesc.CharacterEncoding, null);
+                if (!dir.TryGetFile(Utilities.GetFileFromPath(path), out result))
+                {
+                    throw new FileNotFoundException("No such file", path);
+                }
+            }
+
+            return result;
+        }
+
+        internal ReaderDirectory GetDirectory(string path)
+        {
+            PathTableRecord ptr;
+            if (TrySearchPathTable(path, out ptr))
+            {
+                return new ReaderDirectory(this, ptr, _volDesc.CharacterEncoding, null);
+            }
+            else
+            {
+                throw new DirectoryNotFoundException("No such directory: " + path);
+            }
+        }
+
+        private bool TryGetFileDirectoryRecord(string path, out DirectoryRecord result)
+        {
+            int pos = path.LastIndexOf('\\');
+            if (pos == path.Length - 1)
+            {
+                throw new FileNotFoundException("Invalid path", path);
+            }
+
+            string dirPart = (pos <= 0) ? "\0" : path.Substring(0, pos);
+            string file = path.Substring(pos + 1);
+
+            PathTableRecord ptr = SearchPathTable(dirPart);
+
+            ReaderDirectory dir = new ReaderDirectory(
+                this,
+                ptr,
+                _volDesc.CharacterEncoding,
+                null);
+
+            return dir.TryGetFile(file, out result);
+        }
+
+        private bool TrySearchPathTable(string path, out PathTableRecord result)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                path = "\x0";
+            }
+
+            string[] pathParts = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             int part = 0;
             int pathTableIdx = 0;
             ushort parent = 1;
@@ -380,7 +486,8 @@ namespace DiscUtils.Iso9660
                     if (part == pathParts.Length - 1)
                     {
                         // Found all parts of the path - we're done
-                        return ptr;
+                        result = ptr;
+                        return true;
                     }
                     else if (_pathTableFirstInParent.TryGetValue(pathTableIdx + 1, out newIdx))
                     {
@@ -395,18 +502,53 @@ namespace DiscUtils.Iso9660
                     else
                     {
                         // No sub-dirs for this dir and not at final part of the path
-                        throw new FileNotFoundException("No such directory", path);
+                        result = new PathTableRecord();
+                        return false;
                     }
                 }
                 else
                 {
                     pathTableIdx++;
                 }
-                ptr = _pathTable[pathTableIdx];
+
+                if (pathTableIdx < _pathTable.Count)
+                {
+                    ptr = _pathTable[pathTableIdx];
+                }
+                else
+                {
+                    // Fallen off the end of the path table...
+                    result = new PathTableRecord();
+                    return false;
+                }
             }
 
             // Fell off the end of parent's records
-            throw new FileNotFoundException("No such directory", path);
+            result = new PathTableRecord();
+            return false;
+        }
+
+        private PathTableRecord SearchPathTable(string path)
+        {
+            PathTableRecord ptr;
+            if (TrySearchPathTable(path, out ptr))
+            {
+                return ptr;
+            }
+            else
+            {
+                throw new FileNotFoundException("No such directory", path);
+            }
+        }
+
+        internal PathTableRecord LookupPathTable(ushort index)
+        {
+            return _pathTable[index];
+        }
+
+        internal Stream GetDirectoryExtentStream(uint startBlock)
+        {
+            return new ExtentStream(_data, startBlock, uint.MaxValue, 0, 0);
         }
 
         internal Stream GetExtentStream(DirectoryRecord record)
@@ -414,38 +556,6 @@ namespace DiscUtils.Iso9660
             return new ExtentStream(_data, record.LocationOfExtent, record.DataLength, record.FileUnitSize, record.InterleaveGapSize);
         }
 
-        /// <summary>
-        /// Gets an object representing a possible file.
-        /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
-        public override DiscFileInfo GetFileInfo(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible directory.
-        /// </summary>
-        /// <param name="path">The directory path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The directory does not need to exist</remarks>
-        public override DiscDirectoryInfo GetDirectoryInfo(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible file system object (file or directory).
-        /// </summary>
-        /// <param name="path">The file system path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file system object does not need to exist</remarks>
-        public override DiscFileSystemInfo GetFileSystemInfo(string path)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }

@@ -128,6 +128,23 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Adds a directory to the ISO image.
+        /// </summary>
+        /// <param name="name">The name of the directory on the ISO image.</param>
+        /// <returns>The object representing this directory</returns>
+        /// <remarks>
+        /// The name is the full path to the directory, for example:
+        /// <example><code>
+        ///   builder.AddDirectory(@"DIRA\DIRB\DIRC");
+        /// </code></example>
+        /// </remarks>
+        public BuildDirectoryInfo AddDirectory(string name)
+        {
+            string[] nameElements = name.Split('\\');
+            return GetDirectory(nameElements, nameElements.Length, true);
+        }
+
+        /// <summary>
         /// Adds a byte array to the ISO image as a file.
         /// </summary>
         /// <param name="name">The name of the file on the ISO image.</param>

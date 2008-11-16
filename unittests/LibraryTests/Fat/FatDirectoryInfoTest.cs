@@ -348,5 +348,14 @@ namespace DiscUtils.Fat
 
             Assert.Less(baseTime, di.LastWriteTime);
         }
+
+        [Test]
+        public void Equals()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            Assert.AreEqual(fs.GetDirectoryInfo("foo"), fs.GetDirectoryInfo("foo"));
+        }
     }
 }

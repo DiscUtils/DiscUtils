@@ -49,19 +49,6 @@ namespace DiscUtils.Iso9660
         public ushort VolumeSequenceNumber;
         public String FileIdentifier;
 
-        public DirectoryRecord(string name, FileFlags flags, uint extentLocation, uint dataLength)
-        {
-            ExtendedAttributeRecordLength = 0;
-            LocationOfExtent = extentLocation;
-            DataLength = dataLength;
-            RecordingDateAndTime = DateTime.Now;
-            Flags = flags;
-            FileUnitSize = 0;
-            InterleaveGapSize = 0;
-            VolumeSequenceNumber = 1;
-            FileIdentifier = name;
-        }
-
         public static int ReadFrom(byte[] src, int offset, Encoding enc, out DirectoryRecord record)
         {
             int length = src[offset + 0];

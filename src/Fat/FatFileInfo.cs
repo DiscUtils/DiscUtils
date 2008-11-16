@@ -46,11 +46,6 @@ namespace DiscUtils.Fat
             _fileSystem.CopyFile(_path, destinationFileName, overwrite);
         }
 
-        public override DiscDirectoryInfo Directory
-        {
-            get { return _fileSystem.GetDirectoryInfo(Utilities.GetDirectoryFromPath(_path)); }
-        }
-
         public override long Length
         {
             get { return GetDirEntry().FileSize; }
@@ -136,6 +131,23 @@ namespace DiscUtils.Fat
         public override void Delete()
         {
             _fileSystem.DeleteFile(_path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            FatFileInfo other = (FatFileInfo)obj;
+
+            return _fileSystem == other._fileSystem && _path == other._path;
+        }
+
+        public override int GetHashCode()
+        {
+            return _fileSystem.GetHashCode() ^ _path.GetHashCode();
         }
 
         private DirectoryEntry GetDirEntry()

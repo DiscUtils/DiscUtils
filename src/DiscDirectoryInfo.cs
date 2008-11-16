@@ -73,7 +73,10 @@ namespace DiscUtils
         /// <returns>An array of child directories, or empty if none match</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).</remarks>
-        public abstract DiscDirectoryInfo[] GetDirectories(string pattern);
+        public virtual DiscDirectoryInfo[] GetDirectories(string pattern)
+        {
+            return GetDirectories(pattern, SearchOption.TopDirectoryOnly);
+        }
 
         /// <summary>
         /// Gets all descendant directories matching a search pattern.
@@ -99,7 +102,10 @@ namespace DiscUtils
         /// <returns>An array of files, or empty if none match</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).</remarks>
-        public abstract DiscFileInfo[] GetFiles(string pattern);
+        public virtual DiscFileInfo[] GetFiles(string pattern)
+        {
+            return GetFiles(pattern, SearchOption.TopDirectoryOnly);
+        }
 
         /// <summary>
         /// Gets all descendant files matching a search pattern.

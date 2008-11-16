@@ -474,5 +474,29 @@ namespace DiscUtils.Fat
             fi = fs.GetFileInfo("foo.txt");
             Assert.IsFalse(fi.Exists);
         }
+
+        [Test]
+        public void Equals()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            Assert.AreEqual(fs.GetFileInfo("foo.txt"), fs.GetFileInfo("foo.txt"));
+        }
+
+        [Test]
+        public void Parent()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory(@"SOMEDIR\ADIR");
+            using (Stream s = fs.OpenFile(@"SOMEDIR\ADIR\FILE.TXT", FileMode.Create)) { }
+
+            DiscFileInfo fi = fs.GetFileInfo(@"SOMEDIR\ADIR\FILE.TXT");
+            Assert.AreEqual(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Parent);
+            Assert.AreEqual(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Directory);
+        }
+
     }
 }

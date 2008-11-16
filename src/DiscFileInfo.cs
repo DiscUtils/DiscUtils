@@ -75,7 +75,10 @@ namespace DiscUtils
         /// <summary>
         /// Gets an instance of the parent directory.
         /// </summary>
-        public abstract DiscDirectoryInfo Directory { get; }
+        public virtual DiscDirectoryInfo Directory
+        {
+            get { return Parent; }
+        }
 
         /// <summary>
         /// Gets a string representing the directory's full path.

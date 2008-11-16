@@ -315,6 +315,11 @@ namespace DiscUtils.Iso9660
             return parts;
         }
 
+        public static string NormalizeDirectoryNameForSearch(string dirName)
+        {
+            return (dirName.IndexOf('.') < 0) ? dirName + "." : dirName;
+        }
+
         /// <summary>
         /// Converts a DirectoryRecord time to UTC.
         /// </summary>

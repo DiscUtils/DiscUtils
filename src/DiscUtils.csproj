@@ -81,8 +81,10 @@
     <Compile Include="Iso9660\PathTable.cs" />
     <Compile Include="Iso9660\PathTableRecord.cs" />
     <Compile Include="Iso9660\PrimaryVolumeDescriptor.cs" />
+    <Compile Include="Iso9660\ReaderDirectory.cs" />
     <Compile Include="Iso9660\ReaderDirectoryInfo.cs" />
     <Compile Include="Iso9660\ReaderFileInfo.cs" />
+    <Compile Include="Iso9660\ReaderFileSystemInfo.cs" />
     <Compile Include="Iso9660\SupplementaryVolumeDescriptor.cs" />
     <Compile Include="Iso9660\IsoUtilities.cs" />
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
