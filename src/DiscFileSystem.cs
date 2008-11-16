@@ -188,7 +188,7 @@ namespace DiscUtils
         /// <returns>The new stream.</returns>
         public virtual Stream OpenFile(string path, FileMode mode)
         {
-            return OpenFile(path, mode, (mode == FileMode.Open) ? FileAccess.Read : FileAccess.ReadWrite);
+            return OpenFile(path, mode, FileAccess.ReadWrite);
         }
 
         /// <summary>

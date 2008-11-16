@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 using NUnit.Framework;
 
@@ -126,6 +127,277 @@ namespace DiscUtils.Fat
                     Assert.AreEqual((byte)i, buffer[i]);
                 }
             }
+        }
+
+        [Test]
+        [ExpectedException(typeof(FileNotFoundException))]
+        [Category("ThrowsException")]
+        public void Open_FileNotFound()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+            using (Stream s = di.Open(FileMode.Open)) { }
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void Open_FileExists()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+            using (Stream s = di.Open(FileMode.Create)) { s.WriteByte(1); }
+
+            using (Stream s = di.Open(FileMode.CreateNew)) { }
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void Open_DirExists()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            fs.CreateDirectory("FOO.TXT");
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+            using (Stream s = di.Open(FileMode.Create)) { s.WriteByte(1); }
+        }
+
+        [Test]
+        public void Open_Read()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+
+            using (Stream s = di.Open(FileMode.Create))
+            {
+                s.WriteByte(1);
+            }
+
+            using (Stream s = di.Open(FileMode.Open, FileAccess.Read))
+            {
+                Assert.IsFalse(s.CanWrite);
+                Assert.IsTrue(s.CanRead);
+
+                Assert.AreEqual(1, s.ReadByte());
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void Open_Read_Fail()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+            using (Stream s = di.Open(FileMode.Create, FileAccess.Read))
+            {
+                s.WriteByte(1);
+            }
+        }
+
+        [Test]
+        public void Open_Write()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+            using (Stream s = di.Open(FileMode.Create, FileAccess.Write))
+            {
+                Assert.IsTrue(s.CanWrite);
+                Assert.IsFalse(s.CanRead);
+                s.WriteByte(1);
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void Open_Write_Fail()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo di = fs.GetFileInfo("foo.txt");
+            using (Stream s = di.Open(FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.WriteByte(1);
+            }
+
+            using (Stream s = di.Open(FileMode.Open, FileAccess.Write))
+            {
+                Assert.IsTrue(s.CanWrite);
+                Assert.IsFalse(s.CanRead);
+                s.ReadByte();
+            }
+        }
+
+        [Test]
+        public void Name()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            Assert.AreEqual("foo.txt", fs.GetFileInfo("foo.txt").Name);
+            Assert.AreEqual("foo.txt", fs.GetFileInfo(@"path\foo.txt").Name);
+            Assert.AreEqual("foo.txt", fs.GetFileInfo(@"\foo.txt").Name);
+        }
+
+        [Test]
+        public void Attributes()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+            using (Stream s = fi.Open(FileMode.Create)) { }
+
+            // Check default attributes
+            Assert.AreEqual(FileAttributes.Archive, fi.Attributes);
+
+            // Check round-trip
+            FileAttributes newAttrs = FileAttributes.Hidden | FileAttributes.ReadOnly | FileAttributes.System;
+            fi.Attributes = newAttrs;
+            Assert.AreEqual(newAttrs, fi.Attributes);
+
+            // And check persistence to disk
+            fs = new FatFileSystem(ms);
+            Assert.AreEqual(newAttrs, fs.GetFileInfo("foo.txt").Attributes);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        [Category("ThrowsException")]
+        public void Attributes_ChangeType()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+            using (Stream s = fi.Open(FileMode.Create)) { }
+
+            fi.Attributes = fi.Attributes | FileAttributes.Directory;
+        }
+
+        [Test]
+        public void Exists()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+
+            Assert.IsFalse(fi.Exists);
+
+            using (Stream s = fi.Open(FileMode.Create)) { }
+            Assert.IsTrue(fi.Exists);
+
+            fs.CreateDirectory("dir.txt");
+            Assert.IsFalse(fs.GetFileInfo("dir.txt").Exists);
+        }
+
+        [Test]
+        public void CreationTimeUtc()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
+
+            Assert.GreaterOrEqual(DateTime.UtcNow, fs.GetFileInfo("foo.txt").CreationTimeUtc);
+            Assert.LessOrEqual(DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(10)), fs.GetFileInfo("foo.txt").CreationTimeUtc);
+        }
+
+        [Test]
+        public void CreationTime()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
+
+            Assert.GreaterOrEqual(DateTime.Now, fs.GetFileInfo("foo.txt").CreationTime);
+            Assert.LessOrEqual(DateTime.Now.Subtract(TimeSpan.FromSeconds(10)), fs.GetFileInfo("foo.txt").CreationTime);
+        }
+
+        [Test]
+        public void LastAccessTime()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+
+            DateTime baseTime = DateTime.Now - TimeSpan.FromDays(2);
+            fi.LastAccessTime = baseTime;
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Open, FileAccess.Read)) { }
+
+            Assert.Less(baseTime, fi.LastAccessTime);
+        }
+
+        [Test]
+        public void LastWriteTime()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+
+            DateTime baseTime = DateTime.Now - TimeSpan.FromMinutes(10);
+            fi.LastWriteTime = baseTime;
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Open)) { s.WriteByte(1); }
+
+            Assert.Less(baseTime, fi.LastWriteTime);
+        }
+
+        [Test]
+        public void Delete()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
+            fs.GetFileInfo("foo.txt").Delete();
+
+            Assert.IsFalse(fs.FileExists("foo.txt"));
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void Delete_Dir()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.CreateDirectory("foo.txt");
+            fs.GetFileInfo("foo.txt").Delete();
+        }
+
+        [Test]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void Delete_NoFile()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.DoubleDensity, null);
+
+            fs.GetFileInfo("foo.txt").Delete();
         }
     }
 }

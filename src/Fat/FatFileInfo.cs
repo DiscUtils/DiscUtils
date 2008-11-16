@@ -67,7 +67,7 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    return _path.Substring(sepIdx);
+                    return _path.Substring(sepIdx + 1);
                 }
             }
         }
