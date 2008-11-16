@@ -69,5 +69,63 @@ namespace DiscUtils.Fat
 
             Assert.AreEqual(0, fs.Root.GetFiles().Length);
         }
+
+        [Test]
+        public void Length()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, null);
+
+            using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite)) {
+                s.SetLength(3128);
+            }
+
+            Assert.AreEqual(3128, fs.GetFileInfo("foo.txt").Length);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Open, FileAccess.ReadWrite))
+            {
+                s.SetLength(3);
+            }
+
+            Assert.AreEqual(3, fs.GetFileInfo("foo.txt").Length);
+
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Open, FileAccess.ReadWrite))
+            {
+                s.SetLength(3333);
+
+                byte[] buffer = new byte[512];
+                for(int i = 0; i < buffer.Length; ++i)
+                {
+                    buffer[i] = (byte)i;
+                }
+
+                s.Write(buffer, 0, buffer.Length);
+                s.Write(buffer, 0, buffer.Length);
+
+                Assert.AreEqual(1024, s.Position);
+
+                s.SetLength(512);
+
+                Assert.AreEqual(512, s.Position);
+            }
+
+            fs = new FatFileSystem(ms);
+            using (Stream s = fs.OpenFile("foo.txt", FileMode.Open, FileAccess.ReadWrite))
+            {
+                byte[] buffer = new byte[512];
+                int numRead = s.Read(buffer, 0, buffer.Length);
+                int totalRead = 0;
+                while (numRead != 0)
+                {
+                    totalRead += numRead;
+                    numRead = s.Read(buffer, totalRead, buffer.Length - totalRead);
+                }
+
+                for (int i = 0; i < buffer.Length; ++i)
+                {
+                    Assert.AreEqual((byte)i, buffer[i]);
+                }
+            }
+        }
     }
 }

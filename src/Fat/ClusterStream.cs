@@ -192,7 +192,47 @@ namespace DiscUtils.Fat
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            // In case the length is unbounded, detect the length
+            // from the cluster chain
+            long actualLength = _length;
+            if (actualLength == uint.MaxValue)
+            {
+                actualLength = DetectLength();
+            }
+
+            long desiredNumClusters = value / _reader.ClusterSize;
+            long actualNumClusters = actualLength / _reader.ClusterSize;
+
+            if (desiredNumClusters < actualNumClusters)
+            {
+                uint cluster;
+                if (!TryGetClusterByPosition(value, out cluster))
+                {
+                    throw new IOException("Internal state corrupt - unable to find cluster");
+                }
+
+                uint firstToFree = _fat.GetNext(cluster);
+                _fat.SetEndOfChain(cluster);
+                _fat.FreeChain(firstToFree);
+            }
+            else if (desiredNumClusters > actualNumClusters)
+            {
+                uint cluster;
+                while (!TryGetClusterByPosition(value, out cluster))
+                {
+                    cluster = ExtendChain();
+                    _reader.WipeCluster(cluster);
+                }
+            }
+
+            if (_length != value)
+            {
+                _length = (uint)value;
+                if (_position > _length)
+                {
+                    _position = _length;
+                }
+            }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
