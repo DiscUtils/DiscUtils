@@ -46,18 +46,7 @@ namespace DiscUtils.Fat
 
         public override string Name
         {
-            get
-            {
-                int sepIdx = _path.LastIndexOf('\\');
-                if (sepIdx < 0)
-                {
-                    return _path;
-                }
-                else
-                {
-                    return _path.Substring(sepIdx);
-                }
-            }
+            get { return Utilities.GetFileFromPath(_path); }
         }
 
         public override string FullName
@@ -82,18 +71,7 @@ namespace DiscUtils.Fat
 
         public override DiscDirectoryInfo Parent
         {
-            get
-            {
-                int sepIdx = _path.LastIndexOf('\\');
-                if (sepIdx < 0)
-                {
-                    return new FatDirectoryInfo(_fileSystem, "");
-                }
-                else
-                {
-                    return new FatDirectoryInfo(_fileSystem, _path.Substring(0, sepIdx));
-                }
-            }
+            get { return new FatDirectoryInfo(_fileSystem, Utilities.GetDirectoryFromPath(_path)); }
         }
 
         public override bool Exists
@@ -142,7 +120,14 @@ namespace DiscUtils.Fat
 
         public override void Delete()
         {
-            throw new NotImplementedException();
+            if ((Attributes & FileAttributes.Directory) != 0)
+            {
+                _fileSystem.DeleteDirectory(_path);
+            }
+            else
+            {
+                _fileSystem.DeleteFile(_path);
+            }
         }
 
         private DirectoryEntry GetDirEntry()

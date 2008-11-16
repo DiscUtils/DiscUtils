@@ -403,7 +403,7 @@ namespace DiscUtils.Fat
             return pos;
         }
 
-        internal void DeleteEntry(long id)
+        internal void DeleteEntry(long id, bool releaseContents)
         {
             if (id < 0)
             {
@@ -419,7 +419,10 @@ namespace DiscUtils.Fat
                 _dirStream.Position = id;
                 copy.WriteTo(_dirStream);
 
-                _fileSystem.Fat.FreeChain(entry.FirstCluster);
+                if (releaseContents)
+                {
+                    _fileSystem.Fat.FreeChain(entry.FirstCluster);
+                }
 
                 _entries.Remove(id);
                 _freeEntries.Add(id);

@@ -146,17 +146,7 @@ namespace DiscUtils.Fat
 
         public override string Name
         {
-            get {
-                int sepIdx = _path.LastIndexOf('\\');
-                if (sepIdx < 0)
-                {
-                    return _path;
-                }
-                else
-                {
-                    return _path.Substring(sepIdx + 1);
-                }
-            }
+            get { return Utilities.GetFileFromPath(_path); }
         }
 
         public override string FullName
@@ -174,15 +164,7 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    int sepIdx = _path.LastIndexOf('\\');
-                    if (sepIdx < 0)
-                    {
-                        return new FatDirectoryInfo(_fileSystem, "");
-                    }
-                    else
-                    {
-                        return new FatDirectoryInfo(_fileSystem, _path.Substring(0, sepIdx));
-                    }
+                    return new FatDirectoryInfo(_fileSystem, Utilities.GetDirectoryFromPath(_path));
                 }
             }
         }

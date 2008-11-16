@@ -524,6 +524,86 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
+        /// Copies an existing file to a new file, allowing overwriting of an existing file.
+        /// </summary>
+        /// <param name="sourceFile">The source file</param>
+        /// <param name="destinationFile">The destination file</param>
+        /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
+        public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
+        {
+            Directory sourceDir;
+            long sourceEntryId = GetDirectoryEntry(sourceFile, out sourceDir);
+
+            if (sourceDir == null || sourceEntryId < 0)
+            {
+                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "The source file '{0}' was not found", sourceFile));
+            }
+
+            DirectoryEntry sourceEntry = sourceDir.GetEntry(sourceEntryId);
+
+            if ((sourceEntry.Attributes & FatAttributes.Directory) != 0)
+            {
+                throw new IOException("The source file is a directory");
+            }
+
+
+            DirectoryEntry newEntry = new DirectoryEntry(sourceEntry);
+            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(destinationFile);
+            newEntry.FirstCluster = 0;
+
+
+            Directory destDir;
+            long destEntryId = GetDirectoryEntry(destinationFile, out destDir);
+
+            if (destDir == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The destination directory for '{0}' was not found", destinationFile));
+            }
+
+            // If the destination is a directory, use the old file name to construct a full path.
+            if (destEntryId >= 0)
+            {
+                DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
+                if ((destEntry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(sourceFile);
+                    destinationFile = Utilities.CombinePaths(destinationFile, Utilities.GetFileFromPath(sourceFile));
+
+                    destEntryId = GetDirectoryEntry(destinationFile, out destDir);
+                }
+            }
+
+            // If there's an existing entry...
+            if (destEntryId >= 0)
+            {
+                DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
+
+                if ((destEntry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    throw new IOException("Destination file is an existing directory");
+                }
+
+                if (!overwrite)
+                {
+                    throw new IOException("Destination file already exists");
+                }
+
+                // Remove the old file
+                destDir.DeleteEntry(destEntryId, true);
+            }
+
+            // Add the new file's entry
+            destEntryId = destDir.AddEntry(newEntry);
+
+            // Copy the contents...
+            using (Stream sourceStream = new FatFileStream(this, sourceDir, sourceEntryId, FileAccess.Read),
+                destStream = new FatFileStream(this, destDir, destEntryId, FileAccess.Write))
+            {
+                Utilities.PumpStreams(sourceStream, destStream);
+            }
+        }
+
+        /// <summary>
         /// Creates a directory.
         /// </summary>
         /// <param name="path">The directory to create.</param>
@@ -555,7 +635,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Deletes a directory.
+        /// Deletes a directory, optionally with all descendants.
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
         public override void DeleteDirectory(string path)
@@ -580,36 +660,13 @@ namespace DiscUtils.Fat
             else if (parent != null && id >= 0)
             {
                 DirectoryEntry deadEntry = parent.GetEntry(id);
-                parent.DeleteEntry(id);
+                parent.DeleteEntry(id, true);
                 ForgetDirectory(deadEntry);
             }
             else
             {
                 throw new DirectoryNotFoundException("No such directory: " + path);
             }
-        }
-
-        /// <summary>
-        /// Deletes a directory, optionally with all descendants.
-        /// </summary>
-        /// <param name="path">The path of the directory to delete.</param>
-        /// <param name="recursive">Determines if the all descendants should be deleted</param>
-        public override void DeleteDirectory(string path, bool recursive)
-        {
-            if (recursive)
-            {
-                foreach (string dir in GetDirectories(path))
-                {
-                    DeleteDirectory(dir, true);
-                }
-
-                foreach (string file in GetFiles(path))
-                {
-                    DeleteFile(file);
-                }
-            }
-
-            DeleteDirectory(path);
         }
 
         /// <summary>
@@ -631,7 +688,7 @@ namespace DiscUtils.Fat
                 throw new IOException("No such file: " + path);
             }
 
-            parent.DeleteEntry(id);
+            parent.DeleteEntry(id, true);
         }
 
         /// <summary>
@@ -709,18 +766,6 @@ namespace DiscUtils.Fat
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory matching a specified
-        /// search pattern.
-        /// </summary>
-        /// <param name="path">The path to search.</param>
-        /// <param name="searchPattern">The search string to match against.</param>
-        /// <returns>Array of directories matching the search pattern.</returns>
-        public override string[] GetDirectories(string path, string searchPattern)
-        {
-            return GetDirectories(path, searchPattern, SearchOption.TopDirectoryOnly);
-        }
-
-        /// <summary>
-        /// Gets the names of subdirectories in a specified directory matching a specified
         /// search pattern, using a value to determine whether to search subdirectories.
         /// </summary>
         /// <param name="path">The path to search.</param>
@@ -753,17 +798,6 @@ namespace DiscUtils.Fat
             }
 
             return files.ToArray();
-        }
-
-        /// <summary>
-        /// Gets the names of files in a specified directory.
-        /// </summary>
-        /// <param name="path">The path to search.</param>
-        /// <param name="searchPattern">The search string to match against.</param>
-        /// <returns>Array of files matching the search pattern.</returns>
-        public override string[] GetFiles(string path, string searchPattern)
-        {
-            return GetFiles(path, searchPattern, SearchOption.TopDirectoryOnly);
         }
 
         /// <summary>
@@ -864,7 +898,80 @@ namespace DiscUtils.Fat
             }
 
             destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destinationDirectoryName), GetDirectory(sourceDirectoryName));
-            sourceParent.DeleteEntry(sourceId);
+            sourceParent.DeleteEntry(sourceId, false);
+        }
+
+        /// <summary>
+        /// Moves a file, allowing an existing file to be overwritten.
+        /// </summary>
+        /// <param name="sourceName">The file to move.</param>
+        /// <param name="destinationName">The target file name.</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        public override void MoveFile(string sourceName, string destinationName, bool overwrite)
+        {
+            Directory sourceDir;
+            long sourceEntryId = GetDirectoryEntry(sourceName, out sourceDir);
+
+            if (sourceDir == null || sourceEntryId < 0)
+            {
+                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "The source file '{0}' was not found", sourceName));
+            }
+
+            DirectoryEntry sourceEntry = sourceDir.GetEntry(sourceEntryId);
+
+            if ((sourceEntry.Attributes & FatAttributes.Directory) != 0)
+            {
+                throw new IOException("The source file is a directory");
+            }
+
+
+            DirectoryEntry newEntry = new DirectoryEntry(sourceEntry);
+            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(destinationName);
+
+
+            Directory destDir;
+            long destEntryId = GetDirectoryEntry(destinationName, out destDir);
+
+            if (destDir == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The destination directory for '{0}' was not found", destinationName));
+            }
+
+            // If the destination is a directory, use the old file name to construct a full path.
+            if (destEntryId >= 0)
+            {
+                DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
+                if ((destEntry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(sourceName);
+                    destinationName = Utilities.CombinePaths(destinationName, Utilities.GetFileFromPath(sourceName));
+
+                    destEntryId = GetDirectoryEntry(destinationName, out destDir);
+                }
+            }
+
+            // If there's an existing entry...
+            if (destEntryId >= 0)
+            {
+                DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
+
+                if ((destEntry.Attributes & FatAttributes.Directory) != 0)
+                {
+                    throw new IOException("Destination file is an existing directory");
+                }
+
+                if (!overwrite)
+                {
+                    throw new IOException("Destination file already exists");
+                }
+
+                // Remove the old file
+                destDir.DeleteEntry(destEntryId, true);
+            }
+
+            // Add the new file's entry and remove the old link to the file's contents
+            destDir.AddEntry(newEntry);
+            sourceDir.DeleteEntry(sourceEntryId, false);
         }
 
         /// <summary>

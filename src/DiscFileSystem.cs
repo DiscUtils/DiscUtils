@@ -61,6 +61,24 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Copies an existing file to a new file.
+        /// </summary>
+        /// <param name="sourceFile">The source file</param>
+        /// <param name="destinationFile">The destination file</param>
+        public virtual void CopyFile(string sourceFile, string destinationFile)
+        {
+            CopyFile(sourceFile, destinationFile, false);
+        }
+
+        /// <summary>
+        /// Copies an existing file to a new file, allowing overwriting of an existing file.
+        /// </summary>
+        /// <param name="sourceFile">The source file</param>
+        /// <param name="destinationFile">The destination file</param>
+        /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
+        public abstract void CopyFile(string sourceFile, string destinationFile, bool overwrite);
+
+        /// <summary>
         /// Creates a directory.
         /// </summary>
         /// <param name="path">The path of the new directory</param>
@@ -77,7 +95,23 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
         /// <param name="recursive">Determines if the all descendants should be deleted</param>
-        public abstract void DeleteDirectory(string path, bool recursive);
+        public void DeleteDirectory(string path, bool recursive)
+        {
+            if (recursive)
+            {
+                foreach (string dir in GetDirectories(path))
+                {
+                    DeleteDirectory(dir, true);
+                }
+
+                foreach (string file in GetFiles(path))
+                {
+                    DeleteFile(file);
+                }
+            }
+
+            DeleteDirectory(path);
+        }
 
         /// <summary>
         /// Deletes a file.
@@ -104,14 +138,20 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path to test</param>
         /// <returns>true if the file or directory exists</returns>
-        public abstract bool Exists(string path);
+        public virtual bool Exists(string path)
+        {
+            return FileExists(path) || DirectoryExists(path);
+        }
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory.
         /// </summary>
         /// <param name="path">The path to search.</param>
         /// <returns>Array of directories.</returns>
-        public abstract string[] GetDirectories(string path);
+        public virtual string[] GetDirectories(string path)
+        {
+            return GetDirectories(path, "*.*", SearchOption.TopDirectoryOnly);
+        }
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory matching a specified
@@ -120,7 +160,10 @@ namespace DiscUtils
         /// <param name="path">The path to search.</param>
         /// <param name="searchPattern">The search string to match against.</param>
         /// <returns>Array of directories matching the search pattern.</returns>
-        public abstract string[] GetDirectories(string path, string searchPattern);
+        public virtual string[] GetDirectories(string path, string searchPattern)
+        {
+            return GetDirectories(path, searchPattern, SearchOption.TopDirectoryOnly);
+        }
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory matching a specified
@@ -137,7 +180,10 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path to search.</param>
         /// <returns>Array of files.</returns>
-        public abstract string[] GetFiles(string path);
+        public virtual string[] GetFiles(string path)
+        {
+            return GetFiles(path, "*.*", SearchOption.TopDirectoryOnly);
+        }
 
         /// <summary>
         /// Gets the names of files in a specified directory.
@@ -145,7 +191,10 @@ namespace DiscUtils
         /// <param name="path">The path to search.</param>
         /// <param name="searchPattern">The search string to match against.</param>
         /// <returns>Array of files matching the search pattern.</returns>
-        public abstract string[] GetFiles(string path, string searchPattern);
+        public virtual string[] GetFiles(string path, string searchPattern)
+        {
+            return GetFiles(path, searchPattern, SearchOption.TopDirectoryOnly);
+        }
 
         /// <summary>
         /// Gets the names of files in a specified directory matching a specified
@@ -179,6 +228,24 @@ namespace DiscUtils
         /// <param name="sourceDirectoryName">The directory to move.</param>
         /// <param name="destinationDirectoryName">The target directory name.</param>
         public abstract void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName);
+
+        /// <summary>
+        /// Moves a file.
+        /// </summary>
+        /// <param name="sourceName">The file to move.</param>
+        /// <param name="destinationName">The target file name.</param>
+        public virtual void MoveFile(string sourceName, string destinationName)
+        {
+            MoveFile(sourceName, destinationName, false);
+        }
+
+        /// <summary>
+        /// Moves a file, allowing an existing file to be overwritten.
+        /// </summary>
+        /// <param name="sourceName">The file to move.</param>
+        /// <param name="destinationName">The target file name.</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        public abstract void MoveFile(string sourceName, string destinationName, bool overwrite);
 
         /// <summary>
         /// Opens the specified file.
@@ -246,7 +313,7 @@ namespace DiscUtils
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The last access time</returns>
         public abstract DateTime GetLastAccessTime(string path);
 
         /// <summary>
@@ -260,7 +327,7 @@ namespace DiscUtils
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The last access time</returns>
         public abstract DateTime GetLastAccessTimeUtc(string path);
 
         /// <summary>
@@ -274,7 +341,7 @@ namespace DiscUtils
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The last write time</returns>
         public abstract DateTime GetLastWriteTime(string path);
 
         /// <summary>
@@ -288,7 +355,7 @@ namespace DiscUtils
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The last write time</returns>
         public abstract DateTime GetLastWriteTimeUtc(string path);
 
         /// <summary>

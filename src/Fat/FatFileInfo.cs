@@ -41,6 +41,16 @@ namespace DiscUtils.Fat
             _path = path.TrimStart('\\');
         }
 
+        public override void CopyTo(string destinationFileName, bool overwrite)
+        {
+            _fileSystem.CopyFile(_path, destinationFileName, overwrite);
+        }
+
+        public override DiscDirectoryInfo Directory
+        {
+            get { return _fileSystem.GetDirectoryInfo(Utilities.GetDirectoryFromPath(_path)); }
+        }
+
         public override long Length
         {
             get { return GetDirEntry().FileSize; }
@@ -56,20 +66,14 @@ namespace DiscUtils.Fat
             return _fileSystem.OpenFile(_path, mode, access);
         }
 
+        public override void MoveTo(string destinationFileName)
+        {
+            _fileSystem.MoveFile(_path, destinationFileName);
+        }
+
         public override string Name
         {
-            get
-            {
-                int sepIdx = _path.LastIndexOf('\\');
-                if (sepIdx < 0)
-                {
-                    return _path;
-                }
-                else
-                {
-                    return _path.Substring(sepIdx + 1);
-                }
-            }
+            get { return Utilities.GetFileFromPath(_path); }
         }
 
         public override string FullName
@@ -85,18 +89,7 @@ namespace DiscUtils.Fat
 
         public override DiscDirectoryInfo Parent
         {
-            get
-            {
-                int sepIdx = _path.LastIndexOf('\\');
-                if (sepIdx < 0)
-                {
-                    return new FatDirectoryInfo(_fileSystem, "");
-                }
-                else
-                {
-                    return new FatDirectoryInfo(_fileSystem, _path.Substring(0, sepIdx));
-                }
-            }
+            get { return new FatDirectoryInfo(_fileSystem, Utilities.GetDirectoryFromPath(_path)); }
         }
 
         public override bool Exists

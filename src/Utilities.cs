@@ -19,6 +19,40 @@ namespace DiscUtils
         /// </summary>
         private Utilities() { }
 
+        #region Path Manipulation
+        public static string GetDirectoryFromPath(string path)
+        {
+            string trimmed = path.Trim('\\');
+
+            int index = trimmed.LastIndexOf('\\');
+            if (index < 0)
+            {
+                return ""; // No directory, just a file name
+            }
+
+            return trimmed.Substring(0, index);
+        }
+
+        public static string GetFileFromPath(string path)
+        {
+            string trimmed = path.Trim('\\');
+
+            int index = trimmed.LastIndexOf('\\');
+            if (index < 0)
+            {
+                return trimmed; // No directory, just a file name
+            }
+
+            return trimmed.Substring(index + 1);
+        }
+
+        public static string CombinePaths(string a, string b)
+        {
+            return a.TrimEnd('\\') + '\\' + b.TrimStart('\\');
+        }
+
+        #endregion
+
         #region Stream Manipulation
         /// <summary>
         /// Read bytes until buffer filled or EOF.
@@ -69,6 +103,25 @@ namespace DiscUtils
         {
             return ReadFully(stream, SectorSize);
         }
+
+        /// <summary>
+        /// Copies the contents of one stream to another.
+        /// </summary>
+        /// <param name="source">The stream to copy from</param>
+        /// <param name="dest">The destination stream</param>
+        /// <remarks>Copying starts at the current stream positions</remarks>
+        public static void PumpStreams(Stream source, Stream dest)
+        {
+            byte[] buffer = new byte[64 * 1024];
+
+            int numRead = source.Read(buffer, 0, buffer.Length);
+            while (numRead != 0)
+            {
+                dest.Write(buffer, 0, numRead);
+                numRead = source.Read(buffer, 0, buffer.Length);
+            }
+        }
+
         #endregion
 
         #region Filesystem Support

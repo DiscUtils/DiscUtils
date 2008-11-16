@@ -91,6 +91,7 @@
     <Compile Include="CompoundSparseStream.cs" />
     <Compile Include="Fat\DirectoryEntry.cs" />
     <Compile Include="Fat\FatFileSystem.cs" />
+    <Compile Include="ReadOnlyDiscFileSystem.cs" />
     <Compile Include="SparseStream.cs" />
     <Compile Include="SubStream.cs">
       <SubType>Code</SubType>

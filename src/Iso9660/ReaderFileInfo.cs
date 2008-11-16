@@ -74,6 +74,11 @@ namespace DiscUtils.Iso9660
             get { return true; }
         }
 
+        public override void CopyTo(string destinationFileName, bool overwrite)
+        {
+            throw new NotSupportedException();
+        }
+
         public override DateTime CreationTime
         {
             get { return _record.RecordingDateAndTime.ToLocalTime(); }
@@ -135,9 +140,20 @@ namespace DiscUtils.Iso9660
             return _reader.GetExtentStream(_record);
         }
 
+        public override void MoveTo(string destinationFileName)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void Delete()
         {
             throw new NotSupportedException();
         }
+
+        public override DiscDirectoryInfo Directory
+        {
+            get { throw new NotImplementedException(); }
+        }
+
     }
 }

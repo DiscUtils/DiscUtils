@@ -399,5 +399,80 @@ namespace DiscUtils.Fat
 
             fs.GetFileInfo("foo.txt").Delete();
         }
+
+        [Test]
+        public void CopyFile()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "FLOPPY_IMG ");
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+
+            using (Stream s = fi.Create())
+            {
+                for (int i = 0; i < 10; ++i)
+                {
+                    s.Write(new byte[111], 0, 111);
+                }
+            }
+            fi.Attributes = FileAttributes.Hidden | FileAttributes.System;
+
+            fi.CopyTo("foo2.txt");
+
+            fi = fs.GetFileInfo("foo2.txt");
+            Assert.IsTrue(fi.Exists);
+            Assert.AreEqual(1110, fi.Length);
+            Assert.AreEqual(FileAttributes.Hidden | FileAttributes.System, fi.Attributes);
+
+            fi = fs.GetFileInfo("foo.txt");
+            Assert.IsTrue(fi.Exists);
+
+            fs = new FatFileSystem(ms);
+
+            fi = fs.GetFileInfo("foo2.txt");
+            Assert.IsTrue(fi.Exists);
+            Assert.AreEqual(1110, fi.Length);
+            Assert.AreEqual(FileAttributes.Hidden | FileAttributes.System, fi.Attributes);
+
+            fi = fs.GetFileInfo("foo.txt");
+            Assert.IsTrue(fi.Exists);
+        }
+
+
+        [Test]
+        public void MoveFile()
+        {
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "FLOPPY_IMG ");
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+
+            using (Stream s = fi.Create())
+            {
+                for (int i = 0; i < 10; ++i)
+                {
+                    s.Write(new byte[111], 0, 111);
+                }
+            }
+            fi.Attributes = FileAttributes.Hidden | FileAttributes.System;
+
+            fi.MoveTo("foo2.txt");
+
+            fi = fs.GetFileInfo("foo2.txt");
+            Assert.IsTrue(fi.Exists);
+            Assert.AreEqual(1110, fi.Length);
+            Assert.AreEqual(FileAttributes.Hidden | FileAttributes.System, fi.Attributes);
+
+            fi = fs.GetFileInfo("foo.txt");
+            Assert.IsFalse(fi.Exists);
+
+            fs = new FatFileSystem(ms);
+
+            fi = fs.GetFileInfo("foo2.txt");
+            Assert.IsTrue(fi.Exists);
+            Assert.AreEqual(1110, fi.Length);
+            Assert.AreEqual(FileAttributes.Hidden | FileAttributes.System, fi.Attributes);
+
+            fi = fs.GetFileInfo("foo.txt");
+            Assert.IsFalse(fi.Exists);
+        }
     }
 }
