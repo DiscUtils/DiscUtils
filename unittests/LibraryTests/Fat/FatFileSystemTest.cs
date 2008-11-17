@@ -40,15 +40,7 @@ namespace DiscUtils.Fat
         {
             MemoryStream ms = new MemoryStream();
 
-            ushort cylinders;
-            byte headsPerCylinder;
-            byte sectorsPerTrack;
-
-            CalcDefaultVHDGeometry((1024 * 1024 * 32)/512, out cylinders, out headsPerCylinder, out sectorsPerTrack);
-
-            ulong actualSize = (ulong)cylinders * (ulong)headsPerCylinder * (ulong)sectorsPerTrack * 512;
-
-            FatFileSystem fs = FatFileSystem.FormatPartition(ms, "KBPARTITION", cylinders, headsPerCylinder, sectorsPerTrack, 0, 13);
+            FatFileSystem fs = FatFileSystem.FormatPartition(ms, "KBPARTITION", DiskGeometry.FromCapacity(1024 * 1024 * 32), 0, 13);
 
             fs.CreateDirectory(@"DIRB\DIRC");
 
@@ -123,51 +115,5 @@ namespace DiscUtils.Fat
             Assert.IsNull(fs.Root.Parent);
         }
 
-        internal static void CalcDefaultVHDGeometry(uint totalSectors, out ushort cylinders, out byte headsPerCylinder, out byte sectorsPerTrack)
-        {
-            // If more than ~128GB truncate at ~128GB
-            if (totalSectors > 65535 * 16 * 255)
-            {
-                totalSectors = 65535 * 16 * 255;
-            }
-
-            // If more than ~32GB, break partition table compatibility.
-            // Partition table has max 63 sectors per track.  Otherwise
-            // we're looking for a geometry that's valid for both BIOS
-            // and ATA.
-            if (totalSectors > 65535 * 16 * 63)
-            {
-                sectorsPerTrack = 255;
-                headsPerCylinder = 16;
-            }
-            else
-            {
-                sectorsPerTrack = 17;
-                uint cylindersTimesHeads = totalSectors / sectorsPerTrack;
-                headsPerCylinder = (byte)((cylindersTimesHeads + 1023) / 1024);
-
-                if (headsPerCylinder < 4)
-                {
-                    headsPerCylinder = 4;
-                }
-
-                // If we need more than 1023 cylinders, or 16 heads, try more sectors per track
-                if (cylindersTimesHeads >= (headsPerCylinder * 1024U) || headsPerCylinder > 16)
-                {
-                    sectorsPerTrack = 31;
-                    headsPerCylinder = 16;
-                    cylindersTimesHeads = totalSectors / sectorsPerTrack;
-                }
-
-                // We need 63 sectors per track to keep the cylinder count down
-                if (cylindersTimesHeads >= (headsPerCylinder * 1024U))
-                {
-                    sectorsPerTrack = 63;
-                    headsPerCylinder = 16;
-                }
-
-            }
-            cylinders = (ushort)((totalSectors / sectorsPerTrack) / headsPerCylinder);
-        }
     }
 }

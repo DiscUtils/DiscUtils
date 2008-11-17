@@ -47,10 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChsAddress.cs" />
     <Compile Include="DiscFileInfo.cs" />
     <Compile Include="DiscFileSystemInfo.cs" />
     <Compile Include="DiscDirectoryInfo.cs" />
     <Compile Include="DiscFileSystem.cs" />
+    <Compile Include="DiskGeometry.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
     <Compile Include="Fat\Directory.cs" />
     <Compile Include="Fat\FatBuffer.cs" />
@@ -99,6 +101,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utilities.cs" />
+    <Compile Include="VirtualDisk.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

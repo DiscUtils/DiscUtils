@@ -1028,17 +1028,17 @@ namespace DiscUtils.Fat
             if (type == FloppyDiskType.DoubleDensity)
             {
                 sectors = 1440;
-                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, 9, 2, true, volId, label);
+                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new DiskGeometry(80, 2, 9), true, volId, label);
             }
             else if (type == FloppyDiskType.HighDensity)
             {
                 sectors = 2880;
-                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, 18, 2, true, volId, label);
+                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new DiskGeometry(80, 2, 18), true, volId, label);
             }
             else if (type == FloppyDiskType.Extended)
             {
                 sectors = 5760;
-                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, 36, 2, true, volId, label);
+                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new DiskGeometry(80, 2, 36), true, volId, label);
             }
             else
             {
@@ -1075,18 +1075,14 @@ namespace DiscUtils.Fat
         /// </summary>
         /// <param name="stream">The stream to write the blank image to</param>
         /// <param name="label">The volume label for the floppy (or null)</param>
-        /// <param name="cylinders">The size of the partition in cylinders</param>
-        /// <param name="headsPerCylinder">The number of heads per cylinder in the disk geometry</param>
-        /// <param name="sectorsPerTrack">The number of sectors per track in the disk geometry</param>
+        /// <param name="diskGeometry">The geometry of the disk containing the partition</param>
         /// <param name="hiddenSectors">The starting sector number of this partition (hide's sectors in other partitions)</param>
         /// <param name="reservedSectors">The number of reserved sectors at the start of the partition</param>
         /// <returns>An object that provides access to the newly created floppy disk image</returns>
         public static FatFileSystem FormatPartition(
             Stream stream,
             string label,
-            int    cylinders,
-            short  headsPerCylinder,
-            short  sectorsPerTrack,
+            DiskGeometry diskGeometry,
             int    hiddenSectors,
             short  reservedSectors)
         {
@@ -1095,7 +1091,7 @@ namespace DiscUtils.Fat
             long ticks = DateTime.UtcNow.Ticks;
             uint volId = (uint)((ticks & 0xFFFF) | (ticks >> 32));
 
-            uint totalSectors = ((uint)cylinders) * ((ushort)headsPerCylinder) * ((ushort)sectorsPerTrack);
+            uint totalSectors = (uint)diskGeometry.TotalSectors;
             byte sectorsPerCluster;
             FatType fatType;
             ushort maxRootEntries;
@@ -1152,7 +1148,7 @@ namespace DiscUtils.Fat
                     sectorsPerCluster = 64;
                 }
             }
-            WriteBPB(bpb, totalSectors, fatType, maxRootEntries, (uint)hiddenSectors, (ushort)reservedSectors, sectorsPerCluster, (ushort)sectorsPerTrack, (ushort)headsPerCylinder, false, volId, label);
+            WriteBPB(bpb, totalSectors, fatType, maxRootEntries, (uint)hiddenSectors, (ushort)reservedSectors, sectorsPerCluster, diskGeometry, false, volId, label);
             stream.Write(bpb, 0, bpb.Length);
 
             // Skip the reserved sectors
@@ -1300,8 +1296,7 @@ namespace DiscUtils.Fat
         /// <param name="hiddenSectors">The number of hidden sectors before this file system (i.e. partition offset)</param>
         /// <param name="reservedSectors">The number of reserved sectors before the FAT</param>
         /// <param name="sectorsPerCluster">The number of sectors per cluster</param>
-        /// <param name="sectorsPerTrack">The number of sectors per track</param>
-        /// <param name="headsPerCylinder">The number of heads per cylinder</param>
+        /// <param name="diskGeometry">The geometry of the disk containing the Fat file system</param>
         /// <param name="isFloppy">Indicates if the disk is a removable media (a floppy disk)</param>
         /// <param name="volId">The disk's volume Id</param>
         /// <param name="label">The disk's label (or null)</param>
@@ -1313,8 +1308,7 @@ namespace DiscUtils.Fat
             uint hiddenSectors,
             ushort reservedSectors,
             byte sectorsPerCluster,
-            ushort sectorsPerTrack,
-            ushort headsPerCylinder,
+            DiskGeometry diskGeometry,
             bool isFloppy,
             uint volId,
             string label)
@@ -1354,10 +1348,10 @@ namespace DiscUtils.Fat
             Array.Copy(BitConverter.GetBytes((ushort)(fatType < FatType.Fat32 ? fatSectors : 0)), 0, bootSector, 22, 2);
 
             // Sectors Per Track
-            Array.Copy(BitConverter.GetBytes((ushort)sectorsPerTrack), 0, bootSector, 24, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)diskGeometry.SectorsPerTrack), 0, bootSector, 24, 2);
 
             // Sectors Per Track
-            Array.Copy(BitConverter.GetBytes((ushort)headsPerCylinder), 0, bootSector, 26, 2);
+            Array.Copy(BitConverter.GetBytes((ushort)diskGeometry.HeadsPerCylinder), 0, bootSector, 26, 2);
 
             // Hidden Sectors
             Array.Copy(BitConverter.GetBytes((uint)hiddenSectors), 0, bootSector, 28, 4);

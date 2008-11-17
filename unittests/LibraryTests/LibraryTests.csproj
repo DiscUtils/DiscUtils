@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChsAddressTest.cs" />
+    <Compile Include="DiskGeometryTest.cs" />
     <Compile Include="Fat\FatDirectoryInfoTest.cs" />
     <Compile Include="Fat\FatFileInfoTest.cs" />
     <Compile Include="Iso9660\IsoDirectoryInfoTest.cs" />
