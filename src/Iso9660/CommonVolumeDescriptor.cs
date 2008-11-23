@@ -66,10 +66,10 @@ namespace DiscUtils.Iso9660
             VolumeSequenceNumber = IsoUtilities.ToUInt16FromBoth(src, offset + 124);
             LogicalBlockSize = IsoUtilities.ToUInt16FromBoth(src, offset + 128);
             PathTableSize = IsoUtilities.ToUInt32FromBoth(src, offset + 132);
-            TypeLPathTableLocation = BitConverter.ToUInt32(src, offset + 140);
-            OptionalTypeLPathTableLocation = BitConverter.ToUInt32(src, offset + 144);
-            TypeMPathTableLocation = IsoUtilities.ByteSwap(BitConverter.ToUInt32(src, offset + 148));
-            OptionalTypeMPathTableLocation = IsoUtilities.ByteSwap(BitConverter.ToUInt32(src, offset + 152));
+            TypeLPathTableLocation = Utilities.ToUInt32LittleEndian(src, offset + 140);
+            OptionalTypeLPathTableLocation = Utilities.ToUInt32LittleEndian(src, offset + 144);
+            TypeMPathTableLocation = Utilities.BitSwap(Utilities.ToUInt32LittleEndian(src, offset + 148));
+            OptionalTypeMPathTableLocation = Utilities.BitSwap(Utilities.ToUInt32LittleEndian(src, offset + 152));
             DirectoryRecord.ReadFrom(src, offset + 156, CharacterEncoding, out RootDirectory);
             VolumeSetIdentifier = IsoUtilities.ReadChars(src, offset + 190, 318 - 190, CharacterEncoding);
             PublisherIdentifier = IsoUtilities.ReadChars(src, offset + 318, 446 - 318, CharacterEncoding);

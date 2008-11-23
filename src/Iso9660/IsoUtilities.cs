@@ -37,56 +37,34 @@ namespace DiscUtils.Iso9660
 
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {
-            return BitConverter.ToUInt32(data, offset);
+            return Utilities.ToUInt32LittleEndian(data, offset);
         }
 
         public static ushort ToUInt16FromBoth(byte[] data, int offset)
         {
-            return BitConverter.ToUInt16(data, offset);
+            return Utilities.ToUInt16LittleEndian(data, offset);
         }
 
         internal static void ToBothFromUInt32(byte[] buffer, int offset, uint value)
         {
-            byte[] bytes;
-
-            bytes = BitConverter.GetBytes(value);
-            Array.Copy(bytes, 0, buffer, offset, 4);
-            bytes = BitConverter.GetBytes(ByteSwap(value));
-            Array.Copy(bytes, 0, buffer, offset + 4, 4);
+            Utilities.WriteBytesLittleEndian(value, buffer, offset);
+            Utilities.WriteBytesBigEndian(value, buffer, offset + 4);
         }
 
         internal static void ToBothFromUInt16(byte[] buffer, int offset, ushort value)
         {
-            byte[] bytes;
-
-            bytes = BitConverter.GetBytes(value);
-            Array.Copy(bytes, 0, buffer, offset, 2);
-            bytes = BitConverter.GetBytes(ByteSwap(value));
-            Array.Copy(bytes, 0, buffer, offset + 2, 2);
+            Utilities.WriteBytesLittleEndian(value, buffer, offset);
+            Utilities.WriteBytesBigEndian(value, buffer, offset + 2);
         }
 
         internal static void ToBytesFromUInt32(byte[] buffer, int offset, uint value)
         {
-            byte[] bytes;
-            bytes = BitConverter.GetBytes(value);
-            Array.Copy(bytes, 0, buffer, offset, 4);
+            Utilities.WriteBytesLittleEndian(value, buffer, offset);
         }
 
         internal static void ToBytesFromUInt16(byte[] buffer, int offset, ushort value)
         {
-            byte[] bytes;
-            bytes = BitConverter.GetBytes(value);
-            Array.Copy(bytes, 0, buffer, offset, 2);
-        }
-
-        public static uint ByteSwap(uint val)
-        {
-            return ((val >> 24) & 0x000000FF) | ((val >> 8) & 0x0000FF00) | ((val << 8) & 0x00FF0000) | ((val << 24) & 0xFF000000);
-        }
-
-        public static ushort ByteSwap(ushort val)
-        {
-            return (ushort)(((val >> 8) & 0x00FF) | ((val << 8) & 0xFF00));
+            Utilities.WriteBytesLittleEndian(value, buffer, offset);
         }
 
         public static void WriteAChars(byte[] buffer, int offset, int numBytes, String str)
@@ -392,7 +370,7 @@ namespace DiscUtils.Iso9660
             }
 
             string strForm = dateTime.ToString("yyyyMMddHHmmssff", CultureInfo.InvariantCulture);
-            Array.Copy(Encoding.ASCII.GetBytes(strForm), 0, buffer, offset, 16);
+            Utilities.StringToBytes(strForm, buffer, offset, 16);
             buffer[offset + 16] = 0;
         }
 

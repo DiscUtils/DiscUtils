@@ -56,8 +56,8 @@ namespace DiscUtils.Iso9660
             IsoUtilities.ToBothFromUInt32(buffer, offset + 132, PathTableSize);
             IsoUtilities.ToBytesFromUInt32(buffer, offset + 140, TypeLPathTableLocation);
             IsoUtilities.ToBytesFromUInt32(buffer, offset + 144, OptionalTypeLPathTableLocation);
-            IsoUtilities.ToBytesFromUInt32(buffer, offset + 148, IsoUtilities.ByteSwap(TypeMPathTableLocation));
-            IsoUtilities.ToBytesFromUInt32(buffer, offset + 152, IsoUtilities.ByteSwap(OptionalTypeMPathTableLocation));
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 148, Utilities.BitSwap(TypeMPathTableLocation));
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 152, Utilities.BitSwap(OptionalTypeMPathTableLocation));
             RootDirectory.WriteTo(buffer, offset + 156, Encoding.ASCII);
             IsoUtilities.WriteDChars(buffer, offset + 190, 129, VolumeSetIdentifier);
             IsoUtilities.WriteAChars(buffer, offset + 318, 129, PublisherIdentifier);

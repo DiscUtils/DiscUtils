@@ -37,14 +37,14 @@ namespace DiscUtils.Iso9660
         {
             byte directoryIdentifierLength = src[offset + 0];
             record.ExtendedAttributeRecordLength = src[offset + 1];
-            record.LocationOfExtent = BitConverter.ToUInt32(src, offset + 2);
-            record.ParentDirectoryNumber = BitConverter.ToUInt16(src, offset + 6);
+            record.LocationOfExtent = Utilities.ToUInt32LittleEndian(src, offset + 2);
+            record.ParentDirectoryNumber = Utilities.ToUInt16LittleEndian(src, offset + 6);
             record.DirectoryIdentifier = IsoUtilities.ReadChars(src, offset + 8, directoryIdentifierLength, enc);
 
             if (byteSwap)
             {
-                record.LocationOfExtent = IsoUtilities.ByteSwap(record.LocationOfExtent);
-                record.ParentDirectoryNumber = IsoUtilities.ByteSwap(record.ParentDirectoryNumber);
+                record.LocationOfExtent = Utilities.BitSwap(record.LocationOfExtent);
+                record.ParentDirectoryNumber = Utilities.BitSwap(record.ParentDirectoryNumber);
             }
 
             return directoryIdentifierLength + 8 + (((directoryIdentifierLength & 1) == 1) ? 1 : 0);
@@ -56,8 +56,8 @@ namespace DiscUtils.Iso9660
 
             buffer[offset + 0] = (byte)nameBytes;
             buffer[offset + 1] = ExtendedAttributeRecordLength;
-            IsoUtilities.ToBytesFromUInt32(buffer, offset + 2, byteSwap ? IsoUtilities.ByteSwap(LocationOfExtent) : LocationOfExtent);
-            IsoUtilities.ToBytesFromUInt16(buffer, offset + 6, byteSwap ? IsoUtilities.ByteSwap(ParentDirectoryNumber) : ParentDirectoryNumber);
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 2, byteSwap ? Utilities.BitSwap(LocationOfExtent) : LocationOfExtent);
+            IsoUtilities.ToBytesFromUInt16(buffer, offset + 6, byteSwap ? Utilities.BitSwap(ParentDirectoryNumber) : ParentDirectoryNumber);
             IsoUtilities.WriteString(buffer, offset + 8, nameBytes, false, DirectoryIdentifier, enc);
             if ((nameBytes & 1) == 1)
             {
