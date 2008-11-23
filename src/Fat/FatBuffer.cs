@@ -96,21 +96,21 @@ namespace DiscUtils.Fat
         {
             if (_type == FatType.Fat16)
             {
-                return BitConverter.ToUInt16(_buffer, (int)(cluster * 2));
+                return Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster * 2));
             }
             else if (_type == FatType.Fat32)
             {
-                return BitConverter.ToUInt32(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
+                return Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
             }
             else // FAT12
             {
                 if ((cluster & 1) != 0)
                 {
-                    return (uint)((BitConverter.ToUInt16(_buffer, (int)(cluster + (cluster / 2))) >> 4) & 0x0FFF);
+                    return (uint)((Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + (cluster / 2))) >> 4) & 0x0FFF);
                 }
                 else
                 {
-                    return (uint)(BitConverter.ToUInt16(_buffer, (int)(cluster + (cluster / 2))) & 0x0FFF);
+                    return (uint)(Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + (cluster / 2))) & 0x0FFF);
                 }
             }
         }
@@ -134,13 +134,13 @@ namespace DiscUtils.Fat
         {
             if (_type == FatType.Fat16)
             {
-                Array.Copy(BitConverter.GetBytes((ushort)next), 0, _buffer, (int)(cluster * 2), 2);
+                Utilities.WriteBytesLittleEndian((ushort)next, _buffer, (int)(cluster * 2));
             }
             else if (_type == FatType.Fat32)
             {
-                uint oldVal = BitConverter.ToUInt32(_buffer, (int)(cluster * 4));
+                uint oldVal = Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4));
                 uint newVal = (oldVal & 0xF0000000) | (next & 0x0FFFFFFF);
-                Array.Copy(BitConverter.GetBytes((uint)newVal), 0, _buffer, (int)(cluster * 4), 4);
+                Utilities.WriteBytesLittleEndian((uint)newVal, _buffer, (int)(cluster * 4));
             }
             else
             {
@@ -150,17 +150,17 @@ namespace DiscUtils.Fat
                 if ((cluster & 1) != 0)
                 {
                     next = next << 4;
-                    maskedOldVal = (ushort)(BitConverter.ToUInt16(_buffer, offset) & 0x000F);
+                    maskedOldVal = (ushort)(Utilities.ToUInt16LittleEndian(_buffer, offset) & 0x000F);
                 }
                 else
                 {
                     next = next & 0x0FFF;
-                    maskedOldVal = (ushort)(BitConverter.ToUInt16(_buffer, offset) & 0xF000);
+                    maskedOldVal = (ushort)(Utilities.ToUInt16LittleEndian(_buffer, offset) & 0xF000);
                 }
 
                 ushort newVal = (ushort)(maskedOldVal | next);
 
-                Array.Copy(BitConverter.GetBytes(newVal), 0, _buffer, offset, 2);
+                Utilities.WriteBytesLittleEndian(newVal, _buffer, offset);
             }
         }
 

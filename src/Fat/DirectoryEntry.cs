@@ -69,34 +69,34 @@ namespace DiscUtils.Fat
 
         private void Load(byte[] data, int offset)
         {
-            _name = FatUtilities.BytesToString(data, offset, 11);
+            _name = Utilities.BytesToString(data, offset, 11);
             _attr = data[offset + 11];
             _creationTimeTenth = data[offset + 13];
-            _creationTime = BitConverter.ToUInt16(data, offset + 14);
-            _creationDate = BitConverter.ToUInt16(data, offset + 16);
-            _lastAccessDate = BitConverter.ToUInt16(data, offset + 18);
-            _firstClusterHi = BitConverter.ToUInt16(data, offset + 20);
-            _lastWriteTime = BitConverter.ToUInt16(data, offset + 22);
-            _lastWriteDate = BitConverter.ToUInt16(data, offset + 24);
-            _firstClusterLo = BitConverter.ToUInt16(data, offset + 26);
-            _fileSize = BitConverter.ToUInt32(data, offset + 28);
+            _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);
+            _creationDate = Utilities.ToUInt16LittleEndian(data, offset + 16);
+            _lastAccessDate = Utilities.ToUInt16LittleEndian(data, offset + 18);
+            _firstClusterHi = Utilities.ToUInt16LittleEndian(data, offset + 20);
+            _lastWriteTime = Utilities.ToUInt16LittleEndian(data, offset + 22);
+            _lastWriteDate = Utilities.ToUInt16LittleEndian(data, offset + 24);
+            _firstClusterLo = Utilities.ToUInt16LittleEndian(data, offset + 26);
+            _fileSize = Utilities.ToUInt32LittleEndian(data, offset + 28);
         }
 
         internal void WriteTo(Stream stream)
         {
             byte[] buffer = new byte[32];
 
-            FatUtilities.StringToBytes(_name, buffer, 0, 11);
+            Utilities.StringToBytes(_name, buffer, 0, 11);
             buffer[11] = _attr;
             buffer[13] = _creationTimeTenth;
-            Array.Copy(BitConverter.GetBytes((ushort)_creationTime), 0, buffer, 14, 2);
-            Array.Copy(BitConverter.GetBytes((ushort)_creationDate), 0, buffer, 16, 2);
-            Array.Copy(BitConverter.GetBytes((ushort)_lastAccessDate), 0, buffer, 18, 2);
-            Array.Copy(BitConverter.GetBytes((ushort)_firstClusterHi), 0, buffer, 20, 2);
-            Array.Copy(BitConverter.GetBytes((ushort)_lastWriteTime), 0, buffer, 22, 2);
-            Array.Copy(BitConverter.GetBytes((ushort)_lastWriteDate), 0, buffer, 24, 2);
-            Array.Copy(BitConverter.GetBytes((ushort)_firstClusterLo), 0, buffer, 26, 2);
-            Array.Copy(BitConverter.GetBytes((uint)_fileSize), 0, buffer, 28, 4);
+            Utilities.WriteBytesLittleEndian((ushort)_creationTime, buffer, 14);
+            Utilities.WriteBytesLittleEndian((ushort)_creationDate, buffer, 16);
+            Utilities.WriteBytesLittleEndian((ushort)_lastAccessDate, buffer, 18);
+            Utilities.WriteBytesLittleEndian((ushort)_firstClusterHi, buffer, 20);
+            Utilities.WriteBytesLittleEndian((ushort)_lastWriteTime, buffer, 22);
+            Utilities.WriteBytesLittleEndian((ushort)_lastWriteDate, buffer, 24);
+            Utilities.WriteBytesLittleEndian((ushort)_firstClusterLo, buffer, 26);
+            Utilities.WriteBytesLittleEndian((uint)_fileSize, buffer, 28);
 
             stream.Write(buffer, 0, buffer.Length);
         }

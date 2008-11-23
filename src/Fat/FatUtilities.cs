@@ -35,46 +35,6 @@ namespace DiscUtils.Fat
         /// </summary>
         private FatUtilities() { }
 
-        /// <summary>
-        /// Primitive conversion from Unicode to ASCII that preserves special characters.
-        /// </summary>
-        /// <param name="value">The string to convert</param>
-        /// <param name="dest">The buffer to fill</param>
-        /// <param name="offset">The start of the string in the buffer</param>
-        /// <param name="count">The number of characters to convert</param>
-        /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
-        /// we need to preserve them.  Instead we'll just truncate the top-half of each character.</remarks>
-        public static void StringToBytes(string value, byte[] dest, int offset, int count)
-        {
-            char[] chars = value.ToCharArray();
-
-            for (int i = 0; i < count; ++i)
-            {
-                dest[i + offset] = (byte)chars[i];
-            }
-        }
-
-        /// <summary>
-        /// Primitive conversion from ASCII to Unicode that preserves special characters.
-        /// </summary>
-        /// <param name="data">The data to convert</param>
-        /// <param name="offset">The first byte to convert</param>
-        /// <param name="count">The number of bytes to convert</param>
-        /// <returns>The string</returns>
-        /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
-        /// we need to preserve them.</remarks>
-        public static string BytesToString(byte[] data, int offset, int count)
-        {
-            char[] result = new char[count];
-
-            for (int i = 0; i < count; ++i)
-            {
-                result[i] = (char)data[i + offset];
-            }
-
-            return new String(result);
-        }
-
         public static string NormalizedFileNameFromPath(string path)
         {
             string[] elems = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
