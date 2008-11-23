@@ -1071,50 +1071,77 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
+        /// Formats a virtual hard disk partition.
+        /// </summary>
+        /// <param name="disk">The disk containing the partition</param>
+        /// <param name="partitionIndex">The index of the partition on the disk</param>
+        /// <param name="label">The volume label for the partition (or null)</param>
+        /// <returns>An object that provides access to the newly created partition file system</returns>
+        public static FatFileSystem FormatPartition(VirtualDisk disk, int partitionIndex, string label)
+        {
+            using (Stream partitionStream = disk.OpenPartition(disk.Partitions[partitionIndex]))
+            {
+                return FormatPartition(
+                    partitionStream,
+                    label,
+                    disk.Geometry,
+                    (int)disk.Partitions[0].FirstSector,
+                    (int)(1 + disk.Partitions[0].LastSector - disk.Partitions[0].FirstSector),
+                    (short)disk.Geometry.SectorsPerTrack);
+            }
+        }
+
+        /// <summary>
         /// Creates a formatted hard disk partition in a stream.
         /// </summary>
         /// <param name="stream">The stream to write the blank image to</param>
-        /// <param name="label">The volume label for the floppy (or null)</param>
+        /// <param name="label">The volume label for the partition (or null)</param>
         /// <param name="diskGeometry">The geometry of the disk containing the partition</param>
-        /// <param name="hiddenSectors">The starting sector number of this partition (hide's sectors in other partitions)</param>
+        /// <param name="firstSector">The starting sector number of this partition (hide's sectors in other partitions)</param>
+        /// <param name="sectorCount">The number of sectors in this partition</param>
         /// <param name="reservedSectors">The number of reserved sectors at the start of the partition</param>
-        /// <returns>An object that provides access to the newly created floppy disk image</returns>
+        /// <returns>An object that provides access to the newly created partition file system</returns>
         public static FatFileSystem FormatPartition(
             Stream stream,
             string label,
             DiskGeometry diskGeometry,
-            int    hiddenSectors,
-            short  reservedSectors)
+            int firstSector,
+            int sectorCount,
+            short reservedSectors)
         {
+            if (reservedSectors < 1)
+            {
+                throw new ArgumentOutOfRangeException("reservedSectors", reservedSectors, "Must have at least one reserved sector, for the BPB");
+            }
+
             long pos = stream.Position;
 
             long ticks = DateTime.UtcNow.Ticks;
             uint volId = (uint)((ticks & 0xFFFF) | (ticks >> 32));
 
-            uint totalSectors = (uint)diskGeometry.TotalSectors;
             byte sectorsPerCluster;
             FatType fatType;
             ushort maxRootEntries;
 
             // Write the BIOS Parameter Block (BPB) - a single sector
             byte[] bpb = new byte[512];
-            if(totalSectors <= 8400)
+            if (sectorCount <= 8400)
             {
                 throw new ArgumentException("Requested size is too small for a partition");
             }
-            else if(totalSectors < 1024 * 1024)
+            else if (sectorCount < 1024 * 1024)
             {
                 fatType = FatType.Fat16;
                 maxRootEntries = 512;
-                if (totalSectors <= 32680)
+                if (sectorCount <= 32680)
                 {
                     sectorsPerCluster = 2;
                 }
-                else if (totalSectors <= 262144)
+                else if (sectorCount <= 262144)
                 {
                     sectorsPerCluster = 4;
                 }
-                else if (totalSectors <= 524288)
+                else if (sectorCount <= 524288)
                 {
                     sectorsPerCluster = 8;
                 }
@@ -1127,19 +1154,19 @@ namespace DiscUtils.Fat
             {
                 fatType = FatType.Fat32;
                 maxRootEntries = 0;
-                if (totalSectors <= 532480)
+                if (sectorCount <= 532480)
                 {
                     sectorsPerCluster = 1;
                 }
-                else if (totalSectors <= 16777216)
+                else if (sectorCount <= 16777216)
                 {
                     sectorsPerCluster = 8;
                 }
-                else if (totalSectors <= 33554432)
+                else if (sectorCount <= 33554432)
                 {
                     sectorsPerCluster = 16;
                 }
-                else if (totalSectors <= 67108864)
+                else if (sectorCount <= 67108864)
                 {
                     sectorsPerCluster = 32;
                 }
@@ -1148,14 +1175,14 @@ namespace DiscUtils.Fat
                     sectorsPerCluster = 64;
                 }
             }
-            WriteBPB(bpb, totalSectors, fatType, maxRootEntries, (uint)hiddenSectors, (ushort)reservedSectors, sectorsPerCluster, diskGeometry, false, volId, label);
+            WriteBPB(bpb, (uint)sectorCount, fatType, maxRootEntries, (uint)firstSector, (ushort)reservedSectors, sectorsPerCluster, diskGeometry, false, volId, label);
             stream.Write(bpb, 0, bpb.Length);
 
             // Skip the reserved sectors
             stream.Position = pos + (((ushort)reservedSectors) * Utilities.SectorSize);
 
             // Write both FAT copies
-            byte[] fat = new byte[CalcFatSize(totalSectors, fatType, 1) * Utilities.SectorSize];
+            byte[] fat = new byte[CalcFatSize((uint)sectorCount, fatType, sectorsPerCluster) * Utilities.SectorSize];
             FatBuffer fatBuffer = new FatBuffer(fatType, fat);
             fatBuffer.SetNext(0, 0xFFFFFFF8);
             fatBuffer.SetEndOfChain(1);
@@ -1183,7 +1210,7 @@ namespace DiscUtils.Fat
 
             // Write a single byte at the end of the disk to ensure the stream is at least as big
             // as needed for this disk image.
-            stream.Position = pos + (totalSectors * (long)Utilities.SectorSize) - 1;
+            stream.Position = pos + (sectorCount * (long)Utilities.SectorSize) - 1;
             stream.WriteByte(0);
 
             // Give the caller access to the new file system
@@ -1257,18 +1284,18 @@ namespace DiscUtils.Fat
         private void ReadBPB()
         {
             _bpbOEMName = Encoding.ASCII.GetString(_bootSector, 3, 8).TrimEnd('\0');
-            _bpbBytesPerSec = BitConverter.ToUInt16(_bootSector, 11);
+            _bpbBytesPerSec = Utilities.ToUInt16LittleEndian(_bootSector, 11);
             _bpbSecPerClus = _bootSector[13];
-            _bpbRsvdSecCnt = BitConverter.ToUInt16(_bootSector, 14);
+            _bpbRsvdSecCnt = Utilities.ToUInt16LittleEndian(_bootSector, 14);
             _bpbNumFATs = _bootSector[16];
-            _bpbRootEntCnt = BitConverter.ToUInt16(_bootSector, 17);
-            _bpbTotSec16 = BitConverter.ToUInt16(_bootSector, 19);
+            _bpbRootEntCnt = Utilities.ToUInt16LittleEndian(_bootSector, 17);
+            _bpbTotSec16 = Utilities.ToUInt16LittleEndian(_bootSector, 19);
             _bpbMedia = _bootSector[21];
-            _bpbFATSz16 = BitConverter.ToUInt16(_bootSector, 22);
-            _bpbSecPerTrk = BitConverter.ToUInt16(_bootSector, 24);
-            _bpbNumHeads = BitConverter.ToUInt16(_bootSector, 26);
-            _bpbHiddSec = BitConverter.ToUInt32(_bootSector, 28);
-            _bpbTotSec32 = BitConverter.ToUInt32(_bootSector, 32);
+            _bpbFATSz16 = Utilities.ToUInt16LittleEndian(_bootSector, 22);
+            _bpbSecPerTrk = Utilities.ToUInt16LittleEndian(_bootSector, 24);
+            _bpbNumHeads = Utilities.ToUInt16LittleEndian(_bootSector, 26);
+            _bpbHiddSec = Utilities.ToUInt32LittleEndian(_bootSector, 28);
+            _bpbTotSec32 = Utilities.ToUInt32LittleEndian(_bootSector, 32);
 
             if (_type != FatType.Fat32)
             {
@@ -1276,12 +1303,12 @@ namespace DiscUtils.Fat
             }
             else
             {
-                _bpbFATSz32 = BitConverter.ToUInt32(_bootSector, 36);
-                _bpbExtFlags = BitConverter.ToUInt16(_bootSector, 40);
-                _bpbFSVer = BitConverter.ToUInt16(_bootSector, 42);
-                _bpbRootClus = BitConverter.ToUInt32(_bootSector, 44);
-                _bpbFSInfo = BitConverter.ToUInt16(_bootSector, 48);
-                _bpbBkBootSec = BitConverter.ToUInt16(_bootSector, 50);
+                _bpbFATSz32 = Utilities.ToUInt32LittleEndian(_bootSector, 36);
+                _bpbExtFlags = Utilities.ToUInt16LittleEndian(_bootSector, 40);
+                _bpbFSVer = Utilities.ToUInt16LittleEndian(_bootSector, 42);
+                _bpbRootClus = Utilities.ToUInt32LittleEndian(_bootSector, 44);
+                _bpbFSInfo = Utilities.ToUInt16LittleEndian(_bootSector, 48);
+                _bpbBkBootSec = Utilities.ToUInt16LittleEndian(_bootSector, 50);
                 ReadBS(64);
             }
         }
@@ -1320,7 +1347,7 @@ namespace DiscUtils.Fat
             bootSector[2] = 0x90;
 
             // OEM Name
-            Array.Copy(Encoding.ASCII.GetBytes("DISCUTIL"), 0, bootSector, 3, 8);
+            Utilities.StringToBytes("DISCUTIL", bootSector, 3, 8);
 
             // Bytes Per Sector (512)
             bootSector[11] = 0;
@@ -1330,34 +1357,34 @@ namespace DiscUtils.Fat
             bootSector[13] = sectorsPerCluster;
 
             // Reserved Sector Count
-            Array.Copy(BitConverter.GetBytes(reservedSectors), 0, bootSector, 14, 2);
+            Utilities.WriteBytesLittleEndian(reservedSectors, bootSector, 14);
 
             // Number of FATs
             bootSector[16] = 2;
 
             // Number of Entries in the root directory
-            Array.Copy(BitConverter.GetBytes((ushort)maxRootEntries), 0, bootSector, 17, 2);
+            Utilities.WriteBytesLittleEndian((ushort)maxRootEntries, bootSector, 17);
 
             // Total number of sectors (small)
-            Array.Copy(BitConverter.GetBytes((ushort)(sectors < 0x10000 ? sectors : 0)), 0, bootSector, 19, 2);
+            Utilities.WriteBytesLittleEndian((ushort)(sectors < 0x10000 ? sectors : 0), bootSector, 19);
 
             // Media
             bootSector[21] = (byte)(isFloppy ? 0xF0 : 0xF8);
 
             // FAT size (FAT12/FAT16)
-            Array.Copy(BitConverter.GetBytes((ushort)(fatType < FatType.Fat32 ? fatSectors : 0)), 0, bootSector, 22, 2);
+            Utilities.WriteBytesLittleEndian((ushort)(fatType < FatType.Fat32 ? fatSectors : 0), bootSector, 22);
 
             // Sectors Per Track
-            Array.Copy(BitConverter.GetBytes((ushort)diskGeometry.SectorsPerTrack), 0, bootSector, 24, 2);
+            Utilities.WriteBytesLittleEndian((ushort)diskGeometry.SectorsPerTrack, bootSector, 24);
 
             // Sectors Per Track
-            Array.Copy(BitConverter.GetBytes((ushort)diskGeometry.HeadsPerCylinder), 0, bootSector, 26, 2);
+            Utilities.WriteBytesLittleEndian((ushort)diskGeometry.HeadsPerCylinder, bootSector, 26);
 
             // Hidden Sectors
-            Array.Copy(BitConverter.GetBytes((uint)hiddenSectors), 0, bootSector, 28, 4);
+            Utilities.WriteBytesLittleEndian((uint)hiddenSectors, bootSector, 28);
 
             // Total number of sectors (large)
-            Array.Copy(BitConverter.GetBytes((uint)(sectors >= 0x10000 ? sectors : 0)), 0, bootSector, 32, 4);
+            Utilities.WriteBytesLittleEndian((uint)(sectors >= 0x10000 ? sectors : 0), bootSector, 32);
 
             if (fatType < FatType.Fat32)
             {
@@ -1366,7 +1393,7 @@ namespace DiscUtils.Fat
             else
             {
                 // FAT size (FAT32)
-                Array.Copy(BitConverter.GetBytes((uint)fatSectors), 0, bootSector, 36, 4);
+                Utilities.WriteBytesLittleEndian((uint)fatSectors, bootSector, 36);
 
                 // Ext flags: 0x80 = FAT 1 (i.e. Zero) active, no mirroring
                 bootSector[40] = 0x80;
@@ -1377,13 +1404,13 @@ namespace DiscUtils.Fat
                 bootSector[43] = 0;
 
                 // First cluster of the root directory, always 2 since we don't do bad sectors...
-                Array.Copy(BitConverter.GetBytes((uint)2), 0, bootSector, 44, 4);
+                Utilities.WriteBytesLittleEndian((uint)2, bootSector, 44);
 
                 // Sector number of FSINFO
-                Array.Copy(BitConverter.GetBytes((uint)1), 0, bootSector, 48, 4);
+                Utilities.WriteBytesLittleEndian((uint)1, bootSector, 48);
 
                 // Sector number of the Backup Boot Sector
-                Array.Copy(BitConverter.GetBytes((uint)6), 0, bootSector, 50, 4);
+                Utilities.WriteBytesLittleEndian((uint)6, bootSector, 50);
 
                 // Reserved area - must be set to 0
                 Array.Clear(bootSector, 52, 12);
@@ -1404,7 +1431,7 @@ namespace DiscUtils.Fat
         {
             _bsDrvNum = _bootSector[offset];
             _bsBootSig = _bootSector[offset + 2];
-            _bsVolId = BitConverter.ToUInt32(_bootSector, offset + 3);
+            _bsVolId = Utilities.ToUInt32LittleEndian(_bootSector, offset + 3);
             _bsVolLab = Encoding.ASCII.GetString(_bootSector, offset + 7, 11);
             _bsFilSysType = Encoding.ASCII.GetString(_bootSector, offset + 18, 8);
         }
@@ -1436,24 +1463,24 @@ namespace DiscUtils.Fat
             bootSector[offset + 2] = 0x29;
 
             // Volume Id
-            Array.Copy(BitConverter.GetBytes(volId), 0, bootSector, offset + 3, 4);
+            Utilities.WriteBytesLittleEndian(volId, bootSector, offset + 3);
 
             // Volume Label
-            Array.Copy(Encoding.ASCII.GetBytes(label), 0, bootSector, offset + 7, 11);
+            Utilities.StringToBytes(label, bootSector, offset + 7, 11);
 
             // File System Type
-            Array.Copy(Encoding.ASCII.GetBytes(fsType), 0, bootSector, offset + 18, 8);
+            Utilities.StringToBytes(fsType, bootSector, offset + 18, 8);
         }
 
         private static FatType DetectFATType(byte[] bpb)
         {
-            uint bpbBytesPerSec = BitConverter.ToUInt16(bpb, 11);
-            uint bpbRootEntCnt = BitConverter.ToUInt16(bpb, 17);
-            uint bpbFATSz16 = BitConverter.ToUInt16(bpb, 22);
-            uint bpbFATSz32 = BitConverter.ToUInt32(bpb, 36);
-            uint bpbTotSec16 = BitConverter.ToUInt16(bpb, 19);
-            uint bpbTotSec32 = BitConverter.ToUInt32(bpb, 32);
-            uint bpbResvdSecCnt = BitConverter.ToUInt16(bpb, 14);
+            uint bpbBytesPerSec = Utilities.ToUInt16LittleEndian(bpb, 11);
+            uint bpbRootEntCnt = Utilities.ToUInt16LittleEndian(bpb, 17);
+            uint bpbFATSz16 = Utilities.ToUInt16LittleEndian(bpb, 22);
+            uint bpbFATSz32 = Utilities.ToUInt32LittleEndian(bpb, 36);
+            uint bpbTotSec16 = Utilities.ToUInt16LittleEndian(bpb, 19);
+            uint bpbTotSec32 = Utilities.ToUInt32LittleEndian(bpb, 32);
+            uint bpbResvdSecCnt = Utilities.ToUInt16LittleEndian(bpb, 14);
             uint bpbNumFATs = bpb[16];
             uint bpbSecPerClus = bpb[13];
 

@@ -40,7 +40,8 @@ namespace DiscUtils.Fat
         {
             MemoryStream ms = new MemoryStream();
 
-            FatFileSystem fs = FatFileSystem.FormatPartition(ms, "KBPARTITION", DiskGeometry.FromCapacity(1024 * 1024 * 32), 0, 13);
+            DiskGeometry g = DiskGeometry.FromCapacity(1024 * 1024 * 32);
+            FatFileSystem fs = FatFileSystem.FormatPartition(ms, "KBPARTITION", g, 0, (int)g.TotalSectors, 13);
 
             fs.CreateDirectory(@"DIRB\DIRC");
 

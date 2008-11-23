@@ -41,6 +41,27 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Filters a collection into a new collection.
+        /// </summary>
+        /// <typeparam name="C">The type of the new collection</typeparam>
+        /// <typeparam name="T">The type of the collection entries</typeparam>
+        /// <param name="source">The collection to filter</param>
+        /// <param name="predicate">The predicate to select which entries are carried over</param>
+        /// <returns>The new collection, containing all entries where the predicate returns <code>true</code></returns>
+        public static C Filter<C, T>(ICollection<T> source, Func<T, bool> predicate) where C : ICollection<T>, new()
+        {
+            C result = new C();
+            foreach (T val in source)
+            {
+                if (predicate(val))
+                {
+                    result.Add(val);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Indicates if two ranges overlap.
         /// </summary>
         /// <typeparam name="T">The type of the ordinals</typeparam>

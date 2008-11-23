@@ -98,6 +98,57 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Partitions">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Partitions</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="7" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
+   <Namespace Name="DiscUtils.Vhd">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-22 16:45:38Z">
+      <Issue>
+       <Item>DiscUtils.Vhd</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="3" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Vhd</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="1" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Vhd" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
+      <Issue Name="Namespace">
+       <Item>Vhd</Item>
+       <Item>DiscUtils.Vhd</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="2" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
   </Namespaces>
   <Targets>
    <Target Name="$(ProjectDir)/src/bin/Release/DiscUtils.dll">
@@ -193,6 +244,262 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="22" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Utilities">
+          <Members>
+           <Member Name="#BitSwap(System.Int16)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.BitSwap(short)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BitSwap(System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.BitSwap(int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BitSwap(System.Int64)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.BitSwap(long)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BitSwap(System.UInt64)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.BitSwap(ulong)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToInt16BigEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToInt16BigEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToInt16LittleEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToInt16LittleEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToInt32BigEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToInt32BigEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToInt32LittleEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToInt32LittleEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToInt64BigEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToInt64BigEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToInt64LittleEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToInt64LittleEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ToUInt64LittleEndian(System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.ToUInt64LittleEndian(byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesBigEndian(System.Int16,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesBigEndian(short, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesBigEndian(System.Int32,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesBigEndian(int, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesBigEndian(System.Int64,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesBigEndian(long, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesLittleEndian(System.Int16,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesLittleEndian(short, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesLittleEndian(System.Int32,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesLittleEndian(int, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesLittleEndian(System.Int64,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesLittleEndian(long, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteBytesLittleEndian(System.UInt64,System.Byte[],System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
+              <Issue>
+               <Item>'Utilities.WriteBytesLittleEndian(ulong, byte[], int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="25" />
                </User>
               </Notes>
              </Message>
@@ -392,9 +699,13 @@
   <Notes>
    <User Name="Kenneth">
     <Note Id="0" Modified="2008-11-16 19:06:07Z">Added for completeness - setter is used.</Note>
+    <Note Id="1" Modified="2008-11-22 16:47:22Z">DiscUtils is the fixed name of the project</Note>
+    <Note Id="2" Modified="2008-11-22 16:47:50Z">VHD is well-used acronym.</Note>
+    <Note Id="3" Modified="2008-11-22 16:48:05Z">Deliberately using namespace separation</Note>
     <Note Id="4" Modified="2008-11-10 13:18:19Z">Deliberately not strong named - people using the library should add their own signature.</Note>
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="6" Modified="2008-11-10 13:18:45Z">DiscUtils is the fixed name of the project</Note>
+    <Note Id="7" Modified="2008-11-22 17:12:07Z">DiscUtils is fixed name of the project</Note>
     <Note Id="8" Modified="2008-11-10 13:24:01Z">Reflects name of member in CLR's DirectoryInfo class.</Note>
     <Note Id="9" Modified="2008-11-10 13:22:31Z">Reflects the GetFileSystemInfos member of CLR's DirectoryInfo class.</Note>
     <Note Id="10" Modified="2008-11-10 13:24:14Z">DiscUtils is the fixed project name</Note>
@@ -411,6 +722,7 @@
     <Note Id="21" Modified="2008-11-10 15:30:33Z">Will use parameter later to create unique names</Note>
     <Note Id="22" Modified="2008-11-17 22:09:55Z">Instance property to match other properties.</Note>
     <Note Id="23" Modified="2008-11-17 23:20:40Z">ChsAddress is immutable.</Note>
+    <Note Id="25" Modified="2008-11-23 11:21:13Z">Part of a set of re-usable bit-swapping methods.</Note>
    </User>
   </Notes>
   <Rules>

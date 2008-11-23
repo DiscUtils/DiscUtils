@@ -91,6 +91,14 @@
     <Compile Include="Iso9660\IsoUtilities.cs" />
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminator.cs" />
+    <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
+    <Compile Include="Partitions\BiosPartitionInfo.cs" />
+    <Compile Include="Partitions\BiosPartitionRecord.cs" />
+    <Compile Include="Partitions\BiosPartitionTable.cs" />
+    <Compile Include="Partitions\PartitionInfo.cs" />
+    <Compile Include="Partitions\PartitionTable.cs" />
+    <Compile Include="Partitions\BiosPartitionTypes.cs" />
+    <Compile Include="Partitions\WellKnownPartitionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CompoundSparseStream.cs" />
     <Compile Include="Fat\DirectoryEntry.cs" />
@@ -101,7 +109,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utilities.cs" />
+    <Compile Include="Vhd\Disk.cs" />
+    <Compile Include="Vhd\DiskImageFile.cs" />
+    <Compile Include="Vhd\FileType.cs" />
+    <Compile Include="Vhd\Footer.cs" />
     <Compile Include="VirtualDisk.cs" />
+    <Compile Include="VirtualDiskLayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

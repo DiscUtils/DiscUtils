@@ -20,6 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using DiscUtils.Partitions;
+using System.Collections.ObjectModel;
+
 namespace DiscUtils
 {
     /// <summary>
@@ -33,6 +37,48 @@ namespace DiscUtils
         public abstract DiskGeometry Geometry
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets the content of the disk as a stream.
+        /// </summary>
+        public abstract Stream Content
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Reduces the amount of actual storage consumed, if possible, by the disk.
+        /// </summary>
+        public abstract void Compact();
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public abstract ReadOnlyCollection<VirtualDiskLayer> Layers
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the object that interprets the partition structure.
+        /// </summary>
+        public virtual PartitionTable Partitions
+        {
+            get
+            {
+                return new BiosPartitionTable(this);
+            }
+        }
+
+        /// <summary>
+        /// Opens a partition as a stream.
+        /// </summary>
+        /// <param name="partition">The partition to open</param>
+        /// <returns>The stream providing access to the partition</returns>
+        public virtual Stream OpenPartition(PartitionInfo partition)
+        {
+            return new SubStream(Content, partition.FirstSector * Utilities.SectorSize, (1 + partition.LastSector - partition.FirstSector) * Utilities.SectorSize);
         }
     }
 }
