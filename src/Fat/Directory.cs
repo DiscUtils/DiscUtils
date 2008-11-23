@@ -157,14 +157,21 @@ namespace DiscUtils.Fat
             {
                 try
                 {
+                    uint firstCluster;
+                    if( !_fileSystem.Fat.TryGetFreeCluster(out firstCluster))
+                    {
+                        throw new IOException("Failed to allocate first cluster for new directory");
+                    }
+                    _fileSystem.Fat.SetEndOfChain(firstCluster);
+
                     DirectoryEntry newEntry = new DirectoryEntry(normalizedName, FatAttributes.Directory);
-                    newEntry.FirstCluster = 0; // i.e. Zero-length
+                    newEntry.FirstCluster = firstCluster;
                     newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                     newEntry.LastWriteTime = newEntry.CreationTime;
 
                     id = AddEntry(newEntry);
 
-                    PopulateNewChildDirectory(id, newEntry);
+                    PopulateNewChildDirectory(newEntry);
 
                     // Rather than just creating a new instance, pull it through the fileSystem cache
                     // to ensure the cache model is preserved.
@@ -475,25 +482,21 @@ namespace DiscUtils.Fat
             }
         }
 
-        private void PopulateNewChildDirectory(long newEntryId, DirectoryEntry newEntry)
+        private void PopulateNewChildDirectory(DirectoryEntry newEntry)
         {
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
             using (ClusterStream stream = new ClusterStream(_fileSystem, FileAccess.Write, newEntry.FirstCluster, uint.MaxValue))
             {
-                // Update our entry for the child when the first cluster is actually allocated
-                stream.FirstClusterChanged += (cluster) => {
-                    newEntry.FirstCluster = cluster;
-                    UpdateEntry(newEntryId, newEntry);
-                };
-
                 // First is the self-referencing entry...
                 DirectoryEntry selfEntry = new DirectoryEntry(newEntry);
                 selfEntry.NormalizedName = SelfEntryNormalizedName;
                 selfEntry.WriteTo(stream);
 
-                // Second is a clone of our self entry (i.e. parent)...
+                // Second is a clone of our self entry (i.e. parent) - though dates are odd...
                 DirectoryEntry parentEntry = new DirectoryEntry(SelfEntry);
                 parentEntry.NormalizedName = ParentEntryNormalizedName;
+                parentEntry.CreationTime = newEntry.CreationTime;
+                parentEntry.LastWriteTime = newEntry.LastWriteTime;
                 parentEntry.WriteTo(stream);
             }
         }
