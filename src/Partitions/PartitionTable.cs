@@ -33,6 +33,16 @@ namespace DiscUtils.Partitions
     public abstract class PartitionTable
     {
         /// <summary>
+        /// Creates a new partition that encompasses the entire disk.
+        /// </summary>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <returns>The index of the partition</returns>
+        /// <remarks>The partition table must be empty before this method is called,
+        /// otherwise IOException is thrown.</remarks>
+        public abstract int Create(WellKnownPartitionType type, bool active);
+
+        /// <summary>
         /// Creates a new partition with a target size.
         /// </summary>
         /// <param name="size">The target size (in bytes)</param>

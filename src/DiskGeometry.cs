@@ -162,6 +162,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the address of the last sector on the disk.
+        /// </summary>
+        public ChsAddress LastSector
+        {
+            get { return new ChsAddress(_cylinders - 1, _headsPerCylinder - 1, _sectorsPerTrack); }
+        }
+
+        /// <summary>
         /// Calculates a sensible disk geometry for a disk capacity using the VHD algorithm (errs under).
         /// </summary>
         /// <param name="capacity">The desired capacity of the disk</param>

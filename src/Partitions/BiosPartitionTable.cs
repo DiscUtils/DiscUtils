@@ -101,6 +101,25 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Creates a new partition that encompasses the entire disk.
+        /// </summary>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <returns>The index of the partition</returns>
+        /// <remarks>The partition table must be empty before this method is called,
+        /// otherwise IOException is thrown.</remarks>
+        public override int Create(WellKnownPartitionType type, bool active)
+        {
+            ChsAddress start = new ChsAddress(0, 1, 1);
+            ChsAddress last = _diskGeometry.LastSector;
+
+            long startLba = _diskGeometry.ToLogicalBlockAddress(start);
+            long lastLba = _diskGeometry.ToLogicalBlockAddress(last);
+
+            return CreatePrimaryByCylinder(0, _diskGeometry.Cylinders - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
+        }
+
+        /// <summary>
         /// Creates a new primary partition with a target size.
         /// </summary>
         /// <param name="size">The target size (in bytes)</param>
@@ -123,7 +142,7 @@ namespace DiscUtils.Partitions
         /// <param name="index">The index of the partition</param>
         public override void Delete(int index)
         {
-            throw new NotImplementedException();
+            WriteRecord(index, new BiosPartitionRecord());
         }
 
         /// <summary>
@@ -134,11 +153,13 @@ namespace DiscUtils.Partitions
         /// <param name="type">The BIOS (MBR) type of the new partition</param>
         /// <param name="markActive">Whether to mark the partition active (bootable)</param>
         /// <returns>The index of the new partition</returns>
+        /// <remarks>If the cylinder 0 is given, the first track will not be used, to reserve space
+        /// for the meta-data at the start of the disk.</remarks>
         public int CreatePrimaryByCylinder(int first, int last, byte type, bool markActive)
         {
-            if (first < 1)
+            if (first < 0)
             {
-                throw new ArgumentOutOfRangeException("first", first, "Can't use first cylinder, contains BIOS Parameter Block");
+                throw new ArgumentOutOfRangeException("first", first, "First cylinder must be Zero or greater");
             }
 
             if (last <= first)
@@ -146,7 +167,7 @@ namespace DiscUtils.Partitions
                 throw new ArgumentException("Last cylinder must be greater than first");
             }
 
-            int lbaStart = _diskGeometry.ToLogicalBlockAddress(first, 0, 1);
+            int lbaStart = (first == 0) ? _diskGeometry.ToLogicalBlockAddress(0, 1, 1) : _diskGeometry.ToLogicalBlockAddress(first, 0, 1);
             int lbaLast = _diskGeometry.ToLogicalBlockAddress(last, _diskGeometry.HeadsPerCylinder - 1, _diskGeometry.SectorsPerTrack);
 
             return CreatePrimaryBySector(lbaStart, lbaLast, type, markActive);
@@ -176,7 +197,7 @@ namespace DiscUtils.Partitions
 
             BiosPartitionRecord newRecord = new BiosPartitionRecord();
             ChsAddress startAddr = _diskGeometry.ToChsAddress(first);
-            ChsAddress endAddr = _diskGeometry.ToChsAddress(first);
+            ChsAddress endAddr = _diskGeometry.ToChsAddress(last);
 
             // Because C/H/S addresses can max out at lower values than the LBA values,
             // the special tuple (1023, 254, 63) is used.
@@ -349,7 +370,7 @@ namespace DiscUtils.Partitions
             var list = Utilities.Filter<List<BiosPartitionRecord>, BiosPartitionRecord>(GetPrimaryRecords(), (r) => r.IsValid);
             list.Sort();
 
-            int startCylinder = 1;
+            int startCylinder = 0;
             foreach (var r in list)
             {
                 if (!Utilities.RangesOverlap(startCylinder, startCylinder + numCylinders - 1, r.StartCylinder, r.EndCylinder))

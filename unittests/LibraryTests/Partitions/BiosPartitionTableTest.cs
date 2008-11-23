@@ -39,19 +39,84 @@ namespace DiscUtils.Partitions
         }
 
         [Test]
-        public void Create()
+        public void CreateWholeDisk()
         {
             MemoryStream ms = new MemoryStream();
             DiskGeometry geom = DiskGeometry.FromCapacity(3 * 1024 * 1024);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
-            Assert.AreEqual(0, table.CreatePrimaryByCylinder(1, 4, 33, false));
-            Assert.AreEqual(1, table.CreatePrimaryByCylinder(5, 9, 33, false));
+            int idx = table.Create(WellKnownPartitionType.WindowsFat, false);
 
-            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(1, 0, 1)), table[0].FirstSector);
-            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(5, 0, 1)) - 1, table[0].LastSector);
-            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(5, 0, 1)), table[1].FirstSector);
-            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(10, 0, 1)) - 1, table[1].LastSector);
+            // Make sure the partition fills all by the first track on the disk.
+            Assert.AreEqual(geom.TotalSectors, table[idx].SectorCount + geom.SectorsPerTrack);
+
+            // Make sure FAT16 was selected for a disk of this size
+            Assert.AreEqual(BiosPartitionTypes.Fat16, table[idx].BiosType);
         }
+
+        [Test]
+        public void CreateBySize()
+        {
+            MemoryStream ms = new MemoryStream();
+            DiskGeometry geom = DiskGeometry.FromCapacity(3 * 1024 * 1024);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            int idx = table.Create(2 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+
+            // Make sure the partition is within 10% of the size requested.
+            Assert.That((2 * 1024 * 2) * 0.9 < table[idx].SectorCount);
+
+            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(0, 1, 1)), table[idx].FirstSector);
+            Assert.AreEqual(geom.HeadsPerCylinder - 1, geom.ToChsAddress((int)table[idx].LastSector).Head);
+            Assert.AreEqual(geom.SectorsPerTrack, geom.ToChsAddress((int)table[idx].LastSector).Sector);
+        }
+
+        [Test]
+        public void CreateBySizeInGap()
+        {
+            MemoryStream ms = new MemoryStream();
+            DiskGeometry geom = new DiskGeometry(15, 30, 63);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
+            Assert.AreEqual(1, table.CreatePrimaryByCylinder(10, 14, 33, false));
+            table.Create(geom.ToLogicalBlockAddress(new ChsAddress(4, 0, 1)) * 512, WellKnownPartitionType.WindowsFat, true);
+        }
+
+        [Test]
+        public void CreateByCylinder()
+        {
+            MemoryStream ms = new MemoryStream();
+            DiskGeometry geom = new DiskGeometry(15, 30, 63);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
+            Assert.AreEqual(1, table.CreatePrimaryByCylinder(10, 14, 33, false));
+
+            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(0, 1, 1)), table[0].FirstSector);
+            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(5, 0, 1)) - 1, table[0].LastSector);
+            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(10, 0, 1)), table[1].FirstSector);
+            Assert.AreEqual(geom.ToLogicalBlockAddress(new ChsAddress(14, 29, 63)), table[1].LastSector);
+        }
+
+        [Test]
+        public void Delete()
+        {
+            MemoryStream ms = new MemoryStream();
+            DiskGeometry geom = DiskGeometry.FromCapacity(10 * 1024 * 1024);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            Assert.AreEqual(0, table.Create(1 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false));
+            Assert.AreEqual(1, table.Create(2 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false));
+            Assert.AreEqual(2, table.Create(3 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false));
+
+            long[] sectorCount = new long[] { table[0].SectorCount, table[1].SectorCount, table[2].SectorCount };
+
+            table.Delete(1);
+
+            Assert.AreEqual(2, table.Count);
+            Assert.AreEqual(sectorCount[2], table[1].SectorCount);
+        }
+
     }
 }
