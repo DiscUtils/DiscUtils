@@ -200,8 +200,8 @@ namespace DiscUtils.Fat
                 actualLength = DetectLength();
             }
 
-            long desiredNumClusters = value / _reader.ClusterSize;
-            long actualNumClusters = actualLength / _reader.ClusterSize;
+            long desiredNumClusters = (value + _reader.ClusterSize - 1) / _reader.ClusterSize;
+            long actualNumClusters = (actualLength + _reader.ClusterSize - 1) / _reader.ClusterSize;
 
             if (desiredNumClusters < actualNumClusters)
             {
@@ -214,6 +214,17 @@ namespace DiscUtils.Fat
                 uint firstToFree = _fat.GetNext(cluster);
                 _fat.SetEndOfChain(cluster);
                 _fat.FreeChain(firstToFree);
+
+                while (_knownClusters.Count > desiredNumClusters)
+                {
+                    _knownClusters.RemoveAt(_knownClusters.Count - 1);
+                }
+                _knownClusters.Add(FatBuffer.EndOfChain);
+
+                if (desiredNumClusters == 0)
+                {
+                    FireFirstClusterAllocated(0);
+                }
             }
             else if (desiredNumClusters > actualNumClusters)
             {
