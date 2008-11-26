@@ -1208,10 +1208,11 @@ namespace DiscUtils.Fat
             byte[] rootDir = new byte[rootDirSectors * Utilities.SectorSize];
             stream.Write(rootDir, 0, rootDir.Length);
 
-            // Write a single byte at the end of the disk to ensure the stream is at least as big
-            // as needed for this disk image.
-            stream.Position = pos + (sectorCount * (long)Utilities.SectorSize) - 1;
-            stream.WriteByte(0);
+            // Make sure the stream is at least as large as the partition requires.
+            if (stream.Length < pos + sectorCount * Utilities.SectorSize)
+            {
+                stream.SetLength(pos + sectorCount * Utilities.SectorSize);
+            }
 
             // Give the caller access to the new file system
             stream.Position = pos;
@@ -1262,7 +1263,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                fatStream = new ClusterStream(this, FileAccess.Read, _bpbRootClus, uint.MaxValue);
+                fatStream = new ClusterStream(this, FileAccess.ReadWrite, _bpbRootClus, uint.MaxValue);
             }
             _rootDir = new Directory(this, fatStream);
         }
