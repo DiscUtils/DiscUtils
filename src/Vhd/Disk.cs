@@ -23,6 +23,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Globalization;
 
 namespace DiscUtils.Vhd
 {
@@ -58,13 +59,24 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static Disk Initialize(Stream stream, long capacity, FileType type)
         {
-            if (type != FileType.Fixed)
+            if (type == FileType.Fixed)
             {
-                throw new NotImplementedException("Only fixed disks supported so far");
+                return InitializeFixedDisk(stream, capacity);
             }
+            else if (type == FileType.Dynamic)
+            {
+                return InitializeDynamicDisk(stream, capacity);
+            }
+            else
+            {
+                throw new NotImplementedException(String.Format(CultureInfo.InvariantCulture, "Disk type '{0}' not supported", type));
+            }
+        }
 
+        private static Disk InitializeFixedDisk(Stream stream, long capacity)
+        {
             DiskGeometry geometry = DiskGeometry.FromCapacity(capacity);
-            Footer footer = new Footer(geometry, type);
+            Footer footer = new Footer(geometry, FileType.Fixed);
             footer.UpdateChecksum();
 
             byte[] sector = new byte[Utilities.SectorSize];
@@ -74,6 +86,36 @@ namespace DiscUtils.Vhd
             stream.SetLength(stream.Position);
 
             stream.Position = 0;
+            return new Disk(stream);
+        }
+
+        private static Disk InitializeDynamicDisk(Stream stream, long capacity)
+        {
+            DiskGeometry geometry = DiskGeometry.FromCapacity(capacity);
+            Footer footer = new Footer(geometry, FileType.Dynamic);
+            footer.DataOffset = 512; // Offset of Dynamic Header
+            footer.UpdateChecksum();
+            byte[] footerBlock = new byte[512];
+            footer.ToBytes(footerBlock, 0);
+
+            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, capacity);
+            dynamicHeader.UpdateChecksum();
+            byte[] dynamicHeaderBlock = new byte[1024];
+            dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
+
+            int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
+            byte[] bat = new byte[batSize];
+            for (int i = 0; i < bat.Length; ++i)
+            {
+                bat[i] = 0xFF;
+            }
+
+            stream.Position = 0;
+            stream.Write(footerBlock, 0, 512);
+            stream.Write(dynamicHeaderBlock, 0, 1024);
+            stream.Write(bat, 0, batSize);
+            stream.Write(footerBlock, 0, 512);
+
             return new Disk(stream);
         }
 

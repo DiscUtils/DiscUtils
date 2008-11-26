@@ -44,6 +44,22 @@ namespace DiscUtils.Vhd
 
         public DynamicHeader() { }
 
+        public DynamicHeader(long dataOffset, long tableOffset, long diskSize)
+        {
+            Cookie = HeaderCookie;
+            DataOffset = dataOffset;
+            TableOffset = tableOffset;
+            HeaderVersion = Version1;
+            BlockSize = 0x00200000;
+            MaxTableEntries = (int)((diskSize + BlockSize - 1) / BlockSize);
+            ParentUnicodeName = "";
+            ParentLocators = new ParentLocator[8];
+            for(int i = 0; i < 8; ++i)
+            {
+                ParentLocators[i] = new ParentLocator();
+            }
+        }
+
         public DynamicHeader(DynamicHeader toCopy)
         {
             Cookie = toCopy.Cookie;

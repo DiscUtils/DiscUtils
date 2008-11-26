@@ -30,7 +30,10 @@ namespace DiscUtils.Vhd
         public uint PlatformDataLength;
         public ulong PlatformDataOffset;
 
-        public ParentLocator() { }
+        public ParentLocator()
+        {
+            PlatformCode = "";
+        }
 
         public ParentLocator(ParentLocator toCopy)
         {
