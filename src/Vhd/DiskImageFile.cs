@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Globalization;
 using System.IO;
 
 namespace DiscUtils.Vhd
@@ -42,6 +41,11 @@ namespace DiscUtils.Vhd
         private Footer _footer;
 
         /// <summary>
+        /// The VHD file's dynamic header (if not static)
+        /// </summary>
+        private DynamicHeader _dynamicHeader;
+
+        /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
@@ -51,9 +55,11 @@ namespace DiscUtils.Vhd
 
             ReadFooter(true);
 
-            if (_footer.DiskType != FileType.Fixed)
+            ReadHeaders();
+
+            if (_footer.DiskType == FileType.Differencing)
             {
-                throw new NotImplementedException("Only static disks implemented so far");
+                throw new NotImplementedException("Differencing disks not supported yet");
             }
         }
 
@@ -89,6 +95,23 @@ namespace DiscUtils.Vhd
             get { return _footer.DiskType != FileType.Fixed; }
         }
 
+        internal override Stream GetContentStream(Stream parent)
+        {
+            if (_footer.DiskType == FileType.Fixed)
+            {
+                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
+            }
+            else if (_footer.DiskType == FileType.Dynamic)
+            {
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+#if false
         /// <summary>
         /// Reads a logical disk sector, if available.
         /// </summary>
@@ -262,7 +285,7 @@ namespace DiscUtils.Vhd
                 return -1;
             }
         }
-
+#endif
         private void ReadFooter(bool fallbackToFront)
         {
             long length = _fileStream.Length;
@@ -301,5 +324,26 @@ namespace DiscUtils.Vhd
                 }
             }
         }
+
+        private void ReadHeaders()
+        {
+            long pos = _footer.DataOffset;
+            while (pos != -1)
+            {
+                _fileStream.Position = pos;
+                Header hdr = Header.FromStream(_fileStream);
+                if (hdr.Cookie == DynamicHeader.HeaderCookie)
+                {
+                    _fileStream.Position = pos;
+                    _dynamicHeader = DynamicHeader.FromStream(_fileStream);
+                    if (!_dynamicHeader.IsValid())
+                    {
+                        throw new IOException("Invalid Dynamic Disc Header");
+                    }
+                }
+                pos = hdr.DataOffset;
+            }
+        }
+
     }
 }

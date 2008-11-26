@@ -111,8 +111,12 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Vhd\Disk.cs" />
     <Compile Include="Vhd\DiskImageFile.cs" />
+    <Compile Include="Vhd\DynamicHeader.cs" />
+    <Compile Include="Vhd\DynamicStream.cs" />
     <Compile Include="Vhd\FileType.cs" />
     <Compile Include="Vhd\Footer.cs" />
+    <Compile Include="Vhd\Header.cs" />
+    <Compile Include="Vhd\ParentLocator.cs" />
     <Compile Include="VirtualDisk.cs" />
     <Compile Include="VirtualDiskLayer.cs" />
   </ItemGroup>

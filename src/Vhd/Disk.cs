@@ -90,18 +90,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public override Stream Content
         {
-            get
-            {
-                if (!_vhdFile.IsSparse)
-                {
-                    // Protect the footer by denying access to last 512 bytes
-                    return new SubStream(_fileStream, 0, _fileStream.Length - 512);
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            get { return _vhdFile.GetContentStream(null); }
         }
 
         /// <summary>
