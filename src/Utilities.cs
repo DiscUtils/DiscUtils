@@ -290,9 +290,16 @@ namespace DiscUtils
         {
             char[] chars = value.ToCharArray();
 
-            for (int i = 0; i < count; ++i)
+            int i = 0;
+            while (i < chars.Length)
             {
                 dest[i + offset] = (byte)chars[i];
+                ++i;
+            }
+            while (i < count)
+            {
+                dest[i + offset] = 0;
+                ++i;
             }
         }
 
@@ -385,6 +392,11 @@ namespace DiscUtils
             while (numRead > 0)
             {
                 totalRead += numRead;
+                if (totalRead == length)
+                {
+                    break;
+                }
+
                 numRead = stream.Read(buffer, offset + totalRead, length - totalRead);
             }
 
