@@ -190,13 +190,16 @@ namespace DiscUtils.Vhd
 
                 int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
                 int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
-                int toWrite = Math.Min(count - numWritten, 512 - offsetInSector); // TODO - write to end of block
-
-                byte sectorMask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                int toWrite = (int)Math.Min(count - numWritten, _dynamicHeader.BlockSize - offsetInBlock);
 
                 // Need to read - we're not handling a full sector
-                if (toWrite != Utilities.SectorSize)
+                if (offsetInSector != 0 || toWrite < Utilities.SectorSize)
                 {
+                    // Reduce the write to just the end of the current sector
+                    toWrite = Math.Min(count - numWritten, Utilities.SectorSize - offsetInSector);
+
+                    byte sectorMask = (byte)(1 << (7 - (sectorInBlock % 8)));
+
                     long sectorStart = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmaps[block].Length;
 
                     // Get the existing sector data (if any)
@@ -213,17 +216,31 @@ namespace DiscUtils.Vhd
                     // Overlay as much data as we have for this sector
                     Array.Copy(buffer, offset + numWritten, sectorBuffer, offsetInSector, toWrite);
 
+                    // Write the sector back
                     _fileStream.Position = sectorStart;
                     _fileStream.Write(sectorBuffer, 0, Utilities.SectorSize);
+
+                    // Update the in-memory block bitmap
+                    _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
                 }
                 else
                 {
-                    // Whole sector, just write...
+                    // Processing at least one whole sector, just write (after making sure to trim any partial sectors from the end)...
+                    toWrite = (toWrite / Utilities.SectorSize) * Utilities.SectorSize;
+
                     _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmaps[block].Length;
                     _fileStream.Write(buffer, offset + numWritten, toWrite);
+
+                    // Update all of the bits in the block bitmap
+                    for (int i = offset; i < offset + toWrite; i += Utilities.SectorSize)
+                    {
+                        byte sectorMask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
+                        sectorInBlock++;
+                    }
+
                 }
 
-                _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
                 WriteBlockBitmap(block);
 
                 numWritten += toWrite;
