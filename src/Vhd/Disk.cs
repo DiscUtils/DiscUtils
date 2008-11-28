@@ -22,8 +22,8 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Globalization;
+using System.IO;
 
 namespace DiscUtils.Vhd
 {
@@ -33,7 +33,6 @@ namespace DiscUtils.Vhd
     public class Disk : VirtualDisk
     {
         private DiskImageFile _vhdFile;
-        private Stream _fileStream;
 
         /// <summary>
         /// Creates a new instance from an existing stream, differencing disks not supported.
@@ -41,7 +40,6 @@ namespace DiscUtils.Vhd
         /// <param name="stream">The stream to read</param>
         public Disk(Stream stream)
         {
-            _fileStream = stream;
             _vhdFile = new DiskImageFile(stream);
 
             if (_vhdFile.HasParent)

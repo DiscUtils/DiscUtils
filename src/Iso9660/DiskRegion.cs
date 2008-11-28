@@ -26,23 +26,23 @@ namespace DiscUtils.Iso9660
 {
     internal abstract class DiskRegion
     {
-        private long start;
-        private long length;
+        private long _start;
+        private long _length;
 
         public DiskRegion(long start)
         {
-            this.start = start;
+            _start = start;
         }
 
         internal long DiskStart
         {
-            get { return start; }
+            get { return _start; }
         }
 
         internal long DiskLength
         {
-            get { return length; }
-            set { length = value; }
+            get { return _length; }
+            set { _length = value; }
         }
 
         internal abstract void PrepareForRead();

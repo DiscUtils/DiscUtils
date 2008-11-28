@@ -29,30 +29,30 @@ namespace DiscUtils.Iso9660
 {
     internal class CDBuildStream : Stream
     {
-        private List<BuildFileInfo> files;
-        private List<BuildDirectoryInfo> dirs;
-        private BuildDirectoryInfo rootDirectory;
-        private BuildParameters buildParams;
+        private List<BuildFileInfo> _files;
+        private List<BuildDirectoryInfo> _dirs;
+        private BuildDirectoryInfo _rootDirectory;
+        private BuildParameters _buildParams;
 
-        private DateTime buildTime;
-        private Encoding suppEncoding;
-        private Dictionary<BuildDirectoryMember, uint> primaryLocationTable;
-        private Dictionary<BuildDirectoryMember, uint> supplementaryLocationTable;
-        private List<DiskRegion> fixedRegions;
+        private DateTime _buildTime;
+        private Encoding _suppEncoding;
+        private Dictionary<BuildDirectoryMember, uint> _primaryLocationTable;
+        private Dictionary<BuildDirectoryMember, uint> _supplementaryLocationTable;
+        private List<DiskRegion> _fixedRegions;
 
-        private DiskRegion currentRegion;
-        private long position;
-        private byte[] blockBuffer = new byte[2048];
+        private DiskRegion _currentRegion;
+        private long _position;
+        private byte[] _blockBuffer = new byte[2048];
 
         private const long DiskStart = 0x8000;
-        private long endOfDisk;
+        private long _endOfDisk;
 
         public CDBuildStream(List<BuildFileInfo> files, List<BuildDirectoryInfo> dirs, BuildDirectoryInfo rootDirectory, BuildParameters buildParams)
         {
-            this.files = files;
-            this.dirs = dirs;
-            this.rootDirectory = rootDirectory;
-            this.buildParams = buildParams;
+            _files = files;
+            _dirs = dirs;
+            _rootDirectory = rootDirectory;
+            _buildParams = buildParams;
 
             Fix();
         }
@@ -62,9 +62,9 @@ namespace DiscUtils.Iso9660
             base.Dispose(disposing);
             if (disposing)
             {
-                if (currentRegion != null)
+                if (_currentRegion != null)
                 {
-                    currentRegion.DisposeReadState();
+                    _currentRegion.DisposeReadState();
                 }
             }
         }
@@ -74,13 +74,13 @@ namespace DiscUtils.Iso9660
         /// </summary>
         private void Fix()
         {
-            buildTime = DateTime.UtcNow;
+            _buildTime = DateTime.UtcNow;
 
-            suppEncoding = buildParams.UseJoliet ? Encoding.BigEndianUnicode : Encoding.ASCII;
+            _suppEncoding = _buildParams.UseJoliet ? Encoding.BigEndianUnicode : Encoding.ASCII;
 
-            primaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
-            supplementaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
-            fixedRegions = new List<DiskRegion>();
+            _primaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
+            _supplementaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
+            _fixedRegions = new List<DiskRegion>();
 
             long focus = DiskStart + 3 * 2048; // Primary, Supplementary, End (fixed at end...)
 
@@ -92,11 +92,11 @@ namespace DiscUtils.Iso9660
 
             // Find start of the second set of directory data, fixing ASCII directories in place.
             long startOfFirstDirData = focus;
-            focus = FixDirectories(focus, primaryLocationTable, Encoding.ASCII);
+            focus = FixDirectories(focus, _primaryLocationTable, Encoding.ASCII);
 
             // Find end of the second directory table, fixing supplementary directories in place.
             long startOfSecondDirData = focus;
-            focus = FixDirectories(focus, supplementaryLocationTable, suppEncoding);
+            focus = FixDirectories(focus, _supplementaryLocationTable, _suppEncoding);
 
             // There are four path tables:
             //  1. LE, ASCII
@@ -106,70 +106,70 @@ namespace DiscUtils.Iso9660
 
             // Find end of the path table
             long startOfFirstPathTable = focus;
-            PathTable pathTable = new PathTable(false, Encoding.ASCII, dirs, primaryLocationTable, focus);
-            fixedRegions.Add(pathTable);
+            PathTable pathTable = new PathTable(false, Encoding.ASCII, _dirs, _primaryLocationTable, focus);
+            _fixedRegions.Add(pathTable);
             focus += pathTable.DiskLength;
             long primaryPathTableLength = pathTable.DataLength;
 
             long startOfSecondPathTable = focus;
-            pathTable = new PathTable(true, Encoding.ASCII, dirs, primaryLocationTable, focus);
-            fixedRegions.Add(pathTable);
+            pathTable = new PathTable(true, Encoding.ASCII, _dirs, _primaryLocationTable, focus);
+            _fixedRegions.Add(pathTable);
             focus += pathTable.DiskLength;
 
             long startOfThirdPathTable = focus;
-            pathTable = new PathTable(false, suppEncoding, dirs, supplementaryLocationTable, focus);
-            fixedRegions.Add(pathTable);
+            pathTable = new PathTable(false, _suppEncoding, _dirs, _supplementaryLocationTable, focus);
+            _fixedRegions.Add(pathTable);
             focus += pathTable.DiskLength;
             long supplementaryPathTableLength = pathTable.DataLength;
 
             long startOfFourthPathTable = focus;
-            pathTable = new PathTable(true, suppEncoding, dirs, supplementaryLocationTable, focus);
-            fixedRegions.Add(pathTable);
+            pathTable = new PathTable(true, _suppEncoding, _dirs, _supplementaryLocationTable, focus);
+            _fixedRegions.Add(pathTable);
             focus += pathTable.DiskLength;
 
             // Find the end of the disk
-            endOfDisk = focus;
+            _endOfDisk = focus;
 
 
             PrimaryVolumeDescriptor pvDesc = new PrimaryVolumeDescriptor(
-                (uint)(endOfDisk / 2048),                        // VolumeSpaceSize
+                (uint)(_endOfDisk / 2048),                        // VolumeSpaceSize
                 (uint)(primaryPathTableLength),                  // PathTableSize
                 (uint)(startOfFirstPathTable / 2048),            // TypeLPathTableLocation
                 (uint)(startOfSecondPathTable / 2048),           // TypeMPathTableLocation
                 (uint)(startOfFirstDirData / 2048),              // RootDirectory.LocationOfExtent
-                (uint)rootDirectory.GetDataSize(Encoding.ASCII), // RootDirectory.DataLength
-                buildTime
+                (uint)_rootDirectory.GetDataSize(Encoding.ASCII), // RootDirectory.DataLength
+                _buildTime
                 );
-            pvDesc.VolumeIdentifier = buildParams.VolumeIdentifier;
+            pvDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
             PrimaryVolumeDescriptorRegion pvdr = new PrimaryVolumeDescriptorRegion(pvDesc, DiskStart);
-            fixedRegions.Insert(0, pvdr);
+            _fixedRegions.Insert(0, pvdr);
 
             SupplementaryVolumeDescriptor svDesc = new SupplementaryVolumeDescriptor(
-                (uint)(endOfDisk / 2048),                        // VolumeSpaceSize
+                (uint)(_endOfDisk / 2048),                        // VolumeSpaceSize
                 (uint)(supplementaryPathTableLength),            // PathTableSize
                 (uint)(startOfThirdPathTable / 2048),            // TypeLPathTableLocation
                 (uint)(startOfFourthPathTable / 2048),           // TypeMPathTableLocation
                 (uint)(startOfSecondDirData / 2048),             // RootDirectory.LocationOfExtent
-                (uint)rootDirectory.GetDataSize(suppEncoding),   // RootDirectory.DataLength
-                buildTime,
-                suppEncoding
+                (uint)_rootDirectory.GetDataSize(_suppEncoding),   // RootDirectory.DataLength
+                _buildTime,
+                _suppEncoding
                 );
-            svDesc.VolumeIdentifier = buildParams.VolumeIdentifier;
+            svDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
             SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, DiskStart + 2048);
-            fixedRegions.Insert(1, svdr);
+            _fixedRegions.Insert(1, svdr);
 
             VolumeDescriptorSetTerminator evDesc = new VolumeDescriptorSetTerminator();
             VolumeDescriptorSetTerminatorRegion evdr = new VolumeDescriptorSetTerminatorRegion(evDesc, DiskStart + 4096);
-            fixedRegions.Insert(2, evdr);
+            _fixedRegions.Insert(2, evdr);
         }
 
         private long FixDirectories(long focus, Dictionary<BuildDirectoryMember, uint> locationTable, Encoding enc)
         {
-            foreach (BuildDirectoryInfo di in dirs)
+            foreach (BuildDirectoryInfo di in _dirs)
             {
                 locationTable.Add(di, (uint)(focus / 2048));
                 DirectoryExtent extent = new DirectoryExtent(di, locationTable, enc, focus);
-                fixedRegions.Add(extent);
+                _fixedRegions.Add(extent);
                 focus += extent.DiskLength;
             }
             return focus;
@@ -178,16 +178,16 @@ namespace DiscUtils.Iso9660
         private long FixFiles(long focus)
         {
             // Find end of the file data, fixing the files in place as we go
-            foreach (BuildFileInfo fi in files)
+            foreach (BuildFileInfo fi in _files)
             {
-                primaryLocationTable.Add(fi, (uint)(focus / 2048));
-                supplementaryLocationTable.Add(fi, (uint)(focus / 2048));
+                _primaryLocationTable.Add(fi, (uint)(focus / 2048));
+                _supplementaryLocationTable.Add(fi, (uint)(focus / 2048));
                 FileExtent extent = new FileExtent(fi, focus);
 
                 // Only remember files of non-zero length (otherwise we'll stomp on a valid file)
                 if (extent.DiskLength != 0)
                 {
-                    fixedRegions.Add(extent);
+                    _fixedRegions.Add(extent);
                 }
 
                 focus += extent.DiskLength;
@@ -198,32 +198,32 @@ namespace DiscUtils.Iso9660
         private void GetLogicalBlock(long start, byte[] buffer, int offset)
         {
             // If current region is outside the area of interest, clean it up
-            if (currentRegion != null && (start < currentRegion.DiskStart || start >= currentRegion.DiskStart + currentRegion.DiskLength))
+            if (_currentRegion != null && (start < _currentRegion.DiskStart || start >= _currentRegion.DiskStart + _currentRegion.DiskLength))
             {
-                currentRegion.DisposeReadState();
-                currentRegion = null;
+                _currentRegion.DisposeReadState();
+                _currentRegion = null;
             }
 
             // If we need to find a new region, look for it
-            if (currentRegion == null)
+            if (_currentRegion == null)
             {
-                int idx = fixedRegions.BinarySearch(new SearchDiskRegion(start), new DiskRegionComparer());
+                int idx = _fixedRegions.BinarySearch(new SearchDiskRegion(start), new DiskRegionComparer());
                 if (idx >= 0)
                 {
-                    DiskRegion region = fixedRegions[idx];
+                    DiskRegion region = _fixedRegions[idx];
                     region.PrepareForRead();
-                    currentRegion = region;
+                    _currentRegion = region;
                 }
             }
 
             // If the block is outside any known region, fill with zeros, else read the block
-            if (currentRegion == null)
+            if (_currentRegion == null)
             {
                 Array.Clear(buffer, offset, 2048);
             }
             else
             {
-                currentRegion.ReadLogicalBlock(start, buffer, offset);
+                _currentRegion.ReadLogicalBlock(start, buffer, offset);
             }
         }
 
@@ -275,35 +275,35 @@ namespace DiscUtils.Iso9660
 
         public override long Length
         {
-            get { return endOfDisk; }
+            get { return _endOfDisk; }
         }
 
         public override long Position
         {
             get
             {
-                return position;
+                return _position;
             }
             set
             {
-                position = value;
+                _position = value;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (position >= endOfDisk)
+            if (_position >= _endOfDisk)
             {
                 return 0;
             }
 
             // Get the current block
-            GetLogicalBlock((position / 2048) * 2048, blockBuffer, 0);
+            GetLogicalBlock((_position / 2048) * 2048, _blockBuffer, 0);
 
             // Read up to the block boundary only
-            int numRead = (int)Math.Min(count, 2048 - (position % 2048));
-            Array.Copy(blockBuffer, position % 2048, buffer, offset, numRead);
-            position += numRead;
+            int numRead = (int)Math.Min(count, 2048 - (_position % 2048));
+            Array.Copy(_blockBuffer, _position % 2048, buffer, offset, numRead);
+            _position += numRead;
             return numRead;
         }
 
@@ -312,13 +312,13 @@ namespace DiscUtils.Iso9660
             long newPos = offset;
             if (origin == SeekOrigin.Current)
             {
-                newPos += position;
+                newPos += _position;
             }
             else if (origin == SeekOrigin.End)
             {
                 newPos += Length;
             }
-            position = newPos;
+            _position = newPos;
             return newPos;
         }
 

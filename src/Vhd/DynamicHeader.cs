@@ -27,7 +27,7 @@ namespace DiscUtils.Vhd
 {
     internal class DynamicHeader
     {
-        public static readonly string HeaderCookie = "cxsparse";
+        public const string HeaderCookie = "cxsparse";
         public const uint Version1 = 0x00010000;
 
         public string Cookie;

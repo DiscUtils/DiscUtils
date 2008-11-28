@@ -45,7 +45,7 @@ namespace DiscUtils.Partitions
 
         public BiosPartitionRecord(byte[] data, int offset, uint lbaOffset)
         {
-            this._lbaOffset = lbaOffset;
+            _lbaOffset = lbaOffset;
 
             _status = data[offset];
             _startHead = data[offset + 1];

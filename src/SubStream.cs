@@ -27,56 +27,56 @@ namespace DiscUtils
 {
     internal class SubStream : Stream
     {
-        private long position;
-        private long first;
-        private long length;
+        private long _position;
+        private long _first;
+        private long _length;
 
-        private Stream parent;
+        private Stream _parent;
 
         public SubStream(Stream parent, long first, long length)
         {
-            this.parent = parent;
-            this.first = first;
-            this.length = length;
+            _parent = parent;
+            _first = first;
+            _length = length;
         }
 
 
         public override bool CanRead
         {
-            get { return parent.CanRead; }
+            get { return _parent.CanRead; }
         }
 
         public override bool CanSeek
         {
-            get { return parent.CanSeek; }
+            get { return _parent.CanSeek; }
         }
 
         public override bool CanWrite
         {
-            get { return parent.CanWrite; }
+            get { return _parent.CanWrite; }
         }
 
         public override void Flush()
         {
-            parent.Flush();
+            _parent.Flush();
         }
 
         public override long Length
         {
-            get { return length; }
+            get { return _length; }
         }
 
         public override long Position
         {
             get
             {
-                return position;
+                return _position;
             }
             set
             {
-                if (value <= length)
+                if (value <= _length)
                 {
-                    position = value;
+                    _position = value;
                 }
                 else
                 {
@@ -92,9 +92,9 @@ namespace DiscUtils
                 throw new ArgumentOutOfRangeException("count", "Attempt to read negative bytes");
             }
 
-            parent.Position = first + position;
-            int numRead = parent.Read(buffer, offset, (int)Math.Min(count, Math.Min(length - position, int.MaxValue)));
-            position += numRead;
+            _parent.Position = _first + _position;
+            int numRead = _parent.Read(buffer, offset, (int)Math.Min(count, Math.Min(_length - _position, int.MaxValue)));
+            _position += numRead;
             return numRead;
         }
 
@@ -103,19 +103,19 @@ namespace DiscUtils
             long absNewPos = offset;
             if (origin == SeekOrigin.Current)
             {
-                absNewPos += position;
+                absNewPos += _position;
             }
             else if (origin == SeekOrigin.End)
             {
-                absNewPos += length;
+                absNewPos += _length;
             }
 
             if (absNewPos < 0)
             {
                 throw new ArgumentOutOfRangeException("offset", "Attempt to move before start of stream");
             }
-            position = absNewPos;
-            return position;
+            _position = absNewPos;
+            return _position;
         }
 
         public override void SetLength(long value)
@@ -129,14 +129,14 @@ namespace DiscUtils
             {
                 throw new ArgumentOutOfRangeException("count", "Attempt to write negative bytes");
             }
-            if (position + count > length)
+            if (_position + count > _length)
             {
                 throw new ArgumentOutOfRangeException("count", "Attempt to write beyond end of substream");
             }
 
-            parent.Position = first + position;
-            parent.Write(buffer, offset, count);
-            position += count;
+            _parent.Position = _first + _position;
+            _parent.Write(buffer, offset, count);
+            _position += count;
         }
     }
 }

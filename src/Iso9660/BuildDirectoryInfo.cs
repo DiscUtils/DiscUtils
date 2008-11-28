@@ -40,9 +40,9 @@ namespace DiscUtils.Iso9660
         internal BuildDirectoryInfo(string name, BuildDirectoryInfo parent)
             : base(name, MakeShortDirName(name, parent))
         {
-            this._parent = (parent == null) ? this : parent;
-            this._hierarchyDepth = (parent == null) ? 0 : parent._hierarchyDepth + 1;
-            this._members = new Dictionary<string, BuildDirectoryMember>();
+            _parent = (parent == null) ? this : parent;
+            _hierarchyDepth = (parent == null) ? 0 : parent._hierarchyDepth + 1;
+            _members = new Dictionary<string, BuildDirectoryMember>();
         }
 
         internal void Add(BuildDirectoryMember member)

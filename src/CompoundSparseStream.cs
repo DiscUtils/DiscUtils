@@ -27,7 +27,7 @@ namespace DiscUtils
 {
     internal class CompoundSparseStream : SparseStream
     {
-        private SparseStream[] streams;
+        private SparseStream[] _streams;
 
         public CompoundSparseStream(SparseStream[] streams)
         {
@@ -49,12 +49,12 @@ namespace DiscUtils
                 }
             }
 
-            this.streams = streams;
+            _streams = streams;
         }
 
         public override int BlockBoundary
         {
-            get { return streams[0].BlockBoundary; }
+            get { return _streams[0].BlockBoundary; }
         }
 
         public override bool CanWipe()
@@ -71,10 +71,10 @@ namespace DiscUtils
         {
             get
             {
-                long value = streams[0].NextBlock;
-                for (int i = 1; i < streams.Length; ++i)
+                long value = _streams[0].NextBlock;
+                for (int i = 1; i < _streams.Length; ++i)
                 {
-                    long newValue = streams[i].NextBlock;
+                    long newValue = _streams[i].NextBlock;
                     if (value == -1 && newValue != -1)
                     {
                         value = newValue;
@@ -126,7 +126,7 @@ namespace DiscUtils
                     while (focusPos > lastFocusPos)
                     {
                         lastFocusPos = focusPos;
-                        foreach (SparseStream s in streams)
+                        foreach (SparseStream s in _streams)
                         {
                             s.Position = focusPos;
 
@@ -160,28 +160,28 @@ namespace DiscUtils
 
         public override bool CanWrite
         {
-            get { return streams[0].CanWrite; }
+            get { return _streams[0].CanWrite; }
         }
 
         public override void Flush()
         {
-            streams[0].Flush();
+            _streams[0].Flush();
         }
 
         public override long Length
         {
-            get { return streams[0].Length; }
+            get { return _streams[0].Length; }
         }
 
         public override long Position
         {
             get
             {
-                return streams[0].Position;
+                return _streams[0].Position;
             }
             set
             {
-                foreach (Stream s in streams)
+                foreach (Stream s in _streams)
                 {
                     s.Position = value;
                 }
@@ -210,7 +210,7 @@ namespace DiscUtils
 
         public override long Seek(long offset, System.IO.SeekOrigin origin)
         {
-            long pos = streams[0].Seek(offset, origin);
+            long pos = _streams[0].Seek(offset, origin);
             return SyncPositions();
         }
 
@@ -233,9 +233,9 @@ namespace DiscUtils
                 throw new ArgumentException("Attempt to write beyond end of stream");
             }
 
-            if (Position % streams[0].BlockBoundary == 0 && count % streams[0].BlockBoundary == 0)
+            if (Position % _streams[0].BlockBoundary == 0 && count % _streams[0].BlockBoundary == 0)
             {
-                streams[0].Write(buffer, offset, count);
+                _streams[0].Write(buffer, offset, count);
             }
             else
             {
@@ -251,17 +251,17 @@ namespace DiscUtils
         /// </summary>
         private long SyncPositions()
         {
-            long pos = streams[0].Position;
-            for (int i = 1; i < streams.Length; ++i)
+            long pos = _streams[0].Position;
+            for (int i = 1; i < _streams.Length; ++i)
             {
-                streams[i].Position = pos;
+                _streams[i].Position = pos;
             }
             return pos;
         }
 
         private int ReadFromStreams(int stream, byte[] buffer, int offset, int count)
         {
-            if (stream >= streams.Length)
+            if (stream >= _streams.Length)
             {
                 // No data in any stream - fill
                 for (int i = 0; i < count; ++i)
@@ -271,7 +271,7 @@ namespace DiscUtils
                 return count;
             }
 
-            long nextBlock = streams[stream].NextBlock;
+            long nextBlock = _streams[stream].NextBlock;
             if (nextBlock == -1)
             {
                 // Nothing left in this stream - let the next one have a shot.
@@ -280,7 +280,7 @@ namespace DiscUtils
             else if (nextBlock == 0)
             {
                 // Read some bytes from this stream, and update global position
-                return streams[stream].Read(buffer, offset, (int)Math.Min(streams[stream].NextBlockLength, count));
+                return _streams[stream].Read(buffer, offset, (int)Math.Min(_streams[stream].NextBlockLength, count));
             }
             else
             {

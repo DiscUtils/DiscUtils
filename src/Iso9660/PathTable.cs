@@ -23,74 +23,73 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.IO;
 
 namespace DiscUtils.Iso9660
 {
     internal class PathTable : DiskRegion
     {
-        private bool byteSwap;
-        private Encoding enc;
-        private List<BuildDirectoryInfo> dirs;
-        private Dictionary<BuildDirectoryMember, uint> locations;
+        private bool _byteSwap;
+        private Encoding _enc;
+        private List<BuildDirectoryInfo> _dirs;
+        private Dictionary<BuildDirectoryMember, uint> _locations;
 
-        private uint dataLength;
+        private uint _dataLength;
 
-        private byte[] readCache;
+        private byte[] _readCache;
 
         public PathTable(bool byteSwap, Encoding enc, List<BuildDirectoryInfo> dirs, Dictionary<BuildDirectoryMember, uint> locations, long start)
             : base(start)
         {
-            this.byteSwap = byteSwap;
-            this.enc = enc;
-            this.dirs = dirs;
-            this.locations = locations;
+            _byteSwap = byteSwap;
+            _enc = enc;
+            _dirs = dirs;
+            _locations = locations;
 
             uint length = 0;
             foreach (BuildDirectoryInfo di in dirs)
             {
                 length += di.GetPathTableEntrySize(enc);
             }
-            dataLength = length;
+            _dataLength = length;
             DiskLength = ((length + 2047) / 2048) * 2048;
         }
 
         public uint DataLength
         {
-            get { return dataLength; }
+            get { return _dataLength; }
         }
 
         internal override void PrepareForRead()
         {
-            readCache = new byte[DiskLength];
+            _readCache = new byte[DiskLength];
             int pos = 0;
 
-            List<BuildDirectoryInfo> sortedList = new List<BuildDirectoryInfo>(dirs);
+            List<BuildDirectoryInfo> sortedList = new List<BuildDirectoryInfo>(_dirs);
             sortedList.Sort(BuildDirectoryInfo.PathTableSortComparison);
 
-            Dictionary<BuildDirectoryInfo, ushort> dirNumbers = new Dictionary<BuildDirectoryInfo, ushort>(dirs.Count);
+            Dictionary<BuildDirectoryInfo, ushort> dirNumbers = new Dictionary<BuildDirectoryInfo, ushort>(_dirs.Count);
             ushort i = 1;
             foreach (BuildDirectoryInfo di in sortedList)
             {
                 dirNumbers[di] = i++;
                 PathTableRecord ptr = new PathTableRecord();
-                ptr.DirectoryIdentifier = di.PickName(null, enc);
-                ptr.LocationOfExtent = locations[di];
+                ptr.DirectoryIdentifier = di.PickName(null, _enc);
+                ptr.LocationOfExtent = _locations[di];
                 ptr.ParentDirectoryNumber = dirNumbers[di.Parent];
 
-                pos += ptr.Write(byteSwap, enc, readCache, pos);
+                pos += ptr.Write(_byteSwap, _enc, _readCache, pos);
             }
         }
 
         internal override void ReadLogicalBlock(long diskOffset, byte[] buffer, int offset)
         {
             long relPos = diskOffset - DiskStart;
-            Array.Copy(readCache, relPos, buffer, offset, 2048);
+            Array.Copy(_readCache, relPos, buffer, offset, 2048);
         }
 
         internal override void DisposeReadState()
         {
-            readCache = null;
+            _readCache = null;
         }
 
     }

@@ -47,8 +47,8 @@ namespace DiscUtils.Iso9660
         /// <param name="shortName">The ISO 9660 compliant name of the file or directory</param>
         protected BuildDirectoryMember(string name, string shortName)
         {
-            this._name = name;
-            this._shortName = shortName;
+            _name = name;
+            _shortName = shortName;
             _creationTime = DateTime.UtcNow;
         }
 

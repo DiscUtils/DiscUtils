@@ -28,20 +28,20 @@ namespace DiscUtils.Iso9660
 {
     internal class FileExtent : DiskRegion
     {
-        private BuildFileInfo fileInfo;
+        private BuildFileInfo _fileInfo;
 
-        private Stream readStream;
+        private Stream _readStream;
 
         public FileExtent(BuildFileInfo fileInfo, long start)
             : base(start)
         {
-            this.fileInfo = fileInfo;
+            _fileInfo = fileInfo;
             DiskLength = ((fileInfo.GetDataSize(Encoding.ASCII) + 2047) / 2048) * 2048;
         }
 
         internal override void PrepareForRead()
         {
-            readStream = fileInfo.OpenStream();
+            _readStream = _fileInfo.OpenStream();
         }
 
         internal override void ReadLogicalBlock(long diskOffset, byte[] block, int offset)
@@ -51,17 +51,17 @@ namespace DiscUtils.Iso9660
 
             // Don't arbitrarily set position, just in case stream implementation is
             // non-seeking, and we're doing sequential reads
-            if (readStream.Position != relPos)
+            if (_readStream.Position != relPos)
             {
-                readStream.Position = relPos;
+                _readStream.Position = relPos;
             }
 
             // Read up to 2048 bytes (or EOF)
-            int numRead = readStream.Read(block, offset, 2048);
+            int numRead = _readStream.Read(block, offset, 2048);
             while (numRead > 0)
             {
                 totalRead += numRead;
-                numRead = readStream.Read(block, offset + totalRead, 2048 - totalRead);
+                numRead = _readStream.Read(block, offset + totalRead, 2048 - totalRead);
             }
 
             // Wipe any that couldn't be read (beyond end of file)
@@ -73,8 +73,8 @@ namespace DiscUtils.Iso9660
 
         internal override void DisposeReadState()
         {
-            fileInfo.CloseStream(readStream);
-            readStream = null;
+            _fileInfo.CloseStream(_readStream);
+            _readStream = null;
         }
     }
 

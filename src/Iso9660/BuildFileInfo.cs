@@ -21,9 +21,9 @@
 //
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Globalization;
 
 namespace DiscUtils.Iso9660
 {

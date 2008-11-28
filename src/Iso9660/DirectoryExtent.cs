@@ -28,36 +28,36 @@ namespace DiscUtils.Iso9660
 {
     internal class DirectoryExtent : DiskRegion
     {
-        private BuildDirectoryInfo dirInfo;
-        private Dictionary<BuildDirectoryMember, uint> locationTable;
-        private Encoding enc;
+        private BuildDirectoryInfo _dirInfo;
+        private Dictionary<BuildDirectoryMember, uint> _locationTable;
+        private Encoding _enc;
 
-        private byte[] readCache;
+        private byte[] _readCache;
 
         public DirectoryExtent(BuildDirectoryInfo dirInfo, Dictionary<BuildDirectoryMember, uint> locationTable, Encoding enc, long start)
             : base(start)
         {
-            this.dirInfo = dirInfo;
-            this.locationTable = locationTable;
-            this.enc = enc;
+            _dirInfo = dirInfo;
+            _locationTable = locationTable;
+            _enc = enc;
             DiskLength = ((dirInfo.GetDataSize(enc) + 2047) / 2048) * 2048;
         }
 
         internal override void PrepareForRead()
         {
-            readCache = new byte[DiskLength];
-            dirInfo.Write(readCache, 0, locationTable, enc);
+            _readCache = new byte[DiskLength];
+            _dirInfo.Write(_readCache, 0, _locationTable, _enc);
         }
 
         internal override void ReadLogicalBlock(long diskOffset, byte[] buffer, int offset)
         {
             long relPos = diskOffset - DiskStart;
-            Array.Copy(readCache, relPos, buffer, offset, 2048);
+            Array.Copy(_readCache, relPos, buffer, offset, 2048);
         }
 
         internal override void DisposeReadState()
         {
-            readCache = null;
+            _readCache = null;
         }
     }
 }

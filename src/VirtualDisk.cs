@@ -20,9 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.ObjectModel;
 using System.IO;
 using DiscUtils.Partitions;
-using System.Collections.ObjectModel;
 
 namespace DiscUtils
 {

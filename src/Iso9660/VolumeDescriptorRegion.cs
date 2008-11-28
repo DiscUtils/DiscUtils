@@ -26,7 +26,7 @@ namespace DiscUtils.Iso9660
 {
     internal abstract class VolumeDescriptorDiskRegion : DiskRegion
     {
-        byte[] readCache;
+        byte[] _readCache;
 
         public VolumeDescriptorDiskRegion(long start)
             : base(start)
@@ -35,17 +35,17 @@ namespace DiscUtils.Iso9660
 
         internal override void PrepareForRead()
         {
-            readCache = GetBlockData();
+            _readCache = GetBlockData();
         }
 
         internal override void ReadLogicalBlock(long diskOffset, byte[] block, int offset)
         {
-            Array.Copy(readCache, 0, block, offset, 2048);
+            Array.Copy(_readCache, 0, block, offset, 2048);
         }
 
         internal override void DisposeReadState()
         {
-            readCache = null;
+            _readCache = null;
         }
 
         protected abstract byte[] GetBlockData();
@@ -53,57 +53,57 @@ namespace DiscUtils.Iso9660
 
     internal class PrimaryVolumeDescriptorRegion : VolumeDescriptorDiskRegion
     {
-        private PrimaryVolumeDescriptor descriptor;
+        private PrimaryVolumeDescriptor _descriptor;
 
         public PrimaryVolumeDescriptorRegion(PrimaryVolumeDescriptor descriptor, long start)
             : base(start)
         {
-            this.descriptor = descriptor;
+            _descriptor = descriptor;
             DiskLength = 2048;
         }
 
         protected override byte[] GetBlockData()
         {
             byte[] buffer = new byte[2048];
-            descriptor.WriteTo(buffer, 0);
+            _descriptor.WriteTo(buffer, 0);
             return buffer;
         }
     }
 
     internal class SupplementaryVolumeDescriptorRegion : VolumeDescriptorDiskRegion
     {
-        private SupplementaryVolumeDescriptor descriptor;
+        private SupplementaryVolumeDescriptor _descriptor;
 
         public SupplementaryVolumeDescriptorRegion(SupplementaryVolumeDescriptor descriptor, long start)
             : base(start)
         {
-            this.descriptor = descriptor;
+            _descriptor = descriptor;
             DiskLength = 2048;
         }
 
         protected override byte[] GetBlockData()
         {
             byte[] buffer = new byte[2048];
-            descriptor.WriteTo(buffer, 0);
+            _descriptor.WriteTo(buffer, 0);
             return buffer;
         }
     }
 
     internal class VolumeDescriptorSetTerminatorRegion : VolumeDescriptorDiskRegion
     {
-        private VolumeDescriptorSetTerminator descriptor;
+        private VolumeDescriptorSetTerminator _descriptor;
 
         public VolumeDescriptorSetTerminatorRegion(VolumeDescriptorSetTerminator descriptor, long start)
             : base(start)
         {
-            this.descriptor = descriptor;
+            _descriptor = descriptor;
             DiskLength = 2048;
         }
 
         protected override byte[] GetBlockData()
         {
             byte[] buffer = new byte[2048];
-            descriptor.WriteTo(buffer, 0);
+            _descriptor.WriteTo(buffer, 0);
             return buffer;
         }
     }
