@@ -53,6 +53,7 @@ namespace DiscUtils.Fat
 
         private FatType _type;
         private byte[] _buffer;
+        private uint _nextFreeCandidate;
 
         public FatBuffer(FatType type, byte[] buffer)
         {
@@ -127,6 +128,10 @@ namespace DiscUtils.Fat
 
         internal void SetFree(uint cluster)
         {
+            if (cluster < _nextFreeCandidate)
+            {
+                _nextFreeCandidate = cluster;
+            }
             SetNext(cluster, FreeCluster);
         }
 
@@ -186,9 +191,11 @@ namespace DiscUtils.Fat
             uint numEntries = (uint)NumEntries;
             for (uint i = 0; i < numEntries; i++)
             {
-                if (IsFree(GetNext(i)))
+                uint candidate = (i + _nextFreeCandidate) % numEntries;
+                if (IsFree(GetNext(candidate)))
                 {
-                    cluster = i;
+                    cluster = candidate;
+                    _nextFreeCandidate = candidate + 1;
                     return true;
                 }
             }
