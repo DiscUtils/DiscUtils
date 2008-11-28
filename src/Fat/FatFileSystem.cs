@@ -1423,9 +1423,9 @@ namespace DiscUtils.Fat
 
         private static uint CalcFatSize(uint sectors, FatType fatType, byte sectorsPerCluster)
         {
-            ushort numClusters = (ushort)(sectors / sectorsPerCluster);
-            ushort fatBytes = (ushort)((numClusters * (ushort)fatType) / 8);
-            return (uint)((fatBytes + Utilities.SectorSize - 1) / Utilities.SectorSize);
+            uint numClusters = (uint)(sectors / sectorsPerCluster);
+            uint fatBytes = (numClusters * (ushort)fatType) / 8;
+            return ((fatBytes + Utilities.SectorSize - 1) / Utilities.SectorSize);
         }
 
         private void ReadBS(int offset)
