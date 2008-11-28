@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Fat
 {
@@ -51,19 +52,18 @@ namespace DiscUtils.Fat
         /// </remarks>
         public const uint FreeCluster = 0;
 
+        private const uint DirtyRegionSize = 512;
+
         private FatType _type;
         private byte[] _buffer;
         private uint _nextFreeCandidate;
+        private Dictionary<uint,uint> _dirtySectors;
 
         public FatBuffer(FatType type, byte[] buffer)
         {
             _type = type;
             _buffer = buffer;
-        }
-
-        internal byte[] GetBytes()
-        {
-            return _buffer;
+            _dirtySectors = new Dictionary<uint, uint>();
         }
 
         internal bool IsFree(uint val)
@@ -137,6 +137,7 @@ namespace DiscUtils.Fat
 
         internal void SetNext(uint cluster, uint next)
         {
+            _dirtySectors[cluster / DirtyRegionSize] = cluster / DirtyRegionSize;
             if (_type == FatType.Fat16)
             {
                 Utilities.WriteBytesLittleEndian((ushort)next, _buffer, (int)(cluster * 2));
@@ -227,6 +228,25 @@ namespace DiscUtils.Fat
             }
 
             return result;
+        }
+
+        internal int Size
+        {
+            get { return _buffer.Length; }
+        }
+
+        internal void WriteDirtyRegions(Stream stream, long position)
+        {
+            foreach (uint val in _dirtySectors.Values)
+            {
+                stream.Position = position + (val * DirtyRegionSize);
+                stream.Write(_buffer, (int)(val * DirtyRegionSize), (int)DirtyRegionSize);
+            }
+        }
+
+        internal void ClearDirtyRegions()
+        {
+            _dirtySectors.Clear();
         }
     }
 }

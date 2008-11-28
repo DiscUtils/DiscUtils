@@ -30,17 +30,19 @@ namespace DiscUtils.Vhd
         private Stream _fileStream;
         private DynamicHeader _dynamicHeader;
         private long _length;
+        private Stream _parentStream;
 
         private long _position;
         private bool _atEof;
         private uint[] _blockAllocationTable;
         private byte[][] _blockBitmaps;
 
-        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length)
+        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, Stream parentStream)
         {
             _fileStream = fileStream;
             _dynamicHeader = dynamicHeader;
             _length = length;
+            _parentStream = parentStream;
 
             ReadBlockAllocationTable();
 
@@ -122,7 +124,8 @@ namespace DiscUtils.Vhd
                     }
                     else
                     {
-                        Array.Clear(buffer, offset + numRead, toRead);
+                        _parentStream.Position = _position;
+                        Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
                     }
                     numRead += toRead;
                     _position += toRead;
@@ -130,7 +133,8 @@ namespace DiscUtils.Vhd
                 else
                 {
                     int toRead = Math.Min(count - numRead, (int)(_dynamicHeader.BlockSize - offsetInBlock));
-                    Array.Clear(buffer, offset + numRead, toRead);
+                    _parentStream.Position = _position;
+                    Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
                     numRead += toRead;
                     _position += toRead;
                 }
@@ -202,15 +206,17 @@ namespace DiscUtils.Vhd
 
                     long sectorStart = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmaps[block].Length;
 
-                    // Get the existing sector data (if any)
-                    byte[] sectorBuffer = new byte[Utilities.SectorSize];
+                    // Get the existing sector data (if any), or otherwise the parent's content
+                    byte[] sectorBuffer;
                     if ((_blockBitmaps[block][sectorInBlock / 8] & sectorMask) != 0)
                     {
                         _fileStream.Position = sectorStart;
-                        if (Utilities.ReadFully(_fileStream, sectorBuffer, 0, Utilities.SectorSize) != Utilities.SectorSize)
-                        {
-                            throw new IOException("Failed to read entire sector");
-                        }
+                        sectorBuffer = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+                    }
+                    else
+                    {
+                        _parentStream.Position = ((_position / Utilities.SectorSize) * Utilities.SectorSize);
+                        sectorBuffer = Utilities.ReadFully(_parentStream, Utilities.SectorSize);
                     }
 
                     // Overlay as much data as we have for this sector

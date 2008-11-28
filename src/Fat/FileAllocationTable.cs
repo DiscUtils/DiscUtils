@@ -80,13 +80,11 @@ namespace DiscUtils.Fat
 
         internal void Flush()
         {
-            byte[] data = _buffer.GetBytes();
-
-            _stream.Position = _firstFatSector * Utilities.SectorSize;
             for (int i = 0; i < _numFats; ++i)
             {
-                _stream.Write(data, 0, data.Length);
+                _buffer.WriteDirtyRegions(_stream, _firstFatSector * Utilities.SectorSize + _buffer.Size * i);
             }
+            _buffer.ClearDirtyRegions();
         }
 
         internal bool TryGetFreeCluster(out uint cluster)

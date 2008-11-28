@@ -103,7 +103,7 @@ namespace DiscUtils.Vhd
             }
             else if (_footer.DiskType == FileType.Dynamic)
             {
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize);
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize));
             }
             else
             {
