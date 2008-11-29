@@ -1087,7 +1087,7 @@ namespace DiscUtils.Fat
                     disk.Geometry,
                     (int)disk.Partitions[0].FirstSector,
                     (int)(1 + disk.Partitions[0].LastSector - disk.Partitions[0].FirstSector),
-                    (short)disk.Geometry.SectorsPerTrack);
+                    0);
             }
         }
 
@@ -1109,11 +1109,6 @@ namespace DiscUtils.Fat
             int sectorCount,
             short reservedSectors)
         {
-            if (reservedSectors < 1)
-            {
-                throw new ArgumentOutOfRangeException("reservedSectors", reservedSectors, "Must have at least one reserved sector, for the BPB");
-            }
-
             long pos = stream.Position;
 
             long ticks = DateTime.UtcNow.Ticks;
@@ -1122,6 +1117,11 @@ namespace DiscUtils.Fat
             byte sectorsPerCluster;
             FatType fatType;
             ushort maxRootEntries;
+
+            while (diskGeometry.Cylinders > 1024)
+            {
+                diskGeometry = new DiskGeometry(diskGeometry.Cylinders / 2, diskGeometry.HeadsPerCylinder * 2, diskGeometry.SectorsPerTrack);
+            }
 
             // Write the BIOS Parameter Block (BPB) - a single sector
             byte[] bpb = new byte[512];
@@ -1149,6 +1149,11 @@ namespace DiscUtils.Fat
                 {
                     sectorsPerCluster = 16;
                 }
+
+                if (reservedSectors < 1)
+                {
+                    reservedSectors = 1;
+                }
             }
             else
             {
@@ -1173,6 +1178,11 @@ namespace DiscUtils.Fat
                 else
                 {
                     sectorsPerCluster = 64;
+                }
+
+                if (reservedSectors < 32)
+                {
+                    reservedSectors = 32;
                 }
             }
             WriteBPB(bpb, (uint)sectorCount, fatType, maxRootEntries, (uint)firstSector, (ushort)reservedSectors, sectorsPerCluster, diskGeometry, false, volId, label);
@@ -1378,7 +1388,7 @@ namespace DiscUtils.Fat
             // Sectors Per Track
             Utilities.WriteBytesLittleEndian((ushort)diskGeometry.SectorsPerTrack, bootSector, 24);
 
-            // Sectors Per Track
+            // Heads Per Cylinder
             Utilities.WriteBytesLittleEndian((ushort)diskGeometry.HeadsPerCylinder, bootSector, 26);
 
             // Hidden Sectors
@@ -1396,8 +1406,8 @@ namespace DiscUtils.Fat
                 // FAT size (FAT32)
                 Utilities.WriteBytesLittleEndian((uint)fatSectors, bootSector, 36);
 
-                // Ext flags: 0x80 = FAT 1 (i.e. Zero) active, no mirroring
-                bootSector[40] = 0x80;
+                // Ext flags: 0x80 = FAT 1 (i.e. Zero) active, mirroring
+                bootSector[40] = 0x00;
                 bootSector[41] = 0x00;
 
                 // Filesystem version (0.0)
@@ -1419,6 +1429,8 @@ namespace DiscUtils.Fat
                 WriteBS(bootSector, 64, isFloppy, volId, label, fatType);
             }
 
+            bootSector[510] = 0x55;
+            bootSector[511] = 0xAA;
         }
 
         private static uint CalcFatSize(uint sectors, FatType fatType, byte sectorsPerCluster)
@@ -1444,7 +1456,7 @@ namespace DiscUtils.Fat
                 label = "NO NAME    ";
             }
 
-            string fsType = "FAT     ";
+            string fsType = "FAT32   ";
             if (fatType == FatType.Fat12)
             {
                 fsType = "FAT12   ";
