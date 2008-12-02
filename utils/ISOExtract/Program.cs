@@ -79,7 +79,7 @@ namespace ISOExtract
 
                     using (FileStream outFile = new FileStream(destDir + "\\" + fileName, FileMode.Create, FileAccess.ReadWrite))
                     {
-                        using (Stream inFile = reader.Open(_targetFileParam.Value, FileMode.Open))
+                        using (Stream inFile = reader.OpenFile(_targetFileParam.Value, FileMode.Open))
                         {
                             PumpStreams(inFile, outFile);
                         }
