@@ -59,13 +59,19 @@ namespace DiscUtils.Iso9660
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-            if (disposing)
+            try
             {
-                if (_currentRegion != null)
+                if (disposing)
                 {
-                    _currentRegion.DisposeReadState();
+                    if (_currentRegion != null)
+                    {
+                        _currentRegion.DisposeReadState();
+                    }
                 }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 
