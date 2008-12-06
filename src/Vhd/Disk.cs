@@ -244,7 +244,7 @@ namespace DiscUtils.Vhd
                 parent = new DiskImageFile(new FileStream(fullParentPath, FileMode.Open, FileAccess.Read, FileShare.Read), true);
 
                 newFile = DiskImageFile.InitializeDifferencing(
-                    new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None),
+                    new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None),
                     true,
                     parent,
                     fullParentPath,

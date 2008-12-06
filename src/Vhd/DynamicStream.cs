@@ -159,9 +159,10 @@ namespace DiscUtils.Vhd
                 return 0;
             }
 
+            int maxToRead = (int)Math.Min(count, _length - _position);
             int numRead = 0;
 
-            while (numRead < count)
+            while (numRead < maxToRead)
             {
                 long block = _position / _dynamicHeader.BlockSize;
                 uint offsetInBlock = (uint)(_position % _dynamicHeader.BlockSize);
@@ -170,7 +171,7 @@ namespace DiscUtils.Vhd
                 {
                     int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
                     int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
-                    int toRead = Math.Min(count - numRead, 512 - offsetInSector);
+                    int toRead = Math.Min(maxToRead - numRead, 512 - offsetInSector);
 
                     byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
                     if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
@@ -191,7 +192,7 @@ namespace DiscUtils.Vhd
                 }
                 else
                 {
-                    int toRead = Math.Min(count - numRead, (int)(_dynamicHeader.BlockSize - offsetInBlock));
+                    int toRead = Math.Min(maxToRead - numRead, (int)(_dynamicHeader.BlockSize - offsetInBlock));
                     _parentStream.Position = _position;
                     Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
                     numRead += toRead;
