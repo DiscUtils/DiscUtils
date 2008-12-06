@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using DiscUtils.Partitions;
@@ -29,12 +30,39 @@ namespace DiscUtils
     /// <summary>
     /// Base class representing virtual hard disks.
     /// </summary>
-    public abstract class VirtualDisk
+    public abstract class VirtualDisk : IDisposable
     {
+        /// <summary>
+        /// Destroys this instance.
+        /// </summary>
+        ~VirtualDisk()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Disposes of this instance, freeing underlying resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
+        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
+        /// if running inside destructor.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+
         /// <summary>
         /// Gets the geometry of the disk.
         /// </summary>
-        public abstract DiskGeometry Geometry
+        public abstract Geometry Geometry
         {
             get;
         }
@@ -46,11 +74,6 @@ namespace DiscUtils
         {
             get;
         }
-
-        /// <summary>
-        /// Reduces the amount of actual storage consumed, if possible, by the disk.
-        /// </summary>
-        public abstract void Compact();
 
         /// <summary>
         /// Gets the layers that make up the disk.
@@ -69,16 +92,6 @@ namespace DiscUtils
             {
                 return new BiosPartitionTable(this);
             }
-        }
-
-        /// <summary>
-        /// Opens a partition as a stream.
-        /// </summary>
-        /// <param name="partition">The partition to open</param>
-        /// <returns>The stream providing access to the partition</returns>
-        public virtual Stream OpenPartition(PartitionInfo partition)
-        {
-            return new SubStream(Content, partition.FirstSector * Utilities.SectorSize, (1 + partition.LastSector - partition.FirstSector) * Utilities.SectorSize);
         }
     }
 }

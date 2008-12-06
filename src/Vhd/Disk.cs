@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -32,7 +33,16 @@ namespace DiscUtils.Vhd
     /// </summary>
     public class Disk : VirtualDisk
     {
-        private DiskImageFile _vhdFile;
+        /// <summary>
+        /// The list of files that make up the disk.
+        /// </summary>
+        /// <remarks>The values are: File, OwnFile</remarks>
+        private List<Tuple<DiskImageFile, bool>> _files;
+
+        /// <summary>
+        /// The stream representing the disk's contents.
+        /// </summary>
+        private Stream _content;
 
         /// <summary>
         /// Creates a new instance from an existing stream, differencing disks not supported.
@@ -40,89 +50,266 @@ namespace DiscUtils.Vhd
         /// <param name="stream">The stream to read</param>
         public Disk(Stream stream)
         {
-            _vhdFile = new DiskImageFile(stream);
+            _files = new List<Tuple<DiskImageFile, bool>>();
+            _files.Add(new Tuple<DiskImageFile, bool>(new DiskImageFile(stream), true));
 
-            if (_vhdFile.HasParent)
+            if (_files[0].First.NeedsParent)
             {
                 throw new NotSupportedException("Differencing disks cannot be opened from a stream");
             }
         }
 
         /// <summary>
-        /// Initializes a stream as a VHD file.
+        /// Creates a new instance from an existing stream, differencing disks not supported.
         /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the VHD file</param>
-        /// <param name="type">The type of VHD file</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static Disk Initialize(Stream stream, long capacity, FileType type)
+        /// <param name="stream">The stream to read</param>
+        /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
+        public Disk(Stream stream, bool ownsStream)
         {
-            if (type == FileType.Fixed)
+            _files = new List<Tuple<DiskImageFile, bool>>();
+            _files.Add(new Tuple<DiskImageFile, bool>(new DiskImageFile(stream, ownsStream), true));
+
+            if (_files[0].First.NeedsParent)
             {
-                return InitializeFixedDisk(stream, capacity);
+                throw new NotSupportedException("Differencing disks cannot be opened from a stream");
             }
-            else if (type == FileType.Dynamic)
+        }
+
+        /// <summary>
+        /// Creates a new instance from an existing stream, differencing disks not supported.
+        /// </summary>
+        /// <param name="file">The file containing the disk</param>
+        /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
+        public Disk(DiskImageFile file, bool ownsFile)
+        {
+            if (file.NeedsParent)
             {
-                return InitializeDynamicDisk(stream, capacity);
+                throw new NotSupportedException("Differencing disks cannot be opened from a single file");
+            }
+
+            _files = new List<Tuple<DiskImageFile, bool>>();
+            _files.Add(new Tuple<DiskImageFile, bool>(file, ownsFile));
+        }
+
+        /// <summary>
+        /// Creates a new instance from an existing stream, differencing disks supported.
+        /// </summary>
+        /// <param name="file">The file containing the disk</param>
+        /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
+        /// <param name="parentPath">Path to the parent disk (if required)</param>
+        public Disk(DiskImageFile file, bool ownsFile, string parentPath)
+        {
+            _files = new List<Tuple<DiskImageFile, bool>>();
+            _files.Add(new Tuple<DiskImageFile, bool>(file, ownsFile));
+            if (file.NeedsParent)
+            {
+                _files.Add(new Tuple<DiskImageFile, bool>(new DiskImageFile(new FileStream(parentPath, FileMode.Open, FileAccess.Read, FileShare.Read), true), true));
+                ResolveFileChain(parentPath);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new instance from an existing stream, differencing disks supported.
+        /// </summary>
+        /// <param name="file">The file containing the disk</param>
+        /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
+        /// <param name="parentFile">The file containing the disk's parent</param>
+        /// <param name="ownsParent">Indicates if the new instance should control the lifetime of the parentFile</param>
+        /// <param name="parentPath">Path to the parent disk (if required)</param>
+        private Disk(DiskImageFile file, bool ownsFile, DiskImageFile parentFile, bool ownsParent, string parentPath)
+        {
+            _files = new List<Tuple<DiskImageFile, bool>>();
+            _files.Add(new Tuple<DiskImageFile, bool>(file, ownsFile));
+            if (file.NeedsParent)
+            {
+                _files.Add(new Tuple<DiskImageFile, bool>(parentFile, ownsParent));
+                ResolveFileChain(parentPath);
             }
             else
             {
-                throw new NotImplementedException(String.Format(CultureInfo.InvariantCulture, "Disk type '{0}' not supported", type));
+                if (parentFile != null && ownsParent)
+                {
+                    parentFile.Dispose();
+                }
             }
         }
 
-        private static Disk InitializeFixedDisk(Stream stream, long capacity)
+        /// <summary>
+        /// Creates a new instance from an existing file, differencing disks are supported.
+        /// </summary>
+        /// <param name="path">The path to the disk image</param>
+        public Disk(string path)
         {
-            DiskGeometry geometry = DiskGeometry.FromCapacity(capacity);
-            Footer footer = new Footer(geometry, FileType.Fixed);
-            footer.UpdateChecksum();
-
-            byte[] sector = new byte[Utilities.SectorSize];
-            footer.ToBytes(sector, 0);
-            stream.Position = geometry.Capacity;
-            stream.Write(sector, 0, sector.Length);
-            stream.SetLength(stream.Position);
-
-            stream.Position = 0;
-            return new Disk(stream);
+            DiskImageFile file = new DiskImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None), true);
+            _files = new List<Tuple<DiskImageFile, bool>>();
+            _files.Add(new Tuple<DiskImageFile, bool>(file, true));
+            ResolveFileChain(path);
         }
 
-        private static Disk InitializeDynamicDisk(Stream stream, long capacity)
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
         {
-            DiskGeometry geometry = DiskGeometry.FromCapacity(capacity);
-            Footer footer = new Footer(geometry, FileType.Dynamic);
-            footer.DataOffset = 512; // Offset of Dynamic Header
-            footer.UpdateChecksum();
-            byte[] footerBlock = new byte[512];
-            footer.ToBytes(footerBlock, 0);
-
-            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, capacity);
-            dynamicHeader.UpdateChecksum();
-            byte[] dynamicHeaderBlock = new byte[1024];
-            dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
-
-            int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
-            byte[] bat = new byte[batSize];
-            for (int i = 0; i < bat.Length; ++i)
+            try
             {
-                bat[i] = 0xFF;
+                if (disposing)
+                {
+                    if (_content != null)
+                    {
+                        _content.Dispose();
+                        _content = null;
+                    }
+
+                    foreach (var record in _files)
+                    {
+                        if (record.Second)
+                        {
+                            record.First.Dispose();
+                        }
+                    }
+                    _files = null;
+                }
             }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
 
-            stream.Position = 0;
-            stream.Write(footerBlock, 0, 512);
-            stream.Write(dynamicHeaderBlock, 0, 1024);
-            stream.Write(bat, 0, batSize);
-            stream.Write(footerBlock, 0, 512);
+        /// <summary>
+        /// Initializes a stream as a fixed-sized VHD file, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeFixed(Stream stream, long capacity)
+        {
+            return InitializeFixed(stream, false, capacity);
+        }
 
-            return new Disk(stream);
+        /// <summary>
+        /// Initializes a stream as a fixed-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeFixed(Stream stream, bool ownsStream, long capacity)
+        {
+            return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity), true);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeDynamic(Stream stream, long capacity)
+        {
+            return InitializeDynamic(stream, false, capacity);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeDynamic(Stream stream, bool ownsStream, long capacity)
+        {
+            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity), true);
+        }
+
+        /// <summary>
+        /// Creates a new VHD differencing disk file.
+        /// </summary>
+        /// <param name="path">The path to the new disk file</param>
+        /// <param name="parentPath">The path to the parent disk file</param>
+        /// <returns>An object that accesses the new file as a Disk</returns>
+        public static Disk InitializeDifferencing(String path, string parentPath)
+        {
+            DiskImageFile parent = null;
+            DiskImageFile newFile = null;
+
+            string fullParentPath = Path.GetFullPath(parentPath);
+            string fullNewFilePath = Path.GetFullPath(path);
+
+            try
+            {
+                parent = new DiskImageFile(new FileStream(fullParentPath, FileMode.Open, FileAccess.Read, FileShare.Read), true);
+
+                newFile = DiskImageFile.InitializeDifferencing(
+                    new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None),
+                    true,
+                    parent,
+                    fullParentPath,
+                    Utilities.MakeRelativePath(fullParentPath, fullNewFilePath),
+                    File.GetLastWriteTimeUtc(parentPath));
+
+                Disk newDisk = new Disk(newFile, true, fullParentPath);
+                newFile = null;
+                return newDisk;
+            }
+            finally
+            {
+                if (parent != null)
+                {
+                    parent.Dispose();
+                }
+
+                if (newFile != null)
+                {
+                    newFile.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initializes a stream as a differencing disk VHD file, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="parent">The disk this file is a different from.</param>
+        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
+        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
+        /// <param name="parentModificationTime">The time the parent disk's file was last modified (from file system).</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeDifferencing(
+            Stream stream, DiskImageFile parent, string parentAbsolutePath,
+            string parentRelativePath, DateTime parentModificationTime)
+        {
+            return InitializeDifferencing(stream, false, parent, false, parentAbsolutePath, parentRelativePath, parentModificationTime);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a differencing disk VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the <paramref name="stream"/>.</param>
+        /// <param name="parent">The disk this file is a different from.</param>
+        /// <param name="ownsParent">Indicates if the new instance controls the lifetime of the <paramref name="parent"/> file.</param>
+        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
+        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
+        /// <param name="parentModificationTime">The time the parent disk's file was last modified (from file system).</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeDifferencing(
+            Stream stream, bool ownsStream, DiskImageFile parent, bool ownsParent,
+            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTime)
+        {
+            DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath, parentRelativePath, parentModificationTime);
+            return new Disk(file, true, parent, ownsParent, parentAbsolutePath);
         }
 
         /// <summary>
         /// Gets the geometry of the disk.
         /// </summary>
-        public override DiskGeometry Geometry
+        public override Geometry Geometry
         {
-            get { return _vhdFile.Geometry; }
+            get { return _files[0].First.Geometry; }
         }
 
         /// <summary>
@@ -130,15 +317,19 @@ namespace DiscUtils.Vhd
         /// </summary>
         public override Stream Content
         {
-            get { return _vhdFile.GetContentStream(null); }
-        }
-
-        /// <summary>
-        /// Reduces the amount of actual storage consumed, if possible, by the disk.
-        /// </summary>
-        public override void Compact()
-        {
-            _vhdFile.Compact();
+            get
+            {
+                if (_content == null)
+                {
+                    Stream stream = null;
+                    for (int i = _files.Count - 1; i >= 0; --i)
+                    {
+                        stream = _files[i].First.OpenContent(stream, true);
+                    }
+                    _content = stream;
+                }
+                return _content;
+            }
         }
 
         /// <summary>
@@ -146,7 +337,37 @@ namespace DiscUtils.Vhd
         /// </summary>
         public override ReadOnlyCollection<VirtualDiskLayer> Layers
         {
-            get { return new ReadOnlyCollection<VirtualDiskLayer>(new VirtualDiskLayer[] { _vhdFile }); }
+            get
+            {
+                VirtualDiskLayer[] layers = Utilities.Map<Tuple<DiskImageFile, bool>, VirtualDiskLayer>(_files, (f) => f.First);
+                return new ReadOnlyCollection<VirtualDiskLayer>(layers);
+            }
+        }
+
+        private void ResolveFileChain(string lastPath)
+        {
+            DiskImageFile file = _files[_files.Count - 1].First;
+            string filePath = lastPath;
+
+            while (file.NeedsParent)
+            {
+                bool found = false;
+                foreach (string testPath in file.GetParentLocations(filePath))
+                {
+                    if (File.Exists(testPath))
+                    {
+                        filePath = Path.GetFullPath(testPath);
+                        file = new DiskImageFile(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), true);
+                        _files.Add(new Tuple<DiskImageFile, bool>(file, true));
+                        found = true;
+                    }
+                }
+
+                if (!found)
+                {
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Failed to find parent for disk '{0}'", filePath));
+                }
+            }
         }
     }
 }

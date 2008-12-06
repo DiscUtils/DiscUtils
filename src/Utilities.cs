@@ -1,7 +1,31 @@
-﻿using System;
+﻿//
+// Copyright (c) 2008, Kenneth Bell
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+//
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DiscUtils
@@ -46,7 +70,7 @@ namespace DiscUtils
         /// <typeparam name="T">The type of the collection entries</typeparam>
         /// <param name="source">The collection to filter</param>
         /// <param name="predicate">The predicate to select which entries are carried over</param>
-        /// <returns>The new collection, containing all entries where the predicate returns <code>true</code></returns>
+        /// <returns>The new collection, containing all entries where the predicate returns <c>true</c></returns>
         public static C Filter<C, T>(ICollection<T> source, Func<T, bool> predicate) where C : ICollection<T>, new()
         {
             C result = new C();
@@ -68,7 +92,7 @@ namespace DiscUtils
         /// <param name="xLast">The highest ordinal of the first range (exclusive)</param>
         /// <param name="yFirst">The lowest ordinal of the second range (inclusive)</param>
         /// <param name="yLast">The highest ordinal of the second range (exclusive)</param>
-        /// <returns><code>true</code> if the ranges overlap, else <code>false</code></returns>
+        /// <returns><c>true</c> if the ranges overlap, else <c>false</c></returns>
         public static bool RangesOverlap<T>(T xFirst, T xLast, T yFirst, T yLast) where T : IComparable<T>
         {
             return !((xLast.CompareTo(yFirst) <= 0) || (xFirst.CompareTo(yLast) >= 0));
@@ -373,6 +397,108 @@ namespace DiscUtils
             return a.TrimEnd('\\') + '\\' + b.TrimStart('\\');
         }
 
+        /// <summary>
+        /// Resolves a relative path into an absolute one.
+        /// </summary>
+        /// <param name="basePath">The base path to resolve from</param>
+        /// <param name="relativePath">The relative path</param>
+        /// <returns>The absolute path, so far as it can be resolved.  If the
+        /// <paramref name="relativePath"/> contains more '..' characters than the
+        /// base path contains levels of directory, the resultant string will be relative.
+        /// For example: (TEMP\Foo.txt, ..\..\Bar.txt) gives (..\Bar.txt).</returns>
+        public static string ResolveRelativePath(string basePath, string relativePath)
+        {
+            List<string> pathElements = new List<string>(basePath.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+            if (!basePath.EndsWith("\\", StringComparison.Ordinal) && pathElements.Count > 0)
+            {
+                pathElements.RemoveAt(pathElements.Count - 1);
+            }
+
+            pathElements.AddRange(relativePath.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+
+            int pos = 1;
+            while (pos < pathElements.Count)
+            {
+                if (pathElements[pos] == ".")
+                {
+                    pathElements.RemoveAt(pos);
+                }
+                else if (pathElements[pos] == ".." && pos > 0 && pathElements[pos - 1][0] != '.')
+                {
+                    pathElements.RemoveAt(pos);
+                    pathElements.RemoveAt(pos - 1);
+                    pos--;
+                }
+                else
+                {
+                    pos++;
+                }
+            }
+
+            string merged = string.Join("\\", pathElements.ToArray());
+            if (relativePath.EndsWith("\\", StringComparison.Ordinal))
+            {
+                merged += "\\";
+            }
+            if (basePath.StartsWith("\\", StringComparison.Ordinal))
+            {
+                merged = "\\" + merged;
+            }
+
+            return merged;
+        }
+
+        internal static string MakeRelativePath(string path, string basePath)
+        {
+            List<string> pathElements = new List<string>(path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+            List<string> basePathElements = new List<string>(basePath.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+
+            if (!basePath.EndsWith("\\", StringComparison.Ordinal) && basePathElements.Count > 0)
+            {
+                basePathElements.RemoveAt(basePathElements.Count - 1);
+            }
+
+            // Find first part of paths that don't match
+            int i = 0;
+            while (i < Math.Min(pathElements.Count - 1, basePathElements.Count))
+            {
+                if (pathElements[i].ToUpperInvariant() != basePathElements[i].ToUpperInvariant())
+                {
+                    break;
+                }
+                ++i;
+            }
+
+            // For each remaining part of the base path, insert '..'
+            StringBuilder result = new StringBuilder();
+            if (i == basePathElements.Count)
+            {
+                result.Append(@".\");
+            }
+            else if (i < basePathElements.Count)
+            {
+                for (int j = 0; j < basePathElements.Count - i; ++j)
+                {
+                    result.Append(@"..\");
+                }
+            }
+
+            // For each remaining part of the path, add the path element
+            for (int j = i; j < pathElements.Count - 1; ++j)
+            {
+                result.Append(pathElements[j]);
+                result.Append(@"\");
+            }
+            result.Append(pathElements[pathElements.Count - 1]);
+
+            // If the target was a directory, put the terminator back
+            if (path.EndsWith(@"\", StringComparison.Ordinal))
+            {
+                result.Append(@"\");
+            }
+
+            return result.ToString();
+        }
         #endregion
 
         #region Stream Manipulation

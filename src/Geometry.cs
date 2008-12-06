@@ -28,7 +28,7 @@ namespace DiscUtils
     /// Class whose instances represent disk geometries.
     /// </summary>
     /// <remarks>Instances of this class are immutable.</remarks>
-    public sealed class DiskGeometry
+    public sealed class Geometry
     {
         private int _cylinders;
         private int _headsPerCylinder;
@@ -40,7 +40,7 @@ namespace DiscUtils
         /// <param name="cylinders">The number of cylinders of the disk</param>
         /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
         /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk</param>
-        public DiskGeometry(int cylinders, int headsPerCylinder, int sectorsPerTrack)
+        public Geometry(int cylinders, int headsPerCylinder, int sectorsPerTrack)
         {
             _cylinders = cylinders;
             _headsPerCylinder = headsPerCylinder;
@@ -176,7 +176,7 @@ namespace DiscUtils
         /// <returns>The appropriate disk geometry.</returns>
         /// <remarks>The geometry returned tends to produce a disk with less capacity
         /// than requested (an exact capacity is not always possible).</remarks>
-        public static DiskGeometry FromCapacity(long capacity)
+        public static Geometry FromCapacity(long capacity)
         {
             int totalSectors = (int)(capacity / 512);
 
@@ -228,14 +228,14 @@ namespace DiscUtils
             }
             cylinders = (totalSectors / sectorsPerTrack) / headsPerCylinder;
 
-            return new DiskGeometry(cylinders, headsPerCylinder, sectorsPerTrack);
+            return new Geometry(cylinders, headsPerCylinder, sectorsPerTrack);
         }
 
         /// <summary>
         /// Determines if this object is equivalent to another.
         /// </summary>
         /// <param name="obj">The object to test against.</param>
-        /// <returns><code>true</code> if the <paramref name="obj"/> is equalivalent, else <code>false</code>.</returns>
+        /// <returns><c>true</c> if the <paramref name="obj"/> is equalivalent, else <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null || obj.GetType() != GetType())
@@ -243,7 +243,7 @@ namespace DiscUtils
                 return false;
             }
 
-            DiskGeometry other = (DiskGeometry)obj;
+            Geometry other = (Geometry)obj;
 
             return _cylinders == other._cylinders && _headsPerCylinder == other._headsPerCylinder && _sectorsPerTrack == other._sectorsPerTrack;
         }

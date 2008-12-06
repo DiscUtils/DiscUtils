@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.IO;
 
 namespace DiscUtils.Partitions
 {
@@ -30,10 +31,21 @@ namespace DiscUtils.Partitions
     public class BiosPartitionInfo : PartitionInfo
     {
         private BiosPartitionRecord _record;
+        private BiosPartitionTable _table;
 
-        internal BiosPartitionInfo(BiosPartitionRecord record)
+        internal BiosPartitionInfo(BiosPartitionTable table, BiosPartitionRecord record)
         {
+            _table = table;
             _record = record;
+        }
+
+        /// <summary>
+        /// Opens a stream to access the content of the partition.
+        /// </summary>
+        /// <returns>The new stream</returns>
+        public override Stream Open()
+        {
+            return _table.Open(_record);
         }
 
         /// <summary>

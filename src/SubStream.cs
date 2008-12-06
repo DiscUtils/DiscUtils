@@ -32,6 +32,7 @@ namespace DiscUtils
         private long _length;
 
         private Stream _parent;
+        private bool _ownsParent;
 
         public SubStream(Stream parent, long first, long length)
         {
@@ -40,6 +41,31 @@ namespace DiscUtils
             _length = length;
         }
 
+        public SubStream(Stream parent, bool ownsParent, long first, long length)
+        {
+            _parent = parent;
+            _ownsParent = ownsParent;
+            _first = first;
+            _length = length;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_ownsParent)
+                    {
+                        _parent.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
 
         public override bool CanRead
         {

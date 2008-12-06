@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace DiscUtils.Vhd
 {
@@ -46,6 +48,11 @@ namespace DiscUtils.Vhd
         private DynamicHeader _dynamicHeader;
 
         /// <summary>
+        /// Indicates if this object controls the lifetime of the stream.
+        /// </summary>
+        private bool _ownsStream;
+
+        /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
@@ -56,35 +63,263 @@ namespace DiscUtils.Vhd
             ReadFooter(true);
 
             ReadHeaders();
+        }
 
-            if (_footer.DiskType == FileType.Differencing)
+        /// <summary>
+        /// Creates a new instance from a stream.
+        /// </summary>
+        /// <param name="stream">The stream to interpret</param>
+        /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
+        public DiskImageFile(Stream stream, bool ownsStream)
+        {
+            _fileStream = stream;
+            _ownsStream = ownsStream;
+
+            ReadFooter(true);
+
+            ReadHeaders();
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
             {
-                throw new NotImplementedException("Differencing disks not supported yet");
+                if (disposing)
+                {
+                    if (_ownsStream)
+                    {
+                        _fileStream.Dispose();
+                        _fileStream = null;
+                    }
+                }
             }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a stream as a fixed-sized VHD file, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeFixed(Stream stream, long capacity)
+        {
+            return InitializeFixed(stream, false, capacity);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a fixed-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeFixed(Stream stream, bool ownsStream, long capacity)
+        {
+            Geometry geometry = Geometry.FromCapacity(capacity);
+            Footer footer = new Footer(geometry, FileType.Fixed);
+            footer.UpdateChecksum();
+
+            byte[] sector = new byte[Utilities.SectorSize];
+            footer.ToBytes(sector, 0);
+            stream.Position = geometry.Capacity;
+            stream.Write(sector, 0, sector.Length);
+            stream.SetLength(stream.Position);
+
+            stream.Position = 0;
+            return new DiskImageFile(stream, ownsStream);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDynamic(Stream stream, long capacity)
+        {
+            return InitializeDynamic(stream, false, capacity);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDynamic(Stream stream, bool ownsStream, long capacity)
+        {
+            Geometry geometry = Geometry.FromCapacity(capacity);
+            Footer footer = new Footer(geometry, FileType.Dynamic);
+            footer.DataOffset = 512; // Offset of Dynamic Header
+            footer.UpdateChecksum();
+            byte[] footerBlock = new byte[512];
+            footer.ToBytes(footerBlock, 0);
+
+            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, capacity);
+            dynamicHeader.UpdateChecksum();
+            byte[] dynamicHeaderBlock = new byte[1024];
+            dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
+
+            int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
+            byte[] bat = new byte[batSize];
+            for (int i = 0; i < bat.Length; ++i)
+            {
+                bat[i] = 0xFF;
+            }
+
+            stream.Position = 0;
+            stream.Write(footerBlock, 0, 512);
+            stream.Write(dynamicHeaderBlock, 0, 1024);
+            stream.Write(bat, 0, batSize);
+            stream.Write(footerBlock, 0, 512);
+
+            return new DiskImageFile(stream, ownsStream);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a differencing disk VHD file, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="parent">The disk this file is a different from.</param>
+        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
+        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
+        /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDifferencing(
+            Stream stream, DiskImageFile parent, string parentAbsolutePath,
+            string parentRelativePath, DateTime parentModificationTimeUtc)
+        {
+            return InitializeDifferencing(stream, false, parent, parentAbsolutePath, parentRelativePath, parentModificationTimeUtc);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a differencing disk VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="parent">The disk this file is a different from.</param>
+        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
+        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
+        /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDifferencing(
+            Stream stream, bool ownsStream, DiskImageFile parent,
+            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+        {
+            Footer footer = new Footer(parent.Geometry, FileType.Differencing);
+            footer.DataOffset = 512; // Offset of Dynamic Header
+            footer.UpdateChecksum();
+            byte[] footerBlock = new byte[512];
+            footer.ToBytes(footerBlock, 0);
+
+            long tableOffset = 512 + 1024; // Footer + Header
+
+            DynamicHeader dynamicHeader = new DynamicHeader(-1, tableOffset, footer.CurrentSize);
+            int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
+            dynamicHeader.ParentUniqueId = parent.UniqueId;
+            dynamicHeader.ParentTimeStamp = parentModificationTimeUtc;
+            dynamicHeader.ParentUnicodeName = Utilities.GetFileFromPath(parentAbsolutePath);
+            dynamicHeader.ParentLocators[7].PlatformCode = ParentLocator.PlatformCodeWindowsAbsoluteUnicode;
+            dynamicHeader.ParentLocators[7].PlatformDataSpace = 512;
+            dynamicHeader.ParentLocators[7].PlatformDataLength = parentAbsolutePath.Length * 2;
+            dynamicHeader.ParentLocators[7].PlatformDataOffset = tableOffset + batSize;
+            dynamicHeader.ParentLocators[6].PlatformCode = ParentLocator.PlatformCodeWindowsRelativeUnicode;
+            dynamicHeader.ParentLocators[6].PlatformDataSpace = 512;
+            dynamicHeader.ParentLocators[6].PlatformDataLength = parentRelativePath.Length * 2;
+            dynamicHeader.ParentLocators[6].PlatformDataOffset = tableOffset + batSize + 512;
+            dynamicHeader.UpdateChecksum();
+            byte[] dynamicHeaderBlock = new byte[1024];
+            dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
+
+            byte[] platformLocator1 = new byte[512];
+            Encoding.Unicode.GetBytes(parentAbsolutePath, 0, parentAbsolutePath.Length, platformLocator1, 0);
+            byte[] platformLocator2 = new byte[512];
+            Encoding.Unicode.GetBytes(parentRelativePath, 0, parentRelativePath.Length, platformLocator2, 0);
+
+            byte[] bat = new byte[batSize];
+            for (int i = 0; i < bat.Length; ++i)
+            {
+                bat[i] = 0xFF;
+            }
+
+            stream.Position = 0;
+            stream.Write(footerBlock, 0, 512);
+            stream.Write(dynamicHeaderBlock, 0, 1024);
+            stream.Write(bat, 0, batSize);
+            stream.Write(platformLocator1, 0, 512);
+            stream.Write(platformLocator2, 0, 512);
+            stream.Write(footerBlock, 0, 512);
+
+            return new DiskImageFile(stream, ownsStream);
         }
 
         /// <summary>
         /// Gets a value indicating if the VHD file is a differencing disk.
         /// </summary>
-        public bool HasParent
+        public bool NeedsParent
         {
             get { return _footer.DiskType == FileType.Differencing; }
         }
 
         /// <summary>
-        /// Gets the geometry of the virtual disk.
+        /// Gets the location of the parent file, given a base path.
         /// </summary>
-        public DiskGeometry Geometry
+        /// <param name="basePath">The full path to this file</param>
+        /// <returns>Array of candidate file locations</returns>
+        public string[] GetParentLocations(string basePath)
         {
-            get { return _footer.Geometry; }
+            List<string> absPaths = new List<string>(8);
+            List<string> relPaths = new List<string>(8);
+            foreach (var pl in _dynamicHeader.ParentLocators)
+            {
+                if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode
+                    || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
+                {
+                    _fileStream.Position = pl.PlatformDataOffset;
+                    byte[] buffer = Utilities.ReadFully(_fileStream, pl.PlatformDataLength);
+                    string locationVal = Encoding.Unicode.GetString(buffer);
+
+                    if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode)
+                    {
+                        absPaths.Add(locationVal);
+                    }
+                    else // Relative
+                    {
+                        relPaths.Add(Utilities.ResolveRelativePath(basePath, locationVal));
+                    }
+                }
+            }
+
+            // Order the paths to put absolute paths first
+            List<string> paths = new List<string>(absPaths.Count + relPaths.Count + 1);
+            paths.AddRange(absPaths);
+            paths.AddRange(relPaths);
+
+            // As a back-up, try to infer from the parent name...
+            if (paths.Count == 0)
+            {
+                paths.Add(Utilities.ResolveRelativePath(basePath, _dynamicHeader.ParentUnicodeName));
+            }
+
+            return paths.ToArray();
         }
 
         /// <summary>
-        /// Reduces the amount of actual storage consumed, if possible, by the file.
+        /// Gets the geometry of the virtual disk.
         /// </summary>
-        public void Compact()
+        public Geometry Geometry
         {
-            throw new NotImplementedException();
+            get { return _footer.Geometry; }
         }
 
         /// <summary>
@@ -95,197 +330,46 @@ namespace DiscUtils.Vhd
             get { return _footer.DiskType != FileType.Fixed; }
         }
 
-        internal override Stream GetContentStream(Stream parent)
+        internal override Stream OpenContent(Stream parent, bool ownsParent)
         {
             if (_footer.DiskType == FileType.Fixed)
             {
+                if (parent != null && ownsParent)
+                {
+                    parent.Dispose();
+                }
                 return new SubStream(_fileStream, 0, _fileStream.Length - 512);
             }
             else if (_footer.DiskType == FileType.Dynamic)
             {
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize));
+                if (parent != null && ownsParent)
+                {
+                    parent.Dispose();
+                }
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), true);
             }
             else
             {
-                throw new NotImplementedException();
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
             }
-        }
-
-#if false
-        /// <summary>
-        /// Reads a logical disk sector, if available.
-        /// </summary>
-        /// <param name="sector">The logical block address (i.e. index) of the sector</param>
-        /// <param name="buffer">The buffer to populate</param>
-        /// <param name="offset">The offset in <paramref name="buffer"/> to place the first byte</param>
-        /// <returns><code>true</code> if the sector is present, else <code>false</code></returns>
-        public override bool TryReadSector(long sector, byte[] buffer, int offset)
-        {
-            if (_footer.DiskType != FileType.Fixed)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (sector < 0)
-            {
-                throw new ArgumentOutOfRangeException("sector", sector, "Negative sector address");
-            }
-
-            long pos = sector * Utilities.SectorSize;
-            if ((ulong)pos + Utilities.SectorSize >= _footer.CurrentSize)
-            {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Sector {0}: attempt to read beyond end of disk", sector));
-            }
-
-            _fileStream.Position = pos;
-            int numRead = Utilities.ReadFully(_fileStream, buffer, offset, Utilities.SectorSize);
-            if (numRead != Utilities.SectorSize)
-            {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Sector {0}: failed to read entire sector", sector));
-            }
-
-            return true;
         }
 
         /// <summary>
-        /// Reads sectors up until there's one that is 'not stored'.
+        /// Gets the unique id of this file.
         /// </summary>
-        /// <param name="first">The logical block address (i.e. index) of the first sector</param>
-        /// <param name="buffer">The buffer to populate</param>
-        /// <param name="offset">The offset within the buffer to fill from</param>
-        /// <param name="count">The maximum number of sectors to read</param>
-        /// <returns>The number of sectors read, zero if none</returns>
-        public override int ReadSectors(long first, byte[] buffer, int offset, int count)
+        public Guid UniqueId
         {
-            if (_footer.DiskType != FileType.Fixed)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (first < 0)
-            {
-                throw new ArgumentOutOfRangeException("first", first, "Negative sector address");
-            }
-
-            if (count > int.MaxValue / Utilities.SectorSize)
-            {
-                throw new ArgumentOutOfRangeException("count", count, "Total bytes to read exceeds Int32.MaxValue");
-            }
-
-            long pos = first * Utilities.SectorSize;
-            if ((ulong)(pos + count) >= _footer.CurrentSize)
-            {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Sector {0} (+{1}): attempt to read beyond end of disk", first, count));
-            }
-
-            _fileStream.Position = pos;
-            int numRead = Utilities.ReadFully(_fileStream, buffer, offset, count * Utilities.SectorSize);
-            if (numRead != count * Utilities.SectorSize)
-            {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Sector {0}: failed to read entire set of sectors", first));
-            }
-
-            return count;
+            get { return _footer.UniqueId; }
         }
 
         /// <summary>
-        /// Writes one or more sectors.
+        /// Gets the timestamp for this file (when it was created).
         /// </summary>
-        /// <param name="first">The logical block address (i.e. index) of the first sector</param>
-        /// <param name="buffer">The buffer containing the data to write</param>
-        /// <param name="offset">The offset within the buffer of the data to write</param>
-        /// <param name="count">The number of bytes to write</param>
-        public override void WriteSectors(long first, byte[] buffer, int offset, int count)
+        public DateTime CreationTimestamp
         {
-            if (_footer.DiskType != FileType.Fixed)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (first < 0)
-            {
-                throw new ArgumentOutOfRangeException("first", first, "Negative sector address");
-            }
-
-            if (count > int.MaxValue / Utilities.SectorSize)
-            {
-                throw new ArgumentOutOfRangeException("count", count, "Total bytes to write exceeds Int32.MaxValue");
-            }
-
-            long pos = first * Utilities.SectorSize;
-            if ((ulong)(pos + count) >= _footer.CurrentSize)
-            {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Sector {0} (+{1}): attempt to write beyond end of disk", first, count));
-            }
-
-            _fileStream.Position = pos;
-            _fileStream.Write(buffer, offset, count * Utilities.SectorSize);
+            get { return _footer.TimeStamp; }
         }
 
-        /// <summary>
-        /// Deletes one or more sectors.
-        /// </summary>
-        /// <param name="first">The logical block address (i.e. index) of the first sector to delete</param>
-        /// <param name="count">The number of sectors to delete</param>
-        /// <exception cref="System.NotSupportedException">The layer doesn't support absent sectors</exception>
-        public override void DeleteSectors(long first, int count)
-        {
-            if (_footer.DiskType != FileType.Fixed)
-            {
-                throw new NotImplementedException();
-            }
-
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Indicates if a particular sector is present in this layer.
-        /// </summary>
-        /// <param name="sector">The logical block address (i.e. index) of the sector</param>
-        /// <returns><code>true</code> if the sector is present, else <code>false</code></returns>
-        public override bool HasSector(long sector)
-        {
-            if (_footer.DiskType != FileType.Fixed)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (sector < 0)
-            {
-                throw new ArgumentOutOfRangeException("sector", sector, "Negative sector address");
-            }
-
-            long pos = sector * Utilities.SectorSize;
-            return ((ulong)((sector * Utilities.SectorSize) + Utilities.SectorSize) < _footer.CurrentSize);
-        }
-
-        /// <summary>
-        /// Gets the Logical Block Address of the next sector stored in this layer.
-        /// </summary>
-        /// <param name="sector">The reference sector</param>
-        /// <returns>The LBA of the next sector, or <code>-1</code> if none.</returns>
-        public override long NextSector(long sector)
-        {
-            if (_footer.DiskType != FileType.Fixed)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (sector < 0)
-            {
-                throw new ArgumentOutOfRangeException("sector", sector, "Negative sector address");
-            }
-
-            if ((ulong)(((sector + 1) * Utilities.SectorSize) + Utilities.SectorSize) < _footer.CurrentSize)
-            {
-                return sector + 1;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-#endif
         private void ReadFooter(bool fallbackToFront)
         {
             long length = _fileStream.Length;
@@ -295,17 +379,6 @@ namespace DiscUtils.Vhd
             byte[] sector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
 
             _footer = Footer.FromBytes(sector, 0);
-
-            byte[] outSector = new byte[512];
-            _footer.ToBytes(outSector, 0);
-            for (int i = 0; i < sector.Length; ++i)
-            {
-                if (sector[i] != outSector[i])
-                {
-                    throw new IOException();
-                }
-            }
-
 
             if (!_footer.IsValid())
             {

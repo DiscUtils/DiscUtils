@@ -25,10 +25,13 @@ namespace DiscUtils.Vhd
 {
     internal class ParentLocator
     {
+        public const string PlatformCodeWindowsRelativeUnicode = "W2ru";
+        public const string PlatformCodeWindowsAbsoluteUnicode = "W2ku";
+
         public string PlatformCode;
-        public uint PlatformDataSpace;
-        public uint PlatformDataLength;
-        public ulong PlatformDataOffset;
+        public int PlatformDataSpace;
+        public int PlatformDataLength;
+        public long PlatformDataOffset;
 
         public ParentLocator()
         {
@@ -47,9 +50,9 @@ namespace DiscUtils.Vhd
         {
             ParentLocator result = new ParentLocator();
             result.PlatformCode = Utilities.BytesToString(data, offset, 4);
-            result.PlatformDataSpace = Utilities.ToUInt32BigEndian(data, offset + 4);
-            result.PlatformDataLength = Utilities.ToUInt32BigEndian(data, offset + 8);
-            result.PlatformDataOffset = Utilities.ToUInt64BigEndian(data, offset + 16);
+            result.PlatformDataSpace = Utilities.ToInt32BigEndian(data, offset + 4);
+            result.PlatformDataLength = Utilities.ToInt32BigEndian(data, offset + 8);
+            result.PlatformDataOffset = Utilities.ToInt64BigEndian(data, offset + 16);
             return result;
         }
 

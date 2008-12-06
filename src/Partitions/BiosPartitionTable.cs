@@ -34,7 +34,7 @@ namespace DiscUtils.Partitions
     public class BiosPartitionTable : PartitionTable
     {
         private Stream _diskData;
-        private DiskGeometry _diskGeometry;
+        private Geometry _diskGeometry;
 
         /// <summary>
         /// Creates a new instance to access an existing partition table on a disk.
@@ -50,7 +50,7 @@ namespace DiscUtils.Partitions
         /// </summary>
         /// <param name="disk">The stream containing the disk data</param>
         /// <param name="diskGeometry">The geometry of the disk</param>
-        public BiosPartitionTable(Stream disk, DiskGeometry diskGeometry)
+        public BiosPartitionTable(Stream disk, Geometry diskGeometry)
         {
             Init(disk, diskGeometry);
         }
@@ -66,12 +66,25 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Creates a new partition table on a disk containing a single partition.
+        /// </summary>
+        /// <param name="disk">The disk to initialize.</param>
+        /// <param name="type">The partition type for the single partition</param>
+        /// <returns>An object to access the newly created partition table</returns>
+        public static BiosPartitionTable Initialize(VirtualDisk disk, WellKnownPartitionType type)
+        {
+            BiosPartitionTable table = Initialize(disk.Content, disk.Geometry);
+            table.Create(type, true);
+            return table;
+        }
+
+        /// <summary>
         /// Creates a new partition table on a disk.
         /// </summary>
         /// <param name="disk">The stream containing the disk data</param>
         /// <param name="diskGeometry">The geometry of the disk</param>
         /// <returns>An object to access the newly created partition table</returns>
-        public static BiosPartitionTable Initialize(Stream disk, DiskGeometry diskGeometry)
+        public static BiosPartitionTable Initialize(Stream disk, Geometry diskGeometry)
         {
             Stream data = disk;
 
@@ -254,7 +267,7 @@ namespace DiscUtils.Partitions
                 {
                     if (r.IsValid)
                     {
-                        result.Add(new BiosPartitionInfo(r));
+                        result.Add(new BiosPartitionInfo(this, r));
                     }
                 }
                 return new ReadOnlyCollection<BiosPartitionInfo>(result);
@@ -273,7 +286,7 @@ namespace DiscUtils.Partitions
                 {
                     if (r.IsValid)
                     {
-                        result.Add(new BiosPartitionInfo(r));
+                        result.Add(new BiosPartitionInfo(this, r));
                     }
                 }
                 return new ReadOnlyCollection<PartitionInfo>(result);
@@ -385,7 +398,7 @@ namespace DiscUtils.Partitions
             return startCylinder;
         }
 
-        private void Init(Stream disk, DiskGeometry diskGeometry)
+        private void Init(Stream disk, Geometry diskGeometry)
         {
             _diskData = disk;
             _diskGeometry = diskGeometry;
@@ -398,5 +411,9 @@ namespace DiscUtils.Partitions
             }
         }
 
+        internal Stream Open(BiosPartitionRecord record)
+        {
+            return new SubStream(_diskData, false, record.LBAStartAbsolute * Utilities.SectorSize, record.LBALength * Utilities.SectorSize);
+        }
     }
 }

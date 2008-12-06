@@ -52,7 +52,7 @@ namespace DiscUtils.Vhd
         public string CreatorHostOS;
         public long OriginalSize;
         public long CurrentSize;
-        public DiskGeometry Geometry;
+        public Geometry Geometry;
         public FileType DiskType;
         public uint Checksum;
         public Guid UniqueId;
@@ -62,7 +62,7 @@ namespace DiscUtils.Vhd
         {
         }
 
-        public Footer(DiskGeometry geometry, FileType type)
+        public Footer(Geometry geometry, FileType type)
         {
             Cookie = FileCookie;
             Features = FeatureReservedMustBeSet;
@@ -76,7 +76,7 @@ namespace DiscUtils.Vhd
             CurrentSize = geometry.Capacity;
             Geometry = geometry;
             DiskType = type;
-            UniqueId = new Guid();
+            UniqueId = Guid.NewGuid();
             //SavedState = 0;
         }
 
@@ -113,7 +113,7 @@ namespace DiscUtils.Vhd
             result.CreatorHostOS = Utilities.BytesToString(buffer, offset + 36, 4);
             result.OriginalSize = Utilities.ToInt64BigEndian(buffer, offset + 40);
             result.CurrentSize = Utilities.ToInt64BigEndian(buffer, offset + 48);
-            result.Geometry = new DiskGeometry(Utilities.ToUInt16BigEndian(buffer, offset + 56), buffer[58], buffer[59]);
+            result.Geometry = new Geometry(Utilities.ToUInt16BigEndian(buffer, offset + 56), buffer[58], buffer[59]);
             result.DiskType = (FileType)Utilities.ToUInt32BigEndian(buffer, offset + 60);
             result.Checksum = Utilities.ToUInt32BigEndian(buffer, offset + 64);
             result.UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 68);

@@ -73,7 +73,7 @@ namespace DiscUtils
         /// Determines if this object is equivalent to another.
         /// </summary>
         /// <param name="obj">The object to test against.</param>
-        /// <returns><code>true</code> if the <paramref name="obj"/> is equalivalent, else <code>false</code>.</returns>
+        /// <returns><c>true</c> if the <paramref name="obj"/> is equalivalent, else <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null || obj.GetType() != GetType())

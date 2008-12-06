@@ -32,10 +32,11 @@ namespace DiscUtils.Fat
     /// <summary>
     /// Class for accessing FAT file systems.
     /// </summary>
-    public class FatFileSystem : DiscFileSystem, IDisposable
+    public class FatFileSystem : DiscFileSystem
     {
         private TimeZoneInfo _timeZone;
         private Stream _data;
+        private bool _ownsData;
         private byte[] _bootSector;
         private FileAllocationTable _fat;
         private ClusterReader _clusterReader;
@@ -88,6 +89,20 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
+        /// Creates a new instance, with local time as effective timezone
+        /// </summary>
+        /// <param name="data">The stream containing the file system.</param>
+        /// <param name="ownsData">Indicates if the new instance should take ownership
+        /// of <paramref name="data"/>.</param>
+        public FatFileSystem(Stream data, bool ownsData)
+        {
+            _dirCache = new Dictionary<uint, Directory>();
+            _timeZone = TimeZoneInfo.Local;
+            Initialize(data);
+            _ownsData = ownsData;
+        }
+
+        /// <summary>
         /// Creates a new instance, with a specific timezone
         /// </summary>
         /// <param name="data">The stream containing the file system.</param>
@@ -97,6 +112,21 @@ namespace DiscUtils.Fat
             _dirCache = new Dictionary<uint, Directory>();
             _timeZone = timeZone;
             Initialize(data);
+        }
+
+        /// <summary>
+        /// Creates a new instance, with a specific timezone
+        /// </summary>
+        /// <param name="data">The stream containing the file system.</param>
+        /// <param name="ownsData">Indicates if the new instance should take ownership
+        /// of <paramref name="data"/>.</param>
+        /// <param name="timeZone">The timezone of the new instance.</param>
+        public FatFileSystem(Stream data, bool ownsData, TimeZoneInfo timeZone)
+        {
+            _dirCache = new Dictionary<uint, Directory>();
+            _timeZone = timeZone;
+            Initialize(data);
+            _ownsData = ownsData;
         }
 
         /// <summary>
@@ -1028,17 +1058,17 @@ namespace DiscUtils.Fat
             if (type == FloppyDiskType.DoubleDensity)
             {
                 sectors = 1440;
-                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new DiskGeometry(80, 2, 9), true, volId, label);
+                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new Geometry(80, 2, 9), true, volId, label);
             }
             else if (type == FloppyDiskType.HighDensity)
             {
                 sectors = 2880;
-                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new DiskGeometry(80, 2, 18), true, volId, label);
+                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new Geometry(80, 2, 18), true, volId, label);
             }
             else if (type == FloppyDiskType.Extended)
             {
                 sectors = 5760;
-                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new DiskGeometry(80, 2, 36), true, volId, label);
+                WriteBPB(bpb, sectors, FatType.Fat12, 224, 0, 1, 1, new Geometry(80, 2, 36), true, volId, label);
             }
             else
             {
@@ -1079,7 +1109,7 @@ namespace DiscUtils.Fat
         /// <returns>An object that provides access to the newly created partition file system</returns>
         public static FatFileSystem FormatPartition(VirtualDisk disk, int partitionIndex, string label)
         {
-            using (Stream partitionStream = disk.OpenPartition(disk.Partitions[partitionIndex]))
+            using (Stream partitionStream = disk.Partitions[partitionIndex].Open())
             {
                 return FormatPartition(
                     partitionStream,
@@ -1104,7 +1134,7 @@ namespace DiscUtils.Fat
         public static FatFileSystem FormatPartition(
             Stream stream,
             string label,
-            DiskGeometry diskGeometry,
+            Geometry diskGeometry,
             int firstSector,
             int sectorCount,
             short reservedSectors)
@@ -1120,7 +1150,7 @@ namespace DiscUtils.Fat
 
             while (diskGeometry.Cylinders > 1024)
             {
-                diskGeometry = new DiskGeometry(diskGeometry.Cylinders / 2, diskGeometry.HeadsPerCylinder * 2, diskGeometry.SectorsPerTrack);
+                diskGeometry = new Geometry(diskGeometry.Cylinders / 2, diskGeometry.HeadsPerCylinder * 2, diskGeometry.SectorsPerTrack);
             }
 
             // Write the BIOS Parameter Block (BPB) - a single sector
@@ -1346,7 +1376,7 @@ namespace DiscUtils.Fat
             uint hiddenSectors,
             ushort reservedSectors,
             byte sectorsPerCluster,
-            DiskGeometry diskGeometry,
+            Geometry diskGeometry,
             bool isFloppy,
             uint volId,
             string label)
@@ -1692,16 +1722,28 @@ namespace DiscUtils.Fat
         /// <param name="disposing">true if Disposing</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            try
             {
-                foreach (Directory dir in _dirCache.Values)
+                if (disposing)
                 {
-                    dir.Dispose();
-                }
-                _rootDir.Dispose();
-            }
+                    foreach (Directory dir in _dirCache.Values)
+                    {
+                        dir.Dispose();
+                    }
 
-            base.Dispose(disposing);
+                    _rootDir.Dispose();
+
+                    if (_ownsData)
+                    {
+                        _data.Dispose();
+                        _data = null;
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

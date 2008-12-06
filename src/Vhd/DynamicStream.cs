@@ -31,56 +31,113 @@ namespace DiscUtils.Vhd
         private DynamicHeader _dynamicHeader;
         private long _length;
         private Stream _parentStream;
+        private bool _ownsParentStream;
 
         private long _position;
         private bool _atEof;
         private uint[] _blockAllocationTable;
         private byte[][] _blockBitmaps;
 
-        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, Stream parentStream)
+        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, Stream parentStream, bool ownsParentStream)
         {
+            if (fileStream == null)
+            {
+                throw new ArgumentNullException("fileStream");
+            }
+            if (dynamicHeader == null)
+            {
+                throw new ArgumentNullException("dynamicHeader");
+            }
+            if (parentStream == null)
+            {
+                throw new ArgumentNullException("parentStream");
+            }
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length", length, "Negative lengths not allowed");
+            }
+
             _fileStream = fileStream;
             _dynamicHeader = dynamicHeader;
             _length = length;
             _parentStream = parentStream;
+            _ownsParentStream = ownsParentStream;
 
             ReadBlockAllocationTable();
 
             _blockBitmaps = new byte[_dynamicHeader.MaxTableEntries][];
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_ownsParentStream && _parentStream != null)
+                    {
+                        _parentStream.Dispose();
+                        _parentStream = null;
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+
         public override bool CanRead
         {
-            get { return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanSeek
         {
-            get { return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanWrite
         {
-            get { return _fileStream.CanWrite; }
+            get
+            {
+                CheckDisposed();
+                return _fileStream.CanWrite;
+            }
         }
 
         public override void Flush()
         {
+            CheckDisposed();
         }
 
         public override long Length
         {
-            get { return _length; }
+            get
+            {
+                CheckDisposed();
+                return _length;
+            }
         }
 
         public override long Position
         {
             get
             {
+                CheckDisposed();
                 return _position;
             }
             set
             {
+                CheckDisposed();
                 _atEof = false;
                 _position = value;
             }
@@ -88,6 +145,8 @@ namespace DiscUtils.Vhd
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            CheckDisposed();
+
             if (_atEof || _position > _length)
             {
                 _atEof = true;
@@ -145,6 +204,8 @@ namespace DiscUtils.Vhd
 
         public override long Seek(long offset, SeekOrigin origin)
         {
+            CheckDisposed();
+
             long effectiveOffset = offset;
             if (origin == SeekOrigin.Current)
             {
@@ -170,11 +231,15 @@ namespace DiscUtils.Vhd
 
         public override void SetLength(long value)
         {
+            CheckDisposed();
+
             throw new NotSupportedException();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+            CheckDisposed();
+
             if (!CanWrite)
             {
                 throw new IOException("Attempt to write to read-only stream");
@@ -336,6 +401,14 @@ namespace DiscUtils.Vhd
             int bitmapSize = (int)((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8);
             _fileStream.Position = _blockAllocationTable[block] * Utilities.SectorSize;
             _fileStream.Write(_blockBitmaps[block], 0, bitmapSize);
+        }
+
+        private void CheckDisposed()
+        {
+            if (_parentStream == null)
+            {
+                throw new ObjectDisposedException("Attempt to use closed stream");
+            }
         }
     }
 }

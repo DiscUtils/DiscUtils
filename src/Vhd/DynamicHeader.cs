@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 
 namespace DiscUtils.Vhd
 {
@@ -38,7 +39,7 @@ namespace DiscUtils.Vhd
         public uint BlockSize;
         public uint Checksum;
         public Guid ParentUniqueId;
-        public uint ParentTimeStamp;
+        public DateTime ParentTimeStamp;
         public string ParentUnicodeName;
         public ParentLocator[] ParentLocators;
 
@@ -52,6 +53,7 @@ namespace DiscUtils.Vhd
             HeaderVersion = Version1;
             BlockSize = 0x00200000;
             MaxTableEntries = (int)((diskSize + BlockSize - 1) / BlockSize);
+            ParentTimeStamp = Footer.EpochUtc;
             ParentUnicodeName = "";
             ParentLocators = new ParentLocator[8];
             for(int i = 0; i < 8; ++i)
@@ -95,8 +97,8 @@ namespace DiscUtils.Vhd
             result.BlockSize = Utilities.ToUInt32BigEndian(data, offset + 32);
             result.Checksum = Utilities.ToUInt32BigEndian(data, offset + 36);
             result.ParentUniqueId = Utilities.ToGuidBigEndian(data, offset + 40);
-            result.ParentTimeStamp = Utilities.ToUInt32BigEndian(data, offset + 56);
-            result.ParentUnicodeName = Utilities.BytesToString(data, offset + 64, 512).TrimEnd('\0');
+            result.ParentTimeStamp = Footer.EpochUtc.AddSeconds(Utilities.ToUInt32BigEndian(data, offset + 56));
+            result.ParentUnicodeName = Encoding.BigEndianUnicode.GetString(data, offset + 64, 512).TrimEnd('\0');
 
             result.ParentLocators = new ParentLocator[8];
             for (int i = 0; i < 8; ++i)
@@ -117,9 +119,10 @@ namespace DiscUtils.Vhd
             Utilities.WriteBytesBigEndian(BlockSize, data, offset + 32);
             Utilities.WriteBytesBigEndian(Checksum, data, offset + 36);
             Utilities.WriteBytesBigEndian(ParentUniqueId, data, offset + 40);
-            Utilities.WriteBytesBigEndian(ParentTimeStamp, data, offset + 56);
+            Utilities.WriteBytesBigEndian((uint)(ParentTimeStamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
             Utilities.WriteBytesBigEndian((uint)0, data, offset + 60);
-            Utilities.StringToBytes(ParentUnicodeName, data, offset + 64, 512);
+            Array.Clear(data, offset + 64, 512);
+            Encoding.BigEndianUnicode.GetBytes(ParentUnicodeName, 0, ParentUnicodeName.Length, data, offset + 64);
 
             for (int i = 0; i < 8; ++i)
             {

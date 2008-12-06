@@ -233,17 +233,17 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="DiskGeometry">
+         <Type Name="Geometry">
           <Members>
            <Member Name="#BytesPerSector">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2008-11-17 22:09:13Z" FixCategory="DependsOnFix">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2008-12-03 00:50:45Z" FixCategory="DependsOnFix">
               <Issue>
-               <Item>'DiskGeometry.BytesPerSector'</Item>
+               <Item>'Geometry.BytesPerSector'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
-                <Note Id="22" />
+                <Note Id="28" />
                </User>
               </Notes>
              </Message>
@@ -337,39 +337,11 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ToInt32BigEndian(System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.ToInt32BigEndian(byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#ToInt32LittleEndian(System.Byte[],System.Int32)">
             <Messages>
              <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
               <Issue>
                <Item>'Utilities.ToInt32LittleEndian(byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToInt64BigEndian(System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.ToInt64BigEndian(byte[], int)'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -412,34 +384,6 @@
              <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
               <Issue>
                <Item>'Utilities.WriteBytesBigEndian(short, byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WriteBytesBigEndian(System.Int32,System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.WriteBytesBigEndian(int, byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WriteBytesBigEndian(System.Int64,System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.WriteBytesBigEndian(long, byte[], int)'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -837,11 +781,11 @@
     <Note Id="19" Modified="2008-11-10 14:21:03Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="20" Modified="2008-11-10 15:23:21Z">Will use parameter to generate unique short name in future...</Note>
     <Note Id="21" Modified="2008-11-10 15:30:33Z">Will use parameter later to create unique names</Note>
-    <Note Id="22" Modified="2008-11-17 22:09:55Z">Instance property to match other properties.</Note>
     <Note Id="23" Modified="2008-11-17 23:20:40Z">ChsAddress is immutable.</Note>
     <Note Id="24" Modified="2008-11-23 17:52:13Z">Well known acronym</Note>
     <Note Id="25" Modified="2008-11-23 11:21:13Z">Part of a set of re-usable bit-swapping methods.</Note>
     <Note Id="26" Modified="2008-11-23 17:54:26Z">Well known acronyms</Note>
+    <Note Id="28" Modified="2008-12-03 00:53:09Z">Instance method for consistency.</Note>
    </User>
   </Notes>
   <Rules>

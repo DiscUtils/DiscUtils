@@ -26,12 +26,12 @@ using NUnit.Framework;
 namespace DiscUtils
 {
     [TestFixture]
-    public class DiskGeometryTest
+    public class GeometryTest
     {
         [Test]
         public void Create()
         {
-            DiskGeometry g = new DiskGeometry(100, 16, 63);
+            Geometry g = new Geometry(100, 16, 63);
             Assert.AreEqual(100, g.Cylinders);
             Assert.AreEqual(16, g.HeadsPerCylinder);
             Assert.AreEqual(63, g.SectorsPerTrack);
@@ -40,7 +40,7 @@ namespace DiscUtils
         [Test]
         public void LBARoundTrip()
         {
-            DiskGeometry g = new DiskGeometry(100, 16, 63);
+            Geometry g = new Geometry(100, 16, 63);
 
             const int TestCylinder = 54;
             const int TestHead = 15;
@@ -57,14 +57,14 @@ namespace DiscUtils
         [Test]
         public void TotalSectors()
         {
-            DiskGeometry g = new DiskGeometry(333, 22, 11);
+            Geometry g = new Geometry(333, 22, 11);
             Assert.AreEqual(333 * 22 * 11, g.TotalSectors);
         }
 
         [Test]
         public void Capacity()
         {
-            DiskGeometry g = new DiskGeometry(333, 22, 11);
+            Geometry g = new Geometry(333, 22, 11);
             Assert.AreEqual(333 * 22 * 11 * 512, g.Capacity);
         }
 
@@ -73,26 +73,26 @@ namespace DiscUtils
         {
             // Check the capacity calculated is no greater than requested, and off by no more than 10%
             const long ThreeTwentyMB = 1024 * 1024 * 320;
-            DiskGeometry g = DiskGeometry.FromCapacity(ThreeTwentyMB);
+            Geometry g = Geometry.FromCapacity(ThreeTwentyMB);
             Assert.That(g.Capacity <= ThreeTwentyMB && g.Capacity > ThreeTwentyMB * 0.9);
 
             // Check exact sizes are maintained - do one pass to allow for finding a geometry that matches
             // the algorithm - then expect identical results each time.
-            DiskGeometry startGeometry = new DiskGeometry(333,22,11);
-            DiskGeometry trip1 = DiskGeometry.FromCapacity(startGeometry.Capacity);
-            Assert.AreEqual(trip1, DiskGeometry.FromCapacity(trip1.Capacity));
+            Geometry startGeometry = new Geometry(333,22,11);
+            Geometry trip1 = Geometry.FromCapacity(startGeometry.Capacity);
+            Assert.AreEqual(trip1, Geometry.FromCapacity(trip1.Capacity));
         }
 
         [Test]
         public void Equals()
         {
-            Assert.AreEqual(DiskGeometry.FromCapacity(1024 * 1024 * 32), DiskGeometry.FromCapacity(1024 * 1024 * 32));
+            Assert.AreEqual(Geometry.FromCapacity(1024 * 1024 * 32), Geometry.FromCapacity(1024 * 1024 * 32));
         }
 
         [Test]
         public void TestToString()
         {
-            Assert.AreEqual("(333/22/11)", new DiskGeometry(333, 22, 11).ToString());
+            Assert.AreEqual("(333/22/11)", new Geometry(333, 22, 11).ToString());
         }
     }
 }

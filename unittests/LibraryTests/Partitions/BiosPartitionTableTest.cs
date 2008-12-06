@@ -32,7 +32,7 @@ namespace DiscUtils.Partitions
         public void Initialize()
         {
             MemoryStream ms = new MemoryStream();
-            DiskGeometry geom = DiskGeometry.FromCapacity(3 * 1024 * 1024);
+            Geometry geom = Geometry.FromCapacity(3 * 1024 * 1024);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.Count);
@@ -42,23 +42,33 @@ namespace DiscUtils.Partitions
         public void CreateWholeDisk()
         {
             MemoryStream ms = new MemoryStream();
-            DiskGeometry geom = DiskGeometry.FromCapacity(3 * 1024 * 1024);
+            Geometry geom = Geometry.FromCapacity(3 * 1024 * 1024);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
-            int idx = table.Create(WellKnownPartitionType.WindowsFat, false);
+            int idx = table.Create(WellKnownPartitionType.WindowsFat, true);
 
-            // Make sure the partition fills all by the first track on the disk.
+            // Make sure the partition fills all but the first track on the disk.
             Assert.AreEqual(geom.TotalSectors, table[idx].SectorCount + geom.SectorsPerTrack);
 
             // Make sure FAT16 was selected for a disk of this size
             Assert.AreEqual(BiosPartitionTypes.Fat16, table[idx].BiosType);
+
+            // Make sure partition starts where expected
+            Assert.AreEqual(new ChsAddress(0, 1, 1), ((BiosPartitionInfo)table[idx]).Start);
+
+            // Make sure partition ends at end of disk
+            Assert.AreEqual(geom.ToLogicalBlockAddress(geom.LastSector), table[idx].LastSector);
+            Assert.AreEqual(geom.LastSector, ((BiosPartitionInfo)table[idx]).End);
+
+            // Make sure the 'active' flag made it through...
+            Assert.IsTrue(((BiosPartitionInfo)table[idx]).IsActive);
         }
 
         [Test]
         public void CreateBySize()
         {
             MemoryStream ms = new MemoryStream();
-            DiskGeometry geom = DiskGeometry.FromCapacity(3 * 1024 * 1024);
+            Geometry geom = Geometry.FromCapacity(3 * 1024 * 1024);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             int idx = table.Create(2 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
@@ -75,7 +85,7 @@ namespace DiscUtils.Partitions
         public void CreateBySizeInGap()
         {
             MemoryStream ms = new MemoryStream();
-            DiskGeometry geom = new DiskGeometry(15, 30, 63);
+            Geometry geom = new Geometry(15, 30, 63);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
@@ -87,7 +97,7 @@ namespace DiscUtils.Partitions
         public void CreateByCylinder()
         {
             MemoryStream ms = new MemoryStream();
-            DiskGeometry geom = new DiskGeometry(15, 30, 63);
+            Geometry geom = new Geometry(15, 30, 63);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
@@ -103,7 +113,7 @@ namespace DiscUtils.Partitions
         public void Delete()
         {
             MemoryStream ms = new MemoryStream();
-            DiskGeometry geom = DiskGeometry.FromCapacity(10 * 1024 * 1024);
+            Geometry geom = Geometry.FromCapacity(10 * 1024 * 1024);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.Create(1 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false));
