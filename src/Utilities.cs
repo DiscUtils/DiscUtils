@@ -233,7 +233,7 @@ namespace DiscUtils
 
         public static ulong ToUInt64LittleEndian(byte[] buffer, int offset)
         {
-            return (ToUInt32LittleEndian(buffer, offset + 4) << 32) | ToUInt32LittleEndian(buffer, offset + 0);
+            return (((ulong)ToUInt32LittleEndian(buffer, offset + 4)) << 32) | ToUInt32LittleEndian(buffer, offset + 0);
         }
 
         public static short ToInt16LittleEndian(byte[] buffer, int offset)
