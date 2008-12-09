@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FATExtract", "utils\FATExtr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryTests", "unittests\LibraryTests\LibraryTests.csproj", "{A33BA1D9-BBEA-4513-9180-D392436F62FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTFSDump", "utils\NTFSDump\NTFSDump.csproj", "{C9047119-4E83-4826-9CD3-371FF2FCCC1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9047119-4E83-4826-9CD3-371FF2FCCC1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9047119-4E83-4826-9CD3-371FF2FCCC1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9047119-4E83-4826-9CD3-371FF2FCCC1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9047119-4E83-4826-9CD3-371FF2FCCC1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

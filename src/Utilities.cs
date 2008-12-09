@@ -578,6 +578,57 @@ namespace DiscUtils
         #endregion
 
         #region Filesystem Support
+
+        /// <summary>
+        /// Indicates if a file name matches the 8.3 pattern.
+        /// </summary>
+        /// <param name="name">The name to test</param>
+        /// <returns><c>true</c> if the name is 8.3, otherwise <c>false</c>.</returns>
+        internal static bool Is8Dot3(string name)
+        {
+            if (name.Length > 12)
+            {
+                return false;
+            }
+
+            string[] split = name.Split(new char[] { '.' });
+
+            if (split.Length > 2 || split.Length < 1)
+            {
+                return false;
+            }
+
+            if (split[0].Length > 8)
+            {
+                return false;
+            }
+
+            foreach (char ch in split[0])
+            {
+                if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%£-{}()@'`".IndexOf(ch) == -1)
+                {
+                    return false;
+                }
+            }
+
+            if (split.Length > 1)
+            {
+                if (split[1].Length > 3)
+                {
+                    return false;
+                }
+                foreach (char ch in split[1])
+                {
+                    if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%£-{}()@'`".IndexOf(ch) == -1)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Converts a 'standard' wildcard file/path specification into a regular expression.
         /// </summary>

@@ -91,6 +91,26 @@
     <Compile Include="Iso9660\IsoUtilities.cs" />
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminator.cs" />
+    <Compile Include="Ntfs\AttributeType.cs" />
+    <Compile Include="Ntfs\BiosParameterBlock.cs" />
+    <Compile Include="Ntfs\Bitmap.cs" />
+    <Compile Include="Ntfs\DataRun.cs" />
+    <Compile Include="Ntfs\Directory.cs" />
+    <Compile Include="Ntfs\File.cs" />
+    <Compile Include="Ntfs\FileAttribute.cs" />
+    <Compile Include="Ntfs\FileAttributeRecord.cs" />
+    <Compile Include="Ntfs\FileNameRecord.cs" />
+    <Compile Include="Ntfs\IByteArraySerializable.cs" />
+    <Compile Include="Ntfs\IndexBlock.cs" />
+    <Compile Include="Ntfs\IndexEntry.cs" />
+    <Compile Include="Ntfs\IndexEntryHeader.cs" />
+    <Compile Include="Ntfs\MasterFileTable.cs" />
+    <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
+    <Compile Include="Ntfs\FileRecord.cs" />
+    <Compile Include="Ntfs\FileReference.cs" />
+    <Compile Include="Ntfs\FixupRecordBase.cs" />
+    <Compile Include="Ntfs\NtfsFileSystem.cs" />
+    <Compile Include="Ntfs\VolumeInformationFlags.cs" />
     <Compile Include="Tuple.cs" />
     <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
     <Compile Include="Partitions\BiosPartitionInfo.cs" />
@@ -119,6 +139,11 @@
     <Compile Include="VirtualDisk.cs" />
     <Compile Include="VirtualDiskLayer.cs" />
     <Compile Include="ZeroStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
