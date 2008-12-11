@@ -27,8 +27,29 @@ namespace DiscUtils
     /// <summary>
     /// Provides information about a file on a disc.
     /// </summary>
-    public abstract class DiscFileInfo : DiscFileSystemInfo
+    public class DiscFileInfo : DiscFileSystemInfo
     {
+        internal DiscFileInfo(DiscFileSystem fileSystem, string path)
+            : base(fileSystem, path)
+        {
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file exists.
+        /// </summary>
+        public override bool Exists
+        {
+            get { return FileSystem.FileExists(Path); }
+        }
+
+        /// <summary>
+        /// Deletes a file.
+        /// </summary>
+        public override void Delete()
+        {
+            FileSystem.DeleteFile(Path);
+        }
+
         /// <summary>
         /// Creates a <see cref="StreamWriter" /> that appends text to the file represented by this <see cref="DiscFileInfo"/>.
         /// </summary>
@@ -52,7 +73,10 @@ namespace DiscUtils
         /// </summary>
         /// <param name="destinationFileName">The destination file</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
-        public abstract void CopyTo(string destinationFileName, bool overwrite);
+        public virtual void CopyTo(string destinationFileName, bool overwrite)
+        {
+            FileSystem.CopyFile(Path, destinationFileName, overwrite);
+        }
 
         /// <summary>
         /// Creates a new file for reading and writing.
@@ -99,13 +123,19 @@ namespace DiscUtils
         /// <summary>
         /// Gets the length of the current file in bytes.
         /// </summary>
-        public abstract long Length { get; }
+        public virtual long Length
+        {
+            get { return FileSystem.GetFileLength(Path); }
+        }
 
         /// <summary>
         /// Moves a file to a new location.
         /// </summary>
         /// <param name="destinationFileName">The new name of the file</param>
-        public abstract void MoveTo(string destinationFileName);
+        public virtual void MoveTo(string destinationFileName)
+        {
+            FileSystem.MoveFile(Path, destinationFileName);
+        }
 
         /// <summary>
         /// Opens the current file.
@@ -113,7 +143,10 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The newly created stream</returns>
         /// <remarks>Read-only file systems only support <c>FileMode.Open</c>.</remarks>
-        public abstract Stream Open(FileMode mode);
+        public virtual Stream Open(FileMode mode)
+        {
+            return FileSystem.OpenFile(Path, mode);
+        }
 
         /// <summary>
         /// Opens the current file.
@@ -122,7 +155,10 @@ namespace DiscUtils
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The newly created stream</returns>
         /// <remarks>Read-only file systems only support <c>FileMode.Open</c> and <c>FileAccess.Read</c>.</remarks>
-        public abstract Stream Open(FileMode mode, FileAccess access);
+        public virtual Stream Open(FileMode mode, FileAccess access)
+        {
+            return FileSystem.OpenFile(Path, mode, access);
+        }
 
         /// <summary>
         /// Opens an existing file for read-only access.

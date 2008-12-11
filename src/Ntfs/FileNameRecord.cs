@@ -49,6 +49,11 @@ namespace DiscUtils.Ntfs
             ReadFrom(data, offset);
         }
 
+        public FileAttributes FileAttributes
+        {
+            get { return FileNameFileAttribute.ConvertFlags(Flags); }
+        }
+
         public override string ToString()
         {
             return FileName;

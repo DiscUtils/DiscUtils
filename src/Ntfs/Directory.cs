@@ -23,51 +23,65 @@
 using System.Collections.Generic;
 using System.IO;
 
-using DirectoryEntry = DiscUtils.Ntfs.IndexEntry<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileReference>;
+using DirectoryIndexEntry = DiscUtils.Ntfs.IndexEntry<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileReference>;
+using System;
 
 namespace DiscUtils.Ntfs
 {
     internal class Directory : File
     {
-        private DirectoryEntry _rootEntry;
+        private DirectoryIndexEntry _rootEntry;
         private Stream _indexStream;
 
         public Directory(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
             IndexRootFileAttribute indexRoot = (IndexRootFileAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
-            using (Stream s = indexRoot.Open())
+            using (Stream s = indexRoot.Open(FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
-                _rootEntry = new DirectoryEntry(buffer, (int)indexRoot.Header.OffsetToFirstEntry + 0x10);
+                _rootEntry = new DirectoryIndexEntry(buffer, (int)indexRoot.Header.OffsetToFirstEntry + 0x10);
             }
 
             FileAttribute indexAlloc = GetAttribute(AttributeType.IndexAllocation, "$I30");
             if (indexAlloc != null)
             {
-                _indexStream = indexAlloc.Open();
+                _indexStream = indexAlloc.Open(FileAccess.Read);
             }
         }
 
-        public IEnumerable<File> GetMembers()
+        internal DirectoryEntry FindEntryByName(string name)
         {
-            List<DirectoryEntry> entries;
+            // TODO: Improve - this is sucky, should utilize the B*Tree...
+            foreach (DirectoryEntry dirEntry in GetMembers())
+            {
+                if (name.Equals(dirEntry.Details.FileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return dirEntry;
+                }
+            }
+            return null;
+        }
+
+        public IEnumerable<DirectoryEntry> GetMembers()
+        {
+            List<DirectoryIndexEntry> entries;
             if ((_rootEntry.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != (IndexEntryFlags.End | IndexEntryFlags.Node))
             {
                 entries = EnumerateResident();
             }
             else
             {
-                entries = new List<DirectoryEntry>();
+                entries = new List<DirectoryIndexEntry>();
                 Enumerate(_rootEntry, entries);
             }
 
             // Weed out short-name versions of files where there's a long name
-            Dictionary<FileReference, DirectoryEntry> byRefIndex = new Dictionary<FileReference, DirectoryEntry>();
+            Dictionary<FileReference, DirectoryIndexEntry> byRefIndex = new Dictionary<FileReference, DirectoryIndexEntry>();
             int i = 0;
             while(i < entries.Count)
             {
-                DirectoryEntry entry = entries[i];
+                DirectoryIndexEntry entry = entries[i];
 
                 if (((entry.Key.Flags & (uint)FileAttributes.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
                 {
@@ -83,7 +97,7 @@ namespace DiscUtils.Ntfs
                 }
                 else if (byRefIndex.ContainsKey(entry.Data))
                 {
-                    DirectoryEntry storedEntry = byRefIndex[entry.Data];
+                    DirectoryIndexEntry storedEntry = byRefIndex[entry.Data];
                     if (Utilities.Is8Dot3(storedEntry.Key.FileName))
                     {
                         // Make this the definitive entry for the file
@@ -114,22 +128,22 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            return Utilities.Map<DirectoryEntry, File>(entries, (r) => _fileSystem.MasterFileTable.GetFileOrDirectory(r.Data));
+            return Utilities.Map<DirectoryIndexEntry, DirectoryEntry>(entries, (r) => new DirectoryEntry(r));
         }
 
-        private List<DirectoryEntry> EnumerateResident()
+        private List<DirectoryIndexEntry> EnumerateResident()
         {
-            List<DirectoryEntry> residentEntries = new List<DirectoryEntry>();
+            List<DirectoryIndexEntry> residentEntries = new List<DirectoryIndexEntry>();
 
             IndexRootFileAttribute indexRoot = (IndexRootFileAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
-            using (Stream s = indexRoot.Open())
+            using (Stream s = indexRoot.Open(FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
 
                 long pos = 0;
                 while (pos < indexRoot.Header.TotalSizeOfEntries)
                 {
-                    DirectoryEntry entry = new DirectoryEntry(buffer, (int)(0x10 + indexRoot.Header.OffsetToFirstEntry + pos));
+                    DirectoryIndexEntry entry = new DirectoryIndexEntry(buffer, (int)(0x10 + indexRoot.Header.OffsetToFirstEntry + pos));
                     if ((entry.Flags & IndexEntryFlags.End) != 0)
                     {
                         break;
@@ -141,8 +155,8 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            List<DirectoryEntry> result = new List<DirectoryEntry>();
-            foreach (DirectoryEntry entry in residentEntries)
+            List<DirectoryIndexEntry> result = new List<DirectoryIndexEntry>();
+            foreach (DirectoryIndexEntry entry in residentEntries)
             {
                 Enumerate(entry, result);
             }
@@ -150,7 +164,7 @@ namespace DiscUtils.Ntfs
             return result;
         }
 
-        private void Enumerate(DirectoryEntry focus, List<DirectoryEntry> accumulator)
+        private void Enumerate(DirectoryIndexEntry focus, List<DirectoryIndexEntry> accumulator)
         {
             if ((focus.Flags & IndexEntryFlags.Node) != 0)
             {
@@ -160,7 +174,7 @@ namespace DiscUtils.Ntfs
                 block.FromBytes(buffer, 0);
                 buffer = null;
 
-                foreach (DirectoryEntry entry in block.IndexEntries)
+                foreach (DirectoryIndexEntry entry in block.IndexEntries)
                 {
                     Enumerate(entry, accumulator);
                 }

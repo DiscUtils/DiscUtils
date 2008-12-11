@@ -28,22 +28,51 @@ namespace DiscUtils
     /// <summary>
     /// Provides the base class for both <see cref="DiscFileInfo"/> and <see cref="DiscDirectoryInfo"/> objects.
     /// </summary>
-    public abstract class DiscFileSystemInfo
+    public class DiscFileSystemInfo
     {
+        private DiscFileSystem _fileSystem;
+        private string _path;
+
+        internal DiscFileSystemInfo(DiscFileSystem fileSystem, string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException("path");
+            }
+            _fileSystem = fileSystem;
+            _path = path.Trim('\\');
+        }
+
+        /// <summary>
+        /// The file system the referenced file exists on.
+        /// </summary>
+        protected DiscFileSystem FileSystem
+        {
+            get { return _fileSystem; }
+        }
+
+        /// <summary>
+        /// The path to the referenced file.
+        /// </summary>
+        protected string Path
+        {
+            get { return _path; }
+        }
+
         /// <summary>
         /// Gets the name of the file or directory.
         /// </summary>
-        public abstract string Name
+        public virtual string Name
         {
-            get;
+            get { return Utilities.GetFileFromPath(_path); }
         }
 
         /// <summary>
         /// Gets the full path of the file or directory.
         /// </summary>
-        public abstract string FullName
+        public virtual string FullName
         {
-            get;
+            get { return _path; }
         }
 
         /// <summary>
@@ -66,87 +95,129 @@ namespace DiscUtils
         /// <summary>
         /// Gets or sets the <see cref="System.IO.FileAttributes"/> of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public abstract FileAttributes Attributes
+        public virtual FileAttributes Attributes
         {
-            get;
-            set;
+            get { return FileSystem.GetAttributes(_path); }
+            set { FileSystem.SetAttributes(_path, value); }
         }
 
         /// <summary>
         /// Gets the <see cref="DiscDirectoryInfo"/> of the directory containing the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public abstract DiscDirectoryInfo Parent
+        public virtual DiscDirectoryInfo Parent
         {
-            get;
+            get
+            {
+                if (string.IsNullOrEmpty(_path))
+                {
+                    return null;
+                }
+                return new DiscDirectoryInfo(FileSystem, Utilities.GetDirectoryFromPath(_path));
+            }
         }
 
         /// <summary>
         /// Gets a value indicating whether the file system object exists.
         /// </summary>
-        public abstract bool Exists
+        public virtual bool Exists
         {
-            get;
+            get { return FileSystem.Exists(_path); }
         }
 
         /// <summary>
         /// Gets or sets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public abstract DateTime CreationTime
+        public virtual DateTime CreationTime
         {
-            get;
-            set;
+            get { return CreationTimeUtc.ToLocalTime(); }
+            set { CreationTimeUtc = value.ToUniversalTime(); }
         }
 
         /// <summary>
         /// Gets or sets the creation time (in UTC) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public abstract DateTime CreationTimeUtc
+        public virtual DateTime CreationTimeUtc
         {
-            get;
-            set;
+            get { return FileSystem.GetCreationTimeUtc(_path); }
+            set { FileSystem.SetCreationTimeUtc(_path, value); }
         }
 
         /// <summary>
         /// Gets or sets the last time (in local time) the file or directory was accessed.
         /// </summary>
         /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
-        public abstract DateTime LastAccessTime
+        public virtual DateTime LastAccessTime
         {
-            get;
-            set;
+            get { return LastAccessTimeUtc.ToLocalTime(); }
+            set { LastAccessTimeUtc = value.ToUniversalTime(); }
         }
 
         /// <summary>
         /// Gets or sets the last time (in UTC) the file or directory was accessed.
         /// </summary>
         /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
-        public abstract DateTime LastAccessTimeUtc
+        public virtual DateTime LastAccessTimeUtc
         {
-            get;
-            set;
+            get { return FileSystem.GetLastAccessTimeUtc(_path); }
+            set { FileSystem.SetLastAccessTimeUtc(_path, value); }
         }
 
         /// <summary>
         /// Gets or sets the last time (in local time) the file or directory was written to.
         /// </summary>
-        public abstract DateTime LastWriteTime
+        public virtual DateTime LastWriteTime
         {
-            get;
-            set;
+            get { return LastWriteTimeUtc.ToLocalTime(); }
+            set { LastWriteTimeUtc = value.ToUniversalTime(); }
         }
 
         /// <summary>
         /// Gets or sets the last time (in UTC) the file or directory was written to.
         /// </summary>
-        public abstract DateTime LastWriteTimeUtc
+        public virtual DateTime LastWriteTimeUtc
         {
-            get;
-            set;
+            get { return FileSystem.GetLastWriteTimeUtc(_path); }
+            set { FileSystem.SetLastWriteTimeUtc(_path, value); }
         }
 
         /// <summary>
         /// Deletes a file or directory.
         /// </summary>
-        public abstract void Delete();
+        public virtual void Delete()
+        {
+            if ((Attributes & FileAttributes.Directory) != 0)
+            {
+                FileSystem.DeleteDirectory(_path);
+            }
+            else
+            {
+                FileSystem.DeleteFile(_path);
+            }
+        }
+
+        /// <summary>
+        /// Indicates if <paramref name="obj"/> is equivalent to this object.
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns><c>true</c> if <paramref name="obj"/> is equivalent, else <c>false</c></returns>
+        public override bool Equals(object obj)
+        {
+            DiscFileSystemInfo asInfo = obj as DiscFileSystemInfo;
+            if (obj == null)
+            {
+                return false;
+            }
+
+            return string.Compare(Path, asInfo.Path, StringComparison.Ordinal) == 0 && DiscFileSystem.Equals(FileSystem, asInfo.FileSystem);
+        }
+
+        /// <summary>
+        /// Gets the hash code for this object.
+        /// </summary>
+        /// <returns>The hash code</returns>
+        public override int GetHashCode()
+        {
+            return _path.GetHashCode() ^ _fileSystem.GetHashCode();
+        }
     }
 }

@@ -64,6 +64,26 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Converts between two arrays.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of the source array</typeparam>
+        /// <typeparam name="U">The type of the elements of the destination array</typeparam>
+        /// <param name="source">The source array</param>
+        /// <param name="func">The function to map from source type to destination type</param>
+        /// <returns>The resultant array</returns>
+        public static U[] Map<T, U>(IEnumerable<T> source, Func<T, U> func)
+        {
+            List<U> result = new List<U>();
+
+            foreach (T sVal in source)
+            {
+                result.Add(func(sVal));
+            }
+
+            return result.ToArray();
+        }
+
+        /// <summary>
         /// Filters a collection into a new collection.
         /// </summary>
         /// <typeparam name="C">The type of the new collection</typeparam>

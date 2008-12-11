@@ -21,33 +21,38 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class Bitmap
+    internal class DirectoryEntry
     {
-        private byte[] _bitmap;
+        private FileReference _fileReference;
+        private FileNameRecord _fileDetails;
 
-        public Bitmap(BitmapFileAttribute fileAttr)
+        public DirectoryEntry(FileReference fileReference, FileNameRecord fileDetails)
         {
-            if (fileAttr.Length > 100 * 1024)
-            {
-                throw new NotImplementedException("Large Bitmap");
-            }
-
-            using (Stream stream = fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)fileAttr.Length);
-            }
+            _fileReference = fileReference;
+            _fileDetails = fileDetails;
         }
 
-        public bool IsPresent(long index)
+        public DirectoryEntry(IndexEntry<FileNameRecord, FileReference> dirIndexEntry)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
+            _fileReference = dirIndexEntry.Data;
+            _fileDetails = dirIndexEntry.Key;
+        }
 
-            return (_bitmap[byteIdx] & mask) != 0;
+        public FileReference Reference
+        {
+            get { return _fileReference; }
+        }
+
+        public FileNameRecord Details
+        {
+            get { return _fileDetails; }
         }
     }
 }

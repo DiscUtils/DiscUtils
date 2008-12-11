@@ -348,14 +348,6 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Gets the root directory of the file system.
-        /// </summary>
-        public override DiscDirectoryInfo Root
-        {
-            get { return new FatDirectoryInfo(this, ""); }
-        }
-
-        /// <summary>
         /// Opens a file for reading and/or writing.
         /// </summary>
         /// <param name="path">The full path to the file</param>
@@ -398,8 +390,13 @@ namespace DiscUtils.Fat
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("No such file", path);
+            }
             // Luckily, FAT and .NET FileAttributes match, bit-for-bit
-            return (FileAttributes)GetDirectoryEntry(path).Attributes;
+            return (FileAttributes)dirEntry.Attributes;
         }
 
         /// <summary>
@@ -551,6 +548,16 @@ namespace DiscUtils.Fat
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
             UpdateDirEntry(path, (e) => { e.LastWriteTime = ConvertFromUtc(newTime); });
+        }
+
+        /// <summary>
+        /// Gets the length of a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>The length in bytes</returns>
+        public override long GetFileLength(string path)
+        {
+            return GetDirectoryEntry(path).FileSize;
         }
 
         /// <summary>
@@ -709,13 +716,13 @@ namespace DiscUtils.Fat
             long id = GetDirectoryEntry(path, out parent);
             if (parent == null || id < 0)
             {
-                throw new IOException("No such file: " + path);
+                throw new FileNotFoundException("No such file", path);
             }
 
             DirectoryEntry entry = parent.GetEntry(id);
             if (entry == null || (entry.Attributes & FatAttributes.Directory) != 0)
             {
-                throw new IOException("No such file: " + path);
+                throw new FileNotFoundException("No such file", path);
             }
 
             parent.DeleteEntry(id, true);
@@ -1002,39 +1009,6 @@ namespace DiscUtils.Fat
             // Add the new file's entry and remove the old link to the file's contents
             destDir.AddEntry(newEntry);
             sourceDir.DeleteEntry(sourceEntryId, false);
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible file.
-        /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
-        public override DiscFileInfo GetFileInfo(string path)
-        {
-            return new FatFileInfo(this, path);
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible directory.
-        /// </summary>
-        /// <param name="path">The directory path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The directory does not need to exist</remarks>
-        public override DiscDirectoryInfo GetDirectoryInfo(string path)
-        {
-            return new FatDirectoryInfo(this, path);
-        }
-
-        /// <summary>
-        /// Gets an object representing a possible file system object (file or directory).
-        /// </summary>
-        /// <param name="path">The file system path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file system object does not need to exist</remarks>
-        public override DiscFileSystemInfo GetFileSystemInfo(string path)
-        {
-            return new FatFileSystemInfo(this, path);
         }
 
         #region Disk Formatting

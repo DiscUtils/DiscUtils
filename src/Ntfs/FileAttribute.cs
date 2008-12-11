@@ -76,15 +76,15 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal Stream Open()
+        internal Stream Open(FileAccess access)
         {
             if (_fileSystem != null)
             {
-                return _record.Open(_fileSystem.RawStream, _fileSystem.BytesPerCluster);
+                return _record.Open(_fileSystem.RawStream, _fileSystem.BytesPerCluster, access);
             }
             else
             {
-                return _record.Open(null, 0);
+                return _record.Open(null, 0, access);
             }
         }
 
@@ -99,6 +99,11 @@ namespace DiscUtils.Ntfs
             : base(null, record)
         {
             _fileNameRecord = new FileNameRecord(record.Data, 0);
+        }
+
+        public FileNameRecord FileNameRecord
+        {
+            get { return _fileNameRecord; }
         }
 
         public FileAttributes Attributes
@@ -127,7 +132,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "          File Name: " + _fileNameRecord.FileName);
         }
 
-        private static FileAttributes ConvertFlags(uint flags)
+        internal static FileAttributes ConvertFlags(uint flags)
         {
             FileAttributes result = (FileAttributes)(flags & 0xFFFF);
             if ((flags & 0x10000000) != 0)
@@ -202,7 +207,7 @@ namespace DiscUtils.Ntfs
             : base(fileSystem, record)
         {
             _securityDescriptor = new FileSecurity();
-            using (Stream s = Open())
+            using (Stream s = Open(FileAccess.Read))
             {
                 _securityDescriptor.SetSecurityDescriptorBinaryForm(Utilities.ReadFully(s, (int)record.DataLength));
             }
@@ -233,7 +238,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                using (Stream s = Open())
+                using (Stream s = Open(FileAccess.Read))
                 {
                     string hex = "";
                     byte[] buffer = new byte[5];
@@ -267,7 +272,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                using (Stream s = Open())
+                using (Stream s = Open(FileAccess.Read))
                 {
                     string hex = "";
                     byte[] buffer = new byte[5];
@@ -290,7 +295,7 @@ namespace DiscUtils.Ntfs
         public VolumeNameFileAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
             : base(fileSystem, record)
         {
-            using (Stream s = Open())
+            using (Stream s = Open(FileAccess.Read))
             {
                 byte[] nameBytes = Utilities.ReadFully(s, (int)record.DataLength);
                 _volName = Encoding.Unicode.GetString(nameBytes);
@@ -313,7 +318,7 @@ namespace DiscUtils.Ntfs
         public VolumeInformationFileAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
             : base(fileSystem, record)
         {
-            using (Stream s = Open())
+            using (Stream s = Open(FileAccess.Read))
             {
                 byte[] data = Utilities.ReadFully(s, (int)record.DataLength);
                 _majorVersion = data[0x08];
@@ -342,7 +347,7 @@ namespace DiscUtils.Ntfs
         public IndexRootFileAttribute(ResidentFileAttributeRecord record)
             : base(null, record)
         {
-            using (Stream s = Open())
+            using (Stream s = Open(FileAccess.Read))
             {
                 byte[] data = record.Data;
                 _rootAttrType = Utilities.ToUInt32LittleEndian(data, 0x00);
@@ -390,7 +395,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                using (Stream s = Open())
+                using (Stream s = Open(FileAccess.Read))
                 {
                     string hex = "";
                     byte[] buffer = new byte[5];
@@ -436,7 +441,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                using (Stream s = Open())
+                using (Stream s = Open(FileAccess.Read))
                 {
                     string hex = "";
                     byte[] buffer = new byte[5];

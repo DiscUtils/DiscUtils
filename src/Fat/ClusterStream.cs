@@ -102,6 +102,7 @@ namespace DiscUtils.Fat
                 if (value >= 0)
                 {
                     _position = value;
+                    _atEOF = false;
                 }
                 else
                 {

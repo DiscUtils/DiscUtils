@@ -146,7 +146,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         public override DiscDirectoryInfo Root
         {
-            get { return new ReaderDirectoryInfo(this, @""); }
+            get { return new DiscDirectoryInfo(this, @""); }
         }
 
         /// <summary>
@@ -250,11 +250,7 @@ namespace DiscUtils.Iso9660
             List<string> results = new List<string>();
             foreach (DirectoryRecord r in dir.GetRecords())
             {
-                if ((r.Flags & FileFlags.Directory) == 0)
-                {
-                    results.Add(Utilities.CombinePaths(path, r.FileIdentifier) + "\\");
-                }
-                else if (!IsoUtilities.IsSpecialDirectory(r))
+                if (!IsoUtilities.IsSpecialDirectory(r))
                 {
                     results.Add(Utilities.CombinePaths(path, r.FileIdentifier));
                 }
@@ -380,6 +376,16 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets the length of a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>The length in bytes</returns>
+        public override long GetFileLength(string path)
+        {
+            return GetDirectoryRecord(path).DataLength;
+        }
+
+        /// <summary>
         /// Gets an object representing a possible file.
         /// </summary>
         /// <param name="path">The file path</param>
@@ -387,7 +393,7 @@ namespace DiscUtils.Iso9660
         /// <remarks>The file does not need to exist</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
-            return new ReaderFileInfo(this, path);
+            return new DiscFileInfo(this, path);
         }
 
         /// <summary>
@@ -398,7 +404,7 @@ namespace DiscUtils.Iso9660
         /// <remarks>The directory does not need to exist</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
-            return new ReaderDirectoryInfo(this, path);
+            return new DiscDirectoryInfo(this, path);
         }
 
         /// <summary>
@@ -409,7 +415,7 @@ namespace DiscUtils.Iso9660
         /// <remarks>The file system object does not need to exist</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
-            return new ReaderFileSystemInfo(this, path);
+            return new DiscFileSystemInfo(this, path);
         }
 
         internal DirectoryRecord GetDirectoryRecord(string path)
@@ -446,7 +452,8 @@ namespace DiscUtils.Iso9660
             int pos = path.LastIndexOf('\\');
             if (pos == path.Length - 1)
             {
-                throw new FileNotFoundException("Invalid path", path);
+                result = new DirectoryRecord();
+                return false;
             }
 
             string dirPart = (pos <= 0) ? "\0" : path.Substring(0, pos);

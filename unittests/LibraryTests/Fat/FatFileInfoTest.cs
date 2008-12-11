@@ -378,7 +378,7 @@ namespace DiscUtils.Fat
         }
 
         [Test]
-        [ExpectedException(typeof(IOException))]
+        [ExpectedException(typeof(FileNotFoundException))]
         [Category("ThrowsException")]
         public void Delete_Dir()
         {
@@ -390,7 +390,7 @@ namespace DiscUtils.Fat
         }
 
         [Test]
-        [ExpectedException(typeof(IOException))]
+        [ExpectedException(typeof(FileNotFoundException))]
         [Category("ThrowsException")]
         public void Delete_NoFile()
         {

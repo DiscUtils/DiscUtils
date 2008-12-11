@@ -31,15 +31,18 @@ namespace DiscUtils.Ntfs
         private long _bytesPerCluster;
         private DataRun[] _runs;
 
+        private bool _readOnly;
         private long _length;
         private long _position;
 
-        public NonResidentAttributeStream(Stream fsStream, long bytesPerCluster, DataRun[] runs, long length)
+        private bool _atEOF;
+
+        public NonResidentAttributeStream(Stream fsStream, long bytesPerCluster, DataRun[] runs, bool readOnly, long length)
         {
             _fsStream = fsStream;
             _bytesPerCluster = bytesPerCluster;
             _runs = runs;
-
+            _readOnly = readOnly;
             _length = length;
         }
 
@@ -55,7 +58,7 @@ namespace DiscUtils.Ntfs
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return !_readOnly; }
         }
 
         public override void Flush()
@@ -77,11 +80,33 @@ namespace DiscUtils.Ntfs
             set
             {
                 _position = value;
+                _atEOF = false;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (!CanRead)
+            {
+                throw new IOException("Attempt to read from file not opened for read");
+            }
+
+            if (_atEOF)
+            {
+                throw new IOException("Attempt to read beyond end of file");
+            }
+
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count", "Attempt to read negative number of bytes");
+            }
+
+            if (_position >= _length)
+            {
+                _atEOF = true;
+                return 0;
+            }
+
             ulong vcn = (ulong)(_position / _bytesPerCluster);
             ulong clusterOffset = (ulong)(_position % _bytesPerCluster);
 
@@ -124,17 +149,28 @@ namespace DiscUtils.Ntfs
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            long newPos = offset;
+            if (origin == SeekOrigin.Current)
+            {
+                newPos += _position;
+            }
+            else if (origin == SeekOrigin.End)
+            {
+                newPos += Length;
+            }
+            _position = newPos;
+            _atEOF = false;
+            return newPos;
         }
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
     }
 }

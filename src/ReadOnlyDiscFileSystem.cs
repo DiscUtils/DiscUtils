@@ -100,21 +100,22 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Opens the specified file.
+        /// </summary>
+        /// <param name="path">The full path of the file to open.</param>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <returns>The new stream.</returns>
+        public override Stream OpenFile(string path, FileMode mode)
+        {
+            return OpenFile(path, mode, FileAccess.Read);
+        }
+
+        /// <summary>
         /// Sets the attributes of a file or directory - not supported on read-only file systems.
         /// </summary>
         /// <param name="path">The file or directory to change</param>
         /// <param name="newValue">The new attributes of the file or directory</param>
         public override void SetAttributes(string path, FileAttributes newValue)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Sets the creation time (in local time) of a file or directory - not supported on read-only file systems.
-        /// </summary>
-        /// <param name="path">The path of the file or directory.</param>
-        /// <param name="newTime">The new time to set.</param>
-        public override void SetCreationTime(string path, DateTime newTime)
         {
             throw new NotSupportedException();
         }
@@ -130,31 +131,11 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Sets the last access time (in local time) of a file or directory - not supported on read-only file systems.
-        /// </summary>
-        /// <param name="path">The path of the file or directory.</param>
-        /// <param name="newTime">The new time to set.</param>
-        public override void SetLastAccessTime(string path, DateTime newTime)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
         /// Sets the last access time (in UTC) of a file or directory - not supported on read-only file systems.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Sets the last modification time (in local time) of a file or directory - not supported on read-only file systems.
-        /// </summary>
-        /// <param name="path">The path of the file or directory.</param>
-        /// <param name="newTime">The new time to set.</param>
-        public override void SetLastWriteTime(string path, DateTime newTime)
         {
             throw new NotSupportedException();
         }

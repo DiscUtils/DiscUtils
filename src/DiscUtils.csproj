@@ -56,12 +56,9 @@
     <Compile Include="Fat\ClusterReader.cs" />
     <Compile Include="Fat\Directory.cs" />
     <Compile Include="Fat\FatBuffer.cs" />
-    <Compile Include="Fat\FatDirectoryInfo.cs" />
-    <Compile Include="Fat\FatFileInfo.cs" />
     <Compile Include="Fat\FatAttributes.cs" />
     <Compile Include="Fat\ClusterStream.cs" />
     <Compile Include="Fat\FatFileStream.cs" />
-    <Compile Include="Fat\FatFileSystemInfo.cs" />
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
@@ -84,9 +81,6 @@
     <Compile Include="Iso9660\PathTableRecord.cs" />
     <Compile Include="Iso9660\PrimaryVolumeDescriptor.cs" />
     <Compile Include="Iso9660\ReaderDirectory.cs" />
-    <Compile Include="Iso9660\ReaderDirectoryInfo.cs" />
-    <Compile Include="Iso9660\ReaderFileInfo.cs" />
-    <Compile Include="Iso9660\ReaderFileSystemInfo.cs" />
     <Compile Include="Iso9660\SupplementaryVolumeDescriptor.cs" />
     <Compile Include="Iso9660\IsoUtilities.cs" />
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
@@ -143,6 +137,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ntfs\DirectoryEntry.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>

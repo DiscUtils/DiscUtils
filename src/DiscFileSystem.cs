@@ -55,9 +55,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the root directory of the file system.
         /// </summary>
-        public abstract DiscDirectoryInfo Root
+        public virtual DiscDirectoryInfo Root
         {
-            get;
+            get { return new DiscDirectoryInfo(this, @""); }
         }
 
         /// <summary>
@@ -286,14 +286,20 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The creation time.</returns>
-        public abstract DateTime GetCreationTime(string path);
+        public virtual DateTime GetCreationTime(string path)
+        {
+            return GetCreationTimeUtc(path).ToLocalTime();
+        }
 
         /// <summary>
         /// Sets the creation time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public abstract void SetCreationTime(string path, DateTime newTime);
+        public virtual void SetCreationTime(string path, DateTime newTime)
+        {
+            SetCreationTimeUtc(path, newTime.ToUniversalTime());
+        }
 
         /// <summary>
         /// Gets the creation time (in UTC) of a file or directory.
@@ -314,14 +320,20 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The last access time</returns>
-        public abstract DateTime GetLastAccessTime(string path);
+        public virtual DateTime GetLastAccessTime(string path)
+        {
+            return GetLastAccessTimeUtc(path).ToLocalTime();
+        }
 
         /// <summary>
         /// Sets the last access time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public abstract void SetLastAccessTime(string path, DateTime newTime);
+        public virtual void SetLastAccessTime(string path, DateTime newTime)
+        {
+            SetLastAccessTimeUtc(path, newTime.ToUniversalTime());
+        }
 
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
@@ -342,14 +354,20 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The last write time</returns>
-        public abstract DateTime GetLastWriteTime(string path);
+        public virtual DateTime GetLastWriteTime(string path)
+        {
+            return GetLastWriteTimeUtc(path).ToLocalTime();
+        }
 
         /// <summary>
         /// Sets the last modification time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public abstract void SetLastWriteTime(string path, DateTime newTime);
+        public virtual void SetLastWriteTime(string path, DateTime newTime)
+        {
+            SetLastWriteTimeUtc(path, newTime.ToUniversalTime());
+        }
 
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
@@ -366,28 +384,44 @@ namespace DiscUtils
         public abstract void SetLastWriteTimeUtc(string path, DateTime newTime);
 
         /// <summary>
+        /// Gets the length of a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>The length in bytes</returns>
+        public abstract long GetFileLength(string path);
+
+        /// <summary>
         /// Gets an object representing a possible file.
         /// </summary>
         /// <param name="path">The file path</param>
         /// <returns>The representing object</returns>
         /// <remarks>The file does not need to exist</remarks>
-        public abstract DiscFileInfo GetFileInfo(string path);
+        public virtual DiscFileInfo GetFileInfo(string path)
+        {
+            return new DiscFileInfo(this, path);
+        }
 
         /// <summary>
         /// Gets an object representing a possible directory.
         /// </summary>
         /// <param name="path">The directory path</param>
         /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
-        public abstract DiscDirectoryInfo GetDirectoryInfo(string path);
+        /// <remarks>The directory does not need to exist</remarks>
+        public virtual DiscDirectoryInfo GetDirectoryInfo(string path)
+        {
+            return new DiscDirectoryInfo(this, path);
+        }
 
         /// <summary>
         /// Gets an object representing a possible file system object (file or directory).
         /// </summary>
         /// <param name="path">The file system path</param>
         /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
-        public abstract DiscFileSystemInfo GetFileSystemInfo(string path);
+        /// <remarks>The file system object does not need to exist</remarks>
+        public virtual DiscFileSystemInfo GetFileSystemInfo(string path)
+        {
+            return new DiscFileSystemInfo(this, path);
+        }
 
         #region IDisposable Members
 

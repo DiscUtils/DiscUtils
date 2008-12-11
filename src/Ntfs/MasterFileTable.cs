@@ -32,12 +32,72 @@ namespace DiscUtils.Ntfs
 
         private int _recordLength;
 
+        /// <summary>
+        /// MFT index of the MFT file itself.
+        /// </summary>
+        public const long MftIndex = 0;
+
+        /// <summary>
+        /// MFT index of the MFT Mirror file.
+        /// </summary>
+        public const long MftMirrorIndex = 1;
+
+        /// <summary>
+        /// MFT Index of the Log file.
+        /// </summary>
+        public const long LogFileIndex = 2;
+
+        /// <summary>
+        /// MFT Index of the Volume file.
+        /// </summary>
+        public const long VolumeIndex = 3;
+
+        /// <summary>
+        /// MFT Index of the Attribute Definition file.
+        /// </summary>
+        public const long AttrDefIndex = 4;
+
+        /// <summary>
+        /// MFT Index of the Root Directory.
+        /// </summary>
+        public const long RootDirIndex = 5;
+
+        /// <summary>
+        /// MFT Index of the Bitmap file.
+        /// </summary>
+        public const long BitmapIndex = 6;
+
+        /// <summary>
+        /// MFT Index of the Boot sector(s).
+        /// </summary>
+        public const long BootIndex = 7;
+
+        /// <summary>
+        /// MFT Index of the Bad Bluster file.
+        /// </summary>
+        public const long BadClusIndex = 8;
+
+        /// <summary>
+        /// MFT Index of the Security Descriptor file.
+        /// </summary>
+        public const long SecureIndex = 9;
+
+        /// <summary>
+        /// MFT Index of the Uppercase mapping file.
+        /// </summary>
+        public const long UpCaseIndex = 10;
+
+        /// <summary>
+        /// MFT Index of the Optional Extensions directory.
+        /// </summary>
+        public const long ExtendIndex = 11;
+
 
         public MasterFileTable(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
             _bitmap = new Bitmap((BitmapFileAttribute)GetAttribute(AttributeType.Bitmap));
-            _records = GetAttribute(AttributeType.Data).Open();
+            _records = GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
 
             // TODO - How to figure out the record length?
             _recordLength = _fileSystem.BiosParameterBlock.MftRecordSize;
@@ -73,9 +133,19 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public Directory GetDirectory(int index)
+        public Directory GetDirectory(long index)
         {
             FileRecord record = GetRecord(index);
+            if (record != null)
+            {
+                return new Directory(_fileSystem, record);
+            }
+            return null;
+        }
+
+        public Directory GetDirectory(FileReference fileReference)
+        {
+            FileRecord record = GetRecord(fileReference.MftIndex);
             if (record != null)
             {
                 return new Directory(_fileSystem, record);
@@ -131,7 +201,7 @@ namespace DiscUtils.Ntfs
             ushort bytesPerSector = _fileSystem.BiosParameterBlock.BytesPerSector;
 
             writer.WriteLine(indent + "MASTER FILE TABLE");
-            using (Stream mftStream = OpenAttribute(AttributeType.Data))
+            using (Stream mftStream = OpenAttribute(AttributeType.Data, FileAccess.Read))
             {
                 while (mftStream.Position < mftStream.Length)
                 {

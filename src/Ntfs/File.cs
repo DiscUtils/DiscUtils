@@ -97,7 +97,7 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
-        public Stream OpenAttribute(AttributeType type)
+        public Stream OpenAttribute(AttributeType type, FileAccess access)
         {
             FileAttribute attr = GetAttribute(type);
 
@@ -106,8 +106,27 @@ namespace DiscUtils.Ntfs
                 return null;
             }
 
-            return attr.Open();
+            return attr.Open(access);
         }
+
+        public FileAttributes FileAttributes
+        {
+            get
+            {
+                return ((FileNameFileAttribute)GetAttribute(AttributeType.FileName)).Attributes;
+            }
+        }
+
+        public DirectoryEntry DirectoryEntry
+        {
+            get
+            {
+                FileNameFileAttribute fnAttr = (FileNameFileAttribute)GetAttribute(AttributeType.FileName);
+                FileAttributeRecord record = _baseRecord.GetAttribute(AttributeType.FileName);
+                return new DirectoryEntry(new FileReference(_baseRecord.MasterFileTableIndex), fnAttr.FileNameRecord);
+            }
+        }
+
 
         public virtual void Dump(TextWriter writer, string indent)
         {

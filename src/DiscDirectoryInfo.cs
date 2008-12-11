@@ -30,37 +30,74 @@ namespace DiscUtils
     /// <remarks>
     /// This class allows navigation of the disc directory/file hierarchy.
     /// </remarks>
-    public abstract class DiscDirectoryInfo : DiscFileSystemInfo
+    public class DiscDirectoryInfo : DiscFileSystemInfo
     {
         /// <summary>
         /// Construction limited to sub classes.
         /// </summary>
-        protected DiscDirectoryInfo()
+        internal DiscDirectoryInfo(DiscFileSystem fileSystem, string path)
+            : base(fileSystem, path)
         {
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the directory exists.
+        /// </summary>
+        public override bool Exists
+        {
+            get { return FileSystem.DirectoryExists(Path); }
+        }
+
+        /// <summary>
+        /// Gets the full path of the directory.
+        /// </summary>
+        public override string FullName
+        {
+            get { return base.FullName + @"\"; }
         }
 
         /// <summary>
         /// Creates a directory.
         /// </summary>
-        public abstract void Create();
+        public virtual void Create()
+        {
+            FileSystem.CreateDirectory(Path);
+        }
 
         /// <summary>
         /// Deletes a directory, even if it's not empty.
         /// </summary>
-        /// <param name="recursive">Controls whether to recursively delete contents</param>
-        public abstract void Delete(bool recursive);
+        public override void Delete()
+        {
+            FileSystem.DeleteDirectory(Path, false);
+        }
+
+        /// <summary>
+        /// Deletes a directory, with the caller choosing whether to recurse.
+        /// </summary>
+        /// <param name="recursive"><c>true</c> to delete all child node, <c>false</c> to fail if the directory is not empty</param>
+        public virtual void Delete(bool recursive)
+        {
+            FileSystem.DeleteDirectory(Path, recursive);
+        }
 
         /// <summary>
         /// Moves a directory and it's contents to a new path.
         /// </summary>
         /// <param name="destinationDirName">The</param>
-        public abstract void MoveTo(string destinationDirName);
+        public virtual void MoveTo(string destinationDirName)
+        {
+            FileSystem.MoveDirectory(Path, destinationDirName);
+        }
 
         /// <summary>
         /// Gets all child directories.
         /// </summary>
         /// <returns>An array of child directories</returns>
-        public abstract DiscDirectoryInfo[] GetDirectories();
+        public virtual DiscDirectoryInfo[] GetDirectories()
+        {
+            return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path), (p) => new DiscDirectoryInfo(FileSystem, p));
+        }
 
         /// <summary>
         /// Gets all child directories matching a search pattern.
@@ -83,13 +120,19 @@ namespace DiscUtils
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).  The option parameter determines whether only immediate
         /// children, or all children are returned.</remarks>
-        public abstract DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption searchOption);
+        public virtual DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption searchOption)
+        {
+            return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path, pattern, searchOption), (p) => new DiscDirectoryInfo(FileSystem, p));
+        }
 
         /// <summary>
         /// Gets all files.
         /// </summary>
         /// <returns>An array of files.</returns>
-        public abstract DiscFileInfo[] GetFiles();
+        public virtual DiscFileInfo[] GetFiles()
+        {
+            return Utilities.Map<string, DiscFileInfo>(FileSystem.GetFiles(Path), (p) => new DiscFileInfo(FileSystem, p));
+        }
 
         /// <summary>
         /// Gets all files matching a search pattern.
@@ -112,13 +155,19 @@ namespace DiscUtils
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).  The option parameter determines whether only immediate
         /// children, or all children are returned.</remarks>
-        public abstract DiscFileInfo[] GetFiles(string pattern, SearchOption searchOption);
+        public virtual DiscFileInfo[] GetFiles(string pattern, SearchOption searchOption)
+        {
+            return Utilities.Map<string, DiscFileInfo>(FileSystem.GetFiles(Path, pattern, searchOption), (p) => new DiscFileInfo(FileSystem, p));
+        }
 
         /// <summary>
         /// Gets all files and directories in this directory.
         /// </summary>
         /// <returns>An array of files and directories.</returns>
-        public abstract DiscFileSystemInfo[] GetFileSystemInfos();
+        public virtual DiscFileSystemInfo[] GetFileSystemInfos()
+        {
+            return Utilities.Map<string, DiscFileSystemInfo>(FileSystem.GetFileSystemEntries(Path), (p) => new DiscFileSystemInfo(FileSystem, p));
+        }
 
         /// <summary>
         /// Gets all files and directories in this directory.
@@ -127,7 +176,9 @@ namespace DiscUtils
         /// <returns>An array of files and directories.</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).</remarks>
-        public abstract DiscFileSystemInfo[] GetFileSystemInfos(string pattern);
-
+        public virtual DiscFileSystemInfo[] GetFileSystemInfos(string pattern)
+        {
+            return Utilities.Map<string, DiscFileSystemInfo>(FileSystem.GetFileSystemEntries(Path, pattern), (p) => new DiscFileSystemInfo(FileSystem, p));
+        }
     }
 }

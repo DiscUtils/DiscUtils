@@ -98,6 +98,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Ntfs">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-12-09 22:48:10Z">
+      <Issue>
+       <Item>DiscUtils.Ntfs</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="27" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-12-09 22:48:10Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Ntfs</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="22" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Partitions">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
@@ -342,34 +367,6 @@
              <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
               <Issue>
                <Item>'Utilities.ToInt32LittleEndian(byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToInt64LittleEndian(System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.ToInt64LittleEndian(byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToUInt64LittleEndian(System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.ToUInt64LittleEndian(byte[], int)'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -781,10 +778,12 @@
     <Note Id="19" Modified="2008-11-10 14:21:03Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="20" Modified="2008-11-10 15:23:21Z">Will use parameter to generate unique short name in future...</Note>
     <Note Id="21" Modified="2008-11-10 15:30:33Z">Will use parameter later to create unique names</Note>
+    <Note Id="22" Modified="2008-12-09 22:48:46Z">Using normal rules around acronyms - and NTFS is a well known acronym.</Note>
     <Note Id="23" Modified="2008-11-17 23:20:40Z">ChsAddress is immutable.</Note>
     <Note Id="24" Modified="2008-11-23 17:52:13Z">Well known acronym</Note>
     <Note Id="25" Modified="2008-11-23 11:21:13Z">Part of a set of re-usable bit-swapping methods.</Note>
     <Note Id="26" Modified="2008-11-23 17:54:26Z">Well known acronyms</Note>
+    <Note Id="27" Modified="2008-12-09 22:49:03Z">Separating file systems by namespace.</Note>
     <Note Id="28" Modified="2008-12-03 00:53:09Z">Instance method for consistency.</Note>
    </User>
   </Notes>

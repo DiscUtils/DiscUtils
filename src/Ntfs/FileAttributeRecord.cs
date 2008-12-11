@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs
             get { return _name; }
         }
 
-        public abstract Stream Open(Stream rawStream, long bytesPerCluster);
+        public abstract Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access);
 
         public static FileAttributeRecord FromBytes(byte[] buffer, int offset)
         {
@@ -145,9 +145,9 @@ namespace DiscUtils.Ntfs
             get { return _data; }
         }
 
-        public override Stream Open(Stream rawStream, long bytesPerCluster)
+        public override Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
         {
-            return new MemoryStream(_data, 0, _data.Length, false, false);
+            return new MemoryStream(_data, 0, _data.Length, access != FileAccess.Read, false);
         }
 
         public override void Read(byte[] buffer, int offset)
@@ -202,9 +202,9 @@ namespace DiscUtils.Ntfs
             get { return _dataRuns.ToArray(); }
         }
 
-        public override Stream Open(Stream rawStream, long bytesPerCluster)
+        public override Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
         {
-            return new NonResidentAttributeStream(rawStream, bytesPerCluster, _dataRuns.ToArray(), (long)_dataRealSize);
+            return new NonResidentAttributeStream(rawStream, bytesPerCluster, _dataRuns.ToArray(), access == FileAccess.Read, (long)_dataRealSize);
         }
 
         public override void Read(byte[] buffer, int offset)
