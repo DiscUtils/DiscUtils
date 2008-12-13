@@ -26,6 +26,27 @@ using System.Text;
 
 namespace DiscUtils.Ntfs
 {
+    [Flags]
+    internal enum FileNameRecordFlags : uint
+    {
+        None =         0x00000000,
+        ReadOnly =     0x00000001,
+        Hidden =       0x00000002,
+        System =       0x00000004,
+        Archive =      0x00000020,
+        Device =       0x00000040,
+        Normal =       0x00000080,
+        Temporary =    0x00000100,
+        Sparse    =    0x00000200,
+        ReparsePoint = 0x00000400,
+        Compressed =   0x00000800,
+        Offline =      0x00001000,
+        NotIndexed =   0x00002000,
+        Encrypted =    0x00004000,
+        Directory =    0x10000000,
+        IndexView =    0x20000000
+    }
+
     internal class FileNameRecord : IByteArraySerializable
     {
         public FileReference ParentDirectory;
@@ -35,7 +56,7 @@ namespace DiscUtils.Ntfs
         public DateTime LastAccessTime;
         public ulong AllocatedSize;
         public ulong RealSize;
-        public uint Flags;
+        public FileNameRecordFlags Flags;
         public uint Unknown;
         public byte FileNameNamespace;
         public string FileName;
@@ -51,7 +72,7 @@ namespace DiscUtils.Ntfs
 
         public FileAttributes FileAttributes
         {
-            get { return FileNameFileAttribute.ConvertFlags(Flags); }
+            get { return ConvertFlags(Flags); }
         }
 
         public override string ToString()
@@ -70,7 +91,6 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     Allocated Size: " + AllocatedSize);
             writer.WriteLine(indent + "          Real Size: " + RealSize);
             writer.WriteLine(indent + "              Flags: " + Flags);
-            writer.WriteLine(indent + "    File Attributes: " + (FileAttributes)(Flags & 0xFFFF));
             writer.WriteLine(indent + "            Unknown: " + Unknown);
             writer.WriteLine(indent + "          File Name: " + FileName);
         }
@@ -86,7 +106,7 @@ namespace DiscUtils.Ntfs
             LastAccessTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x20));
             AllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
             RealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
-            Flags = Utilities.ToUInt32LittleEndian(buffer, offset + 0x38);
+            Flags = (FileNameRecordFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 0x38);
             Unknown = Utilities.ToUInt32LittleEndian(buffer, offset + 0x3C);
             byte fnLen = buffer[offset + 0x40];
             FileNameNamespace = buffer[offset + 0x41];
@@ -94,5 +114,15 @@ namespace DiscUtils.Ntfs
         }
 
         #endregion
+
+        internal static FileAttributes ConvertFlags(FileNameRecordFlags flags)
+        {
+            FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
+            if ((flags & FileNameRecordFlags.Directory) != 0)
+            {
+                result |= FileAttributes.Directory;
+            }
+            return result;
+        }
     }
 }

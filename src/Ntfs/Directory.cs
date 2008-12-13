@@ -83,11 +83,11 @@ namespace DiscUtils.Ntfs
             {
                 DirectoryIndexEntry entry = entries[i];
 
-                if (((entry.Key.Flags & (uint)FileAttributes.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
+                if (((entry.Key.Flags & FileNameRecordFlags.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
                 {
                     entries.RemoveAt(i);
                 }
-                else if (((entry.Key.Flags & (uint)FileAttributes.System) != 0) && _fileSystem.Options.HideSystemFiles)
+                else if (((entry.Key.Flags & FileNameRecordFlags.System) != 0) && _fileSystem.Options.HideSystemFiles)
                 {
                     entries.RemoveAt(i);
                 }

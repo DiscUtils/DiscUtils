@@ -108,7 +108,7 @@ namespace DiscUtils.Ntfs
 
         public FileAttributes Attributes
         {
-            get { return ConvertFlags(_fileNameRecord.Flags); }
+            get { return FileNameRecord.ConvertFlags(_fileNameRecord.Flags); }
         }
 
         public override string ToString()
@@ -127,19 +127,8 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     Allocated Size: " + _fileNameRecord.AllocatedSize);
             writer.WriteLine(indent + "          Real Size: " + _fileNameRecord.RealSize);
             writer.WriteLine(indent + "              Flags: " + _fileNameRecord.Flags);
-            writer.WriteLine(indent + "    File Attributes: " + ConvertFlags(_fileNameRecord.Flags));
             writer.WriteLine(indent + "            Unknown: " + _fileNameRecord.Unknown);
             writer.WriteLine(indent + "          File Name: " + _fileNameRecord.FileName);
-        }
-
-        internal static FileAttributes ConvertFlags(uint flags)
-        {
-            FileAttributes result = (FileAttributes)(flags & 0xFFFF);
-            if ((flags & 0x10000000) != 0)
-            {
-                result |= FileAttributes.Directory;
-            }
-            return result;
         }
     }
 
