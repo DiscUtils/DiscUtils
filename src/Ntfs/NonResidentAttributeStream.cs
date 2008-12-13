@@ -31,24 +31,29 @@ namespace DiscUtils.Ntfs
         private long _bytesPerCluster;
         private DataRun[] _runs;
 
-        private bool _readOnly;
+        private FileAccess _access;
         private long _length;
         private long _position;
 
         private bool _atEOF;
 
-        public NonResidentAttributeStream(Stream fsStream, long bytesPerCluster, DataRun[] runs, bool readOnly, long length)
+        public NonResidentAttributeStream(Stream fsStream, long bytesPerCluster, FileAccess access, NonResidentFileAttributeRecord record)
         {
+            if (record.Flags != FileAttributeFlags.None)
+            {
+                throw new NotImplementedException("No support for sparse, compressed, or encrypted attributes");
+            }
+
             _fsStream = fsStream;
             _bytesPerCluster = bytesPerCluster;
-            _runs = runs;
-            _readOnly = readOnly;
-            _length = length;
+            _runs = record.DataRuns;
+            _access = access;
+            _length = record.DataLength;
         }
 
         public override bool CanRead
         {
-            get { return true; }
+            get { return _access == FileAccess.Read || _access == FileAccess.ReadWrite; }
         }
 
         public override bool CanSeek
@@ -58,7 +63,7 @@ namespace DiscUtils.Ntfs
 
         public override bool CanWrite
         {
-            get { return !_readOnly; }
+            get { return _access == FileAccess.Write || _access == FileAccess.ReadWrite; }
         }
 
         public override void Flush()

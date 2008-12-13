@@ -27,6 +27,15 @@ using System.Text;
 
 namespace DiscUtils.Ntfs
 {
+    [Flags]
+    internal enum FileAttributeFlags : ushort
+    {
+        None = 0x0000,
+        Compressed = 0x0001,
+        Encrypted = 0x4000,
+        Sparse = 0x8000
+    }
+
     internal abstract class FileAttributeRecord
     {
         protected AttributeType _type;
@@ -34,7 +43,7 @@ namespace DiscUtils.Ntfs
         protected byte _nonResidentFlag;
         protected byte _nameLength;
         protected ushort _nameOffset;
-        protected ushort _flags;
+        protected FileAttributeFlags _flags;
         protected ushort _attributeId;
 
         protected string _name;
@@ -64,6 +73,11 @@ namespace DiscUtils.Ntfs
             get { return _name; }
         }
 
+        public FileAttributeFlags Flags
+        {
+            get { return _flags; }
+        }
+
         public abstract Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access);
 
         public static FileAttributeRecord FromBytes(byte[] buffer, int offset)
@@ -89,7 +103,7 @@ namespace DiscUtils.Ntfs
             _nonResidentFlag = buffer[offset + 0x08];
             _nameLength = buffer[offset + 0x09];
             _nameOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            _flags = (FileAttributeFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
             _attributeId = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0E);
 
             if (_nameLength != 0x00)
@@ -147,6 +161,11 @@ namespace DiscUtils.Ntfs
 
         public override Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
         {
+            if (_flags != FileAttributeFlags.None)
+            {
+                throw new NotImplementedException("No support for sparse, compressed, or encrypted attributes");
+            }
+
             return new MemoryStream(_data, 0, _data.Length, access != FileAccess.Read, false);
         }
 
@@ -204,7 +223,7 @@ namespace DiscUtils.Ntfs
 
         public override Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
         {
-            return new NonResidentAttributeStream(rawStream, bytesPerCluster, _dataRuns.ToArray(), access == FileAccess.Read, (long)_dataRealSize);
+            return new NonResidentAttributeStream(rawStream, bytesPerCluster, access, this);
         }
 
         public override void Read(byte[] buffer, int offset)
