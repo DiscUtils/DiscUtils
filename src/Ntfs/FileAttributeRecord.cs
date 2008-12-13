@@ -161,11 +161,6 @@ namespace DiscUtils.Ntfs
 
         public override Stream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
         {
-            if (_flags != FileAttributeFlags.None)
-            {
-                throw new NotImplementedException("No support for sparse, compressed, or encrypted attributes");
-            }
-
             return new MemoryStream(_data, 0, _data.Length, access != FileAccess.Read, false);
         }
 
