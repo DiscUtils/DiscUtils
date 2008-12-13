@@ -38,6 +38,9 @@ namespace DiscUtils.Ntfs
 
         private bool _atEOF;
 
+        private byte[] _cachedDecompressedBlock;
+        private long _cachedBlockStartVcn;
+
         public NonResidentAttributeStream(Stream fsStream, long bytesPerCluster, FileAccess access, NonResidentFileAttributeRecord record)
         {
             _fsStream = fsStream;
@@ -197,29 +200,39 @@ namespace DiscUtils.Ntfs
                 Array.Clear(buffer, offset, numBytes);
                 return numBytes;
             }
-            else
+            else if (IsBlockCompressed(dataRunIdx, _record.CompressionUnitSize))
             {
-                if (IsBlockCompressed(dataRunIdx, _record.CompressionUnitSize))
+                byte[] decompBuffer;
+                if (_cachedDecompressedBlock != null && _cachedBlockStartVcn == dataRunIdx)
+                {
+                    decompBuffer = _cachedDecompressedBlock;
+                }
+                else
                 {
                     byte[] compBuffer = new byte[compressionUnitLength];
                     RawRead(dataRunIdx, 0, compBuffer, 0, (int)compressionUnitLength, false);
 
-                    byte[] decompBuffer = Decompress(compBuffer);
+                    decompBuffer = Decompress(compBuffer);
 
-                    int numBytes = (int)Math.Min(count, decompBuffer.Length - blockOffset);
-                    Array.Copy(decompBuffer, blockOffset, buffer, offset, numBytes);
-                    return numBytes;
+                    _cachedDecompressedBlock = decompBuffer;
+                    _cachedBlockStartVcn = dataRunIdx;
                 }
-                else
-                {
-                    // Skip forward to the data run containing the first cluster we need to read
-                    dataRunIdx = FindDataRun(targetCluster, dataRunIdx);
 
-                    // Read to the end of the compression cluster
-                    int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
-                    RawRead(dataRunIdx, _position - _runs[dataRunIdx].StartVcn, buffer, offset, numBytes, true);
-                    return numBytes;
-                }
+                int numBytes = (int)Math.Min(count, decompBuffer.Length - blockOffset);
+                Array.Copy(decompBuffer, blockOffset, buffer, offset, numBytes);
+                return numBytes;
+            }
+            else
+            {
+                // Whole block is uncompressed.
+
+                // Skip forward to the data run containing the first cluster we need to read
+                dataRunIdx = FindDataRun(targetCluster, dataRunIdx);
+
+                // Read to the end of the compression cluster
+                int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
+                RawRead(dataRunIdx, _position - _runs[dataRunIdx].StartVcn, buffer, offset, numBytes, true);
+                return numBytes;
             }
         }
 
