@@ -206,9 +206,36 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset);
         }
 
+        /// <summary>
+        /// The amount of space occupied by the attribute (in bytes)
+        /// </summary>
+        public long AllocatedLength
+        {
+            get { return (long)_dataAllocatedSize; }
+        }
+
+        /// <summary>
+        /// The amount of data in the attribute (in bytes)
+        /// </summary>
         public override long DataLength
         {
             get { return (long)_dataRealSize; }
+        }
+
+        /// <summary>
+        /// The amount of initialized data in the attribute (in bytes)
+        /// </summary>
+        public long InitializedDataLength
+        {
+            get { return (long)_initializedDataSize; }
+        }
+
+        /// <summary>
+        /// Size of a compression unit (in clusters)
+        /// </summary>
+        public int CompressionUnitSize
+        {
+            get { return 1 << _compressionUnitSize; }
         }
 
         public DataRun[] DataRuns

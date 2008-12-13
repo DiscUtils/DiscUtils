@@ -27,10 +27,11 @@ namespace DiscUtils.Ntfs
 {
     internal class DataRun
     {
-        private ulong _runLength;
+        private long _runLength;
         private long _runOffset;
+        private bool _isSparse;
 
-        public ulong RunLength
+        public long RunLength
         {
             get { return _runLength; }
         }
@@ -40,13 +41,19 @@ namespace DiscUtils.Ntfs
             get { return _runOffset; }
         }
 
+        public bool IsSparse
+        {
+            get { return _isSparse; }
+        }
+
         public int Read(byte[] buffer, int offset)
         {
             int runOffsetSize = (buffer[offset] >> 4) & 0x0F;
             int runLengthSize = buffer[offset] & 0x0F;
 
-            _runLength = ReadVarULong(buffer, offset + 1, runLengthSize);
+            _runLength = (long)ReadVarULong(buffer, offset + 1, runLengthSize);
             _runOffset = ReadVarLong(buffer, offset + 1 + runLengthSize, runOffsetSize);
+            _isSparse = (runOffsetSize == 0);
 
             return 1 + runLengthSize + runOffsetSize;
         }
