@@ -51,12 +51,13 @@ namespace DiscUtils.Ntfs
             while (pos < IndexHeader.TotalSizeOfEntries)
             {
                 IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, (int)(offset + IndexHeader.OffsetToFirstEntry + 0x18 + pos));
+
+                IndexEntries.Add(entry);
+
                 if ((entry.Flags & IndexEntryFlags.End) != 0)
                 {
                     break;
                 }
-
-                IndexEntries.Add(entry);
 
                 pos += entry.Length;
             }
