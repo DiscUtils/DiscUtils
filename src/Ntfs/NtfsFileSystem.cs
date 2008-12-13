@@ -162,6 +162,11 @@ namespace DiscUtils.Ntfs
         public override string[] GetFileSystemEntries(string path)
         {
             DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
+            if (parentDirEntry == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
+            }
+
             Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
 
             return Utilities.Map<DirectoryEntry, string>(parentDir.GetMembers(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
@@ -181,6 +186,11 @@ namespace DiscUtils.Ntfs
             Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
             DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
+            if (parentDirEntry == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
+            }
+
             Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
 
             List<string> result = new List<string>();
@@ -309,7 +319,12 @@ namespace DiscUtils.Ntfs
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            return (long)GetDirectoryEntry(path).Details.RealSize;
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+            return (long)dirEntry.Details.RealSize;
         }
 
         internal Stream RawStream
