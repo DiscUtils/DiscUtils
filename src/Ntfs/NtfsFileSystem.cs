@@ -236,7 +236,16 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                return _mft.GetFile(entry.Reference).OpenAttribute(AttributeType.Data, access);
+                string fileName = Utilities.GetFileFromPath(path);
+                string attributeName = null;
+
+                int streamSepPos = fileName.IndexOf(':');
+                if (streamSepPos >= 0)
+                {
+                    attributeName = fileName.Substring(streamSepPos + 1);
+                }
+
+                return _mft.GetFile(entry.Reference).OpenAttribute(AttributeType.Data, attributeName, access);
             }
         }
 

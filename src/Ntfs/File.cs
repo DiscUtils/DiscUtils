@@ -139,6 +139,18 @@ namespace DiscUtils.Ntfs
             return attr.Open(access);
         }
 
+        public Stream OpenAttribute(AttributeType type, string name, FileAccess access)
+        {
+            BaseAttribute attr = GetAttribute(type, name);
+
+            if (attr == null)
+            {
+                throw new IOException("No such attribute: " + type + "(" + name + ")");
+            }
+
+            return attr.Open(access);
+        }
+
         public FileAttributes FileAttributes
         {
             get

@@ -53,9 +53,18 @@ namespace DiscUtils.Ntfs
         internal DirectoryEntry FindEntryByName(string name)
         {
             // TODO: Improve - this is sucky, should utilize the B*Tree...
+
+            string searchName = name;
+
+            int streamSepPos = name.IndexOf(':');
+            if (streamSepPos >= 0)
+            {
+                searchName = name.Substring(0, streamSepPos);
+            }
+
             foreach (DirectoryEntry dirEntry in GetMembers())
             {
-                if (name.Equals(dirEntry.Details.FileName, StringComparison.OrdinalIgnoreCase))
+                if (searchName.Equals(dirEntry.Details.FileName, StringComparison.OrdinalIgnoreCase))
                 {
                     return dirEntry;
                 }
