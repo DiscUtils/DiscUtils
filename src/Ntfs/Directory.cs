@@ -153,12 +153,12 @@ namespace DiscUtils.Ntfs
                 while (pos < indexRoot.Header.TotalSizeOfEntries)
                 {
                     DirectoryIndexEntry entry = new DirectoryIndexEntry(buffer, (int)(0x10 + indexRoot.Header.OffsetToFirstEntry + pos));
+                    residentEntries.Add(entry);
+
                     if ((entry.Flags & IndexEntryFlags.End) != 0)
                     {
                         break;
                     }
-
-                    residentEntries.Add(entry);
 
                     pos += entry.Length;
                 }
