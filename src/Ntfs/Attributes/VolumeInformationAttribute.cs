@@ -20,35 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils.Ntfs.Attributes
 {
-    internal class Bitmap
+    internal class VolumeInformationAttribute : BaseAttribute
     {
-        private byte[] _bitmap;
+        private byte _majorVersion;
+        private byte _minorVersion;
+        private VolumeInformationFlags _flags;
 
-        public Bitmap(BitmapAttribute fileAttr)
+        public VolumeInformationAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
+            : base(fileSystem, record)
         {
-            if (fileAttr.Length > 100 * 1024)
+            using (Stream s = Open(FileAccess.Read))
             {
-                throw new NotImplementedException("Large Bitmap");
-            }
-
-            using (Stream stream = fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)fileAttr.Length);
+                byte[] data = Utilities.ReadFully(s, (int)record.DataLength);
+                _majorVersion = data[0x08];
+                _minorVersion = data[0x09];
+                _flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(data, 0x0A);
             }
         }
 
-        public bool IsPresent(long index)
+        public override void Dump(TextWriter writer, string indent)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
-
-            return (_bitmap[byteIdx] & mask) != 0;
+            writer.WriteLine(indent + "VOLUME INFORMATION ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+            writer.WriteLine(indent + "  Version: " + _majorVersion + "." + _minorVersion);
+            writer.WriteLine(indent + "    Flags: " + _flags);
         }
     }
+
 }

@@ -20,35 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
+using System.Security.AccessControl;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils.Ntfs.Attributes
 {
-    internal class Bitmap
+    internal class SecurityDescriptorAttribute : BaseAttribute
     {
-        private byte[] _bitmap;
+        private ObjectSecurity _securityDescriptor;
 
-        public Bitmap(BitmapAttribute fileAttr)
+        public SecurityDescriptorAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
+            : base(fileSystem, record)
         {
-            if (fileAttr.Length > 100 * 1024)
+            _securityDescriptor = new FileSecurity();
+            using (Stream s = Open(FileAccess.Read))
             {
-                throw new NotImplementedException("Large Bitmap");
-            }
-
-            using (Stream stream = fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)fileAttr.Length);
+                _securityDescriptor.SetSecurityDescriptorBinaryForm(Utilities.ReadFully(s, (int)record.DataLength));
             }
         }
 
-        public bool IsPresent(long index)
+        public override void Dump(TextWriter writer, string indent)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
-
-            return (_bitmap[byteIdx] & mask) != 0;
+            writer.WriteLine(indent + "SECURITY DESCRIPTOR ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+            writer.WriteLine(indent + "  Descriptor: " + _securityDescriptor.GetSecurityDescriptorSddlForm(AccessControlSections.All));
         }
     }
+
 }

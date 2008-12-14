@@ -91,7 +91,7 @@
     <Compile Include="Ntfs\DataRun.cs" />
     <Compile Include="Ntfs\Directory.cs" />
     <Compile Include="Ntfs\File.cs" />
-    <Compile Include="Ntfs\FileAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\BaseAttribute.cs" />
     <Compile Include="Ntfs\FileAttributeRecord.cs" />
     <Compile Include="Ntfs\FileNameRecord.cs" />
     <Compile Include="Ntfs\IByteArraySerializable.cs" />
@@ -137,6 +137,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ntfs\Attributes\AttributeListAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\BitmapAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\DataAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\FileNameAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\IndexAllocationAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\IndexRootAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\NonResidentAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\ObjectIdAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\SecurityDescriptorAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\StandardInformationAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\UnknownAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\VolumeInformationAttribute.cs" />
+    <Compile Include="Ntfs\Attributes\VolumeNameAttribute.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>

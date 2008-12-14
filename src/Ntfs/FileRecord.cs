@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -50,6 +51,11 @@ namespace DiscUtils.Ntfs
             get { return _index; }
         }
 
+        public ushort SequenceNumber
+        {
+            get { return _sequenceNumber; }
+        }
+
         public ICollection<FileAttributeRecord> Attributes
         {
             get { return new ReadOnlyCollection<FileAttributeRecord>(_attributes); }
@@ -62,9 +68,20 @@ namespace DiscUtils.Ntfs
         /// <returns>The attribute, or <c>null</c>.</returns>
         public FileAttributeRecord GetAttribute(AttributeType type)
         {
+            return GetAttribute(type, null);
+        }
+
+        /// <summary>
+        /// Gets an named attribute.
+        /// </summary>
+        /// <param name="type">The attribute type</param>
+        /// <param name="name">The name of the attribute</param>
+        /// <returns>The attribute, or <c>null</c>.</returns>
+        public FileAttributeRecord GetAttribute(AttributeType type, string name)
+        {
             foreach (FileAttributeRecord attrRec in _attributes)
             {
-                if (attrRec.AttributeType == type && attrRec.Name == null)
+                if (attrRec.AttributeType == type && attrRec.Name == name)
                 {
                     return attrRec;
                 }
@@ -111,7 +128,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == AttributeType.FileName)
                 {
-                    FileNameFileAttribute fnAttr = new FileNameFileAttribute((ResidentFileAttributeRecord)attr);
+                    FileNameAttribute fnAttr = new FileNameAttribute((ResidentFileAttributeRecord)attr);
                     return fnAttr.ToString();
                 }
             }

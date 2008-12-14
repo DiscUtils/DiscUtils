@@ -20,35 +20,41 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using System.Globalization;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils.Ntfs.Attributes
 {
-    internal class Bitmap
+    internal class UnknownAttribute : BaseAttribute
     {
-        private byte[] _bitmap;
-
-        public Bitmap(BitmapAttribute fileAttr)
+        public UnknownAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
+            : base(fileSystem, record)
         {
-            if (fileAttr.Length > 100 * 1024)
-            {
-                throw new NotImplementedException("Large Bitmap");
-            }
-
-            using (Stream stream = fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)fileAttr.Length);
-            }
         }
 
-        public bool IsPresent(long index)
+        public override void Dump(TextWriter writer, string indent)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
+            writer.WriteLine(indent + "UNKNOWN ATTRIBUTE <" + _record.AttributeType + ">");
+            writer.WriteLine(indent + "  Name: " + Name);
+            if (_record.DataLength == 0)
+            {
+                writer.WriteLine(indent + "  Data: <none>");
+            }
+            else
+            {
+                using (Stream s = Open(FileAccess.Read))
+                {
+                    string hex = "";
+                    byte[] buffer = new byte[5];
+                    int numBytes = s.Read(buffer, 0, 5);
+                    for (int i = 0; i < numBytes; ++i)
+                    {
+                        hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
+                    }
 
-            return (_bitmap[byteIdx] & mask) != 0;
+                    writer.WriteLine(indent + "  Data: " + hex + "...");
+                }
+            }
         }
     }
 }

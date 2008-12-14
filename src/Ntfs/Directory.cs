@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-
+using DiscUtils.Ntfs.Attributes;
 using DirectoryIndexEntry = DiscUtils.Ntfs.IndexEntry<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileReference>;
-using System;
 
 namespace DiscUtils.Ntfs
 {
@@ -36,14 +36,14 @@ namespace DiscUtils.Ntfs
         public Directory(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            IndexRootFileAttribute indexRoot = (IndexRootFileAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
+            IndexRootAttribute indexRoot = (IndexRootAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
             using (Stream s = indexRoot.Open(FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
                 _rootEntry = new DirectoryIndexEntry(buffer, (int)indexRoot.Header.OffsetToFirstEntry + 0x10);
             }
 
-            FileAttribute indexAlloc = GetAttribute(AttributeType.IndexAllocation, "$I30");
+            BaseAttribute indexAlloc = GetAttribute(AttributeType.IndexAllocation, "$I30");
             if (indexAlloc != null)
             {
                 _indexStream = indexAlloc.Open(FileAccess.Read);
@@ -135,7 +135,7 @@ namespace DiscUtils.Ntfs
         {
             List<DirectoryIndexEntry> residentEntries = new List<DirectoryIndexEntry>();
 
-            IndexRootFileAttribute indexRoot = (IndexRootFileAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
+            IndexRootAttribute indexRoot = (IndexRootAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
             using (Stream s = indexRoot.Open(FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
@@ -194,7 +194,7 @@ namespace DiscUtils.Ntfs
 
             foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
             {
-                FileAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
+                BaseAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
             }
         }
 

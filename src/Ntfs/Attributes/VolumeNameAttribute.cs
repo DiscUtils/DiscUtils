@@ -20,35 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
+using System.Text;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils.Ntfs.Attributes
 {
-    internal class Bitmap
+    internal class VolumeNameAttribute : BaseAttribute
     {
-        private byte[] _bitmap;
+        private string _volName;
 
-        public Bitmap(BitmapAttribute fileAttr)
+        public VolumeNameAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
+            : base(fileSystem, record)
         {
-            if (fileAttr.Length > 100 * 1024)
+            using (Stream s = Open(FileAccess.Read))
             {
-                throw new NotImplementedException("Large Bitmap");
-            }
-
-            using (Stream stream = fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)fileAttr.Length);
+                byte[] nameBytes = Utilities.ReadFully(s, (int)record.DataLength);
+                _volName = Encoding.Unicode.GetString(nameBytes);
             }
         }
 
-        public bool IsPresent(long index)
+        public override void Dump(TextWriter writer, string indent)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
-
-            return (_bitmap[byteIdx] & mask) != 0;
+            writer.WriteLine(indent + "VOLUME NAME ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+            writer.WriteLine(indent + "     Volume Name: " + _volName);
         }
     }
 }

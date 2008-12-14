@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -128,11 +129,11 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     AttributeId: " + _attributeId);
             if (_nonResidentFlag == 0)
             {
-                FileAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
+                BaseAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
             }
             else
             {
-                new NonResidentFileAttribute(this).Dump(writer, indent + "  ");
+                new NonResidentAttribute(this).Dump(writer, indent + "  ");
             }
         }
     }

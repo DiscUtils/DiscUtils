@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -46,17 +47,9 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public FileAttribute GetAttribute(AttributeType type)
+        public BaseAttribute GetAttribute(AttributeType type)
         {
-            foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
-            {
-                if (attrRec.AttributeType == type && attrRec.Name == null)
-                {
-                    return FileAttribute.FromRecord(_fileSystem, attrRec);
-                }
-            }
-
-            return null;
+            return GetAttribute(type, null);
         }
 
         /// <summary>
@@ -64,14 +57,31 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public FileAttribute[] GetAttributes(AttributeType type)
+        public BaseAttribute[] GetAttributes(AttributeType type)
         {
-            List<FileAttribute> matches = new List<FileAttribute>();
-            foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
+            List<BaseAttribute> matches = new List<BaseAttribute>();
+
+            FileAttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
+            if (attrListRec != null)
             {
-                if (attrRec.AttributeType == type && attrRec.Name == null)
+                AttributeListAttribute attrList = new AttributeListAttribute(_fileSystem, attrListRec);
+                foreach (var r in attrList.Records)
                 {
-                    matches.Add(FileAttribute.FromRecord(_fileSystem, attrRec));
+                    if (r.Type == type && r.Name == null)
+                    {
+                        FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(r.BaseFileReference);
+                        matches.Add(BaseAttribute.FromRecord(_fileSystem, fileRec.GetAttribute(type)));
+                    }
+                }
+            }
+            else
+            {
+                foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
+                {
+                    if (attrRec.AttributeType == type && attrRec.Name == null)
+                    {
+                        matches.Add(BaseAttribute.FromRecord(_fileSystem, attrRec));
+                    }
                 }
             }
 
@@ -84,26 +94,46 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The attribute type</param>
         /// <param name="name">The attribute's name</param>
         /// <returns>The attribute of <c>null</c>.</returns>
-        public FileAttribute GetAttribute(AttributeType type, string name)
+        public BaseAttribute GetAttribute(AttributeType type, string name)
         {
-            foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
+            FileAttributeRecord targetAttribute = null;
+
+            FileAttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
+            if (attrListRec != null)
             {
-                if (attrRec.AttributeType == type && attrRec.Name == name)
+                AttributeListAttribute attrList = new AttributeListAttribute(_fileSystem, attrListRec);
+                foreach (var r in attrList.Records)
                 {
-                    return FileAttribute.FromRecord(_fileSystem, attrRec);
+                    if (r.Type == type && r.Name == name)
+                    {
+                        FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(r.BaseFileReference);
+                        targetAttribute = fileRec.GetAttribute(type);
+                        break;
+                    }
                 }
             }
+            else
+            {
+                targetAttribute = _baseRecord.GetAttribute(type, name);
+            }
 
-            return null;
+            if (targetAttribute != null)
+            {
+                return BaseAttribute.FromRecord(_fileSystem, targetAttribute);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public Stream OpenAttribute(AttributeType type, FileAccess access)
         {
-            FileAttribute attr = GetAttribute(type);
+            BaseAttribute attr = GetAttribute(type);
 
             if (attr == null)
             {
-                return null;
+                throw new IOException("No such attribute: " + type);
             }
 
             return attr.Open(access);
@@ -113,7 +143,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return ((FileNameFileAttribute)GetAttribute(AttributeType.FileName)).Attributes;
+                return ((FileNameAttribute)GetAttribute(AttributeType.FileName)).Attributes;
             }
         }
 
@@ -121,7 +151,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                FileNameFileAttribute fnAttr = (FileNameFileAttribute)GetAttribute(AttributeType.FileName);
+                FileNameAttribute fnAttr = (FileNameAttribute)GetAttribute(AttributeType.FileName);
                 FileAttributeRecord record = _baseRecord.GetAttribute(AttributeType.FileName);
                 return new DirectoryEntry(new FileReference(_baseRecord.MasterFileTableIndex), fnAttr.FileNameRecord);
             }
@@ -135,13 +165,13 @@ namespace DiscUtils.Ntfs
 
             foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
             {
-                FileAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
+                BaseAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
             }
         }
 
         public override string ToString()
         {
-            FileAttribute[] attrs = GetAttributes(AttributeType.FileName);
+            BaseAttribute[] attrs = GetAttributes(AttributeType.FileName);
 
             int longest = 0;
             string longName = attrs[0].ToString();
