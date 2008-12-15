@@ -330,7 +330,12 @@ namespace DiscUtils.Vhd
             get { return _footer.DiskType != FileType.Fixed; }
         }
 
-        internal override Stream OpenContent(Stream parent, bool ownsParent)
+        internal override long Capacity
+        {
+            get { return _footer.CurrentSize; }
+        }
+
+        internal Stream OpenContent(Stream parent, bool ownsParent)
         {
             if (_footer.DiskType == FileType.Fixed)
             {

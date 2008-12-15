@@ -68,6 +68,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the capacity of the disk (in bytes).
+        /// </summary>
+        public abstract long Capacity
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
         public abstract Stream Content

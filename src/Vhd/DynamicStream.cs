@@ -408,7 +408,7 @@ namespace DiscUtils.Vhd
         {
             if (_parentStream == null)
             {
-                throw new ObjectDisposedException("Attempt to use closed stream");
+                throw new ObjectDisposedException("DynamicStream", "Attempt to use closed stream");
             }
         }
     }

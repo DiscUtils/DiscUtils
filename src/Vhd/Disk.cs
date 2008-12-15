@@ -313,6 +313,14 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Gets the capacity of the disk (in bytes).
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _files[0].First.Capacity; }
+        }
+
+        /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
         public override Stream Content

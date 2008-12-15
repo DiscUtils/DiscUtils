@@ -75,11 +75,11 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the content of this layer, combined with a the layer below (for differencing disks)
+        /// Gets the capacity of the disk (in bytes).
         /// </summary>
-        /// <param name="parent">The parent stream (if required)</param>
-        /// <param name="ownsParent">Whether ownership of the <paramref name="parent"/> Stream is passed over.</param>
-        /// <returns>The content stream.</returns>
-        internal abstract Stream OpenContent(Stream parent, bool ownsParent);
+        internal abstract long Capacity
+        {
+            get;
+        }
     }
 }
