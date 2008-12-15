@@ -360,9 +360,13 @@ namespace DiscUtils.Partitions
                     {
                         return BiosPartitionTypes.Fat16;
                     }
-                    else
+                    else if (size < 1023 * (long)254 * 63 * 512) // Max BIOS size
                     {
                         return BiosPartitionTypes.Fat32;
+                    }
+                    else
+                    {
+                        return BiosPartitionTypes.Fat32Lba;
                     }
                 case WellKnownPartitionType.WindowsNtfs:
                     return BiosPartitionTypes.Ntfs;
