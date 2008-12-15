@@ -33,9 +33,10 @@ namespace DiscUtils
         private int _cylinders;
         private int _headsPerCylinder;
         private int _sectorsPerTrack;
+        private int _bytesPerSector;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Creates a new instance, assuming the default 512 bytes per sector.
         /// </summary>
         /// <param name="cylinders">The number of cylinders of the disk</param>
         /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
@@ -45,6 +46,22 @@ namespace DiscUtils
             _cylinders = cylinders;
             _headsPerCylinder = headsPerCylinder;
             _sectorsPerTrack = sectorsPerTrack;
+            _bytesPerSector = 512;
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="cylinders">The number of cylinders of the disk</param>
+        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk</param>
+        /// <param name="bytesPerSector">The number of bytes per sector of the disk</param>
+        public Geometry(int cylinders, int headsPerCylinder, int sectorsPerTrack, int bytesPerSector)
+        {
+            _cylinders = cylinders;
+            _headsPerCylinder = headsPerCylinder;
+            _sectorsPerTrack = sectorsPerTrack;
+            _bytesPerSector = bytesPerSector;
         }
 
         /// <summary>
@@ -76,7 +93,7 @@ namespace DiscUtils
         /// </summary>
         public int BytesPerSector
         {
-            get { return 512; }
+            get { return _bytesPerSector; }
         }
 
         /// <summary>
@@ -114,10 +131,6 @@ namespace DiscUtils
         /// <returns>The Logical Block Address (in sectors)</returns>
         public int ToLogicalBlockAddress(int cylinder, int head, int sector)
         {
-            if (cylinder >= _cylinders)
-            {
-                throw new ArgumentOutOfRangeException("cylinder", cylinder, "cylinder number is larger than disk geometry");
-            }
             if (cylinder < 0)
             {
                 throw new ArgumentOutOfRangeException("cylinder", cylinder, "cylinder number is negative");
@@ -245,7 +258,8 @@ namespace DiscUtils
 
             Geometry other = (Geometry)obj;
 
-            return _cylinders == other._cylinders && _headsPerCylinder == other._headsPerCylinder && _sectorsPerTrack == other._sectorsPerTrack;
+            return _cylinders == other._cylinders && _headsPerCylinder == other._headsPerCylinder
+                && _sectorsPerTrack == other._sectorsPerTrack && _bytesPerSector == other._bytesPerSector;
         }
 
         /// <summary>
@@ -254,7 +268,8 @@ namespace DiscUtils
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return _cylinders.GetHashCode() ^ _headsPerCylinder.GetHashCode() ^ _sectorsPerTrack.GetHashCode();
+            return _cylinders.GetHashCode() ^ _headsPerCylinder.GetHashCode()
+                ^ _sectorsPerTrack.GetHashCode() ^ _bytesPerSector.GetHashCode();
         }
 
         /// <summary>
@@ -263,7 +278,14 @@ namespace DiscUtils
         /// <returns>The string representation</returns>
         public override string ToString()
         {
-            return "(" + _cylinders + "/" + _headsPerCylinder + "/" + _sectorsPerTrack + ")";
+            if (_bytesPerSector == 512)
+            {
+                return "(" + _cylinders + "/" + _headsPerCylinder + "/" + _sectorsPerTrack + ")";
+            }
+            else
+            {
+                return "(" + _cylinders + "/" + _headsPerCylinder + "/" + _sectorsPerTrack + ":" + _bytesPerSector + ")";
+            }
         }
     }
 }
