@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using NUnit.Framework;
 
-namespace DiscUtils.Vhd
+namespace DiscUtils.Vdi
 {
     [TestFixture]
     public class DiskTest
@@ -37,7 +37,7 @@ namespace DiscUtils.Vhd
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity < 8 * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+                Assert.That(disk.Geometry.Capacity <= disk.Content.Length);
             }
 
             // Check the stream is still valid
@@ -64,7 +64,7 @@ namespace DiscUtils.Vhd
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+                Assert.That(disk.Geometry.Capacity <= disk.Content.Length);
             }
 
             Assert.Greater(1 * 1024 * 1024, ms.Length);
@@ -72,24 +72,8 @@ namespace DiscUtils.Vhd
             using (Disk disk = new Disk(ms))
             {
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+                Assert.That(disk.Geometry.Capacity <= disk.Content.Length);
             }
-        }
-
-        [Test]
-        public void InitializeDifferencing()
-        {
-            MemoryStream baseStream = new MemoryStream();
-            MemoryStream diffStream = new MemoryStream();
-            DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, 16 * 1024L * 1024 * 1024);
-            using (Disk disk = Disk.InitializeDifferencing(diffStream, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", DateTime.UtcNow))
-            {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
-                Assert.AreEqual(2, disk.Layers.Count);
-            }
-            Assert.Greater(1 * 1024 * 1024, diffStream.Length);
         }
 
         [Test]

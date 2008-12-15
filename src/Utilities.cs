@@ -119,6 +119,20 @@ namespace DiscUtils
         }
 
         #region Bit Twiddling
+        public static  bool IsAllZeros(byte[] buffer, int offset, int count)
+        {
+            int end = offset + count;
+            for (int i = offset; i < end; ++i)
+            {
+                if (buffer[i] != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static ushort BitSwap(ushort value)
         {
             return (ushort)(((value & 0x00FF) << 8) | ((value & 0xFF00) >> 8));
@@ -188,6 +202,12 @@ namespace DiscUtils
         public static void WriteBytesLittleEndian(long val, byte[] buffer, int offset)
         {
             WriteBytesLittleEndian((ulong)val, buffer, offset);
+        }
+
+        public static void WriteBytesLittleEndian(Guid val, byte[] buffer, int offset)
+        {
+            byte[] le = val.ToByteArray();
+            Array.Copy(le, 0, buffer, offset, 16);
         }
 
         public static void WriteBytesBigEndian(ushort val, byte[] buffer, int offset)
@@ -301,6 +321,13 @@ namespace DiscUtils
         public static long ToInt64BigEndian(byte[] buffer, int offset)
         {
             return (long)ToUInt64BigEndian(buffer, offset);
+        }
+
+        public static Guid ToGuidLittleEndian(byte[] buffer, int offset)
+        {
+            byte[] temp = new byte[16];
+            Array.Copy(buffer, offset, temp, 0, 16);
+            return new Guid(temp);
         }
 
         public static Guid ToGuidBigEndian(byte[] buffer, int offset)

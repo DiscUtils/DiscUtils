@@ -1122,11 +1122,6 @@ namespace DiscUtils.Fat
             FatType fatType;
             ushort maxRootEntries;
 
-            while (diskGeometry.Cylinders > 1024)
-            {
-                diskGeometry = new Geometry(diskGeometry.Cylinders / 2, diskGeometry.HeadsPerCylinder * 2, diskGeometry.SectorsPerTrack);
-            }
-
             // Write the BIOS Parameter Block (BPB) - a single sector
             byte[] bpb = new byte[512];
             if (sectorCount <= 8400)

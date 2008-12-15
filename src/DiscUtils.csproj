@@ -154,6 +154,15 @@
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Vdi\Disk.cs" />
+    <Compile Include="Vdi\DiskImageFile.cs" />
+    <Compile Include="Vdi\DiskStream.cs" />
+    <Compile Include="Vdi\FileVersion.cs" />
+    <Compile Include="Vdi\GeometryRecord.cs" />
+    <Compile Include="Vdi\HeaderRecord.cs" />
+    <Compile Include="Vdi\ImageFlags.cs" />
+    <Compile Include="Vdi\ImageType.cs" />
+    <Compile Include="Vdi\PreHeaderRecord.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
