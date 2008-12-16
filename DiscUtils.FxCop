@@ -138,6 +138,42 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Vdi">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-12-15 22:03:38Z">
+      <Issue>
+       <Item>DiscUtils.Vdi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="29" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-12-15 22:03:38Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Vdi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="30" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Vdi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-12-15 22:03:38Z">
+      <Issue Name="Namespace">
+       <Item>Vdi</Item>
+       <Item>DiscUtils.Vdi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="31" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Vhd">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-22 16:45:38Z">
@@ -785,6 +821,9 @@
     <Note Id="26" Modified="2008-11-23 17:54:26Z">Well known acronyms</Note>
     <Note Id="27" Modified="2008-12-09 22:49:03Z">Separating file systems by namespace.</Note>
     <Note Id="28" Modified="2008-12-03 00:53:09Z">Instance method for consistency.</Note>
+    <Note Id="29" Modified="2008-12-15 22:03:59Z">Deliberate use of namespace to separate technologies.</Note>
+    <Note Id="30" Modified="2008-12-15 22:04:20Z">DiscUtils is the establish project name.</Note>
+    <Note Id="31" Modified="2008-12-15 22:04:48Z">VDI is an established acronym for VirtualBox's virtual disk images.</Note>
    </User>
   </Notes>
   <Rules>
