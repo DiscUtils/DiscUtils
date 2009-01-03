@@ -213,7 +213,7 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of files.</returns>
         public override string[] GetFiles(string path)
         {
-            ReaderDirectory dir = GetDirectory(Utilities.GetDirectoryFromPath(path));
+            ReaderDirectory dir = GetDirectory(path);
             List<string> files = new List<string>();
             foreach (DirectoryRecord r in dir.GetRecords())
             {

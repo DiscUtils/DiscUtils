@@ -48,6 +48,8 @@ namespace DiscUtils.Iso9660
             byte[] buffer = new byte[2048];
             Stream extent = reader.GetDirectoryExtentStream(ptr.LocationOfExtent);
 
+            _records = new List<DirectoryRecord>();
+
             uint totalLength = uint.MaxValue; // Will correct later...
             uint totalRead = 0;
             while (totalRead < totalLength)
@@ -59,7 +61,6 @@ namespace DiscUtils.Iso9660
                 }
                 totalRead += (uint)bytesRead;
 
-                _records = new List<DirectoryRecord>();
                 uint pos = 0;
                 while (pos < buffer.Length && buffer[pos] != 0)
                 {
