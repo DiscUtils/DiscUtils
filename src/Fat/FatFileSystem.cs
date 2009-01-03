@@ -1089,8 +1089,8 @@ namespace DiscUtils.Fat
                     partitionStream,
                     label,
                     disk.Geometry,
-                    (int)disk.Partitions[0].FirstSector,
-                    (int)(1 + disk.Partitions[0].LastSector - disk.Partitions[0].FirstSector),
+                    (int)disk.Partitions[partitionIndex].FirstSector,
+                    (int)(1 + disk.Partitions[partitionIndex].LastSector - disk.Partitions[partitionIndex].FirstSector),
                     0);
             }
         }

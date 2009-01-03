@@ -43,5 +43,22 @@ namespace DiscUtils.Combined
                 }
             }
         }
+
+        [Test]
+        public void FormatSecondFatPartition()
+        {
+            MemoryStream ms = new MemoryStream();
+
+            VirtualDisk disk = Disk.InitializeDynamic(ms, 30 * 1024 * 1204);
+
+            PartitionTable pt = BiosPartitionTable.Initialize(disk);
+            pt.Create(15 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+            pt.Create(5 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+
+            FatFileSystem fileSystem = FatFileSystem.FormatPartition(disk, 1, null);
+            long fileSystemSize = fileSystem.TotalSectors * fileSystem.BytesPerSector;
+            Assert.IsTrue(fileSystemSize > (5 * 1024 * 1024) * 0.9);
+        }
+
     }
 }
