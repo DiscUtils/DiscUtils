@@ -1,5 +1,5 @@
-ï»¿//
-// Copyright (c) 2008, Kenneth Bell
+//
+// Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -652,7 +652,7 @@ namespace DiscUtils
 
             foreach (char ch in split[0])
             {
-                if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%Â£-{}()@'`".IndexOf(ch) == -1)
+                if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%£-{}()@'`".IndexOf(ch) == -1)
                 {
                     return false;
                 }
@@ -666,7 +666,7 @@ namespace DiscUtils
                 }
                 foreach (char ch in split[1])
                 {
-                    if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%Â£-{}()@'`".IndexOf(ch) == -1)
+                    if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%£-{}()@'`".IndexOf(ch) == -1)
                     {
                         return false;
                     }

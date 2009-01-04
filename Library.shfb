@@ -1,4 +1,4 @@
-﻿<project schemaVersion="1.6.0.7">
+<project schemaVersion="1.6.0.7">
     <assemblies>
         <assembly assemblyPath=".\src\bin\Release\DiscUtils.dll" xmlCommentsPath=".\src\bin\Release\DiscUtils.dll.xml" commentsOnly="False" />
     </assemblies>
@@ -34,7 +34,7 @@
     <HtmlHelpName>Documentation</HtmlHelpName>
     <Language>en-US</Language>
     <CopyrightHref />
-    <CopyrightText>Copyright (c) Kenneth Bell, 2008</CopyrightText>
+    <CopyrightText>Copyright (c) Kenneth Bell, 2008-2009</CopyrightText>
     <FeedbackEMailAddress />
     <FeedbackEMailLinkText />
     <HeaderText />

@@ -1,5 +1,5 @@
-﻿//
-// Copyright (c) 2008, Kenneth Bell
+//
+// Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -90,7 +90,7 @@ namespace FATExtract
         private static void ShowHeader()
         {
             Console.WriteLine("FATExtract v{0}, available from http://codeplex.com/DiscUtils", GetVersion());
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008");
+            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
             Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
             Console.WriteLine();
         }
