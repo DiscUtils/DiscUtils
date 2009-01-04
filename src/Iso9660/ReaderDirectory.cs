@@ -54,15 +54,16 @@ namespace DiscUtils.Iso9660
             uint totalRead = 0;
             while (totalRead < totalLength)
             {
-                uint bytesRead = (uint)Utilities.ReadFully(extent, buffer, 0, buffer.Length);
-                if (bytesRead != Math.Min(buffer.Length, totalLength - totalRead))
+                int toRead = (int)Math.Min(buffer.Length, totalLength - totalRead);
+                uint bytesRead = (uint)Utilities.ReadFully(extent, buffer, 0, toRead);
+                if (bytesRead != toRead)
                 {
                     throw new IOException("Failed to read whole directory");
                 }
                 totalRead += (uint)bytesRead;
 
                 uint pos = 0;
-                while (pos < buffer.Length && buffer[pos] != 0)
+                while (pos < bytesRead && buffer[pos] != 0)
                 {
                     DirectoryRecord dr;
                     uint length = (uint)DirectoryRecord.ReadFrom(buffer, (int)pos, enc, out dr);

@@ -73,5 +73,20 @@ namespace DiscUtils.Iso9660
             Assert.IsNull(fs.Root.Parent);
         }
 
+        [Test]
+        public void LargeDirectory()
+        {
+            CDBuilder builder = new CDBuilder();
+            builder.UseJoliet = true;
+
+            for (int i = 0; i < 3000; ++i)
+            {
+                builder.AddFile("FILE" + i + ".TXT", new byte[] { });
+            }
+
+            CDReader reader = new CDReader(builder.Build(), true);
+
+            Assert.AreEqual(3000, reader.Root.GetFiles().Length);
+        }
     }
 }
