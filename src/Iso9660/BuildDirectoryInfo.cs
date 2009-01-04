@@ -36,6 +36,7 @@ namespace DiscUtils.Iso9660
         private BuildDirectoryInfo _parent;
         private Dictionary<string, BuildDirectoryMember> _members;
         private int _hierarchyDepth;
+        private List<BuildDirectoryMember> _sortedMembers;
 
         internal BuildDirectoryInfo(string name, BuildDirectoryInfo parent)
             : base(name, MakeShortDirName(name, parent))
@@ -48,6 +49,7 @@ namespace DiscUtils.Iso9660
         internal void Add(BuildDirectoryMember member)
         {
             _members.Add(member.Name, member);
+            _sortedMembers = null;
         }
 
         /// <summary>
@@ -76,8 +78,7 @@ namespace DiscUtils.Iso9660
 
         internal override long GetDataSize(Encoding enc)
         {
-            List<BuildDirectoryMember> sorted = _members.Values.ToList();
-            sorted.Sort(BuildDirectoryMember.SortedComparison);
+            List<BuildDirectoryMember> sorted = GetSortedMembers();
 
             long total = (34 * 2); // Two pseudo entries (self & parent)
 
@@ -110,8 +111,7 @@ namespace DiscUtils.Iso9660
         {
             int pos = 0;
 
-            List<BuildDirectoryMember> sorted = _members.Values.ToList();
-            sorted.Sort(BuildDirectoryMember.SortedComparison);
+            List<BuildDirectoryMember> sorted = GetSortedMembers();
 
             // Two pseudo entries, effectively '.' and '..'
             pos += WriteMember(this, "\0", Encoding.ASCII, buffer, offset + pos, locationTable, enc);
@@ -163,6 +163,17 @@ namespace DiscUtils.Iso9660
             }
 
             return new string(shortNameChars);
+        }
+
+        private List<BuildDirectoryMember> GetSortedMembers()
+        {
+            if (_sortedMembers == null)
+            {
+                List<BuildDirectoryMember> sorted = _members.Values.ToList();
+                sorted.Sort(BuildDirectoryMember.SortedComparison);
+                _sortedMembers = sorted;
+            }
+            return _sortedMembers;
         }
 
         private class PathTableComparison : Comparer<BuildDirectoryInfo>

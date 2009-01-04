@@ -36,12 +36,14 @@ namespace DiscUtils.Iso9660
         private byte[] _contentData;
         private string _contentPath;
         private Stream _contentStream;
+        private long _contentSize;
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, byte[] content)
             : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
             _parent = parent;
             _contentData = content;
+            _contentSize = content.LongLength;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, string content)
@@ -49,6 +51,7 @@ namespace DiscUtils.Iso9660
         {
             _parent = parent;
             _contentPath = content;
+            _contentSize = new FileInfo(_contentPath).Length;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, Stream source)
@@ -56,6 +59,7 @@ namespace DiscUtils.Iso9660
         {
             _parent = parent;
             _contentStream = source;
+            _contentSize = _contentStream.Length;
         }
 
         /// <summary>
@@ -68,19 +72,7 @@ namespace DiscUtils.Iso9660
 
         internal override long GetDataSize(Encoding enc)
         {
-            if (_contentData != null)
-            {
-                return _contentData.LongLength;
-            }
-            else if (_contentPath != null)
-            {
-                System.IO.FileInfo fi = new System.IO.FileInfo(_contentPath);
-                return fi.Length;
-            }
-            else
-            {
-                return _contentStream.Length;
-            }
+            return _contentSize;
         }
 
         internal Stream OpenStream()

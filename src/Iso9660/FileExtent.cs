@@ -58,10 +58,11 @@ namespace DiscUtils.Iso9660
 
             // Read up to 2048 bytes (or EOF)
             int numRead = _readStream.Read(block, offset, 2048);
-            while (numRead > 0)
+            totalRead += numRead;
+            while (numRead > 0 && totalRead < 2048)
             {
-                totalRead += numRead;
                 numRead = _readStream.Read(block, offset + totalRead, 2048 - totalRead);
+                totalRead += numRead;
             }
 
             // Wipe any that couldn't be read (beyond end of file)
