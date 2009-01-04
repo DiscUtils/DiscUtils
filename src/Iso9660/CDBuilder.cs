@@ -76,7 +76,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// Initiates a layout of the ISO image, returning a Stream.
+        /// Initiates a layout of the ISO image to a file.
         /// </summary>
         /// <param name="file">The file to write the ISO image to.</param>
         public void Build(string file)
@@ -85,7 +85,7 @@ namespace DiscUtils.Iso9660
             {
                 using (FileStream fileStream = new FileStream(file, FileMode.Create, FileAccess.Write))
                 {
-                    byte[] buffer = new byte[2048];
+                    byte[] buffer = new byte[64 * 1024];
                     int numRead = cdStream.Read(buffer, 0, buffer.Length);
                     while (numRead != 0)
                     {

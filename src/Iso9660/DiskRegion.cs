@@ -45,9 +45,14 @@ namespace DiscUtils.Iso9660
             set { _length = value; }
         }
 
+        internal virtual long PaddedLength
+        {
+            get { return ((DiskLength + 2047) / 2048) * 2048; }
+        }
+
         internal abstract void PrepareForRead();
 
-        internal abstract void ReadLogicalBlock(long diskOffset, byte[] block, int offset);
+        internal abstract int Read(long diskOffset, byte[] block, int offset, int count);
 
         internal abstract void DisposeReadState();
     }
@@ -65,7 +70,7 @@ namespace DiscUtils.Iso9660
             throw new NotImplementedException();
         }
 
-        internal override void ReadLogicalBlock(long diskOffset, byte[] block, int offset)
+        internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
             // Not valid to use this 'dummy' region for actual ISO construction
             throw new NotImplementedException();

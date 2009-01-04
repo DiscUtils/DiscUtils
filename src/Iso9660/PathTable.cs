@@ -51,7 +51,7 @@ namespace DiscUtils.Iso9660
                 length += di.GetPathTableEntrySize(enc);
             }
             _dataLength = length;
-            DiskLength = ((length + 2047) / 2048) * 2048;
+            DiskLength = _dataLength;
         }
 
         public uint DataLength
@@ -81,10 +81,15 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        internal override void ReadLogicalBlock(long diskOffset, byte[] buffer, int offset)
+        internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
             long relPos = diskOffset - DiskStart;
-            Array.Copy(_readCache, relPos, buffer, offset, 2048);
+
+            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
+
+            Array.Copy(_readCache, relPos, buffer, offset, numRead);
+
+            return numRead;
         }
 
         internal override void DisposeReadState()

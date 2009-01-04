@@ -42,7 +42,6 @@ namespace DiscUtils.Iso9660
 
         private DiskRegion _currentRegion;
         private long _position;
-        private byte[] _blockBuffer = new byte[2048];
 
         private const long DiskStart = 0x8000;
         private long _endOfDisk;
@@ -114,24 +113,24 @@ namespace DiscUtils.Iso9660
             long startOfFirstPathTable = focus;
             PathTable pathTable = new PathTable(false, Encoding.ASCII, _dirs, _primaryLocationTable, focus);
             _fixedRegions.Add(pathTable);
-            focus += pathTable.DiskLength;
+            focus += pathTable.PaddedLength;
             long primaryPathTableLength = pathTable.DataLength;
 
             long startOfSecondPathTable = focus;
             pathTable = new PathTable(true, Encoding.ASCII, _dirs, _primaryLocationTable, focus);
             _fixedRegions.Add(pathTable);
-            focus += pathTable.DiskLength;
+            focus += pathTable.PaddedLength;
 
             long startOfThirdPathTable = focus;
             pathTable = new PathTable(false, _suppEncoding, _dirs, _supplementaryLocationTable, focus);
             _fixedRegions.Add(pathTable);
-            focus += pathTable.DiskLength;
+            focus += pathTable.PaddedLength;
             long supplementaryPathTableLength = pathTable.DataLength;
 
             long startOfFourthPathTable = focus;
             pathTable = new PathTable(true, _suppEncoding, _dirs, _supplementaryLocationTable, focus);
             _fixedRegions.Add(pathTable);
-            focus += pathTable.DiskLength;
+            focus += pathTable.PaddedLength;
 
             // Find the end of the disk
             _endOfDisk = focus;
@@ -176,7 +175,7 @@ namespace DiscUtils.Iso9660
                 locationTable.Add(di, (uint)(focus / 2048));
                 DirectoryExtent extent = new DirectoryExtent(di, locationTable, enc, focus);
                 _fixedRegions.Add(extent);
-                focus += extent.DiskLength;
+                focus += extent.PaddedLength;
             }
             return focus;
         }
@@ -191,46 +190,14 @@ namespace DiscUtils.Iso9660
                 FileExtent extent = new FileExtent(fi, focus);
 
                 // Only remember files of non-zero length (otherwise we'll stomp on a valid file)
-                if (extent.DiskLength != 0)
+                if (extent.PaddedLength != 0)
                 {
                     _fixedRegions.Add(extent);
                 }
 
-                focus += extent.DiskLength;
+                focus += extent.PaddedLength;
             }
             return focus;
-        }
-
-        private void GetLogicalBlock(long start, byte[] buffer, int offset)
-        {
-            // If current region is outside the area of interest, clean it up
-            if (_currentRegion != null && (start < _currentRegion.DiskStart || start >= _currentRegion.DiskStart + _currentRegion.DiskLength))
-            {
-                _currentRegion.DisposeReadState();
-                _currentRegion = null;
-            }
-
-            // If we need to find a new region, look for it
-            if (_currentRegion == null)
-            {
-                int idx = _fixedRegions.BinarySearch(new SearchDiskRegion(start), new DiskRegionComparer());
-                if (idx >= 0)
-                {
-                    DiskRegion region = _fixedRegions[idx];
-                    region.PrepareForRead();
-                    _currentRegion = region;
-                }
-            }
-
-            // If the block is outside any known region, fill with zeros, else read the block
-            if (_currentRegion == null)
-            {
-                Array.Clear(buffer, offset, 2048);
-            }
-            else
-            {
-                _currentRegion.ReadLogicalBlock(start, buffer, offset);
-            }
         }
 
         private class DiskRegionComparer : IComparer<DiskRegion>
@@ -303,12 +270,39 @@ namespace DiscUtils.Iso9660
                 return 0;
             }
 
-            // Get the current block
-            GetLogicalBlock((_position / 2048) * 2048, _blockBuffer, 0);
+            // If current region is outside the area of interest, clean it up
+            if (_currentRegion != null && (_position < _currentRegion.DiskStart || _position >= _currentRegion.DiskStart + _currentRegion.DiskLength))
+            {
+                _currentRegion.DisposeReadState();
+                _currentRegion = null;
+            }
 
-            // Read up to the block boundary only
-            int numRead = (int)Math.Min(count, 2048 - (_position % 2048));
-            Array.Copy(_blockBuffer, _position % 2048, buffer, offset, numRead);
+            // If we need to find a new region, look for it
+            if (_currentRegion == null)
+            {
+                int idx = _fixedRegions.BinarySearch(new SearchDiskRegion(_position), new DiskRegionComparer());
+                if (idx >= 0)
+                {
+                    DiskRegion region = _fixedRegions[idx];
+                    region.PrepareForRead();
+                    _currentRegion = region;
+                }
+            }
+
+            int numRead = 0;
+
+            // If the block is outside any known region, return zero's up to the sector boundary.
+            if (_currentRegion == null)
+            {
+                long nextSectorStart = (((_position / 2048) + 1) * 2048);
+                numRead = (int)Math.Min(count, nextSectorStart - _position);
+                Array.Clear(buffer, offset, numRead);
+            }
+            else
+            {
+                numRead = _currentRegion.Read(_position, buffer, offset, count);
+            }
+
             _position += numRead;
             return numRead;
         }

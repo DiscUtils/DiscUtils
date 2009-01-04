@@ -61,7 +61,7 @@ namespace DiscUtils.Iso9660
             IsoUtilities.WriteString(buffer, offset + 8, nameBytes, false, DirectoryIdentifier, enc);
             if ((nameBytes & 1) == 1)
             {
-                buffer[offset + 33 + nameBytes] = 0;
+                buffer[offset + 8 + nameBytes] = 0;
             }
 
             return (int)(8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0));

@@ -40,7 +40,7 @@ namespace DiscUtils.Iso9660
             _dirInfo = dirInfo;
             _locationTable = locationTable;
             _enc = enc;
-            DiskLength = ((dirInfo.GetDataSize(enc) + 2047) / 2048) * 2048;
+            DiskLength = dirInfo.GetDataSize(enc);
         }
 
         internal override void PrepareForRead()
@@ -49,10 +49,15 @@ namespace DiscUtils.Iso9660
             _dirInfo.Write(_readCache, 0, _locationTable, _enc);
         }
 
-        internal override void ReadLogicalBlock(long diskOffset, byte[] buffer, int offset)
+        internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
             long relPos = diskOffset - DiskStart;
-            Array.Copy(_readCache, relPos, buffer, offset, 2048);
+
+            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
+
+            Array.Copy(_readCache, relPos, buffer, offset, numRead);
+
+            return numRead;
         }
 
         internal override void DisposeReadState()

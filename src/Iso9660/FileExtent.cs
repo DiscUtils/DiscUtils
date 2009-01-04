@@ -36,7 +36,7 @@ namespace DiscUtils.Iso9660
             : base(start)
         {
             _fileInfo = fileInfo;
-            DiskLength = ((fileInfo.GetDataSize(Encoding.ASCII) + 2047) / 2048) * 2048;
+            DiskLength = fileInfo.GetDataSize(Encoding.ASCII);
         }
 
         internal override void PrepareForRead()
@@ -44,7 +44,7 @@ namespace DiscUtils.Iso9660
             _readStream = _fileInfo.OpenStream();
         }
 
-        internal override void ReadLogicalBlock(long diskOffset, byte[] block, int offset)
+        internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
             long relPos = diskOffset - DiskStart;
             int totalRead = 0;
@@ -56,20 +56,16 @@ namespace DiscUtils.Iso9660
                 _readStream.Position = relPos;
             }
 
-            // Read up to 2048 bytes (or EOF)
-            int numRead = _readStream.Read(block, offset, 2048);
+            // Read up to EOF
+            int numRead = _readStream.Read(block, offset, count);
             totalRead += numRead;
-            while (numRead > 0 && totalRead < 2048)
+            while (numRead > 0 && totalRead < count)
             {
-                numRead = _readStream.Read(block, offset + totalRead, 2048 - totalRead);
+                numRead = _readStream.Read(block, offset + totalRead, count - totalRead);
                 totalRead += numRead;
             }
 
-            // Wipe any that couldn't be read (beyond end of file)
-            if (numRead < 2048)
-            {
-                Array.Clear(block, offset + totalRead, 2048 - totalRead);
-            }
+            return totalRead;
         }
 
         internal override void DisposeReadState()

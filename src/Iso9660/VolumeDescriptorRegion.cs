@@ -38,9 +38,15 @@ namespace DiscUtils.Iso9660
             _readCache = GetBlockData();
         }
 
-        internal override void ReadLogicalBlock(long diskOffset, byte[] block, int offset)
+        internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
-            Array.Copy(_readCache, 0, block, offset, 2048);
+            long relPos = diskOffset - DiskStart;
+
+            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
+
+            Array.Copy(_readCache, relPos, buffer, offset, numRead);
+
+            return numRead;
         }
 
         internal override void DisposeReadState()
