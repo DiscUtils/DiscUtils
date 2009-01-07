@@ -294,24 +294,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="Geometry">
-          <Members>
-           <Member Name="#BytesPerSector">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2008-12-03 00:50:45Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'Geometry.BytesPerSector'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="28" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="Utilities">
           <Members>
            <Member Name="#BitSwap(System.Int16)">
@@ -398,20 +380,6 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ToInt32LittleEndian(System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.ToInt32LittleEndian(byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#WriteBytesBigEndian(System.Int16,System.Byte[],System.Int32)">
             <Messages>
              <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
@@ -431,48 +399,6 @@
              <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
               <Issue>
                <Item>'Utilities.WriteBytesLittleEndian(short, byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WriteBytesLittleEndian(System.Int32,System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.WriteBytesLittleEndian(int, byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WriteBytesLittleEndian(System.Int64,System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.WriteBytesLittleEndian(long, byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WriteBytesLittleEndian(System.UInt64,System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.WriteBytesLittleEndian(ulong, byte[], int)'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -820,7 +746,6 @@
     <Note Id="25" Modified="2008-11-23 11:21:13Z">Part of a set of re-usable bit-swapping methods.</Note>
     <Note Id="26" Modified="2008-11-23 17:54:26Z">Well known acronyms</Note>
     <Note Id="27" Modified="2008-12-09 22:49:03Z">Separating file systems by namespace.</Note>
-    <Note Id="28" Modified="2008-12-03 00:53:09Z">Instance method for consistency.</Note>
     <Note Id="29" Modified="2008-12-15 22:03:59Z">Deliberate use of namespace to separate technologies.</Note>
     <Note Id="30" Modified="2008-12-15 22:04:20Z">DiscUtils is the establish project name.</Note>
     <Note Id="31" Modified="2008-12-15 22:04:48Z">VDI is an established acronym for VirtualBox's virtual disk images.</Note>

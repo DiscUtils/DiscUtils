@@ -154,6 +154,11 @@
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Partitions\Crc32.cs" />
+    <Compile Include="Partitions\GptEntry.cs" />
+    <Compile Include="Partitions\GptHeader.cs" />
+    <Compile Include="Partitions\GuidPartitionInfo.cs" />
+    <Compile Include="Partitions\GuidPartitionTable.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />

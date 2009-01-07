@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,17 +26,17 @@ using System.IO;
 namespace DiscUtils.Partitions
 {
     /// <summary>
-    /// Provides access to partition records in a BIOS (MBR) partition table.
+    /// Provides access to partition records in a GUID partition table.
     /// </summary>
-    public class BiosPartitionInfo : PartitionInfo
+    public class GuidPartitionInfo : PartitionInfo
     {
-        private BiosPartitionRecord _record;
-        private BiosPartitionTable _table;
+        private GuidPartitionTable _table;
+        private GptEntry _entry;
 
-        internal BiosPartitionInfo(BiosPartitionTable table, BiosPartitionRecord record)
+        internal GuidPartitionInfo(GuidPartitionTable table, GptEntry entry)
         {
             _table = table;
-            _record = record;
+            _entry = entry;
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace DiscUtils.Partitions
         /// <returns>The new stream</returns>
         public override Stream Open()
         {
-            return _table.Open(_record);
+            return _table.Open(_entry);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace DiscUtils.Partitions
         /// </summary>
         public override long FirstSector
         {
-            get { return _record.LBAStartAbsolute; }
+            get { return _entry.FirstUsedLogicalBlock; }
         }
 
         /// <summary>
@@ -61,23 +61,23 @@ namespace DiscUtils.Partitions
         /// </summary>
         public override long LastSector
         {
-            get { return _record.LBAStartAbsolute + _record.LBALength - 1; }
+            get { return _entry.LastUsedLogicalBlock; }
         }
 
         /// <summary>
-        /// Always returns <see cref="System.Guid"/>.Empty.
+        /// Gets the type of the partition, as a GUID.
         /// </summary>
         public override Guid GuidType
         {
-            get { return Guid.Empty; }
+            get { return _entry.PartitionType; }
         }
 
         /// <summary>
-        /// Gets the type of the partition.
+        /// Always returns Zero.
         /// </summary>
         public override byte BiosType
         {
-            get { return _record.PartitionType; }
+            get { return 0; }
         }
 
         /// <summary>
@@ -85,31 +85,31 @@ namespace DiscUtils.Partitions
         /// </summary>
         public override string TypeAsString
         {
-            get { return _record.FriendlyPartitionType; }
+            get { return _entry.FriendlyPartitionType; }
         }
 
         /// <summary>
-        /// Gets a value indicating if this partition is active (bootable).
+        /// Gets the name of the partition.
         /// </summary>
-        public bool IsActive
+        public string Name
         {
-            get { return _record.Status != 0; }
+            get { return _entry.Name; }
         }
 
         /// <summary>
-        /// Gets the start of the partition as a CHS address.
+        /// Gets the attributes of the partition.
         /// </summary>
-        public ChsAddress Start
+        public long Attributes
         {
-            get { return new ChsAddress(_record.StartCylinder, _record.StartHead, _record.StartSector); }
+            get { return (long)_entry.Attributes; }
         }
 
         /// <summary>
-        /// Gets the end (inclusive) of the partition as a CHS address.
+        /// Gets the unique identity of this specific partition.
         /// </summary>
-        public ChsAddress End
+        public Guid Identity
         {
-            get { return new ChsAddress(_record.EndCylinder, _record.EndHead, _record.EndSector); }
+            get { return _entry.Identity; }
         }
     }
 }
