@@ -225,7 +225,7 @@ namespace DiscUtils.Vdi
                 throw new ArgumentOutOfRangeException("count", count, "Attempt to write negative number of bytes");
             }
 
-            if (_atEof || _position + count >= _fileHeader.DiskSize)
+            if (_atEof || _position + count > _fileHeader.DiskSize)
             {
                 _atEof = true;
                 throw new IOException("Attempt to write beyond end of file");
