@@ -186,7 +186,7 @@ namespace DiscUtils
             buffer[offset + 4] = (byte)((val >> 32) & 0xFF);
             buffer[offset + 5] = (byte)((val >> 40) & 0xFF);
             buffer[offset + 6] = (byte)((val >> 48) & 0xFF);
-            buffer[offset + 7] = (byte)((val >> 64) & 0xFF);
+            buffer[offset + 7] = (byte)((val >> 56) & 0xFF);
         }
 
         public static void WriteBytesLittleEndian(short val, byte[] buffer, int offset)
