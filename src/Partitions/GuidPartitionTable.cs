@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Globalization;
 
 namespace DiscUtils.Partitions
 {
@@ -34,7 +35,9 @@ namespace DiscUtils.Partitions
     {
         private Stream _diskData;
         private Geometry _diskGeometry;
-        private GptHeader _header;
+        private GptHeader _primaryHeader;
+        private GptHeader _secondaryHeader;
+        private byte[] _entryBuffer;
 
         /// <summary>
         /// Creates a new instance to access an existing partition table on a disk.
@@ -86,7 +89,9 @@ namespace DiscUtils.Partitions
         /// <param name="index">The index of the partition</param>
         public override void Delete(int index)
         {
-            throw new NotImplementedException();
+            int offset = GetPartitionOffset(index);
+            Array.Clear(_entryBuffer, offset, _primaryHeader.PartitionEntrySize);
+            Write();
         }
 
         /// <summary>
@@ -127,34 +132,151 @@ namespace DiscUtils.Partitions
             _diskData = disk;
             _diskGeometry = diskGeometry;
 
-            byte[] sector = new byte[diskGeometry.BytesPerSector];
-            disk.Position = 512;
-            disk.Read(sector, 0, sector.Length);
+            disk.Position = diskGeometry.BytesPerSector;
+            byte[] sector = Utilities.ReadFully(disk, diskGeometry.BytesPerSector);
 
-            _header = new GptHeader();
-            if (!_header.ReadFrom(sector, 0, 512))
+            _primaryHeader = new GptHeader(diskGeometry.BytesPerSector);
+            if (!_primaryHeader.ReadFrom(sector, 0, 512) || !ReadEntries(_primaryHeader))
             {
                 disk.Position = disk.Length - diskGeometry.BytesPerSector;
                 disk.Read(sector, 0, sector.Length);
-                _header.ReadFrom(sector, 0, sector.Length);
+                _secondaryHeader = new GptHeader(diskGeometry.BytesPerSector);
+                if (!_secondaryHeader.ReadFrom(sector, 0, sector.Length) || !ReadEntries(_secondaryHeader))
+                {
+                    throw new IOException("No valid GUID Partition Table found");
+                }
+
+                // Generate from the primary table from the secondary one
+                _primaryHeader = new GptHeader(_secondaryHeader);
+                _primaryHeader.HeaderLba = _secondaryHeader.AlternateHeaderLba;
+                _primaryHeader.AlternateHeaderLba = _secondaryHeader.HeaderLba;
+                _primaryHeader.PartitionEntriesLba = 2;
+
+                // If the disk is writeable, fix up the primary partition table based on the
+                // (valid) secondary table.
+                if (disk.CanWrite)
+                {
+                    WritePrimaryHeader();
+                }
             }
+
+            if (_secondaryHeader == null)
+            {
+                _secondaryHeader = new GptHeader(diskGeometry.BytesPerSector);
+                disk.Position = disk.Length - diskGeometry.BytesPerSector;
+                disk.Read(sector, 0, sector.Length);
+                if (!_secondaryHeader.ReadFrom(sector, 0, sector.Length) || !ReadEntries(_secondaryHeader))
+                {
+                    // Generate from the secondary table from the primary one
+                    _secondaryHeader = new GptHeader(_primaryHeader);
+                    _secondaryHeader.HeaderLba = _secondaryHeader.AlternateHeaderLba;
+                    _secondaryHeader.AlternateHeaderLba = _secondaryHeader.HeaderLba;
+                    _secondaryHeader.PartitionEntriesLba = _secondaryHeader.HeaderLba - (((_secondaryHeader.PartitionEntryCount * _secondaryHeader.PartitionEntrySize) + diskGeometry.BytesPerSector - 1)) / diskGeometry.BytesPerSector;
+
+                    // If the disk is writeable, fix up the secondary partition table based on the
+                    // (valid) primary table.
+                    if (disk.CanWrite)
+                    {
+                        WriteSecondaryHeader();
+                    }
+                }
+            }
+
+        }
+
+        private void Write()
+        {
+            WritePrimaryHeader();
+            WriteSecondaryHeader();
+        }
+
+        private void WritePrimaryHeader()
+        {
+            byte[] buffer = new byte[_diskGeometry.BytesPerSector];
+            _primaryHeader.EntriesCrc = CalcEntriesCrc();
+            _primaryHeader.WriteTo(buffer, 0);
+            _diskData.Position = _diskGeometry.BytesPerSector;
+            _diskData.Write(buffer, 0, buffer.Length);
+
+            _diskData.Position = 2 * _diskGeometry.BytesPerSector;
+            _diskData.Write(_entryBuffer, 0, _entryBuffer.Length);
+        }
+
+        private void WriteSecondaryHeader()
+        {
+            byte[] buffer = new byte[_diskGeometry.BytesPerSector];
+            _secondaryHeader.EntriesCrc = CalcEntriesCrc();
+            _secondaryHeader.WriteTo(buffer, 0);
+            _diskData.Position = _diskData.Length - _diskGeometry.BytesPerSector;
+            _diskData.Write(buffer, 0, buffer.Length);
+
+            _diskData.Position = _secondaryHeader.PartitionEntriesLba * _diskGeometry.BytesPerSector;
+            _diskData.Write(_entryBuffer, 0, _entryBuffer.Length);
+        }
+
+        private bool ReadEntries(GptHeader header)
+        {
+            _diskData.Position = header.PartitionEntriesLba * _diskGeometry.BytesPerSector;
+            _entryBuffer = Utilities.ReadFully(_diskData, (int)(header.PartitionEntrySize * header.PartitionEntryCount));
+            if (header.EntriesCrc != CalcEntriesCrc())
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private uint CalcEntriesCrc()
+        {
+            uint calcSig = Crc32.Compute(0xFFFFFFFF, _entryBuffer, 0, _entryBuffer.Length) ^ 0xFFFFFFFF;
+            return calcSig;
         }
 
 
         private IEnumerable<GptEntry> GetAllEntries()
         {
-            _diskData.Position = _header.PartitionEntriesLba * _diskGeometry.BytesPerSector;
-            byte[] buffer = Utilities.ReadFully(_diskData, (int)(_header.PartitionEntrySize * _header.PartitionEntryCount));
-
-            for (int i = 0; i < _header.PartitionEntryCount; ++i)
+            for (int i = 0; i < _primaryHeader.PartitionEntryCount; ++i)
             {
                 GptEntry entry = new GptEntry();
-                entry.ReadFrom(buffer, i * _header.PartitionEntrySize, _header.PartitionEntrySize);
+                entry.ReadFrom(_entryBuffer, i * _primaryHeader.PartitionEntrySize, _primaryHeader.PartitionEntrySize);
                 if (entry.PartitionType != Guid.Empty)
                 {
                     yield return entry;
                 }
             }
         }
+
+        private int GetPartitionOffset(int index)
+        {
+            bool found = false;
+            int entriesSoFar = 0;
+            int position = 0;
+
+            while (!found && position < _primaryHeader.PartitionEntryCount)
+            {
+                GptEntry entry = new GptEntry();
+                entry.ReadFrom(_entryBuffer, position * _primaryHeader.PartitionEntrySize, _primaryHeader.PartitionEntrySize);
+                if (entry.PartitionType != Guid.Empty)
+                {
+                    if (index == entriesSoFar)
+                    {
+                        found = true;
+                        break;
+                    }
+                    entriesSoFar++;
+                }
+                position++;
+            }
+
+            if (found)
+            {
+                return position * _primaryHeader.PartitionEntrySize;
+            }
+            else
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "No such partition: {0}", index));
+            }
+        }
+
+
     }
 }

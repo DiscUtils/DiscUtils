@@ -42,6 +42,37 @@ namespace DiscUtils.Partitions
         public int PartitionEntrySize;
         public uint EntriesCrc;
 
+        public byte[] Buffer;
+
+        public GptHeader(int sectorSize)
+        {
+            Signature = GptSignature;
+            Version = 0x0100;
+            HeaderSize = 92;
+            Buffer = new byte[sectorSize];
+        }
+
+        public GptHeader(GptHeader toCopy)
+        {
+            Signature = toCopy.Signature;
+            Version = toCopy.Version;
+            HeaderSize = toCopy.HeaderSize;
+            Crc = toCopy.Crc;
+            HeaderLba = toCopy.HeaderLba;
+            AlternateHeaderLba = toCopy.AlternateHeaderLba;
+            FirstUsable = toCopy.FirstUsable;
+            LastUsable = toCopy.LastUsable;
+            DiskGuid = toCopy.DiskGuid;
+            PartitionEntriesLba = toCopy.PartitionEntriesLba;
+            PartitionEntryCount = toCopy.PartitionEntryCount;
+            PartitionEntrySize = toCopy.PartitionEntrySize;
+            EntriesCrc = toCopy.EntriesCrc;
+
+            Buffer = new byte[toCopy.Buffer.Length];
+            Array.Copy(toCopy.Buffer, Buffer, Buffer.Length);
+        }
+
+
         public bool ReadFrom(byte[] buffer, int offset, int count)
         {
             Signature = Utilities.BytesToString(buffer, offset + 0, 8);
@@ -58,11 +89,43 @@ namespace DiscUtils.Partitions
             PartitionEntrySize = Utilities.ToInt32LittleEndian(buffer, offset + 84);
             EntriesCrc = Utilities.ToUInt32LittleEndian(buffer, offset + 88);
 
+            // In case the header has new fields unknown to us, store the entire header
+            // as a byte array
+            Buffer = new byte[HeaderSize];
+            Array.Copy(buffer, offset, Buffer, 0, HeaderSize);
+
             return (Crc == CalcCrc(buffer, offset, HeaderSize));
         }
 
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            // First, copy the cached header to allow for unknown fields
+            Array.Copy(Buffer, 0, buffer, offset, Buffer.Length);
 
-        private uint CalcCrc(byte[] buffer, int offset, int count)
+            // Next, write the fields
+            Utilities.StringToBytes(Signature, buffer, offset + 0, 8);
+            Utilities.WriteBytesLittleEndian(Version, buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(HeaderSize, buffer, offset + 12);
+            Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(HeaderLba, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian(AlternateHeaderLba, buffer, offset + 32);
+            Utilities.WriteBytesLittleEndian(FirstUsable, buffer, offset + 40);
+            Utilities.WriteBytesLittleEndian(LastUsable, buffer, offset + 48);
+            Utilities.WriteBytesLittleEndian(DiskGuid, buffer, offset + 56);
+            Utilities.WriteBytesLittleEndian(PartitionEntriesLba, buffer, offset + 72);
+            Utilities.WriteBytesLittleEndian(PartitionEntryCount, buffer, offset + 80);
+            Utilities.WriteBytesLittleEndian(PartitionEntrySize, buffer, offset + 84);
+            Utilities.WriteBytesLittleEndian(EntriesCrc, buffer, offset + 88);
+
+            // Calculate & write the CRC
+            Utilities.WriteBytesLittleEndian(CalcCrc(buffer, offset, HeaderSize), buffer, offset + 16);
+
+            // Update the cached copy - re-allocate the buffer to allow for HeaderSize potentially having changed
+            Buffer = new byte[HeaderSize];
+            Array.Copy(buffer, offset, Buffer, 0, HeaderSize);
+        }
+
+        internal static uint CalcCrc(byte[] buffer, int offset, int count)
         {
             byte[] temp = new byte[count];
             Array.Copy(buffer, offset, temp, 0, count);

@@ -34,6 +34,13 @@ namespace DiscUtils.Partitions
         public ulong Attributes;
         public string Name;
 
+        public GptEntry()
+        {
+            PartitionType = Guid.Empty;
+            Identity = Guid.Empty;
+            Name = "";
+        }
+
         public void ReadFrom(byte[] buffer, int offset, int count)
         {
             PartitionType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
@@ -42,6 +49,16 @@ namespace DiscUtils.Partitions
             LastUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 40);
             Attributes = Utilities.ToUInt64LittleEndian(buffer, offset + 48);
             Name = Encoding.Unicode.GetString(buffer, offset + 56, 72).TrimEnd(new char[]{'\0'});
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(PartitionType, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Identity, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(FirstUsedLogicalBlock, buffer, offset + 32);
+            Utilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
+            Utilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
+            Encoding.Unicode.GetBytes(Name + new String('\0', 36), 0, 36, buffer, offset + 56);
         }
 
         public string FriendlyPartitionType
