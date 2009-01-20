@@ -47,7 +47,7 @@ namespace DiscUtils.Partitions
         public GptHeader(int sectorSize)
         {
             Signature = GptSignature;
-            Version = 0x0100;
+            Version = 0x00010000;
             HeaderSize = 92;
             Buffer = new byte[sectorSize];
         }
@@ -73,7 +73,7 @@ namespace DiscUtils.Partitions
         }
 
 
-        public bool ReadFrom(byte[] buffer, int offset, int count)
+        public bool ReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.BytesToString(buffer, offset + 0, 8);
             Version = Utilities.ToUInt32LittleEndian(buffer, offset + 8);

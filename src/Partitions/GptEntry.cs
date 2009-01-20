@@ -25,7 +25,7 @@ using System.Text;
 
 namespace DiscUtils.Partitions
 {
-    internal class GptEntry
+    internal class GptEntry : IComparable<GptEntry>
     {
         public Guid PartitionType;
         public Guid Identity;
@@ -41,7 +41,7 @@ namespace DiscUtils.Partitions
             Name = "";
         }
 
-        public void ReadFrom(byte[] buffer, int offset, int count)
+        public void ReadFrom(byte[] buffer, int offset)
         {
             PartitionType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
             Identity = Utilities.ToGuidLittleEndian(buffer, offset + 16);
@@ -103,5 +103,14 @@ namespace DiscUtils.Partitions
                 }
             }
         }
+
+        #region IComparable<GptEntry> Members
+
+        public int CompareTo(GptEntry other)
+        {
+            return FirstUsedLogicalBlock.CompareTo(other.FirstUsedLogicalBlock);
+        }
+
+        #endregion
     }
 }

@@ -159,6 +159,7 @@
     <Compile Include="Partitions\GptHeader.cs" />
     <Compile Include="Partitions\GuidPartitionInfo.cs" />
     <Compile Include="Partitions\GuidPartitionTable.cs" />
+    <Compile Include="Partitions\GuidPartitionTypes.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />

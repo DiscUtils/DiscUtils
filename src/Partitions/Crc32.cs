@@ -26,7 +26,7 @@ namespace DiscUtils.Partitions
     /// <summary>
     /// Calculates CRC32 of buffers.
     /// </summary>
-    internal class Crc32
+    internal static class Crc32
     {
         private const uint Polynomial = 0xedb88320;
 
