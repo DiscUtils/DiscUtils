@@ -98,7 +98,15 @@ namespace DiscUtils
         {
             get
             {
-                return new BiosPartitionTable(this);
+                BiosPartitionTable table = new BiosPartitionTable(this);
+                if (table.Count == 1 && table[0].BiosType == BiosPartitionTypes.GptProtective)
+                {
+                    return new GuidPartitionTable(this);
+                }
+                else
+                {
+                    return table;
+                }
             }
         }
     }
