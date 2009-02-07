@@ -210,6 +210,42 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Xva">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2009-02-07 12:25:26Z">
+      <Issue>
+       <Item>DiscUtils.Xva</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="33" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-07 12:25:26Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Xva</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="34" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Xva" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-07 12:25:26Z">
+      <Issue Name="Namespace">
+       <Item>Xva</Item>
+       <Item>DiscUtils.Xva</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="34" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
   </Namespaces>
   <Targets>
    <Target Name="$(ProjectDir)/src/bin/Release/DiscUtils.dll">
@@ -690,6 +726,58 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="Crc32">
+          <Members>
+           <Member Name="#.cctor()">
+            <Messages>
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2009-01-20 20:09:47Z">
+              <Issue>
+               <Item>'Crc32'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="32" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="GuidPartitionTypes">
+          <Members>
+           <Member Name="#EfiSystem">
+            <Messages>
+             <Message Id="Efi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-01-20 20:09:47Z">
+              <Issue Name="Member">
+               <Item>Efi</Item>
+               <Item>'GuidPartitionTypes.EfiSystem'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="28" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LinuxLvm">
+            <Messages>
+             <Message Id="Lvm" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-01-20 20:09:47Z">
+              <Issue Name="Member">
+               <Item>Lvm</Item>
+               <Item>'GuidPartitionTypes.LinuxLvm'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="28" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="WellKnownPartitionType">
           <Members>
            <Member Name="#LinuxLvm">
@@ -702,6 +790,29 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="24" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Xva">
+        <Types>
+         <Type Name="Disk">
+          <Members>
+           <Member Name="#Uuid">
+            <Messages>
+             <Message Id="Uuid" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-07 12:25:26Z">
+              <Issue Name="Member">
+               <Item>Uuid</Item>
+               <Item>'Disk.Uuid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="35" />
                </User>
               </Notes>
              </Message>
@@ -746,9 +857,14 @@
     <Note Id="25" Modified="2008-11-23 11:21:13Z">Part of a set of re-usable bit-swapping methods.</Note>
     <Note Id="26" Modified="2008-11-23 17:54:26Z">Well known acronyms</Note>
     <Note Id="27" Modified="2008-12-09 22:49:03Z">Separating file systems by namespace.</Note>
+    <Note Id="28" Modified="2009-01-20 20:13:20Z">Naming follows best practice - acronyms in Camel Case</Note>
     <Note Id="29" Modified="2008-12-15 22:03:59Z">Deliberate use of namespace to separate technologies.</Note>
     <Note Id="30" Modified="2008-12-15 22:04:20Z">DiscUtils is the establish project name.</Note>
     <Note Id="31" Modified="2008-12-15 22:04:48Z">VDI is an established acronym for VirtualBox's virtual disk images.</Note>
+    <Note Id="32" Modified="2009-01-20 20:14:24Z">Complex table values to be calculated, so in static constructor.</Note>
+    <Note Id="33" Modified="2009-02-07 12:25:57Z">Xva fits in with existing namespace naming scheme</Note>
+    <Note Id="34" Modified="2009-02-07 12:26:27Z">Xva is camel case form of XVA acronym</Note>
+    <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
    </User>
   </Notes>
   <Rules>
@@ -768,6 +884,9 @@
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
     <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
+   </Rule>
+   <Rule TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810">
+    <Resolution Name="Default">Initialize all static fields in {0} when those fields are declared and remove the explicit static constructor.</Resolution>
    </Rule>
    <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
     <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>

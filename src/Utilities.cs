@@ -43,6 +43,17 @@ namespace DiscUtils
         private Utilities() { }
 
         /// <summary>
+        /// Round up a value to a multiple of a unit size.
+        /// </summary>
+        /// <param name="value">The value to round up</param>
+        /// <param name="unit">The unit (the returned value will be a multiple of this number)</param>
+        /// <returns>The rounded-up value</returns>
+        public static long RoundUp(long value, long unit)
+        {
+            return (((value + (unit - 1)) / unit) * unit);
+        }
+
+        /// <summary>
         /// Converts between two arrays.
         /// </summary>
         /// <typeparam name="T">The type of the elements of the source array</typeparam>

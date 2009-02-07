@@ -160,6 +160,7 @@
     <Compile Include="Partitions\GuidPartitionInfo.cs" />
     <Compile Include="Partitions\GuidPartitionTable.cs" />
     <Compile Include="Partitions\GuidPartitionTypes.cs" />
+    <Compile Include="Sizes.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />
@@ -169,6 +170,13 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Xva\Disk.cs" />
+    <Compile Include="Xva\DiskLayer.cs" />
+    <Compile Include="Xva\DiskStream.cs" />
+    <Compile Include="Xva\FileRecord.cs" />
+    <Compile Include="Xva\Tar.cs" />
+    <Compile Include="Xva\TarHeader.cs" />
+    <Compile Include="Xva\VirtualMachine.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
