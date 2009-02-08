@@ -42,7 +42,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// The stream representing the disk's contents.
         /// </summary>
-        private Stream _content;
+        private SparseStream _content;
 
         /// <summary>
         /// Creates a new instance from an existing stream, differencing disks not supported.
@@ -323,13 +323,13 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
-        public override Stream Content
+        public override SparseStream Content
         {
             get
             {
                 if (_content == null)
                 {
-                    Stream stream = null;
+                    SparseStream stream = null;
                     for (int i = _files.Count - 1; i >= 0; --i)
                     {
                         stream = _files[i].First.OpenContent(stream, true);

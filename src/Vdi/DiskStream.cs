@@ -21,11 +21,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Vdi
 {
-    internal class DiskStream : Stream
+    internal class DiskStream : SparseStream
     {
         private const uint BlockFree = unchecked((uint)(int)~0);
         private const uint BlockZero = unchecked((uint)(int)~1);
@@ -155,7 +156,6 @@ namespace DiscUtils.Vdi
 
                 if (_blockTable[block] == BlockFree)
                 {
-                    //throw new NotImplementedException("Free blocks not implemented");
                     // TODO: Use parent
                     Array.Clear(buffer, offset + numRead, toRead);
                 }
@@ -304,6 +304,39 @@ namespace DiscUtils.Vdi
 
                 numWritten += toWrite;
                 _position += toWrite;
+            }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long blockSize = _fileHeader.BlockSize;
+                int i = 0;
+                while (i < _blockTable.Length)
+                {
+                    // Find next stored block
+                    while (i < _blockTable.Length && (_blockTable[i] == BlockZero && _blockTable[i] == BlockFree))
+                    {
+                        ++i;
+                    }
+                    int start = i;
+
+                    // Find next absent block
+                    while (i < _blockTable.Length && (_blockTable[i] != BlockZero && _blockTable[i] != BlockFree))
+                    {
+                        ++i;
+                    }
+
+                    if (start != i)
+                    {
+                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
+                    }
+                }
+
+                return extents;
             }
         }
 

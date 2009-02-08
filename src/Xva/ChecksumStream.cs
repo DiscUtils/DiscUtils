@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,23 +21,21 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 
-namespace DiscUtils
+namespace DiscUtils.Xva
 {
-    /// <summary>
-    /// A stream that returns Zero's.
-    /// </summary>
-    internal class ZeroStream : SparseStream
+    internal class ChecksumStream : Stream
     {
-        private long _length;
-        private long _position;
-        private bool _atEof;
+        private HashAlgorithm _hashGenerator;
 
-        public ZeroStream(long length)
+        private long _position;
+        private byte[] _data;
+
+        public ChecksumStream(HashAlgorithm hashGenerator)
         {
-            _length = length;
+            _hashGenerator = hashGenerator;
         }
 
         public override bool CanRead
@@ -47,7 +45,7 @@ namespace DiscUtils
 
         public override bool CanSeek
         {
-            get { return true; }
+            get { return false; }
         }
 
         public override bool CanWrite
@@ -57,11 +55,16 @@ namespace DiscUtils
 
         public override void Flush()
         {
+            throw new NotSupportedException();
         }
 
         public override long Length
         {
-            get { return _length; }
+            get
+            {
+                // We output as ascii hex
+                return (_hashGenerator.HashSize / 8) * 2;
+            }
         }
 
         public override long Position
@@ -78,48 +81,28 @@ namespace DiscUtils
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_atEof || _position > _length)
+            // We commit the hash on the first read
+            if (_data == null)
             {
-                _atEof = true;
-                throw new IOException("Attempt to read beyond end of stream");
+                _hashGenerator.TransformFinalBlock(new byte[0], 0, 0);
+                byte[] hash = _hashGenerator.Hash;
+                byte[] result = new byte[Length];
+                for (int i = 0; i < hash.Length; ++i)
+                {
+                    result[i * 2] = (byte)"0123456789abcdef"[(hash[i] >> 4) & 0x0F];
+                    result[i * 2 + 1] = (byte)"0123456789abcdef"[hash[i] & 0x0F];
+                }
+                _data = result;
             }
 
-            if (_position == _length)
-            {
-                _atEof = true;
-                return 0;
-            }
-
-            int numToClear = (int)Math.Min(count, _length - _position);
-            Array.Clear(buffer, offset, numToClear);
-            _position += numToClear;
-
-            return numToClear;
+            int numToRead = (int)Math.Min(count, Length - _position);
+            Array.Copy(_data, _position, buffer, offset, numToRead);
+            return numToRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            long effectiveOffset = offset;
-            if (origin == SeekOrigin.Current)
-            {
-                effectiveOffset += _position;
-            }
-            else if (origin == SeekOrigin.End)
-            {
-                effectiveOffset += _length;
-            }
-
-            _atEof = false;
-
-            if (offset < 0)
-            {
-                throw new IOException("Attempt to move before beginning of stream");
-            }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            throw new NotSupportedException();
         }
 
         public override void SetLength(long value)
@@ -130,12 +113,6 @@ namespace DiscUtils
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            // The stream is entirely sparse
-            get { return new List<StreamExtent>(0); }
         }
     }
 }

@@ -335,7 +335,7 @@ namespace DiscUtils.Vhd
             get { return _footer.CurrentSize; }
         }
 
-        internal Stream OpenContent(Stream parent, bool ownsParent)
+        internal SparseStream OpenContent(SparseStream parent, bool ownsParent)
         {
             if (_footer.DiskType == FileType.Fixed)
             {

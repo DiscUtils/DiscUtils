@@ -36,7 +36,7 @@ namespace DiscUtils.Xva
         private string _location;
         private long _capacity;
 
-        private Stream _content;
+        private SparseStream _content;
 
         internal Disk(VirtualMachine vm, string id, string displayname, string location, long capacity)
         {
@@ -103,7 +103,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
-        public override Stream Content
+        public override SparseStream Content
         {
             get
             {

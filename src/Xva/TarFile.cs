@@ -31,12 +31,12 @@ namespace DiscUtils.Xva
     /// </summary>
     /// <remarks>This is not a complete implementation of the tar file format, it
     /// is just functional enough to make valid XVA files.</remarks>
-    internal class Tar
+    internal class TarFile
     {
         private Stream _fileStream;
         private Dictionary<string, FileRecord> _files;
 
-        public Tar(Stream fileStream)
+        public TarFile(Stream fileStream)
         {
             _fileStream = fileStream;
             _files = new Dictionary<string, FileRecord>();

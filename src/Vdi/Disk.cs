@@ -157,7 +157,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
-        public override Stream Content
+        public override SparseStream Content
         {
             get
             {

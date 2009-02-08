@@ -42,7 +42,7 @@ namespace DiscUtils.Xva
         private static readonly XPathExpression GetDiskCapacity = XPathExpression.Compile("member[child::name='snapshot']/value/struct/member[child::name='virtual_size']/value");
 
         private Stream _fileStream;
-        private Tar _archive;
+        private TarFile _archive;
 
         /// <summary>
         /// Creates a new instance from a stream.
@@ -52,10 +52,10 @@ namespace DiscUtils.Xva
         {
             _fileStream = fileStream;
             _fileStream.Position = 0;
-            _archive = new Tar(fileStream);
+            _archive = new TarFile(fileStream);
         }
 
-        internal Tar Archive
+        internal TarFile Archive
         {
             get { return _archive; }
         }

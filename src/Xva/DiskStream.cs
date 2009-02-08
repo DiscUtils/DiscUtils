@@ -22,14 +22,15 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
 namespace DiscUtils.Xva
 {
-    internal class DiskStream : Stream
+    internal class DiskStream : SparseStream
     {
-        private Tar _archive;
+        private TarFile _archive;
         private long _length;
         private string _dir;
 
@@ -39,7 +40,7 @@ namespace DiscUtils.Xva
         private int _currentChunkIndex;
         private Stream _currentChunkData;
 
-        public DiskStream(Tar archive, long length, string dir)
+        public DiskStream(TarFile archive, long length, string dir)
         {
             _archive = archive;
             _length = length;
@@ -164,6 +165,45 @@ namespace DiscUtils.Xva
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long chunkSize = Sizes.OneMiB;
+                int i = 0;
+                int numChunks = (int)((_length + chunkSize - 1) / chunkSize);
+                while (i < numChunks)
+                {
+                    // Find next stored block
+                    while (i < numChunks && !ChunkExists(i))
+                    {
+                        ++i;
+                    }
+                    int start = i;
+
+                    // Find next absent block
+                    while (i < numChunks && ChunkExists(i))
+                    {
+                        ++i;
+                    }
+
+                    if (start != i)
+                    {
+                        extents.Add(new StreamExtent(start * chunkSize, (i - start) * chunkSize));
+                    }
+                }
+
+                return extents;
+            }
+        }
+
+        private bool ChunkExists(int i)
+        {
+            return _archive.FileExists(string.Format(@"{0}/{1:X8}", _dir, i));
         }
     }
 }

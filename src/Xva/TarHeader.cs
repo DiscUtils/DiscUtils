@@ -43,7 +43,7 @@ namespace DiscUtils.Xva
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Array.Clear(buffer, offset, 512);
+            Array.Clear(buffer, offset, Length);
 
             Utilities.StringToBytes(FileName, buffer, offset, 99);
             Utilities.StringToBytes(LongToOctal(0, 7), buffer, offset + 100, 7);

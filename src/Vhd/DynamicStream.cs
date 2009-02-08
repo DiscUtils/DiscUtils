@@ -21,11 +21,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Vhd
 {
-    internal class DynamicStream : Stream
+    internal class DynamicStream : SparseStream
     {
         private Stream _fileStream;
         private DynamicHeader _dynamicHeader;
@@ -322,6 +323,41 @@ namespace DiscUtils.Vhd
             _atEof = false;
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                // Note: For now we only go down to block granularity (2MB chunks), we don't inspect the
+                // blocks to indicate which sectors are present.
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long blockSize = _dynamicHeader.BlockSize;
+                int i = 0;
+                while (i < _blockAllocationTable.Length)
+                {
+                    // Find next stored block
+                    while (i < _blockAllocationTable.Length && _blockAllocationTable[i] == uint.MaxValue)
+                    {
+                        ++i;
+                    }
+                    int start = i;
+
+                    // Find next absent block
+                    while (i < _blockAllocationTable.Length && _blockAllocationTable[i] != uint.MaxValue)
+                    {
+                        ++i;
+                    }
+
+                    if (start != i)
+                    {
+                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
+                    }
+                }
+
+                return extents;
+            }
+        }
+
         private void ReadBlockAllocationTable()
         {
             _fileStream.Position = _dynamicHeader.TableOffset;
@@ -411,5 +447,6 @@ namespace DiscUtils.Vhd
                 throw new ObjectDisposedException("DynamicStream", "Attempt to use closed stream");
             }
         }
+
     }
 }

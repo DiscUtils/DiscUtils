@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,121 +21,109 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 
-namespace DiscUtils
+namespace DiscUtils.Xva
 {
-    /// <summary>
-    /// A stream that returns Zero's.
-    /// </summary>
-    internal class ZeroStream : SparseStream
+    internal class HashStream : Stream
     {
-        private long _length;
-        private long _position;
-        private bool _atEof;
+        private Stream _wrapped;
+        private bool _ownWrapped;
 
-        public ZeroStream(long length)
+        private HashAlgorithm _hashAlg;
+
+        private long _hashPos;
+
+
+        public HashStream(Stream wrapped, bool ownsWrapped, HashAlgorithm hashAlg)
         {
-            _length = length;
+            _wrapped = wrapped;
+            _ownWrapped = ownsWrapped;
+            _hashAlg = hashAlg;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing && _ownWrapped && _wrapped != null)
+                {
+                    _wrapped.Dispose();
+                    _wrapped = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         public override bool CanRead
         {
-            get { return true; }
+            get { return _wrapped.CanRead; }
         }
 
         public override bool CanSeek
         {
-            get { return true; }
+            get { return _wrapped.CanSeek; }
         }
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return _wrapped.CanWrite; }
         }
 
         public override void Flush()
         {
+            _wrapped.Flush();
         }
 
         public override long Length
         {
-            get { return _length; }
+            get { return _wrapped.Length; }
         }
 
         public override long Position
         {
             get
             {
-                return _position;
+                return _wrapped.Position;
             }
             set
             {
-                _position = value;
+                _wrapped.Position = value;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_atEof || _position > _length)
+            if (Position != _hashPos)
             {
-                _atEof = true;
-                throw new IOException("Attempt to read beyond end of stream");
+                throw new InvalidOperationException("Reads must be contiguous");
             }
 
-            if (_position == _length)
-            {
-                _atEof = true;
-                return 0;
-            }
+            int numRead = _wrapped.Read(buffer, offset, count);
 
-            int numToClear = (int)Math.Min(count, _length - _position);
-            Array.Clear(buffer, offset, numToClear);
-            _position += numToClear;
+            _hashAlg.TransformBlock(buffer, offset, numRead, buffer, offset);
+            _hashPos += numRead;
 
-            return numToClear;
+            return numRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            long effectiveOffset = offset;
-            if (origin == SeekOrigin.Current)
-            {
-                effectiveOffset += _position;
-            }
-            else if (origin == SeekOrigin.End)
-            {
-                effectiveOffset += _length;
-            }
-
-            _atEof = false;
-
-            if (offset < 0)
-            {
-                throw new IOException("Attempt to move before beginning of stream");
-            }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            return _wrapped.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException();
+            _wrapped.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException();
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            // The stream is entirely sparse
-            get { return new List<StreamExtent>(0); }
+            _wrapped.Write(buffer, offset, count);
         }
     }
 }

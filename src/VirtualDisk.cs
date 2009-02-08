@@ -78,7 +78,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
-        public abstract Stream Content
+        public abstract SparseStream Content
         {
             get;
         }

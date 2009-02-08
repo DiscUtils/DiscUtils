@@ -21,11 +21,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils
 {
-    internal class SubStream : Stream
+    internal class SubStream : SparseStream
     {
         private long _position;
         private long _first;
@@ -163,6 +164,30 @@ namespace DiscUtils
             _parent.Position = _first + _position;
             _parent.Write(buffer, offset, count);
             _position += count;
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                SparseStream parentAsSparse = _parent as SparseStream;
+                if (parentAsSparse != null)
+                {
+                    return StreamExtent.Intersect(OffsetExtents(parentAsSparse.Extents), new StreamExtent[] { new StreamExtent(0, _length) });
+                }
+                else
+                {
+                    return new StreamExtent[] { new StreamExtent(0, _length) };
+                }
+            }
+        }
+
+        private IEnumerable<StreamExtent> OffsetExtents(IEnumerable<StreamExtent> src)
+        {
+            foreach (StreamExtent e in src)
+            {
+                yield return new StreamExtent(e.Start - _first, e.Length);
+            }
         }
     }
 }

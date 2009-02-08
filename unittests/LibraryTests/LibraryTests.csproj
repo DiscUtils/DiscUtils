@@ -61,6 +61,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Fat\FatFileSystemTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamExtentTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />
     <Compile Include="Vdi\StreamTest.cs" />
     <Compile Include="Vhd\DiskImageFileTest.cs" />

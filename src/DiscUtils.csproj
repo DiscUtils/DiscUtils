@@ -137,6 +137,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuilderBufferExtent.cs" />
+    <Compile Include="BuilderExtent.cs" />
+    <Compile Include="BuilderStreamExtent.cs" />
+    <Compile Include="BuiltStream.cs" />
+    <Compile Include="BuilderExtentSource.cs" />
+    <Compile Include="BuilderFileExtent.cs" />
     <Compile Include="Ntfs\Attributes\AttributeListAttribute.cs" />
     <Compile Include="Ntfs\Attributes\BitmapAttribute.cs" />
     <Compile Include="Ntfs\Attributes\DataAttribute.cs" />
@@ -160,7 +166,15 @@
     <Compile Include="Partitions\GuidPartitionInfo.cs" />
     <Compile Include="Partitions\GuidPartitionTable.cs" />
     <Compile Include="Partitions\GuidPartitionTypes.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Sizes.cs" />
+    <Compile Include="SparseStream.cs" />
+    <Compile Include="StreamBuilder.cs" />
+    <Compile Include="StreamExtent.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />
@@ -170,13 +184,44 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Xva\BuildFileRecord.cs" />
+    <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />
     <Compile Include="Xva\DiskLayer.cs" />
     <Compile Include="Xva\DiskStream.cs" />
     <Compile Include="Xva\FileRecord.cs" />
-    <Compile Include="Xva\Tar.cs" />
+    <Compile Include="Xva\HashStream.cs" />
+    <Compile Include="Xva\TarFile.cs" />
+    <Compile Include="Xva\TarFileBuilder.cs" />
     <Compile Include="Xva\TarHeader.cs" />
+    <Compile Include="Xva\TarHeaderExtent.cs" />
     <Compile Include="Xva\VirtualMachine.cs" />
+    <Compile Include="Xva\VirtualMachineBuilder.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\XVA_ova_base.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\XVA_ova_sr.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\XVA_ova_vbd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\XVA_ova_vdi.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\XVA_ova_vm.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\XVA_ova_ref.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
