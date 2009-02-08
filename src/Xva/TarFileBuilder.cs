@@ -44,11 +44,6 @@ namespace DiscUtils.Xva
             _files.Add(new BuildFileRecord(name, stream));
         }
 
-        public void AddFile(string name, string file)
-        {
-            _files.Add(new BuildFileRecord(name, file));
-        }
-
         internal override List<BuilderExtent> FixExtents(out long totalLength)
         {
             List<BuilderExtent> result = new List<BuilderExtent>(_files.Count * 2 + 2);

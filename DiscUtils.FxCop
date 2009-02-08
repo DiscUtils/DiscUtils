@@ -32,7 +32,29 @@
    <RuleFile Name="$(FxCopDir)\Rules\GlobalizationRules.dll" Enabled="True" AllRulesEnabled="True" />
    <RuleFile Name="$(FxCopDir)\Rules\InteroperabilityRules.dll" Enabled="True" AllRulesEnabled="True" />
    <RuleFile Name="$(FxCopDir)\Rules\MobilityRules.dll" Enabled="True" AllRulesEnabled="True" />
-   <RuleFile Name="$(FxCopDir)\Rules\NamingRules.dll" Enabled="True" AllRulesEnabled="True" />
+   <RuleFile Name="$(FxCopDir)\Rules\NamingRules.dll" Enabled="True" AllRulesEnabled="False">
+    <Rule Name="CompoundWordsShouldBeCasedCorrectly" Enabled="True" />
+    <Rule Name="DoNotNameEnumValuesReserved" Enabled="True" />
+    <Rule Name="DoNotPrefixEnumValuesWithTypeName" Enabled="True" />
+    <Rule Name="EventsShouldNotHaveBeforeOrAfterPrefix" Enabled="True" />
+    <Rule Name="FlagsEnumsShouldHavePluralNames" Enabled="True" />
+    <Rule Name="IdentifiersShouldBeCasedCorrectly" Enabled="True" />
+    <Rule Name="IdentifiersShouldBeSpelledCorrectly" Enabled="True" />
+    <Rule Name="IdentifiersShouldDifferByMoreThanCase" Enabled="True" />
+    <Rule Name="IdentifiersShouldHaveCorrectPrefix" Enabled="True" />
+    <Rule Name="IdentifiersShouldHaveCorrectSuffix" Enabled="True" />
+    <Rule Name="IdentifiersShouldNotContainTypeNames" Enabled="True" />
+    <Rule Name="IdentifiersShouldNotContainUnderscores" Enabled="True" />
+    <Rule Name="IdentifiersShouldNotHaveIncorrectPrefix" Enabled="True" />
+    <Rule Name="IdentifiersShouldNotHaveIncorrectSuffix" Enabled="True" />
+    <Rule Name="IdentifiersShouldNotMatchKeywords" Enabled="True" />
+    <Rule Name="OnlyFlagsEnumsShouldHavePluralNames" Enabled="True" />
+    <Rule Name="ParameterNamesShouldMatchBaseDeclaration" Enabled="True" />
+    <Rule Name="ParameterNamesShouldNotMatchMemberNames" Enabled="True" />
+    <Rule Name="PropertyNamesShouldNotMatchGetMethods" Enabled="True" />
+    <Rule Name="TypeNamesShouldNotMatchNamespaces" Enabled="True" />
+    <Rule Name="UsePreferredTerms" Enabled="True" />
+   </RuleFile>
    <RuleFile Name="$(FxCopDir)\Rules\PerformanceRules.dll" Enabled="True" AllRulesEnabled="True" />
    <RuleFile Name="$(FxCopDir)\Rules\PortabilityRules.dll" Enabled="True" AllRulesEnabled="True" />
    <RuleFile Name="$(FxCopDir)\Rules\SecurityRules.dll" Enabled="True" AllRulesEnabled="True" />
@@ -43,21 +65,6 @@
  </Rules>
  <FxCopReport Version="1.36">
   <Namespaces>
-   <Namespace Name="DiscUtils">
-    <Messages>
-     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
-      <Issue Name="Namespace">
-       <Item>Utils</Item>
-       <Item>DiscUtils</Item>
-      </Issue>
-      <Notes>
-       <User Name="Kenneth">
-        <Note Id="6" />
-       </User>
-      </Notes>
-     </Message>
-    </Messages>
-   </Namespace>
    <Namespace Name="DiscUtils.Fat">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-10 13:17:45Z">
@@ -277,6 +284,21 @@
       <Namespaces>
        <Namespace Name="DiscUtils">
         <Types>
+         <Type Name="BuilderFileExtent">
+          <Messages>
+           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Excluded" Created="2009-02-08 22:31:04Z" FixCategory="NonBreaking">
+            <Issue Name="NonBreaking">
+             <Item>'BuilderFileExtent'</Item>
+             <Item>'FileStream'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="38" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="ChsAddress">
           <Members>
            <Member Name="#First">
@@ -323,6 +345,62 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="9" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="StreamExtent">
+          <Members>
+           <Member Name="#op_Equality(DiscUtils.StreamExtent,DiscUtils.StreamExtent)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator ==(StreamExtent, StreamExtent)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="37" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator ==(StreamExtent, StreamExtent)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="37" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#op_Inequality(DiscUtils.StreamExtent,DiscUtils.StreamExtent)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator !=(StreamExtent, StreamExtent)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="37" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator !=(StreamExtent, StreamExtent)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="37" />
                </User>
               </Notes>
              </Message>
@@ -820,6 +898,42 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="VirtualMachineBuilder">
+          <Members>
+           <Member Name="#AddDisk(System.String,DiscUtils.SparseStream)">
+            <Messages>
+             <Message Id="uuid" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
+              <Issue Name="MemberParameter">
+               <Item>'VirtualMachineBuilder.AddDisk(string, SparseStream)'</Item>
+               <Item>uuid</Item>
+               <Item>'uuid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="36" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#AddDisk(System.String,System.IO.Stream)">
+            <Messages>
+             <Message Id="uuid" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
+              <Issue Name="MemberParameter">
+               <Item>'VirtualMachineBuilder.AddDisk(string, Stream)'</Item>
+               <Item>uuid</Item>
+               <Item>'uuid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="36" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
       </Namespaces>
@@ -835,7 +949,6 @@
     <Note Id="3" Modified="2008-11-22 16:48:05Z">Deliberately using namespace separation</Note>
     <Note Id="4" Modified="2008-11-10 13:18:19Z">Deliberately not strong named - people using the library should add their own signature.</Note>
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
-    <Note Id="6" Modified="2008-11-10 13:18:45Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="7" Modified="2008-11-22 17:12:07Z">DiscUtils is fixed name of the project</Note>
     <Note Id="8" Modified="2008-11-10 13:24:01Z">Reflects name of member in CLR's DirectoryInfo class.</Note>
     <Note Id="9" Modified="2008-11-10 13:22:31Z">Reflects the GetFileSystemInfos member of CLR's DirectoryInfo class.</Note>
@@ -865,6 +978,9 @@
     <Note Id="33" Modified="2009-02-07 12:25:57Z">Xva fits in with existing namespace naming scheme</Note>
     <Note Id="34" Modified="2009-02-07 12:26:27Z">Xva is camel case form of XVA acronym</Note>
     <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
+    <Note Id="36" Modified="2009-02-08 22:41:58Z">Acronym</Note>
+    <Note Id="37" Modified="2009-02-08 22:43:49Z">Parameter names are arbitrary</Note>
+    <Note Id="38" Modified="2009-02-08 22:45:11Z">Equivalent disposal pattern implemented, but not using IDisposable because instances can be re-used.</Note>
    </User>
   </Notes>
   <Rules>
@@ -883,6 +999,8 @@
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
     <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+    <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+    <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
    </Rule>
    <Rule TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810">
@@ -893,6 +1011,9 @@
    </Rule>
    <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
     <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
+   </Rule>
+   <Rule TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001">
+    <Resolution Name="NonBreaking">Implement IDisposable on {0} because it creates members of the following IDisposable types: {1}.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

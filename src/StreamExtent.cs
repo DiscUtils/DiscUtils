@@ -25,27 +25,52 @@ using System.Collections.Generic;
 
 namespace DiscUtils
 {
+    /// <summary>
+    /// Represents a range of bytes in a stream.
+    /// </summary>
+    /// <remarks>This is normally used to represent regions of a SparseStream that
+    /// are actually stored in the underlying storage medium (rather than implied
+    /// zero bytes).  Extents are stored as a zero-based byte offset (from the
+    /// beginning of the stream), and a byte length</remarks>
     public class StreamExtent : IEquatable<StreamExtent>
     {
         private long _start;
         private long _length;
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="start">The start of the extent</param>
+        /// <param name="length">The length of the extent</param>
         public StreamExtent(long start, long length)
         {
             _start = start;
             _length = length;
         }
 
+        /// <summary>
+        /// Gets the start of the extent (in bytes).
+        /// </summary>
         public long Start
         {
             get { return _start; }
         }
 
+        /// <summary>
+        /// Gets the start of the extent (in bytes).
+        /// </summary>
         public long Length
         {
             get { return _length; }
         }
 
+        /// <summary>
+        /// Calculates the union of the extents of multiple streams.
+        /// </summary>
+        /// <param name="streams">The stream extents</param>
+        /// <returns>The union of the extents from multiple streams.</returns>
+        /// <remarks>A typical use of this method is to calculate the combined set of
+        /// stored extents from a number of overlayed sparse streams.</remarks>
         public static IEnumerable<StreamExtent> Union(params IEnumerable<StreamExtent>[] streams)
         {
             long extentStart = long.MaxValue;
@@ -120,6 +145,13 @@ namespace DiscUtils
             }
         }
 
+        /// <summary>
+        /// Calculates the intersection of the extents of multiple streams.
+        /// </summary>
+        /// <param name="streams">The stream extents</param>
+        /// <returns>The intersection of the extents from multiple streams.</returns>
+        /// <remarks>A typical use of this method is to calculate the extents in a
+        /// region of a stream..</remarks>
         public static IEnumerable<StreamExtent> Intersect(params IEnumerable<StreamExtent>[] streams)
         {
             long extentStart = long.MinValue;
@@ -177,6 +209,11 @@ namespace DiscUtils
             }
         }
 
+        /// <summary>
+        /// Indicates if this StreamExtent is equal to another.
+        /// </summary>
+        /// <param name="other">The extent to compare</param>
+        /// <returns><c>true</c> if the extents are equal, else <c>false</c></returns>
         public bool Equals(StreamExtent other)
         {
             if (other == null)
@@ -189,21 +226,40 @@ namespace DiscUtils
             }
         }
 
+        /// <summary>
+        /// Returns a string representation of the extent as [start:+length].
+        /// </summary>
+        /// <returns>The string representation</returns>
         public override string ToString()
         {
             return "[" + _start + ":+" + _length + "]";
         }
 
+        /// <summary>
+        /// Indicates if this stream extent is equal to another object.
+        /// </summary>
+        /// <param name="obj">The object to test</param>
+        /// <returns><c>true</c> if <c>obj</c> is equivalent, else <c>false</c></returns>
         public override bool Equals(object obj)
         {
             return Equals(obj as StreamExtent);
         }
 
+        /// <summary>
+        /// Gets a hash code for this extent.
+        /// </summary>
+        /// <returns>The extent's hash code.</returns>
         public override int GetHashCode()
         {
             return _start.GetHashCode() ^ _length.GetHashCode();
         }
 
+        /// <summary>
+        /// The equality operator.
+        /// </summary>
+        /// <param name="a">The first extent to compare</param>
+        /// <param name="b">The second extent to compare</param>
+        /// <returns>Whether the two extents are equal</returns>
         public static bool operator ==(StreamExtent a, StreamExtent b)
         {
             if (Object.ReferenceEquals(a, null))
@@ -216,6 +272,12 @@ namespace DiscUtils
             }
         }
 
+        /// <summary>
+        /// The inequality operator.
+        /// </summary>
+        /// <param name="a">The first extent to compare</param>
+        /// <param name="b">The second extent to compare</param>
+        /// <returns>Whether the two extents are different</returns>
         public static bool operator !=(StreamExtent a, StreamExtent b)
         {
             return !(a == b);

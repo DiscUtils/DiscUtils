@@ -56,6 +56,11 @@ namespace DiscUtils
                         _currentExtent.DisposeReadState();
                         _currentExtent = null;
                     }
+                    if (_baseStream != null)
+                    {
+                        _baseStream.Dispose();
+                        _baseStream = null;
+                    }
                 }
             }
             finally

@@ -31,7 +31,7 @@ namespace DiscUtils.Vhd
         private Stream _fileStream;
         private DynamicHeader _dynamicHeader;
         private long _length;
-        private Stream _parentStream;
+        private SparseStream _parentStream;
         private bool _ownsParentStream;
 
         private long _position;
@@ -39,7 +39,7 @@ namespace DiscUtils.Vhd
         private uint[] _blockAllocationTable;
         private byte[][] _blockBitmaps;
 
-        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, Stream parentStream, bool ownsParentStream)
+        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, bool ownsParentStream)
         {
             if (fileStream == null)
             {
@@ -354,7 +354,7 @@ namespace DiscUtils.Vhd
                     }
                 }
 
-                return extents;
+                return StreamExtent.Union(extents, _parentStream.Extents);
             }
         }
 

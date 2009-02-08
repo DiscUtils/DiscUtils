@@ -30,6 +30,10 @@ namespace DiscUtils
     /// </summary>
     public abstract class StreamBuilder
     {
+        /// <summary>
+        /// Creates a new stream.
+        /// </summary>
+        /// <returns></returns>
         public virtual SparseStream Build()
         {
             long totalLength;
@@ -37,7 +41,11 @@ namespace DiscUtils
             return new BuiltStream(totalLength, extents);
         }
 
-        public void Build(Stream destStream)
+        /// <summary>
+        /// Writes the stream contents to an existing stream.
+        /// </summary>
+        /// <param name="output">The stream to write to.</param>
+        public void Build(Stream output)
         {
             using (Stream src = Build())
             {
@@ -45,15 +53,19 @@ namespace DiscUtils
                 int numRead = src.Read(buffer, 0, buffer.Length);
                 while (numRead != 0)
                 {
-                    destStream.Write(buffer, 0, numRead);
+                    output.Write(buffer, 0, numRead);
                     numRead = src.Read(buffer, 0, buffer.Length);
                 }
             }
         }
 
-        public void Build(string destFile)
+        /// <summary>
+        /// Writes the stream contents to a file.
+        /// </summary>
+        /// <param name="outputFile">The file to write to.</param>
+        public void Build(string outputFile)
         {
-            using (FileStream destStream = new FileStream(destFile, FileMode.Create, FileAccess.Write))
+            using (FileStream destStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
             {
                 Build(destStream);
             }

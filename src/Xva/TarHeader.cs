@@ -37,8 +37,8 @@ namespace DiscUtils.Xva
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            FileName = ReadNullTerminatedString(buffer, 0, 100);
-            FileLength = OctalToLong(ReadNullTerminatedString(buffer, 124, 12));
+            FileName = ReadNullTerminatedString(buffer, offset + 0, 100);
+            FileLength = OctalToLong(ReadNullTerminatedString(buffer, offset + 124, 12));
         }
 
         public void WriteTo(byte[] buffer, int offset)

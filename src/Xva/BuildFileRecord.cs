@@ -41,12 +41,6 @@ namespace DiscUtils.Xva
             _source = new BuilderStreamExtentSource(stream);
         }
 
-        public BuildFileRecord(string name, string file)
-        {
-            _name = name;
-            _source = new BuilderFileExtentSource(file);
-        }
-
         public string Name
         {
             get { return _name; }

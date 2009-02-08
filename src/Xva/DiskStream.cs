@@ -203,7 +203,7 @@ namespace DiscUtils.Xva
 
         private bool ChunkExists(int i)
         {
-            return _archive.FileExists(string.Format(@"{0}/{1:X8}", _dir, i));
+            return _archive.FileExists(string.Format(CultureInfo.InvariantCulture, @"{0}/{1:X8}", _dir, i));
         }
     }
 }

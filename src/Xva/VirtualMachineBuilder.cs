@@ -22,31 +22,56 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace DiscUtils.Xva
 {
+    /// <summary>
+    /// A class that can be used to create Xen Virtual Appliance (XVA) files.
+    /// </summary>
+    /// <remarks>This class is not intended to be a general purpose XVA generator,
+    /// the options to control the VM properties are strictly limited.  The class
+    /// generates a minimal VM really as a wrapper for one or more disk images, 
+    /// making them easy to import into XenServer.</remarks>
     public class VirtualMachineBuilder : StreamBuilder
     {
         private Dictionary<string, SparseStream> _disks;
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
         public VirtualMachineBuilder()
         {
             _disks = new Dictionary<string, SparseStream>();
         }
 
+        /// <summary>
+        /// Adds a sparse disk image to the XVA file.
+        /// </summary>
+        /// <param name="uuid">The Unique Id for the disk (should be a GUID)</param>
+        /// <param name="content">The content of the disk</param>
         public void AddDisk(string uuid, SparseStream content)
         {
             _disks.Add(uuid, content);
         }
 
+        /// <summary>
+        /// Adds a disk image to the XVA file.
+        /// </summary>
+        /// <param name="uuid">The Unique Id for the disk (should be a GUID)</param>
+        /// <param name="content">The content of the disk</param>
         public void AddDisk(string uuid, Stream content)
         {
             _disks.Add(uuid, SparseStream.FromStream(content, false));
         }
 
+        /// <summary>
+        /// Creates a new stream that contains the XVA image.
+        /// </summary>
+        /// <returns>The new stream</returns>
         public override SparseStream Build()
         {
             TarFileBuilder tarBuilder = new TarFileBuilder();
@@ -76,8 +101,8 @@ namespace DiscUtils.Xva
                             Stream chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
                             HashStream chunkHashStream = new HashStream(chunkStream, true, hashAlg);
 
-                            tarBuilder.AddFile(string.Format("Ref:{0}/{1:X8}", diskIds[diskIdx], i), chunkHashStream);
-                            tarBuilder.AddFile(string.Format("Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], i), new ChecksumStream(hashAlg));
+                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], i), chunkHashStream);
+                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], i), new ChecksumStream(hashAlg));
 
                             lastChunkAdded = i;
                         }
@@ -126,34 +151,34 @@ namespace DiscUtils.Xva
             string vbdRefs = "";
             for (int i = 0; i < _disks.Count; ++i)
             {
-                vbdRefs += string.Format(Resources.XVA_ova_ref, "Ref:" + vbdIds[i]);
+                vbdRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vbdIds[i]);
             }
 
             string vdiRefs = "";
             for (int i = 0; i < _disks.Count; ++i)
             {
-                vdiRefs += string.Format(Resources.XVA_ova_ref, "Ref:" + vdiIds[i]);
+                vdiRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vdiIds[i]);
             }
 
 
             StringBuilder objectsString = new StringBuilder();
 
-            objectsString.Append(string.Format(Resources.XVA_ova_vm, "Ref:" + vmId, vmGuid, vmName, vbdRefs));
+            objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_vm, "Ref:" + vmId, vmGuid, vmName, vbdRefs));
 
             for (int i = 0; i < _disks.Count; ++i)
             {
-                objectsString.Append(string.Format(Resources.XVA_ova_vbd, "Ref:" + vbdIds[i], vbdGuids[i], "Ref:" + vmId, "Ref:" + vdiIds[i], i));
+                objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_vbd, "Ref:" + vbdIds[i], vbdGuids[i], "Ref:" + vmId, "Ref:" + vdiIds[i], i));
             }
 
             for (int i = 0; i < _disks.Count; ++i)
             {
-                objectsString.Append(string.Format(Resources.XVA_ova_vdi, "Ref:" + vdiIds[i], vdiGuids[i], vdiNames[i], "Ref:" + srId, "Ref:" + vbdIds[i]));
+                objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_vdi, "Ref:" + vdiIds[i], vdiGuids[i], vdiNames[i], "Ref:" + srId, "Ref:" + vbdIds[i]));
             }
 
-            objectsString.Append(string.Format(Resources.XVA_ova_sr, "Ref:" + srId, srGuid, srName, vdiRefs));
+            objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_sr, "Ref:" + srId, srGuid, srName, vdiRefs));
 
             diskIds = vdiIds;
-            return string.Format(Resources.XVA_ova_base, objectsString.ToString());
+            return string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_base, objectsString.ToString());
         }
     }
 }
