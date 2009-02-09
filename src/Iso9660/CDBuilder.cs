@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace DiscUtils.Iso9660
 {
@@ -38,13 +39,15 @@ namespace DiscUtils.Iso9660
     ///   builder.Build(@"C:\TEMP\myiso.iso");
     /// </code>
     /// </example>
-    public class CDBuilder
+    public class CDBuilder : StreamBuilder
     {
         private List<BuildFileInfo> _files;
         private List<BuildDirectoryInfo> _dirs;
         private BuildDirectoryInfo _rootDirectory;
 
         private BuildParameters _buildParams;
+
+        private const long DiskStart = 0x8000;
 
         /// <summary>
         /// Creates a new instance.
@@ -58,42 +61,6 @@ namespace DiscUtils.Iso9660
 
             _buildParams = new BuildParameters();
             _buildParams.UseJoliet = true;
-        }
-
-        /// <summary>
-        /// Initiates a layout of the ISO image, returning a Stream.
-        /// </summary>
-        /// <returns>The stream containing the ISO image.</returns>
-        /// <remarks>
-        /// The ISO is built as it is read and not held in memory or on disk.  To obtain the
-        /// full image read sequentially from the start to the end of the stream.  However
-        /// seeking is supported, so reading arbitrary byte locations from the stream is also
-        /// possible.
-        /// </remarks>
-        public Stream Build()
-        {
-            return new CDBuildStream(_files, _dirs, _rootDirectory, _buildParams);
-        }
-
-        /// <summary>
-        /// Initiates a layout of the ISO image to a file.
-        /// </summary>
-        /// <param name="file">The file to write the ISO image to.</param>
-        public void Build(string file)
-        {
-            using (CDBuildStream cdStream = new CDBuildStream(_files, _dirs, _rootDirectory, _buildParams))
-            {
-                using (FileStream fileStream = new FileStream(file, FileMode.Create, FileAccess.Write))
-                {
-                    byte[] buffer = new byte[64 * 1024];
-                    int numRead = cdStream.Read(buffer, 0, buffer.Length);
-                    while (numRead != 0)
-                    {
-                        fileStream.Write(buffer, 0, numRead);
-                        numRead = cdStream.Read(buffer, 0, buffer.Length);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -246,6 +213,143 @@ namespace DiscUtils.Iso9660
                 dir.Add(fi);
                 return fi;
             }
+        }
+
+        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        {
+            List<BuilderExtent> fixedRegions = new List<BuilderExtent>();
+
+            DateTime buildTime = DateTime.UtcNow;
+
+            Encoding suppEncoding = _buildParams.UseJoliet ? Encoding.BigEndianUnicode : Encoding.ASCII;
+
+            Dictionary<BuildDirectoryMember, uint> primaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
+            Dictionary<BuildDirectoryMember, uint> supplementaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
+
+            long focus = DiskStart + 3 * IsoUtilities.SectorSize; // Primary, Supplementary, End (fixed at end...)
+
+            // ####################################################################
+            // # 1. Fix file locations
+            // ####################################################################
+
+            // Find end of the file data, fixing the files in place as we go
+            foreach (BuildFileInfo fi in _files)
+            {
+                primaryLocationTable.Add(fi, (uint)(focus / IsoUtilities.SectorSize));
+                supplementaryLocationTable.Add(fi, (uint)(focus / IsoUtilities.SectorSize));
+                FileExtent extent = new FileExtent(fi, focus);
+
+                // Only remember files of non-zero length (otherwise we'll stomp on a valid file)
+                if (extent.Length != 0)
+                {
+                    fixedRegions.Add(extent);
+                }
+
+                focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+            }
+
+
+            // ####################################################################
+            // # 2. Fix directory locations
+            // ####################################################################
+
+            // There are two directory tables
+            //  1. Primary        (std ISO9660)
+            //  2. Supplementary  (Joliet)
+
+            // Find start of the second set of directory data, fixing ASCII directories in place.
+            long startOfFirstDirData = focus;
+            foreach (BuildDirectoryInfo di in _dirs)
+            {
+                primaryLocationTable.Add(di, (uint)(focus / IsoUtilities.SectorSize));
+                DirectoryExtent extent = new DirectoryExtent(di, primaryLocationTable, Encoding.ASCII, focus);
+                fixedRegions.Add(extent);
+                focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+            }
+
+            // Find end of the second directory table, fixing supplementary directories in place.
+            long startOfSecondDirData = focus;
+            foreach (BuildDirectoryInfo di in _dirs)
+            {
+                supplementaryLocationTable.Add(di, (uint)(focus / IsoUtilities.SectorSize));
+                DirectoryExtent extent = new DirectoryExtent(di, supplementaryLocationTable, suppEncoding, focus);
+                fixedRegions.Add(extent);
+                focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+            }
+
+            // ####################################################################
+            // # 3. Fix path tables
+            // ####################################################################
+
+            // There are four path tables:
+            //  1. LE, ASCII
+            //  2. BE, ASCII
+            //  3. LE, Supp Encoding (Joliet)
+            //  4. BE, Supp Encoding (Joliet)
+
+            // Find end of the path table
+            long startOfFirstPathTable = focus;
+            PathTable pathTable = new PathTable(false, Encoding.ASCII, _dirs, primaryLocationTable, focus);
+            fixedRegions.Add(pathTable);
+            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+            long primaryPathTableLength = pathTable.Length;
+
+            long startOfSecondPathTable = focus;
+            pathTable = new PathTable(true, Encoding.ASCII, _dirs, primaryLocationTable, focus);
+            fixedRegions.Add(pathTable);
+            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+
+            long startOfThirdPathTable = focus;
+            pathTable = new PathTable(false, suppEncoding, _dirs, supplementaryLocationTable, focus);
+            fixedRegions.Add(pathTable);
+            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+            long supplementaryPathTableLength = pathTable.Length;
+
+            long startOfFourthPathTable = focus;
+            pathTable = new PathTable(true, suppEncoding, _dirs, supplementaryLocationTable, focus);
+            fixedRegions.Add(pathTable);
+            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+
+            // Find the end of the disk
+            totalLength = focus;
+
+
+            // ####################################################################
+            // # 4. Prepare volume descriptors now other structures are fixed
+            // ####################################################################
+
+            PrimaryVolumeDescriptor pvDesc = new PrimaryVolumeDescriptor(
+                (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
+                (uint)(primaryPathTableLength),                            // PathTableSize
+                (uint)(startOfFirstPathTable / IsoUtilities.SectorSize),   // TypeLPathTableLocation
+                (uint)(startOfSecondPathTable / IsoUtilities.SectorSize),  // TypeMPathTableLocation
+                (uint)(startOfFirstDirData / IsoUtilities.SectorSize),     // RootDirectory.LocationOfExtent
+                (uint)_rootDirectory.GetDataSize(Encoding.ASCII),          // RootDirectory.DataLength
+                buildTime
+                );
+            pvDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
+            PrimaryVolumeDescriptorRegion pvdr = new PrimaryVolumeDescriptorRegion(pvDesc, DiskStart);
+            fixedRegions.Insert(0, pvdr);
+
+            SupplementaryVolumeDescriptor svDesc = new SupplementaryVolumeDescriptor(
+                (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
+                (uint)(supplementaryPathTableLength),                      // PathTableSize
+                (uint)(startOfThirdPathTable / IsoUtilities.SectorSize),   // TypeLPathTableLocation
+                (uint)(startOfFourthPathTable / IsoUtilities.SectorSize),  // TypeMPathTableLocation
+                (uint)(startOfSecondDirData / IsoUtilities.SectorSize),    // RootDirectory.LocationOfExtent
+                (uint)_rootDirectory.GetDataSize(suppEncoding),            // RootDirectory.DataLength
+                buildTime,
+                suppEncoding
+                );
+            svDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
+            SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, DiskStart + IsoUtilities.SectorSize);
+            fixedRegions.Insert(1, svdr);
+
+            VolumeDescriptorSetTerminator evDesc = new VolumeDescriptorSetTerminator();
+            VolumeDescriptorSetTerminatorRegion evdr = new VolumeDescriptorSetTerminatorRegion(evDesc, DiskStart + (IsoUtilities.SectorSize * 2));
+            fixedRegions.Insert(2, evdr);
+
+            return fixedRegions;
         }
 
         private BuildDirectoryInfo GetDirectory(string[] path, int pathLength, bool createMissing)

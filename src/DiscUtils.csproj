@@ -66,14 +66,12 @@
     <Compile Include="Iso9660\BaseVolumeDescriptor.cs" />
     <Compile Include="Iso9660\BuildParameters.cs" />
     <Compile Include="Iso9660\CDBuilder.cs" />
-    <Compile Include="Iso9660\CDBuildStream.cs" />
     <Compile Include="Iso9660\CDReader.cs" />
     <Compile Include="Iso9660\CommonVolumeDescriptor.cs" />
     <Compile Include="Iso9660\DirectoryExtent.cs" />
     <Compile Include="Iso9660\BuildDirectoryInfo.cs" />
     <Compile Include="Iso9660\BuildDirectoryMember.cs" />
     <Compile Include="Iso9660\DirectoryRecord.cs" />
-    <Compile Include="Iso9660\DiskRegion.cs" />
     <Compile Include="Iso9660\ExtentStream.cs" />
     <Compile Include="Iso9660\FileExtent.cs" />
     <Compile Include="Iso9660\BuildFileInfo.cs" />

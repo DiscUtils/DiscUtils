@@ -26,17 +26,16 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
-    internal class FileExtent : DiskRegion
+    internal class FileExtent : BuilderExtent
     {
         private BuildFileInfo _fileInfo;
 
         private Stream _readStream;
 
         public FileExtent(BuildFileInfo fileInfo, long start)
-            : base(start)
+            : base(start, fileInfo.GetDataSize(Encoding.ASCII))
         {
             _fileInfo = fileInfo;
-            DiskLength = fileInfo.GetDataSize(Encoding.ASCII);
         }
 
         internal override void PrepareForRead()
@@ -46,7 +45,7 @@ namespace DiscUtils.Iso9660
 
         internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
-            long relPos = diskOffset - DiskStart;
+            long relPos = diskOffset - Start;
             int totalRead = 0;
 
             // Don't arbitrarily set position, just in case stream implementation is

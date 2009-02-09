@@ -24,12 +24,12 @@ using System;
 
 namespace DiscUtils.Iso9660
 {
-    internal abstract class VolumeDescriptorDiskRegion : DiskRegion
+    internal abstract class VolumeDescriptorDiskRegion : BuilderExtent
     {
         byte[] _readCache;
 
         public VolumeDescriptorDiskRegion(long start)
-            : base(start)
+            : base(start, IsoUtilities.SectorSize)
         {
         }
 
@@ -40,7 +40,7 @@ namespace DiscUtils.Iso9660
 
         internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
-            long relPos = diskOffset - DiskStart;
+            long relPos = diskOffset - Start;
 
             int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 
@@ -65,12 +65,11 @@ namespace DiscUtils.Iso9660
             : base(start)
         {
             _descriptor = descriptor;
-            DiskLength = 2048;
         }
 
         protected override byte[] GetBlockData()
         {
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
             _descriptor.WriteTo(buffer, 0);
             return buffer;
         }
@@ -84,12 +83,11 @@ namespace DiscUtils.Iso9660
             : base(start)
         {
             _descriptor = descriptor;
-            DiskLength = 2048;
         }
 
         protected override byte[] GetBlockData()
         {
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
             _descriptor.WriteTo(buffer, 0);
             return buffer;
         }
@@ -103,12 +101,11 @@ namespace DiscUtils.Iso9660
             : base(start)
         {
             _descriptor = descriptor;
-            DiskLength = 2048;
         }
 
         protected override byte[] GetBlockData()
         {
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
             _descriptor.WriteTo(buffer, 0);
             return buffer;
         }

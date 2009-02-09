@@ -35,6 +35,8 @@ namespace DiscUtils.Iso9660
         /// </summary>
         private IsoUtilities() { }
 
+        public const int SectorSize = 2048;
+
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {
             return Utilities.ToUInt32LittleEndian(data, offset);

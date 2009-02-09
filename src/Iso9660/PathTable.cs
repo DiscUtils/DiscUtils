@@ -26,42 +26,27 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
-    internal class PathTable : DiskRegion
+    internal class PathTable : BuilderExtent
     {
         private bool _byteSwap;
         private Encoding _enc;
         private List<BuildDirectoryInfo> _dirs;
         private Dictionary<BuildDirectoryMember, uint> _locations;
 
-        private uint _dataLength;
-
         private byte[] _readCache;
 
         public PathTable(bool byteSwap, Encoding enc, List<BuildDirectoryInfo> dirs, Dictionary<BuildDirectoryMember, uint> locations, long start)
-            : base(start)
+            : base(start, CalcLength(enc, dirs))
         {
             _byteSwap = byteSwap;
             _enc = enc;
             _dirs = dirs;
             _locations = locations;
-
-            uint length = 0;
-            foreach (BuildDirectoryInfo di in dirs)
-            {
-                length += di.GetPathTableEntrySize(enc);
-            }
-            _dataLength = length;
-            DiskLength = _dataLength;
-        }
-
-        public uint DataLength
-        {
-            get { return _dataLength; }
         }
 
         internal override void PrepareForRead()
         {
-            _readCache = new byte[DiskLength];
+            _readCache = new byte[Length];
             int pos = 0;
 
             List<BuildDirectoryInfo> sortedList = new List<BuildDirectoryInfo>(_dirs);
@@ -83,7 +68,7 @@ namespace DiscUtils.Iso9660
 
         internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
-            long relPos = diskOffset - DiskStart;
+            long relPos = diskOffset - Start;
 
             int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 
@@ -95,6 +80,16 @@ namespace DiscUtils.Iso9660
         internal override void DisposeReadState()
         {
             _readCache = null;
+        }
+
+        private static uint CalcLength(Encoding enc, List<BuildDirectoryInfo> dirs)
+        {
+            uint length = 0;
+            foreach (BuildDirectoryInfo di in dirs)
+            {
+                length += di.GetPathTableEntrySize(enc);
+            }
+            return length;
         }
 
     }

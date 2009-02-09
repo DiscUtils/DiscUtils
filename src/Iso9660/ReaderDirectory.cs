@@ -45,7 +45,7 @@ namespace DiscUtils.Iso9660
             _enc = enc;
             _parent = parent;
 
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
             Stream extent = reader.GetDirectoryExtentStream(ptr.LocationOfExtent);
 
             _records = new List<DirectoryRecord>();

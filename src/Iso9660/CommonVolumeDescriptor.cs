@@ -105,7 +105,7 @@ namespace DiscUtils.Iso9660
             VolumeSpaceSize = volumeSpaceSize;
             VolumeSetSize = 1;
             VolumeSequenceNumber = 1;
-            LogicalBlockSize = 2048;
+            LogicalBlockSize = IsoUtilities.SectorSize;
             PathTableSize = pathTableSize;
             TypeLPathTableLocation = typeLPathTableLocation;
             //OptionalTypeLPathTableLocation = 0;

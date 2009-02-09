@@ -26,7 +26,7 @@ using System.Text;
 
 namespace DiscUtils.Iso9660
 {
-    internal class DirectoryExtent : DiskRegion
+    internal class DirectoryExtent : BuilderExtent
     {
         private BuildDirectoryInfo _dirInfo;
         private Dictionary<BuildDirectoryMember, uint> _locationTable;
@@ -35,23 +35,22 @@ namespace DiscUtils.Iso9660
         private byte[] _readCache;
 
         public DirectoryExtent(BuildDirectoryInfo dirInfo, Dictionary<BuildDirectoryMember, uint> locationTable, Encoding enc, long start)
-            : base(start)
+            : base(start, dirInfo.GetDataSize(enc))
         {
             _dirInfo = dirInfo;
             _locationTable = locationTable;
             _enc = enc;
-            DiskLength = dirInfo.GetDataSize(enc);
         }
 
         internal override void PrepareForRead()
         {
-            _readCache = new byte[DiskLength];
+            _readCache = new byte[Length];
             _dirInfo.Write(_readCache, 0, _locationTable, _enc);
         }
 
         internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
-            long relPos = diskOffset - DiskStart;
+            long relPos = diskOffset - Start;
 
             int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 

@@ -56,7 +56,7 @@ namespace DiscUtils.Iso9660
 
         internal virtual void WriteTo(byte[] buffer, int offset)
         {
-            Array.Clear(buffer, offset, 2048);
+            Array.Clear(buffer, offset, IsoUtilities.SectorSize);
             buffer[offset] = (byte)VolumeDescriptorType;
             IsoUtilities.WriteAChars(buffer, offset + 1, 5, StandardIdentifier);
             buffer[offset + 6] = VolumeDescriptorVersion;

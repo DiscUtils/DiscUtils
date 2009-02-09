@@ -88,9 +88,9 @@ namespace DiscUtils.Iso9660
 
                 // If this record would span a sector boundary, then the current sector is
                 // zero-padded, and the record goes at the start of the next sector.
-                if ((total % 2048) + recordSize > 2048)
+                if ((total % IsoUtilities.SectorSize) + recordSize > IsoUtilities.SectorSize)
                 {
-                    long padLength = 2048 - (total % 2048);
+                    long padLength = IsoUtilities.SectorSize - (total % IsoUtilities.SectorSize);
                     total += padLength;
                 }
 
@@ -121,9 +121,9 @@ namespace DiscUtils.Iso9660
             {
                 uint recordSize = m.GetDirectoryRecordSize(enc);
 
-                if ((pos % 2048) + recordSize > 2048)
+                if ((pos % IsoUtilities.SectorSize) + recordSize > IsoUtilities.SectorSize)
                 {
-                    int padLength = 2048 -(pos % 2048);
+                    int padLength = IsoUtilities.SectorSize - (pos % IsoUtilities.SectorSize);
                     Array.Clear(buffer, offset + pos, padLength);
                     pos += padLength;
                 }

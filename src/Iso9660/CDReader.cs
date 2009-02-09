@@ -48,7 +48,7 @@ namespace DiscUtils.Iso9660
 
             long vdpos = 0x8000; // Skip lead-in
 
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
 
             long pvdPos = 0;
             long svdPos = 0;
@@ -57,8 +57,8 @@ namespace DiscUtils.Iso9660
             do
             {
                 data.Position = vdpos;
-                int numRead = data.Read(buffer, 0, 2048);
-                if (numRead != 2048)
+                int numRead = data.Read(buffer, 0, IsoUtilities.SectorSize);
+                if (numRead != IsoUtilities.SectorSize)
                 {
                     break;
                 }
@@ -81,20 +81,20 @@ namespace DiscUtils.Iso9660
                         break;
                 }
 
-                vdpos += 2048;
+                vdpos += IsoUtilities.SectorSize;
             } while (bvd.VolumeDescriptorType != VolumeDescriptorType.SetTerminator);
 
 
             if (joliet)
             {
                 data.Position = svdPos;
-                data.Read(buffer, 0, 2048);
+                data.Read(buffer, 0, IsoUtilities.SectorSize);
                 _volDesc = new SupplementaryVolumeDescriptor(buffer, 0);
             }
             else
             {
                 data.Position = pvdPos;
-                data.Read(buffer, 0, 2048);
+                data.Read(buffer, 0, IsoUtilities.SectorSize);
                 _volDesc = new PrimaryVolumeDescriptor(buffer, 0);
             }
 
