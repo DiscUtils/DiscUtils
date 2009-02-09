@@ -141,6 +141,7 @@
     <Compile Include="BuiltStream.cs" />
     <Compile Include="BuilderExtentSource.cs" />
     <Compile Include="BuilderFileExtent.cs" />
+    <Compile Include="ConcatStream.cs" />
     <Compile Include="Ntfs\Attributes\AttributeListAttribute.cs" />
     <Compile Include="Ntfs\Attributes\BitmapAttribute.cs" />
     <Compile Include="Ntfs\Attributes\DataAttribute.cs" />

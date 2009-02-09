@@ -40,6 +40,11 @@ namespace DiscUtils
             _parent = parent;
             _first = first;
             _length = length;
+
+            if (_first + _length > _parent.Length)
+            {
+                throw new ArgumentOutOfRangeException("Substream extends beyond end of parent stream");
+            }
         }
 
         public SubStream(Stream parent, bool ownsParent, long first, long length)
@@ -48,6 +53,11 @@ namespace DiscUtils
             _ownsParent = ownsParent;
             _first = first;
             _length = length;
+
+            if (_first + _length > _parent.Length)
+            {
+                throw new ArgumentOutOfRangeException("Substream extends beyond end of parent stream");
+            }
         }
 
         protected override void Dispose(bool disposing)

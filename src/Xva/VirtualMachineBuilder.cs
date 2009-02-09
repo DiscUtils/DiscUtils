@@ -98,7 +98,19 @@ namespace DiscUtils.Xva
                         if (i != lastChunkAdded)
                         {
                             HashAlgorithm hashAlg = new SHA1Managed();
-                            Stream chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
+                            Stream chunkStream;
+
+                            long diskBytesLeft = diskStream.Length - i * Sizes.OneMiB;
+                            if(diskBytesLeft < Sizes.OneMiB)
+                            {
+                                chunkStream = new ConcatStream(
+                                    new SubStream(diskStream, i * Sizes.OneMiB, diskBytesLeft),
+                                    new ZeroStream(Sizes.OneMiB - diskBytesLeft));
+                            }
+                            else
+                            {
+                                chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
+                            }
                             HashStream chunkHashStream = new HashStream(chunkStream, true, hashAlg);
 
                             tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], i), chunkHashStream);
@@ -108,6 +120,18 @@ namespace DiscUtils.Xva
                         }
                     }
                 }
+
+                // Make sure the last chunk is present, filled with zero's if necessary
+                int lastActualChunk = (int)((diskStream.Length - 1) / Sizes.OneMiB);
+                if (lastChunkAdded < lastActualChunk)
+                {
+                    HashAlgorithm hashAlg = new SHA1Managed();
+                    Stream chunkStream = new ZeroStream(Sizes.OneMiB);
+                    HashStream chunkHashStream = new HashStream(chunkStream, true, hashAlg);
+                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], lastActualChunk), chunkHashStream);
+                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], lastActualChunk), new ChecksumStream(hashAlg));
+                }
+
                 ++diskIdx;
             }
 
@@ -128,21 +152,27 @@ namespace DiscUtils.Xva
             string vmName = "VM";
             int vmId = id++;
 
-            // Establish Ids
+            // Establish per-disk info
             Guid[] vbdGuids = new Guid[_disks.Count];
             int[] vbdIds = new int[_disks.Count];
             Guid[] vdiGuids = new Guid[_disks.Count];
             string[] vdiNames = new string[_disks.Count];
             int[] vdiIds = new int[_disks.Count];
-            for (int i = 0; i < _disks.Count; ++i)
+            long[] vdiSizes = new long[_disks.Count];
+
+            int diskIdx = 0;
+            foreach(var disk in _disks)
             {
-                vbdGuids[i] = Guid.NewGuid();
-                vbdIds[i] = id++;
-                vdiGuids[i] = Guid.NewGuid();
-                vdiIds[i] = id++;
-                vdiNames[i] = "VDI_" + i;
+                vbdGuids[diskIdx] = Guid.NewGuid();
+                vbdIds[diskIdx] = id++;
+                vdiGuids[diskIdx] = Guid.NewGuid();
+                vdiIds[diskIdx] = id++;
+                vdiNames[diskIdx] = "VDI_" + diskIdx;
+                vdiSizes[diskIdx] = Utilities.RoundUp(disk.Value.Length, Sizes.OneMiB);
+                diskIdx++;
             }
 
+            // Establish SR info
             Guid srGuid = Guid.NewGuid();
             string srName = "SR";
             int srId = id++;
@@ -172,7 +202,16 @@ namespace DiscUtils.Xva
 
             for (int i = 0; i < _disks.Count; ++i)
             {
-                objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_vdi, "Ref:" + vdiIds[i], vdiGuids[i], vdiNames[i], "Ref:" + srId, "Ref:" + vbdIds[i]));
+                objectsString.Append(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Resources.XVA_ova_vdi,
+                        "Ref:" + vdiIds[i],
+                        vdiGuids[i],
+                        vdiNames[i],
+                        "Ref:" + srId,
+                        "Ref:" + vbdIds[i],
+                        vdiSizes[i]));
             }
 
             objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_sr, "Ref:" + srId, srGuid, srName, vdiRefs));
