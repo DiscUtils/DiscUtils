@@ -67,6 +67,7 @@
     <Compile Include="Vhd\DiskImageFileTest.cs" />
     <Compile Include="Vhd\DiskTest.cs" />
     <Compile Include="Vhd\DynamicStreamTest.cs" />
+    <Compile Include="Xva\VirtualMachineBuilderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DiscUtils.csproj">

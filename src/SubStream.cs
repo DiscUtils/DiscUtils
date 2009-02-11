@@ -43,7 +43,7 @@ namespace DiscUtils
 
             if (_first + _length > _parent.Length)
             {
-                throw new ArgumentOutOfRangeException("Substream extends beyond end of parent stream");
+                throw new ArgumentException("Substream extends beyond end of parent stream");
             }
         }
 
@@ -56,7 +56,7 @@ namespace DiscUtils
 
             if (_first + _length > _parent.Length)
             {
-                throw new ArgumentOutOfRangeException("Substream extends beyond end of parent stream");
+                throw new ArgumentException("Substream extends beyond end of parent stream");
             }
         }
 

@@ -184,7 +184,13 @@ namespace DiscUtils
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { throw new NotSupportedException(); }
+            get
+            {
+                foreach (var extent in _extents)
+                {
+                    yield return new StreamExtent(extent.Start, extent.Length);
+                }
+            }
         }
 
         private BuilderExtent FindNext(long pos)

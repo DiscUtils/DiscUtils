@@ -67,12 +67,11 @@ namespace DiscUtils.Xva
 
         public override bool CanWrite
         {
-            get { throw new NotImplementedException(); }
+            get { return false; }
         }
 
         public override void Flush()
         {
-            throw new NotImplementedException();
         }
 
         public override long Length
@@ -164,7 +163,7 @@ namespace DiscUtils.Xva
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override IEnumerable<StreamExtent> Extents
