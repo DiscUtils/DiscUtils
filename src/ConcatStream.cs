@@ -100,7 +100,9 @@ namespace DiscUtils
             }
 
             _streams[activeStream].Position = _position - pos;
-            return _streams[activeStream].Read(buffer, offset, count);
+            int numRead = _streams[activeStream].Read(buffer, offset, count);
+            _position += numRead;
+            return numRead;
         }
 
         public override long Seek(long offset, System.IO.SeekOrigin origin)
