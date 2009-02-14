@@ -21,14 +21,22 @@
 //
 
 
-namespace DiscUtils
+namespace DiscUtils.Vmdk
 {
-    internal static class Sizes
+    internal enum DiskCreateType
     {
-        public const long OneKiB = 1024;
-        public const long OneMiB = 1024 * OneKiB;
-        public const long OneGiB = 1024 * OneMiB;
-
-        public const int Sector = 512;
+        None = 0,
+        MonolithicSparse = 1,
+        VmfsSparse = 2,
+        MonolithicFlat = 3,
+        Vmfs = 4,
+        TwoGbMaxExtentSparse = 5,
+        TwoGbMaxExtentFlat = 6,
+        FullDevice = 7,
+        VmfsRaw = 8,
+        PartitionedDevice = 9,
+        VmfsRawDeviceMap = 10,
+        VmfsPassthroughRawDeviceMap = 11,
+        StreamOptimized = 12
     }
 }

@@ -20,15 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace DiscUtils
+namespace DiscUtils.Vmdk
 {
-    internal static class Sizes
+    internal enum DiskAdapterType
     {
-        public const long OneKiB = 1024;
-        public const long OneMiB = 1024 * OneKiB;
-        public const long OneGiB = 1024 * OneMiB;
-
-        public const int Sector = 512;
+        None = 0,
+        Ide = 1,
+        BusLogicScsi = 2,
+        LsiLogicScsi = 3,
+        LegacyESX = 4
     }
 }

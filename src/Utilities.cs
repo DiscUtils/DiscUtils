@@ -35,7 +35,7 @@ namespace DiscUtils
         /// <summary>
         /// The number of bytes in a standard disk sector (512).
         /// </summary>
-        internal const int SectorSize = 512;
+        internal const int SectorSize = Sizes.Sector;
 
         /// <summary>
         /// Prevent instantiation.

@@ -39,6 +39,7 @@ namespace DiscUtils.Xva
     public class VirtualMachineBuilder : StreamBuilder
     {
         private Dictionary<string, SparseStream> _disks;
+        private string _vmDisplayName;
 
         /// <summary>
         /// Creates a new instance.
@@ -46,6 +47,16 @@ namespace DiscUtils.Xva
         public VirtualMachineBuilder()
         {
             _disks = new Dictionary<string, SparseStream>();
+            _vmDisplayName = "VM";
+        }
+
+        /// <summary>
+        /// The display name of the VM.
+        /// </summary>
+        public string DisplayName
+        {
+            get { return _vmDisplayName; }
+            set { _vmDisplayName = value; }
         }
 
         /// <summary>
@@ -149,7 +160,7 @@ namespace DiscUtils.Xva
             int id = 0;
 
             Guid vmGuid = Guid.NewGuid();
-            string vmName = "VM";
+            string vmName = _vmDisplayName;
             int vmId = id++;
 
             // Establish per-disk info

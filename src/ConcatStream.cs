@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace DiscUtils
@@ -32,12 +33,23 @@ namespace DiscUtils
     internal class ConcatStream : SparseStream
     {
         private SparseStream[] _streams;
+        private bool _canWrite;
 
         private long _position;
 
         public ConcatStream(params SparseStream[] streams)
         {
             _streams = streams;
+
+            // Only allow writes if all streams can be written
+            _canWrite = true;
+            foreach (var stream in streams)
+            {
+                if (!stream.CanWrite)
+                {
+                    _canWrite = false;
+                }
+            }
         }
 
         public override bool CanRead
@@ -52,7 +64,7 @@ namespace DiscUtils
 
         public override bool CanWrite
         {
-            get { return false; }
+            get { return _canWrite; }
         }
 
         public override void Flush()
@@ -90,16 +102,10 @@ namespace DiscUtils
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            // Find the stream that _position is within
-            long pos = 0;
-            int activeStream = 0;
-            while (activeStream < _streams.Length - 1 && pos + _streams[activeStream].Length <= _position)
-            {
-                pos += _streams[activeStream].Length;
-                activeStream++;
-            }
+            long activeStreamStartPos;
+            int activeStream = GetActiveStream(out activeStreamStartPos);
 
-            _streams[activeStream].Position = _position - pos;
+            _streams[activeStream].Position = _position - activeStreamStartPos;
             int numRead = _streams[activeStream].Read(buffer, offset, count);
             _position += numRead;
             return numRead;
@@ -130,12 +136,46 @@ namespace DiscUtils
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException();
+            long lastStreamOffset;
+            int lastStream = GetStream(Length, out lastStreamOffset);
+            if (value < lastStreamOffset)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to reduce stream length to less than {0}", lastStreamOffset));
+            }
+            _streams[lastStream].SetLength(value - lastStreamOffset);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotSupportedException();
+
+            int totalWritten = 0;
+            while (totalWritten != count)
+            {
+                // Offset of the stream = streamOffset
+                long streamOffset;
+                int streamIdx = GetActiveStream(out streamOffset);
+
+                // Offset within the stream = streamPos
+                long streamPos = _position - streamOffset;
+                _streams[streamIdx].Position = streamPos;
+
+                // Write (limited to the stream's length), except for final stream - that may be
+                // extendable
+                int numToWrite;
+                if(streamIdx == _streams.Length - 1)
+                {
+                    numToWrite = count - totalWritten;
+                }
+                else
+                {
+                    numToWrite = (int)Math.Min(count - totalWritten, _streams[streamIdx].Length - streamPos);
+                }
+
+                _streams[streamIdx].Write(buffer, offset + totalWritten, numToWrite);
+
+                totalWritten += numToWrite;
+                _position += numToWrite;
+            }
         }
 
         public override IEnumerable<StreamExtent> Extents
@@ -158,5 +198,25 @@ namespace DiscUtils
                 return extents;
             }
         }
+
+        private int GetActiveStream(out long startPos)
+        {
+            return GetStream(_position, out startPos);
+        }
+
+        private int GetStream(long targetPos, out long streamStartPos)
+        {
+            // Find the stream that _position is within
+            streamStartPos = 0;
+            int focusStream = 0;
+            while (focusStream < _streams.Length - 1 && streamStartPos + _streams[focusStream].Length <= targetPos)
+            {
+                streamStartPos += _streams[focusStream].Length;
+                focusStream++;
+            }
+
+            return focusStream;
+        }
+
     }
 }

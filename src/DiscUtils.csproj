@@ -142,6 +142,7 @@
     <Compile Include="BuilderExtentSource.cs" />
     <Compile Include="BuilderFileExtent.cs" />
     <Compile Include="ConcatStream.cs" />
+    <Compile Include="FileLocator.cs" />
     <Compile Include="Ntfs\Attributes\AttributeListAttribute.cs" />
     <Compile Include="Ntfs\Attributes\BitmapAttribute.cs" />
     <Compile Include="Ntfs\Attributes\DataAttribute.cs" />
@@ -183,6 +184,13 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Vmdk\DescriptorFile.cs" />
+    <Compile Include="Vmdk\DescriptorFileEntry.cs" />
+    <Compile Include="Vmdk\Disk.cs" />
+    <Compile Include="Vmdk\DiskAdapterType.cs" />
+    <Compile Include="Vmdk\DiskCreateType.cs" />
+    <Compile Include="Vmdk\ExtentDescriptor.cs" />
+    <Compile Include="Vmdk\SparseExtentHeader.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

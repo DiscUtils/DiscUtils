@@ -217,6 +217,42 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Vmdk">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2009-02-14 11:07:51Z">
+      <Issue>
+       <Item>DiscUtils.Vmdk</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="6" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-14 11:07:51Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Vmdk</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="39" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Vmdk" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-14 11:07:51Z">
+      <Issue Name="Namespace">
+       <Item>Vmdk</Item>
+       <Item>DiscUtils.Vmdk</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="40" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Xva">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2009-02-07 12:25:26Z">
@@ -949,6 +985,7 @@
     <Note Id="3" Modified="2008-11-22 16:48:05Z">Deliberately using namespace separation</Note>
     <Note Id="4" Modified="2008-11-10 13:18:19Z">Deliberately not strong named - people using the library should add their own signature.</Note>
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
+    <Note Id="6" Modified="2009-02-14 11:08:26Z">Namespace fits with existing pattern.</Note>
     <Note Id="7" Modified="2008-11-22 17:12:07Z">DiscUtils is fixed name of the project</Note>
     <Note Id="8" Modified="2008-11-10 13:24:01Z">Reflects name of member in CLR's DirectoryInfo class.</Note>
     <Note Id="9" Modified="2008-11-10 13:22:31Z">Reflects the GetFileSystemInfos member of CLR's DirectoryInfo class.</Note>
@@ -981,6 +1018,8 @@
     <Note Id="36" Modified="2009-02-08 22:41:58Z">Acronym</Note>
     <Note Id="37" Modified="2009-02-08 22:43:49Z">Parameter names are arbitrary</Note>
     <Note Id="38" Modified="2009-02-08 22:45:11Z">Equivalent disposal pattern implemented, but not using IDisposable because instances can be re-used.</Note>
+    <Note Id="39" Modified="2009-02-14 11:08:37Z">Utils is part of project name</Note>
+    <Note Id="40" Modified="2009-02-14 11:08:47Z">Vmdk is correct form of VMDK</Note>
    </User>
   </Notes>
   <Rules>
