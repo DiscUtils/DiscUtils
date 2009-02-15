@@ -31,9 +31,8 @@ namespace DiscUtils.Vmdk
     /// </summary>
     public class Disk : VirtualDisk
     {
-        private DescriptorFile _descriptor;
-        private SparseStream _contentStream;
-        private FileLocator _extentLocator;
+        private DiskImageFile _file;
+        private SparseStream _content;
 
         /// <summary>
         /// Creates a new instance from a file on disk.
@@ -41,12 +40,7 @@ namespace DiscUtils.Vmdk
         /// <param name="path">The path to the disk</param>
         public Disk(string path)
         {
-            using (FileStream s = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                LoadDescriptor(s);
-            }
-
-            _extentLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+            _file = new DiskImageFile(path);
         }
 
         /// <summary>
@@ -57,10 +51,19 @@ namespace DiscUtils.Vmdk
         {
             try
             {
-                if (disposing && _contentStream != null)
+                if (disposing)
                 {
-                    _contentStream.Dispose();
-                    _contentStream = null;
+                    if (_content != null)
+                    {
+                        _content.Dispose();
+                        _content = null;
+                    }
+
+                    if (_file != null)
+                    {
+                        _file.Dispose();
+                        _file = null;
+                    }
                 }
             }
             finally
@@ -74,7 +77,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override Geometry Geometry
         {
-            get { return _descriptor.DiskGeometry; }
+            get { return _file.Geometry; }
         }
 
         /// <summary>
@@ -82,15 +85,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override long Capacity
         {
-            get
-            {
-                long result = 0;
-                foreach (var extent in _descriptor.Extents)
-                {
-                    result += extent.SizeInSectors * Sizes.Sector;
-                }
-                return result;
-            }
+            get { return _file.Capacity; }
         }
 
         /// <summary>
@@ -100,16 +95,11 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                if (_contentStream == null)
+                if (_content == null)
                 {
-                    SparseStream[] streams = new SparseStream[_descriptor.Extents.Count];
-                    for (int i = 0; i < streams.Length; ++i)
-                    {
-                        streams[i] = OpenExtent(_descriptor.Extents[i]);
-                    }
-                    _contentStream = new ConcatStream(streams);
+                    _content = _file.OpenContent(null, false);
                 }
-                return _contentStream;
+                return _content;
             }
         }
 
@@ -118,49 +108,11 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override ReadOnlyCollection<VirtualDiskLayer> Layers
         {
-            get { throw new NotImplementedException(); }
-        }
-
-        private SparseStream OpenExtent(ExtentDescriptor extent)
-        {
-            FileAccess access = FileAccess.Read;
-            FileShare share = FileShare.Read;
-            if(extent.Access == ExtentAccess.ReadWrite)
+            get
             {
-                access = FileAccess.ReadWrite;
-                share = FileShare.ReadWrite;
-            }
-
-            switch (extent.Type)
-            {
-                case ExtentType.Flat:
-                    return SparseStream.FromStream(_extentLocator.Open(extent.FileName, FileMode.Open, access, share), true);
-                case ExtentType.Zero:
-                    return new ZeroStream(extent.SizeInSectors * Utilities.SectorSize);
-                case ExtentType.Sparse:
-                    throw new NotImplementedException();
-                default:
-                    throw new NotSupportedException();
+                return new ReadOnlyCollection<VirtualDiskLayer>(new VirtualDiskLayer[] { _file });
             }
         }
 
-        private void LoadDescriptor(Stream s)
-        {
-            byte[] header = Utilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
-            if (header.Length < Sizes.Sector || Utilities.ToUInt32LittleEndian(header, 0) != SparseExtentHeader.VmdkMagicNumber)
-            {
-                s.Position = 0;
-                _descriptor = new DescriptorFile(s);
-            }
-            else
-            {
-                // This is a sparse disk extent, hopefully with embedded descriptor...
-                SparseExtentHeader hdr = SparseExtentHeader.Read(header, 0);
-                if (hdr.DescriptorOffset != 0)
-                {
-                    _descriptor = new DescriptorFile(new SubStream(s, hdr.DescriptorOffset * Sizes.Sector, hdr.DescriptorSize * Sizes.Sector));
-                }
-            }
-        }
     }
 }

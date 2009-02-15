@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
@@ -79,7 +80,7 @@ namespace DiscUtils.Vmdk
 
         public static ExtentDescriptor Parse(string descriptor)
         {
-            string[] elems = descriptor.Split(new string[]{" "}, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = SplitQuotedString(descriptor);
             if (elems.Length < 4)
             {
                 throw new IOException(string.Format(CultureInfo.InvariantCulture, "Invalid extent descriptor: {0}", descriptor));
@@ -153,6 +154,50 @@ namespace DiscUtils.Vmdk
             {
                 throw new ArgumentException("Unknown extent type", "type");
             }
+        }
+
+        private static string[] SplitQuotedString(string source)
+        {
+            List<string> result = new List<string>();
+
+            int idx = 0;
+            while (idx < source.Length)
+            {
+                // Skip spaces
+                while (source[idx] == ' ' && idx < source.Length)
+                {
+                    idx++;
+                }
+
+                if (source[idx] == '"')
+                {
+                    // A quoted value, find end of quotes...
+                    int start = idx;
+                    idx++;
+                    while (source[idx] != '"' && idx < source.Length)
+                    {
+                        idx++;
+                    }
+
+                    result.Add(source.Substring(start, idx - start + 1));
+                }
+                else
+                {
+                    // An unquoted value, find end of value
+                    int start = idx;
+                    idx++;
+                    while (source[idx] != ' ' && idx < source.Length)
+                    {
+                        idx++;
+                    }
+
+                    result.Add(source.Substring(start, idx - start));
+                }
+
+                idx++;
+            }
+
+            return result.ToArray();
         }
     }
 }

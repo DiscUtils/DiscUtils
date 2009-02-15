@@ -54,6 +54,17 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Calculates the CEIL function.
+        /// </summary>
+        /// <param name="numerator">The value to divide</param>
+        /// <param name="denominator">The value to divide by</param>
+        /// <returns>CEIL(numerator/denominator)</returns>
+        public static long Ceil(long numerator, long denominator)
+        {
+            return (numerator + (denominator - 1)) / denominator;
+        }
+
+        /// <summary>
         /// Converts between two arrays.
         /// </summary>
         /// <typeparam name="T">The type of the elements of the source array</typeparam>
