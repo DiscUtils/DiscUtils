@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace DiscUtils.Vmdk
 {
@@ -58,6 +59,7 @@ namespace DiscUtils.Vmdk
         public uint ContentId
         {
             get { return uint.Parse(GetHeader(HeaderContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
+            set { SetHeader(HeaderContentId, value.ToString("x8")); }
         }
 
         public uint ParentContentId
@@ -180,6 +182,19 @@ namespace DiscUtils.Vmdk
             return null;
         }
 
+        private void SetHeader(string key, string newValue)
+        {
+            foreach (var entry in _header)
+            {
+                if (entry.Key == key)
+                {
+                    entry.Value = newValue;
+                    return;
+                }
+            }
+            _header.Add(new DescriptorFileEntry(HeaderContentId, newValue, DescriptorFileEntryType.Plain));
+        }
+
         private string GetDiskDatabase(string key)
         {
             foreach (var entry in _diskDataBase)
@@ -198,33 +213,67 @@ namespace DiscUtils.Vmdk
             string line = reader.ReadLine();
             while (line != null)
             {
+                line = line.Trim('\0');
+
                 int commentPos = line.IndexOf('#');
                 if (commentPos >= 0)
                 {
                     line = line.Substring(0, commentPos);
                 }
 
-                if (line.StartsWith("RW", StringComparison.Ordinal)
-                    || line.StartsWith("RDONLY", StringComparison.Ordinal)
-                    || line.StartsWith("NOACCESS", StringComparison.Ordinal))
+                if (line.Length > 0)
                 {
-                    _descriptors.Add(ExtentDescriptor.Parse(line));
-                }
-                else
-                {
-                    DescriptorFileEntry entry = DescriptorFileEntry.Parse(line);
-                    if (entry.Key.StartsWith("ddb.", StringComparison.Ordinal))
+                    if (line.StartsWith("RW", StringComparison.Ordinal)
+                        || line.StartsWith("RDONLY", StringComparison.Ordinal)
+                        || line.StartsWith("NOACCESS", StringComparison.Ordinal))
                     {
-                        _diskDataBase.Add(entry);
+                        _descriptors.Add(ExtentDescriptor.Parse(line));
                     }
                     else
                     {
-                        _header.Add(entry);
+                        DescriptorFileEntry entry = DescriptorFileEntry.Parse(line);
+                        if (entry.Key.StartsWith("ddb.", StringComparison.Ordinal))
+                        {
+                            _diskDataBase.Add(entry);
+                        }
+                        else
+                        {
+                            _header.Add(entry);
+                        }
                     }
                 }
 
                 line = reader.ReadLine();
             }
+        }
+
+        internal void Write(Stream stream)
+        {
+            StringBuilder content = new StringBuilder();
+
+            content.Append("# Disk DescriptorFile\n");
+            for (int i = 0; i < _header.Count; ++i)
+            {
+                content.Append(_header[i].ToString() + "\n");
+            }
+
+            content.Append("\n");
+            content.Append("# Extent description\n");
+            for (int i = 0; i < _descriptors.Count; ++i)
+            {
+                content.Append(_descriptors[i].ToString() + "\n");
+            }
+
+            content.Append("\n");
+            content.Append("# The Disk Data Base\n");
+            content.Append("#DDB\n");
+            for (int i = 0; i < _diskDataBase.Count; ++i)
+            {
+                content.Append(_diskDataBase[i].ToString() + "\n");
+            }
+
+            byte[] contentBytes = Encoding.ASCII.GetBytes(content.ToString());
+            stream.Write(contentBytes, 0, contentBytes.Length);
         }
     }
 }

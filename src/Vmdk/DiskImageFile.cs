@@ -34,13 +34,26 @@ namespace DiscUtils.Vmdk
         private SparseStream _contentStream;
         private FileLocator _extentLocator;
 
+        private FileAccess _access;
+
         /// <summary>
         /// Creates a new instance from a file on disk.
         /// </summary>
         /// <param name="path">The path to the disk</param>
-        public DiskImageFile(string path)
+        /// <param name="access">The desired access to the disk</param>
+        public DiskImageFile(string path, FileAccess access)
         {
-            using (FileStream s = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            _access = access;
+
+            FileAccess fileAccess = FileAccess.Read;
+            FileShare fileShare = FileShare.Read;
+            if (_access != FileAccess.Read)
+            {
+                fileAccess = FileAccess.ReadWrite;
+                fileShare = FileShare.None;
+            }
+
+            using (FileStream s = new FileStream(path, FileMode.Open, fileAccess, fileShare))
             {
                 LoadDescriptor(s);
             }
@@ -135,10 +148,10 @@ namespace DiscUtils.Vmdk
         {
             FileAccess access = FileAccess.Read;
             FileShare share = FileShare.Read;
-            if(extent.Access == ExtentAccess.ReadWrite)
+            if(extent.Access == ExtentAccess.ReadWrite && _access != FileAccess.Read)
             {
                 access = FileAccess.ReadWrite;
-                share = FileShare.ReadWrite;
+                share = FileShare.None;
             }
 
             switch (extent.Type)
@@ -168,20 +181,37 @@ namespace DiscUtils.Vmdk
         private void LoadDescriptor(Stream s)
         {
             byte[] header = Utilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
-            if (header.Length < Sizes.Sector || Utilities.ToUInt32LittleEndian(header, 0) != SparseExtentHeader.VmdkMagicNumber)
+            if (header.Length < Sizes.Sector || Utilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
             {
                 s.Position = 0;
                 _descriptor = new DescriptorFile(s);
+                if (_access != FileAccess.Read)
+                {
+                    _descriptor.ContentId = (uint)new Random().Next();
+                    s.Position = 0;
+                    _descriptor.Write(s);
+                    s.SetLength(s.Position);
+                }
             }
             else
             {
                 // This is a sparse disk extent, hopefully with embedded descriptor...
-                SparseExtentHeader hdr = SparseExtentHeader.Read(header, 0);
+                HostedSparseExtentHeader hdr = HostedSparseExtentHeader.Read(header, 0);
                 if (hdr.DescriptorOffset != 0)
                 {
-                    _descriptor = new DescriptorFile(new SubStream(s, hdr.DescriptorOffset * Sizes.Sector, hdr.DescriptorSize * Sizes.Sector));
+                    Stream descriptorStream = new SubStream(s, hdr.DescriptorOffset * Sizes.Sector, hdr.DescriptorSize * Sizes.Sector);
+                    _descriptor = new DescriptorFile(descriptorStream);
+                    if (_access != FileAccess.Read)
+                    {
+                        _descriptor.ContentId = (uint)new Random().Next();
+                        descriptorStream.Position = 0;
+                        _descriptor.Write(descriptorStream);
+                        byte[] blank = new byte[descriptorStream.Length - descriptorStream.Position];
+                        descriptorStream.Write(blank, 0, blank.Length);
+                    }
                 }
             }
         }
+
     }
 }

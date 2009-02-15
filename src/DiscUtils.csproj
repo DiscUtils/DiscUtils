@@ -191,8 +191,9 @@
     <Compile Include="Vmdk\DiskCreateType.cs" />
     <Compile Include="Vmdk\DiskImageFile.cs" />
     <Compile Include="Vmdk\ExtentDescriptor.cs" />
+    <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
-    <Compile Include="Vmdk\SparseExtentHeader.cs" />
+    <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

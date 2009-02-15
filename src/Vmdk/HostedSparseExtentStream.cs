@@ -50,7 +50,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// The stream containing the unstored bytes.
         /// </summary>
-        private Stream _parentDiskStream;
+        private SparseStream _parentDiskStream;
 
         /// <summary>
         /// Indicates if this object controls the lifetime of _parentDiskStream.
@@ -63,9 +63,14 @@ namespace DiscUtils.Vmdk
         private uint[] _globalDirectory;
 
         /// <summary>
+        /// The Redundant Global Directory for this extent.
+        /// </summary>
+        private uint[] _redundantGlobalDirectory;
+
+        /// <summary>
         /// The header from the start of the extent.
         /// </summary>
-        private SparseExtentHeader _header;
+        private HostedSparseExtentHeader _header;
 
         /// <summary>
         /// The number of bytes controlled by a single grain table.
@@ -87,7 +92,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         private long _position;
 
-        public HostedSparseExtentStream(Stream file, bool ownsFile, long diskOffset, Stream parentDiskStream, bool ownsParentDiskStream)
+        public HostedSparseExtentStream(Stream file, bool ownsFile, long diskOffset, SparseStream parentDiskStream, bool ownsParentDiskStream)
         {
             _fileStream = file;
             _ownsFileStream = ownsFile;
@@ -97,7 +102,17 @@ namespace DiscUtils.Vmdk
 
             file.Position = 0;
             byte[] firstSector = Utilities.ReadFully(file, Sizes.Sector);
-            _header = SparseExtentHeader.Read(firstSector, 0);
+            _header = HostedSparseExtentHeader.Read(firstSector, 0);
+
+            if (_header.CompressAlgorithm != 0)
+            {
+                throw new NotImplementedException("No support for compressed disks");
+            }
+
+            if ((_header.Flags & (HostedSparseExtentFlags.MarkersInUse | HostedSparseExtentFlags.CompressedGrains)) != 0)
+            {
+                throw new NotImplementedException("No support for streamed disk format");
+            }
 
             _gtCoverage = _header.NumGTEsPerGT * _header.GrainSize * Sizes.Sector;
 
@@ -172,42 +187,137 @@ namespace DiscUtils.Vmdk
             int grainOffset = grainTableOffset - (grain * grainSize);
 
             int numToRead = Math.Min(count, grainSize - grainOffset);
-            _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
-            int numRead = _fileStream.Read(buffer, offset, numToRead);
+            int numRead;
+
+            if (_grainTable[grain] == 0)
+            {
+                _parentDiskStream.Position = _position + _diskOffset;
+                numRead = _parentDiskStream.Read(buffer, offset, numToRead);
+            }
+            else
+            {
+                _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
+                numRead = _fileStream.Read(buffer, offset, numToRead);
+            }
 
             _position += numRead;
             return numRead;
         }
 
-        public override long Seek(long offset, System.IO.SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            long effectiveOffset = offset;
+            if (origin == SeekOrigin.Current)
+            {
+                effectiveOffset += _position;
+            }
+            else if (origin == SeekOrigin.End)
+            {
+                effectiveOffset += _header.Capacity * Sizes.Sector;
+            }
+
+            if (offset < 0)
+            {
+                throw new IOException("Attempt to move before beginning of disk");
+            }
+            else
+            {
+                _position = effectiveOffset;
+                return _position;
+            }
         }
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            int totalWritten = 0;
+            while (totalWritten < count)
+            {
+                int grainTable = (int)(_position / _gtCoverage);
+                int grainTableOffset = (int)(_position - (grainTable * _gtCoverage));
+
+                LoadGrainTable(grainTable);
+
+                int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+                int grain = grainTableOffset / grainSize;
+                int grainOffset = grainTableOffset - (grain * grainSize);
+
+                if (_grainTable[grain] == 0)
+                {
+                    AllocateGrain(grainTable, grain);
+                }
+
+                int numToWrite = Math.Min(count - totalWritten, grainSize - grainOffset);
+                _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
+                _fileStream.Write(buffer, offset + totalWritten, numToWrite);
+
+                _position += numToWrite;
+                totalWritten += numToWrite;
+            }
         }
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // Note: For now we only go down to grain table granularity (large chunks), we don't inspect the
+                // grain tables themselves to indicate which sectors are present.
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long blockSize = _gtCoverage;
+                int i = 0;
+                while (i < _globalDirectory.Length)
+                {
+                    // Find next stored block
+                    while (i < _globalDirectory.Length && _globalDirectory[i] == 0)
+                    {
+                        ++i;
+                    }
+                    int start = i;
+
+                    // Find next absent block
+                    while (i < _globalDirectory.Length && _globalDirectory[i] != 0)
+                    {
+                        ++i;
+                    }
+
+                    if (start != i)
+                    {
+                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
+                    }
+                }
+
+                var parentExtents = StreamExtent.Intersect(_parentDiskStream.Extents, new StreamExtent[]{new StreamExtent(_diskOffset, Length)});
+                parentExtents = StreamExtent.Offset( parentExtents, -_diskOffset);
+                return StreamExtent.Union(extents, parentExtents);
+            }
         }
 
         private void LoadGlobalDirectory()
         {
             int numGTs = (int)Utilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
+
             _globalDirectory = new uint[numGTs];
             _fileStream.Position = _header.GdOffset * Sizes.Sector;
             byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
             for (int i = 0; i < _globalDirectory.Length; ++i)
             {
                 _globalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
+            }
+
+            if ((_header.Flags & HostedSparseExtentFlags.RedundantGrainTable) != 0)
+            {
+                _redundantGlobalDirectory = new uint[numGTs];
+                _fileStream.Position = _header.RgdOffset * Sizes.Sector;
+                gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
+                for (int i = 0; i < _globalDirectory.Length; ++i)
+                {
+                    _redundantGlobalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
+                }
             }
         }
 
@@ -236,6 +346,46 @@ namespace DiscUtils.Vmdk
             _currentGrain = index;
             _grainTable = newGrainTable;
         }
+
+        private void AllocateGrain(int grainTable, int grain)
+        {
+            // Calculate start pos for new grain
+            long grainStartPos = Utilities.RoundUp(_fileStream.Length, _header.GrainSize * Sizes.Sector);
+
+            // Copy-on-write semantics, read the bytes from parent and write them out to this extent.
+            _parentDiskStream.Position = _diskOffset + grainStartPos;
+            byte[] content = Utilities.ReadFully(_parentDiskStream, (int)_header.GrainSize * Sizes.Sector);
+            _fileStream.Position = grainStartPos;
+            _fileStream.Write(content, 0, content.Length);
+
+            LoadGrainTable(grainTable);
+            _grainTable[grain] = (uint)(grainStartPos / Sizes.Sector);
+            WriteGrainTable();
+        }
+
+        private void WriteGrainTable()
+        {
+            if (_grainTable == null)
+            {
+                throw new InvalidOperationException("No grain table loaded");
+            }
+
+            byte[] buffer = new byte[_header.NumGTEsPerGT * 4];
+            for (int i = 0; i < _grainTable.Length; ++i)
+            {
+                Utilities.WriteBytesLittleEndian(_grainTable[i], buffer, i * 4);
+            }
+
+            _fileStream.Position = _globalDirectory[_currentGrain] * Sizes.Sector;
+            _fileStream.Write(buffer, 0, buffer.Length);
+
+            if (_redundantGlobalDirectory != null)
+            {
+                _fileStream.Position = _redundantGlobalDirectory[_currentGrain] * Sizes.Sector;
+                _fileStream.Write(buffer, 0, buffer.Length);
+            }
+        }
+
 
     }
 }

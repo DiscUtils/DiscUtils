@@ -120,6 +120,21 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        public static string FormatAccess(ExtentAccess access)
+        {
+            switch (access)
+            {
+                case ExtentAccess.None:
+                    return "NOACCESS";
+                case ExtentAccess.ReadOnly:
+                    return "RDONLY";
+                case ExtentAccess.ReadWrite:
+                    return "RW";
+                default:
+                    throw new ArgumentException("Unknown access type", "access");
+            }
+        }
+
         public static ExtentType ParseType(string type)
         {
             if (type == "FLAT")
@@ -153,6 +168,29 @@ namespace DiscUtils.Vmdk
             else
             {
                 throw new ArgumentException("Unknown extent type", "type");
+            }
+        }
+
+        public static string FormatExtentType(ExtentType type)
+        {
+            switch (type)
+            {
+                case ExtentType.Flat:
+                    return "FLAT";
+                case ExtentType.Sparse:
+                    return "SPARSE";
+                case ExtentType.Zero:
+                    return "ZERO";
+                case ExtentType.Vmfs:
+                    return "VMFS";
+                case ExtentType.VmfsSparse:
+                    return "VMFSSPARSE";
+                case ExtentType.VmfsRdm:
+                    return "VMFSRDM";
+                case ExtentType.VmfsRaw:
+                    return "VMFSRAW";
+                default:
+                    throw new ArgumentException("Unknown extent type", "type");
             }
         }
 
@@ -198,6 +236,18 @@ namespace DiscUtils.Vmdk
             }
 
             return result.ToArray();
+        }
+
+
+
+        public override string ToString()
+        {
+            string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" + _fileName + "\"";
+            if (_type != ExtentType.Sparse && _type != ExtentType.VmfsSparse && _type != ExtentType.Zero)
+            {
+                return basic + " " + _offset;
+            }
+            return basic;
         }
     }
 }

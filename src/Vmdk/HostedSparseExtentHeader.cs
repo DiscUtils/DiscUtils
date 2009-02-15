@@ -23,13 +23,13 @@
 
 namespace DiscUtils.Vmdk
 {
-    internal class SparseExtentHeader
+    internal class HostedSparseExtentHeader
     {
         public const uint VmdkMagicNumber = 0x564d444b;
 
         public uint MagicNumber;
         public uint Version;
-        public uint Flags;
+        public HostedSparseExtentFlags Flags;
         public long Capacity;
         public long GrainSize;
         public long DescriptorOffset;
@@ -45,12 +45,12 @@ namespace DiscUtils.Vmdk
         public byte DoubleEndLineChar2;
         public ushort CompressAlgorithm;
 
-        public static SparseExtentHeader Read(byte[] buffer, int offset)
+        public static HostedSparseExtentHeader Read(byte[] buffer, int offset)
         {
-            SparseExtentHeader hdr = new SparseExtentHeader();
+            HostedSparseExtentHeader hdr = new HostedSparseExtentHeader();
             hdr.MagicNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             hdr.Version = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            hdr.Flags = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
+            hdr.Flags = (HostedSparseExtentFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 8);
             hdr.Capacity = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
             hdr.GrainSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x14);
             hdr.DescriptorOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x1C);

@@ -38,9 +38,10 @@ namespace DiscUtils.Vmdk
         /// Creates a new instance from a file on disk.
         /// </summary>
         /// <param name="path">The path to the disk</param>
-        public Disk(string path)
+        /// <param name="access">The access requested to the disk</param>
+        public Disk(string path, FileAccess access)
         {
-            _file = new DiskImageFile(path);
+            _file = new DiskImageFile(path, access);
         }
 
         /// <summary>

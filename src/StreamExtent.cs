@@ -210,6 +210,20 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Offsets the extents of a stream.
+        /// </summary>
+        /// <param name="stream">The stream extents</param>
+        /// <param name="delta">The amount to offset the extents by</param>
+        /// <returns>The stream extents, offset by delta.</returns>
+        public static IEnumerable<StreamExtent> Offset(IEnumerable<StreamExtent> stream, long delta)
+        {
+            foreach (StreamExtent extent in stream)
+            {
+                yield return new StreamExtent(extent.Start + delta, extent.Length);
+            }
+        }
+
+        /// <summary>
         /// Indicates if this StreamExtent is equal to another.
         /// </summary>
         /// <param name="other">The extent to compare</param>
