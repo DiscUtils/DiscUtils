@@ -45,6 +45,18 @@ namespace DiscUtils.Vmdk
         public byte DoubleEndLineChar2;
         public ushort CompressAlgorithm;
 
+        public HostedSparseExtentHeader()
+        {
+            MagicNumber = VmdkMagicNumber;
+            Version = 1;
+            SingleEndLineChar = (byte)'\n';
+            NonEndLineChar = (byte)' ';
+            DoubleEndLineChar1 = (byte)'\r';
+            DoubleEndLineChar2 = (byte)'\n';
+            CompressAlgorithm = 0;
+            UncleanShutdown = 0;
+        }
+
         public static HostedSparseExtentHeader Read(byte[] buffer, int offset)
         {
             HostedSparseExtentHeader hdr = new HostedSparseExtentHeader();
@@ -67,6 +79,29 @@ namespace DiscUtils.Vmdk
             hdr.CompressAlgorithm = Utilities.ToUInt16LittleEndian(buffer, offset + 0x4D);
 
             return hdr;
+        }
+
+        public byte[] GetBytes()
+        {
+            byte[] buffer = new byte[Sizes.Sector];
+            Utilities.WriteBytesLittleEndian(MagicNumber, buffer, 0x00);
+            Utilities.WriteBytesLittleEndian(Version, buffer, 0x04);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, 0x08);
+            Utilities.WriteBytesLittleEndian(Capacity, buffer, 0x0C);
+            Utilities.WriteBytesLittleEndian(GrainSize, buffer, 0x14);
+            Utilities.WriteBytesLittleEndian(DescriptorOffset, buffer, 0x1C);
+            Utilities.WriteBytesLittleEndian(DescriptorSize, buffer, 0x24);
+            Utilities.WriteBytesLittleEndian(NumGTEsPerGT, buffer, 0x2C);
+            Utilities.WriteBytesLittleEndian(RgdOffset, buffer, 0x30);
+            Utilities.WriteBytesLittleEndian(GdOffset, buffer, 0x38);
+            Utilities.WriteBytesLittleEndian(Overhead, buffer, 0x40);
+            buffer[0x48] = UncleanShutdown;
+            buffer[0x49] = SingleEndLineChar;
+            buffer[0x4A] = NonEndLineChar;
+            buffer[0x4B] = DoubleEndLineChar1;
+            buffer[0x4C] = DoubleEndLineChar2;
+            Utilities.WriteBytesLittleEndian(CompressAlgorithm, buffer, 0x4D);
+            return buffer;
         }
     }
 }

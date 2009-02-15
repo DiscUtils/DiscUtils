@@ -53,6 +53,19 @@ namespace DiscUtils.Vmdk
         private string _fileName;
         private long _offset;
 
+        public ExtentDescriptor()
+        {
+        }
+
+        public ExtentDescriptor(ExtentAccess access, long size, ExtentType type, string fileName, long offset)
+        {
+            _access = access;
+            _sizeInSectors = size;
+            _type = type;
+            _fileName = fileName;
+            _offset = offset;
+        }
+
         public ExtentAccess Access
         {
             get { return _access; }

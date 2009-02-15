@@ -87,6 +87,39 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
+        {
+            if (type != DiskCreateType.MonolithicSparse)
+            {
+                throw new NotImplementedException("Only MonolithicSparse implemented");
+            }
+
+            using(FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            {
+                long descriptorStart;
+                long actualSize = CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
+
+                DescriptorFile descriptor = new DescriptorFile();
+                descriptor.DiskGeometry = Geometry.FromCapacity(actualSize);
+                descriptor.ContentId = (uint)new Random().Next();
+                descriptor.CreateType = type;
+                descriptor.Extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, actualSize / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0));
+                descriptor.UniqueId = Guid.NewGuid();
+
+                fs.Position = descriptorStart * Sizes.Sector;
+                descriptor.Write(fs);
+            }
+
+            return new DiskImageFile(path, FileAccess.ReadWrite);
+        }
+
+        /// <summary>
         /// Gets an indication as to whether the disk file is sparse.
         /// </summary>
         public override bool IsSparse
@@ -176,6 +209,118 @@ namespace DiscUtils.Vmdk
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        private static long CreateExtent(Stream extentStream, long size, ExtentType type, long descriptorLength, out long descriptorStart)
+        {
+            if (type == ExtentType.Flat || type == ExtentType.Vmfs)
+            {
+                extentStream.SetLength(size);
+                descriptorStart = 0;
+                return size;
+            }
+
+            if (type != ExtentType.Sparse)
+            {
+                throw new NotImplementedException("Extent type not implemented");
+            }
+
+            // Figure out grain size and number of grain tables, and adjust actual extent size to be a multiple
+            // of grain size
+            int targetGrainTables = 256;
+            const int gtesPerGt = 512;
+            long grainSize = Math.Max(size / (targetGrainTables * gtesPerGt * Sizes.Sector), 8);
+            int numGrainTables = (int)Utilities.Ceil(size, grainSize * gtesPerGt * Sizes.Sector);
+            long actualSize = numGrainTables * grainSize * gtesPerGt * Sizes.Sector;
+
+            descriptorLength = Utilities.RoundUp(descriptorLength, Sizes.Sector);
+            descriptorStart = 0;
+            if (descriptorLength != 0)
+            {
+                descriptorStart = 1;
+            }
+
+            long redundantGrainDirStart = descriptorStart + Utilities.Ceil(descriptorLength, Sizes.Sector);
+            long redundantGrainDirLength = numGrainTables * 4;
+
+            long redundantGrainTablesStart = redundantGrainDirStart + Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
+            long redundantGrainTablesLength = numGrainTables * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector);
+
+            long grainDirStart = redundantGrainTablesStart + Utilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
+            long grainDirLength = numGrainTables * 4;
+
+            long grainTablesStart = grainDirStart + Utilities.Ceil(grainDirLength, Sizes.Sector);
+            long grainTablesLength = numGrainTables * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector);
+
+            long dataStart = Utilities.RoundUp(grainTablesStart + Utilities.Ceil(grainTablesLength, Sizes.Sector), grainSize);
+
+            // Generate the header, and write it
+            HostedSparseExtentHeader header = new HostedSparseExtentHeader();
+            header.Flags = HostedSparseExtentFlags.ValidLineDetectionTest | HostedSparseExtentFlags.RedundantGrainTable;
+            header.Capacity = actualSize / Sizes.Sector;
+            header.GrainSize = grainSize;
+            header.DescriptorOffset = descriptorStart;
+            header.DescriptorSize = descriptorLength / Sizes.Sector;
+            header.NumGTEsPerGT = gtesPerGt;
+            header.RgdOffset = redundantGrainDirStart;
+            header.GdOffset = grainDirStart;
+            header.Overhead = dataStart;
+
+            extentStream.Position = 0;
+            extentStream.Write(header.GetBytes(), 0, Sizes.Sector);
+
+
+            // Zero-out the descriptor space
+            if (descriptorLength > 0)
+            {
+                byte[] descriptor = new byte[descriptorLength];
+                extentStream.Position = descriptorStart * Sizes.Sector;
+                extentStream.Write(descriptor, 0, descriptor.Length);
+            }
+
+
+            // Generate the redundant grain dir, and write it
+            byte[] grainDir = new byte[numGrainTables * 4];
+            for (int i = 0; i < numGrainTables; ++i)
+            {
+                Utilities.WriteBytesLittleEndian((uint)(redundantGrainTablesStart + (i * Utilities.Ceil(gtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
+            }
+            extentStream.Position = redundantGrainDirStart * Sizes.Sector;
+            extentStream.Write(grainDir, 0, grainDir.Length);
+
+
+            // Write out the blank grain tables
+            byte[] grainTable = new byte[gtesPerGt * 4];
+            for (int i = 0; i < numGrainTables; ++i)
+            {
+                extentStream.Position = (redundantGrainTablesStart * Sizes.Sector) + (i * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector));
+                extentStream.Write(grainTable, 0, grainTable.Length);
+            }
+
+
+            // Generate the main grain dir, and write it
+            for (int i = 0; i < numGrainTables; ++i)
+            {
+                Utilities.WriteBytesLittleEndian((uint)(grainTablesStart + (i * Utilities.Ceil(gtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
+            }
+            extentStream.Position = grainDirStart * Sizes.Sector;
+            extentStream.Write(grainDir, 0, grainDir.Length);
+
+
+            // Write out the blank grain tables
+            for (int i = 0; i < numGrainTables; ++i)
+            {
+                extentStream.Position = (grainTablesStart * Sizes.Sector) + (i * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector));
+                extentStream.Write(grainTable, 0, grainTable.Length);
+            }
+
+            // Make sure stream is correct length
+            if (extentStream.Length != dataStart * Sizes.Sector)
+            {
+                extentStream.SetLength(dataStart * Sizes.Sector);
+            }
+
+            return actualSize;
         }
 
         private void LoadDescriptor(Stream s)

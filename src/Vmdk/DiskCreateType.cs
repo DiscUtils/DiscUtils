@@ -23,20 +23,74 @@
 
 namespace DiscUtils.Vmdk
 {
-    internal enum DiskCreateType
+    /// <summary>
+    /// Enumeration of VMDK disk types.
+    /// </summary>
+    public enum DiskCreateType
     {
+        /// <summary>
+        /// None - do not use.
+        /// </summary>
         None = 0,
+
+        /// <summary>
+        /// VMWare Workstation single-file dynamic disk.
+        /// </summary>
         MonolithicSparse = 1,
+
+        /// <summary>
+        /// ESX Dynamic Disk.
+        /// </summary>
         VmfsSparse = 2,
+
+        /// <summary>
+        /// VMWare Workstation single-extent pre-allocated disk.
+        /// </summary>
         MonolithicFlat = 3,
+
+        /// <summary>
+        /// ESX pre-allocated disk.
+        /// </summary>
         Vmfs = 4,
+
+        /// <summary>
+        /// VMWare Workstation multi-extent dynamic disk.
+        /// </summary>
         TwoGbMaxExtentSparse = 5,
+
+        /// <summary>
+        /// VMWare Workstation multi-extent pre-allocated disk.
+        /// </summary>
         TwoGbMaxExtentFlat = 6,
+
+        /// <summary>
+        /// Full device disk.
+        /// </summary>
         FullDevice = 7,
+
+        /// <summary>
+        /// ESX raw disk.
+        /// </summary>
         VmfsRaw = 8,
+
+        /// <summary>
+        /// Partition disk.
+        /// </summary>
         PartitionedDevice = 9,
+
+        /// <summary>
+        /// ESX RDM disk.
+        /// </summary>
         VmfsRawDeviceMap = 10,
+
+        /// <summary>
+        /// ESX Passthrough RDM disk.
+        /// </summary>
         VmfsPassthroughRawDeviceMap = 11,
+
+        /// <summary>
+        /// A streaming-optimized disk.
+        /// </summary>
         StreamOptimized = 12
     }
 }

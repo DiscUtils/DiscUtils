@@ -47,6 +47,23 @@ namespace DiscUtils.Vmdk
         private const string DiskDbHardwareVersion = "ddb.virtualHWVersion";
         private const string DiskDbUuid = "ddb.uuid";
 
+        public DescriptorFile()
+        {
+            _header = new List<DescriptorFileEntry>();
+            _descriptors = new List<ExtentDescriptor>();
+            _diskDataBase = new List<DescriptorFileEntry>();
+
+            _header.Add(new DescriptorFileEntry(HeaderVersion, "1", DescriptorFileEntryType.Plain));
+            _header.Add(new DescriptorFileEntry(HeaderContentId, "ffffffff", DescriptorFileEntryType.Plain));
+            _header.Add(new DescriptorFileEntry(HeaderParentContentId, "ffffffff", DescriptorFileEntryType.Plain));
+            _header.Add(new DescriptorFileEntry(HeaderCreateType, "", DescriptorFileEntryType.Quoted));
+
+            _diskDataBase.Add(new DescriptorFileEntry(DiskDbAdapterType, "lsilogic", DescriptorFileEntryType.Quoted));
+            _diskDataBase.Add(new DescriptorFileEntry(DiskDbSectors, "", DescriptorFileEntryType.Quoted));
+            _diskDataBase.Add(new DescriptorFileEntry(DiskDbHeads, "", DescriptorFileEntryType.Quoted));
+            _diskDataBase.Add(new DescriptorFileEntry(DiskDbCylinders, "", DescriptorFileEntryType.Quoted));
+        }
+
         public DescriptorFile(Stream source)
         {
             _header = new List<DescriptorFileEntry>();
@@ -70,11 +87,13 @@ namespace DiscUtils.Vmdk
         public DiskCreateType CreateType
         {
             get { return ParseCreateType(GetHeader(HeaderCreateType)); }
+            set { SetHeader(HeaderCreateType, FormatCreateType(value)); }
         }
 
         public string ParentFileNameHint
         {
             get { return GetHeader(HeaderParentFileNameHint); }
+            set { SetHeader(HeaderParentFileNameHint, value); }
         }
 
         public List<ExtentDescriptor> Extents
@@ -91,16 +110,24 @@ namespace DiscUtils.Vmdk
                     int.Parse(GetDiskDatabase(DiskDbHeads), CultureInfo.InvariantCulture),
                     int.Parse(GetDiskDatabase(DiskDbSectors), CultureInfo.InvariantCulture));
             }
+            set
+            {
+                SetDiskDatabase(DiskDbCylinders, value.Cylinders.ToString());
+                SetDiskDatabase(DiskDbHeads, value.HeadsPerCylinder.ToString());
+                SetDiskDatabase(DiskDbSectors, value.SectorsPerTrack.ToString());
+            }
         }
 
         public Guid UniqueId
         {
             get { return ParseUuid(GetDiskDatabase(DiskDbUuid)); }
+            set { SetDiskDatabase(DiskDbUuid, FormatUuid(value)); }
         }
 
         public DiskAdapterType AdaptorType
         {
             get { return ParseAdapterType(GetDiskDatabase(DiskDbAdapterType)); }
+            set { SetDiskDatabase(DiskDbAdapterType, FormatAdapterType(value)); }
         }
 
         private static DiskAdapterType ParseAdapterType(string value)
@@ -115,6 +142,23 @@ namespace DiscUtils.Vmdk
                     return DiskAdapterType.LsiLogicScsi;
                 case "legacyESX":
                     return DiskAdapterType.LegacyESX;
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
+            }
+        }
+
+        private static string FormatAdapterType(DiskAdapterType value)
+        {
+            switch (value)
+            {
+                case DiskAdapterType.Ide:
+                    return "ide";
+                case DiskAdapterType.BusLogicScsi:
+                    return "buslogic";
+                case DiskAdapterType.LsiLogicScsi:
+                    return "lsilogic";
+                case DiskAdapterType.LegacyESX:
+                    return "legacyESX";
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
             }
@@ -153,6 +197,39 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        private static string FormatCreateType(DiskCreateType value)
+        {
+            switch (value)
+            {
+                case DiskCreateType.MonolithicSparse:
+                    return "monolithicSparse";
+                case DiskCreateType.VmfsSparse:
+                    return "vmfsSparse";
+                case DiskCreateType.MonolithicFlat:
+                    return "monolithicFlat";
+                case DiskCreateType.Vmfs:
+                    return "vmfs";
+                case DiskCreateType.TwoGbMaxExtentSparse:
+                    return "twoGbMaxExtentSparse";
+                case DiskCreateType.TwoGbMaxExtentFlat:
+                    return "twoGbMaxExtentFlat";
+                case DiskCreateType.FullDevice:
+                    return "fullDevice";
+                case DiskCreateType.VmfsRaw:
+                    return "vmfsRaw";
+                case DiskCreateType.PartitionedDevice:
+                    return "partitionedDevice";
+                case DiskCreateType.VmfsRawDeviceMap:
+                    return "vmfsRawDeviceMap";
+                case DiskCreateType.VmfsPassthroughRawDeviceMap:
+                    return "vmfsPassthroughRawDeviceMap";
+                case DiskCreateType.StreamOptimized:
+                    return "streamOptimized";
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
+            }
+        }
+
         private static Guid ParseUuid(string value)
         {
             byte[] data = new byte[16];
@@ -168,6 +245,15 @@ namespace DiscUtils.Vmdk
             }
 
             return new Guid(data);
+        }
+
+        private static string FormatUuid(Guid value)
+        {
+            byte[] data = value.ToByteArray();
+            return string.Format(
+                "{0:x2} {1:x2} {2:x2} {3:x2} {4:x2} {5:x2} {6:x2} {7:x2}-{8:x2} {9:x2} {10:x2} {11:x2} {12:x2} {13:x2} {14:x2} {15:x2}",
+                data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
+                data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15]);
         }
 
         private string GetHeader(string key)
@@ -192,7 +278,7 @@ namespace DiscUtils.Vmdk
                     return;
                 }
             }
-            _header.Add(new DescriptorFileEntry(HeaderContentId, newValue, DescriptorFileEntryType.Plain));
+            _header.Add(new DescriptorFileEntry(key, newValue, DescriptorFileEntryType.Plain));
         }
 
         private string GetDiskDatabase(string key)
@@ -205,6 +291,19 @@ namespace DiscUtils.Vmdk
                 }
             }
             return null;
+        }
+
+        private void SetDiskDatabase(string key, string value)
+        {
+            foreach (var entry in _diskDataBase)
+            {
+                if (entry.Key == key)
+                {
+                    entry.Value = value;
+                    return;
+                }
+            }
+            _diskDataBase.Add(new DescriptorFileEntry(key, value, DescriptorFileEntryType.Quoted));
         }
 
         private void Load(Stream source)
