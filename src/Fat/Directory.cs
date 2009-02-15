@@ -103,7 +103,7 @@ namespace DiscUtils.Fat
             List<DirectoryEntry> files = new List<DirectoryEntry>(_entries.Count);
             foreach (DirectoryEntry dirEntry in _entries.Values)
             {
-                if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
+                if ((dirEntry.Attributes & (FatAttributes.Directory | FatAttributes.VolumeId)) == 0)
                 {
                     files.Add(dirEntry);
                 }
