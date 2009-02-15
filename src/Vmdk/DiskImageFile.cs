@@ -22,6 +22,8 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace DiscUtils.Vmdk
 {
@@ -95,26 +97,87 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
-            if (type != DiskCreateType.MonolithicSparse)
+            if (type == DiskCreateType.MonolithicSparse)
             {
-                throw new NotImplementedException("Only MonolithicSparse implemented");
+                // MonolithicSparse is a special case, the descriptor is embedded in the file itself...
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    long descriptorStart;
+                    long extentSize = CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
+
+                    DescriptorFile descriptor = new DescriptorFile();
+                    descriptor.DiskGeometry = Geometry.FromCapacity(extentSize);
+                    descriptor.ContentId = (uint)new Random().Next();
+                    descriptor.CreateType = type;
+                    descriptor.Extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0));
+                    descriptor.UniqueId = Guid.NewGuid();
+
+                    fs.Position = descriptorStart * Sizes.Sector;
+                    descriptor.Write(fs);
+                }
+            }
+            else
+            {
+                ExtentType extentType = CreateTypeToExtentType(type);
+                long totalSize = 0;
+                List<ExtentDescriptor> extents = new List<ExtentDescriptor>();
+                if (type == DiskCreateType.MonolithicFlat || type == DiskCreateType.VmfsSparse || type == DiskCreateType.Vmfs)
+                {
+                    string adornment = (type == DiskCreateType.VmfsSparse) ? "sparse" : "flat";
+                    string fileName = AdornFileName(Path.GetFileName(path), adornment);
+
+                    using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
+                    {
+                        long extentSize = CreateExtent(fs, capacity, extentType);
+                        extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
+                        totalSize = extentSize;
+                    }
+                }
+                else if (type == DiskCreateType.TwoGbMaxExtentFlat || type == DiskCreateType.TwoGbMaxExtentSparse)
+                {
+                    int i = 1;
+                    while (totalSize < capacity)
+                    {
+                        string adornment;
+                        if (type == DiskCreateType.TwoGbMaxExtentSparse)
+                        {
+                            adornment = string.Format(CultureInfo.InvariantCulture, "s{0:x3}", i);
+                        }
+                        else
+                        {
+                            adornment = string.Format(CultureInfo.InvariantCulture, "{0:x6}", i);
+                        }
+
+                        string fileName = AdornFileName(Path.GetFileName(path), adornment);
+
+                        using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            long extentSize = CreateExtent(fs, Math.Min(2 * Sizes.OneGiB, capacity - totalSize), extentType);
+                            extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
+                            totalSize += extentSize;
+                        }
+
+                        ++i;
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException("Creating disks of this type is not supported");
+                }
+
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    DescriptorFile descriptor = new DescriptorFile();
+                    descriptor.DiskGeometry = Geometry.FromCapacity(totalSize);
+                    descriptor.ContentId = (uint)new Random().Next();
+                    descriptor.CreateType = type;
+                    descriptor.Extents.AddRange(extents);
+                    descriptor.UniqueId = Guid.NewGuid();
+
+                    descriptor.Write(fs);
+                }
             }
 
-            using(FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-            {
-                long descriptorStart;
-                long actualSize = CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
-
-                DescriptorFile descriptor = new DescriptorFile();
-                descriptor.DiskGeometry = Geometry.FromCapacity(actualSize);
-                descriptor.ContentId = (uint)new Random().Next();
-                descriptor.CreateType = type;
-                descriptor.Extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, actualSize / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0));
-                descriptor.UniqueId = Guid.NewGuid();
-
-                fs.Position = descriptorStart * Sizes.Sector;
-                descriptor.Write(fs);
-            }
 
             return new DiskImageFile(path, FileAccess.ReadWrite);
         }
@@ -211,6 +274,12 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        private static long CreateExtent(Stream extentStream, long size, ExtentType type)
+        {
+            long descriptorStart;
+            return CreateExtent(extentStream, size, type, 0, out descriptorStart);
+        }
+
         private static long CreateExtent(Stream extentStream, long size, ExtentType type, long descriptorLength, out long descriptorStart)
         {
             if (type == ExtentType.Flat || type == ExtentType.Vmfs)
@@ -240,7 +309,7 @@ namespace DiscUtils.Vmdk
                 descriptorStart = 1;
             }
 
-            long redundantGrainDirStart = descriptorStart + Utilities.Ceil(descriptorLength, Sizes.Sector);
+            long redundantGrainDirStart = Math.Max(descriptorStart, 1) + Utilities.Ceil(descriptorLength, Sizes.Sector);
             long redundantGrainDirLength = numGrainTables * 4;
 
             long redundantGrainTablesStart = redundantGrainDirStart + Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
@@ -355,6 +424,49 @@ namespace DiscUtils.Vmdk
                         descriptorStream.Write(blank, 0, blank.Length);
                     }
                 }
+            }
+        }
+
+        private static string AdornFileName(string name, string adornment)
+        {
+            if (!name.EndsWith(".vmdk", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("name must end in .vmdk to be adorned");
+            }
+
+            return name.Substring(0, name.Length - 5) + "-" + adornment + ".vmdk";
+        }
+
+        private static ExtentType CreateTypeToExtentType(DiskCreateType type)
+        {
+            switch (type)
+            {
+                case DiskCreateType.FullDevice:
+                case DiskCreateType.MonolithicFlat:
+                case DiskCreateType.PartitionedDevice:
+                case DiskCreateType.TwoGbMaxExtentFlat:
+                    return ExtentType.Flat;
+
+                case DiskCreateType.MonolithicSparse:
+                case DiskCreateType.StreamOptimized:
+                case DiskCreateType.TwoGbMaxExtentSparse:
+                    return ExtentType.Sparse;
+
+                case DiskCreateType.Vmfs:
+                    return ExtentType.Vmfs;
+
+                case DiskCreateType.VmfsPassthroughRawDeviceMap:
+                    return ExtentType.VmfsRdm;
+
+                case DiskCreateType.VmfsRaw:
+                case DiskCreateType.VmfsRawDeviceMap:
+                    return ExtentType.VmfsRaw;
+
+                case DiskCreateType.VmfsSparse:
+                    return ExtentType.VmfsSparse;
+
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unable to convert {0}", type));
             }
         }
 

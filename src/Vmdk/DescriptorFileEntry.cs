@@ -89,14 +89,22 @@ namespace DiscUtils.Vmdk
 
         public override string ToString()
         {
+            return ToString(true);
+        }
+
+        public string ToString(bool spaceOut)
+        {
+            // VMWare workstation appears to be sensitive to spaces, wants them for 'header' values, not for DiskDataBase...
+            string sep = spaceOut ? " " : "";
+
             switch (_type)
             {
                 case DescriptorFileEntryType.NoValue:
                     return _key;
                 case DescriptorFileEntryType.Plain:
-                    return _key + " = " + _value;
+                    return _key + sep + "=" + sep + _value;
                 case DescriptorFileEntryType.Quoted:
-                    return _key + " = \"" + _value + "\"";
+                    return _key + sep + "=" + sep + "\"" + _value + "\"";
                 default:
                     throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", _type));
             }

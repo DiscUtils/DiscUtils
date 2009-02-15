@@ -225,7 +225,7 @@ namespace DiscUtils.Vmdk
                     // A quoted value, find end of quotes...
                     int start = idx;
                     idx++;
-                    while (source[idx] != '"' && idx < source.Length)
+                    while (idx < source.Length && source[idx] != '"')
                     {
                         idx++;
                     }
@@ -237,7 +237,7 @@ namespace DiscUtils.Vmdk
                     // An unquoted value, find end of value
                     int start = idx;
                     idx++;
-                    while (source[idx] != ' ' && idx < source.Length)
+                    while (idx < source.Length && source[idx] != ' ')
                     {
                         idx++;
                     }

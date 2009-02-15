@@ -353,7 +353,7 @@ namespace DiscUtils.Vmdk
             content.Append("# Disk DescriptorFile\n");
             for (int i = 0; i < _header.Count; ++i)
             {
-                content.Append(_header[i].ToString() + "\n");
+                content.Append(_header[i].ToString(false) + "\n");
             }
 
             content.Append("\n");
@@ -368,7 +368,7 @@ namespace DiscUtils.Vmdk
             content.Append("#DDB\n");
             for (int i = 0; i < _diskDataBase.Count; ++i)
             {
-                content.Append(_diskDataBase[i].ToString() + "\n");
+                content.Append(_diskDataBase[i].ToString(true) + "\n");
             }
 
             byte[] contentBytes = Encoding.ASCII.GetBytes(content.ToString());
