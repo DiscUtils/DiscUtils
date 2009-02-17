@@ -1555,6 +1555,10 @@ namespace DiscUtils.Fat
             }
 
             DirectoryEntry dirEntry = parent.GetEntry(parentId);
+            if ((dirEntry.Attributes & FatAttributes.Directory) == 0)
+            {
+                throw new DirectoryNotFoundException();
+            }
 
             // If we have this one cached, return it
             Directory result;

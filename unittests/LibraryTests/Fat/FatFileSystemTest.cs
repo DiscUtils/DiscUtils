@@ -116,5 +116,21 @@ namespace DiscUtils.Fat
             Assert.IsNull(fs.Root.Parent);
         }
 
+        [Test]
+        [ExpectedException(typeof(DirectoryNotFoundException))]
+        [Category("ThrowsException")]
+        public void OpenFileAsDir()
+        {
+            FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
+
+            using (Stream s = fs.OpenFile("FOO.TXT", FileMode.Create, FileAccess.ReadWrite))
+            {
+                StreamWriter w = new StreamWriter(s);
+                w.WriteLine("FOO - some sample text");
+                w.Flush();
+            }
+
+            fs.GetFiles("FOO.TXT");
+        }
     }
 }
