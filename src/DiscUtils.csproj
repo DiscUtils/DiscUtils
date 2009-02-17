@@ -184,6 +184,8 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Vmdk\CommonSparseExtentHeader.cs" />
+    <Compile Include="Vmdk\CommonSparseExtentStream.cs" />
     <Compile Include="Vmdk\DescriptorFile.cs" />
     <Compile Include="Vmdk\DescriptorFileEntry.cs" />
     <Compile Include="Vmdk\Disk.cs" />
@@ -194,6 +196,8 @@
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
+    <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
+    <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

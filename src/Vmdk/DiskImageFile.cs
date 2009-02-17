@@ -269,6 +269,14 @@ namespace DiscUtils.Vmdk
                         new ZeroStream(extent.SizeInSectors * Sizes.Sector),
                         true);
 
+                case ExtentType.VmfsSparse:
+                    return new ServerSparseExtentStream(
+                        _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        true,
+                        extentStart,
+                        new ZeroStream(extent.SizeInSectors * Sizes.Sector),
+                        true);
+
                 default:
                     throw new NotSupportedException();
             }
@@ -289,11 +297,39 @@ namespace DiscUtils.Vmdk
                 return size;
             }
 
-            if (type != ExtentType.Sparse)
+            if (type == ExtentType.Sparse)
+            {
+                return CreateSparseExtent(extentStream, size, descriptorLength, out descriptorStart);
+            }
+            else if(type == ExtentType.VmfsSparse)
+            {
+                uint numSectors = (uint)Utilities.Ceil(size, Sizes.Sector);
+                uint numGDEntries = (uint)Utilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
+
+                ServerSparseExtentHeader header = new ServerSparseExtentHeader();
+                header.Capacity = numSectors;
+                header.GrainSize = 1;
+                header.GdOffset = 4;
+                header.NumGdEntries = numGDEntries;
+                header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
+
+                extentStream.Position = 0;
+                extentStream.Write(header.GetBytes(), 0, 4 * Sizes.Sector);
+
+                byte[] blankGlobalDirectory = new byte[numGDEntries * 4];
+                extentStream.Write(blankGlobalDirectory, 0, blankGlobalDirectory.Length);
+
+                descriptorStart = 0;
+                return numSectors * (long)Sizes.Sector;
+            }
+            else
             {
                 throw new NotImplementedException("Extent type not implemented");
             }
+        }
 
+        private static long CreateSparseExtent(Stream extentStream, long size, long descriptorLength, out long descriptorStart)
+        {
             // Figure out grain size and number of grain tables, and adjust actual extent size to be a multiple
             // of grain size
             int targetGrainTables = 256;

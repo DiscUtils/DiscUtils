@@ -23,20 +23,14 @@
 
 namespace DiscUtils.Vmdk
 {
-    internal class HostedSparseExtentHeader
+    internal class HostedSparseExtentHeader : CommonSparseExtentHeader
     {
         public const uint VmdkMagicNumber = 0x564d444b;
 
-        public uint MagicNumber;
-        public uint Version;
         public HostedSparseExtentFlags Flags;
-        public long Capacity;
-        public long GrainSize;
         public long DescriptorOffset;
         public long DescriptorSize;
-        public uint NumGTEsPerGT;
         public long RgdOffset;
-        public long GdOffset;
         public long Overhead;
         public byte UncleanShutdown;
         public byte SingleEndLineChar;
