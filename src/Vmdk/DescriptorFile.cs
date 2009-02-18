@@ -62,6 +62,7 @@ namespace DiscUtils.Vmdk
             _diskDataBase.Add(new DescriptorFileEntry(DiskDbSectors, "", DescriptorFileEntryType.Quoted));
             _diskDataBase.Add(new DescriptorFileEntry(DiskDbHeads, "", DescriptorFileEntryType.Quoted));
             _diskDataBase.Add(new DescriptorFileEntry(DiskDbCylinders, "", DescriptorFileEntryType.Quoted));
+            _diskDataBase.Add(new DescriptorFileEntry(DiskDbHardwareVersion, "4", DescriptorFileEntryType.Quoted));
         }
 
         public DescriptorFile(Stream source)

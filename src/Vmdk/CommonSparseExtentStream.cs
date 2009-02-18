@@ -78,7 +78,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// The current grain that's loaded into _grainTable.
         /// </summary>
-        protected int _currentGrain;
+        protected int _currentGrainTable;
 
         /// <summary>
         /// The data corresponding to the current grain (or null).
@@ -263,7 +263,7 @@ namespace DiscUtils.Vmdk
 
         protected bool LoadGrainTable(int index)
         {
-            if (_grainTable != null && _currentGrain == index)
+            if (_grainTable != null && _currentGrainTable == index)
             {
                 return true;
             }
@@ -289,7 +289,7 @@ namespace DiscUtils.Vmdk
                 newGrainTable[i] = Utilities.ToUInt32LittleEndian(buffer, i * 4);
             }
 
-            _currentGrain = index;
+            _currentGrainTable = index;
             _grainTable = newGrainTable;
             return true;
         }

@@ -103,13 +103,13 @@ namespace DiscUtils.Vmdk
                 using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
                 {
                     long descriptorStart;
-                    long extentSize = CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
+                    CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
 
                     DescriptorFile descriptor = new DescriptorFile();
-                    descriptor.DiskGeometry = Geometry.FromCapacity(extentSize);
+                    descriptor.DiskGeometry = DefaultGeometry(capacity);
                     descriptor.ContentId = (uint)new Random().Next();
                     descriptor.CreateType = type;
-                    descriptor.Extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0));
+                    descriptor.Extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0));
                     descriptor.UniqueId = Guid.NewGuid();
 
                     fs.Position = descriptorStart * Sizes.Sector;
@@ -128,9 +128,9 @@ namespace DiscUtils.Vmdk
 
                     using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
                     {
-                        long extentSize = CreateExtent(fs, capacity, extentType);
-                        extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
-                        totalSize = extentSize;
+                        CreateExtent(fs, capacity, extentType);
+                        extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, extentType, fileName, 0));
+                        totalSize = capacity;
                     }
                 }
                 else if (type == DiskCreateType.TwoGbMaxExtentFlat || type == DiskCreateType.TwoGbMaxExtentSparse)
@@ -152,7 +152,8 @@ namespace DiscUtils.Vmdk
 
                         using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
                         {
-                            long extentSize = CreateExtent(fs, Math.Min(2 * Sizes.OneGiB, capacity - totalSize), extentType);
+                            long extentSize = Math.Min(2 * Sizes.OneGiB - Sizes.OneMiB, capacity - totalSize);
+                            CreateExtent(fs, extentSize, extentType);
                             extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
                             totalSize += extentSize;
                         }
@@ -168,7 +169,7 @@ namespace DiscUtils.Vmdk
                 using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
                 {
                     DescriptorFile descriptor = new DescriptorFile();
-                    descriptor.DiskGeometry = Geometry.FromCapacity(totalSize);
+                    descriptor.DiskGeometry = DefaultGeometry(totalSize);
                     descriptor.ContentId = (uint)new Random().Next();
                     descriptor.CreateType = type;
                     descriptor.Extents.AddRange(extents);
@@ -282,24 +283,25 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        private static long CreateExtent(Stream extentStream, long size, ExtentType type)
+        private static void CreateExtent(Stream extentStream, long size, ExtentType type)
         {
             long descriptorStart;
-            return CreateExtent(extentStream, size, type, 0, out descriptorStart);
+            CreateExtent(extentStream, size, type, 0, out descriptorStart);
         }
 
-        private static long CreateExtent(Stream extentStream, long size, ExtentType type, long descriptorLength, out long descriptorStart)
+        private static void CreateExtent(Stream extentStream, long size, ExtentType type, long descriptorLength, out long descriptorStart)
         {
             if (type == ExtentType.Flat || type == ExtentType.Vmfs)
             {
                 extentStream.SetLength(size);
                 descriptorStart = 0;
-                return size;
+                return;
             }
 
             if (type == ExtentType.Sparse)
             {
-                return CreateSparseExtent(extentStream, size, descriptorLength, out descriptorStart);
+                CreateSparseExtent(extentStream, size, descriptorLength, out descriptorStart);
+                return;
             }
             else if(type == ExtentType.VmfsSparse)
             {
@@ -320,7 +322,7 @@ namespace DiscUtils.Vmdk
                 extentStream.Write(blankGlobalDirectory, 0, blankGlobalDirectory.Length);
 
                 descriptorStart = 0;
-                return numSectors * (long)Sizes.Sector;
+                return;
             }
             else
             {
@@ -328,7 +330,7 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        private static long CreateSparseExtent(Stream extentStream, long size, long descriptorLength, out long descriptorStart)
+        private static void CreateSparseExtent(Stream extentStream, long size, long descriptorLength, out long descriptorStart)
         {
             // Figure out grain size and number of grain tables, and adjust actual extent size to be a multiple
             // of grain size
@@ -336,7 +338,6 @@ namespace DiscUtils.Vmdk
             const int gtesPerGt = 512;
             long grainSize = Math.Max(size / (targetGrainTables * gtesPerGt * Sizes.Sector), 8);
             int numGrainTables = (int)Utilities.Ceil(size, grainSize * gtesPerGt * Sizes.Sector);
-            long actualSize = numGrainTables * grainSize * gtesPerGt * Sizes.Sector;
 
             descriptorLength = Utilities.RoundUp(descriptorLength, Sizes.Sector);
             descriptorStart = 0;
@@ -362,7 +363,7 @@ namespace DiscUtils.Vmdk
             // Generate the header, and write it
             HostedSparseExtentHeader header = new HostedSparseExtentHeader();
             header.Flags = HostedSparseExtentFlags.ValidLineDetectionTest | HostedSparseExtentFlags.RedundantGrainTable;
-            header.Capacity = actualSize / Sizes.Sector;
+            header.Capacity = Utilities.RoundUp(size, grainSize * Sizes.Sector) / Sizes.Sector;
             header.GrainSize = grainSize;
             header.DescriptorOffset = descriptorStart;
             header.DescriptorSize = descriptorLength / Sizes.Sector;
@@ -424,8 +425,6 @@ namespace DiscUtils.Vmdk
             {
                 extentStream.SetLength(dataStart * Sizes.Sector);
             }
-
-            return actualSize;
         }
 
         private void LoadDescriptor(Stream s)
@@ -504,6 +503,32 @@ namespace DiscUtils.Vmdk
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unable to convert {0}", type));
             }
+        }
+
+        private static Geometry DefaultGeometry(long diskSize)
+        {
+            int heads;
+            int sectors;
+
+            if (diskSize < Sizes.OneGiB)
+            {
+                heads = 64;
+                sectors = 32;
+            }
+            else if (diskSize < 2 * Sizes.OneGiB)
+            {
+                heads = 128;
+                sectors = 32;
+            }
+            else
+            {
+                heads = 255;
+                sectors = 63;
+            }
+
+            int cylinders = (int)(diskSize / (heads * sectors * Sizes.Sector));
+
+            return new Geometry(cylinders, heads, sectors);
         }
 
     }

@@ -136,12 +136,12 @@ namespace DiscUtils.Vmdk
                 Utilities.WriteBytesLittleEndian(_grainTable[i], buffer, i * 4);
             }
 
-            _fileStream.Position = _globalDirectory[_currentGrain] * Sizes.Sector;
+            _fileStream.Position = _globalDirectory[_currentGrainTable] * Sizes.Sector;
             _fileStream.Write(buffer, 0, buffer.Length);
 
             if (_redundantGlobalDirectory != null)
             {
-                _fileStream.Position = _redundantGlobalDirectory[_currentGrain] * Sizes.Sector;
+                _fileStream.Position = _redundantGlobalDirectory[_currentGrainTable] * Sizes.Sector;
                 _fileStream.Write(buffer, 0, buffer.Length);
             }
         }
