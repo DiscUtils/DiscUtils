@@ -32,7 +32,7 @@ namespace DiscUtils.Vdi
         private const uint BlockZero = unchecked((uint)(int)~1);
 
         private Stream _fileStream;
-        private bool _ownsStream;
+        private Ownership _ownsStream;
         private HeaderRecord _fileHeader;
 
         private uint[] _blockTable;
@@ -43,7 +43,7 @@ namespace DiscUtils.Vdi
 
         private bool _isDisposed;
 
-        public DiskStream(Stream fileStream, bool ownsStream, HeaderRecord fileHeader)
+        public DiskStream(Stream fileStream, Ownership ownsStream, HeaderRecord fileHeader)
         {
             _fileStream = fileStream;
             _fileHeader = fileHeader;
@@ -58,7 +58,7 @@ namespace DiscUtils.Vdi
             _isDisposed = true;
             try
             {
-                if (_ownsStream && _fileStream != null)
+                if (_ownsStream == Ownership.Dispose && _fileStream != null)
                 {
                     _fileStream.Dispose();
                     _fileStream = null;

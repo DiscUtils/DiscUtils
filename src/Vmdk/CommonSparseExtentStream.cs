@@ -38,7 +38,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Indicates if this object controls the lifetime of _fileStream.
         /// </summary>
-        protected bool _ownsFileStream;
+        protected Ownership _ownsFileStream;
 
         /// <summary>
         /// Offset of this extent within the disk.
@@ -53,7 +53,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Indicates if this object controls the lifetime of _parentDiskStream.
         /// </summary>
-        protected bool _ownsParentDiskStream;
+        protected Ownership _ownsParentDiskStream;
 
         /// <summary>
         /// The Global Directory for this extent.
@@ -97,13 +97,13 @@ namespace DiscUtils.Vmdk
             {
                 if (disposing)
                 {
-                    if (_ownsFileStream && _fileStream != null)
+                    if (_ownsFileStream == Ownership.Dispose && _fileStream != null)
                     {
                         _fileStream.Dispose();
                         _fileStream = null;
                     }
 
-                    if (_ownsParentDiskStream && _parentDiskStream != null)
+                    if (_ownsParentDiskStream == Ownership.Dispose && _parentDiskStream != null)
                     {
                         _parentDiskStream.Dispose();
                         _parentDiskStream = null;

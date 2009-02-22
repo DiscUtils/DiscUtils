@@ -33,13 +33,14 @@ namespace DiscUtils
         private long _length;
 
         private Stream _parent;
-        private bool _ownsParent;
+        private Ownership _ownsParent;
 
         public SubStream(Stream parent, long first, long length)
         {
             _parent = parent;
             _first = first;
             _length = length;
+            _ownsParent = Ownership.None;
 
             if (_first + _length > _parent.Length)
             {
@@ -47,7 +48,7 @@ namespace DiscUtils
             }
         }
 
-        public SubStream(Stream parent, bool ownsParent, long first, long length)
+        public SubStream(Stream parent, Ownership ownsParent, long first, long length)
         {
             _parent = parent;
             _ownsParent = ownsParent;
@@ -66,7 +67,7 @@ namespace DiscUtils
             {
                 if (disposing)
                 {
-                    if (_ownsParent)
+                    if (_ownsParent == Ownership.Dispose)
                     {
                         _parent.Dispose();
                     }

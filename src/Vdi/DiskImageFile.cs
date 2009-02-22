@@ -44,7 +44,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Indicates if this object controls the lifetime of the stream.
         /// </summary>
-        private bool _ownsStream;
+        private Ownership _ownsStream;
 
         /// <summary>
         /// Creates a new instance from a stream.
@@ -62,7 +62,7 @@ namespace DiscUtils.Vdi
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
-        public DiskImageFile(Stream stream, bool ownsStream)
+        public DiskImageFile(Stream stream, Ownership ownsStream)
         {
             _stream = stream;
             _ownsStream = ownsStream;
@@ -88,7 +88,7 @@ namespace DiscUtils.Vdi
                         _header.Write(_stream);
                     }
 
-                    if (_ownsStream && _stream != null)
+                    if (_ownsStream == Ownership.Dispose && _stream != null)
                     {
                         _stream.Dispose();
                         _stream = null;
@@ -105,21 +105,10 @@ namespace DiscUtils.Vdi
         /// Initializes a stream as a fixed-sized VDI file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static DiskImageFile InitializeFixed(Stream stream, long capacity)
-        {
-            return InitializeFixed(stream, false, capacity);
-        }
-
-        /// <summary>
-        /// Initializes a stream as a fixed-sized VDI file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static DiskImageFile InitializeFixed(Stream stream, bool ownsStream, long capacity)
+        public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
             HeaderRecord header = HeaderRecord.Initialized(ImageType.Fixed, ImageFlags.None, capacity, 1024 * 1024, 0);
@@ -151,21 +140,10 @@ namespace DiscUtils.Vdi
         /// Initializes a stream as a dynamically-sized VDI file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, long capacity)
-        {
-            return InitializeDynamic(stream, false, capacity);
-        }
-
-        /// <summary>
-        /// Initializes a stream as a dynamically-sized VDI file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, bool ownsStream, long capacity)
+        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
             HeaderRecord header = HeaderRecord.Initialized(ImageType.Dynamic, ImageFlags.None, capacity, 1024 * 1024, 0);
@@ -222,15 +200,15 @@ namespace DiscUtils.Vdi
             }
         }
 
-        internal DiskStream OpenContent(Stream parent, bool ownsParent)
+        internal DiskStream OpenContent(Stream parent, Ownership ownsParent)
         {
-            if (parent != null && ownsParent)
+            if (parent != null && ownsParent == Ownership.Dispose)
             {
                 // Not needed until differencing disks supported.
                 parent.Dispose();
             }
 
-            DiskStream stream = new DiskStream(_stream, false, _header);
+            DiskStream stream = new DiskStream(_stream, Ownership.None, _header);
             stream.WriteOccurred += OnWriteOccurred;
             return stream;
         }

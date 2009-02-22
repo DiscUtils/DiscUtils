@@ -33,7 +33,7 @@ namespace DiscUtils.Vhd
         public void Attributes()
         {
             MemoryStream stream = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(stream, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(stream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
                 Stream s = disk.Content;
                 Assert.IsTrue(s.CanRead);
@@ -46,7 +46,7 @@ namespace DiscUtils.Vhd
         public void ReadWriteSmall()
         {
             MemoryStream stream = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(stream, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(stream, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 byte[] content = new byte[100];
                 for(int i = 0; i < content.Length; ++i)
@@ -75,7 +75,7 @@ namespace DiscUtils.Vhd
             }
 
             // Check the data persisted
-            using (Disk disk = new Disk(stream))
+            using (Disk disk = new Disk(stream, Ownership.Dispose))
             {
                 Stream s = disk.Content;
 
@@ -97,7 +97,7 @@ namespace DiscUtils.Vhd
         public void ReadWriteLarge()
         {
             MemoryStream stream = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(stream, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(stream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
                 byte[] content = new byte[3 * 1024 * 1024];
                 for (int i = 0; i < content.Length; ++i)
@@ -129,7 +129,7 @@ namespace DiscUtils.Vhd
             Stream contentStream;
 
             MemoryStream stream = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(stream, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(stream, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 contentStream = disk.Content;
             }
@@ -146,7 +146,7 @@ namespace DiscUtils.Vhd
         public void ReadNotPresent()
         {
             MemoryStream stream = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(stream, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(stream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
                 byte[] buffer = new byte[100];
                 disk.Content.Seek(2 * 1024 * 1024, SeekOrigin.Current);

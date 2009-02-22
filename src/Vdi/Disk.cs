@@ -58,7 +58,7 @@ namespace DiscUtils.Vdi
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new disk should take ownership of <paramref name="stream"/> lifetime.</param>
-        public Disk(Stream stream, bool ownsStream)
+        public Disk(Stream stream, Ownership ownsStream)
         {
             _diskImage = new DiskImageFile(stream, ownsStream);
         }
@@ -96,21 +96,10 @@ namespace DiscUtils.Vdi
         /// Initializes a stream as a fixed-sized VDI file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static Disk InitializeFixed(Stream stream, long capacity)
-        {
-            return InitializeFixed(stream, false, capacity);
-        }
-
-        /// <summary>
-        /// Initializes a stream as a fixed-sized VDI file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static Disk InitializeFixed(Stream stream, bool ownsStream, long capacity)
+        public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity));
         }
@@ -119,21 +108,10 @@ namespace DiscUtils.Vdi
         /// Initializes a stream as a dynamically-sized VDI file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static Disk InitializeDynamic(Stream stream, long capacity)
-        {
-            return InitializeDynamic(stream, false, capacity);
-        }
-
-        /// <summary>
-        /// Initializes a stream as a dynamically-sized VDI file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static Disk InitializeDynamic(Stream stream, bool ownsStream, long capacity)
+        public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity));
         }
@@ -163,7 +141,7 @@ namespace DiscUtils.Vdi
             {
                 if (_content == null)
                 {
-                    _content = _diskImage.OpenContent(null, false);
+                    _content = _diskImage.OpenContent(null, Ownership.None);
                 }
                 return _content;
             }

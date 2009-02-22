@@ -34,7 +34,7 @@ namespace DiscUtils.Combined
         [Test]
         public void SimpleVhdFat()
         {
-            using (Disk disk = Disk.InitializeDynamic(new MemoryStream(), 16 * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(new MemoryStream(), Ownership.Dispose, 16 * 1024 * 1024))
             {
                 BiosPartitionTable.Initialize(disk, WellKnownPartitionType.WindowsFat);
                 using (FatFileSystem fs = FatFileSystem.FormatPartition(disk, 0, null))
@@ -49,7 +49,7 @@ namespace DiscUtils.Combined
         {
             MemoryStream ms = new MemoryStream();
 
-            VirtualDisk disk = Disk.InitializeDynamic(ms, 30 * 1024 * 1204);
+            VirtualDisk disk = Disk.InitializeDynamic(ms, Ownership.Dispose, 30 * 1024 * 1204);
 
             PartitionTable pt = BiosPartitionTable.Initialize(disk);
             pt.Create(15 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);

@@ -36,7 +36,7 @@ namespace DiscUtils.Fat
     {
         private TimeZoneInfo _timeZone;
         private Stream _data;
-        private bool _ownsData;
+        private Ownership _ownsData;
         private byte[] _bootSector;
         private FileAllocationTable _fat;
         private ClusterReader _clusterReader;
@@ -94,7 +94,7 @@ namespace DiscUtils.Fat
         /// <param name="data">The stream containing the file system.</param>
         /// <param name="ownsData">Indicates if the new instance should take ownership
         /// of <paramref name="data"/>.</param>
-        public FatFileSystem(Stream data, bool ownsData)
+        public FatFileSystem(Stream data, Ownership ownsData)
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeZone = TimeZoneInfo.Local;
@@ -121,7 +121,7 @@ namespace DiscUtils.Fat
         /// <param name="ownsData">Indicates if the new instance should take ownership
         /// of <paramref name="data"/>.</param>
         /// <param name="timeZone">The timezone of the new instance.</param>
-        public FatFileSystem(Stream data, bool ownsData, TimeZoneInfo timeZone)
+        public FatFileSystem(Stream data, Ownership ownsData, TimeZoneInfo timeZone)
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeZone = timeZone;
@@ -1706,7 +1706,7 @@ namespace DiscUtils.Fat
 
                     _rootDir.Dispose();
 
-                    if (_ownsData)
+                    if (_ownsData == Ownership.Dispose)
                     {
                         _data.Dispose();
                         _data = null;

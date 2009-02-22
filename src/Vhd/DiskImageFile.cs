@@ -50,7 +50,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Indicates if this object controls the lifetime of the stream.
         /// </summary>
-        private bool _ownsStream;
+        private Ownership _ownsStream;
 
         /// <summary>
         /// Creates a new instance from a stream.
@@ -70,7 +70,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
-        public DiskImageFile(Stream stream, bool ownsStream)
+        public DiskImageFile(Stream stream, Ownership ownsStream)
         {
             _fileStream = stream;
             _ownsStream = ownsStream;
@@ -91,7 +91,7 @@ namespace DiscUtils.Vhd
             {
                 if (disposing)
                 {
-                    if (_ownsStream)
+                    if (_ownsStream == Ownership.Dispose)
                     {
                         _fileStream.Dispose();
                         _fileStream = null;
@@ -105,24 +105,13 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Initializes a stream as a fixed-sized VHD file, without taking ownership of the stream.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static DiskImageFile InitializeFixed(Stream stream, long capacity)
-        {
-            return InitializeFixed(stream, false, capacity);
-        }
-
-        /// <summary>
         /// Initializes a stream as a fixed-sized VHD file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static DiskImageFile InitializeFixed(Stream stream, bool ownsStream, long capacity)
+        public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             Geometry geometry = Geometry.FromCapacity(capacity);
             Footer footer = new Footer(geometry, FileType.Fixed);
@@ -139,24 +128,13 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Initializes a stream as a dynamically-sized VHD file, without taking ownership of the stream.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, long capacity)
-        {
-            return InitializeDynamic(stream, false, capacity);
-        }
-
-        /// <summary>
         /// Initializes a stream as a dynamically-sized VHD file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, bool ownsStream, long capacity)
+        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             Geometry geometry = Geometry.FromCapacity(capacity);
             Footer footer = new Footer(geometry, FileType.Dynamic);
@@ -187,22 +165,6 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Initializes a stream as a differencing disk VHD file, without taking ownership of the stream.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="parent">The disk this file is a different from.</param>
-        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
-        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
-        /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static DiskImageFile InitializeDifferencing(
-            Stream stream, DiskImageFile parent, string parentAbsolutePath,
-            string parentRelativePath, DateTime parentModificationTimeUtc)
-        {
-            return InitializeDifferencing(stream, false, parent, parentAbsolutePath, parentRelativePath, parentModificationTimeUtc);
-        }
-
-        /// <summary>
         /// Initializes a stream as a differencing disk VHD file.
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
@@ -213,7 +175,7 @@ namespace DiscUtils.Vhd
         /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeDifferencing(
-            Stream stream, bool ownsStream, DiskImageFile parent,
+            Stream stream, Ownership ownsStream, DiskImageFile parent,
             string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
             Footer footer = new Footer(parent.Geometry, FileType.Differencing);
@@ -335,11 +297,11 @@ namespace DiscUtils.Vhd
             get { return _footer.CurrentSize; }
         }
 
-        internal SparseStream OpenContent(SparseStream parent, bool ownsParent)
+        internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (_footer.DiskType == FileType.Fixed)
             {
-                if (parent != null && ownsParent)
+                if (parent != null && ownsParent == Ownership.Dispose)
                 {
                     parent.Dispose();
                 }
@@ -347,11 +309,11 @@ namespace DiscUtils.Vhd
             }
             else if (_footer.DiskType == FileType.Dynamic)
             {
-                if (parent != null && ownsParent)
+                if (parent != null && ownsParent == Ownership.Dispose)
                 {
                     parent.Dispose();
                 }
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), true);
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
             }
             else
             {

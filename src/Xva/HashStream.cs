@@ -29,14 +29,14 @@ namespace DiscUtils.Xva
     internal class HashStream : Stream
     {
         private Stream _wrapped;
-        private bool _ownWrapped;
+        private Ownership _ownWrapped;
 
         private HashAlgorithm _hashAlg;
 
         private long _hashPos;
 
 
-        public HashStream(Stream wrapped, bool ownsWrapped, HashAlgorithm hashAlg)
+        public HashStream(Stream wrapped, Ownership ownsWrapped, HashAlgorithm hashAlg)
         {
             _wrapped = wrapped;
             _ownWrapped = ownsWrapped;
@@ -47,7 +47,7 @@ namespace DiscUtils.Xva
         {
             try
             {
-                if (disposing && _ownWrapped && _wrapped != null)
+                if (disposing && _ownWrapped == Ownership.Dispose && _wrapped != null)
                 {
                     _wrapped.Dispose();
                     _wrapped = null;

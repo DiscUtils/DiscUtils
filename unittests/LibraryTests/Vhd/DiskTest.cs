@@ -33,7 +33,7 @@ namespace DiscUtils.Vhd
         public void InitializeFixed()
         {
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeFixed(ms, 8 * 1024 * 1024))
+            using (Disk disk = Disk.InitializeFixed(ms, Ownership.None, 8 * 1024 * 1024))
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity < 8 * 1024 * 1024);
@@ -50,7 +50,7 @@ namespace DiscUtils.Vhd
         public void InitializeFixedOwnStream()
         {
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeFixed(ms, true, 8 * 1024 * 1024))
+            using (Disk disk = Disk.InitializeFixed(ms, Ownership.Dispose, 8 * 1024 * 1024))
             {
             }
             ms.ReadByte();
@@ -60,7 +60,7 @@ namespace DiscUtils.Vhd
         public void InitializeDynamic()
         {
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(ms, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
@@ -69,7 +69,7 @@ namespace DiscUtils.Vhd
 
             Assert.Greater(1 * 1024 * 1024, ms.Length);
 
-            using (Disk disk = new Disk(ms))
+            using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Geometry.Capacity == disk.Content.Length);
@@ -81,8 +81,8 @@ namespace DiscUtils.Vhd
         {
             MemoryStream baseStream = new MemoryStream();
             MemoryStream diffStream = new MemoryStream();
-            DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, 16 * 1024L * 1024 * 1024);
-            using (Disk disk = Disk.InitializeDifferencing(diffStream, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", DateTime.UtcNow))
+            DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, Ownership.Dispose, 16 * 1024L * 1024 * 1024);
+            using (Disk disk = Disk.InitializeDifferencing(diffStream, Ownership.None, baseFile, Ownership.Dispose, @"C:\TEMP\Base.vhd", @".\Base.vhd", DateTime.UtcNow))
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
@@ -90,6 +90,7 @@ namespace DiscUtils.Vhd
                 Assert.AreEqual(2, disk.Layers.Count);
             }
             Assert.Greater(1 * 1024 * 1024, diffStream.Length);
+            diffStream.Dispose();
         }
 
         [Test]
@@ -97,16 +98,16 @@ namespace DiscUtils.Vhd
         {
             Geometry geometry;
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(ms, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 geometry = disk.Geometry;
             }
-            using (Disk disk = new Disk(ms))
+            using (Disk disk = new Disk(ms, Ownership.None))
             {
                 Assert.AreEqual(geometry, disk.Geometry);
                 Assert.IsNotNull(disk.Content);
             }
-            using (Disk disk = new Disk(ms, true))
+            using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
                 Assert.AreEqual(geometry, disk.Geometry);
                 Assert.IsNotNull(disk.Content);

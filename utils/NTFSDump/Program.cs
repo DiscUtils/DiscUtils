@@ -21,13 +21,11 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DiscUtils.Common;
 using System.IO;
-using DiscUtils.Vhd;
+using DiscUtils;
+using DiscUtils.Common;
 using DiscUtils.Ntfs;
+using DiscUtils.Vhd;
 
 namespace NTFSDump
 {
@@ -82,7 +80,7 @@ namespace NTFSDump
 
             using (Stream fileStream = File.OpenRead(_vhdFile.Value))
             {
-                using (Disk vhdDisk = new Disk(fileStream))
+                using (Disk vhdDisk = new Disk(fileStream, Ownership.None))
                 {
                     using (Stream partitionStream = vhdDisk.Partitions[partition].Open())
                     {

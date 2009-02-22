@@ -33,7 +33,7 @@ namespace DiscUtils.Vdi
         public void InitializeFixed()
         {
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeFixed(ms, 8 * 1024 * 1024))
+            using (Disk disk = Disk.InitializeFixed(ms, Ownership.None, 8 * 1024 * 1024))
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity < 8 * 1024 * 1024);
@@ -50,7 +50,7 @@ namespace DiscUtils.Vdi
         public void InitializeFixedOwnStream()
         {
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeFixed(ms, true, 8 * 1024 * 1024))
+            using (Disk disk = Disk.InitializeFixed(ms, Ownership.Dispose, 8 * 1024 * 1024))
             {
             }
             ms.ReadByte();
@@ -60,7 +60,7 @@ namespace DiscUtils.Vdi
         public void InitializeDynamic()
         {
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(ms, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
@@ -81,7 +81,7 @@ namespace DiscUtils.Vdi
         {
             Geometry geometry;
             MemoryStream ms = new MemoryStream();
-            using (Disk disk = Disk.InitializeDynamic(ms, 16 * 1024L * 1024 * 1024))
+            using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 geometry = disk.Geometry;
             }
@@ -90,7 +90,7 @@ namespace DiscUtils.Vdi
                 Assert.AreEqual(geometry, disk.Geometry);
                 Assert.IsNotNull(disk.Content);
             }
-            using (Disk disk = new Disk(ms, true))
+            using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
                 Assert.AreEqual(geometry, disk.Geometry);
                 Assert.IsNotNull(disk.Content);

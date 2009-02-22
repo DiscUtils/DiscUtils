@@ -175,6 +175,7 @@
     <Compile Include="SparseStream.cs" />
     <Compile Include="StreamBuilder.cs" />
     <Compile Include="StreamExtent.cs" />
+    <Compile Include="Ownership.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />

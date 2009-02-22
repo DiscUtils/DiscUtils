@@ -50,7 +50,7 @@ namespace DiscUtils
         /// <returns>A sparse stream</returns>
         /// <remarks>The returned stream has the entire wrapped stream as a
         /// single extent.</remarks>
-        public static SparseStream FromStream(Stream stream, bool takeOwnership)
+        public static SparseStream FromStream(Stream stream, Ownership takeOwnership)
         {
             return new SparseWrapperStream(stream, takeOwnership);
         }
@@ -58,9 +58,9 @@ namespace DiscUtils
         private class SparseWrapperStream : SparseStream
         {
             private Stream _wrapped;
-            private bool _ownsWrapped;
+            private Ownership _ownsWrapped;
 
-            public SparseWrapperStream(Stream wrapped, bool ownsWrapped)
+            public SparseWrapperStream(Stream wrapped, Ownership ownsWrapped)
             {
                 _wrapped = wrapped;
                 _ownsWrapped = ownsWrapped;
@@ -70,7 +70,7 @@ namespace DiscUtils
             {
                 try
                 {
-                    if (disposing && _ownsWrapped && _wrapped != null)
+                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
                     {
                         _wrapped.Dispose();
                         _wrapped = null;

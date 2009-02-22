@@ -223,9 +223,9 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Gets the contents of this disk as a stream.
         /// </summary>
-        internal SparseStream OpenContent(SparseStream parent, bool ownsParent)
+        internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
-            if (parent != null && ownsParent)
+            if (parent != null && ownsParent == Ownership.Dispose)
             {
                 parent.Dispose();
                 parent = null;
@@ -257,7 +257,7 @@ namespace DiscUtils.Vmdk
                 case ExtentType.Vmfs:
                     return SparseStream.FromStream(
                         _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
-                        true);
+                        Ownership.Dispose);
 
                 case ExtentType.Zero:
                     return new ZeroStream(extent.SizeInSectors * Utilities.SectorSize);
@@ -265,18 +265,18 @@ namespace DiscUtils.Vmdk
                 case ExtentType.Sparse:
                     return new HostedSparseExtentStream(
                         _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
-                        true,
+                        Ownership.Dispose,
                         extentStart,
                         new ZeroStream(extent.SizeInSectors * Sizes.Sector),
-                        true);
+                        Ownership.Dispose);
 
                 case ExtentType.VmfsSparse:
                     return new ServerSparseExtentStream(
                         _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
-                        true,
+                        Ownership.Dispose,
                         extentStart,
                         new ZeroStream(extent.SizeInSectors * Sizes.Sector),
-                        true);
+                        Ownership.Dispose);
 
                 default:
                     throw new NotSupportedException();

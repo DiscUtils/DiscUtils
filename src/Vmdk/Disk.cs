@@ -98,7 +98,7 @@ namespace DiscUtils.Vmdk
             {
                 if (_content == null)
                 {
-                    _content = _file.OpenContent(null, false);
+                    _content = _file.OpenContent(null, Ownership.None);
                 }
                 return _content;
             }

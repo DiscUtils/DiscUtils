@@ -76,7 +76,7 @@ namespace DiscUtils.Xva
         /// <param name="content">The content of the disk</param>
         public void AddDisk(string uuid, Stream content)
         {
-            _disks.Add(uuid, SparseStream.FromStream(content, false));
+            _disks.Add(uuid, SparseStream.FromStream(content, Ownership.None));
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace DiscUtils.Xva
                             {
                                 chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
                             }
-                            HashStream chunkHashStream = new HashStream(chunkStream, true, hashAlg);
+                            HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
 
                             tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], i), chunkHashStream);
                             tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], i), new ChecksumStream(hashAlg));
@@ -138,7 +138,7 @@ namespace DiscUtils.Xva
                 {
                     HashAlgorithm hashAlg = new SHA1Managed();
                     Stream chunkStream = new ZeroStream(Sizes.OneMiB);
-                    HashStream chunkHashStream = new HashStream(chunkStream, true, hashAlg);
+                    HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
                     tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], lastActualChunk), chunkHashStream);
                     tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], lastActualChunk), new ChecksumStream(hashAlg));
                 }

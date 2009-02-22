@@ -417,7 +417,7 @@ namespace DiscUtils.Partitions
 
         internal Stream Open(BiosPartitionRecord record)
         {
-            return new SubStream(_diskData, false, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);
+            return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);
         }
     }
 }

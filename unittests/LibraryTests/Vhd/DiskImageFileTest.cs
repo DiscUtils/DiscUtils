@@ -34,9 +34,9 @@ namespace DiscUtils.Vhd
         {
             MemoryStream baseStream = new MemoryStream();
             MemoryStream diffStream = new MemoryStream();
-            using (DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, 16 * 1024L * 1024 * 1024))
+            using (DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
-                using (DiskImageFile diffFile = DiskImageFile.InitializeDifferencing(diffStream, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", new DateTime(2007, 12, 31)))
+                using (DiskImageFile diffFile = DiskImageFile.InitializeDifferencing(diffStream, Ownership.None, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", new DateTime(2007, 12, 31)))
                 {
                     Assert.IsNotNull(diffFile);
                     Assert.That(diffFile.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && diffFile.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
@@ -52,9 +52,9 @@ namespace DiscUtils.Vhd
         {
             MemoryStream baseStream = new MemoryStream();
             MemoryStream diffStream = new MemoryStream();
-            using (DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, 16 * 1024L * 1024 * 1024))
+            using (DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
-                using (DiskImageFile diffFile = DiskImageFile.InitializeDifferencing(diffStream, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", new DateTime(2007, 12, 31)))
+                using (DiskImageFile diffFile = DiskImageFile.InitializeDifferencing(diffStream, Ownership.None, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", new DateTime(2007, 12, 31)))
                 {
                 }
             }
@@ -78,7 +78,7 @@ namespace DiscUtils.Vhd
             Geometry geometry;
 
             MemoryStream stream = new MemoryStream();
-            using (DiskImageFile file = DiskImageFile.InitializeDynamic(stream, 16 * 1024L * 1024 * 1024))
+            using (DiskImageFile file = DiskImageFile.InitializeDynamic(stream, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 geometry = file.Geometry;
             }

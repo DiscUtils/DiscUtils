@@ -32,7 +32,7 @@ namespace DiscUtils.Vmdk
     {
         private ServerSparseExtentHeader _serverHeader;
 
-        public ServerSparseExtentStream(Stream file, bool ownsFile, long diskOffset, SparseStream parentDiskStream, bool ownsParentDiskStream)
+        public ServerSparseExtentStream(Stream file, Ownership ownsFile, long diskOffset, SparseStream parentDiskStream, Ownership ownsParentDiskStream)
         {
             _fileStream = file;
             _ownsFileStream = ownsFile;

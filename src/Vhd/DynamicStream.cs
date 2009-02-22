@@ -32,14 +32,14 @@ namespace DiscUtils.Vhd
         private DynamicHeader _dynamicHeader;
         private long _length;
         private SparseStream _parentStream;
-        private bool _ownsParentStream;
+        private Ownership _ownsParentStream;
 
         private long _position;
         private bool _atEof;
         private uint[] _blockAllocationTable;
         private byte[][] _blockBitmaps;
 
-        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, bool ownsParentStream)
+        public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, Ownership ownsParentStream)
         {
             if (fileStream == null)
             {
@@ -75,7 +75,7 @@ namespace DiscUtils.Vhd
             {
                 if (disposing)
                 {
-                    if (_ownsParentStream && _parentStream != null)
+                    if (_ownsParentStream == Ownership.Dispose && _parentStream != null)
                     {
                         _parentStream.Dispose();
                         _parentStream = null;
