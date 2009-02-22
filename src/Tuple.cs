@@ -92,7 +92,6 @@ namespace DiscUtils
         }
     }
 
-#if false
     internal class Tuple<A, B, C> : BaseTuple
     {
         private A _a;
@@ -142,5 +141,4 @@ namespace DiscUtils
                 ^ ((_c == null) ? 0x2D4C25CF : _b.GetHashCode());
         }
     }
-#endif
 }

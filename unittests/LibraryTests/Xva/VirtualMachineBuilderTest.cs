@@ -23,6 +23,7 @@
 using System.IO;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System;
 
 namespace DiscUtils.Xva
 {
@@ -34,7 +35,7 @@ namespace DiscUtils.Xva
         {
             MemoryStream xvaStream = new MemoryStream();
             VirtualMachineBuilder vmb = new VirtualMachineBuilder();
-            vmb.AddDisk("foo", new MemoryStream());
+            vmb.AddDisk("Foo", new MemoryStream(), Ownership.Dispose);
             vmb.Build(xvaStream);
 
             Assert.AreNotEqual(0, xvaStream.Length);
@@ -58,7 +59,7 @@ namespace DiscUtils.Xva
                 ms.WriteByte((byte)(i ^ (i >> 8) ^ (i >> 16) ^ (i >> 24)));
             }
 
-            vmb.AddDisk("foo", ms);
+            vmb.AddDisk("Foo", ms, Ownership.Dispose);
             vmb.Build(xvaStream);
 
             Assert.AreNotEqual(0, xvaStream.Length);

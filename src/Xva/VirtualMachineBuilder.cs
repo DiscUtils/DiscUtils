@@ -27,6 +27,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
+using DiskRecord = DiscUtils.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
+
 namespace DiscUtils.Xva
 {
     /// <summary>
@@ -36,9 +38,9 @@ namespace DiscUtils.Xva
     /// the options to control the VM properties are strictly limited.  The class
     /// generates a minimal VM really as a wrapper for one or more disk images, 
     /// making them easy to import into XenServer.</remarks>
-    public class VirtualMachineBuilder : StreamBuilder
+    public sealed class VirtualMachineBuilder : StreamBuilder, IDisposable
     {
-        private Dictionary<string, SparseStream> _disks;
+        private List<DiskRecord> _disks;
         private string _vmDisplayName;
 
         /// <summary>
@@ -46,8 +48,22 @@ namespace DiscUtils.Xva
         /// </summary>
         public VirtualMachineBuilder()
         {
-            _disks = new Dictionary<string, SparseStream>();
+            _disks = new List<DiskRecord>();
             _vmDisplayName = "VM";
+        }
+
+        /// <summary>
+        /// Disposes this instance, including any underlying resources.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (DiskRecord r in _disks)
+            {
+                if (r.Third == Ownership.Dispose)
+                {
+                    r.Second.Dispose();
+                }
+            }
         }
 
         /// <summary>
@@ -62,21 +78,23 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Adds a sparse disk image to the XVA file.
         /// </summary>
-        /// <param name="uuid">The Unique Id for the disk (should be a GUID)</param>
+        /// <param name="label">The admin-visible name of the disk</param>
         /// <param name="content">The content of the disk</param>
-        public void AddDisk(string uuid, SparseStream content)
+        /// <param name="ownsContent">Indicates if ownership of content is transfered</param>
+        public void AddDisk(string label, SparseStream content, Ownership ownsContent)
         {
-            _disks.Add(uuid, content);
+            _disks.Add(new DiskRecord(label, content, ownsContent));
         }
 
         /// <summary>
         /// Adds a disk image to the XVA file.
         /// </summary>
-        /// <param name="uuid">The Unique Id for the disk (should be a GUID)</param>
+        /// <param name="label">The admin-visible name of the disk</param>
         /// <param name="content">The content of the disk</param>
-        public void AddDisk(string uuid, Stream content)
+        /// <param name="ownsContent">Indicates if ownership of content is transfered</param>
+        public void AddDisk(string label, Stream content, Ownership ownsContent)
         {
-            _disks.Add(uuid, SparseStream.FromStream(content, Ownership.None));
+            _disks.Add(new DiskRecord(label, SparseStream.FromStream(content, ownsContent), Ownership.Dispose));
         }
 
         /// <summary>
@@ -95,7 +113,7 @@ namespace DiscUtils.Xva
             int diskIdx = 0;
             foreach (var diskRec in _disks)
             {
-                SparseStream diskStream = diskRec.Value;
+                SparseStream diskStream = diskRec.Second;
                 List<StreamExtent> extents = new List<StreamExtent>(diskStream.Extents);
 
                 int lastChunkAdded = -1;
@@ -178,8 +196,8 @@ namespace DiscUtils.Xva
                 vbdIds[diskIdx] = id++;
                 vdiGuids[diskIdx] = Guid.NewGuid();
                 vdiIds[diskIdx] = id++;
-                vdiNames[diskIdx] = "VDI_" + diskIdx;
-                vdiSizes[diskIdx] = Utilities.RoundUp(disk.Value.Length, Sizes.OneMiB);
+                vdiNames[diskIdx] = disk.First;
+                vdiSizes[diskIdx] = Utilities.RoundUp(disk.Second.Length, Sizes.OneMiB);
                 diskIdx++;
             }
 
