@@ -913,6 +913,132 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Vmdk">
+        <Types>
+         <Type Name="DiskCreateType">
+          <Members>
+           <Member Name="#TwoGbMaxExtentFlat">
+            <Messages>
+             <Message Id="Gb" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Gb</Item>
+               <Item>'DiskCreateType.TwoGbMaxExtentFlat'</Item>
+               <Item>GB</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TwoGbMaxExtentSparse">
+            <Messages>
+             <Message Id="Gb" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Gb</Item>
+               <Item>'DiskCreateType.TwoGbMaxExtentSparse'</Item>
+               <Item>GB</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Vmfs">
+            <Messages>
+             <Message Id="Vmfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Vmfs</Item>
+               <Item>'DiskCreateType.Vmfs'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VmfsPassthroughRawDeviceMap">
+            <Messages>
+             <Message Id="Passthrough" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Passthrough</Item>
+               <Item>'DiskCreateType.VmfsPassthroughRawDeviceMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Vmfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Vmfs</Item>
+               <Item>'DiskCreateType.VmfsPassthroughRawDeviceMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VmfsRaw">
+            <Messages>
+             <Message Id="Vmfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Vmfs</Item>
+               <Item>'DiskCreateType.VmfsRaw'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VmfsRawDeviceMap">
+            <Messages>
+             <Message Id="Vmfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Vmfs</Item>
+               <Item>'DiskCreateType.VmfsRawDeviceMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VmfsSparse">
+            <Messages>
+             <Message Id="Vmfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-22 11:28:13Z">
+              <Issue Name="Member">
+               <Item>Vmfs</Item>
+               <Item>'DiskCreateType.VmfsSparse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="41" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Xva">
         <Types>
          <Type Name="Disk">
@@ -927,42 +1053,6 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="35" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="VirtualMachineBuilder">
-          <Members>
-           <Member Name="#AddDisk(System.String,DiscUtils.SparseStream)">
-            <Messages>
-             <Message Id="uuid" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
-              <Issue Name="MemberParameter">
-               <Item>'VirtualMachineBuilder.AddDisk(string, SparseStream)'</Item>
-               <Item>uuid</Item>
-               <Item>'uuid'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="36" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#AddDisk(System.String,System.IO.Stream)">
-            <Messages>
-             <Message Id="uuid" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
-              <Issue Name="MemberParameter">
-               <Item>'VirtualMachineBuilder.AddDisk(string, Stream)'</Item>
-               <Item>uuid</Item>
-               <Item>'uuid'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="36" />
                </User>
               </Notes>
              </Message>
@@ -1015,11 +1105,11 @@
     <Note Id="33" Modified="2009-02-07 12:25:57Z">Xva fits in with existing namespace naming scheme</Note>
     <Note Id="34" Modified="2009-02-07 12:26:27Z">Xva is camel case form of XVA acronym</Note>
     <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
-    <Note Id="36" Modified="2009-02-08 22:41:58Z">Acronym</Note>
     <Note Id="37" Modified="2009-02-08 22:43:49Z">Parameter names are arbitrary</Note>
     <Note Id="38" Modified="2009-02-08 22:45:11Z">Equivalent disposal pattern implemented, but not using IDisposable because instances can be re-used.</Note>
     <Note Id="39" Modified="2009-02-14 11:08:37Z">Utils is part of project name</Note>
     <Note Id="40" Modified="2009-02-14 11:08:47Z">Vmdk is correct form of VMDK</Note>
+    <Note Id="41" Modified="2009-02-22 11:33:46Z">Follows best-practice naming (VMFS is well-known), and names derived from public spec.</Note>
    </User>
   </Notes>
   <Rules>
@@ -1035,10 +1125,12 @@
    <Rule TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104">
     <Resolution Name="Default">Remove the read-only designation from {0} or change the field to one that is an immutable reference type. If the reference type {1} is, in fact, immutable, exclude this message.</Resolution>
    </Rule>
+   <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
+    <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
+   </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
     <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
-    <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
    </Rule>

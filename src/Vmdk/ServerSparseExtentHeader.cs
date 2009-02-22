@@ -44,8 +44,6 @@ namespace DiscUtils.Vmdk
             GrainSize = 512;
             NumGTEsPerGT = 4096;
             Flags = 3;
-            SavedGeneration = 0;
-            UncleanShutdown = 0;
         }
 
         public static ServerSparseExtentHeader Read(byte[] buffer, int offset)

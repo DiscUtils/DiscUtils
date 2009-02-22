@@ -30,7 +30,7 @@ namespace DiscUtils.Vmdk
     /// Represents and extent from a sparse disk from 'hosted' software (VMWare Workstation, etc).
     /// </summary>
     /// <remarks>Hosted disks and server disks (ESX, etc) are subtly different formats.</remarks>
-    internal class HostedSparseExtentStream : CommonSparseExtentStream
+    internal sealed class HostedSparseExtentStream : CommonSparseExtentStream
     {
         private HostedSparseExtentHeader _hostedHeader;
 

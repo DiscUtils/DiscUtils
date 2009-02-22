@@ -77,7 +77,7 @@ namespace DiscUtils.Vmdk
         public uint ContentId
         {
             get { return uint.Parse(GetHeader(HeaderContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
-            set { SetHeader(HeaderContentId, value.ToString("x8")); }
+            set { SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture)); }
         }
 
         public uint ParentContentId
@@ -113,9 +113,9 @@ namespace DiscUtils.Vmdk
             }
             set
             {
-                SetDiskDatabase(DiskDbCylinders, value.Cylinders.ToString());
-                SetDiskDatabase(DiskDbHeads, value.HeadsPerCylinder.ToString());
-                SetDiskDatabase(DiskDbSectors, value.SectorsPerTrack.ToString());
+                SetDiskDatabase(DiskDbCylinders, value.Cylinders.ToString(CultureInfo.InvariantCulture));
+                SetDiskDatabase(DiskDbHeads, value.HeadsPerCylinder.ToString(CultureInfo.InvariantCulture));
+                SetDiskDatabase(DiskDbSectors, value.SectorsPerTrack.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -252,6 +252,7 @@ namespace DiscUtils.Vmdk
         {
             byte[] data = value.ToByteArray();
             return string.Format(
+                CultureInfo.InvariantCulture,
                 "{0:x2} {1:x2} {2:x2} {3:x2} {4:x2} {5:x2} {6:x2} {7:x2}-{8:x2} {9:x2} {10:x2} {11:x2} {12:x2} {13:x2} {14:x2} {15:x2}",
                 data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
                 data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15]);

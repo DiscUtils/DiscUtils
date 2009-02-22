@@ -47,8 +47,6 @@ namespace DiscUtils.Vmdk
             NonEndLineChar = (byte)' ';
             DoubleEndLineChar1 = (byte)'\r';
             DoubleEndLineChar2 = (byte)'\n';
-            CompressAlgorithm = 0;
-            UncleanShutdown = 0;
         }
 
         public static HostedSparseExtentHeader Read(byte[] buffer, int offset)

@@ -28,7 +28,7 @@ using System.IO;
 
 namespace DiscUtils.Vmdk
 {
-    internal class ServerSparseExtentStream : CommonSparseExtentStream
+    internal sealed class ServerSparseExtentStream : CommonSparseExtentStream
     {
         private ServerSparseExtentHeader _serverHeader;
 

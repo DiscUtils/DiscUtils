@@ -110,7 +110,7 @@ namespace DiscUtils.Vmdk
                     }
                 }
             }
-            catch
+            finally
             {
                 base.Dispose(disposing);
             }
