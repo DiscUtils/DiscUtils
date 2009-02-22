@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 
@@ -31,8 +31,13 @@ namespace DiscUtils.Vmdk
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
-        private DiskImageFile _file;
+        /// <summary>
+        /// The list of files that make up the disk.
+        /// </summary>
+        private List<Tuple<DiskImageFile, Ownership>> _files;
+
         private SparseStream _content;
+        private FileLocator _layerLocator;
 
         /// <summary>
         /// Creates a new instance from a file on disk.
@@ -41,7 +46,21 @@ namespace DiscUtils.Vmdk
         /// <param name="access">The access requested to the disk</param>
         public Disk(string path, FileAccess access)
         {
-            _file = new DiskImageFile(path, access);
+            _layerLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(path, access), Ownership.Dispose));
+            ResolveFileChain(path);
+        }
+
+        /// <summary>
+        /// Creates a new instance from a stream, only monolithic sparse streams are supported.
+        /// </summary>
+        /// <param name="stream">The stream containing the VMDK file</param>
+        /// <param name="ownsStream">Indicates if the new instances owns the stream.</param>
+        public Disk(Stream stream, Ownership ownsStream)
+        {
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
         }
 
         /// <summary>
@@ -60,10 +79,12 @@ namespace DiscUtils.Vmdk
                         _content = null;
                     }
 
-                    if (_file != null)
+                    foreach (var file in _files)
                     {
-                        _file.Dispose();
-                        _file = null;
+                        if (file.Second == Ownership.Dispose)
+                        {
+                            file.First.Dispose();
+                        }
                     }
                 }
             }
@@ -78,7 +99,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override Geometry Geometry
         {
-            get { return _file.Geometry; }
+            get { return _files[_files.Count - 1].First.Geometry; }
         }
 
         /// <summary>
@@ -86,7 +107,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override long Capacity
         {
-            get { return _file.Capacity; }
+            get { return _files[_files.Count - 1].First.Capacity; }
         }
 
         /// <summary>
@@ -98,7 +119,12 @@ namespace DiscUtils.Vmdk
             {
                 if (_content == null)
                 {
-                    _content = _file.OpenContent(null, Ownership.None);
+                    SparseStream stream = null;
+                    for (int i = _files.Count - 1; i >= 0; --i)
+                    {
+                        stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
+                    }
+                    _content = stream;
                 }
                 return _content;
             }
@@ -111,9 +137,22 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                return new ReadOnlyCollection<VirtualDiskLayer>(new VirtualDiskLayer[] { _file });
+                VirtualDiskLayer[] layers = Utilities.Map<Tuple<DiskImageFile, Ownership>, VirtualDiskLayer>(_files, (f) => f.First);
+                return new ReadOnlyCollection<VirtualDiskLayer>(layers);
             }
         }
 
+        private void ResolveFileChain(string lastPath)
+        {
+            DiskImageFile file = _files[_files.Count - 1].First;
+            string filePath = lastPath;
+
+            while (file.NeedsParent)
+            {
+                Stream fileStream = _layerLocator.Open(file.ParentLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
+                file = new DiskImageFile(fileStream, Ownership.Dispose, _layerLocator);
+                _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            }
+        }
     }
 }

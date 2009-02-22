@@ -87,7 +87,7 @@ namespace DiscUtils.Vmdk
             long grainStartPos = _serverHeader.FreeSector * Sizes.Sector;
 
             // Copy-on-write semantics, read the bytes from parent and write them out to this extent.
-            _parentDiskStream.Position = _diskOffset + grainStartPos;
+            _parentDiskStream.Position = _diskOffset + ((grain + (_header.NumGTEsPerGT * grainTable)) * _header.GrainSize * Sizes.Sector);
             byte[] content = Utilities.ReadFully(_parentDiskStream, (int)_header.GrainSize * Sizes.Sector);
             _fileStream.Position = grainStartPos;
             _fileStream.Write(content, 0, content.Length);

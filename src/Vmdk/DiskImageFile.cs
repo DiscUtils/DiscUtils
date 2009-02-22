@@ -39,6 +39,16 @@ namespace DiscUtils.Vmdk
         private FileAccess _access;
 
         /// <summary>
+        /// The stream containing the VMDK disk, if this is a monolithic disk.
+        /// </summary>
+        private Stream _monolithicStream;
+
+        /// <summary>
+        /// Indicates if this instance controls lifetime of _monolithicStream.
+        /// </summary>
+        private Ownership _ownsMonolithicStream;
+
+        /// <summary>
         /// Creates a new instance from a file on disk.
         /// </summary>
         /// <param name="path">The path to the disk</param>
@@ -60,12 +70,40 @@ namespace DiscUtils.Vmdk
                 LoadDescriptor(s);
             }
 
-            if (_descriptor.ParentContentId != uint.MaxValue)
+            _extentLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+        }
+
+        /// <summary>
+        /// Creates a new instance from a monolithic file on disk.
+        /// </summary>
+        /// <param name="stream">The stream containing the monolithic disk</param>
+        /// <param name="ownsStream">Indicates if the created instance should own the stream</param>
+        public DiskImageFile(Stream stream, Ownership ownsStream)
+        {
+            LoadDescriptor(stream);
+
+            if (_descriptor.CreateType != DiskCreateType.MonolithicSparse || _descriptor.Extents.Count != 1
+                || _descriptor.Extents[0].Type != ExtentType.Sparse || _descriptor.ParentContentId != uint.MaxValue)
             {
-                throw new NotImplementedException("No support for differencing disks (yet)");
+                throw new ArgumentException("Only Monolithic Sparse disks can be accessed via a stream", "stream");
             }
 
-            _extentLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+            _monolithicStream = stream;
+            _ownsMonolithicStream = ownsStream;
+        }
+
+        /// <summary>
+        /// Creates a new instance from a stream, that can span multiple files.
+        /// </summary>
+        /// <param name="stream">The VMDK stream</param>
+        /// <param name="ownsStream">Indicates if the created instance should own the stream.</param>
+        /// <param name="extentLocator">The locator to read additional files that comprise the disk</param>
+        internal DiskImageFile(Stream stream, Ownership ownsStream, FileLocator extentLocator)
+        {
+            _access = stream.CanWrite ? FileAccess.ReadWrite : FileAccess.Read;
+
+            LoadDescriptor(stream);
+            _extentLocator = extentLocator;
         }
 
         /// <summary>
@@ -76,10 +114,19 @@ namespace DiscUtils.Vmdk
         {
             try
             {
-                if (disposing && _contentStream != null)
+                if (disposing)
                 {
-                    _contentStream.Dispose();
-                    _contentStream = null;
+                    if (_contentStream != null)
+                    {
+                        _contentStream.Dispose();
+                        _contentStream = null;
+                    }
+
+                    if (_ownsMonolithicStream == Ownership.Dispose && _monolithicStream != null)
+                    {
+                        _monolithicStream.Dispose();
+                        _monolithicStream = null;
+                    }
                 }
             }
             finally
@@ -197,6 +244,22 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Indicates if this disk is a linked differencing disk.
+        /// </summary>
+        internal bool NeedsParent
+        {
+            get { return _descriptor.ParentContentId != uint.MaxValue; }
+        }
+
+        /// <summary>
+        /// Gets the location of the parent.
+        /// </summary>
+        internal string ParentLocation
+        {
+            get { return _descriptor.ParentFileNameHint; }
+        }
+
+        /// <summary>
         /// Gets the capacity of this disk (in bytes).
         /// </summary>
         internal override long Capacity
@@ -225,23 +288,51 @@ namespace DiscUtils.Vmdk
         /// </summary>
         internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
-            if (parent != null && ownsParent == Ownership.Dispose)
+            if (_descriptor.ParentContentId == uint.MaxValue)
             {
-                parent.Dispose();
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
                 parent = null;
             }
 
-            long extentStart = 0;
-            SparseStream[] streams = new SparseStream[_descriptor.Extents.Count];
-            for (int i = 0; i < streams.Length; ++i)
+            if (parent == null)
             {
-                streams[i] = OpenExtent(_descriptor.Extents[i], extentStart);
-                extentStart += _descriptor.Extents[i].SizeInSectors * Sizes.Sector;
+                parent = new ZeroStream(Capacity);
+                ownsParent = Ownership.Dispose;
             }
-            return new ConcatStream(streams);
+
+            if (_descriptor.Extents.Count == 1)
+            {
+                if (_monolithicStream != null)
+                {
+                    return new HostedSparseExtentStream(
+                        _monolithicStream,
+                        Ownership.None,
+                        0,
+                        parent,
+                        ownsParent);
+                }
+                else
+                {
+                    return OpenExtent(_descriptor.Extents[0], 0, parent, ownsParent);
+                }
+            }
+            else
+            {
+                long extentStart = 0;
+                SparseStream[] streams = new SparseStream[_descriptor.Extents.Count];
+                for (int i = 0; i < streams.Length; ++i)
+                {
+                    streams[i] = OpenExtent(_descriptor.Extents[i], extentStart, parent, (i == streams.Length - 1) ? ownsParent : Ownership.None);
+                    extentStart += _descriptor.Extents[i].SizeInSectors * Sizes.Sector;
+                }
+                return new ConcatStream(streams);
+            }
         }
 
-        private SparseStream OpenExtent(ExtentDescriptor extent, long extentStart)
+        private SparseStream OpenExtent(ExtentDescriptor extent, long extentStart, SparseStream parent, Ownership ownsParent)
         {
             FileAccess access = FileAccess.Read;
             FileShare share = FileShare.Read;
@@ -249,6 +340,14 @@ namespace DiscUtils.Vmdk
             {
                 access = FileAccess.ReadWrite;
                 share = FileShare.None;
+            }
+
+            if (extent.Type != ExtentType.Sparse && extent.Type != ExtentType.VmfsSparse)
+            {
+                if (ownsParent == Ownership.Dispose && parent != null)
+                {
+                    parent.Dispose();
+                }
             }
 
             switch (extent.Type)
@@ -267,16 +366,16 @@ namespace DiscUtils.Vmdk
                         _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
                         Ownership.Dispose,
                         extentStart,
-                        new ZeroStream(extent.SizeInSectors * Sizes.Sector),
-                        Ownership.Dispose);
+                        parent,
+                        ownsParent);
 
                 case ExtentType.VmfsSparse:
                     return new ServerSparseExtentStream(
                         _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
                         Ownership.Dispose,
                         extentStart,
-                        new ZeroStream(extent.SizeInSectors * Sizes.Sector),
-                        Ownership.Dispose);
+                        parent,
+                        ownsParent);
 
                 default:
                     throw new NotSupportedException();
@@ -429,6 +528,7 @@ namespace DiscUtils.Vmdk
 
         private void LoadDescriptor(Stream s)
         {
+            s.Position = 0;
             byte[] header = Utilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
             if (header.Length < Sizes.Sector || Utilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
             {
