@@ -31,7 +31,7 @@ namespace DiscUtils.Iso9660
     /// <summary>
     /// Represents a directory that will be built into the ISO image.
     /// </summary>
-    public class BuildDirectoryInfo : BuildDirectoryMember
+    public sealed class BuildDirectoryInfo : BuildDirectoryMember
     {
         private BuildDirectoryInfo _parent;
         private Dictionary<string, BuildDirectoryMember> _members;

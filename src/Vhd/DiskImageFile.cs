@@ -30,7 +30,7 @@ namespace DiscUtils.Vhd
     /// <summary>
     /// Represents a single .VHD file.
     /// </summary>
-    public class DiskImageFile : VirtualDiskLayer
+    public sealed class DiskImageFile : VirtualDiskLayer
     {
         /// <summary>
         /// The stream containing the VHD file.

@@ -33,7 +33,7 @@ namespace DiscUtils.Xva
     /// <remarks>XVA is a VM archive, not just a disk archive.  It can contain multiple
     /// disk images.  This class provides access to all of the disk images within the
     /// XVA file.</remarks>
-    public class VirtualMachine
+    public sealed class VirtualMachine
     {
         private static readonly XPathExpression FindVDIsExpression = XPathExpression.Compile("/value/struct/member[child::name='objects']/value/array/data/value/struct[child::member/value='VDI']");
         private static readonly XPathExpression GetDiskId = XPathExpression.Compile("member[child::name='id']/value");

@@ -30,7 +30,7 @@ namespace DiscUtils.Iso9660
     /// <summary>
     /// Class for reading existing ISO images.
     /// </summary>
-    public class CDReader : ReadOnlyDiscFileSystem
+    public sealed class CDReader : ReadOnlyDiscFileSystem
     {
         private Stream _data;
         private CommonVolumeDescriptor _volDesc;

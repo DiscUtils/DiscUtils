@@ -32,7 +32,7 @@ namespace DiscUtils.Fat
     /// <summary>
     /// Class for accessing FAT file systems.
     /// </summary>
-    public class FatFileSystem : DiscFileSystem
+    public sealed class FatFileSystem : DiscFileSystem
     {
         private TimeZoneInfo _timeZone;
         private Stream _data;

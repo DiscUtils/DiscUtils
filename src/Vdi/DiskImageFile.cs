@@ -28,7 +28,7 @@ namespace DiscUtils.Vdi
     /// <summary>
     /// Represents a single VirtualBox disk (.vdi file).
     /// </summary>
-    public class DiskImageFile : VirtualDiskLayer
+    public sealed class DiskImageFile : VirtualDiskLayer
     {
         private Stream _stream;
 

@@ -30,17 +30,12 @@ using System.Text.RegularExpressions;
 
 namespace DiscUtils
 {
-    internal class Utilities
+    internal static class Utilities
     {
         /// <summary>
         /// The number of bytes in a standard disk sector (512).
         /// </summary>
         internal const int SectorSize = Sizes.Sector;
-
-        /// <summary>
-        /// Prevent instantiation.
-        /// </summary>
-        private Utilities() { }
 
         /// <summary>
         /// Round up a value to a multiple of a unit size.

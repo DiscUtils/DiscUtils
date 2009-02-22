@@ -31,7 +31,7 @@ namespace DiscUtils.Ntfs
     /// <summary>
     /// Class for accessing NTFS file systems.
     /// </summary>
-    public class NtfsFileSystem : ReadOnlyDiscFileSystem
+    public sealed class NtfsFileSystem : ReadOnlyDiscFileSystem
     {
         private NtfsOptions _options;
 

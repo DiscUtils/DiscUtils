@@ -28,7 +28,7 @@ namespace DiscUtils.Xva
     /// Class representing a single layer of an XVA disk.
     /// </summary>
     /// <remarks>XVA only supports a single layer.</remarks>
-    public class DiskLayer : VirtualDiskLayer
+    public sealed class DiskLayer : VirtualDiskLayer
     {
         private long _capacity;
 

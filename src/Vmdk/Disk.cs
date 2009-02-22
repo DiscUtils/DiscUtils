@@ -29,7 +29,7 @@ namespace DiscUtils.Vmdk
     /// <summary>
     /// Represents a VMDK-backed disk.
     /// </summary>
-    public class Disk : VirtualDisk
+    public sealed class Disk : VirtualDisk
     {
         private DiskImageFile _file;
         private SparseStream _content;

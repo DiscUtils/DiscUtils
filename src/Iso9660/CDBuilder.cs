@@ -39,7 +39,7 @@ namespace DiscUtils.Iso9660
     ///   builder.Build(@"C:\TEMP\myiso.iso");
     /// </code>
     /// </example>
-    public class CDBuilder : StreamBuilder
+    public sealed class CDBuilder : StreamBuilder
     {
         private List<BuildFileInfo> _files;
         private List<BuildDirectoryInfo> _dirs;

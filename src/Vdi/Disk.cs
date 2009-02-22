@@ -29,7 +29,7 @@ namespace DiscUtils.Vdi
     /// <summary>
     /// Represents a disk stored in VirtualBox (Sun xVM) format.
     /// </summary>
-    public class Disk : VirtualDisk
+    public sealed class Disk : VirtualDisk
     {
         private DiskImageFile _diskImage;
 

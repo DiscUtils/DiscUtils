@@ -28,7 +28,7 @@ namespace DiscUtils.Partitions
     /// <summary>
     /// Provides access to partition records in a GUID partition table.
     /// </summary>
-    public class GuidPartitionInfo : PartitionInfo
+    public sealed class GuidPartitionInfo : PartitionInfo
     {
         private GuidPartitionTable _table;
         private GptEntry _entry;

@@ -32,7 +32,7 @@ namespace DiscUtils
     /// are actually stored in the underlying storage medium (rather than implied
     /// zero bytes).  Extents are stored as a zero-based byte offset (from the
     /// beginning of the stream), and a byte length</remarks>
-    public class StreamExtent : IEquatable<StreamExtent>
+    public sealed class StreamExtent : IEquatable<StreamExtent>
     {
         private long _start;
         private long _length;

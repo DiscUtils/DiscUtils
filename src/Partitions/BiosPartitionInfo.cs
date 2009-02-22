@@ -28,7 +28,7 @@ namespace DiscUtils.Partitions
     /// <summary>
     /// Provides access to partition records in a BIOS (MBR) partition table.
     /// </summary>
-    public class BiosPartitionInfo : PartitionInfo
+    public sealed class BiosPartitionInfo : PartitionInfo
     {
         private BiosPartitionRecord _record;
         private BiosPartitionTable _table;

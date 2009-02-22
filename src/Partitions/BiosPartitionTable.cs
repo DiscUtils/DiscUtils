@@ -31,7 +31,7 @@ namespace DiscUtils.Partitions
     /// <summary>
     /// Represents a BIOS (MBR) Partition Table.
     /// </summary>
-    public class BiosPartitionTable : PartitionTable
+    public sealed class BiosPartitionTable : PartitionTable
     {
         private Stream _diskData;
         private Geometry _diskGeometry;

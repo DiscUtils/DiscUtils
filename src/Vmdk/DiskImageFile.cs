@@ -30,7 +30,7 @@ namespace DiscUtils.Vmdk
     /// <summary>
     /// Represents a single VMDK file.
     /// </summary>
-    public class DiskImageFile : VirtualDiskLayer
+    public sealed class DiskImageFile : VirtualDiskLayer
     {
         private DescriptorFile _descriptor;
         private SparseStream _contentStream;

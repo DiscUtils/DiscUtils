@@ -27,7 +27,7 @@ namespace DiscUtils
     /// <summary>
     /// Provides information about a file on a disc.
     /// </summary>
-    public class DiscFileInfo : DiscFileSystemInfo
+    public sealed class DiscFileInfo : DiscFileSystemInfo
     {
         internal DiscFileInfo(DiscFileSystem fileSystem, string path)
             : base(fileSystem, path)
@@ -54,7 +54,7 @@ namespace DiscUtils
         /// Creates a <see cref="StreamWriter" /> that appends text to the file represented by this <see cref="DiscFileInfo"/>.
         /// </summary>
         /// <returns>The newly created writer</returns>
-        public virtual StreamWriter AppendText()
+        public StreamWriter AppendText()
         {
             return new StreamWriter(Open(FileMode.Append));
         }
@@ -63,7 +63,7 @@ namespace DiscUtils
         /// Copies an existing file to a new file.
         /// </summary>
         /// <param name="destinationFileName">The destination file</param>
-        public virtual void CopyTo(string destinationFileName)
+        public void CopyTo(string destinationFileName)
         {
             CopyTo(destinationFileName, false);
         }
@@ -73,7 +73,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="destinationFileName">The destination file</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
-        public virtual void CopyTo(string destinationFileName, bool overwrite)
+        public void CopyTo(string destinationFileName, bool overwrite)
         {
             FileSystem.CopyFile(Path, destinationFileName, overwrite);
         }
@@ -82,7 +82,7 @@ namespace DiscUtils
         /// Creates a new file for reading and writing.
         /// </summary>
         /// <returns>The newly created stream.</returns>
-        public virtual Stream Create()
+        public Stream Create()
         {
             return Open(FileMode.Create);
         }
@@ -91,7 +91,7 @@ namespace DiscUtils
         /// Creates a new <see cref="StreamWriter"/> that writes a new text file.
         /// </summary>
         /// <returns></returns>
-        public virtual StreamWriter CreateText()
+        public StreamWriter CreateText()
         {
             return new StreamWriter(Open(FileMode.Create));
         }
@@ -99,7 +99,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets an instance of the parent directory.
         /// </summary>
-        public virtual DiscDirectoryInfo Directory
+        public DiscDirectoryInfo Directory
         {
             get { return Parent; }
         }
@@ -107,14 +107,14 @@ namespace DiscUtils
         /// <summary>
         /// Gets a string representing the directory's full path.
         /// </summary>
-        public virtual string DirectoryName {
+        public string DirectoryName {
             get { return Directory.FullName; }
         }
 
         /// <summary>
         /// Gets or sets a value that determines if the file is read-only.
         /// </summary>
-        public virtual bool IsReadOnly
+        public bool IsReadOnly
         {
             get { return (Attributes & FileAttributes.ReadOnly) != 0; }
             set { Attributes = Attributes | FileAttributes.ReadOnly; }
@@ -123,7 +123,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the length of the current file in bytes.
         /// </summary>
-        public virtual long Length
+        public long Length
         {
             get { return FileSystem.GetFileLength(Path); }
         }
@@ -132,7 +132,7 @@ namespace DiscUtils
         /// Moves a file to a new location.
         /// </summary>
         /// <param name="destinationFileName">The new name of the file</param>
-        public virtual void MoveTo(string destinationFileName)
+        public void MoveTo(string destinationFileName)
         {
             FileSystem.MoveFile(Path, destinationFileName);
         }
@@ -143,7 +143,7 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The newly created stream</returns>
         /// <remarks>Read-only file systems only support <c>FileMode.Open</c>.</remarks>
-        public virtual Stream Open(FileMode mode)
+        public Stream Open(FileMode mode)
         {
             return FileSystem.OpenFile(Path, mode);
         }
@@ -155,7 +155,7 @@ namespace DiscUtils
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The newly created stream</returns>
         /// <remarks>Read-only file systems only support <c>FileMode.Open</c> and <c>FileAccess.Read</c>.</remarks>
-        public virtual Stream Open(FileMode mode, FileAccess access)
+        public Stream Open(FileMode mode, FileAccess access)
         {
             return FileSystem.OpenFile(Path, mode, access);
         }
@@ -164,7 +164,7 @@ namespace DiscUtils
         /// Opens an existing file for read-only access.
         /// </summary>
         /// <returns>The newly created stream</returns>
-        public virtual Stream OpenRead()
+        public Stream OpenRead()
         {
             return Open(FileMode.Open, FileAccess.Read);
         }
@@ -173,7 +173,7 @@ namespace DiscUtils
         /// Opens an existing file for reading as UTF-8 text.
         /// </summary>
         /// <returns>The newly created reader</returns>
-        public virtual StreamReader OpenText()
+        public StreamReader OpenText()
         {
             return new StreamReader(OpenRead());
         }
@@ -182,7 +182,7 @@ namespace DiscUtils
         /// Opens a file for writing.
         /// </summary>
         /// <returns>The newly created stream.</returns>
-        public virtual Stream OpenWrite()
+        public Stream OpenWrite()
         {
             return Open(FileMode.Open, FileAccess.Write);
         }

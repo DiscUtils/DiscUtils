@@ -26,7 +26,7 @@ namespace DiscUtils.Ntfs
     /// <summary>
     /// Class whose instances hold options controlling how <see cref="NtfsFileSystem"/> works.
     /// </summary>
-    public class NtfsOptions
+    public sealed class NtfsOptions
     {
         private bool _hideMetaFiles;
         private bool _hideHiddenFiles;

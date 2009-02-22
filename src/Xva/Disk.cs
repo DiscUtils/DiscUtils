@@ -28,7 +28,7 @@ namespace DiscUtils.Xva
     /// <summary>
     /// Class representing a disk containing withing an XVA file.
     /// </summary>
-    public class Disk : VirtualDisk
+    public sealed class Disk : VirtualDisk
     {
         private VirtualMachine _vm;
         private string _id;

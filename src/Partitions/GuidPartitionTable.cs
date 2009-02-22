@@ -32,7 +32,7 @@ namespace DiscUtils.Partitions
     /// <summary>
     /// Represents a GUID Partition Table.
     /// </summary>
-    public class GuidPartitionTable : PartitionTable
+    public sealed class GuidPartitionTable : PartitionTable
     {
         private Stream _diskData;
         private Geometry _diskGeometry;

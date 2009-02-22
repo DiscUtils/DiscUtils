@@ -31,7 +31,7 @@ namespace DiscUtils.Vhd
     /// <summary>
     /// Represents a VHD-backed disk.
     /// </summary>
-    public class Disk : VirtualDisk
+    public sealed class Disk : VirtualDisk
     {
         /// <summary>
         /// The list of files that make up the disk.
