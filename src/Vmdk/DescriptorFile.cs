@@ -57,12 +57,6 @@ namespace DiscUtils.Vmdk
             _header.Add(new DescriptorFileEntry(HeaderContentId, "ffffffff", DescriptorFileEntryType.Plain));
             _header.Add(new DescriptorFileEntry(HeaderParentContentId, "ffffffff", DescriptorFileEntryType.Plain));
             _header.Add(new DescriptorFileEntry(HeaderCreateType, "", DescriptorFileEntryType.Quoted));
-
-            _diskDataBase.Add(new DescriptorFileEntry(DiskDbAdapterType, "lsilogic", DescriptorFileEntryType.Quoted));
-            _diskDataBase.Add(new DescriptorFileEntry(DiskDbSectors, "", DescriptorFileEntryType.Quoted));
-            _diskDataBase.Add(new DescriptorFileEntry(DiskDbHeads, "", DescriptorFileEntryType.Quoted));
-            _diskDataBase.Add(new DescriptorFileEntry(DiskDbCylinders, "", DescriptorFileEntryType.Quoted));
-            _diskDataBase.Add(new DescriptorFileEntry(DiskDbHardwareVersion, "4", DescriptorFileEntryType.Quoted));
         }
 
         public DescriptorFile(Stream source)
@@ -77,24 +71,25 @@ namespace DiscUtils.Vmdk
         public uint ContentId
         {
             get { return uint.Parse(GetHeader(HeaderContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
-            set { SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture)); }
+            set { SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture), DescriptorFileEntryType.Plain); }
         }
 
         public uint ParentContentId
         {
             get { return uint.Parse(GetHeader(HeaderParentContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
+            set { SetHeader(HeaderParentContentId, value.ToString("x8", CultureInfo.InvariantCulture), DescriptorFileEntryType.Plain); }
         }
 
         public DiskCreateType CreateType
         {
             get { return ParseCreateType(GetHeader(HeaderCreateType)); }
-            set { SetHeader(HeaderCreateType, FormatCreateType(value)); }
+            set { SetHeader(HeaderCreateType, FormatCreateType(value), DescriptorFileEntryType.Plain); }
         }
 
         public string ParentFileNameHint
         {
             get { return GetHeader(HeaderParentFileNameHint); }
-            set { SetHeader(HeaderParentFileNameHint, value); }
+            set { SetHeader(HeaderParentFileNameHint, value, DescriptorFileEntryType.Quoted); }
         }
 
         public List<ExtentDescriptor> Extents
@@ -125,11 +120,18 @@ namespace DiscUtils.Vmdk
             set { SetDiskDatabase(DiskDbUuid, FormatUuid(value)); }
         }
 
-        public DiskAdapterType AdaptorType
+        public DiskAdapterType AdapterType
         {
             get { return ParseAdapterType(GetDiskDatabase(DiskDbAdapterType)); }
             set { SetDiskDatabase(DiskDbAdapterType, FormatAdapterType(value)); }
         }
+
+        public string HardwareVersion
+        {
+            get { return GetDiskDatabase(DiskDbHardwareVersion); }
+            set { SetDiskDatabase(DiskDbHardwareVersion, value); }
+        }
+
 
         private static DiskAdapterType ParseAdapterType(string value)
         {
@@ -270,7 +272,7 @@ namespace DiscUtils.Vmdk
             return null;
         }
 
-        private void SetHeader(string key, string newValue)
+        private void SetHeader(string key, string newValue, DescriptorFileEntryType type)
         {
             foreach (var entry in _header)
             {
@@ -280,7 +282,7 @@ namespace DiscUtils.Vmdk
                     return;
                 }
             }
-            _header.Add(new DescriptorFileEntry(key, newValue, DescriptorFileEntryType.Plain));
+            _header.Add(new DescriptorFileEntry(key, newValue, type));
         }
 
         private string GetDiskDatabase(string key)

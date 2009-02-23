@@ -48,6 +48,8 @@ namespace DiscUtils.Vmdk
         /// </summary>
         private Ownership _ownsMonolithicStream;
 
+        private static Random _rng = new Random();
+
         /// <summary>
         /// Creates a new instance from a file on disk.
         /// </summary>
@@ -144,90 +146,39 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
-            if (type == DiskCreateType.MonolithicSparse)
+            DescriptorFile baseDescriptor = new DescriptorFile();
+            baseDescriptor.DiskGeometry = DefaultGeometry(capacity);
+            baseDescriptor.ContentId = (uint)_rng.Next();
+            baseDescriptor.CreateType = type;
+            baseDescriptor.UniqueId = Guid.NewGuid();
+            baseDescriptor.HardwareVersion = "4";
+            baseDescriptor.AdapterType = DiskAdapterType.LsiLogicScsi;
+
+            return DoInitialize(path, capacity, type, baseDescriptor);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk that is a linked clone of an existing disk.
+        /// </summary>
+        /// <param name="path">The path to the new disk</param>
+        /// <param name="type">The type of the new disk</param>
+        /// <param name="parent">The disk to clone</param>
+        /// <param name="parentPath">The path to the parent disk</param>
+        /// <returns>The new virtual disk</returns>
+        public static DiskImageFile InitializeDifferencing(string path, DiskCreateType type, DiskImageFile parent, string parentPath)
+        {
+            if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
             {
-                // MonolithicSparse is a special case, the descriptor is embedded in the file itself...
-                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
-                {
-                    long descriptorStart;
-                    CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
-
-                    DescriptorFile descriptor = new DescriptorFile();
-                    descriptor.DiskGeometry = DefaultGeometry(capacity);
-                    descriptor.ContentId = (uint)new Random().Next();
-                    descriptor.CreateType = type;
-                    descriptor.Extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0));
-                    descriptor.UniqueId = Guid.NewGuid();
-
-                    fs.Position = descriptorStart * Sizes.Sector;
-                    descriptor.Write(fs);
-                }
-            }
-            else
-            {
-                ExtentType extentType = CreateTypeToExtentType(type);
-                long totalSize = 0;
-                List<ExtentDescriptor> extents = new List<ExtentDescriptor>();
-                if (type == DiskCreateType.MonolithicFlat || type == DiskCreateType.VmfsSparse || type == DiskCreateType.Vmfs)
-                {
-                    string adornment = (type == DiskCreateType.VmfsSparse) ? "sparse" : "flat";
-                    string fileName = AdornFileName(Path.GetFileName(path), adornment);
-
-                    using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
-                    {
-                        CreateExtent(fs, capacity, extentType);
-                        extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, extentType, fileName, 0));
-                        totalSize = capacity;
-                    }
-                }
-                else if (type == DiskCreateType.TwoGbMaxExtentFlat || type == DiskCreateType.TwoGbMaxExtentSparse)
-                {
-                    int i = 1;
-                    while (totalSize < capacity)
-                    {
-                        string adornment;
-                        if (type == DiskCreateType.TwoGbMaxExtentSparse)
-                        {
-                            adornment = string.Format(CultureInfo.InvariantCulture, "s{0:x3}", i);
-                        }
-                        else
-                        {
-                            adornment = string.Format(CultureInfo.InvariantCulture, "{0:x6}", i);
-                        }
-
-                        string fileName = AdornFileName(Path.GetFileName(path), adornment);
-
-                        using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
-                        {
-                            long extentSize = Math.Min(2 * Sizes.OneGiB - Sizes.OneMiB, capacity - totalSize);
-                            CreateExtent(fs, extentSize, extentType);
-                            extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
-                            totalSize += extentSize;
-                        }
-
-                        ++i;
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException("Creating disks of this type is not supported");
-                }
-
-                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
-                {
-                    DescriptorFile descriptor = new DescriptorFile();
-                    descriptor.DiskGeometry = DefaultGeometry(totalSize);
-                    descriptor.ContentId = (uint)new Random().Next();
-                    descriptor.CreateType = type;
-                    descriptor.Extents.AddRange(extents);
-                    descriptor.UniqueId = Guid.NewGuid();
-
-                    descriptor.Write(fs);
-                }
+                throw new ArgumentException("Differencing disks must be sparse", "type");
             }
 
+            DescriptorFile baseDescriptor = new DescriptorFile();
+            baseDescriptor.ContentId = (uint)_rng.Next();
+            baseDescriptor.ParentContentId = parent.ContentId;
+            baseDescriptor.ParentFileNameHint = parentPath;
+            baseDescriptor.CreateType = type;
 
-            return new DiskImageFile(path, FileAccess.ReadWrite);
+            return DoInitialize(path, parent.Capacity, type, baseDescriptor);
         }
 
         /// <summary>
@@ -257,6 +208,11 @@ namespace DiscUtils.Vmdk
         internal string ParentLocation
         {
             get { return _descriptor.ParentFileNameHint; }
+        }
+
+        internal uint ContentId
+        {
+            get { return _descriptor.ContentId; }
         }
 
         /// <summary>
@@ -330,6 +286,87 @@ namespace DiscUtils.Vmdk
                 }
                 return new ConcatStream(streams);
             }
+        }
+
+        private static DiskImageFile DoInitialize(string path, long capacity, DiskCreateType type, DescriptorFile baseDescriptor)
+        {
+            if (type == DiskCreateType.MonolithicSparse)
+            {
+                // MonolithicSparse is a special case, the descriptor is embedded in the file itself...
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    long descriptorStart;
+                    CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
+
+                    ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0);
+                    fs.Position = descriptorStart * Sizes.Sector;
+                    baseDescriptor.Extents.Add(extent);
+                    baseDescriptor.Write(fs);
+                }
+            }
+            else
+            {
+                ExtentType extentType = CreateTypeToExtentType(type);
+                long totalSize = 0;
+                List<ExtentDescriptor> extents = new List<ExtentDescriptor>();
+                if (type == DiskCreateType.MonolithicFlat || type == DiskCreateType.VmfsSparse || type == DiskCreateType.Vmfs)
+                {
+                    string adornment = "flat";
+                    if(type == DiskCreateType.VmfsSparse)
+                    {
+                        adornment = string.IsNullOrEmpty(baseDescriptor.ParentFileNameHint) ? "sparse" : "delta";
+                    }
+
+                    string fileName = AdornFileName(Path.GetFileName(path), adornment);
+
+                    using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
+                    {
+                        CreateExtent(fs, capacity, extentType);
+                        extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, extentType, fileName, 0));
+                        totalSize = capacity;
+                    }
+                }
+                else if (type == DiskCreateType.TwoGbMaxExtentFlat || type == DiskCreateType.TwoGbMaxExtentSparse)
+                {
+                    int i = 1;
+                    while (totalSize < capacity)
+                    {
+                        string adornment;
+                        if (type == DiskCreateType.TwoGbMaxExtentSparse)
+                        {
+                            adornment = string.Format(CultureInfo.InvariantCulture, "s{0:x3}", i);
+                        }
+                        else
+                        {
+                            adornment = string.Format(CultureInfo.InvariantCulture, "{0:x6}", i);
+                        }
+
+                        string fileName = AdornFileName(Path.GetFileName(path), adornment);
+
+                        using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            long extentSize = Math.Min(2 * Sizes.OneGiB - Sizes.OneMiB, capacity - totalSize);
+                            CreateExtent(fs, extentSize, extentType);
+                            extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
+                            totalSize += extentSize;
+                        }
+
+                        ++i;
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException("Creating disks of this type is not supported");
+                }
+
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    baseDescriptor.Extents.AddRange(extents);
+                    baseDescriptor.Write(fs);
+                }
+            }
+
+            return new DiskImageFile(path, FileAccess.ReadWrite);
         }
 
         private SparseStream OpenExtent(ExtentDescriptor extent, long extentStart, SparseStream parent, Ownership ownsParent)
@@ -536,7 +573,7 @@ namespace DiscUtils.Vmdk
                 _descriptor = new DescriptorFile(s);
                 if (_access != FileAccess.Read)
                 {
-                    _descriptor.ContentId = (uint)new Random().Next();
+                    _descriptor.ContentId = (uint)_rng.Next();
                     s.Position = 0;
                     _descriptor.Write(s);
                     s.SetLength(s.Position);
@@ -552,7 +589,7 @@ namespace DiscUtils.Vmdk
                     _descriptor = new DescriptorFile(descriptorStream);
                     if (_access != FileAccess.Read)
                     {
-                        _descriptor.ContentId = (uint)new Random().Next();
+                        _descriptor.ContentId = (uint)_rng.Next();
                         descriptorStream.Position = 0;
                         _descriptor.Write(descriptorStream);
                         byte[] blank = new byte[descriptorStream.Length - descriptorStream.Position];
