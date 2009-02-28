@@ -206,7 +206,9 @@ namespace DiscUtils.Vhd
 
             long tableOffset = 512 + 1024; // Footer + Header
 
-            DynamicHeader dynamicHeader = new DynamicHeader(-1, tableOffset, parent._dynamicHeader.BlockSize, footer.CurrentSize);
+            uint blockSize = (parent._dynamicHeader == null) ? DynamicHeader.DefaultBlockSize : parent._dynamicHeader.BlockSize;
+
+            DynamicHeader dynamicHeader = new DynamicHeader(-1, tableOffset, blockSize, footer.CurrentSize);
             int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
             dynamicHeader.ParentUniqueId = parent.UniqueId;
             dynamicHeader.ParentTimestamp = parentModificationTimeUtc;
