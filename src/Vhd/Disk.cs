@@ -193,6 +193,19 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="blockSize">The size of each block (unit of allocation)</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, long blockSize)
+        {
+            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity, blockSize), Ownership.Dispose);
+        }
+
+        /// <summary>
         /// Creates a new VHD differencing disk file.
         /// </summary>
         /// <param name="path">The path to the new disk file</param>

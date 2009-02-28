@@ -30,6 +30,7 @@ namespace DiscUtils.Vhd
     {
         public const string HeaderCookie = "cxsparse";
         public const uint Version1 = 0x00010000;
+        public const uint DefaultBlockSize = 0x00200000;
 
         public string Cookie;
         public long DataOffset;
@@ -39,21 +40,21 @@ namespace DiscUtils.Vhd
         public uint BlockSize;
         public uint Checksum;
         public Guid ParentUniqueId;
-        public DateTime ParentTimeStamp;
+        public DateTime ParentTimestamp;
         public string ParentUnicodeName;
         public ParentLocator[] ParentLocators;
 
         public DynamicHeader() { }
 
-        public DynamicHeader(long dataOffset, long tableOffset, long diskSize)
+        public DynamicHeader(long dataOffset, long tableOffset, uint blockSize, long diskSize)
         {
             Cookie = HeaderCookie;
             DataOffset = dataOffset;
             TableOffset = tableOffset;
             HeaderVersion = Version1;
-            BlockSize = 0x00200000;
-            MaxTableEntries = (int)((diskSize + BlockSize - 1) / BlockSize);
-            ParentTimeStamp = Footer.EpochUtc;
+            BlockSize = blockSize;
+            MaxTableEntries = (int)((diskSize + blockSize - 1) / blockSize);
+            ParentTimestamp = Footer.EpochUtc;
             ParentUnicodeName = "";
             ParentLocators = new ParentLocator[8];
             for(int i = 0; i < 8; ++i)
@@ -72,7 +73,7 @@ namespace DiscUtils.Vhd
             BlockSize = toCopy.BlockSize;
             Checksum = toCopy.Checksum;
             ParentUniqueId = toCopy.ParentUniqueId;
-            ParentTimeStamp = toCopy.ParentTimeStamp;
+            ParentTimestamp = toCopy.ParentTimestamp;
             ParentUnicodeName = toCopy.ParentUnicodeName;
             ParentLocators = new ParentLocator[toCopy.ParentLocators.Length];
             for (int i = 0; i < ParentLocators.Length; ++i)
@@ -97,7 +98,7 @@ namespace DiscUtils.Vhd
             result.BlockSize = Utilities.ToUInt32BigEndian(data, offset + 32);
             result.Checksum = Utilities.ToUInt32BigEndian(data, offset + 36);
             result.ParentUniqueId = Utilities.ToGuidBigEndian(data, offset + 40);
-            result.ParentTimeStamp = Footer.EpochUtc.AddSeconds(Utilities.ToUInt32BigEndian(data, offset + 56));
+            result.ParentTimestamp = Footer.EpochUtc.AddSeconds(Utilities.ToUInt32BigEndian(data, offset + 56));
             result.ParentUnicodeName = Encoding.BigEndianUnicode.GetString(data, offset + 64, 512).TrimEnd('\0');
 
             result.ParentLocators = new ParentLocator[8];
@@ -119,7 +120,7 @@ namespace DiscUtils.Vhd
             Utilities.WriteBytesBigEndian(BlockSize, data, offset + 32);
             Utilities.WriteBytesBigEndian(Checksum, data, offset + 36);
             Utilities.WriteBytesBigEndian(ParentUniqueId, data, offset + 40);
-            Utilities.WriteBytesBigEndian((uint)(ParentTimeStamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
+            Utilities.WriteBytesBigEndian((uint)(ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
             Utilities.WriteBytesBigEndian((uint)0, data, offset + 60);
             Array.Clear(data, offset + 64, 512);
             Encoding.BigEndianUnicode.GetBytes(ParentUnicodeName, 0, ParentUnicodeName.Length, data, offset + 64);

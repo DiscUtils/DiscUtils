@@ -46,7 +46,7 @@ namespace DiscUtils.Vhd
         public uint Features;
         public uint FileFormatVersion;
         public long DataOffset;
-        public DateTime TimeStamp;
+        public DateTime Timestamp;
         public string CreatorApp;
         public uint CreatorVersion;
         public string CreatorHostOS;
@@ -68,7 +68,7 @@ namespace DiscUtils.Vhd
             Features = FeatureReservedMustBeSet;
             FileFormatVersion = Version1;
             DataOffset = -1;
-            TimeStamp = DateTime.UtcNow;
+            Timestamp = DateTime.UtcNow;
             CreatorApp = "dutl";
             CreatorVersion = Version1;
             CreatorHostOS = WindowsHostOS;
@@ -86,7 +86,7 @@ namespace DiscUtils.Vhd
             Features = toCopy.Features;
             FileFormatVersion = toCopy.FileFormatVersion;
             DataOffset = toCopy.DataOffset;
-            TimeStamp = toCopy.TimeStamp;
+            Timestamp = toCopy.Timestamp;
             CreatorApp = toCopy.CreatorApp;
             CreatorVersion = toCopy.CreatorVersion;
             CreatorHostOS = toCopy.CreatorHostOS;
@@ -107,7 +107,7 @@ namespace DiscUtils.Vhd
             result.Features = Utilities.ToUInt32BigEndian(buffer, offset + 8);
             result.FileFormatVersion = Utilities.ToUInt32BigEndian(buffer, offset + 12);
             result.DataOffset = Utilities.ToInt64BigEndian(buffer, offset + 16);
-            result.TimeStamp = EpochUtc.AddSeconds(Utilities.ToUInt32BigEndian(buffer, offset + 24));
+            result.Timestamp = EpochUtc.AddSeconds(Utilities.ToUInt32BigEndian(buffer, offset + 24));
             result.CreatorApp = Utilities.BytesToString(buffer, offset + 28, 4);
             result.CreatorVersion = Utilities.ToUInt32BigEndian(buffer, offset + 32);
             result.CreatorHostOS = Utilities.BytesToString(buffer, offset + 36, 4);
@@ -128,7 +128,7 @@ namespace DiscUtils.Vhd
             Utilities.WriteBytesBigEndian(Features, buffer, offset + 8);
             Utilities.WriteBytesBigEndian(FileFormatVersion, buffer, offset + 12);
             Utilities.WriteBytesBigEndian(DataOffset, buffer, offset + 16);
-            Utilities.WriteBytesBigEndian((uint)(TimeStamp - EpochUtc).TotalSeconds, buffer, offset + 24);
+            Utilities.WriteBytesBigEndian((uint)(Timestamp - EpochUtc).TotalSeconds, buffer, offset + 24);
             Utilities.StringToBytes(CreatorApp, buffer, offset + 28, 4);
             Utilities.WriteBytesBigEndian(CreatorVersion, buffer, offset + 32);
             Utilities.StringToBytes(CreatorHostOS, buffer, offset + 36, 4);

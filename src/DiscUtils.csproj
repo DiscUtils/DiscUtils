@@ -185,6 +185,7 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Vhd\DiskImageFileInfo.cs" />
     <Compile Include="Vmdk\CommonSparseExtentHeader.cs" />
     <Compile Include="Vmdk\CommonSparseExtentStream.cs" />
     <Compile Include="Vmdk\DescriptorFile.cs" />
