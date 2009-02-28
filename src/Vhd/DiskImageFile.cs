@@ -198,6 +198,8 @@ namespace DiscUtils.Vhd
         {
             Footer footer = new Footer(parent.Geometry, FileType.Differencing);
             footer.DataOffset = 512; // Offset of Dynamic Header
+            footer.CurrentSize = parent._footer.CurrentSize;
+            footer.OriginalSize = parent._footer.OriginalSize;
             footer.UpdateChecksum();
             byte[] footerBlock = new byte[512];
             footer.ToBytes(footerBlock, 0);
