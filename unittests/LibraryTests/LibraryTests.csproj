@@ -53,6 +53,7 @@
     <Compile Include="GeometryTest.cs" />
     <Compile Include="Fat\FatDirectoryInfoTest.cs" />
     <Compile Include="Fat\FatFileInfoTest.cs" />
+    <Compile Include="InMemoryFileSystem.cs" />
     <Compile Include="Iso9660\IsoDirectoryInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileSystemTest.cs" />
@@ -67,6 +68,8 @@
     <Compile Include="Vhd\DiskImageFileTest.cs" />
     <Compile Include="Vhd\DiskTest.cs" />
     <Compile Include="Vhd\DynamicStreamTest.cs" />
+    <Compile Include="Vmdk\DiskTest.cs" />
+    <Compile Include="Vmdk\DynamicStreamTest.cs" />
     <Compile Include="Xva\VirtualMachineBuilderTest.cs" />
   </ItemGroup>
   <ItemGroup>

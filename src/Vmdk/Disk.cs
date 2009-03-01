@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -49,7 +50,21 @@ namespace DiscUtils.Vmdk
             _layerLocator = new LocalFileLocator(Path.GetDirectoryName(path));
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(path, access), Ownership.Dispose));
-            ResolveFileChain(path);
+            ResolveFileChain();
+        }
+
+        /// <summary>
+        /// Creates a new instance from a file on a file system.
+        /// </summary>
+        /// <param name="fileSystem">The file system containing the disk.</param>
+        /// <param name="path">The file system relative path to the disk.</param>
+        /// <param name="access">The access requested to the disk.</param>
+        public Disk(DiscFileSystem fileSystem, string path, FileAccess access)
+        {
+            _layerLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(_layerLocator, Path.GetFileName(path), access), Ownership.Dispose));
+            ResolveFileChain();
         }
 
         /// <summary>
@@ -61,6 +76,25 @@ namespace DiscUtils.Vmdk
         {
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+        }
+
+        internal Disk(DiskImageFile file, Ownership ownsStream)
+        {
+            if (file.NeedsParent)
+            {
+                throw new ArgumentException("Cannot create disk from file that needs parent");
+            }
+
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsStream));
+        }
+
+        internal Disk(DiskImageFile file, Ownership ownsStream, FileLocator layerLocator)
+        {
+            _layerLocator = layerLocator;
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsStream));
+            ResolveFileChain();
         }
 
         /// <summary>
@@ -92,6 +126,57 @@ namespace DiscUtils.Vmdk
             {
                 base.Dispose(disposing);
             }
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(string path, long capacity, DiskCreateType type)
+        {
+            return new Disk(DiskImageFile.Initialize(path, capacity, type), Ownership.Dispose);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified location on a file system.
+        /// </summary>
+        /// <param name="fileSystem">The file system to contain the disk</param>
+        /// <param name="path">The file system path to the disk</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type)
+        {
+            return new Disk(DiskImageFile.Initialize(fileSystem, path, capacity, type), Ownership.Dispose);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk as a thin clone of an existing disk.
+        /// </summary>
+        /// <param name="path">The path to the new disk.</param>
+        /// <param name="type">The type of disk to create</param>
+        /// <param name="parentPath">The path to the parent disk.</param>
+        /// <returns>The new disk.</returns>
+        public static Disk InitializeDifferencing(string path, DiskCreateType type, string parentPath)
+        {
+            return new Disk(DiskImageFile.InitializeDifferencing(path, type, parentPath), Ownership.Dispose);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk as a thin clone of an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to contain the disk</param>
+        /// <param name="path">The path to the new disk.</param>
+        /// <param name="type">The type of disk to create</param>
+        /// <param name="parentPath">The path to the parent disk.</param>
+        /// <returns>The new disk.</returns>
+        public static Disk InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type, string parentPath)
+        {
+            FileLocator fileLoc = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            return new Disk(DiskImageFile.InitializeDifferencing(fileSystem, path, type, parentPath), Ownership.Dispose, fileLoc);
         }
 
         /// <summary>
@@ -142,15 +227,14 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        private void ResolveFileChain(string lastPath)
+        private void ResolveFileChain()
         {
             DiskImageFile file = _files[_files.Count - 1].First;
-            string filePath = lastPath;
 
             while (file.NeedsParent)
             {
                 Stream fileStream = _layerLocator.Open(file.ParentLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
-                file = new DiskImageFile(fileStream, Ownership.Dispose, _layerLocator);
+                file = new DiskImageFile(fileStream, Ownership.Dispose, _layerLocator.GetRelativeLocator(Path.GetDirectoryName(file.ParentLocation)));
                 _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             }
         }

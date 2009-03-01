@@ -1037,6 +1037,28 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="ExtentDescriptor">
+          <Members>
+           <Member Name="#Offset">
+            <Accessors>
+             <Accessor Name="#get_Offset()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-03-01 15:09:50Z">
+                <Issue>
+                 <Item>'ExtentDescriptor.Offset.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="36" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="DiscUtils.Xva">
@@ -1105,6 +1127,7 @@
     <Note Id="33" Modified="2009-02-07 12:25:57Z">Xva fits in with existing namespace naming scheme</Note>
     <Note Id="34" Modified="2009-02-07 12:26:27Z">Xva is camel case form of XVA acronym</Note>
     <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
+    <Note Id="36" Modified="2009-03-01 15:12:07Z">This is a part of the data structure, but no extent types that use it are supported</Note>
     <Note Id="37" Modified="2009-02-08 22:43:49Z">Parameter names are arbitrary</Note>
     <Note Id="38" Modified="2009-02-08 22:45:11Z">Equivalent disposal pattern implemented, but not using IDisposable because instances can be re-used.</Note>
     <Note Id="39" Modified="2009-02-14 11:08:37Z">Utils is part of project name</Note>
@@ -1127,7 +1150,6 @@
    </Rule>
    <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
-    <Resolution Name="Type">Correct the casing of '{0}' in type name {1} by changing it to '{2}'.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>

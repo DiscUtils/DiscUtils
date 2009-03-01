@@ -118,77 +118,116 @@ namespace DiscUtils.Vmdk
 
         public override bool CanRead
         {
-            get { return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanSeek
         {
-            get { return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanWrite
         {
-            get { return _fileStream.CanWrite; }
+            get
+            {
+                CheckDisposed();
+                return _fileStream.CanWrite;
+            }
         }
 
         public override void Flush()
         {
+            CheckDisposed();
         }
 
         public override long Length
         {
-            get { return _header.Capacity * Sizes.Sector; }
+            get
+            {
+                CheckDisposed();
+                return _header.Capacity * Sizes.Sector;
+            }
         }
 
         public override long Position
         {
-            get { return _position; }
-            set { _position = value; }
+            get
+            {
+                CheckDisposed();
+                return _position;
+            }
+            set
+            {
+                CheckDisposed();
+                _position = value;
+            }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int grainTable = (int)(_position / _gtCoverage);
-            int grainTableOffset = (int)(_position - (grainTable * _gtCoverage));
+            CheckDisposed();
+
+            int totalRead = 0;
             int numRead;
 
-            if (!LoadGrainTable(grainTable))
+            do
             {
-                // Read from parent stream, to at most the end of grain table's coverage
-                _parentDiskStream.Position = _position + _diskOffset;
-                numRead = _parentDiskStream.Read(buffer, offset, (int)Math.Min(count, _gtCoverage - grainTableOffset));
-            }
-            else
-            {
-                int grainSize = (int)(_header.GrainSize * Sizes.Sector);
-                int grain = grainTableOffset / grainSize;
-                int grainOffset = grainTableOffset - (grain * grainSize);
+                int grainTable = (int)(_position / _gtCoverage);
+                int grainTableOffset = (int)(_position - (grainTable * _gtCoverage));
+                numRead = 0;
 
-                int numToRead = Math.Min(count, grainSize - grainOffset);
-
-                if (_grainTable[grain] == 0)
+                if (!LoadGrainTable(grainTable))
                 {
+                    // Read from parent stream, to at most the end of grain table's coverage
                     _parentDiskStream.Position = _position + _diskOffset;
-                    numRead = _parentDiskStream.Read(buffer, offset, numToRead);
+                    numRead = _parentDiskStream.Read(buffer, offset + totalRead, (int)Math.Min(count - totalRead, _gtCoverage - grainTableOffset));
                 }
                 else
                 {
-                    _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
-                    numRead = _fileStream.Read(buffer, offset, numToRead);
-                }
-            }
+                    int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+                    int grain = grainTableOffset / grainSize;
+                    int grainOffset = grainTableOffset - (grain * grainSize);
 
-            _position += numRead;
-            return numRead;
+                    int numToRead = Math.Min(count - totalRead, grainSize - grainOffset);
+
+                    if (_grainTable[grain] == 0)
+                    {
+                        _parentDiskStream.Position = _position + _diskOffset;
+                        numRead = _parentDiskStream.Read(buffer, offset + totalRead, numToRead);
+                    }
+                    else
+                    {
+                        _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
+                        numRead = _fileStream.Read(buffer, offset + totalRead, numToRead);
+                    }
+                }
+
+                _position += numRead;
+                totalRead += numRead;
+            } while (numRead != 0);
+
+            return totalRead;
         }
 
         public override void SetLength(long value)
         {
+            CheckDisposed();
+
             throw new NotSupportedException();
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
+            CheckDisposed();
+
             long effectiveOffset = offset;
             if (origin == SeekOrigin.Current)
             {
@@ -214,6 +253,8 @@ namespace DiscUtils.Vmdk
         {
             get
             {
+                CheckDisposed();
+
                 // Note: For now we only go down to grain table granularity (large chunks), we don't inspect the
                 // grain tables themselves to indicate which sectors are present.
                 List<StreamExtent> extents = new List<StreamExtent>();
@@ -292,6 +333,14 @@ namespace DiscUtils.Vmdk
             _currentGrainTable = index;
             _grainTable = newGrainTable;
             return true;
+        }
+
+        protected void CheckDisposed()
+        {
+            if (_fileStream == null)
+            {
+                throw new ObjectDisposedException("CommonSparseExtentStream");
+            }
         }
     }
 }

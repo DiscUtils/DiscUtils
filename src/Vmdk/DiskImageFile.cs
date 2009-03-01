@@ -106,6 +106,37 @@ namespace DiscUtils.Vmdk
 
             LoadDescriptor(stream);
             _extentLocator = extentLocator;
+
+            if (ownsStream == Ownership.Dispose)
+            {
+                stream.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Creates a new instance from a file.
+        /// </summary>
+        /// <param name="fileLocator">An object to open the file and any extents</param>
+        /// <param name="file">The file name</param>
+        /// <param name="access">The type of access desired</param>
+        internal DiskImageFile(FileLocator fileLocator, string file, FileAccess access)
+        {
+            _access = access;
+
+            FileAccess fileAccess = FileAccess.Read;
+            FileShare fileShare = FileShare.Read;
+            if (_access != FileAccess.Read)
+            {
+                fileAccess = FileAccess.ReadWrite;
+                fileShare = FileShare.None;
+            }
+
+            using(Stream s = fileLocator.Open(file, FileMode.Open, fileAccess, fileShare))
+            {
+                LoadDescriptor(s);
+            }
+
+            _extentLocator = fileLocator;
         }
 
         /// <summary>
@@ -146,15 +177,26 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
-            DescriptorFile baseDescriptor = new DescriptorFile();
-            baseDescriptor.DiskGeometry = DefaultGeometry(capacity);
-            baseDescriptor.ContentId = (uint)_rng.Next();
-            baseDescriptor.CreateType = type;
-            baseDescriptor.UniqueId = Guid.NewGuid();
-            baseDescriptor.HardwareVersion = "4";
-            baseDescriptor.AdapterType = DiskAdapterType.LsiLogicScsi;
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(capacity, type);
 
-            return DoInitialize(path, capacity, type, baseDescriptor);
+            FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
+            return DoInitialize(locator, Path.GetFileName(path), capacity, type, baseDescriptor);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the VMDK on</param>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type)
+        {
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(capacity, type);
+
+            FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            return DoInitialize(locator, Path.GetFileName(path), capacity, type, baseDescriptor);
         }
 
         /// <summary>
@@ -163,22 +205,48 @@ namespace DiscUtils.Vmdk
         /// <param name="path">The path to the new disk</param>
         /// <param name="type">The type of the new disk</param>
         /// <param name="parent">The disk to clone</param>
-        /// <param name="parentPath">The path to the parent disk</param>
         /// <returns>The new virtual disk</returns>
-        public static DiskImageFile InitializeDifferencing(string path, DiskCreateType type, DiskImageFile parent, string parentPath)
+        public static DiskImageFile InitializeDifferencing(string path, DiskCreateType type, string parent)
         {
             if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
             {
                 throw new ArgumentException("Differencing disks must be sparse", "type");
             }
 
-            DescriptorFile baseDescriptor = new DescriptorFile();
-            baseDescriptor.ContentId = (uint)_rng.Next();
-            baseDescriptor.ParentContentId = parent.ContentId;
-            baseDescriptor.ParentFileNameHint = parentPath;
-            baseDescriptor.CreateType = type;
+            using (DiskImageFile parentFile = new DiskImageFile(parent, FileAccess.Read))
+            {
+                DescriptorFile baseDescriptor = CreateDifferencingDiskDescriptor(type, parentFile, parent);
 
-            return DoInitialize(path, parent.Capacity, type, baseDescriptor);
+                FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
+                return DoInitialize(locator, Path.GetFileName(path), parentFile.Capacity, type, baseDescriptor);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk that is a linked clone of an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the VMDK on</param>
+        /// <param name="path">The path to the new disk</param>
+        /// <param name="type">The type of the new disk</param>
+        /// <param name="parent">The disk to clone</param>
+        /// <returns>The new virtual disk</returns>
+        public static DiskImageFile InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type, string parent)
+        {
+            if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
+            {
+                throw new ArgumentException("Differencing disks must be sparse", "type");
+            }
+
+            string basePath = Path.GetDirectoryName(path);
+            FileLocator locator = new DiscFileLocator(fileSystem, basePath);
+            FileLocator parentLocator = locator.GetRelativeLocator(Path.GetDirectoryName(parent));
+
+            using (DiskImageFile parentFile = new DiskImageFile(parentLocator, Path.GetFileName(parent), FileAccess.Read))
+            {
+                DescriptorFile baseDescriptor = CreateDifferencingDiskDescriptor(type, parentFile, parent);
+
+                return DoInitialize(locator, Path.GetFileName(path), parentFile.Capacity, type, baseDescriptor);
+            }
         }
 
         /// <summary>
@@ -284,21 +352,21 @@ namespace DiscUtils.Vmdk
                     streams[i] = OpenExtent(_descriptor.Extents[i], extentStart, parent, (i == streams.Length - 1) ? ownsParent : Ownership.None);
                     extentStart += _descriptor.Extents[i].SizeInSectors * Sizes.Sector;
                 }
-                return new ConcatStream(streams);
+                return new ConcatStream(Ownership.Dispose, streams);
             }
         }
 
-        private static DiskImageFile DoInitialize(string path, long capacity, DiskCreateType type, DescriptorFile baseDescriptor)
+        private static DiskImageFile DoInitialize(FileLocator fileLocator, string file, long capacity, DiskCreateType type, DescriptorFile baseDescriptor)
         {
             if (type == DiskCreateType.MonolithicSparse)
             {
                 // MonolithicSparse is a special case, the descriptor is embedded in the file itself...
-                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                using (Stream fs = fileLocator.Open(file, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                 {
                     long descriptorStart;
                     CreateExtent(fs, capacity, ExtentType.Sparse, 10 * Sizes.OneKiB, out descriptorStart);
 
-                    ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, ExtentType.Sparse, Path.GetFileName(path), 0);
+                    ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, ExtentType.Sparse, file, 0);
                     fs.Position = descriptorStart * Sizes.Sector;
                     baseDescriptor.Extents.Add(extent);
                     baseDescriptor.Write(fs);
@@ -317,9 +385,9 @@ namespace DiscUtils.Vmdk
                         adornment = string.IsNullOrEmpty(baseDescriptor.ParentFileNameHint) ? "sparse" : "delta";
                     }
 
-                    string fileName = AdornFileName(Path.GetFileName(path), adornment);
+                    string fileName = AdornFileName(file, adornment);
 
-                    using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
+                    using(Stream fs = fileLocator.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                     {
                         CreateExtent(fs, capacity, extentType);
                         extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, extentType, fileName, 0));
@@ -341,9 +409,9 @@ namespace DiscUtils.Vmdk
                             adornment = string.Format(CultureInfo.InvariantCulture, "{0:x6}", i);
                         }
 
-                        string fileName = AdornFileName(Path.GetFileName(path), adornment);
+                        string fileName = AdornFileName(file, adornment);
 
-                        using (FileStream fs = new FileStream(Path.Combine(Path.GetDirectoryName(path), fileName), FileMode.Create, FileAccess.ReadWrite))
+                        using (Stream fs = fileLocator.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                         {
                             long extentSize = Math.Min(2 * Sizes.OneGiB - Sizes.OneMiB, capacity - totalSize);
                             CreateExtent(fs, extentSize, extentType);
@@ -359,14 +427,14 @@ namespace DiscUtils.Vmdk
                     throw new NotSupportedException("Creating disks of this type is not supported");
                 }
 
-                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                using (Stream fs = fileLocator.Open(file, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                 {
                     baseDescriptor.Extents.AddRange(extents);
                     baseDescriptor.Write(fs);
                 }
             }
 
-            return new DiskImageFile(path, FileAccess.ReadWrite);
+            return new DiskImageFile(fileLocator, file, FileAccess.ReadWrite);
         }
 
         private SparseStream OpenExtent(ExtentDescriptor extent, long extentStart, SparseStream parent, Ownership ownsParent)
@@ -666,6 +734,28 @@ namespace DiscUtils.Vmdk
             int cylinders = (int)(diskSize / (heads * sectors * Sizes.Sector));
 
             return new Geometry(cylinders, heads, sectors);
+        }
+
+        private static DescriptorFile CreateSimpleDiskDescriptor(long capacity, DiskCreateType type)
+        {
+            DescriptorFile baseDescriptor = new DescriptorFile();
+            baseDescriptor.DiskGeometry = DefaultGeometry(capacity);
+            baseDescriptor.ContentId = (uint)_rng.Next();
+            baseDescriptor.CreateType = type;
+            baseDescriptor.UniqueId = Guid.NewGuid();
+            baseDescriptor.HardwareVersion = "4";
+            baseDescriptor.AdapterType = DiskAdapterType.LsiLogicScsi;
+            return baseDescriptor;
+        }
+
+        private static DescriptorFile CreateDifferencingDiskDescriptor(DiskCreateType type, DiskImageFile parent, string parentPath)
+        {
+            DescriptorFile baseDescriptor = new DescriptorFile();
+            baseDescriptor.ContentId = (uint)_rng.Next();
+            baseDescriptor.ParentContentId = parent.ContentId;
+            baseDescriptor.ParentFileNameHint = parentPath;
+            baseDescriptor.CreateType = type;
+            return baseDescriptor;
         }
 
     }

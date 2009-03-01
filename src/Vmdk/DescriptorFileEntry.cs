@@ -56,11 +56,6 @@ namespace DiscUtils.Vmdk
             set { _value = value; }
         }
 
-        public DescriptorFileEntryType Type
-        {
-            get { return _type; }
-        }
-
         public static DescriptorFileEntry Parse(string value)
         {
             string[] parts = value.Split(new char[] { '=' }, 2);

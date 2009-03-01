@@ -172,6 +172,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Sizes.cs" />
+    <Compile Include="SparseMemoryBuffer.cs" />
+    <Compile Include="SparseMemoryStream.cs" />
     <Compile Include="SparseStream.cs" />
     <Compile Include="StreamBuilder.cs" />
     <Compile Include="StreamExtent.cs" />

@@ -33,12 +33,14 @@ namespace DiscUtils
     internal class ConcatStream : SparseStream
     {
         private SparseStream[] _streams;
+        private Ownership _ownsStreams;
         private bool _canWrite;
 
         private long _position;
 
-        public ConcatStream(params SparseStream[] streams)
+        public ConcatStream(Ownership ownsStreams, params SparseStream[] streams)
         {
+            _ownsStreams = ownsStreams;
             _streams = streams;
 
             // Only allow writes if all streams can be written
@@ -52,23 +54,55 @@ namespace DiscUtils
             }
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing && _ownsStreams == Ownership.Dispose && _streams != null)
+                {
+                    foreach (var stream in _streams)
+                    {
+                        stream.Dispose();
+                    }
+                    _streams = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+
         public override bool CanRead
         {
-            get { return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanSeek
         {
-            get { return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanWrite
         {
-            get { return _canWrite; }
+            get
+            {
+                CheckDisposed();
+                return _canWrite;
+            }
         }
 
         public override void Flush()
         {
+            CheckDisposed();
             for (int i = 0; i < _streams.Length; ++i)
             {
                 _streams[i].Flush();
@@ -79,6 +113,7 @@ namespace DiscUtils
         {
             get
             {
+                CheckDisposed();
                 long length = 0;
                 for (int i = 0; i < _streams.Length; ++i)
                 {
@@ -92,27 +127,43 @@ namespace DiscUtils
         {
             get
             {
+                CheckDisposed();
                 return _position;
             }
             set
             {
+                CheckDisposed();
                 _position = value;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            long activeStreamStartPos;
-            int activeStream = GetActiveStream(out activeStreamStartPos);
+            CheckDisposed();
 
-            _streams[activeStream].Position = _position - activeStreamStartPos;
-            int numRead = _streams[activeStream].Read(buffer, offset, count);
-            _position += numRead;
-            return numRead;
+            int totalRead = 0;
+            int numRead = 0;
+
+            do
+            {
+                long activeStreamStartPos;
+                int activeStream = GetActiveStream(out activeStreamStartPos);
+
+                _streams[activeStream].Position = _position - activeStreamStartPos;
+
+                numRead = _streams[activeStream].Read(buffer, offset + totalRead, count - totalRead);
+
+                totalRead += numRead;
+                _position += numRead;
+            } while (numRead != 0);
+
+            return totalRead;
         }
 
         public override long Seek(long offset, System.IO.SeekOrigin origin)
         {
+            CheckDisposed();
+
             long effectiveOffset = offset;
             if (origin == SeekOrigin.Current)
             {
@@ -136,6 +187,8 @@ namespace DiscUtils
 
         public override void SetLength(long value)
         {
+            CheckDisposed();
+
             long lastStreamOffset;
             int lastStream = GetStream(Length, out lastStreamOffset);
             if (value < lastStreamOffset)
@@ -147,6 +200,7 @@ namespace DiscUtils
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+            CheckDisposed();
 
             int totalWritten = 0;
             while (totalWritten != count)
@@ -182,6 +236,7 @@ namespace DiscUtils
         {
             get
             {
+                CheckDisposed();
                 List<StreamExtent> extents = new List<StreamExtent>();
 
                 long pos = 0;
@@ -218,5 +273,12 @@ namespace DiscUtils
             return focusStream;
         }
 
+        private void CheckDisposed()
+        {
+            if (_streams == null)
+            {
+                throw new ObjectDisposedException("ConcatStream");
+            }
+        }
     }
 }

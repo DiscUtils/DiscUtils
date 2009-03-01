@@ -52,6 +52,8 @@ namespace DiscUtils.Vmdk
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+            CheckDisposed();
+
             int totalWritten = 0;
             while (totalWritten < count)
             {

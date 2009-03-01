@@ -31,6 +31,8 @@ namespace DiscUtils
     internal abstract class FileLocator
     {
         public abstract Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share);
+
+        public abstract FileLocator GetRelativeLocator(string path);
     }
 
     internal sealed class LocalFileLocator : FileLocator
@@ -45,6 +47,11 @@ namespace DiscUtils
         public override Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
         {
             return new FileStream(Path.Combine(_dir, fileName), mode, access, share);
+        }
+
+        public override FileLocator GetRelativeLocator(string path)
+        {
+            return new LocalFileLocator(Path.Combine(_dir, path));
         }
     }
 
@@ -62,6 +69,11 @@ namespace DiscUtils
         public override Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
         {
             return _fileSystem.OpenFile(Path.Combine(_basePath, fileName), mode, access);
+        }
+
+        public override FileLocator GetRelativeLocator(string path)
+        {
+            return new DiscFileLocator(_fileSystem, Path.Combine(_basePath, path));
         }
     }
 
