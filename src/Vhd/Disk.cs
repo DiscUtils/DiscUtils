@@ -211,7 +211,7 @@ namespace DiscUtils.Vhd
         /// <param name="path">The path to the new disk file</param>
         /// <param name="parentPath">The path to the parent disk file</param>
         /// <returns>An object that accesses the new file as a Disk</returns>
-        public static Disk InitializeDifferencing(String path, string parentPath)
+        public static Disk InitializeDifferencing(string path, string parentPath)
         {
             DiskImageFile parent = null;
             DiskImageFile newFile = null;
