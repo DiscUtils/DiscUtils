@@ -263,6 +263,20 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets the relative paths to all of the disk's extents.
+        /// </summary>
+        public IEnumerable<string> ExtentPaths
+        {
+            get
+            {
+                foreach (var path in _descriptor.Extents)
+                {
+                    yield return path.FileName;
+                }
+            }
+        }
+
+        /// <summary>
         /// Indicates if this disk is a linked differencing disk.
         /// </summary>
         internal bool NeedsParent

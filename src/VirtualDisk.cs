@@ -21,8 +21,7 @@
 //
 
 using System;
-using System.Collections.ObjectModel;
-using System.IO;
+using System.Collections.Generic;
 using DiscUtils.Partitions;
 
 namespace DiscUtils
@@ -86,7 +85,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the layers that make up the disk.
         /// </summary>
-        public abstract ReadOnlyCollection<VirtualDiskLayer> Layers
+        public abstract IEnumerable<VirtualDiskLayer> Layers
         {
             get;
         }

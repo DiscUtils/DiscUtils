@@ -21,7 +21,6 @@
 //
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 
 namespace DiscUtils.Vdi
@@ -150,14 +149,9 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Gets the layers that make up the disk.
         /// </summary>
-        public override ReadOnlyCollection<VirtualDiskLayer> Layers
+        public override IEnumerable<VirtualDiskLayer> Layers
         {
-            get
-            {
-                List<VirtualDiskLayer> layers = new List<VirtualDiskLayer>();
-                layers.Add(_diskImage);
-                return new ReadOnlyCollection<VirtualDiskLayer>(layers);
-            }
+            get { yield return _diskImage; }
         }
     }
 }

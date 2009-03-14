@@ -22,9 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace DiscUtils.Vhd
 {
@@ -309,12 +309,12 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the layers that make up the disk.
         /// </summary>
-        public override ReadOnlyCollection<VirtualDiskLayer> Layers
+        public override IEnumerable<VirtualDiskLayer> Layers
         {
             get
             {
-                VirtualDiskLayer[] layers = Utilities.Map<Tuple<DiskImageFile, Ownership>, VirtualDiskLayer>(_files, (f) => f.First);
-                return new ReadOnlyCollection<VirtualDiskLayer>(layers);
+                return from file in _files
+                       select (file.First as VirtualDiskLayer);
             }
         }
 

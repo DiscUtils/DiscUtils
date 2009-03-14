@@ -20,10 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using DiscUtils.Fat;
 
 namespace DiscUtils.Vmdk
 {
@@ -38,6 +37,11 @@ namespace DiscUtils.Vmdk
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 7.9 * 1024 * 1024 && disk.Geometry.Capacity < 8.1 * 1024 * 1024);
                 Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+
+                List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
+                List<string> paths = new List<string>(links[0].ExtentPaths);
+                Assert.AreEqual(1, paths.Count);
+                Assert.AreEqual("a-flat.vmdk", paths[0]);
             }
         }
 
@@ -58,6 +62,11 @@ namespace DiscUtils.Vmdk
             {
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
+
+                List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
+                List<string> paths = new List<string>(links[0].ExtentPaths);
+                Assert.AreEqual(1, paths.Count);
+                Assert.AreEqual("a.vmdk", paths[0]);
             }
         }
 
@@ -72,7 +81,14 @@ namespace DiscUtils.Vmdk
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
-                Assert.AreEqual(2, disk.Layers.Count);
+                Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
+
+                List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
+                Assert.AreEqual(2, links.Count);
+
+                List<string> paths = new List<string>(links[0].ExtentPaths);
+                Assert.AreEqual(1, paths.Count);
+                Assert.AreEqual("diff.vmdk", paths[0]);
             }
             Assert.Greater(2 * 1024 * 1024, fs.GetFileLength(@"\diff\diff.vmdk"));
         }
@@ -88,7 +104,7 @@ namespace DiscUtils.Vmdk
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
-                Assert.AreEqual(2, disk.Layers.Count);
+                Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
             }
             Assert.Greater(2 * 1024 * 1024, fs.GetFileLength(@"\dir\diff.vmdk"));
         }

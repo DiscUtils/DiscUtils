@@ -22,8 +22,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 
 namespace DiscUtils.Vmdk
 {
@@ -218,12 +218,24 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Gets the layers that make up the disk.
         /// </summary>
-        public override ReadOnlyCollection<VirtualDiskLayer> Layers
+        public override IEnumerable<VirtualDiskLayer> Layers
         {
             get
             {
-                VirtualDiskLayer[] layers = Utilities.Map<Tuple<DiskImageFile, Ownership>, VirtualDiskLayer>(_files, (f) => f.First);
-                return new ReadOnlyCollection<VirtualDiskLayer>(layers);
+                return from file in _files
+                       select (file.First as VirtualDiskLayer);
+            }
+        }
+
+        /// <summary>
+        /// Gets the links that make up the disk (type-safe version of Layers).
+        /// </summary>
+        public IEnumerable<DiskImageFile> Links
+        {
+            get
+            {
+                return from file in _files
+                       select file.First;
             }
         }
 

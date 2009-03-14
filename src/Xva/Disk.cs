@@ -20,8 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.ObjectModel;
-using System.IO;
+using System.Collections.Generic;
 
 namespace DiscUtils.Xva
 {
@@ -118,9 +117,9 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Gets the (single) layer of an XVA disk.
         /// </summary>
-        public override ReadOnlyCollection<VirtualDiskLayer> Layers
+        public override IEnumerable<VirtualDiskLayer> Layers
         {
-            get { return new ReadOnlyCollection<VirtualDiskLayer>(new VirtualDiskLayer[] { new DiskLayer(Capacity) }); }
+            get { yield return new DiskLayer(Capacity); }
         }
     }
 }

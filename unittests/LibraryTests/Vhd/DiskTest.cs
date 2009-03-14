@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 
@@ -87,7 +88,7 @@ namespace DiscUtils.Vhd
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Geometry.Capacity == disk.Content.Length);
-                Assert.AreEqual(2, disk.Layers.Count);
+                Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
             }
             Assert.Greater(1 * 1024 * 1024, diffStream.Length);
             diffStream.Dispose();
