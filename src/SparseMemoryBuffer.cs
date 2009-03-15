@@ -109,7 +109,7 @@ namespace DiscUtils
                 pos += numToWrite;
             }
 
-            _capacity = Math.Max(_capacity, pos + totalWritten);
+            _capacity = Math.Max(_capacity, pos);
         }
 
         /// <summary>
