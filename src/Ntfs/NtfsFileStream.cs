@@ -31,7 +31,6 @@ namespace DiscUtils.Ntfs
 {
     internal sealed class NtfsFileStream : SparseStream
     {
-        private NtfsFileSystem _fileSystem;
         private AttributeReference _attributeRef;
         private FileAccess _access;
 
@@ -39,9 +38,10 @@ namespace DiscUtils.Ntfs
         private BaseAttribute _attr;
         private SparseStream _attrStream;
 
+        private bool _isDirty;
+
         public NtfsFileStream(NtfsFileSystem fileSystem, AttributeReference attribute, FileAccess access)
         {
-            _fileSystem = fileSystem;
             _attributeRef = attribute;
             _access = access;
 
@@ -54,7 +54,12 @@ namespace DiscUtils.Ntfs
         {
             base.Close();
             _attrStream.Close();
-            _file.UpdateRecordInMft();
+
+            if (_isDirty)
+            {
+                _file.UpdateRecordInMft();
+                _isDirty = false;
+            }
         }
 
         public override bool CanRead
@@ -75,7 +80,11 @@ namespace DiscUtils.Ntfs
         public override void Flush()
         {
             _attrStream.Flush();
-            _file.UpdateRecordInMft();
+            if (_isDirty)
+            {
+                _file.UpdateRecordInMft();
+                _isDirty = false;
+            }
         }
 
         public override long Length
@@ -116,10 +125,17 @@ namespace DiscUtils.Ntfs
             {
                 if (!SoftCheckAttributeLengthIsOK(_attrStream.Position + count))
                 {
-                    throw new NotImplementedException("Convert stream to non-resident");
+                    _isDirty = true;
+                    _attrStream.Dispose();
+                    
+                    _file.MakeAttributeNonResident(_attributeRef.Type, _attributeRef.Name);
+
+                    _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
+                    _attrStream = _attr.Open(_access);
                 }
             }
 
+            _isDirty = true;
             _attrStream.Write(buffer, offset, count);
         }
 

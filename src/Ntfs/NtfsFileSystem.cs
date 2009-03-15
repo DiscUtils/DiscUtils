@@ -57,7 +57,7 @@ namespace DiscUtils.Ntfs
             _stream.Position = 0;
             byte[] bytes = Utilities.ReadFully(_stream, 512);
 
-            _bpb = BiosParameterBlock.FromBytes(bytes, 0, bytes.Length);
+            _bpb = BiosParameterBlock.FromBytes(bytes, 0);
 
             _stream.Position = _bpb.MftCluster * _bpb.SectorsPerCluster * _bpb.BytesPerSector;
             byte[] mftSelfRecordData = Utilities.ReadFully(_stream, _bpb.MftRecordSize * _bpb.SectorsPerCluster * _bpb.BytesPerSector);
@@ -347,6 +347,11 @@ namespace DiscUtils.Ntfs
         internal MasterFileTable MasterFileTable
         {
             get { return _mft; }
+        }
+
+        internal ClusterBitmap ClusterBitmap
+        {
+            get { return _bitmap; }
         }
 
         internal long BytesPerCluster

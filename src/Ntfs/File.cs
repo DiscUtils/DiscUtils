@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Ntfs.Attributes;
@@ -159,6 +160,19 @@ namespace DiscUtils.Ntfs
             }
 
             return attr.Open(access);
+        }
+
+        public void MakeAttributeNonResident(AttributeType attributeType, string name)
+        {
+            BaseAttribute attr = GetAttribute(attributeType, name);
+
+            if(attr.IsNonResident)
+            {
+                throw new InvalidOperationException("Attribute is already non-resident");
+            }
+
+            attr.IsNonResident = true;
+            _baseRecord.SetAttribute(attr.Record);
         }
 
         public FileAttributes FileAttributes

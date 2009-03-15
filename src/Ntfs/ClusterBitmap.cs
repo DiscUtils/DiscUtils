@@ -38,9 +38,38 @@ namespace DiscUtils.Ntfs
             _bitmap = new Bitmap(new BitmapAttribute(fileSystem, fileRecord.GetAttribute(AttributeType.Data)));
         }
 
-        public void MarkClusterInUse(int lcn)
+        public Tuple<long, long>[] AllocateClusters(long count)
         {
-            _bitmap.MarkPresent(lcn);
+            List<Tuple<long, long>> result = new List<Tuple<long, long>>();
+
+            long numFound = 0;
+
+            long numClusters = _fileSystem.RawStream.Length / _fileSystem.BytesPerCluster;
+            long focusCluster = numClusters / 8;
+
+            while (numFound < count)
+            {
+                if (!_bitmap.IsPresent(focusCluster))
+                {
+                    // Start of a run...
+                    long runStart = focusCluster;
+                    _bitmap.MarkPresent(focusCluster);
+                    ++focusCluster;
+
+                    while (!_bitmap.IsPresent(focusCluster) && focusCluster - runStart < count)
+                    {
+                        _bitmap.MarkPresent(focusCluster);
+                        ++focusCluster;
+                    }
+
+                    result.Add(new Tuple<long, long>(runStart, focusCluster - runStart));
+                    numFound += (focusCluster - runStart);
+                }
+
+                ++focusCluster;
+            }
+
+            return result.ToArray();
         }
     }
 }

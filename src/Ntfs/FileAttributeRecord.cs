@@ -49,6 +49,19 @@ namespace DiscUtils.Ntfs
         protected int _debug_bufPos;
         protected int _debug_length;
 
+        public FileAttributeRecord()
+        {
+        }
+
+        public FileAttributeRecord(FileAttributeRecord toCopy)
+        {
+            _type = toCopy._type;
+            _nonResidentFlag = toCopy._nonResidentFlag;
+            _flags = toCopy._flags;
+            _attributeId = toCopy._attributeId;
+            _name = toCopy._name;
+        }
+
         public AttributeType AttributeType
         {
             get { return _type; }
@@ -74,7 +87,7 @@ namespace DiscUtils.Ntfs
             get { return _flags; }
         }
 
-        public abstract SparseStream Open(Stream rawStream, long bytesPerCluster, FileAccess access);
+        public abstract SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access);
 
         public static FileAttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
@@ -166,7 +179,7 @@ namespace DiscUtils.Ntfs
             return buffer;
         }
 
-        public override SparseStream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
+        public override SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access)
         {
             return new SparseMemoryStream(_memoryBuffer, access);
         }
@@ -234,7 +247,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 ushort dataOffset = (ushort)(nameOffset + (nameLength * 2));
-                return (int)(dataOffset + _memoryBuffer.Capacity);
+                return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
             }
         }
 
@@ -263,12 +276,29 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
+        public NonResidentFileAttributeRecord(FileAttributeRecord toCopy)
+            : base(toCopy)
+        {
+            base._nonResidentFlag = 1;
+            _dataRuns = new List<DataRun>();
+        }
+
         /// <summary>
         /// The amount of space occupied by the attribute (in bytes)
         /// </summary>
         public long AllocatedLength
         {
             get { return (long)_dataAllocatedSize; }
+            set { _dataAllocatedSize = (ulong)value; }
+        }
+
+        /// <summary>
+        /// The amount of data in the attribute (in bytes)
+        /// </summary>
+        public long RealLength
+        {
+            get { return (long)_dataRealSize; }
+            set { _dataRealSize = (ulong)value; }
         }
 
         /// <summary>
@@ -285,6 +315,13 @@ namespace DiscUtils.Ntfs
         public long InitializedDataLength
         {
             get { return (long)_initializedDataSize; }
+            set { _initializedDataSize = (ulong)value; }
+        }
+
+        public long LastVcn
+        {
+            get { return (long)_lastVCN; }
+            set { _lastVCN = (ulong)value; }
         }
 
         /// <summary>
@@ -295,14 +332,14 @@ namespace DiscUtils.Ntfs
             get { return 1 << _compressionUnitSize; }
         }
 
-        public DataRun[] DataRuns
+        public List<DataRun> DataRuns
         {
-            get { return _dataRuns.ToArray(); }
+            get { return _dataRuns; }
         }
 
-        public override SparseStream Open(Stream rawStream, long bytesPerCluster, FileAccess access)
+        public override SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access)
         {
-            return new NonResidentAttributeStream(rawStream, bytesPerCluster, access, this);
+            return new NonResidentAttributeStream(rawStream, clusterBitmap, bytesPerCluster, access, this);
         }
 
         protected override void Read(byte[] buffer, int offset, out int length)
@@ -402,7 +439,7 @@ namespace DiscUtils.Ntfs
                 }
                 dataLen++; // NULL terminator
 
-                return dataOffset + dataLen;
+                return Utilities.RoundUp(dataOffset + dataLen, 8);
             }
         }
 

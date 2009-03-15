@@ -103,6 +103,20 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
+        public void SetAttribute(FileAttributeRecord record)
+        {
+            for(int i = 0; i < _attributes.Count; ++i)
+            {
+                if (_attributes[i].AttributeType == record.AttributeType && _attributes[i].Name == record.Name)
+                {
+                    _attributes[i] = record;
+                    return;
+                }
+            }
+
+            throw new NotImplementedException("Adding new attributes");
+        }
+
         protected override void Read(byte[] buffer, int offset)
         {
             _logFileSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
@@ -142,6 +156,7 @@ namespace DiscUtils.Ntfs
             ushort headerEnd = (ushort)(_haveIndex ? 0x30 : 0x2A);
 
             _firstAttributeOffset = (ushort)Utilities.RoundUp(headerEnd + updateSeqSize, 0x08);
+            _recordRealSize = (uint)CalcSize(updateSeqSize);
 
             Utilities.WriteBytesLittleEndian(_logFileSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(_sequenceNumber, buffer, offset + 0x10);
@@ -179,7 +194,7 @@ namespace DiscUtils.Ntfs
                 size += attr.Size;
             }
 
-            return size;
+            return Utilities.RoundUp(size + 4, 8); // 0xFFFFFFFF terminator on attributes
         }
 
         public override string ToString()

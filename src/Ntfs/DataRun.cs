@@ -31,9 +31,21 @@ namespace DiscUtils.Ntfs
         private long _runOffset;
         private bool _isSparse;
 
+        public DataRun()
+        {
+        }
+
+        public DataRun(long offset, long length)
+        {
+            _runOffset = offset;
+            _runLength = length;
+            _isSparse = _runOffset == 0;
+        }
+
         public long RunLength
         {
             get { return _runLength; }
+            set { _runLength = value; }
         }
 
         public long RunOffset

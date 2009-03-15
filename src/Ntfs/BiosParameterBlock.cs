@@ -49,49 +49,49 @@ namespace DiscUtils.Ntfs
         public int IndexBufferSize;
         public ulong VolumeSerialNumber;
 
-        internal static BiosParameterBlock FromBytes(byte[] bytes, int p, int p_3)
+        internal static BiosParameterBlock FromBytes(byte[] bytes, int offset)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
-            bpb.OemId = Utilities.BytesToString(bytes, 0x03, 8);
-            bpb.BytesPerSector = Utilities.ToUInt16LittleEndian(bytes, 0x0B);
-            bpb.SectorsPerCluster = bytes[0x0D];
-            bpb.ReservedSectors = Utilities.ToUInt16LittleEndian(bytes, 0x0E);
-            bpb.NumFats = bytes[0x10];
-            bpb.FatRootEntriesCount = Utilities.ToUInt16LittleEndian(bytes, 0x11);
-            bpb.TotalSectors16 = Utilities.ToUInt16LittleEndian(bytes, 0x13);
-            bpb.Media = bytes[0x15];
-            bpb.FatSize16 = Utilities.ToUInt16LittleEndian(bytes, 0x16);
-            bpb.SectorsPerTrack = Utilities.ToUInt16LittleEndian(bytes, 0x18);
-            bpb.NumHeads = Utilities.ToUInt16LittleEndian(bytes, 0x1A);
-            bpb.HiddenSectors = Utilities.ToUInt32LittleEndian(bytes, 0x1C);
-            bpb.TotalSectors32 = Utilities.ToUInt32LittleEndian(bytes, 0x20);
-            bpb.BiosDriveNumber = bytes[0x24];
-            bpb.ChkDskFlags = bytes[0x25];
-            bpb.SignatureByte = bytes[0x26];
-            bpb.PaddingByte = bytes[0x27];
-            bpb.TotalSectors64 = Utilities.ToInt64LittleEndian(bytes, 0x28);
-            bpb.MftCluster = Utilities.ToInt64LittleEndian(bytes, 0x30);
-            bpb.MftMirrorCluster = Utilities.ToInt64LittleEndian(bytes, 0x38);
+            bpb.OemId = Utilities.BytesToString(bytes, offset + 0x03, 8);
+            bpb.BytesPerSector = Utilities.ToUInt16LittleEndian(bytes, offset + 0x0B);
+            bpb.SectorsPerCluster = bytes[offset + 0x0D];
+            bpb.ReservedSectors = Utilities.ToUInt16LittleEndian(bytes, offset + 0x0E);
+            bpb.NumFats = bytes[offset + 0x10];
+            bpb.FatRootEntriesCount = Utilities.ToUInt16LittleEndian(bytes, offset + 0x11);
+            bpb.TotalSectors16 = Utilities.ToUInt16LittleEndian(bytes, offset + 0x13);
+            bpb.Media = bytes[offset + 0x15];
+            bpb.FatSize16 = Utilities.ToUInt16LittleEndian(bytes, offset + 0x16);
+            bpb.SectorsPerTrack = Utilities.ToUInt16LittleEndian(bytes, offset + 0x18);
+            bpb.NumHeads = Utilities.ToUInt16LittleEndian(bytes, offset + 0x1A);
+            bpb.HiddenSectors = Utilities.ToUInt32LittleEndian(bytes, offset + 0x1C);
+            bpb.TotalSectors32 = Utilities.ToUInt32LittleEndian(bytes, offset + 0x20);
+            bpb.BiosDriveNumber = bytes[offset + 0x24];
+            bpb.ChkDskFlags = bytes[offset + 0x25];
+            bpb.SignatureByte = bytes[offset + 0x26];
+            bpb.PaddingByte = bytes[offset + 0x27];
+            bpb.TotalSectors64 = Utilities.ToInt64LittleEndian(bytes, offset + 0x28);
+            bpb.MftCluster = Utilities.ToInt64LittleEndian(bytes, offset + 0x30);
+            bpb.MftMirrorCluster = Utilities.ToInt64LittleEndian(bytes, offset + 0x38);
 
-            if ((bytes[0x40] & 0x80) != 0)
+            if ((bytes[offset + 0x40] & 0x80) != 0)
             {
-                bpb.MftRecordSize = 1 << (-(sbyte)bytes[0x40]);
+                bpb.MftRecordSize = 1 << (-(sbyte)bytes[offset + 0x40]);
             }
             else
             {
-                bpb.MftRecordSize = bytes[0x40] * bpb.SectorsPerCluster * bpb.BytesPerSector;
+                bpb.MftRecordSize = bytes[offset + 0x40] * bpb.SectorsPerCluster * bpb.BytesPerSector;
             }
 
-            if ((bytes[0x44] & 0x80) != 0)
+            if ((bytes[offset + 0x44] & 0x80) != 0)
             {
-                bpb.IndexBufferSize = 1 << (-(sbyte)bytes[0x44]);
+                bpb.IndexBufferSize = 1 << (-(sbyte)bytes[offset + 0x44]);
             }
             else
             {
-                bpb.IndexBufferSize = bytes[0x44] * bpb.SectorsPerCluster * bpb.BytesPerSector;
+                bpb.IndexBufferSize = bytes[offset + 0x44] * bpb.SectorsPerCluster * bpb.BytesPerSector;
             }
 
-            bpb.VolumeSerialNumber = Utilities.ToUInt64LittleEndian(bytes, 0x48);
+            bpb.VolumeSerialNumber = Utilities.ToUInt64LittleEndian(bytes, offset + 0x48);
 
             return bpb;
         }

@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Ntfs.Attributes
@@ -45,19 +46,48 @@ namespace DiscUtils.Ntfs.Attributes
             get { return _record.DataLength; }
         }
 
+        public FileAttributeRecord Record
+        {
+            get { return _record; }
+        }
+
         public bool IsNonResident
         {
             get { return _record.IsNonResident; }
+            set
+            {
+                if (value == _record.IsNonResident)
+                {
+                    return;
+                }
+
+                if (value == false)
+                {
+                    throw new NotImplementedException("Converting non-resident attribute to resident");
+                }
+
+                ResidentFileAttributeRecord oldRecord = (ResidentFileAttributeRecord)_record;
+                byte[] buffer = oldRecord.GetData();
+
+                _record = new NonResidentFileAttributeRecord(_record);
+
+                using (Stream attrStream = Open(FileAccess.Write))
+                {
+                    attrStream.Write(buffer, 0, buffer.Length);
+                }
+            }
         }
 
         public static BaseAttribute FromRecord(NtfsFileSystem fileSystem, FileAttributeRecord record)
         {
+            ResidentFileAttributeRecord asResident = record as ResidentFileAttributeRecord;
+
             switch (record.AttributeType)
             {
                 case AttributeType.StandardInformation:
-                    return new StandardInformationAttribute((ResidentFileAttributeRecord)record);
+                    return new StandardInformationAttribute(asResident);
                 case AttributeType.FileName:
-                    return new FileNameAttribute((ResidentFileAttributeRecord)record);
+                    return new FileNameAttribute(asResident);
                 case AttributeType.SecurityDescriptor:
                     return new SecurityDescriptorAttribute(fileSystem, record);
                 case AttributeType.Data:
@@ -69,7 +99,7 @@ namespace DiscUtils.Ntfs.Attributes
                 case AttributeType.VolumeInformation:
                     return new VolumeInformationAttribute(fileSystem, record);
                 case AttributeType.IndexRoot:
-                    return new IndexRootAttribute((ResidentFileAttributeRecord)record);
+                    return new IndexRootAttribute(asResident);
                 case AttributeType.IndexAllocation:
                     return new IndexAllocationAttribute(fileSystem, record);
                 case AttributeType.ObjectId:
@@ -85,11 +115,11 @@ namespace DiscUtils.Ntfs.Attributes
         {
             if (_fileSystem != null)
             {
-                return _record.Open(_fileSystem.RawStream, _fileSystem.BytesPerCluster, access);
+                return _record.Open(_fileSystem.ClusterBitmap, _fileSystem.RawStream, _fileSystem.BytesPerCluster, access);
             }
             else
             {
-                return _record.Open(null, 0, access);
+                return _record.Open(null, null, 0, access);
             }
         }
 

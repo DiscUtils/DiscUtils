@@ -49,6 +49,17 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Round up a value to a multiple of a unit size.
+        /// </summary>
+        /// <param name="value">The value to round up</param>
+        /// <param name="unit">The unit (the returned value will be a multiple of this number)</param>
+        /// <returns>The rounded-up value</returns>
+        public static int RoundUp(int value, int unit)
+        {
+            return (((value + (unit - 1)) / unit) * unit);
+        }
+
+        /// <summary>
         /// Calculates the CEIL function.
         /// </summary>
         /// <param name="numerator">The value to divide</param>

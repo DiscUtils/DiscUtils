@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Ntfs
@@ -28,8 +29,9 @@ namespace DiscUtils.Ntfs
     internal class NonResidentAttributeStream : SparseStream
     {
         private Stream _fsStream;
+        private ClusterBitmap _clusterBitmap;
         private long _bytesPerCluster;
-        private CookedDataRun[] _runs;
+        private List<CookedDataRun> _runs;
         private NonResidentFileAttributeRecord _record;
 
         private FileAccess _access;
@@ -41,9 +43,10 @@ namespace DiscUtils.Ntfs
         private byte[] _cachedDecompressedBlock;
         private long _cachedBlockStartVcn;
 
-        public NonResidentAttributeStream(Stream fsStream, long bytesPerCluster, FileAccess access, NonResidentFileAttributeRecord record)
+        public NonResidentAttributeStream(Stream fsStream, ClusterBitmap clusterBitmap, long bytesPerCluster, FileAccess access, NonResidentFileAttributeRecord record)
         {
             _fsStream = fsStream;
+            _clusterBitmap = clusterBitmap;
             _bytesPerCluster = bytesPerCluster;
             _runs = CookDataRuns(record.DataRuns);
             _record = record;
@@ -168,9 +171,26 @@ namespace DiscUtils.Ntfs
                 throw new NotImplementedException("Writing to compressed / sparse attributes");
             }
 
+            if (_position + count > _record.AllocatedLength)
+            {
+                long numToAllocate = Utilities.Ceil(_position + count - _record.AllocatedLength, _bytesPerCluster);
+                Tuple<long, long>[] runs = _clusterBitmap.AllocateClusters(numToAllocate);
+                foreach (var run in runs)
+                {
+                    AddDataRun(run.First, run.Second);
+                }
+                _record.AllocatedLength += numToAllocate * _bytesPerCluster;
+            }
+
             if (_position + count > _record.InitializedDataLength)
             {
-                throw new NotImplementedException("Writing beyond existing attribute contents");
+                _record.InitializedDataLength = _position + count;
+            }
+
+            if (_position + count > _record.RealLength)
+            {
+                _record.RealLength = _position + count;
+                _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;
             }
 
             long vcn = _position / _bytesPerCluster;
@@ -253,7 +273,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private byte[] Decompress(byte[] compBuffer)
+        private static byte[] Decompress(byte[] compBuffer)
         {
             const ushort SubBlockIsCompressedFlag = 0x8000;
             const ushort SubBlockSizeMask = 0x0fff;
@@ -465,7 +485,7 @@ namespace DiscUtils.Ntfs
 
         private int FindDataRun(long targetVcn, int startIdx)
         {
-            for (int i = startIdx; i < _runs.Length; ++i)
+            for (int i = startIdx; i < _runs.Count; ++i)
             {
                 if (_runs[i].StartVcn + _runs[i].Length > targetVcn)
                 {
@@ -476,15 +496,40 @@ namespace DiscUtils.Ntfs
             throw new IOException("Looking for VCN outside or data runs");
         }
 
-        private CookedDataRun[] CookDataRuns(DataRun[] runs)
+        private void AddDataRun(long startLcn, long length)
         {
-            CookedDataRun[] result = new CookedDataRun[runs.Length];
+            long startVcn = 0;
+            long prevLcn = 0;
+            if(_runs.Count > 0 )
+            {
+                CookedDataRun tailRun = _runs[_runs.Count - 1];
+                startVcn = tailRun.StartVcn + tailRun.Length;
+                prevLcn = tailRun.StartLcn;
+
+                // Continuation of last run...
+                if (startLcn == prevLcn + tailRun.Length)
+                {
+                    tailRun.Length += length;
+                    return;
+                }
+            }
+
+            DataRun newRun = new DataRun(startLcn - prevLcn, length);
+            CookedDataRun newCookedRun = new CookedDataRun(newRun, startVcn, startLcn);
+
+            _runs.Add(newCookedRun);
+            _record.DataRuns.Add(newRun);
+        }
+
+        private static List<CookedDataRun> CookDataRuns(List<DataRun> runs)
+        {
+            List<CookedDataRun> result = new List<CookedDataRun>(runs.Count);
 
             long vcn = 0;
             long lcn = 0;
-            for (int i = 0; i < runs.Length; ++i)
+            for (int i = 0; i < runs.Count; ++i)
             {
-                result[i] = new CookedDataRun(runs[i], vcn, lcn + runs[i].RunOffset);
+                result.Add(new CookedDataRun(runs[i], vcn, lcn + runs[i].RunOffset));
                 vcn += runs[i].RunLength;
                 lcn += runs[i].RunOffset;
             }
@@ -526,7 +571,8 @@ namespace DiscUtils.Ntfs
 
             public long Length
             {
-                get { return (long)_raw.RunLength; }
+                get { return _raw.RunLength; }
+                set { _raw.RunLength = value; }
             }
 
             public bool IsSparse
