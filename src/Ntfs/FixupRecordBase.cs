@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Ntfs
@@ -52,6 +53,16 @@ namespace DiscUtils.Ntfs
             set { _updateSequenceOffset = value; }
         }
 
+        public ushort UpdateSequenceSize
+        {
+            get { return _updateSequenceSize; }
+        }
+
+        public ushort UpdateSequenceNumber
+        {
+            get { return _updateSequenceNumber; }
+        }
+
         public void FromBytes(byte[] buffer, int offset)
         {
             _magic = Utilities.BytesToString(buffer, offset + 0x00, 4);
@@ -70,7 +81,34 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset);
         }
 
+        public int Size
+        {
+            get
+            {
+                return CalcSize(_updateSequenceSize * 2);
+            }
+        }
+
+        public void ToBytes(byte[] buffer, int offset)
+        {
+            _updateSequenceOffset = Write(buffer, offset, (ushort)(_updateSequenceSize * 2));
+
+            ProtectBuffer(buffer, offset);
+
+            Utilities.StringToBytes(_magic, buffer, offset + 0x00, 4);
+            Utilities.WriteBytesLittleEndian(_updateSequenceOffset, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(_updateSequenceSize, buffer, offset + 0x06);
+
+            Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + _updateSequenceOffset);
+            for (int i = 0; i < _updateSequenceArray.Length; ++i)
+            {
+                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + _updateSequenceOffset + 2 * (i + 1));
+            }
+        }
+
         protected abstract void Read(byte[] buffer, int offset);
+        protected abstract ushort Write(byte[] buffer, int offset, ushort updateSeqSize);
+        protected abstract int CalcSize(int updateSeqSize);
 
         private void UnprotectBuffer(byte[] buffer, int offset)
         {
@@ -87,6 +125,23 @@ namespace DiscUtils.Ntfs
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
                 Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + (_sectorSize * (i + 1)) - 2);
+            }
+        }
+
+        private void ProtectBuffer(byte[] buffer, int offset)
+        {
+            _updateSequenceNumber++;
+
+            // Read in the bytes that are replaced by the USN
+            for (int i = 0; i < _updateSequenceArray.Length; ++i)
+            {
+                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + (_sectorSize * (i + 1)) - 2);
+            }
+
+            // Overwrite the bytes that are replaced with the USN
+            for (int i = 0; i < _updateSequenceArray.Length; ++i)
+            {
+                Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + (_sectorSize * (i + 1)) - 2);
             }
         }
     }

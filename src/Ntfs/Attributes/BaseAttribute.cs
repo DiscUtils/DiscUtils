@@ -45,6 +45,11 @@ namespace DiscUtils.Ntfs.Attributes
             get { return _record.DataLength; }
         }
 
+        public bool IsNonResident
+        {
+            get { return _record.IsNonResident; }
+        }
+
         public static BaseAttribute FromRecord(NtfsFileSystem fileSystem, FileAttributeRecord record)
         {
             switch (record.AttributeType)
@@ -76,7 +81,7 @@ namespace DiscUtils.Ntfs.Attributes
             }
         }
 
-        internal Stream Open(FileAccess access)
+        internal SparseStream Open(FileAccess access)
         {
             if (_fileSystem != null)
             {

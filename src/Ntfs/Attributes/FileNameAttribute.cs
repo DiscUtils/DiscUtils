@@ -31,7 +31,7 @@ namespace DiscUtils.Ntfs.Attributes
         public FileNameAttribute(ResidentFileAttributeRecord record)
             : base(null, record)
         {
-            _fileNameRecord = new FileNameRecord(record.Data, 0);
+            _fileNameRecord = new FileNameRecord(record.GetData(), 0);
         }
 
         public FileNameRecord FileNameRecord

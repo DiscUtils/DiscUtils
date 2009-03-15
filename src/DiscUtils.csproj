@@ -143,6 +143,7 @@
     <Compile Include="BuilderFileExtent.cs" />
     <Compile Include="ConcatStream.cs" />
     <Compile Include="FileLocator.cs" />
+    <Compile Include="Ntfs\AttributeReference.cs" />
     <Compile Include="Ntfs\Attributes\AttributeListAttribute.cs" />
     <Compile Include="Ntfs\Attributes\BitmapAttribute.cs" />
     <Compile Include="Ntfs\Attributes\DataAttribute.cs" />
@@ -156,7 +157,9 @@
     <Compile Include="Ntfs\Attributes\UnknownAttribute.cs" />
     <Compile Include="Ntfs\Attributes\VolumeInformationAttribute.cs" />
     <Compile Include="Ntfs\Attributes\VolumeNameAttribute.cs" />
+    <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
+    <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>

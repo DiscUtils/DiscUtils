@@ -43,7 +43,7 @@ namespace DiscUtils.Ntfs.Attributes
         public StandardInformationAttribute(ResidentFileAttributeRecord record)
             : base(null, record)
         {
-            byte[] data = record.Data;
+            byte[] data = record.GetData();
 
             _creationTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(data, 0x00));
             _modificationTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(data, 0x08));

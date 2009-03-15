@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Ntfs.Attributes;
@@ -100,7 +101,6 @@ namespace DiscUtils.Ntfs
             _bitmap = new Bitmap((BitmapAttribute)GetAttribute(AttributeType.Bitmap));
             _records = GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
 
-            // TODO - How to figure out the record length?
             _recordLength = _fileSystem.BiosParameterBlock.MftRecordSize;
         }
 
@@ -211,12 +211,28 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
+        internal void WriteRecord(FileRecord record)
+        {
+            int recordSize = record.Size;
+            if (recordSize > _recordLength)
+            {
+                throw new NotImplementedException("Multi-record files and/or making attributes non-resident");
+            }
+
+            byte[] buffer = new byte[_recordLength];
+            record.ToBytes(buffer, 0);
+
+            _records.Position = record.MasterFileTableIndex * _recordLength;
+            _records.Write(buffer, 0, _recordLength);
+        }
+
         public override void Dump(TextWriter writer, string indent)
         {
             int recordSize = _fileSystem.BiosParameterBlock.MftRecordSize;
             ushort bytesPerSector = _fileSystem.BiosParameterBlock.BytesPerSector;
 
             writer.WriteLine(indent + "MASTER FILE TABLE");
+            writer.WriteLine(indent + "  Record Length: " + _recordLength);
             using (Stream mftStream = OpenAttribute(AttributeType.Data, FileAccess.Read))
             {
                 while (mftStream.Position < mftStream.Length)

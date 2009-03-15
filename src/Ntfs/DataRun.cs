@@ -58,6 +58,26 @@ namespace DiscUtils.Ntfs
             return 1 + runLengthSize + runOffsetSize;
         }
 
+        internal int Write(byte[] buffer, int offset)
+        {
+            int runLengthSize = WriteVarULong(buffer, offset + 1, (ulong)_runLength);
+            int runOffsetSize = WriteVarLong(buffer, offset + 1 + runLengthSize, _runOffset);
+
+            buffer[offset] = (byte)((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
+
+            return 1 + runLengthSize + runOffsetSize;
+        }
+
+        internal int Size
+        {
+            get
+            {
+                int runLengthSize = VarULongSize((ulong)_runLength);
+                int runOffsetSize = VarLongSize(_runOffset);
+                return 1 + runLengthSize + runOffsetSize;
+            }
+        }
+
         private static ulong ReadVarULong(byte[] buffer, int offset, int size)
         {
             ulong val = 0;
@@ -66,6 +86,29 @@ namespace DiscUtils.Ntfs
                 val = val | (((ulong)buffer[offset + i]) << (i * 8));
             }
             return val;
+        }
+
+        private static int WriteVarULong(byte[] buffer, int offset, ulong val)
+        {
+            int pos = 0;
+            while (val != 0)
+            {
+                buffer[offset + pos] = (byte)(val & 0xFF);
+                val >>= 8;
+                pos++;
+            }
+            return pos;
+        }
+
+        private static int VarULongSize(ulong val)
+        {
+            int len = 0;
+            while (val != 0)
+            {
+                val >>= 8;
+                len++;
+            }
+            return len;
         }
 
         private static long ReadVarLong(byte[] buffer, int offset, int size)
@@ -89,6 +132,39 @@ namespace DiscUtils.Ntfs
             }
 
             return (long)val;
+        }
+
+        private static int WriteVarLong(byte[] buffer, int offset, long val)
+        {
+            int pos = 0;
+            while (val != 0)
+            {
+                buffer[offset + pos] = (byte)(val & 0xFF);
+                val >>= 8;
+                pos++;
+
+                if (val == -1L)
+                {
+                    break;
+                }
+            }
+            return pos;
+        }
+
+        private static int VarLongSize(long val)
+        {
+            int len = 0;
+            while (val != 0)
+            {
+                val >>= 8;
+                len++;
+
+                if (val == -1L)
+                {
+                    break;
+                }
+            }
+            return len;
         }
 
         public void Dump(TextWriter writer, string indent)

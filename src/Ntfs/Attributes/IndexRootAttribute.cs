@@ -38,7 +38,7 @@ namespace DiscUtils.Ntfs.Attributes
         {
             using (Stream s = Open(FileAccess.Read))
             {
-                byte[] data = record.Data;
+                byte[] data = record.GetData();
                 _rootAttrType = Utilities.ToUInt32LittleEndian(data, 0x00);
                 _rootCollationRule = Utilities.ToUInt32LittleEndian(data, 0x04);
                 _rootIndexAllocationEntrySize = Utilities.ToUInt32LittleEndian(data, 0x08);

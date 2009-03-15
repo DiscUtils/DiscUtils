@@ -37,9 +37,19 @@ namespace DiscUtils.Ntfs
             _baseRecord = baseRecord;
         }
 
-        public uint MasterFileTableIndex
+        public uint IndexInMft
         {
             get { return _baseRecord.MasterFileTableIndex; }
+        }
+
+        public uint MaxMftRecordSize
+        {
+            get { return _baseRecord.MaxSize; }
+        }
+
+        public void UpdateRecordInMft()
+        {
+            _fileSystem.MasterFileTable.WriteRecord(_baseRecord);
         }
 
         /// <summary>
@@ -139,7 +149,7 @@ namespace DiscUtils.Ntfs
             return attr.Open(access);
         }
 
-        public Stream OpenAttribute(AttributeType type, string name, FileAccess access)
+        public SparseStream OpenAttribute(AttributeType type, string name, FileAccess access)
         {
             BaseAttribute attr = GetAttribute(type, name);
 

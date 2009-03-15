@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -41,6 +42,8 @@ namespace DiscUtils.Ntfs
         private uint _index; // Self-reference (on XP+)
         private List<FileAttributeRecord> _attributes;
 
+        private bool _haveIndex;
+
         public FileRecord(int sectorSize)
             : base(sectorSize)
         {
@@ -49,11 +52,21 @@ namespace DiscUtils.Ntfs
         public uint MasterFileTableIndex
         {
             get { return _index; }
+            set
+            {
+                _index = value;
+                _haveIndex = true;
+            }
         }
 
         public ushort SequenceNumber
         {
             get { return _sequenceNumber; }
+        }
+
+        public uint MaxSize
+        {
+            get { return _recordAllocatedSize; }
         }
 
         public ICollection<FileAttributeRecord> Attributes
@@ -105,21 +118,68 @@ namespace DiscUtils.Ntfs
             if (UpdateSequenceOffset >= 0x30)
             {
                 _index = Utilities.ToUInt32LittleEndian(buffer, offset + 0x2C);
+                _haveIndex = true;
             }
 
             _attributes = new List<FileAttributeRecord>();
             int focus = _firstAttributeOffset;
             while (true)
             {
-                FileAttributeRecord attr = FileAttributeRecord.FromBytes(buffer, focus);
+                int length;
+                FileAttributeRecord attr = FileAttributeRecord.FromBytes(buffer, focus, out length);
                 if (attr == null)
                 {
                     break;
                 }
 
                 _attributes.Add(attr);
-                focus += (int)attr.Length;
+                focus += (int)length;
             }
+        }
+
+        protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
+        {
+            ushort headerEnd = (ushort)(_haveIndex ? 0x30 : 0x2A);
+
+            _firstAttributeOffset = (ushort)Utilities.RoundUp(headerEnd + updateSeqSize, 0x08);
+
+            Utilities.WriteBytesLittleEndian(_logFileSequenceNumber, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(_sequenceNumber, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian(_hardLinkCount, buffer, offset + 0x12);
+            Utilities.WriteBytesLittleEndian(_firstAttributeOffset, buffer, offset + 0x14);
+            Utilities.WriteBytesLittleEndian(_flags, buffer, offset + 0x16);
+            Utilities.WriteBytesLittleEndian(_recordRealSize, buffer, offset + 0x18);
+            Utilities.WriteBytesLittleEndian(_recordAllocatedSize, buffer, offset + 0x1C);
+            Utilities.WriteBytesLittleEndian(_baseFile.Value, buffer, offset + 0x20);
+            Utilities.WriteBytesLittleEndian(_nextAttributeId, buffer, offset + 0x28);
+
+            if (_haveIndex)
+            {
+                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x2A); // Alignment field
+                Utilities.WriteBytesLittleEndian(_index, buffer, offset + 0x2C);
+            }
+
+            int pos = _firstAttributeOffset;
+            foreach (var attr in _attributes)
+            {
+                pos += attr.Write(buffer, offset + pos);
+            }
+            Utilities.WriteBytesLittleEndian(uint.MaxValue, buffer, offset + pos);
+
+            return headerEnd;
+        }
+
+        protected override int CalcSize(int updateSeqSize)
+        {
+            int headerEnd = _haveIndex ? 0x30 : 0x2A;
+
+            int size = headerEnd + updateSeqSize;
+            foreach (var attr in _attributes)
+            {
+                size += attr.Size;
+            }
+
+            return size;
         }
 
         public override string ToString()
@@ -139,6 +199,10 @@ namespace DiscUtils.Ntfs
         internal void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "FILE RECORD (" + ToString() + ")");
+            writer.WriteLine(indent + "              Magic: " + Magic);
+            writer.WriteLine(indent + "  Update Seq Offset: " + UpdateSequenceOffset);
+            writer.WriteLine(indent + "    Update Seq Size: " + UpdateSequenceSize);
+            writer.WriteLine(indent + "  Update Seq Number: " + UpdateSequenceNumber);
             writer.WriteLine(indent + "   Log File Seq Num: " + _logFileSequenceNumber);
             writer.WriteLine(indent + "    Sequence Number: " + _sequenceNumber);
             writer.WriteLine(indent + "    Hard Link Count: " + _hardLinkCount);

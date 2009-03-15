@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,50 +21,26 @@
 //
 
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
-    internal class Bitmap
+    internal class ClusterBitmap : File
     {
-        private byte[] _bitmap;
-        private BitmapAttribute _fileAttr;
+        private Bitmap _bitmap;
 
-        public Bitmap(BitmapAttribute fileAttr)
+        public ClusterBitmap(NtfsFileSystem fileSystem, FileRecord fileRecord)
+            : base(fileSystem, fileRecord)
         {
-            if (fileAttr.Length > 100 * 1024)
-            {
-                throw new NotImplementedException("Large Bitmap");
-            }
-
-            _fileAttr = fileAttr;
-            using (Stream stream = _fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)_fileAttr.Length);
-            }
+            _bitmap = new Bitmap(new BitmapAttribute(fileSystem, fileRecord.GetAttribute(AttributeType.Data)));
         }
 
-        public bool IsPresent(long index)
+        public void MarkClusterInUse(int lcn)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
-
-            return (_bitmap[byteIdx] & mask) != 0;
-        }
-
-        public void MarkPresent(long index)
-        {
-            long byteIdx = index / 8;
-            byte mask = (byte)(1 << (byte)(index % 8));
-
-            _bitmap[byteIdx] |= mask;
-
-            using (Stream stream = _fileAttr.Open(FileAccess.ReadWrite))
-            {
-                stream.Position = byteIdx;
-                stream.WriteByte(_bitmap[byteIdx]);
-            }
+            _bitmap.MarkPresent(lcn);
         }
     }
 }

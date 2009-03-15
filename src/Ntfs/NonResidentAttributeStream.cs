@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class NonResidentAttributeStream : Stream
+    internal class NonResidentAttributeStream : SparseStream
     {
         private Stream _fsStream;
         private long _bytesPerCluster;
@@ -158,7 +158,24 @@ namespace DiscUtils.Ntfs
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            if (!CanWrite)
+            {
+                throw new IOException("Attempt to write to file not opened for write");
+            }
+
+            if (_record.Flags != FileAttributeFlags.None)
+            {
+                throw new NotImplementedException("Writing to compressed / sparse attributes");
+            }
+
+            if (_position + count > _record.InitializedDataLength)
+            {
+                throw new NotImplementedException("Writing beyond existing attribute contents");
+            }
+
+            long vcn = _position / _bytesPerCluster;
+            int dataRunIdx = FindDataRun(vcn);
+            RawWrite(dataRunIdx, _position - (_runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -377,6 +394,45 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        /// <summary>
+        /// Write data to one or more runs.
+        /// </summary>
+        /// <param name="startRunIdx">The start run index</param>
+        /// <param name="startRunOffset">The first byte in the run to write (as byte offset)</param>
+        /// <param name="data">The buffer to write</param>
+        /// <param name="dataOffset">Offset to first byte in buffer to write</param>
+        /// <param name="count">Number of bytes to write</param>
+        private void RawWrite(int startRunIdx, long startRunOffset, byte[] data, int dataOffset, int count)
+        {
+            int totalWritten = 0;
+            int runIdx = startRunIdx;
+            long runOffset = startRunOffset;
+
+
+            while (totalWritten < count)
+            {
+                int toWrite = (int)Math.Min(count - totalWritten, (_runs[runIdx].Length * _bytesPerCluster) - runOffset);
+
+                if (_runs[runIdx].IsSparse)
+                {
+                    throw new NotImplementedException("Writing to sparse dataruns");
+                }
+                else
+                {
+                    _fsStream.Position = (_runs[runIdx].StartLcn * _bytesPerCluster) + runOffset;
+                    _fsStream.Write(data, dataOffset + totalWritten, toWrite);
+                    totalWritten += toWrite;
+                    runOffset += toWrite;
+
+                    if (runOffset >= _runs[runIdx].Length * _bytesPerCluster)
+                    {
+                        runOffset = 0;
+                        runIdx++;
+                    }
+                }
+            }
+        }
+
         private bool IsBlockCompressed(int startDataRunIdx, int compressionUnitSize)
         {
             int clustersRemaining = compressionUnitSize;
@@ -477,6 +533,11 @@ namespace DiscUtils.Ntfs
             {
                 get { return _raw.IsSparse; }
             }
+        }
+
+        public override System.Collections.Generic.IEnumerable<StreamExtent> Extents
+        {
+            get { throw new NotImplementedException(); }
         }
     }
 }

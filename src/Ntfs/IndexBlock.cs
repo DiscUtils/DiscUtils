@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 
 namespace DiscUtils.Ntfs
@@ -61,6 +62,16 @@ namespace DiscUtils.Ntfs
 
                 pos += entry.Length;
             }
+        }
+
+        protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int CalcSize(int updateSeqSize)
+        {
+            throw new NotImplementedException();
         }
     }
 }

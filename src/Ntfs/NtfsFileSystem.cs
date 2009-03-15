@@ -41,6 +41,8 @@ namespace DiscUtils.Ntfs
 
         private MasterFileTable _mft;
 
+        private ClusterBitmap _bitmap;
+
         /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
@@ -63,6 +65,7 @@ namespace DiscUtils.Ntfs
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
 
             _mft = new MasterFileTable(this, mftSelfRecord);
+            _bitmap = new ClusterBitmap(this, _mft.GetRecord(MasterFileTable.BitmapIndex));
         }
 
         /// <summary>
@@ -218,11 +221,6 @@ namespace DiscUtils.Ntfs
                 throw new NotSupportedException("Can only open existing files");
             }
 
-            if (access != FileAccess.Read)
-            {
-                throw new NotSupportedException("Can only open files for Read");
-            }
-
             DirectoryEntry entry = GetDirectoryEntry(path);
 
             if (entry == null)
@@ -245,7 +243,7 @@ namespace DiscUtils.Ntfs
                     attributeName = fileName.Substring(streamSepPos + 1);
                 }
 
-                return _mft.GetFile(entry.Reference).OpenAttribute(AttributeType.Data, attributeName, access);
+                return new NtfsFileStream(this, new AttributeReference(entry.Reference, attributeName, AttributeType.Data), access);
             }
         }
 
@@ -447,10 +445,10 @@ namespace DiscUtils.Ntfs
             {
                 File file = _mft.GetFileOrDirectory(dirEntry.Reference);
                 Directory asDir = file as Directory;
-                writer.WriteLine(indent + "+-" + file.ToString() + " (" + file.MasterFileTableIndex + ")");
+                writer.WriteLine(indent + "+-" + file.ToString() + " (" + file.IndexInMft + ")");
 
                 // Recurse - but avoid infinite recursion via the root dir...
-                if (asDir != null && file.MasterFileTableIndex != 5)
+                if (asDir != null && file.IndexInMft != 5)
                 {
                     DumpDirectory(asDir, writer, indent + "| ");
                 }
