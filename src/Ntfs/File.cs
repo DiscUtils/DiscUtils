@@ -50,6 +50,42 @@ namespace DiscUtils.Ntfs
 
         public void UpdateRecordInMft()
         {
+            // Make attributes non-resident until the data in the record fits, start with DATA attributes
+            // by default.
+            bool fixedAttribute = true;
+            while (_baseRecord.Size > _fileSystem.MasterFileTable.RecordSize && fixedAttribute)
+            {
+                fixedAttribute = false;
+                foreach (var attr in _baseRecord.Attributes)
+                {
+                    if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
+                    {
+                        MakeAttributeNonResident(attr.AttributeType, attr.Name);
+                        fixedAttribute = true;
+                        break;
+                    }
+                }
+
+                if (!fixedAttribute)
+                {
+                    foreach (var attr in _baseRecord.Attributes)
+                    {
+                        if (!attr.IsNonResident && _fileSystem.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
+                        {
+                            MakeAttributeNonResident(attr.AttributeType, attr.Name);
+                            fixedAttribute = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Still too large?  Error.
+            if (_baseRecord.Size > _fileSystem.MasterFileTable.RecordSize)
+            {
+                throw new NotSupportedException("Spanning over multiple FileRecord entries - TBD");
+            }
+
             _fileSystem.MasterFileTable.WriteRecord(_baseRecord);
         }
 

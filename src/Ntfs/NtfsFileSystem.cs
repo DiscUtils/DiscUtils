@@ -43,6 +43,8 @@ namespace DiscUtils.Ntfs
 
         private ClusterBitmap _bitmap;
 
+        private AttributeDefinitions _attrDefs;
+
         /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
@@ -66,6 +68,7 @@ namespace DiscUtils.Ntfs
 
             _mft = new MasterFileTable(this, mftSelfRecord);
             _bitmap = new ClusterBitmap(this, _mft.GetRecord(MasterFileTable.BitmapIndex));
+            _attrDefs = new AttributeDefinitions(this, _mft.GetRecord(MasterFileTable.AttrDefIndex));
         }
 
         /// <summary>
@@ -352,6 +355,11 @@ namespace DiscUtils.Ntfs
         internal ClusterBitmap ClusterBitmap
         {
             get { return _bitmap; }
+        }
+
+        internal AttributeDefinitions AttributeDefinitions
+        {
+            get { return _attrDefs; }
         }
 
         internal long BytesPerCluster

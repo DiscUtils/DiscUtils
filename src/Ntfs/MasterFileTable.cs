@@ -211,6 +211,11 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
+        public int RecordSize
+        {
+            get { return _recordLength; }
+        }
+
         internal void WriteRecord(FileRecord record)
         {
             int recordSize = record.Size;
