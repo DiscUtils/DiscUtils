@@ -77,6 +77,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
+        /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
+        /// will depend on the last partition table/file system activity, since all access to the disk contents pass
+        /// through a single stream instance.  Set the stream position before accessing the stream.</remarks>
         public abstract SparseStream Content
         {
             get;
