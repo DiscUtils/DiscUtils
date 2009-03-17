@@ -167,6 +167,13 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
+        public ResidentFileAttributeRecord(FileAttributeRecord toCopy)
+            : base(toCopy)
+        {
+            base._nonResidentFlag = 0;
+            _memoryBuffer = new SparseMemoryBuffer(1024);
+        }
+
         public override long DataLength
         {
             get { return _memoryBuffer.Capacity; }

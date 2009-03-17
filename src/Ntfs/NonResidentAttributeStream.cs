@@ -156,7 +156,14 @@ namespace DiscUtils.Ntfs
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            if (value < Length)
+            {
+                Truncate(value);
+            }
+            else
+            {
+                throw new NotImplementedException("Increasing attribute length with SetLength");
+            }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -212,6 +219,52 @@ namespace DiscUtils.Ntfs
             _position = newPos;
             _atEOF = false;
             return newPos;
+        }
+
+        private void Truncate(long value)
+        {
+            if (value == 0)
+            {
+                RemoveAndFreeRuns(0);
+                _record.AllocatedLength = 0;
+                _record.RealLength = 0;
+                _record.InitializedDataLength = 0;
+                _record.LastVcn = 0;
+            }
+            else
+            {
+                int firstRunToDelete = FindDataRun(Utilities.Ceil(value - 1, _bytesPerCluster)) + 1;
+
+                RemoveAndFreeRuns(firstRunToDelete);
+
+                TruncateAndFreeRun(_runs.Count - 1, value - _runs[_runs.Count - 1].StartVcn);
+
+                _record.AllocatedLength = (_runs[_runs.Count - 1].StartVcn + _runs[_runs.Count - 1].Length) * _bytesPerCluster;
+                _record.RealLength = value;
+                _record.InitializedDataLength = value;
+                _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;
+            }
+        }
+
+        private void TruncateAndFreeRun(int index, long bytesRequired)
+        {
+            long firstClusterToFree = Utilities.Ceil(bytesRequired, _bytesPerCluster);
+
+            long oldLength = _runs[index].Length;
+            _runs[index].Length = firstClusterToFree;
+            _clusterBitmap.FreeClusters(new Tuple<long, long>(_runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
+        }
+
+        private void RemoveAndFreeRuns(int firstRunToDelete)
+        {
+            Tuple<long, long>[] runs = new Tuple<long, long>[_runs.Count - firstRunToDelete];
+            for (int i = firstRunToDelete; i < _runs.Count; ++i)
+            {
+                runs[i - firstRunToDelete] = new Tuple<long, long>(_runs[i].StartLcn, _runs[i].Length);
+            }
+
+            RemoveDataRuns(firstRunToDelete, _runs.Count - firstRunToDelete);
+            _clusterBitmap.FreeClusters(runs);
         }
 
         private int DoReadNormal(byte[] buffer, int offset, int count)
@@ -493,7 +546,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            throw new IOException("Looking for VCN outside or data runs");
+            throw new IOException("Looking for VCN outside of data runs");
         }
 
         private void AddDataRun(long startLcn, long length)
@@ -519,6 +572,12 @@ namespace DiscUtils.Ntfs
 
             _runs.Add(newCookedRun);
             _record.DataRuns.Add(newRun);
+        }
+
+        private void RemoveDataRuns(int index, int count)
+        {
+            _runs.RemoveRange(index, count);
+            _record.DataRuns.RemoveRange(index, count);
         }
 
         private static List<CookedDataRun> CookDataRuns(List<DataRun> runs)

@@ -60,7 +60,7 @@ namespace DiscUtils.Ntfs
                 {
                     if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
                     {
-                        MakeAttributeNonResident(attr.AttributeType, attr.Name);
+                        MakeAttributeNonResident(attr.AttributeType, attr.Name, (int)attr.DataLength);
                         fixedAttribute = true;
                         break;
                     }
@@ -72,7 +72,7 @@ namespace DiscUtils.Ntfs
                     {
                         if (!attr.IsNonResident && _fileSystem.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
                         {
-                            MakeAttributeNonResident(attr.AttributeType, attr.Name);
+                            MakeAttributeNonResident(attr.AttributeType, attr.Name, (int)attr.DataLength);
                             fixedAttribute = true;
                             break;
                         }
@@ -198,7 +198,7 @@ namespace DiscUtils.Ntfs
             return attr.Open(access);
         }
 
-        public void MakeAttributeNonResident(AttributeType attributeType, string name)
+        public void MakeAttributeNonResident(AttributeType attributeType, string name, int maxData)
         {
             BaseAttribute attr = GetAttribute(attributeType, name);
 
@@ -207,7 +207,20 @@ namespace DiscUtils.Ntfs
                 throw new InvalidOperationException("Attribute is already non-resident");
             }
 
-            attr.IsNonResident = true;
+            attr.SetNonResident(true, maxData);
+            _baseRecord.SetAttribute(attr.Record);
+        }
+
+        internal void MakeAttributeResident(AttributeType attributeType, string name, int maxData)
+        {
+            BaseAttribute attr = GetAttribute(attributeType, name);
+
+            if (!attr.IsNonResident)
+            {
+                throw new InvalidOperationException("Attribute is already resident");
+            }
+
+            attr.SetNonResident(false, maxData);
             _baseRecord.SetAttribute(attr.Record);
         }
 

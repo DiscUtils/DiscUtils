@@ -71,5 +71,13 @@ namespace DiscUtils.Ntfs
 
             return result.ToArray();
         }
+
+        internal void FreeClusters(params Tuple<long, long>[] runs)
+        {
+            foreach (var run in runs)
+            {
+                _bitmap.MarkAbsentRange(run.First, run.Second);
+            }
+        }
     }
 }

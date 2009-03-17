@@ -66,5 +66,25 @@ namespace DiscUtils.Ntfs
                 stream.WriteByte(_bitmap[byteIdx]);
             }
         }
+
+        internal void MarkAbsentRange(long index, long count)
+        {
+            for (long i = index; i < index + count; ++i)
+            {
+                long byteIdx = i / 8;
+                byte mask = (byte)~(1 << (byte)(i % 8));
+
+                _bitmap[byteIdx] &= mask;
+            }
+
+            using (Stream stream = _fileAttr.Open(FileAccess.ReadWrite))
+            {
+                long firstByte = index / 8;
+                long lastByte = (index + count) / 8;
+
+                stream.Position = firstByte;
+                stream.Write(_bitmap, (int)firstByte, (int)(lastByte - firstByte + 1));
+            }
+        }
     }
 }

@@ -54,27 +54,28 @@ namespace DiscUtils.Ntfs.Attributes
         public bool IsNonResident
         {
             get { return _record.IsNonResident; }
-            set
+        }
+
+        public void SetNonResident(bool nonResident, int maxData)
+        {
+            if (nonResident == _record.IsNonResident)
             {
-                if (value == _record.IsNonResident)
-                {
-                    return;
-                }
+                return;
+            }
 
-                if (value == false)
-                {
-                    throw new NotImplementedException("Converting non-resident attribute to resident");
-                }
+            byte[] buffer;
+            using (Stream attrStream = Open(FileAccess.Read))
+            {
+                buffer = Utilities.ReadFully(attrStream, Math.Min((int)attrStream.Length, maxData));
+                attrStream.SetLength(0);
+            }
 
-                ResidentFileAttributeRecord oldRecord = (ResidentFileAttributeRecord)_record;
-                byte[] buffer = oldRecord.GetData();
+            _record = nonResident ? (FileAttributeRecord)new NonResidentFileAttributeRecord(_record)
+                : (FileAttributeRecord)new ResidentFileAttributeRecord(_record);
 
-                _record = new NonResidentFileAttributeRecord(_record);
-
-                using (Stream attrStream = Open(FileAccess.Write))
-                {
-                    attrStream.Write(buffer, 0, buffer.Length);
-                }
+            using (Stream attrStream = Open(FileAccess.Write))
+            {
+                attrStream.Write(buffer, 0, buffer.Length);
             }
         }
 

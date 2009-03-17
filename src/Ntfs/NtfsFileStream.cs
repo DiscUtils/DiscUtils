@@ -116,26 +116,18 @@ namespace DiscUtils.Ntfs
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            if (value != Length)
+            {
+                _isDirty = true;
+                ChangeAttributeResidencyByLength(value);
+                _attrStream.SetLength(value);
+            }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (_attrStream.Position + count > _attrStream.Length)
-            {
-                if (!SoftCheckAttributeLengthIsOK(_attrStream.Position + count))
-                {
-                    _isDirty = true;
-                    _attrStream.Dispose();
-                    
-                    _file.MakeAttributeNonResident(_attributeRef.Type, _attributeRef.Name);
-
-                    _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
-                    _attrStream = _attr.Open(_access);
-                }
-            }
-
             _isDirty = true;
+            ChangeAttributeResidencyByLength(_attrStream.Position + count);
             _attrStream.Write(buffer, offset, count);
         }
 
@@ -144,21 +136,36 @@ namespace DiscUtils.Ntfs
             get { throw new NotImplementedException(); }
         }
 
-        /// <summary>
-        /// Indicates if an attribute is getting too big to fit into the MFT record.
-        /// </summary>
-        /// <param name="newLength">The new length of the attribute</param>
-        /// <returns><c>true</c> if the attribute possibly still fits, <c>false</c> if not.</returns>
-        /// <remarks>This method indicates when it's sensible to make an attribute non-resident.  A
-        /// firm decision is deferred until the MFT record is regenerated.</remarks>
-        private bool SoftCheckAttributeLengthIsOK(long newLength)
+        private void ChangeAttributeResidencyByLength(long value)
         {
-            if (_attr.IsNonResident)
+            if (!_attr.IsNonResident && value >= _file.MaxMftRecordSize)
             {
-                return true;
-            }
+                long pos = _attrStream.Position;
+                _isDirty = true;
+                _attrStream.Dispose();
 
-            return newLength < _file.MaxMftRecordSize;
+                _file.MakeAttributeNonResident(_attributeRef.Type, _attributeRef.Name, (int)Math.Min(value, _attr.Length));
+
+                _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
+                _attrStream = _attr.Open(_access);
+                _attrStream.Position = pos;
+            }
+            else if (_attr.IsNonResident && value <= _file.MaxMftRecordSize / 4)
+            {
+                // Use of 1/4 of record size here is just a heuristic - the important thing is not to end up with
+                // zero-length non-resident attributes
+
+                long pos = _attrStream.Position;
+                _isDirty = true;
+                _attrStream.Dispose();
+
+                _file.MakeAttributeResident(_attributeRef.Type, _attributeRef.Name, (int)value);
+
+                _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
+                _attrStream = _attr.Open(_access);
+                _attrStream.Position = pos;
+            }
         }
+
     }
 }
