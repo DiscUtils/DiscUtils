@@ -203,7 +203,11 @@ namespace DiscUtils.Ntfs
 
             if (_position > _record.InitializedDataLength + 1)
             {
-                throw new NotImplementedException("Non-contiguous write");
+                byte[] wipeBuffer = new byte[_bytesPerCluster * 4];
+                for (long wipePos = _record.InitializedDataLength; wipePos < _position; wipePos += wipeBuffer.Length)
+                {
+                    RawWrite(wipePos, wipeBuffer, 0, (int)Math.Min(wipeBuffer.Length, _position - wipePos));
+                }
             }
 
             if (_position + count > _record.InitializedDataLength)
@@ -217,9 +221,7 @@ namespace DiscUtils.Ntfs
                 _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;
             }
 
-            long vcn = _position / _bytesPerCluster;
-            int dataRunIdx = FindDataRun(vcn);
-            RawWrite(dataRunIdx, _position - (_runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count);
+            RawWrite(_position, buffer, offset, count);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -487,18 +489,17 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Write data to one or more runs.
         /// </summary>
-        /// <param name="startRunIdx">The start run index</param>
-        /// <param name="startRunOffset">The first byte in the run to write (as byte offset)</param>
+        /// <param name="position">Logical position within stream to start writing</param>
         /// <param name="data">The buffer to write</param>
         /// <param name="dataOffset">Offset to first byte in buffer to write</param>
         /// <param name="count">Number of bytes to write</param>
-        private void RawWrite(int startRunIdx, long startRunOffset, byte[] data, int dataOffset, int count)
+        private void RawWrite(long position, byte[] data, int dataOffset, int count)
         {
+            long vcn = position / _bytesPerCluster;
+            int runIdx = FindDataRun(vcn);
+            long runOffset = position - (_runs[runIdx].StartVcn * _bytesPerCluster);
+
             int totalWritten = 0;
-            int runIdx = startRunIdx;
-            long runOffset = startRunOffset;
-
-
             while (totalWritten < count)
             {
                 int toWrite = (int)Math.Min(count - totalWritten, (_runs[runIdx].Length * _bytesPerCluster) - runOffset);
