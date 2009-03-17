@@ -221,7 +221,7 @@ namespace DiscUtils.Ntfs
             int recordSize = record.Size;
             if (recordSize > _recordLength)
             {
-                throw new NotImplementedException("Multi-record files and/or making attributes non-resident");
+                throw new NotImplementedException("Multi-record files");
             }
 
             byte[] buffer = new byte[_recordLength];

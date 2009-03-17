@@ -658,7 +658,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override System.Collections.Generic.IEnumerable<StreamExtent> Extents
+        public override IEnumerable<StreamExtent> Extents
         {
             get { throw new NotImplementedException(); }
         }
