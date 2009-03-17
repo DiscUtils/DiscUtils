@@ -125,6 +125,7 @@ namespace DiscUtils.Ntfs
                 {
                     // We're just reading zero bytes from the uninitialized area
                     Array.Clear(buffer, offset, toRead);
+                    _position += toRead;
                     return toRead;
                 }
                 else
@@ -162,7 +163,18 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                throw new NotImplementedException("Increasing attribute length with SetLength");
+                if (value > _record.AllocatedLength)
+                {
+                    long numToAllocate = Utilities.Ceil(value - _record.AllocatedLength, _bytesPerCluster);
+                    Tuple<long, long>[] runs = _clusterBitmap.AllocateClusters(numToAllocate);
+                    foreach (var run in runs)
+                    {
+                        AddDataRun(run.First, run.Second);
+                    }
+                    _record.AllocatedLength += numToAllocate * _bytesPerCluster;
+                }
+                _record.RealLength = value;
+                _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;
             }
         }
 
@@ -187,6 +199,11 @@ namespace DiscUtils.Ntfs
                     AddDataRun(run.First, run.Second);
                 }
                 _record.AllocatedLength += numToAllocate * _bytesPerCluster;
+            }
+
+            if (_position > _record.InitializedDataLength + 1)
+            {
+                throw new NotImplementedException("Non-contiguous write");
             }
 
             if (_position + count > _record.InitializedDataLength)
@@ -241,7 +258,7 @@ namespace DiscUtils.Ntfs
 
                 _record.AllocatedLength = (_runs[_runs.Count - 1].StartVcn + _runs[_runs.Count - 1].Length) * _bytesPerCluster;
                 _record.RealLength = value;
-                _record.InitializedDataLength = value;
+                _record.InitializedDataLength = Math.Min(_record.InitializedDataLength, value);
                 _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;
             }
         }
