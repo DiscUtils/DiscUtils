@@ -56,7 +56,7 @@ namespace DiscUtils.Ntfs
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            _val = Utilities.ToUInt32LittleEndian(buffer, offset);
+            _val = Utilities.ToUInt64LittleEndian(buffer, offset);
         }
 
         #endregion
