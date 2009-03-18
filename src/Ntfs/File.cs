@@ -90,6 +90,17 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Creates a new attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        public void CreateAttribute(AttributeType type, string name)
+        {
+            _baseRecord.CreateAttribute(type, name);
+            UpdateRecordInMft();
+        }
+
+        /// <summary>
         /// Gets the first (if more than one) instance of an unnamed attribute.
         /// </summary>
         /// <param name="type">The attribute type</param>

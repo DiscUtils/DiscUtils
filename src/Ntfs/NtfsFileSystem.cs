@@ -82,6 +82,22 @@ namespace DiscUtils.Ntfs
             _upperCase = new UpperCase(this, _mft.GetRecord(MasterFileTable.UpCaseIndex));
             _securityDescriptors = new SecurityDescriptors(this, _mft.GetRecord(MasterFileTable.SecureIndex));
             _objectIds = new ObjectIds(this, _mft.GetRecord(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
+
+#if false
+            byte[] buffer = new byte[1024];
+            for (int i = 0; i < buffer.Length; ++i)
+            {
+                buffer[i] = 0xFF;
+            }
+
+            using (Stream s = OpenFile("$LogFile", FileMode.Open, FileAccess.ReadWrite))
+            {
+                while (s.Position != s.Length)
+                {
+                    s.Write(buffer, 0, (int)Math.Min(buffer.Length, s.Length - s.Position));
+                }
+            }
+#endif
         }
 
         /// <summary>
@@ -232,17 +248,28 @@ namespace DiscUtils.Ntfs
         /// <returns>The new stream.</returns>
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
-            if (mode != FileMode.Open)
+            string fileName = Utilities.GetFileFromPath(path);
+            string attributeName = null;
+
+            int streamSepPos = fileName.IndexOf(':');
+            if (streamSepPos >= 0)
             {
-                throw new NotSupportedException("Can only open existing files");
+                attributeName = fileName.Substring(streamSepPos + 1);
             }
 
-            DirectoryEntry entry = GetDirectoryEntry(path);
-
+            DirectoryEntry entry = GetDirectoryEntry(Path.Combine(Path.GetDirectoryName(path),fileName));
             if (entry == null)
             {
-                throw new FileNotFoundException("No such file", path);
+                if (mode == FileMode.Open)
+                {
+                    throw new FileNotFoundException("No such file", path);
+                }
+                else
+                {
+                    throw new NotSupportedException("Can only open existing files");
+                }
             }
+
 
             if ((entry.Details.FileAttributes & FileAttributes.Directory) != 0)
             {
@@ -250,16 +277,29 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                string fileName = Utilities.GetFileFromPath(path);
-                string attributeName = null;
+                File file = _mft.GetFile(entry.Reference);
+                BaseAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
 
-                int streamSepPos = fileName.IndexOf(':');
-                if (streamSepPos >= 0)
+                if (attr == null)
                 {
-                    attributeName = fileName.Substring(streamSepPos + 1);
+                    if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
+                    {
+                        file.CreateAttribute(AttributeType.Data, attributeName);
+                    }
+                    else
+                    {
+                        throw new FileNotFoundException("No such attribute on file", path);
+                    }
                 }
 
-                return new NtfsFileStream(this, new AttributeReference(entry.Reference, attributeName, AttributeType.Data), access);
+                SparseStream stream = new NtfsFileStream(this, new AttributeReference(entry.Reference, attributeName, AttributeType.Data), access);
+
+                if (mode == FileMode.Create || mode == FileMode.Truncate)
+                {
+                    stream.SetLength(0);
+                }
+
+                return stream;
             }
         }
 

@@ -62,6 +62,13 @@ namespace DiscUtils.Ntfs
             _name = toCopy._name;
         }
 
+        public FileAttributeRecord(AttributeType type, string name, ushort id)
+        {
+            _type = type;
+            _name = name;
+            _attributeId = id;
+        }
+
         public AttributeType AttributeType
         {
             get { return _type; }
@@ -174,6 +181,14 @@ namespace DiscUtils.Ntfs
             _memoryBuffer = new SparseMemoryBuffer(1024);
         }
 
+        public ResidentFileAttributeRecord(AttributeType type, string name, ushort id, bool indexed)
+            : base(type, name, id)
+        {
+            base._nonResidentFlag = 0;
+            _indexedFlag = (byte)(indexed ? 1 : 0);
+            _memoryBuffer = new SparseMemoryBuffer(1024);
+        }
+
         public override long DataLength
         {
             get { return _memoryBuffer.Capacity; }
@@ -218,7 +233,7 @@ namespace DiscUtils.Ntfs
                 nameLength = (byte)Name.Length;
             }
 
-            ushort dataOffset = (ushort)(0x18 + (nameLength * 2));
+            ushort dataOffset = (ushort)Utilities.RoundUp(0x18 + (nameLength * 2), 8);
             int length = (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
 
             Utilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
@@ -235,7 +250,7 @@ namespace DiscUtils.Ntfs
 
             if (Name != null)
             {
-                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength);
+                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength * 2);
             }
             _memoryBuffer.Read(0, buffer, offset + dataOffset, (int)_memoryBuffer.Capacity);
 
@@ -253,7 +268,7 @@ namespace DiscUtils.Ntfs
                     nameLength = (byte)Name.Length;
                 }
 
-                ushort dataOffset = (ushort)(nameOffset + (nameLength * 2));
+                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
                 return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
             }
         }
