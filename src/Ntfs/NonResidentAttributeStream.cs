@@ -222,6 +222,7 @@ namespace DiscUtils.Ntfs
             }
 
             RawWrite(_position, buffer, offset, count);
+            _position += count;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
