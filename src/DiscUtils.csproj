@@ -161,10 +161,14 @@
     <Compile Include="Ntfs\Attributes\VolumeNameAttribute.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
+    <Compile Include="Ntfs\Index.cs" />
     <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />
+    <Compile Include="Ntfs\SecurityDescriptors.cs" />
+    <Compile Include="Ntfs\UpperCase.cs" />
     <Compile Include="Partitions\Crc32.cs" />
     <Compile Include="Partitions\GptEntry.cs" />
     <Compile Include="Partitions\GptHeader.cs" />

@@ -24,36 +24,25 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Ntfs.Attributes;
-using DirectoryIndexEntry = DiscUtils.Ntfs.IndexEntry<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileReference>;
+using DirectoryIndexEntry = System.Collections.Generic.KeyValuePair<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileReference>;
 
 namespace DiscUtils.Ntfs
 {
     internal class Directory : File
     {
-        private DirectoryIndexEntry _rootEntry;
-        private Stream _indexStream;
+        private static IComparer<FileNameRecord> _fileNameComparer = new FileNameComparer();
+
+        private Index<FileNameRecord, FileReference> _index;
+
 
         public Directory(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            IndexRootAttribute indexRoot = (IndexRootAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
-            using (Stream s = indexRoot.Open(FileAccess.Read))
-            {
-                byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
-                _rootEntry = new DirectoryIndexEntry(buffer, (int)indexRoot.Header.OffsetToFirstEntry + 0x10);
-            }
-
-            BaseAttribute indexAlloc = GetAttribute(AttributeType.IndexAllocation, "$I30");
-            if (indexAlloc != null)
-            {
-                _indexStream = indexAlloc.Open(FileAccess.Read);
-            }
+            _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileNameComparer);
         }
 
-        internal DirectoryEntry FindEntryByName(string name)
+        internal DirectoryEntry GetEntryByName(string name)
         {
-            // TODO: Improve - this is sucky, should utilize the B*Tree...
-
             string searchName = name;
 
             int streamSepPos = name.IndexOf(':');
@@ -62,137 +51,24 @@ namespace DiscUtils.Ntfs
                 searchName = name.Substring(0, streamSepPos);
             }
 
-            foreach (DirectoryEntry dirEntry in GetMembers())
+            DirectoryIndexEntry entry = _index.FindFirst(new FileNameQuery(searchName));
+            if (entry.Key != null && entry.Value != null)
             {
-                if (searchName.Equals(dirEntry.Details.FileName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return dirEntry;
-                }
-            }
-            return null;
-        }
-
-        public IEnumerable<DirectoryEntry> GetMembers()
-        {
-            List<DirectoryIndexEntry> entries;
-            if ((_rootEntry.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != (IndexEntryFlags.End | IndexEntryFlags.Node))
-            {
-                entries = EnumerateResident();
+                return new DirectoryEntry(entry.Value, entry.Key);
             }
             else
             {
-                entries = new List<DirectoryIndexEntry>();
-                Enumerate(_rootEntry, entries);
+                return null;
             }
-
-            // Weed out short-name versions of files where there's a long name
-            Dictionary<FileReference, DirectoryIndexEntry> byRefIndex = new Dictionary<FileReference, DirectoryIndexEntry>();
-            int i = 0;
-            while(i < entries.Count)
-            {
-                DirectoryIndexEntry entry = entries[i];
-
-                if (((entry.Key.Flags & FileNameRecordFlags.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
-                {
-                    entries.RemoveAt(i);
-                }
-                else if (((entry.Key.Flags & FileNameRecordFlags.System) != 0) && _fileSystem.Options.HideSystemFiles)
-                {
-                    entries.RemoveAt(i);
-                }
-                else if (entry.Data.MftIndex < 24 && _fileSystem.Options.HideMetafiles)
-                {
-                    entries.RemoveAt(i);
-                }
-                else if (byRefIndex.ContainsKey(entry.Data))
-                {
-                    DirectoryIndexEntry storedEntry = byRefIndex[entry.Data];
-                    if (Utilities.Is8Dot3(storedEntry.Key.FileName))
-                    {
-                        // Make this the definitive entry for the file
-                        byRefIndex[entry.Data] = entry;
-
-                        // Remove the old one from the 'entries' array.
-                        for (int j = i - 1; j >= 0; --j)
-                        {
-                            if (entries[j].Data == entry.Data)
-                            {
-                                entries.RemoveAt(j);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Remove this entry
-                        entries.RemoveAt(i);
-                    }
-                }
-                else
-                {
-                    // Only increment if there's no collision - if there was one
-                    // we'll have removed an earlier entry in the array, effectively
-                    // moving us on one.
-                    byRefIndex.Add(entry.Data, entry);
-                    ++i;
-                }
-            }
-
-            return Utilities.Map<DirectoryIndexEntry, DirectoryEntry>(entries, (r) => new DirectoryEntry(r));
         }
 
-        private List<DirectoryIndexEntry> EnumerateResident()
+        public IEnumerable<DirectoryEntry> GetAllEntries()
         {
-            List<DirectoryIndexEntry> residentEntries = new List<DirectoryIndexEntry>();
+            List<DirectoryIndexEntry> entries = FilterEntries(_index.Entries);
 
-            IndexRootAttribute indexRoot = (IndexRootAttribute)GetAttribute(AttributeType.IndexRoot, "$I30");
-            using (Stream s = indexRoot.Open(FileAccess.Read))
+            foreach (var entry in entries)
             {
-                byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
-
-                long pos = 0;
-                while (pos < indexRoot.Header.TotalSizeOfEntries)
-                {
-                    DirectoryIndexEntry entry = new DirectoryIndexEntry(buffer, (int)(0x10 + indexRoot.Header.OffsetToFirstEntry + pos));
-                    residentEntries.Add(entry);
-
-                    if ((entry.Flags & IndexEntryFlags.End) != 0)
-                    {
-                        break;
-                    }
-
-                    pos += entry.Length;
-                }
-            }
-
-            List<DirectoryIndexEntry> result = new List<DirectoryIndexEntry>();
-            foreach (DirectoryIndexEntry entry in residentEntries)
-            {
-                Enumerate(entry, result);
-            }
-
-            return result;
-        }
-
-        private void Enumerate(DirectoryIndexEntry focus, List<DirectoryIndexEntry> accumulator)
-        {
-            if ((focus.Flags & IndexEntryFlags.Node) != 0)
-            {
-                _indexStream.Position = focus.ChildrenVirtualCluster * _fileSystem.BytesPerCluster;
-                byte[] buffer = Utilities.ReadFully(_indexStream, _fileSystem.BiosParameterBlock.IndexBufferSize);
-                IndexBlock<FileNameRecord, FileReference> block = new IndexBlock<FileNameRecord, FileReference>(_fileSystem.BiosParameterBlock.BytesPerSector);
-                block.FromBytes(buffer, 0);
-                buffer = null;
-
-                foreach (DirectoryIndexEntry entry in block.IndexEntries)
-                {
-                    Enumerate(entry, accumulator);
-                }
-            }
-
-            if ((focus.Flags & IndexEntryFlags.End) == 0)
-            {
-                accumulator.Add(focus);
-                //accumulator.Add(_fileSystem.MasterFileTable.GetFileOrDirectory(focus.Data));
+                yield return new DirectoryEntry(entry.Value, entry.Key);
             }
         }
 
@@ -210,6 +86,89 @@ namespace DiscUtils.Ntfs
         public override string ToString()
         {
             return base.ToString() + @"\";
+        }
+
+        private List<DirectoryIndexEntry> FilterEntries(IEnumerable<DirectoryIndexEntry> entriesIter)
+        {
+            List<DirectoryIndexEntry> entries = new List<DirectoryIndexEntry>(entriesIter);
+
+            // Weed out short-name versions of files where there's a long name
+            // and any hidden / system / metadata files.
+            Dictionary<FileReference, DirectoryIndexEntry> byRefIndex = new Dictionary<FileReference, DirectoryIndexEntry>();
+            int i = 0;
+            while (i < entries.Count)
+            {
+                DirectoryIndexEntry entry = entries[i];
+
+                if (((entry.Key.Flags & FileNameRecordFlags.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
+                {
+                    entries.RemoveAt(i);
+                }
+                else if (((entry.Key.Flags & FileNameRecordFlags.System) != 0) && _fileSystem.Options.HideSystemFiles)
+                {
+                    entries.RemoveAt(i);
+                }
+                else if (entry.Value.MftIndex < 24 && _fileSystem.Options.HideMetafiles)
+                {
+                    entries.RemoveAt(i);
+                }
+                else if (byRefIndex.ContainsKey(entry.Value))
+                {
+                    DirectoryIndexEntry storedEntry = byRefIndex[entry.Value];
+                    if (Utilities.Is8Dot3(storedEntry.Key.FileName))
+                    {
+                        // Make this the definitive entry for the file
+                        byRefIndex[entry.Value] = entry;
+
+                        // Remove the old one from the 'entries' array.
+                        for (int j = i - 1; j >= 0; --j)
+                        {
+                            if (entries[j].Value == entry.Value)
+                            {
+                                entries.RemoveAt(j);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Remove this entry
+                        entries.RemoveAt(i);
+                    }
+                }
+                else
+                {
+                    // Only increment if there's no collision - if there was one
+                    // we'll have removed an earlier entry in the array, effectively
+                    // moving us on one.
+                    byRefIndex.Add(entry.Value, entry);
+                    ++i;
+                }
+            }
+
+            return entries;
+        }
+
+        private sealed class FileNameComparer : IComparer<FileNameRecord>
+        {
+            public int Compare(FileNameRecord x, FileNameRecord y)
+            {
+                return string.Compare(x.FileName, y.FileName, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private sealed class FileNameQuery : IComparable<FileNameRecord>
+        {
+            private string _query;
+
+            public FileNameQuery(string query)
+            {
+                _query = query;
+            }
+
+            public int CompareTo(FileNameRecord other)
+            {
+                return string.Compare(_query, other.FileName, StringComparison.OrdinalIgnoreCase);
+            }
         }
     }
 }

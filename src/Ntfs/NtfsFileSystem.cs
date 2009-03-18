@@ -24,7 +24,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.AccessControl;
 using System.Text.RegularExpressions;
+using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -44,6 +46,11 @@ namespace DiscUtils.Ntfs
         private ClusterBitmap _bitmap;
 
         private AttributeDefinitions _attrDefs;
+
+        private UpperCase _upperCase;
+
+        private SecurityDescriptors _securityDescriptors;
+
 
         /// <summary>
         /// Creates a new instance from a stream.
@@ -66,9 +73,12 @@ namespace DiscUtils.Ntfs
             FileRecord mftSelfRecord = new FileRecord(_bpb.BytesPerSector);
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
 
+            // Initialize access to the well-known metadata files
             _mft = new MasterFileTable(this, mftSelfRecord);
             _bitmap = new ClusterBitmap(this, _mft.GetRecord(MasterFileTable.BitmapIndex));
             _attrDefs = new AttributeDefinitions(this, _mft.GetRecord(MasterFileTable.AttrDefIndex));
+            _upperCase = new UpperCase(this, _mft.GetRecord(MasterFileTable.UpCaseIndex));
+            _securityDescriptors = new SecurityDescriptors(this, _mft.GetRecord(MasterFileTable.SecureIndex));
         }
 
         /// <summary>
@@ -175,7 +185,7 @@ namespace DiscUtils.Ntfs
 
             Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
 
-            return Utilities.Map<DirectoryEntry, string>(parentDir.GetMembers(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
+            return Utilities.Map<DirectoryEntry, string>(parentDir.GetAllEntries(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
         }
 
         /// <summary>
@@ -200,7 +210,7 @@ namespace DiscUtils.Ntfs
             Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
 
             List<string> result = new List<string>();
-            foreach (DirectoryEntry dirEntry in parentDir.GetMembers())
+            foreach (DirectoryEntry dirEntry in parentDir.GetAllEntries())
             {
                 if (re.IsMatch(dirEntry.Details.FileName))
                 {
@@ -247,6 +257,33 @@ namespace DiscUtils.Ntfs
                 }
 
                 return new NtfsFileStream(this, new AttributeReference(entry.Reference, attributeName, AttributeType.Data), access);
+            }
+        }
+
+        /// <summary>
+        /// Gets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The security descriptor.</returns>
+        public FileSystemSecurity GetAccessControl(string path)
+        {
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+            else
+            {
+                File file = _mft.GetFile(dirEntry.Reference);
+
+                SecurityDescriptorAttribute legacyAttr = (SecurityDescriptorAttribute)file.GetAttribute(AttributeType.SecurityDescriptor);
+                if (legacyAttr != null)
+                {
+                    return legacyAttr.Descriptor;
+                }
+
+                StandardInformationAttribute attr = (StandardInformationAttribute)file.GetAttribute(AttributeType.StandardInformation);
+                return _securityDescriptors.GetDescriptorById(attr.SecurityId);
             }
         }
 
@@ -377,6 +414,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine("=====================");
 
             _mft.Dump(writer, "");
+            _securityDescriptors.Dump(writer, "");
 
             writer.WriteLine();
             writer.WriteLine("DIRECTORY TREE");
@@ -400,7 +438,7 @@ namespace DiscUtils.Ntfs
             DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
             Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
 
-            foreach (DirectoryEntry de in parentDir.GetMembers())
+            foreach (DirectoryEntry de in parentDir.GetAllEntries())
             {
                 bool isDir = ((de.Details.FileAttributes & FileAttributes.Directory) != 0);
 
@@ -429,7 +467,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                entry = dir.FindEntryByName(pathEntries[pathOffset]);
+                entry = dir.GetEntryByName(pathEntries[pathOffset]);
                 if (entry != null)
                 {
                     if (pathOffset == pathEntries.Length - 1)
@@ -454,7 +492,7 @@ namespace DiscUtils.Ntfs
 
         private void DumpDirectory(Directory dir, TextWriter writer, string indent)
         {
-            foreach (DirectoryEntry dirEntry in dir.GetMembers())
+            foreach (DirectoryEntry dirEntry in dir.GetAllEntries())
             {
                 File file = _mft.GetFileOrDirectory(dirEntry.Reference);
                 Directory asDir = file as Directory;

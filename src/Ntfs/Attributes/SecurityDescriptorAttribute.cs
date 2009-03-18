@@ -27,7 +27,7 @@ namespace DiscUtils.Ntfs.Attributes
 {
     internal class SecurityDescriptorAttribute : BaseAttribute
     {
-        private ObjectSecurity _securityDescriptor;
+        private FileSecurity _securityDescriptor;
 
         public SecurityDescriptorAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
             : base(fileSystem, record)
@@ -37,6 +37,11 @@ namespace DiscUtils.Ntfs.Attributes
             {
                 _securityDescriptor.SetSecurityDescriptorBinaryForm(Utilities.ReadFully(s, (int)record.DataLength));
             }
+        }
+
+        public FileSecurity Descriptor
+        {
+            get { return _securityDescriptor; }
         }
 
         public override void Dump(TextWriter writer, string indent)

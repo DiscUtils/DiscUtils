@@ -78,6 +78,11 @@ namespace DiscUtils.Ntfs.Attributes
             writer.WriteLine(indent + "      Quota Charged: " + _quotaCharged);
             writer.WriteLine(indent + "     Update Seq Num: " + _updateSequenceNumber);
         }
+
+        public uint SecurityId
+        {
+            get { return _securityId; }
+        }
     }
 
 }

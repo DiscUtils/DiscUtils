@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,34 +20,45 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 
 namespace DiscUtils.Ntfs
 {
-    internal class DirectoryEntry
+    internal sealed class SecurityDescriptorRecord
     {
-        private FileReference _fileReference;
-        private FileNameRecord _fileDetails;
+        public uint Hash;
+        public uint Id;
+        public long OffsetInFile;
+        public uint EntrySize;
+        public byte[] SecurityDescriptor;
 
-        public DirectoryEntry(FileReference fileReference, FileNameRecord fileDetails)
+        public bool Read(byte[] buffer, int offset)
         {
-            _fileReference = fileReference;
-            _fileDetails = fileDetails;
+            Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+            Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
+            OffsetInFile = Utilities.ToUInt32LittleEndian(buffer, offset + 0x08);
+            EntrySize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
+
+            if (EntrySize > 0)
+            {
+                SecurityDescriptor = new byte[EntrySize - 0x14];
+                Array.Copy(buffer, offset + 0x14, SecurityDescriptor, 0, SecurityDescriptor.Length);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public DirectoryEntry(IndexEntry<FileNameRecord, FileReference> dirIndexEntry)
+        private uint CalcHash()
         {
-            _fileReference = dirIndexEntry.Data;
-            _fileDetails = dirIndexEntry.Key;
-        }
-
-        public FileReference Reference
-        {
-            get { return _fileReference; }
-        }
-
-        public FileNameRecord Details
-        {
-            get { return _fileDetails; }
+            uint hash = 0;
+            for (int i = 0; i < SecurityDescriptor.Length / 4; ++i)
+            {
+                hash = Utilities.ToUInt32LittleEndian(SecurityDescriptor, i * 4) + ((hash << 3) | (hash >> 29));
+            }
+            return hash;
         }
     }
 }

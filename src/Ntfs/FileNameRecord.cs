@@ -70,6 +70,11 @@ namespace DiscUtils.Ntfs
             ReadFrom(data, offset);
         }
 
+        public FileNameRecord(string name)
+        {
+            FileName = name;
+        }
+
         public FileAttributes FileAttributes
         {
             get { return ConvertFlags(Flags); }

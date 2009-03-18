@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Ntfs
 {
-    internal class IndexEntry<K,D>
+    internal class IndexEntry<K, D>
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
     {

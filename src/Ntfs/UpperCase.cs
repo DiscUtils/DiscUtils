@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,34 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class DirectoryEntry
+    internal sealed class UpperCase : File
     {
-        private FileReference _fileReference;
-        private FileNameRecord _fileDetails;
+        private char[] _table;
 
-        public DirectoryEntry(FileReference fileReference, FileNameRecord fileDetails)
+        public UpperCase(NtfsFileSystem fileSystem, FileRecord fileRecord)
+            : base(fileSystem, fileRecord)
         {
-            _fileReference = fileReference;
-            _fileDetails = fileDetails;
+            using (Stream s = OpenAttribute(AttributeType.Data, FileAccess.Read))
+            {
+                _table = new char[s.Length / 2];
+
+                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+
+                for (int i = 0; i < _table.Length; ++i)
+                {
+                    _table[i] = (char)Utilities.ToUInt16LittleEndian(buffer, i * 2);
+                }
+            }
         }
 
-        public DirectoryEntry(IndexEntry<FileNameRecord, FileReference> dirIndexEntry)
+        public char ToUpper(char ch)
         {
-            _fileReference = dirIndexEntry.Data;
-            _fileDetails = dirIndexEntry.Key;
-        }
-
-        public FileReference Reference
-        {
-            get { return _fileReference; }
-        }
-
-        public FileNameRecord Details
-        {
-            get { return _fileDetails; }
+            return _table[(int)ch];
         }
     }
 }
