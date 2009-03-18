@@ -51,6 +51,8 @@ namespace DiscUtils.Ntfs
 
         private SecurityDescriptors _securityDescriptors;
 
+        private ObjectIds _objectIds;
+
 
         /// <summary>
         /// Creates a new instance from a stream.
@@ -79,6 +81,7 @@ namespace DiscUtils.Ntfs
             _attrDefs = new AttributeDefinitions(this, _mft.GetRecord(MasterFileTable.AttrDefIndex));
             _upperCase = new UpperCase(this, _mft.GetRecord(MasterFileTable.UpCaseIndex));
             _securityDescriptors = new SecurityDescriptors(this, _mft.GetRecord(MasterFileTable.SecureIndex));
+            _objectIds = new ObjectIds(this, _mft.GetRecord(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
         }
 
         /// <summary>
@@ -404,6 +407,11 @@ namespace DiscUtils.Ntfs
             get { return _upperCase; }
         }
 
+        internal ObjectIds ObjectIds
+        {
+            get { return _objectIds; }
+        }
+
         internal long BytesPerCluster
         {
             get { return _bpb.BytesPerSector * _bpb.SectorsPerCluster; }
@@ -419,7 +427,12 @@ namespace DiscUtils.Ntfs
             writer.WriteLine("=====================");
 
             _mft.Dump(writer, "");
+
+            writer.WriteLine();
             _securityDescriptors.Dump(writer, "");
+
+            writer.WriteLine();
+            _objectIds.Dump(writer, "");
 
             writer.WriteLine();
             writer.WriteLine("DIRECTORY TREE");

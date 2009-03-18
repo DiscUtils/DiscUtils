@@ -166,6 +166,7 @@
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Ntfs\ObjectIds.cs" />
     <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />
     <Compile Include="Ntfs\SecurityDescriptors.cs" />
     <Compile Include="Ntfs\UpperCase.cs" />
