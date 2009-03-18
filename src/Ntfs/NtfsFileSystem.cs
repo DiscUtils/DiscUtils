@@ -399,6 +399,11 @@ namespace DiscUtils.Ntfs
             get { return _attrDefs; }
         }
 
+        internal UpperCase UpperCase
+        {
+            get { return _upperCase; }
+        }
+
         internal long BytesPerCluster
         {
             get { return _bpb.BytesPerSector * _bpb.SectorsPerCluster; }

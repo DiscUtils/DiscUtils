@@ -30,15 +30,13 @@ namespace DiscUtils.Ntfs
 {
     internal class Directory : File
     {
-        private static IComparer<FileNameRecord> _fileNameComparer = new FileNameComparer();
-
         private Index<FileNameRecord, FileReference> _index;
 
 
         public Directory(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileNameComparer);
+            _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, new FileNameComparer(_fileSystem.UpperCase));
         }
 
         internal DirectoryEntry GetEntryByName(string name)
@@ -51,7 +49,7 @@ namespace DiscUtils.Ntfs
                 searchName = name.Substring(0, streamSepPos);
             }
 
-            DirectoryIndexEntry entry = _index.FindFirst(new FileNameQuery(searchName));
+            DirectoryIndexEntry entry = _index.FindFirst(new FileNameQuery(searchName, _fileSystem.UpperCase));
             if (entry.Key != null && entry.Value != null)
             {
                 return new DirectoryEntry(entry.Value, entry.Key);
@@ -150,24 +148,33 @@ namespace DiscUtils.Ntfs
 
         private sealed class FileNameComparer : IComparer<FileNameRecord>
         {
+            private IComparer<string> _nameComparer;
+
+            public FileNameComparer(IComparer<string> nameComparer)
+            {
+                _nameComparer = nameComparer;
+            }
+
             public int Compare(FileNameRecord x, FileNameRecord y)
             {
-                return string.Compare(x.FileName, y.FileName, StringComparison.OrdinalIgnoreCase);
+                return _nameComparer.Compare(x.FileName, y.FileName);
             }
         }
 
         private sealed class FileNameQuery : IComparable<FileNameRecord>
         {
             private string _query;
+            private IComparer<string> _nameComparer;
 
-            public FileNameQuery(string query)
+            public FileNameQuery(string query, IComparer<string> nameComparer)
             {
                 _query = query;
+                _nameComparer = nameComparer;
             }
 
             public int CompareTo(FileNameRecord other)
             {
-                return string.Compare(_query, other.FileName, StringComparison.OrdinalIgnoreCase);
+                return _nameComparer.Compare(_query, other.FileName);
             }
         }
     }

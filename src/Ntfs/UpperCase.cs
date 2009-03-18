@@ -20,11 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class UpperCase : File
+    internal sealed class UpperCase : File, IComparer<string>
     {
         private char[] _table;
 
@@ -47,6 +49,23 @@ namespace DiscUtils.Ntfs
         public char ToUpper(char ch)
         {
             return _table[(int)ch];
+        }
+
+        public int Compare(string x, string y)
+        {
+            int compLen = Math.Min(x.Length, y.Length);
+            for (int i = 0; i < compLen; ++i)
+            {
+                int result = _table[x[i]] - _table[y[i]];
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            // Identical out to the shortest string, so length is now the
+            // determining factor.
+            return x.Length - y.Length;
         }
     }
 }
