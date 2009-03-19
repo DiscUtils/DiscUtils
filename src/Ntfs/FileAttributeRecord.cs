@@ -403,7 +403,7 @@ namespace DiscUtils.Ntfs
                 nameOffset = 0x40;
                 nameLength = (byte)Name.Length;
             }
-            ushort dataOffset = (ushort)(0x40 + (nameLength * 2));
+            ushort dataOffset = (ushort)Utilities.RoundUp(0x40 + (nameLength * 2), 8);
 
             // Write out data first, since we know where it goes...
             int dataLen = 0;
@@ -435,7 +435,7 @@ namespace DiscUtils.Ntfs
 
             if (Name != null)
             {
-                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength);
+                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength * 2);
             }
 
             return length;
@@ -451,7 +451,7 @@ namespace DiscUtils.Ntfs
                 {
                     nameLength = (byte)Name.Length;
                 }
-                ushort dataOffset = (ushort)(nameOffset + (nameLength * 2));
+                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
 
                 // Write out data first, since we know where it goes...
                 int dataLen = 0;
