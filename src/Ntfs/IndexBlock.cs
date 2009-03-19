@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Ntfs
 {
@@ -31,37 +32,23 @@ namespace DiscUtils.Ntfs
     {
         public ulong LogSequenceNumber;
         public ulong IndexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
-        public IndexEntryHeader IndexHeader;
 
-        public List<IndexEntry<K,D>> IndexEntries;
+        public IndexNode<K, D> Node;
 
-        public IndexBlock(int sectorSize)
-            : base(sectorSize)
+        public IndexBlock(Stream stream, long vcn, BiosParameterBlock bpb)
+            : base(bpb.BytesPerSector)
         {
-
+            stream.Position = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
+            byte[] buffer = Utilities.ReadFully(stream, bpb.IndexBufferSize);
+            FromBytes(buffer, 0);
         }
 
         protected override void Read(byte[] buffer, int offset)
         {
+            // Skip FixupRecord fields...
             LogSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             IndexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            IndexHeader = new IndexEntryHeader(buffer, offset + 0x18);
-
-            IndexEntries = new List<IndexEntry<K,D>>();
-            long pos = 0;
-            while (pos < IndexHeader.TotalSizeOfEntries)
-            {
-                IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, (int)(offset + IndexHeader.OffsetToFirstEntry + 0x18 + pos));
-
-                IndexEntries.Add(entry);
-
-                if ((entry.Flags & IndexEntryFlags.End) != 0)
-                {
-                    break;
-                }
-
-                pos += entry.Length;
-            }
+            Node = new IndexNode<K, D>(null, buffer, offset + 0x18);
         }
 
         protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)

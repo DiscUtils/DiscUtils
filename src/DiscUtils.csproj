@@ -95,7 +95,7 @@
     <Compile Include="Ntfs\IByteArraySerializable.cs" />
     <Compile Include="Ntfs\IndexBlock.cs" />
     <Compile Include="Ntfs\IndexEntry.cs" />
-    <Compile Include="Ntfs\IndexEntryHeader.cs" />
+    <Compile Include="Ntfs\IndexHeader.cs" />
     <Compile Include="Ntfs\MasterFileTable.cs" />
     <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
     <Compile Include="Ntfs\FileRecord.cs" />
@@ -162,6 +162,7 @@
     <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
     <Compile Include="Ntfs\Index.cs" />
+    <Compile Include="Ntfs\IndexNode.cs" />
     <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>

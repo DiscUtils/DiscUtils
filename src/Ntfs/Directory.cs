@@ -70,6 +70,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public void UpdateEntry(DirectoryEntry entry)
+        {
+            throw new NotImplementedException();
+        }
+
         public override void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "DIRECTORY (" + _baseRecord.ToString() + ")");

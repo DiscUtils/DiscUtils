@@ -26,45 +26,54 @@ namespace DiscUtils.Ntfs.Attributes
 {
     internal class IndexRootAttribute : BaseAttribute
     {
-        private uint _rootAttrType;
-        private uint _rootCollationRule;
-        private uint _rootIndexAllocationEntrySize;
-        private byte _rootClustersPerIndexRecord;
+        private uint _attrType;
+        private AttributeCollationRule _collationRule;
+        private uint _indexAllocationEntrySize;
+        private byte _rawClustersPerIndexRecord;
 
-        private IndexEntryHeader _header;
+        public const int HeaderOffset = 0x10;
 
         public IndexRootAttribute(ResidentFileAttributeRecord record)
             : base(null, record)
         {
             using (Stream s = Open(FileAccess.Read))
             {
-                byte[] data = record.GetData();
-                _rootAttrType = Utilities.ToUInt32LittleEndian(data, 0x00);
-                _rootCollationRule = Utilities.ToUInt32LittleEndian(data, 0x04);
-                _rootIndexAllocationEntrySize = Utilities.ToUInt32LittleEndian(data, 0x08);
-                _rootClustersPerIndexRecord = data[0x0C];
-
-                _header = new IndexEntryHeader(data, 0x10);
+                byte[] data = Utilities.ReadFully(s, 0x10);
+                _attrType = Utilities.ToUInt32LittleEndian(data, 0x00);
+                _collationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(data, 0x04);
+                _indexAllocationEntrySize = Utilities.ToUInt32LittleEndian(data, 0x08);
+                _rawClustersPerIndexRecord = data[0x0C];
             }
         }
 
-        public IndexEntryHeader Header
+        public AttributeCollationRule CollationRule
         {
-            get { return _header; }
+            get { return _collationRule; }
+        }
+
+        public uint IndexAllocationSize
+        {
+            get { return _indexAllocationEntrySize; }
         }
 
         public override void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "INDEX ROOT ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
-            writer.WriteLine(indent + "            Root Attr Type: " + _rootAttrType);
-            writer.WriteLine(indent + "       Root Collation Rule: " + _rootCollationRule);
-            writer.WriteLine(indent + "     Root Index Alloc Size: " + _rootIndexAllocationEntrySize);
-            writer.WriteLine(indent + "  Root Clusters Per Record: " + _rootClustersPerIndexRecord);
+            writer.WriteLine(indent + "                Attr Type: " + _attrType);
+            writer.WriteLine(indent + "           Collation Rule: " + _collationRule);
+            writer.WriteLine(indent + "         Index Alloc Size: " + _indexAllocationEntrySize);
+            writer.WriteLine(indent + "  Raw Clusters Per Record: " + _rawClustersPerIndexRecord);
 
-            writer.WriteLine(indent + "     Offset To First Entry: " + _header.OffsetToFirstEntry);
-            writer.WriteLine(indent + "     Total Size Of Entries: " + _header.TotalSizeOfEntries);
-            writer.WriteLine(indent + "     Alloc Size Of Entries: " + _header.AllocatedSizeOfEntries);
-            writer.WriteLine(indent + "                     Flags: " + _header.Flags);
+            using (Stream s = Open(FileAccess.Read))
+            {
+                s.Position = HeaderOffset;
+                byte[] data = Utilities.ReadFully(s, IndexHeader.Size);
+                IndexHeader header = new IndexHeader(data, 0);
+                writer.WriteLine(indent + "    Offset To First Entry: " + header.OffsetToFirstEntry);
+                writer.WriteLine(indent + "    Total Size Of Entries: " + header.TotalSizeOfEntries);
+                writer.WriteLine(indent + "    Alloc Size Of Entries: " + header.AllocatedSizeOfEntries);
+                writer.WriteLine(indent + "          Has Child Nodes: " + header.HasChildNodes);
+            }
         }
     }
 

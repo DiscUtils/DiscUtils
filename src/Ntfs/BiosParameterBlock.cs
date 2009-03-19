@@ -45,8 +45,8 @@ namespace DiscUtils.Ntfs
         public long TotalSectors64;
         public long MftCluster;
         public long MftMirrorCluster;
-        public int MftRecordSize;
-        public int IndexBufferSize;
+        public byte RawMftRecordSize;
+        public byte RawIndexBufferSize;
         public ulong VolumeSerialNumber;
 
         internal static BiosParameterBlock FromBytes(byte[] bytes, int offset)
@@ -72,28 +72,33 @@ namespace DiscUtils.Ntfs
             bpb.TotalSectors64 = Utilities.ToInt64LittleEndian(bytes, offset + 0x28);
             bpb.MftCluster = Utilities.ToInt64LittleEndian(bytes, offset + 0x30);
             bpb.MftMirrorCluster = Utilities.ToInt64LittleEndian(bytes, offset + 0x38);
-
-            if ((bytes[offset + 0x40] & 0x80) != 0)
-            {
-                bpb.MftRecordSize = 1 << (-(sbyte)bytes[offset + 0x40]);
-            }
-            else
-            {
-                bpb.MftRecordSize = bytes[offset + 0x40] * bpb.SectorsPerCluster * bpb.BytesPerSector;
-            }
-
-            if ((bytes[offset + 0x44] & 0x80) != 0)
-            {
-                bpb.IndexBufferSize = 1 << (-(sbyte)bytes[offset + 0x44]);
-            }
-            else
-            {
-                bpb.IndexBufferSize = bytes[offset + 0x44] * bpb.SectorsPerCluster * bpb.BytesPerSector;
-            }
-
+            bpb.RawMftRecordSize = bytes[offset + 0x40];
+            bpb.RawIndexBufferSize = bytes[offset + 0x44];
             bpb.VolumeSerialNumber = Utilities.ToUInt64LittleEndian(bytes, offset + 0x48);
 
             return bpb;
+        }
+
+        public int MftRecordSize
+        {
+            get { return CalcRecordSize(RawMftRecordSize); }
+        }
+
+        public int IndexBufferSize
+        {
+            get { return CalcRecordSize(RawIndexBufferSize); }
+        }
+
+        internal int CalcRecordSize(byte rawSize)
+        {
+            if ((rawSize & 0x80) != 0)
+            {
+                return 1 << (-(sbyte)rawSize);
+            }
+            else
+            {
+                return rawSize * SectorsPerCluster * BytesPerSector;
+            }
         }
     }
 }

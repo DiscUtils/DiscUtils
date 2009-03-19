@@ -39,7 +39,8 @@ namespace DiscUtils.Ntfs
 
         private IComparer<K> _comparer;
 
-        private List<IndexEntry<K, D>> _rootEntries;
+        private IndexRootAttribute _rootAttr;
+        private IndexNode<K, D> _rootNode;
         private Stream _indexStream;
 
         public Index(File file, string name, BiosParameterBlock bpb, IComparer<K> comparer)
@@ -49,7 +50,13 @@ namespace DiscUtils.Ntfs
             _bpb = bpb;
             _comparer = comparer;
 
-            ReadRootEntries();
+            _rootAttr = (IndexRootAttribute)_file.GetAttribute(AttributeType.IndexRoot, _name);
+
+            using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
+            {
+                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                _rootNode = new IndexNode<K, D>(null, buffer, IndexRootAttribute.HeaderOffset);
+            }
 
             if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
             {
@@ -61,14 +68,14 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return from entry in Enumerate(_rootEntries)
+                return from entry in Enumerate(_rootNode.Entries)
                        select new KeyValuePair<K, D>(entry.Key, entry.Data);
             }
         }
 
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
         {
-            return from entry in FindAllIn(query, _rootEntries)
+            return from entry in FindAllIn(query, _rootNode.Entries)
                    select new KeyValuePair<K, D>(entry.Key, entry.Data);
         }
 
@@ -237,13 +244,8 @@ namespace DiscUtils.Ntfs
             {
                 if ((focus.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    _indexStream.Position = focus.ChildrenVirtualCluster * _bpb.BytesPerSector * _bpb.SectorsPerCluster;
-                    byte[] buffer = Utilities.ReadFully(_indexStream, _bpb.IndexBufferSize);
-                    IndexBlock<K, D> block = new IndexBlock<K, D>(_bpb.BytesPerSector);
-                    block.FromBytes(buffer, 0);
-                    buffer = null;
-
-                    foreach (var subEntry in Enumerate(block.IndexEntries))
+                    IndexBlock<K, D> block = new IndexBlock<K, D>(_indexStream, focus.ChildrenVirtualCluster, _bpb);
+                    foreach (var subEntry in Enumerate(block.Node.Entries))
                     {
                         yield return subEntry;
                     }
@@ -283,13 +285,8 @@ namespace DiscUtils.Ntfs
 
                 if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    _indexStream.Position = focus.ChildrenVirtualCluster * _bpb.BytesPerSector * _bpb.SectorsPerCluster;
-                    byte[] buffer = Utilities.ReadFully(_indexStream, _bpb.IndexBufferSize);
-                    IndexBlock<K, D> block = new IndexBlock<K, D>(_bpb.BytesPerSector);
-                    block.FromBytes(buffer, 0);
-                    buffer = null;
-
-                    foreach (var entry in FindAllIn(query, block.IndexEntries))
+                    IndexBlock<K, D> block = new IndexBlock<K, D>(_indexStream, focus.ChildrenVirtualCluster, _bpb);
+                    foreach (var entry in FindAllIn(query, block.Node.Entries))
                     {
                         yield return entry;
                     }
@@ -303,33 +300,6 @@ namespace DiscUtils.Ntfs
                 if (!keepIterating)
                 {
                     yield break;
-                }
-            }
-        }
-
-
-        private void ReadRootEntries()
-        {
-            _rootEntries = new List<IndexEntry<K, D>>();
-            IndexRootAttribute indexRoot = (IndexRootAttribute)_file.GetAttribute(AttributeType.IndexRoot, _name);
-            using (Stream s = indexRoot.Open(FileAccess.Read))
-            {
-                byte[] buffer = Utilities.ReadFully(s, (int)indexRoot.Length);
-
-                int bytesRemaining = (int)indexRoot.Header.TotalSizeOfEntries - 0x10;
-                uint pos = indexRoot.Header.OffsetToFirstEntry + 0x10;
-                while (bytesRemaining > 0)
-                {
-                    IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, (int)pos);
-                    _rootEntries.Add(entry);
-
-                    if ((entry.Flags & IndexEntryFlags.End) != 0)
-                    {
-                        break;
-                    }
-
-                    pos += entry.Length;
-                    bytesRemaining -= entry.Length;
                 }
             }
         }

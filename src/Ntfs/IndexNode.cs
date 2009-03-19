@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,33 +20,43 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using System.Collections.Generic;
 
 namespace DiscUtils.Ntfs
 {
-    internal class IndexEntryHeader
+    internal class IndexNode<K, D>
+        where K : IByteArraySerializable, new()
+        where D : IByteArraySerializable, new()
     {
-        public const int Size = 0x10;
+        private IndexNode<K, D> _parent;
 
-        public uint OffsetToFirstEntry;
-        public uint TotalSizeOfEntries;
-        public uint AllocatedSizeOfEntries;
-        public IndexEntryFlags Flags;
+        private IndexHeader _header;
+        private List<IndexEntry<K, D>> _entries;
 
-        public IndexEntryHeader(byte[] data, int offset)
+        public IndexNode(IndexNode<K, D> parent, byte[] buffer, int offset)
         {
-            OffsetToFirstEntry = Utilities.ToUInt32LittleEndian(data, offset + 0x00);
-            TotalSizeOfEntries = Utilities.ToUInt32LittleEndian(data, offset + 0x04);
-            AllocatedSizeOfEntries = Utilities.ToUInt32LittleEndian(data, offset + 0x08);
-            Flags = (IndexEntryFlags)Utilities.ToUInt16LittleEndian(data, offset + 0x0C);
-        }
-    }
+            _parent = parent;
+            _header = new IndexHeader(buffer, offset + 0);
 
-    [Flags]
-    internal enum IndexEntryFlags : ushort
-    {
-        None = 0x00,
-        Node = 0x01,
-        End = 0x02
+            _entries = new List<IndexEntry<K, D>>();
+            uint pos = _header.OffsetToFirstEntry;
+            while (pos < _header.TotalSizeOfEntries)
+            {
+                IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, offset + (int)pos);
+                _entries.Add(entry);
+
+                if ((entry.Flags & IndexEntryFlags.End) != 0)
+                {
+                    break;
+                }
+
+                pos += entry.Length;
+            }
+        }
+
+        public List<IndexEntry<K, D>> Entries
+        {
+            get { return _entries; }
+        }
     }
 }

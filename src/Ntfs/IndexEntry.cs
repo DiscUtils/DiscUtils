@@ -20,9 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 
 namespace DiscUtils.Ntfs
 {
+    [Flags]
+    internal enum IndexEntryFlags : ushort
+    {
+        None = 0x00,
+        Node = 0x01,
+        End = 0x02
+    }
+
     internal class IndexEntry<K, D>
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
