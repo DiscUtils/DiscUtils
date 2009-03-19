@@ -20,7 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Ntfs
 {
@@ -28,21 +30,25 @@ namespace DiscUtils.Ntfs
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
     {
+        private IndexBlock<K, D> _block;
+        private Index<K, D> _index;
         private IndexNode<K, D> _parent;
 
         private IndexHeader _header;
         private List<IndexEntry<K, D>> _entries;
 
-        public IndexNode(IndexNode<K, D> parent, byte[] buffer, int offset)
+        public IndexNode(IndexBlock<K,D> block, Index<K,D> index, IndexNode<K, D> parent, byte[] buffer, int offset)
         {
+            _block = block;
+            _index = index;
             _parent = parent;
             _header = new IndexHeader(buffer, offset + 0);
 
             _entries = new List<IndexEntry<K, D>>();
-            uint pos = _header.OffsetToFirstEntry;
+            int pos = (int)_header.OffsetToFirstEntry;
             while (pos < _header.TotalSizeOfEntries)
             {
-                IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, offset + (int)pos);
+                IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, offset + pos);
                 _entries.Add(entry);
 
                 if ((entry.Flags & IndexEntryFlags.End) != 0)
@@ -50,13 +56,98 @@ namespace DiscUtils.Ntfs
                     break;
                 }
 
-                pos += entry.Length;
+                pos += entry.Size;
             }
+        }
+
+        public ushort WriteTo(byte[] buffer, int offset, ushort updateSeqSize)
+        {
+            uint totalEntriesSize = 0;
+            foreach (var entry in _entries)
+            {
+                totalEntriesSize += (uint)entry.Size;
+            }
+
+            _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + updateSeqSize, 8);
+            _header.TotalSizeOfEntries = totalEntriesSize + _header.OffsetToFirstEntry;
+            _header.WriteTo(buffer, offset + 0);
+
+            int pos = (int)_header.OffsetToFirstEntry;
+            foreach (var entry in _entries)
+            {
+                entry.WriteTo(buffer, offset + pos);
+                pos += entry.Size;
+            }
+
+            return IndexHeader.Size;
+        }
+
+        public IndexHeader Header
+        {
+            get { return _header; }
+        }
+
+        public IndexBlock<K, D> Block
+        {
+            get { return _block; }
         }
 
         public List<IndexEntry<K, D>> Entries
         {
             get { return _entries; }
         }
+
+        public void UpdateEntry(K key, IComparer<K> comparer, D data)
+        {
+            for (int i = 0; i < _entries.Count; ++i)
+            {
+                var focus = _entries[i];
+                int compVal = comparer.Compare(key, focus.Key);
+                if (compVal == 0)
+                {
+                    IndexEntry<K, D> newEntry = new IndexEntry<K, D>(focus, key, data);
+                    if (_entries[i].Size != newEntry.Size)
+                    {
+                        throw new NotImplementedException("Changing index entry sizes");
+                    }
+                    _entries[i] = newEntry;
+                    return;
+                }
+            }
+
+            throw new IOException("No such index entry");
+        }
+
+        public bool TryFindEntry(K key, IComparer<K> comparer, out IndexEntry<K, D> entry, out IndexNode<K, D> node)
+        {
+            foreach (var focus in _entries)
+            {
+                if ((focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
+                {
+                    IndexBlock<K, D> subNode = _index.GetSubBlock(this, focus);
+                    return subNode.Node.TryFindEntry(key, comparer, out entry, out node);
+                }
+                else
+                {
+                    int compVal = comparer.Compare(key, focus.Key);
+                    if (compVal == 0)
+                    {
+                        entry = focus;
+                        node = this;
+                        return true;
+                    }
+                    else if (compVal < 0 && (focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
+                    {
+                        IndexBlock<K, D> subNode = _index.GetSubBlock(this, focus);
+                        return subNode.Node.TryFindEntry(key, comparer, out entry, out node);
+                    }
+                }
+            }
+
+            entry = null;
+            node = null;
+            return false;
+        }
+
     }
 }

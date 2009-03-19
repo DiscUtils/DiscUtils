@@ -61,6 +61,16 @@ namespace DiscUtils.Ntfs
                 Id = Utilities.ToGuidLittleEndian(buffer, offset + 0);
             }
 
+            public void WriteTo(byte[] buffer, int offset)
+            {
+                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
+            }
+
+            public int Size
+            {
+                get { return 16; }
+            }
+
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Id:{0}]", Id);
@@ -90,6 +100,16 @@ namespace DiscUtils.Ntfs
                 BirthVolumeId = Utilities.ToGuidLittleEndian(buffer, offset + 0x08);
                 BirthObjectId = Utilities.ToGuidLittleEndian(buffer, offset + 0x18);
                 BirthDomainId = Utilities.ToGuidLittleEndian(buffer, offset + 0x28);
+            }
+
+            public void WriteTo(byte[] buffer, int offset)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int Size
+            {
+                get { return 0x38; }
             }
 
             public override string ToString()

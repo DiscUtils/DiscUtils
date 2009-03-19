@@ -35,11 +35,22 @@ namespace DiscUtils.Ntfs
 
         public IndexNode<K, D> Node;
 
-        public IndexBlock(Stream stream, long vcn, BiosParameterBlock bpb)
+        private Index<K, D> _index;
+        private IndexNode<K, D> _parentNode;
+        private IndexEntry<K, D> _parentEntry;
+        private long _streamPosition;
+
+        public IndexBlock(Index<K, D> index, IndexNode<K, D> parentNode, IndexEntry<K, D> parentEntry, BiosParameterBlock bpb)
             : base(bpb.BytesPerSector)
         {
-            stream.Position = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
-            byte[] buffer = Utilities.ReadFully(stream, bpb.IndexBufferSize);
+            _index = index;
+            _parentNode = parentNode;
+            _parentEntry = parentEntry;
+
+            Stream stream = index.AllocationStream;
+            _streamPosition = _parentEntry.ChildrenVirtualCluster * bpb.BytesPerSector * bpb.SectorsPerCluster;
+            stream.Position = _streamPosition;
+            byte[] buffer = Utilities.ReadFully(stream, (int)index.IndexBufferSize);
             FromBytes(buffer, 0);
         }
 
@@ -48,17 +59,29 @@ namespace DiscUtils.Ntfs
             // Skip FixupRecord fields...
             LogSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             IndexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            Node = new IndexNode<K, D>(null, buffer, offset + 0x18);
+            Node = new IndexNode<K, D>(this, _index, _parentNode, buffer, offset + 0x18);
         }
 
         protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(LogSequenceNumber, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(IndexBlockVcn, buffer, offset + 0x10);
+            return (ushort)(0x18 + Node.WriteTo(buffer, offset + 0x18, updateSeqSize));
         }
 
         protected override int CalcSize(int updateSeqSize)
         {
             throw new NotImplementedException();
+        }
+
+        internal void WriteToDisk()
+        {
+            byte[] buffer = new byte[_index.IndexBufferSize];
+            ToBytes(buffer, 0);
+
+            Stream stream = _index.AllocationStream;
+            stream.Position = _streamPosition;
+            stream.Write(buffer, 0, buffer.Length);
         }
     }
 }

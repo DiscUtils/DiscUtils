@@ -74,9 +74,16 @@ namespace DiscUtils.Ntfs
             get { return _type; }
         }
 
+        public abstract long AllocatedLength
+        {
+            get;
+            set;
+        }
+
         public abstract long DataLength
         {
             get;
+            set;
         }
 
         public bool IsNonResident
@@ -189,9 +196,16 @@ namespace DiscUtils.Ntfs
             _memoryBuffer = new SparseMemoryBuffer(1024);
         }
 
+        public override long AllocatedLength
+        {
+            get { return DataLength; }
+            set { DataLength = value; }
+        }
+
         public override long DataLength
         {
             get { return _memoryBuffer.Capacity; }
+            set { throw new NotSupportedException(); }
         }
 
         public byte[] GetData()
@@ -308,7 +322,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// The amount of space occupied by the attribute (in bytes)
         /// </summary>
-        public long AllocatedLength
+        public override long AllocatedLength
         {
             get { return (long)_dataAllocatedSize; }
             set { _dataAllocatedSize = (ulong)value; }
@@ -329,6 +343,7 @@ namespace DiscUtils.Ntfs
         public override long DataLength
         {
             get { return (long)_dataRealSize; }
+            set { _dataRealSize = (ulong)value; }
         }
 
         /// <summary>

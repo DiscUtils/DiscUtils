@@ -36,54 +36,125 @@ namespace DiscUtils.Ntfs
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
     {
-        private ushort _dataOffset;
-        private ushort _dataLength;
-        private ushort _length;
-        private ushort _keyLength;
+        private bool _isFileIndexEntry;
+
         private IndexEntryFlags _flags;
 
         // Only valid if Node flag set
         private long _vcn;
 
         private K _key;
-
         private D _data;
+
+        public IndexEntry(IndexEntry<K, D> toCopy, K newKey, D newData)
+        {
+            _isFileIndexEntry = toCopy._isFileIndexEntry;
+            _flags = toCopy.Flags;
+            _vcn = toCopy._vcn;
+
+            _key = newKey;
+            _data = newData;
+        }
 
         public IndexEntry(byte[] buffer, int offset)
         {
-            _dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x00);
-            _dataLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
-            _length = Utilities.ToUInt16LittleEndian(buffer, offset + 0x08);
-            _keyLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            _isFileIndexEntry = typeof(D) == typeof(FileReference);
+
+            ushort dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x00);
+            ushort dataLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
+            ushort length = Utilities.ToUInt16LittleEndian(buffer, offset + 0x08);
+            ushort keyLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
             _flags = (IndexEntryFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
 
-            if(_keyLength > 0 && (_flags & IndexEntryFlags.End) == 0)
+            if ((_flags & IndexEntryFlags.End) == 0)
             {
                 _key = new K();
                 _key.ReadFrom(buffer, offset + 0x10);
-            }
 
-            if (typeof(D) == typeof(FileReference))
-            {
-                // Special case, for file indexes, the MFT ref is held where the data offset & length go
                 _data = new D();
-                _data.ReadFrom(buffer, offset + 0x00);
-            }
-            else if (_dataLength > 0)
-            {
-                _data = new D();
-                _data.ReadFrom(buffer, offset + 0x10 + _keyLength);
+                if (_isFileIndexEntry)
+                {
+                    // Special case, for file indexes, the MFT ref is held where the data offset & length go
+                    _data.ReadFrom(buffer, offset + 0x00);
+                }
+                else
+                {
+                    _data.ReadFrom(buffer, offset + 0x10 + keyLength);
+                }
             }
 
             if ((_flags & IndexEntryFlags.Node) != 0)
             {
-                _vcn = Utilities.ToInt64LittleEndian(buffer, offset + _length - 8);
+                _vcn = Utilities.ToInt64LittleEndian(buffer, offset + length - 8);
+            }
+
+            if (length != Size)
+            {
+                throw new Exception();
             }
         }
 
-        public ushort Length
+        public void WriteTo(byte[] buffer, int offset)
         {
-            get { return _length; }
+            ushort length = (ushort)Size;
+
+            if ((_flags & IndexEntryFlags.End) == 0)
+            {
+                ushort keyLength = (ushort)_key.Size;
+
+                if (_isFileIndexEntry)
+                {
+                    _data.WriteTo(buffer, offset + 0x00);
+                }
+                else
+                {
+                    ushort dataOffset = (ushort)(_isFileIndexEntry ? 0 : (0x10 + keyLength));
+                    ushort dataLength = (ushort)_data.Size;
+
+                    Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x00);
+                    Utilities.WriteBytesLittleEndian(dataLength, buffer, offset + 0x02);
+                    _data.WriteTo(buffer, offset + dataOffset);
+                }
+
+                Utilities.WriteBytesLittleEndian(keyLength, buffer, offset + 0x0A);
+                _key.WriteTo(buffer, offset + 0x10);
+            }
+            else
+            {
+                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x00); //dataOffset
+                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x02); //dataLength
+                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0A); //keyLength
+            }
+
+            Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
+            if ((_flags & IndexEntryFlags.Node) != 0)
+            {
+                Utilities.WriteBytesLittleEndian(_vcn, buffer, offset + length - 8);
+            }
+        }
+
+        public int Size
+        {
+            get
+            {
+                int size = 0x10; // start of variable data
+
+                if ((_flags & IndexEntryFlags.End) == 0)
+                {
+                    size += _key.Size;
+                    size += _isFileIndexEntry ? 0 : _data.Size;
+                }
+
+                size = Utilities.RoundUp(size, 8);
+
+                if ((_flags & IndexEntryFlags.Node) != 0)
+                {
+                    size += 8;
+                }
+
+                return size;
+            }
         }
 
         public IndexEntryFlags Flags

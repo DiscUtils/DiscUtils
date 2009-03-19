@@ -59,6 +59,16 @@ namespace DiscUtils.Ntfs
             _val = Utilities.ToUInt64LittleEndian(buffer, offset);
         }
 
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(_val, buffer, offset);
+        }
+
+        public int Size
+        {
+            get { return 8; }
+        }
+
         #endregion
 
         public override bool Equals(object obj)

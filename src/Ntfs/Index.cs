@@ -55,12 +55,12 @@ namespace DiscUtils.Ntfs
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                _rootNode = new IndexNode<K, D>(null, buffer, IndexRootAttribute.HeaderOffset);
+                _rootNode = new IndexNode<K, D>(null, this, null, buffer, IndexRootAttribute.HeaderOffset);
             }
 
             if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
             {
-                _indexStream = _file.OpenAttribute(AttributeType.IndexAllocation, _name, FileAccess.Read);
+                _indexStream = _file.OpenAttribute(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
             }
         }
 
@@ -68,14 +68,14 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return from entry in Enumerate(_rootNode.Entries)
+                return from entry in Enumerate(_rootNode)
                        select new KeyValuePair<K, D>(entry.Key, entry.Data);
             }
         }
 
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
         {
-            return from entry in FindAllIn(query, _rootNode.Entries)
+            return from entry in FindAllIn(query, _rootNode)
                    select new KeyValuePair<K, D>(entry.Key, entry.Data);
         }
 
@@ -108,7 +108,24 @@ namespace DiscUtils.Ntfs
 
             set
             {
-                throw new NotImplementedException();
+                IndexEntry<K,D> oldEntry;
+                IndexNode<K,D> node;
+                if (_rootNode.TryFindEntry(key, _comparer, out oldEntry, out node))
+                {
+                    node.UpdateEntry(key, _comparer, value);
+                    if (node.Block != null)
+                    {
+                        node.Block.WriteToDisk();
+                    }
+                    else
+                    {
+                        WriteRootNodeToDisk();
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException("Adding new index entries");
+                }
             }
         }
 
@@ -238,14 +255,34 @@ namespace DiscUtils.Ntfs
 
         #endregion
 
-        private IEnumerable<IndexEntry<K, D>> Enumerate(IEnumerable<IndexEntry<K, D>> entryList)
+        internal Stream AllocationStream
         {
-            foreach (var focus in entryList)
+            get { return _indexStream; }
+        }
+
+        internal uint IndexBufferSize
+        {
+            get { return _rootAttr.IndexAllocationSize; }
+        }
+
+        internal IndexBlock<K, D> GetSubBlock(IndexNode<K, D> parentNode, IndexEntry<K, D> parentEntry)
+        {
+            return new IndexBlock<K, D>(this, parentNode, parentEntry, _bpb);
+        }
+
+        private bool TryFindEntry(K key, out IndexEntry<K, D> entry, out IndexNode<K, D> node)
+        {
+            return _rootNode.TryFindEntry(key, _comparer, out entry, out node);
+        }
+
+        private IEnumerable<IndexEntry<K, D>> Enumerate(IndexNode<K,D> node)
+        {
+            foreach (var focus in node.Entries)
             {
                 if ((focus.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock<K, D> block = new IndexBlock<K, D>(_indexStream, focus.ChildrenVirtualCluster, _bpb);
-                    foreach (var subEntry in Enumerate(block.Node.Entries))
+                    IndexBlock<K, D> block = GetSubBlock(node, focus);
+                    foreach (var subEntry in Enumerate(block.Node))
                     {
                         yield return subEntry;
                     }
@@ -258,9 +295,9 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private IEnumerable<IndexEntry<K, D>> FindAllIn(IComparable<K> query, IEnumerable<IndexEntry<K, D>> entryList)
+        private IEnumerable<IndexEntry<K, D>> FindAllIn(IComparable<K> query, IndexNode<K, D> node)
         {
-            foreach (var focus in entryList)
+            foreach (var focus in node.Entries)
             {
                 bool searchChildren = true;
                 bool matches = false;
@@ -285,8 +322,8 @@ namespace DiscUtils.Ntfs
 
                 if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock<K, D> block = new IndexBlock<K, D>(_indexStream, focus.ChildrenVirtualCluster, _bpb);
-                    foreach (var entry in FindAllIn(query, block.Node.Entries))
+                    IndexBlock<K, D> block = GetSubBlock(node, focus);
+                    foreach (var entry in FindAllIn(query, block.Node))
                     {
                         yield return entry;
                     }
@@ -301,6 +338,16 @@ namespace DiscUtils.Ntfs
                 {
                     yield break;
                 }
+            }
+        }
+
+        private void WriteRootNodeToDisk()
+        {
+            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries];
+            _rootNode.WriteTo(buffer, 0, 0);
+            using (Stream s = _rootAttr.Open(FileAccess.Write))
+            {
+                s.Write(buffer, 0, buffer.Length);
             }
         }
 

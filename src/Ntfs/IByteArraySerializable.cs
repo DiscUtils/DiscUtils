@@ -26,5 +26,7 @@ namespace DiscUtils.Ntfs
     internal interface IByteArraySerializable
     {
         void ReadFrom(byte[] buffer, int offset);
+        void WriteTo(byte[] buffer, int offset);
+        int Size { get; }
     }
 }

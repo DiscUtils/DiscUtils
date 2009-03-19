@@ -145,7 +145,6 @@
     <Compile Include="FileLocator.cs" />
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
-    <Compile Include="Ntfs\AttributeReference.cs" />
     <Compile Include="Ntfs\Attributes\AttributeListAttribute.cs" />
     <Compile Include="Ntfs\Attributes\BitmapAttribute.cs" />
     <Compile Include="Ntfs\Attributes\DataAttribute.cs" />

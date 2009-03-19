@@ -292,7 +292,7 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-                SparseStream stream = new NtfsFileStream(this, new AttributeReference(entry.Reference, attributeName, AttributeType.Data), access);
+                SparseStream stream = new NtfsFileStream(this, entry, AttributeType.Data, attributeName, access);
 
                 if (mode == FileMode.Create || mode == FileMode.Truncate)
                 {

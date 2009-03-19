@@ -249,10 +249,9 @@ namespace DiscUtils.Ntfs
             {
                 FileNameAttribute fnAttr = (FileNameAttribute)GetAttribute(AttributeType.FileName);
                 FileAttributeRecord record = _baseRecord.GetAttribute(AttributeType.FileName);
-                return new DirectoryEntry(new FileReference(_baseRecord.MasterFileTableIndex), fnAttr.FileNameRecord);
+                return new DirectoryEntry(_fileSystem.MasterFileTable.GetDirectory(fnAttr.FileNameRecord.ParentDirectory), new FileReference(_baseRecord.MasterFileTableIndex), fnAttr.FileNameRecord);
             }
         }
-
 
         public virtual void Dump(TextWriter writer, string indent)
         {

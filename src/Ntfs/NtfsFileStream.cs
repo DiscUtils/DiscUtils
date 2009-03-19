@@ -31,8 +31,8 @@ namespace DiscUtils.Ntfs
 {
     internal sealed class NtfsFileStream : SparseStream
     {
-        private AttributeReference _attributeRef;
         private FileAccess _access;
+        private DirectoryEntry _entry;
 
         private File _file;
         private BaseAttribute _attr;
@@ -40,13 +40,13 @@ namespace DiscUtils.Ntfs
 
         private bool _isDirty;
 
-        public NtfsFileStream(NtfsFileSystem fileSystem, AttributeReference attribute, FileAccess access)
+        public NtfsFileStream(NtfsFileSystem fileSystem, DirectoryEntry entry, AttributeType attrType, string attrName, FileAccess access)
         {
-            _attributeRef = attribute;
             _access = access;
+            _entry = entry;
 
-            _file = fileSystem.MasterFileTable.GetFile(_attributeRef.FileReference);
-            _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
+            _file = fileSystem.MasterFileTable.GetFile(entry.Reference);
+            _attr = _file.GetAttribute(attrType, attrName);
             _attrStream = _attr.Open(_access);
         }
 
@@ -55,11 +55,7 @@ namespace DiscUtils.Ntfs
             base.Close();
             _attrStream.Close();
 
-            if (_isDirty)
-            {
-                _file.UpdateRecordInMft();
-                _isDirty = false;
-            }
+            UpdateMetadata();
         }
 
         public override bool CanRead
@@ -80,11 +76,7 @@ namespace DiscUtils.Ntfs
         public override void Flush()
         {
             _attrStream.Flush();
-            if (_isDirty)
-            {
-                _file.UpdateRecordInMft();
-                _isDirty = false;
-            }
+            UpdateMetadata();
         }
 
         public override long Length
@@ -136,17 +128,34 @@ namespace DiscUtils.Ntfs
             get { throw new NotImplementedException(); }
         }
 
+        private void UpdateMetadata()
+        {
+            if (_isDirty)
+            {
+                BaseAttribute anonDataAttr = _file.GetAttribute(AttributeType.Data);
+                _entry.Details.RealSize = (ulong)anonDataAttr.Record.DataLength;
+                _entry.Details.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
+                _entry.Details.ModificationTime = DateTime.UtcNow;
+                _entry.Update();
+                _file.UpdateRecordInMft();
+                _isDirty = false;
+            }
+        }
+
         private void ChangeAttributeResidencyByLength(long value)
         {
+            AttributeType attrType = _attr.Record.AttributeType;
+            string attrName = _attr.Name;
+
             if (!_attr.IsNonResident && value >= _file.MaxMftRecordSize)
             {
                 long pos = _attrStream.Position;
                 _isDirty = true;
                 _attrStream.Dispose();
 
-                _file.MakeAttributeNonResident(_attributeRef.Type, _attributeRef.Name, (int)Math.Min(value, _attr.Length));
+                _file.MakeAttributeNonResident(attrType, attrName, (int)Math.Min(value, _attr.Length));
 
-                _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
+                _attr = _file.GetAttribute(attrType, attrName);
                 _attrStream = _attr.Open(_access);
                 _attrStream.Position = pos;
             }
@@ -159,9 +168,9 @@ namespace DiscUtils.Ntfs
                 _isDirty = true;
                 _attrStream.Dispose();
 
-                _file.MakeAttributeResident(_attributeRef.Type, _attributeRef.Name, (int)value);
+                _file.MakeAttributeResident(attrType, attrName, (int)value);
 
-                _attr = _file.GetAttribute(_attributeRef.Type, _attributeRef.Name);
+                _attr = _file.GetAttribute(attrType, attrName);
                 _attrStream = _attr.Open(_access);
                 _attrStream.Position = pos;
             }

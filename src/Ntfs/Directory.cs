@@ -52,7 +52,7 @@ namespace DiscUtils.Ntfs
             DirectoryIndexEntry entry = _index.FindFirst(new FileNameQuery(searchName, _fileSystem.UpperCase));
             if (entry.Key != null && entry.Value != null)
             {
-                return new DirectoryEntry(entry.Value, entry.Key);
+                return new DirectoryEntry(this, entry.Value, entry.Key);
             }
             else
             {
@@ -66,13 +66,13 @@ namespace DiscUtils.Ntfs
 
             foreach (var entry in entries)
             {
-                yield return new DirectoryEntry(entry.Value, entry.Key);
+                yield return new DirectoryEntry(this, entry.Value, entry.Key);
             }
         }
 
         public void UpdateEntry(DirectoryEntry entry)
         {
-            throw new NotImplementedException();
+            _index[entry.Details] = entry.Reference;
         }
 
         public override void Dump(TextWriter writer, string indent)
@@ -162,6 +162,19 @@ namespace DiscUtils.Ntfs
 
             public int Compare(FileNameRecord x, FileNameRecord y)
             {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+                else if (y == null) // Null is high (end of node value)
+                {
+                    return -1;
+                }
+                else if (x == null)
+                {
+                    return 1;
+                }
+
                 return _nameComparer.Compare(x.FileName, y.FileName);
             }
         }

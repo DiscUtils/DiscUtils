@@ -25,19 +25,20 @@ namespace DiscUtils.Ntfs
 {
     internal class DirectoryEntry
     {
+        private Directory _directory;
         private FileReference _fileReference;
         private FileNameRecord _fileDetails;
 
-        public DirectoryEntry(FileReference fileReference, FileNameRecord fileDetails)
+        public DirectoryEntry(Directory directory, FileReference fileReference, FileNameRecord fileDetails)
         {
+            _directory = directory;
             _fileReference = fileReference;
             _fileDetails = fileDetails;
         }
 
-        public DirectoryEntry(IndexEntry<FileNameRecord, FileReference> dirIndexEntry)
+        public Directory Directory
         {
-            _fileReference = dirIndexEntry.Data;
-            _fileDetails = dirIndexEntry.Key;
+            get { return _directory; }
         }
 
         public FileReference Reference
@@ -48,6 +49,11 @@ namespace DiscUtils.Ntfs
         public FileNameRecord Details
         {
             get { return _fileDetails; }
+        }
+
+        internal void Update()
+        {
+            _directory.UpdateEntry(this);
         }
     }
 }

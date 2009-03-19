@@ -106,6 +106,17 @@ namespace DiscUtils.Ntfs
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
             }
 
+            public void WriteTo(byte[] buffer, int offset)
+            {
+                Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0);
+                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 4);
+            }
+
+            public int Size
+            {
+                get { return 8; }
+            }
+
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Hash:{0},Id:{1}]", Hash, Id);
@@ -148,6 +159,16 @@ namespace DiscUtils.Ntfs
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             }
 
+            public void WriteTo(byte[] buffer, int offset)
+            {
+                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
+            }
+
+            public int Size
+            {
+                get { return 4; }
+            }
+
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Id:{0}]", Id);
@@ -187,6 +208,19 @@ namespace DiscUtils.Ntfs
                 SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
                 SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
                 // Padding...
+            }
+
+            public void WriteTo(byte[] buffer, int offset)
+            {
+                Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+                Utilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
+                Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
+            }
+
+            public int Size
+            {
+                get { return 0x14; }
             }
 
             public override string ToString()
