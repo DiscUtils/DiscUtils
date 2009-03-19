@@ -190,6 +190,11 @@ namespace DiscUtils.Ntfs
                 throw new NotImplementedException("Writing to compressed / sparse attributes");
             }
 
+            if (count == 0)
+            {
+                return;
+            }
+
             if (_position + count > _record.AllocatedLength)
             {
                 long numToAllocate = Utilities.Ceil(_position + count - _record.AllocatedLength, _bytesPerCluster);
