@@ -89,7 +89,7 @@
     <Compile Include="Ntfs\DataRun.cs" />
     <Compile Include="Ntfs\Directory.cs" />
     <Compile Include="Ntfs\File.cs" />
-    <Compile Include="Ntfs\Attributes\BaseAttribute.cs" />
+    <Compile Include="Ntfs\NtfsAttribute.cs" />
     <Compile Include="Ntfs\AttributeRecord.cs" />
     <Compile Include="Ntfs\FileNameRecord.cs" />
     <Compile Include="Ntfs\IByteArraySerializable.cs" />
@@ -147,8 +147,7 @@
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
-    <Compile Include="Ntfs\Attributes\StreamAttribute.cs" />
-    <Compile Include="Ntfs\Attributes\StructuredAttribute.cs" />
+    <Compile Include="Ntfs\StructuredNtfsAttribute.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
     <Compile Include="Ntfs\Index.cs" />

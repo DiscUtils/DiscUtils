@@ -26,7 +26,6 @@ using System.Globalization;
 using System.IO;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -278,7 +277,7 @@ namespace DiscUtils.Ntfs
             else
             {
                 File file = _mft.GetFile(entry.Reference);
-                BaseAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+                NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
 
                 if (attr == null)
                 {
@@ -338,10 +337,10 @@ namespace DiscUtils.Ntfs
             {
                 File file = _mft.GetFile(dirEntry.Reference);
 
-                BaseAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
+                NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
                 if (legacyAttr != null)
                 {
-                    return ((StructuredAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
+                    return ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
                 }
 
                 StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);

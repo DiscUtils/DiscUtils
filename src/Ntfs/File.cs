@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -125,13 +124,13 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="id">The id of the attribute</param>
         /// <returns>The attribute</returns>
-        public BaseAttribute GetAttribute(ushort id)
+        public NtfsAttribute GetAttribute(ushort id)
         {
             foreach (var attr in AllAttributeRecords)
             {
                 if (attr.AttributeId == id)
                 {
-                    return BaseAttribute.FromRecord(_fileSystem, attr);
+                    return NtfsAttribute.FromRecord(_fileSystem, attr);
                 }
             }
             return null;
@@ -142,7 +141,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public BaseAttribute GetAttribute(AttributeType type)
+        public NtfsAttribute GetAttribute(AttributeType type)
         {
             return GetAttribute(type, null);
         }
@@ -156,7 +155,7 @@ namespace DiscUtils.Ntfs
         public T GetAttributeContent<T>(AttributeType type)
             where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            return new StructuredAttribute<T>(_fileSystem, GetAttribute(type).Record).Content;
+            return new StructuredNtfsAttribute<T>(_fileSystem, GetAttribute(type).Record).Content;
         }
 
         /// <summary>
@@ -169,7 +168,7 @@ namespace DiscUtils.Ntfs
         public T GetAttributeContent<T>(AttributeType type, string name)
             where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            return new StructuredAttribute<T>(_fileSystem, GetAttribute(type, name).Record).Content;
+            return new StructuredNtfsAttribute<T>(_fileSystem, GetAttribute(type, name).Record).Content;
         }
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace DiscUtils.Ntfs
         public void SetAttributeContent<T>(ushort id, T value)
             where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            StructuredAttribute<T> attr = new StructuredAttribute<T>(_fileSystem, GetAttribute(id).Record);
+            StructuredNtfsAttribute<T> attr = new StructuredNtfsAttribute<T>(_fileSystem, GetAttribute(id).Record);
             attr.Content = value;
             attr.Save();
         }
@@ -192,13 +191,13 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The attribute type</param>
         /// <param name="name">The attribute's name</param>
         /// <returns>The attribute of <c>null</c>.</returns>
-        public BaseAttribute GetAttribute(AttributeType type, string name)
+        public NtfsAttribute GetAttribute(AttributeType type, string name)
         {
             foreach (var attr in AllAttributeRecords)
             {
                 if (attr.AttributeType == type && attr.Name == name)
                 {
-                    return BaseAttribute.FromRecord(_fileSystem, attr);
+                    return NtfsAttribute.FromRecord(_fileSystem, attr);
                 }
             }
             return null;
@@ -209,15 +208,15 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public BaseAttribute[] GetAttributes(AttributeType type)
+        public NtfsAttribute[] GetAttributes(AttributeType type)
         {
-            List<BaseAttribute> matches = new List<BaseAttribute>();
+            List<NtfsAttribute> matches = new List<NtfsAttribute>();
 
             foreach (var attr in AllAttributeRecords)
             {
                 if (attr.AttributeType == type && string.IsNullOrEmpty(attr.Name))
                 {
-                    matches.Add(BaseAttribute.FromRecord(_fileSystem, attr));
+                    matches.Add(NtfsAttribute.FromRecord(_fileSystem, attr));
                 }
             }
 
@@ -226,7 +225,7 @@ namespace DiscUtils.Ntfs
 
         public Stream OpenAttribute(AttributeType type, FileAccess access)
         {
-            BaseAttribute attr = GetAttribute(type);
+            NtfsAttribute attr = GetAttribute(type);
 
             if (attr == null)
             {
@@ -238,7 +237,7 @@ namespace DiscUtils.Ntfs
 
         public SparseStream OpenAttribute(AttributeType type, string name, FileAccess access)
         {
-            BaseAttribute attr = GetAttribute(type, name);
+            NtfsAttribute attr = GetAttribute(type, name);
 
             if (attr == null)
             {
@@ -250,7 +249,7 @@ namespace DiscUtils.Ntfs
 
         public void MakeAttributeNonResident(AttributeType attributeType, string name, int maxData)
         {
-            BaseAttribute attr = GetAttribute(attributeType, name);
+            NtfsAttribute attr = GetAttribute(attributeType, name);
 
             if(attr.IsNonResident)
             {
@@ -263,7 +262,7 @@ namespace DiscUtils.Ntfs
 
         internal void MakeAttributeResident(AttributeType attributeType, string name, int maxData)
         {
-            BaseAttribute attr = GetAttribute(attributeType, name);
+            NtfsAttribute attr = GetAttribute(attributeType, name);
 
             if (!attr.IsNonResident)
             {
@@ -298,13 +297,13 @@ namespace DiscUtils.Ntfs
 
             foreach (AttributeRecord attrRec in _baseRecord.Attributes)
             {
-                BaseAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
+                NtfsAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
             }
         }
 
         public override string ToString()
         {
-            BaseAttribute[] attrs = GetAttributes(AttributeType.FileName);
+            NtfsAttribute[] attrs = GetAttributes(AttributeType.FileName);
 
             int longest = 0;
             string longName = attrs[0].ToString();
@@ -330,7 +329,7 @@ namespace DiscUtils.Ntfs
                 AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
                 if (attrListRec != null)
                 {
-                    StructuredAttribute<AttributeList> attrList = new StructuredAttribute<AttributeList>(_fileSystem, attrListRec);
+                    StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(_fileSystem, attrListRec);
                     foreach (var record in attrList.Content)
                     {
                         FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(record.BaseFileReference);

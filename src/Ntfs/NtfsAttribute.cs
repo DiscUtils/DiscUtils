@@ -21,16 +21,17 @@
 //
 
 using System;
+using System.Globalization;
 using System.IO;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    internal abstract class BaseAttribute
+    internal class NtfsAttribute : IDiagnosticTracer
     {
         protected NtfsFileSystem _fileSystem;
         protected AttributeRecord _record;
 
-        public BaseAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
+        public NtfsAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
         {
             _fileSystem = fileSystem;
             _record = record;
@@ -79,34 +80,72 @@ namespace DiscUtils.Ntfs.Attributes
             }
         }
 
-        public static BaseAttribute FromRecord(NtfsFileSystem fileSystem, AttributeRecord record)
+        public static NtfsAttribute FromRecord(NtfsFileSystem fileSystem, AttributeRecord record)
         {
             switch (record.AttributeType)
             {
                 case AttributeType.StandardInformation:
-                    return new StructuredAttribute<StandardInformation>(fileSystem, record);
+                    return new StructuredNtfsAttribute<StandardInformation>(fileSystem, record);
                 case AttributeType.FileName:
-                    return new StructuredAttribute<FileNameRecord>(fileSystem, record);
+                    return new StructuredNtfsAttribute<FileNameRecord>(fileSystem, record);
                 case AttributeType.SecurityDescriptor:
-                    return new StructuredAttribute<SecurityDescriptor>(fileSystem, record);
+                    return new StructuredNtfsAttribute<SecurityDescriptor>(fileSystem, record);
                 case AttributeType.Data:
-                    return new StreamAttribute(fileSystem, record);
+                    return new NtfsAttribute(fileSystem, record);
                 case AttributeType.Bitmap:
-                    return new StreamAttribute(fileSystem, record);
+                    return new NtfsAttribute(fileSystem, record);
                 case AttributeType.VolumeName:
-                    return new StructuredAttribute<VolumeName>(fileSystem, record);
+                    return new StructuredNtfsAttribute<VolumeName>(fileSystem, record);
                 case AttributeType.VolumeInformation:
-                    return new StructuredAttribute<VolumeInformation>(fileSystem, record);
+                    return new StructuredNtfsAttribute<VolumeInformation>(fileSystem, record);
                 case AttributeType.IndexRoot:
-                    return new StreamAttribute(fileSystem, record);
+                    return new NtfsAttribute(fileSystem, record);
                 case AttributeType.IndexAllocation:
-                    return new StreamAttribute(fileSystem, record);
+                    return new NtfsAttribute(fileSystem, record);
                 case AttributeType.ObjectId:
-                    return new StructuredAttribute<ObjectId>(fileSystem, record);
+                    return new StructuredNtfsAttribute<ObjectId>(fileSystem, record);
                 case AttributeType.AttributeList:
-                    return new StructuredAttribute<AttributeList>(fileSystem, record);
+                    return new StructuredNtfsAttribute<AttributeList>(fileSystem, record);
                 default:
-                    return new StreamAttribute(fileSystem, record);
+                    return new NtfsAttribute(fileSystem, record);
+            }
+        }
+
+        public virtual void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + AttributeTypeName + " ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+
+            writer.WriteLine(indent + "  Length: " + _record.DataLength + " bytes");
+            if (_record.DataLength == 0)
+            {
+                writer.WriteLine(indent + "    Data: <none>");
+            }
+            else
+            {
+                using (Stream s = Open(FileAccess.Read))
+                {
+                    string hex = "";
+                    byte[] buffer = new byte[5];
+                    int numBytes = s.Read(buffer, 0, 5);
+                    for (int i = 0; i < numBytes; ++i)
+                    {
+                        hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
+                    }
+
+                    writer.WriteLine(indent + "    Data: " + hex + "...");
+                }
+            }
+        }
+
+        internal SparseStream Open(FileAccess access)
+        {
+            if (_fileSystem != null)
+            {
+                return _record.Open(_fileSystem.ClusterBitmap, _fileSystem.RawStream, _fileSystem.BytesPerCluster, access);
+            }
+            else
+            {
+                return _record.Open(null, null, 0, access);
             }
         }
 
@@ -144,20 +183,6 @@ namespace DiscUtils.Ntfs.Attributes
             }
         }
 
-        internal SparseStream Open(FileAccess access)
-        {
-            if (_fileSystem != null)
-            {
-                return _record.Open(_fileSystem.ClusterBitmap, _fileSystem.RawStream, _fileSystem.BytesPerCluster, access);
-            }
-            else
-            {
-                return _record.Open(null, null, 0, access);
-            }
-        }
-
-        public abstract void Save();
-        public abstract void Dump(TextWriter writer, string indent);
     }
 
 }

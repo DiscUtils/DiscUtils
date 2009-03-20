@@ -22,16 +22,15 @@
 
 using System;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
     internal class Bitmap
     {
         private byte[] _bitmap;
-        private BaseAttribute _fileAttr;
+        private NtfsAttribute _fileAttr;
 
-        public Bitmap(BaseAttribute fileAttr)
+        public Bitmap(NtfsAttribute fileAttr)
         {
             if (fileAttr.Length > 100 * 1024)
             {

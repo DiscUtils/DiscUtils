@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -98,7 +97,7 @@ namespace DiscUtils.Ntfs
         public MasterFileTable(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            _bitmap = new Bitmap((StreamAttribute)GetAttribute(AttributeType.Bitmap));
+            _bitmap = new Bitmap(GetAttribute(AttributeType.Bitmap));
             _records = GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
 
             _recordLength = _fileSystem.BiosParameterBlock.MftRecordSize;
@@ -169,7 +168,7 @@ namespace DiscUtils.Ntfs
             FileRecord record = GetRecord(fileReference);
             if (record != null)
             {
-                StructuredAttribute<FileNameRecord> sa = (StructuredAttribute<FileNameRecord>)BaseAttribute.FromRecord(_fileSystem, record.GetAttribute(AttributeType.FileName));
+                StructuredNtfsAttribute<FileNameRecord> sa = (StructuredNtfsAttribute<FileNameRecord>)NtfsAttribute.FromRecord(_fileSystem, record.GetAttribute(AttributeType.FileName));
                 if ((sa.Content.FileAttributes & FileAttributes.Directory) != 0)
                 {
                     return new Directory(_fileSystem, record);

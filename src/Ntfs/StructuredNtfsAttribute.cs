@@ -22,15 +22,15 @@
 
 using System.IO;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    internal class StructuredAttribute<T> : BaseAttribute
+    internal class StructuredNtfsAttribute<T> : NtfsAttribute
         where T : IByteArraySerializable, IDiagnosticTracer, new()
     {
         private T _structure;
         private bool _initialized;
 
-        public StructuredAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
+        public StructuredNtfsAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
             : base(fileSystem, record)
         {
             _structure = new T();
@@ -49,7 +49,7 @@ namespace DiscUtils.Ntfs.Attributes
             }
         }
 
-        public override void Save()
+        public void Save()
         {
             byte[] buffer = new byte[_structure.Size];
             _structure.WriteTo(buffer, 0);

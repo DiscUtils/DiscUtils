@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -35,7 +34,7 @@ namespace DiscUtils.Ntfs
         public ClusterBitmap(NtfsFileSystem fileSystem, FileRecord fileRecord)
             : base(fileSystem, fileRecord)
         {
-            BaseAttribute attr = BaseAttribute.FromRecord(fileSystem, fileRecord.GetAttribute(AttributeType.Data));
+            NtfsAttribute attr = NtfsAttribute.FromRecord(fileSystem, fileRecord.GetAttribute(AttributeType.Data));
             _bitmap = new Bitmap(attr);
         }
 

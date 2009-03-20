@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -247,7 +246,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == AttributeType.FileName)
                 {
-                    StructuredAttribute<FileNameRecord> fnAttr = new StructuredAttribute<FileNameRecord>(null, attr);
+                    StructuredNtfsAttribute<FileNameRecord> fnAttr = new StructuredNtfsAttribute<FileNameRecord>(null, attr);
                     return fnAttr.Content.FileName;
                 }
             }

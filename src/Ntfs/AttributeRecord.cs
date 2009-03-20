@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -306,7 +305,7 @@ namespace DiscUtils.Ntfs
             base.Dump(writer, indent);
             writer.WriteLine(indent + "     Data Length: " + DataLength);
             writer.WriteLine(indent + "         Indexed: " + _indexedFlag);
-            BaseAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
+            NtfsAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
         }
     }
 

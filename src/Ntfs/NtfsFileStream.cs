@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using DiscUtils.Ntfs.Attributes;
 
 namespace DiscUtils.Ntfs
 {
@@ -35,7 +34,7 @@ namespace DiscUtils.Ntfs
         private DirectoryEntry _entry;
 
         private File _file;
-        private BaseAttribute _attr;
+        private NtfsAttribute _attr;
         private SparseStream _attrStream;
 
         private bool _isDirty;
@@ -134,8 +133,8 @@ namespace DiscUtils.Ntfs
             {
                 DateTime now = DateTime.UtcNow;
 
-                BaseAttribute anonDataAttr = _file.GetAttribute(AttributeType.Data);
-                StructuredAttribute<StandardInformation> saAttr = (StructuredAttribute<StandardInformation>)_file.GetAttribute(AttributeType.StandardInformation);
+                NtfsAttribute anonDataAttr = _file.GetAttribute(AttributeType.Data);
+                StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)_file.GetAttribute(AttributeType.StandardInformation);
 
                 saAttr.Content.ModificationTime = now;
                 saAttr.Content.MftChangedTime = now;
