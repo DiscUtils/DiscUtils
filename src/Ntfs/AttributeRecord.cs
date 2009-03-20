@@ -132,7 +132,7 @@ namespace DiscUtils.Ntfs
                 return val;
             }
 
-            val = string.Compare(_name, other._name);
+            val = string.Compare(_name, other._name, StringComparison.OrdinalIgnoreCase);
             if (val != 0)
             {
                 return val;

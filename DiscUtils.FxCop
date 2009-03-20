@@ -744,6 +744,24 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Ntfs">
+        <Types>
+         <Type Name="AttributeType">
+          <Messages>
+           <Message TypeName="MarkEnumsWithFlags" Category="Microsoft.Design" CheckId="CA1027" Status="Excluded" Created="2009-03-20 16:51:42Z">
+            <Issue>
+             <Item>'AttributeType'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="42" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Partitions">
         <Types>
          <Type Name="BiosPartitionTypes">
@@ -1133,6 +1151,7 @@
     <Note Id="39" Modified="2009-02-14 11:08:37Z">Utils is part of project name</Note>
     <Note Id="40" Modified="2009-02-14 11:08:47Z">Vmdk is correct form of VMDK</Note>
     <Note Id="41" Modified="2009-02-22 11:33:46Z">Follows best-practice naming (VMFS is well-known), and names derived from public spec.</Note>
+    <Note Id="42" Modified="2009-03-20 16:53:05Z">Despite the actual values, AttributeType is an enumeration, not flags.</Note>
    </User>
   </Notes>
   <Rules>
@@ -1159,6 +1178,9 @@
    </Rule>
    <Rule TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810">
     <Resolution Name="Default">Initialize all static fields in {0} when those fields are declared and remove the explicit static constructor.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkEnumsWithFlags" Category="Microsoft.Design" CheckId="CA1027">
+    <Resolution Name="Default">The constituent members of {0} appear to represent flags that can be combined rather than discrete values. If this is correct, mark the enumeration with FlagsAttribute.</Resolution>
    </Rule>
    <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
     <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
