@@ -435,6 +435,11 @@ namespace DiscUtils.Ntfs
             return (long)dirEntry.Details.RealSize;
         }
 
+        /// <summary>
+        /// Creates an NTFS hard link to an existing file.
+        /// </summary>
+        /// <param name="sourceName">An existing name of the file.</param>
+        /// <param name="destinationName">The name of the new hard link to the file.</param>
         public void CreateHardLink(string sourceName, string destinationName)
         {
             DirectoryEntry sourceDirEntry = GetDirectoryEntry(sourceName);
@@ -444,30 +449,38 @@ namespace DiscUtils.Ntfs
             }
 
             string destinationDirName = Path.GetDirectoryName(destinationName);
-            DirectoryEntry destinationDirEntry = GetDirectoryEntry(destinationDirName);
-            if (destinationDirEntry == null || (destinationDirEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
+            DirectoryEntry destinationDirDirEntry = GetDirectoryEntry(destinationDirName);
+            if (destinationDirDirEntry == null || (destinationDirDirEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
             {
                 throw new FileNotFoundException("Destination directory not found", destinationDirName);
             }
 
-            Directory destinationDir = _mft.GetDirectory(destinationDirEntry.Reference);
+            Directory destinationDir = _mft.GetDirectory(destinationDirDirEntry.Reference);
             if (destinationDir == null)
             {
                 throw new FileNotFoundException("Destination directory not found", destinationDirName);
             }
 
-            FileNameRecord newNameRecord = new FileNameRecord(sourceDirEntry.Details);
-            newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
-            newNameRecord.FileName = Path.GetFileName(destinationName);
-            destinationDir.AddEntry(newNameRecord, sourceDirEntry.Reference);
+            DirectoryEntry destinationDirEntry = GetDirectoryEntry(destinationDir, Path.GetFileName(destinationName));
+            if (destinationDirEntry != null)
+            {
+                throw new IOException("A file with this name already exists: " + destinationName);
+            }
 
             File file = _mft.GetFile(sourceDirEntry.Reference);
-            file.HardLinkCount++;
+
+            FileNameRecord newNameRecord = file.GetFileNameRecord(Path.GetFileName(sourceName), true);
+            newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
+            newNameRecord.FileName = Path.GetFileName(destinationName);
+            newNameRecord.ParentDirectory = destinationDirDirEntry.Reference;
 
             ushort newNameAttrId = file.CreateAttribute(AttributeType.FileName);
             file.SetAttributeContent(newNameAttrId, newNameRecord);
 
+            file.HardLinkCount++;
             file.UpdateRecordInMft();
+
+            destinationDir.AddEntry(newNameRecord, file.MftReference);
         }
 
         internal Stream RawStream

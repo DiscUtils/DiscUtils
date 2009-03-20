@@ -133,22 +133,18 @@ namespace DiscUtils.Ntfs
             {
                 DateTime now = DateTime.UtcNow;
 
-                NtfsAttribute anonDataAttr = _file.GetAttribute(AttributeType.Data);
+                // Update the standard information attribute - so it reflects the actual file state
                 StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)_file.GetAttribute(AttributeType.StandardInformation);
-
                 saAttr.Content.ModificationTime = now;
                 saAttr.Content.MftChangedTime = now;
                 saAttr.Content.LastAccessTime = now;
                 saAttr.Save();
 
-                _entry.Details.RealSize = (ulong)anonDataAttr.Record.DataLength;
-                _entry.Details.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
-                _entry.Details.CreationTime = saAttr.Content.CreationTime;
-                _entry.Details.ModificationTime = saAttr.Content.ModificationTime;
-                _entry.Details.MftChangedTime = saAttr.Content.MftChangedTime;
-                _entry.Details.LastAccessTime = saAttr.Content.LastAccessTime;
+                // Update the directory entry used to open the file, so it's accurate
+                _file.FreshenFileName(_entry.Details);
                 _entry.Update();
 
+                // Write attribute changes back to the Master File Table
                 _file.UpdateRecordInMft();
                 _isDirty = false;
             }

@@ -47,6 +47,11 @@ namespace DiscUtils.Ntfs
             get { return _baseRecord.MaxSize; }
         }
 
+        public FileReference MftReference
+        {
+            get { return new FileReference(_baseRecord.MasterFileTableIndex, _baseRecord.SequenceNumber); }
+        }
+
         public void UpdateRecordInMft()
         {
             // Make attributes non-resident until the data in the record fits, start with DATA attributes
@@ -281,12 +286,61 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public FileNameRecord GetFileNameRecord(string name, bool freshened)
+        {
+            NtfsAttribute[] attrs = GetAttributes(AttributeType.FileName);
+            StructuredNtfsAttribute<FileNameRecord> attr = null;
+            if (String.IsNullOrEmpty(name))
+            {
+                attr = (StructuredNtfsAttribute<FileNameRecord>)attrs[0];
+            }
+            else
+            {
+                foreach (StructuredNtfsAttribute<FileNameRecord> a in attrs)
+                {
+                    if (_fileSystem.UpperCase.Compare(a.Content.FileName, name) == 0)
+                    {
+                        attr = a;
+                    }
+                }
+                if (attr == null)
+                {
+                    throw new FileNotFoundException("File name not found on file", name);
+                }
+            }
+
+            FileNameRecord fnr = new FileNameRecord(attr.Content);
+
+            if (freshened)
+            {
+                FreshenFileName(fnr);
+            }
+
+            return fnr;
+        }
+
+        public void FreshenFileName(FileNameRecord fileName)
+        {
+            //
+            // Freshen the record from the definitive info in the other attributes
+            //
+            StandardInformation si = GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+            NtfsAttribute anonDataAttr = GetAttribute(AttributeType.Data);
+
+            fileName.CreationTime = si.CreationTime;
+            fileName.ModificationTime = si.ModificationTime;
+            fileName.MftChangedTime = si.MftChangedTime;
+            fileName.LastAccessTime = si.LastAccessTime;
+            fileName.RealSize = (ulong)anonDataAttr.Record.DataLength;
+            fileName.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
+        }
+
         public DirectoryEntry DirectoryEntry
         {
             get
             {
                 FileNameRecord record = GetAttributeContent<FileNameRecord>(AttributeType.FileName);
-                return new DirectoryEntry(_fileSystem.MasterFileTable.GetDirectory(record.ParentDirectory), new FileReference(_baseRecord.MasterFileTableIndex), record);
+                return new DirectoryEntry(_fileSystem.MasterFileTable.GetDirectory(record.ParentDirectory), MftReference, record);
             }
         }
 
