@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,47 +23,62 @@
 using System;
 using System.IO;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    internal class ObjectIdAttribute : BaseAttribute
+    internal sealed class ObjectId : IByteArraySerializable, IDiagnosticTracer
     {
         private Guid _objectId;
         private Guid _birthVolumeId;
         private Guid _birthObjectId;
         private Guid _domainId;
 
-        public ObjectIdAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
-            : base(fileSystem, record)
-        {
-            if (record.DataLength > 0)
-            {
-                using (Stream s = Open(FileAccess.Read))
-                {
-                    _objectId = new Guid(Utilities.ReadFully(s, 16));
+        #region IByteArraySerializable Members
 
-                    if (record.DataLength > 16)
-                    {
-                        _birthVolumeId = new Guid(Utilities.ReadFully(s, 16));
-                    }
-                    if (record.DataLength > 32)
-                    {
-                        _birthObjectId = new Guid(Utilities.ReadFully(s, 16));
-                    }
-                    if (record.DataLength > 48)
-                    {
-                        _domainId = new Guid(Utilities.ReadFully(s, 16));
-                    }
+        public void ReadFrom(byte[] buffer, int offset)
+        {
+            int bytesAvail = buffer.Length - offset;
+
+            if (bytesAvail > 0)
+            {
+                _objectId = Utilities.ToGuidLittleEndian(buffer, offset + 0);
+
+                if (bytesAvail > 16)
+                {
+                    _birthVolumeId = Utilities.ToGuidLittleEndian(buffer, offset + 16);
+                }
+                if (bytesAvail > 32)
+                {
+                    _birthObjectId = Utilities.ToGuidLittleEndian(buffer, offset + 32);
+                }
+                if (bytesAvail > 48)
+                {
+                    _domainId = Utilities.ToGuidLittleEndian(buffer, offset + 48);
                 }
             }
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        public void WriteTo(byte[] buffer, int offset)
         {
-            writer.WriteLine(indent + "OBJECT ID ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+            throw new NotImplementedException();
+        }
+
+        public int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
+
+        #region IDiagnosticTracer Members
+
+        public void Dump(TextWriter writer, string indent)
+        {
             writer.WriteLine(indent + "        Object ID: " + _objectId);
             writer.WriteLine(indent + "  Birth Volume ID: " + _birthVolumeId);
             writer.WriteLine(indent + "  Birth Object ID: " + _birthObjectId);
             writer.WriteLine(indent + "        Domain ID: " + _domainId);
         }
+
+        #endregion
     }
 }

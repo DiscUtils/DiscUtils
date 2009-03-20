@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,34 +21,14 @@
 //
 
 using System.IO;
-using System.Security.AccessControl;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils
 {
-    internal class SecurityDescriptorAttribute : BaseAttribute
+    /// <summary>
+    /// Interface exposed by objects that can provide a structured trace of their content.
+    /// </summary>
+    internal interface IDiagnosticTracer
     {
-        private FileSecurity _securityDescriptor;
-
-        public SecurityDescriptorAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
-            : base(fileSystem, record)
-        {
-            _securityDescriptor = new FileSecurity();
-            using (Stream s = Open(FileAccess.Read))
-            {
-                _securityDescriptor.SetSecurityDescriptorBinaryForm(Utilities.ReadFully(s, (int)record.DataLength));
-            }
-        }
-
-        public FileSecurity Descriptor
-        {
-            get { return _securityDescriptor; }
-        }
-
-        public override void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + "SECURITY DESCRIPTOR ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
-            writer.WriteLine(indent + "  Descriptor: " + _securityDescriptor.GetSecurityDescriptorSddlForm(AccessControlSections.All));
-        }
+        void Dump(TextWriter writer, string indent);
     }
-
 }

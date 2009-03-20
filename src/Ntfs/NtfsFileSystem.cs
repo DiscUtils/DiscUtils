@@ -304,6 +304,25 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Opens an existing attribute for read access.
+        /// </summary>
+        /// <param name="file">The file containing the attribute</param>
+        /// <param name="type">The type of the attribute</param>
+        /// <param name="name">The name of the attribute</param>
+        /// <returns>A stream with read access to the attribute</returns>
+        public Stream OpenRawAttribute(string file, AttributeType type, string name)
+        {
+            DirectoryEntry entry = GetDirectoryEntry(file);
+            if (entry == null)
+            {
+                throw new FileNotFoundException("No such file", file);
+            }
+
+            File fileObj = _mft.GetFile(entry.Reference);
+            return fileObj.OpenAttribute(type, name, FileAccess.Read);
+        }
+
+        /// <summary>
         /// Gets the security descriptor associated with the file or directory.
         /// </summary>
         /// <param name="path">The file or directory to inspect.</param>
@@ -319,14 +338,14 @@ namespace DiscUtils.Ntfs
             {
                 File file = _mft.GetFile(dirEntry.Reference);
 
-                SecurityDescriptorAttribute legacyAttr = (SecurityDescriptorAttribute)file.GetAttribute(AttributeType.SecurityDescriptor);
+                BaseAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
                 if (legacyAttr != null)
                 {
-                    return legacyAttr.Descriptor;
+                    return ((StructuredAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
                 }
 
-                StandardInformationAttribute attr = (StandardInformationAttribute)file.GetAttribute(AttributeType.StandardInformation);
-                return _securityDescriptors.GetDescriptorById(attr.SecurityId);
+                StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                return _securityDescriptors.GetDescriptorById(si.SecurityId);
             }
         }
 
@@ -417,6 +436,41 @@ namespace DiscUtils.Ntfs
             return (long)dirEntry.Details.RealSize;
         }
 
+        public void CreateHardLink(string sourceName, string destinationName)
+        {
+            DirectoryEntry sourceDirEntry = GetDirectoryEntry(sourceName);
+            if (sourceDirEntry == null)
+            {
+                throw new FileNotFoundException("Source file not found", sourceName);
+            }
+
+            string destinationDirName = Path.GetDirectoryName(destinationName);
+            DirectoryEntry destinationDirEntry = GetDirectoryEntry(destinationDirName);
+            if (destinationDirEntry == null || (destinationDirEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
+            {
+                throw new FileNotFoundException("Destination directory not found", destinationDirName);
+            }
+
+            Directory destinationDir = _mft.GetDirectory(destinationDirEntry.Reference);
+            if (destinationDir == null)
+            {
+                throw new FileNotFoundException("Destination directory not found", destinationDirName);
+            }
+
+            FileNameRecord newNameRecord = new FileNameRecord(sourceDirEntry.Details);
+            newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
+            newNameRecord.FileName = Path.GetFileName(destinationName);
+            destinationDir.AddEntry(newNameRecord, sourceDirEntry.Reference);
+
+            File file = _mft.GetFile(sourceDirEntry.Reference);
+            file.HardLinkCount++;
+
+            ushort newNameAttrId = file.CreateAttribute(AttributeType.FileName);
+            file.SetAttributeContent(newNameAttrId, newNameRecord);
+
+            file.UpdateRecordInMft();
+        }
+
         internal Stream RawStream
         {
             get { return _stream; }
@@ -473,6 +527,9 @@ namespace DiscUtils.Ntfs
 
             writer.WriteLine();
             _objectIds.Dump(writer, "");
+
+            writer.WriteLine();
+            _mft.GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, "");
 
             writer.WriteLine();
             writer.WriteLine("DIRECTORY TREE");

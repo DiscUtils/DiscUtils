@@ -60,5 +60,15 @@ namespace DiscUtils.Ntfs
             }
             return false;
         }
+
+        internal bool IsIndexed(AttributeType attributeType)
+        {
+            AttributeDefinitionRecord record;
+            if (_attrDefs.TryGetValue(attributeType, out record))
+            {
+                return (record.Flags & AttributeTypeFlags.Indexed) != 0;
+            }
+            return false;
+        }
     }
 }

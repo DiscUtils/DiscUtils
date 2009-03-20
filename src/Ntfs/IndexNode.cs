@@ -26,20 +26,24 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
+    internal delegate void IndexNodeStore<K,D>(IndexNode<K,D> node)
+        where K : IByteArraySerializable, new()
+        where D : IByteArraySerializable, new();
+
     internal class IndexNode<K, D>
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
     {
-        private IndexBlock<K, D> _block;
+        private IndexNodeStore<K, D> _store;
         private Index<K, D> _index;
         private IndexNode<K, D> _parent;
 
         private IndexHeader _header;
         private List<IndexEntry<K, D>> _entries;
 
-        public IndexNode(IndexBlock<K,D> block, Index<K,D> index, IndexNode<K, D> parent, byte[] buffer, int offset)
+        public IndexNode(IndexNodeStore<K, D> store, Index<K,D> index, IndexNode<K, D> parent, byte[] buffer, int offset)
         {
-            _block = block;
+            _store = store;
             _index = index;
             _parent = parent;
             _header = new IndexHeader(buffer, offset + 0);
@@ -87,14 +91,44 @@ namespace DiscUtils.Ntfs
             get { return _header; }
         }
 
-        public IndexBlock<K, D> Block
-        {
-            get { return _block; }
-        }
-
         public List<IndexEntry<K, D>> Entries
         {
             get { return _entries; }
+        }
+
+        public void AddEntry(K key, IComparer<K> comparer, D data)
+        {
+            for (int i = 0; i < _entries.Count; ++i)
+            {
+                var focus = _entries[i];
+                int compVal = comparer.Compare(key, focus.Key);
+                if (compVal == 0)
+                {
+                    throw new InvalidOperationException("Entry already exists");
+                }
+                else if (compVal < 0 || (focus.Flags & IndexEntryFlags.End) != 0)
+                {
+                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        _index.GetSubBlock(this, focus).Node.AddEntry(key, comparer, data);
+                    }
+                    else
+                    {
+                        // Insert before this entry
+                        IndexEntry<K, D> newEntry = new IndexEntry<K, D>(key, data);
+                        if (_header.AllocatedSizeOfEntries < _header.TotalSizeOfEntries + newEntry.Size)
+                        {
+                            throw new NotImplementedException("Re-balancing index nodes");
+                        }
+                        else
+                        {
+                            _entries.Insert(i, newEntry);
+                            _store(this);
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         public void UpdateEntry(K key, IComparer<K> comparer, D data)
@@ -111,6 +145,7 @@ namespace DiscUtils.Ntfs
                         throw new NotImplementedException("Changing index entry sizes");
                     }
                     _entries[i] = newEntry;
+                    _store(this);
                     return;
                 }
             }
@@ -122,10 +157,14 @@ namespace DiscUtils.Ntfs
         {
             foreach (var focus in _entries)
             {
-                if ((focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
+                if ((focus.Flags & IndexEntryFlags.End) != 0)
                 {
-                    IndexBlock<K, D> subNode = _index.GetSubBlock(this, focus);
-                    return subNode.Node.TryFindEntry(key, comparer, out entry, out node);
+                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        IndexBlock<K, D> subNode = _index.GetSubBlock(this, focus);
+                        return subNode.Node.TryFindEntry(key, comparer, out entry, out node);
+                    }
+                    break;
                 }
                 else
                 {

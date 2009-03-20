@@ -40,7 +40,7 @@ namespace DiscUtils.Ntfs
         private FileReference _baseFile;
         private ushort _nextAttributeId;
         private uint _index; // Self-reference (on XP+)
-        private List<FileAttributeRecord> _attributes;
+        private List<AttributeRecord> _attributes;
 
         private bool _haveIndex;
 
@@ -64,14 +64,20 @@ namespace DiscUtils.Ntfs
             get { return _sequenceNumber; }
         }
 
+        public ushort HardLinkCount
+        {
+            get { return _hardLinkCount; }
+            set { _hardLinkCount = value; }
+        }
+
         public uint MaxSize
         {
             get { return _recordAllocatedSize; }
         }
 
-        public ICollection<FileAttributeRecord> Attributes
+        public ICollection<AttributeRecord> Attributes
         {
-            get { return new ReadOnlyCollection<FileAttributeRecord>(_attributes); }
+            get { return new ReadOnlyCollection<AttributeRecord>(_attributes); }
         }
 
         /// <summary>
@@ -79,15 +85,37 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
-        internal void CreateAttribute(AttributeType type, string name)
+        /// <param name="indexed">Whether the attribute is marked as indexed</param>
+        internal ushort CreateAttribute(AttributeType type, string name, bool indexed)
         {
+            ushort id = _nextAttributeId++;
             _attributes.Add(
                 new ResidentFileAttributeRecord(
                     type,
                     name,
-                    _nextAttributeId++,
-                    false)
+                    id,
+                    indexed)
                 );
+            _attributes.Sort();
+            return id;
+        }
+
+        /// <summary>
+        /// Gets an attribute by it's id.
+        /// </summary>
+        /// <param name="id">The attribute's id</param>
+        /// <returns>The attribute, or <c>null</c></returns>
+        public AttributeRecord GetAttribute(ushort id)
+        {
+            foreach (AttributeRecord attrRec in _attributes)
+            {
+                if (attrRec.AttributeId == id)
+                {
+                    return attrRec;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -95,7 +123,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public FileAttributeRecord GetAttribute(AttributeType type)
+        public AttributeRecord GetAttribute(AttributeType type)
         {
             return GetAttribute(type, null);
         }
@@ -106,9 +134,9 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The attribute type</param>
         /// <param name="name">The name of the attribute</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public FileAttributeRecord GetAttribute(AttributeType type, string name)
+        public AttributeRecord GetAttribute(AttributeType type, string name)
         {
-            foreach (FileAttributeRecord attrRec in _attributes)
+            foreach (AttributeRecord attrRec in _attributes)
             {
                 if (attrRec.AttributeType == type && attrRec.Name == name)
                 {
@@ -119,7 +147,7 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
-        public void SetAttribute(FileAttributeRecord record)
+        public void SetAttribute(AttributeRecord record)
         {
             for(int i = 0; i < _attributes.Count; ++i)
             {
@@ -151,12 +179,12 @@ namespace DiscUtils.Ntfs
                 _haveIndex = true;
             }
 
-            _attributes = new List<FileAttributeRecord>();
+            _attributes = new List<AttributeRecord>();
             int focus = _firstAttributeOffset;
             while (true)
             {
                 int length;
-                FileAttributeRecord attr = FileAttributeRecord.FromBytes(buffer, focus, out length);
+                AttributeRecord attr = AttributeRecord.FromBytes(buffer, focus, out length);
                 if (attr == null)
                 {
                     break;
@@ -215,12 +243,12 @@ namespace DiscUtils.Ntfs
 
         public override string ToString()
         {
-            foreach (FileAttributeRecord attr in _attributes)
+            foreach (AttributeRecord attr in _attributes)
             {
                 if (attr.AttributeType == AttributeType.FileName)
                 {
-                    FileNameAttribute fnAttr = new FileNameAttribute((ResidentFileAttributeRecord)attr);
-                    return fnAttr.ToString();
+                    StructuredAttribute<FileNameRecord> fnAttr = new StructuredAttribute<FileNameRecord>(null, attr);
+                    return fnAttr.Content.FileName;
                 }
             }
 
@@ -244,7 +272,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "  Next Attribute Id: " + _nextAttributeId);
             writer.WriteLine(indent + "   Index (Self Ref): " + _index);
 
-            foreach (FileAttributeRecord attr in _attributes)
+            foreach (AttributeRecord attr in _attributes)
             {
                 attr.Dump(writer, indent + "     ");
             }

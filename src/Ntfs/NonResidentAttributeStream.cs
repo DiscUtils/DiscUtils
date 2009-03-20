@@ -137,11 +137,11 @@ namespace DiscUtils.Ntfs
             }
 
             int numRead;
-            if (_record.Flags == FileAttributeFlags.None)
+            if (_record.Flags == AttributeFlags.None)
             {
                 numRead = DoReadNormal(buffer, offset, toRead);
             }
-            else if (_record.Flags == FileAttributeFlags.Compressed)
+            else if (_record.Flags == AttributeFlags.Compressed)
             {
                 numRead = DoReadCompressed(buffer, offset, toRead);
             }
@@ -185,7 +185,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to write to file not opened for write");
             }
 
-            if (_record.Flags != FileAttributeFlags.None)
+            if (_record.Flags != AttributeFlags.None)
             {
                 throw new NotImplementedException("Writing to compressed / sparse attributes");
             }

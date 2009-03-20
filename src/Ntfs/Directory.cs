@@ -75,14 +75,22 @@ namespace DiscUtils.Ntfs
             _index[entry.Details] = entry.Reference;
         }
 
+
+        internal void AddEntry(FileNameRecord newNameRecord, FileReference fileReference)
+        {
+            _index[newNameRecord] = fileReference;
+        }
+
         public override void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "DIRECTORY (" + _baseRecord.ToString() + ")");
             writer.WriteLine(indent + "  File Number: " + _baseRecord.MasterFileTableIndex);
 
-            foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
+            foreach (var entry in _index.Entries)
             {
-                BaseAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
+                writer.WriteLine(indent + "  DIRECTORY ENTRY (" + entry.Key.FileName + ")");
+                writer.WriteLine(indent + "    MFT Ref: " + entry.Value);
+                entry.Key.Dump(writer, indent + "    ");
             }
         }
 
@@ -103,11 +111,11 @@ namespace DiscUtils.Ntfs
             {
                 DirectoryIndexEntry entry = entries[i];
 
-                if (((entry.Key.Flags & FileNameRecordFlags.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
+                if (((entry.Key.Flags & FileAttributeFlags.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
                 {
                     entries.RemoveAt(i);
                 }
-                else if (((entry.Key.Flags & FileNameRecordFlags.System) != 0) && _fileSystem.Options.HideSystemFiles)
+                else if (((entry.Key.Flags & FileAttributeFlags.System) != 0) && _fileSystem.Options.HideSystemFiles)
                 {
                     entries.RemoveAt(i);
                 }

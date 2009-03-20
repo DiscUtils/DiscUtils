@@ -29,7 +29,7 @@ using DiscUtils.Ntfs.Attributes;
 namespace DiscUtils.Ntfs
 {
     [Flags]
-    internal enum FileAttributeFlags : ushort
+    internal enum AttributeFlags : ushort
     {
         None = 0x0000,
         Compressed = 0x0001,
@@ -37,11 +37,11 @@ namespace DiscUtils.Ntfs
         Sparse = 0x8000
     }
 
-    internal abstract class FileAttributeRecord
+    internal abstract class AttributeRecord : IComparable<AttributeRecord>
     {
         protected AttributeType _type;
         protected byte _nonResidentFlag;
-        protected FileAttributeFlags _flags;
+        protected AttributeFlags _flags;
         protected ushort _attributeId;
 
         protected string _name;
@@ -49,11 +49,11 @@ namespace DiscUtils.Ntfs
         protected int _debug_bufPos;
         protected int _debug_length;
 
-        public FileAttributeRecord()
+        public AttributeRecord()
         {
         }
 
-        public FileAttributeRecord(FileAttributeRecord toCopy)
+        public AttributeRecord(AttributeRecord toCopy)
         {
             _type = toCopy._type;
             _nonResidentFlag = toCopy._nonResidentFlag;
@@ -62,7 +62,7 @@ namespace DiscUtils.Ntfs
             _name = toCopy._name;
         }
 
-        public FileAttributeRecord(AttributeType type, string name, ushort id)
+        public AttributeRecord(AttributeType type, string name, ushort id)
         {
             _type = type;
             _name = name;
@@ -72,6 +72,11 @@ namespace DiscUtils.Ntfs
         public AttributeType AttributeType
         {
             get { return _type; }
+        }
+
+        public ushort AttributeId
+        {
+            get { return _attributeId; }
         }
 
         public abstract long AllocatedLength
@@ -96,14 +101,14 @@ namespace DiscUtils.Ntfs
             get { return _name; }
         }
 
-        public FileAttributeFlags Flags
+        public AttributeFlags Flags
         {
             get { return _flags; }
         }
 
         public abstract SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access);
 
-        public static FileAttributeRecord FromBytes(byte[] buffer, int offset, out int length)
+        public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
             if (Utilities.ToUInt32LittleEndian(buffer, offset) == 0xFFFFFFFF)
             {
@@ -120,6 +125,24 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public int CompareTo(AttributeRecord other)
+        {
+            int val = ((int)_type) - (int)other._type;
+            if(val != 0)
+            {
+                return val;
+            }
+
+            val = string.Compare(_name, other._name);
+            if (val != 0)
+            {
+                return val;
+            }
+
+            return ((int)_attributeId) - (int)other._attributeId;
+        }
+
+
         protected virtual void Read(byte[] buffer, int offset, out int length)
         {
             _debug_bufPos = offset;
@@ -132,7 +155,7 @@ namespace DiscUtils.Ntfs
             _nonResidentFlag = buffer[offset + 0x08];
             byte nameLength = buffer[offset + 0x09];
             ushort nameOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = (FileAttributeFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            _flags = (AttributeFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
             _attributeId = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0E);
 
             if (nameLength != 0x00)
@@ -159,19 +182,10 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     AttributeId: " + _attributeId);
             writer.WriteLine(indent + "   DEBUG: bufPos: " + _debug_bufPos);
             writer.WriteLine(indent + "   DEBUG: length: " + _debug_length);
-            if (_nonResidentFlag == 0)
-            {
-                BaseAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
-            }
-            else
-            {
-                new NonResidentAttribute(this).Dump(writer, indent + "  ");
-            }
         }
-
     }
 
-    internal sealed class ResidentFileAttributeRecord : FileAttributeRecord
+    internal sealed class ResidentFileAttributeRecord : AttributeRecord
     {
         private byte _indexedFlag;
         private SparseMemoryBuffer _memoryBuffer;
@@ -181,7 +195,7 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
-        public ResidentFileAttributeRecord(FileAttributeRecord toCopy)
+        public ResidentFileAttributeRecord(AttributeRecord toCopy)
             : base(toCopy)
         {
             base._nonResidentFlag = 0;
@@ -198,8 +212,8 @@ namespace DiscUtils.Ntfs
 
         public override long AllocatedLength
         {
-            get { return DataLength; }
-            set { DataLength = value; }
+            get { return Utilities.RoundUp(DataLength, 8); }
+            set { throw new NotSupportedException(); }
         }
 
         public override long DataLength
@@ -292,10 +306,11 @@ namespace DiscUtils.Ntfs
             base.Dump(writer, indent);
             writer.WriteLine(indent + "     Data Length: " + DataLength);
             writer.WriteLine(indent + "         Indexed: " + _indexedFlag);
+            BaseAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
         }
     }
 
-    internal sealed class NonResidentFileAttributeRecord : FileAttributeRecord
+    internal sealed class NonResidentFileAttributeRecord : AttributeRecord
     {
         private ulong _startingVCN;
         private ulong _lastVCN;
@@ -312,7 +327,7 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
-        public NonResidentFileAttributeRecord(FileAttributeRecord toCopy)
+        public NonResidentFileAttributeRecord(AttributeRecord toCopy)
             : base(toCopy)
         {
             base._nonResidentFlag = 1;
@@ -498,6 +513,7 @@ namespace DiscUtils.Ntfs
             }
 
             writer.WriteLine(indent + "       Data Runs:" + runStr);
+            writer.WriteLine(indent + "  NON-RESIDENT ATTRIBUTE <" + _type + ">");
         }
 
     }

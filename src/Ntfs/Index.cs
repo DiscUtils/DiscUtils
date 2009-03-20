@@ -55,7 +55,7 @@ namespace DiscUtils.Ntfs
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                _rootNode = new IndexNode<K, D>(null, this, null, buffer, IndexRootAttribute.HeaderOffset);
+                _rootNode = new IndexNode<K, D>(StoreRootNode, this, null, buffer, IndexRootAttribute.HeaderOffset);
             }
 
             if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
@@ -113,18 +113,10 @@ namespace DiscUtils.Ntfs
                 if (_rootNode.TryFindEntry(key, _comparer, out oldEntry, out node))
                 {
                     node.UpdateEntry(key, _comparer, value);
-                    if (node.Block != null)
-                    {
-                        node.Block.WriteToDisk();
-                    }
-                    else
-                    {
-                        WriteRootNodeToDisk();
-                    }
                 }
                 else
                 {
-                    throw new NotImplementedException("Adding new index entries");
+                    _rootNode.AddEntry(key, _comparer, value);
                 }
             }
         }
@@ -270,6 +262,12 @@ namespace DiscUtils.Ntfs
             return new IndexBlock<K, D>(this, parentNode, parentEntry, _bpb);
         }
 
+        internal void StoreRootNode(IndexNode<K, D> node)
+        {
+            _rootNode = node;
+            WriteRootNodeToDisk();
+        }
+
         private bool TryFindEntry(K key, out IndexEntry<K, D> entry, out IndexNode<K, D> node)
         {
             return _rootNode.TryFindEntry(key, _comparer, out entry, out node);
@@ -350,6 +348,5 @@ namespace DiscUtils.Ntfs
                 s.Write(buffer, 0, buffer.Length);
             }
         }
-
     }
 }

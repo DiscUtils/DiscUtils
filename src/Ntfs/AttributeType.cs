@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Ntfs
 {
-    internal enum AttributeType : uint
+    public enum AttributeType : int
     {
         None = 0x00,
         StandardInformation = 0x10,

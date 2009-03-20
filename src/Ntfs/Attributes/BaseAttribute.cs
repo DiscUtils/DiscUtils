@@ -28,9 +28,9 @@ namespace DiscUtils.Ntfs.Attributes
     internal abstract class BaseAttribute
     {
         protected NtfsFileSystem _fileSystem;
-        protected FileAttributeRecord _record;
+        protected AttributeRecord _record;
 
-        public BaseAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
+        public BaseAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
         {
             _fileSystem = fileSystem;
             _record = record;
@@ -46,7 +46,7 @@ namespace DiscUtils.Ntfs.Attributes
             get { return _record.DataLength; }
         }
 
-        public FileAttributeRecord Record
+        public AttributeRecord Record
         {
             get { return _record; }
         }
@@ -70,8 +70,8 @@ namespace DiscUtils.Ntfs.Attributes
                 attrStream.SetLength(0);
             }
 
-            _record = nonResident ? (FileAttributeRecord)new NonResidentFileAttributeRecord(_record)
-                : (FileAttributeRecord)new ResidentFileAttributeRecord(_record);
+            _record = nonResident ? (AttributeRecord)new NonResidentFileAttributeRecord(_record)
+                : (AttributeRecord)new ResidentFileAttributeRecord(_record);
 
             using (Stream attrStream = Open(FileAccess.Write))
             {
@@ -79,36 +79,68 @@ namespace DiscUtils.Ntfs.Attributes
             }
         }
 
-        public static BaseAttribute FromRecord(NtfsFileSystem fileSystem, FileAttributeRecord record)
+        public static BaseAttribute FromRecord(NtfsFileSystem fileSystem, AttributeRecord record)
         {
-            ResidentFileAttributeRecord asResident = record as ResidentFileAttributeRecord;
-
             switch (record.AttributeType)
             {
                 case AttributeType.StandardInformation:
-                    return new StandardInformationAttribute(asResident);
+                    return new StructuredAttribute<StandardInformation>(fileSystem, record);
                 case AttributeType.FileName:
-                    return new FileNameAttribute(asResident);
+                    return new StructuredAttribute<FileNameRecord>(fileSystem, record);
                 case AttributeType.SecurityDescriptor:
-                    return new SecurityDescriptorAttribute(fileSystem, record);
+                    return new StructuredAttribute<SecurityDescriptor>(fileSystem, record);
                 case AttributeType.Data:
-                    return new DataAttribute(fileSystem, record);
+                    return new StreamAttribute(fileSystem, record);
                 case AttributeType.Bitmap:
-                    return new BitmapAttribute(fileSystem, record);
+                    return new StreamAttribute(fileSystem, record);
                 case AttributeType.VolumeName:
-                    return new VolumeNameAttribute(fileSystem, record);
+                    return new StructuredAttribute<VolumeName>(fileSystem, record);
                 case AttributeType.VolumeInformation:
-                    return new VolumeInformationAttribute(fileSystem, record);
+                    return new StructuredAttribute<VolumeInformation>(fileSystem, record);
                 case AttributeType.IndexRoot:
-                    return new IndexRootAttribute(asResident);
+                    return new IndexRootAttribute(record as ResidentFileAttributeRecord);
                 case AttributeType.IndexAllocation:
-                    return new IndexAllocationAttribute(fileSystem, record);
+                    return new StreamAttribute(fileSystem, record);
                 case AttributeType.ObjectId:
-                    return new ObjectIdAttribute(fileSystem, record);
+                    return new StructuredAttribute<ObjectId>(fileSystem, record);
                 case AttributeType.AttributeList:
-                    return new AttributeListAttribute(fileSystem, record);
+                    return new StructuredAttribute<AttributeList>(fileSystem, record);
                 default:
-                    return new UnknownAttribute(fileSystem, record);
+                    return new StreamAttribute(fileSystem, record);
+            }
+        }
+
+        protected string AttributeTypeName
+        {
+            get
+            {
+                switch (_record.AttributeType)
+                {
+                    case AttributeType.StandardInformation:
+                        return "STANDARD INFORMATION";
+                    case AttributeType.FileName:
+                        return "FILE NAME";
+                    case AttributeType.SecurityDescriptor:
+                        return "SECURITY DESCRIPTOR";
+                    case AttributeType.Data:
+                        return "DATA";
+                    case AttributeType.Bitmap:
+                        return "BITMAP";
+                    case AttributeType.VolumeName:
+                        return "VOLUME NAME";
+                    case AttributeType.VolumeInformation:
+                        return "VOLUME INFORMATION";
+                    case AttributeType.IndexRoot:
+                        return "INDEX ROOT";
+                    case AttributeType.IndexAllocation:
+                        return "INDEX ALLOCATION";
+                    case AttributeType.ObjectId:
+                        return "OBJECT ID";
+                    case AttributeType.AttributeList:
+                        return "ATTRIBUTE LIST";
+                    default:
+                        return "UNKNOWN";
+                }
             }
         }
 
@@ -124,6 +156,7 @@ namespace DiscUtils.Ntfs.Attributes
             }
         }
 
+        public abstract void Save();
         public abstract void Dump(TextWriter writer, string indent);
     }
 

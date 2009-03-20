@@ -75,6 +75,11 @@ namespace DiscUtils.Ntfs.Attributes
                 writer.WriteLine(indent + "          Has Child Nodes: " + header.HasChildNodes);
             }
         }
+
+        public override void Save()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
 }

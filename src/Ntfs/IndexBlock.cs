@@ -59,7 +59,7 @@ namespace DiscUtils.Ntfs
             // Skip FixupRecord fields...
             LogSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             IndexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            Node = new IndexNode<K, D>(this, _index, _parentNode, buffer, offset + 0x18);
+            Node = new IndexNode<K, D>(Store, _index, _parentNode, buffer, offset + 0x18);
         }
 
         protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
@@ -72,6 +72,12 @@ namespace DiscUtils.Ntfs
         protected override int CalcSize(int updateSeqSize)
         {
             throw new NotImplementedException();
+        }
+
+        public void Store(IndexNode<K, D> node)
+        {
+            Node = node;
+            WriteToDisk();
         }
 
         internal void WriteToDisk()

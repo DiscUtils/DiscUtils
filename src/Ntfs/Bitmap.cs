@@ -29,9 +29,9 @@ namespace DiscUtils.Ntfs
     internal class Bitmap
     {
         private byte[] _bitmap;
-        private BitmapAttribute _fileAttr;
+        private BaseAttribute _fileAttr;
 
-        public Bitmap(BitmapAttribute fileAttr)
+        public Bitmap(BaseAttribute fileAttr)
         {
             if (fileAttr.Length > 100 * 1024)
             {

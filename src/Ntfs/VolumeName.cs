@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,24 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
+using System.Text;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    /// <summary>
-    /// Represents a generic non-resident attribute, use when a specific type is unnecesary / inappropriate.
-    /// </summary>
-    internal class NonResidentAttribute : BaseAttribute
+    internal sealed class VolumeName : IByteArraySerializable, IDiagnosticTracer
     {
-        public NonResidentAttribute(FileAttributeRecord record)
-            : base(null, record)
+        private string _name;
+
+        #region IByteArraySerializable Members
+
+        public void ReadFrom(byte[] buffer, int offset)
         {
+            _name = Encoding.Unicode.GetString(buffer, offset, buffer.Length - offset);
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        public void WriteTo(byte[] buffer, int offset)
         {
-            writer.WriteLine(indent + "NON-RESIDENT ATTRIBUTE <" + _record.AttributeType + ">");
+            throw new NotImplementedException();
         }
+
+        public int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
+
+        #region IDiagnosticTracer Members
+
+        public void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "  Volume Name: " + _name);
+        }
+
+        #endregion
     }
-
 }

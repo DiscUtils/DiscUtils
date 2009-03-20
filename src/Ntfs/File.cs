@@ -89,15 +89,52 @@ namespace DiscUtils.Ntfs
             _fileSystem.MasterFileTable.WriteRecord(_baseRecord);
         }
 
+        public ushort HardLinkCount
+        {
+            get { return _baseRecord.HardLinkCount; }
+            set { _baseRecord.HardLinkCount = value; }
+        }
+
+        /// <summary>
+        /// Creates a new unnamed attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        public ushort CreateAttribute(AttributeType type)
+        {
+            bool indexed = _fileSystem.AttributeDefinitions.IsIndexed(type);
+            ushort id = _baseRecord.CreateAttribute(type, null, indexed);
+            UpdateRecordInMft();
+            return id;
+        }
+
         /// <summary>
         /// Creates a new attribute.
         /// </summary>
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
-        public void CreateAttribute(AttributeType type, string name)
+        public ushort CreateAttribute(AttributeType type, string name)
         {
-            _baseRecord.CreateAttribute(type, name);
+            bool indexed = _fileSystem.AttributeDefinitions.IsIndexed(type);
+            ushort id = _baseRecord.CreateAttribute(type, name, indexed);
             UpdateRecordInMft();
+            return id;
+        }
+
+        /// <summary>
+        /// Gets an attribute by it's id.
+        /// </summary>
+        /// <param name="id">The id of the attribute</param>
+        /// <returns>The attribute</returns>
+        public BaseAttribute GetAttribute(ushort id)
+        {
+            foreach (var attr in AllAttributeRecords)
+            {
+                if (attr.AttributeId == id)
+                {
+                    return BaseAttribute.FromRecord(_fileSystem, attr);
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -111,39 +148,29 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        ///  Gets all instances of an unnamed attribute.
+        /// Gets the content of the first (if more than one) instance of an unnamed attribute.
         /// </summary>
+        /// <typeparam name="T">The attribute's content structure</typeparam>
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
-        public BaseAttribute[] GetAttributes(AttributeType type)
+        public T GetAttributeContent<T>(AttributeType type)
+            where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            List<BaseAttribute> matches = new List<BaseAttribute>();
+            return new StructuredAttribute<T>(_fileSystem, GetAttribute(type).Record).Content;
+        }
 
-            FileAttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
-            if (attrListRec != null)
-            {
-                AttributeListAttribute attrList = new AttributeListAttribute(_fileSystem, attrListRec);
-                foreach (var r in attrList.Records)
-                {
-                    if (r.Type == type && r.Name == null)
-                    {
-                        FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(r.BaseFileReference);
-                        matches.Add(BaseAttribute.FromRecord(_fileSystem, fileRec.GetAttribute(type)));
-                    }
-                }
-            }
-            else
-            {
-                foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
-                {
-                    if (attrRec.AttributeType == type && attrRec.Name == null)
-                    {
-                        matches.Add(BaseAttribute.FromRecord(_fileSystem, attrRec));
-                    }
-                }
-            }
-
-            return matches.ToArray();
+        /// <summary>
+        /// Sets the content of an attribute.
+        /// </summary>
+        /// <typeparam name="T">The attribute's content structure</typeparam>
+        /// <param name="id">The attribute's id</param>
+        /// <param name="value">The new value for the attribute</param>
+        public void SetAttributeContent<T>(ushort id, T value)
+            where T : IByteArraySerializable, IDiagnosticTracer, new()
+        {
+            StructuredAttribute<T> attr = new StructuredAttribute<T>(_fileSystem, GetAttribute(id).Record);
+            attr.Content = value;
+            attr.Save();
         }
 
         /// <summary>
@@ -154,35 +181,34 @@ namespace DiscUtils.Ntfs
         /// <returns>The attribute of <c>null</c>.</returns>
         public BaseAttribute GetAttribute(AttributeType type, string name)
         {
-            FileAttributeRecord targetAttribute = null;
-
-            FileAttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
-            if (attrListRec != null)
+            foreach (var attr in AllAttributeRecords)
             {
-                AttributeListAttribute attrList = new AttributeListAttribute(_fileSystem, attrListRec);
-                foreach (var r in attrList.Records)
+                if (attr.AttributeType == type && attr.Name == name)
                 {
-                    if (r.Type == type && r.Name == name)
-                    {
-                        FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(r.BaseFileReference);
-                        targetAttribute = fileRec.GetAttribute(type);
-                        break;
-                    }
+                    return BaseAttribute.FromRecord(_fileSystem, attr);
                 }
             }
-            else
+            return null;
+        }
+
+        /// <summary>
+        ///  Gets all instances of an unnamed attribute.
+        /// </summary>
+        /// <param name="type">The attribute type</param>
+        /// <returns>The attribute, or <c>null</c>.</returns>
+        public BaseAttribute[] GetAttributes(AttributeType type)
+        {
+            List<BaseAttribute> matches = new List<BaseAttribute>();
+
+            foreach (var attr in AllAttributeRecords)
             {
-                targetAttribute = _baseRecord.GetAttribute(type, name);
+                if (attr.AttributeType == type && string.IsNullOrEmpty(attr.Name))
+                {
+                    matches.Add(BaseAttribute.FromRecord(_fileSystem, attr));
+                }
             }
 
-            if (targetAttribute != null)
-            {
-                return BaseAttribute.FromRecord(_fileSystem, targetAttribute);
-            }
-            else
-            {
-                return null;
-            }
+            return matches.ToArray();
         }
 
         public Stream OpenAttribute(AttributeType type, FileAccess access)
@@ -239,7 +265,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return ((FileNameAttribute)GetAttribute(AttributeType.FileName)).Attributes;
+                return GetAttributeContent<FileNameRecord>(AttributeType.FileName).FileAttributes;
             }
         }
 
@@ -247,9 +273,8 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                FileNameAttribute fnAttr = (FileNameAttribute)GetAttribute(AttributeType.FileName);
-                FileAttributeRecord record = _baseRecord.GetAttribute(AttributeType.FileName);
-                return new DirectoryEntry(_fileSystem.MasterFileTable.GetDirectory(fnAttr.FileNameRecord.ParentDirectory), new FileReference(_baseRecord.MasterFileTableIndex), fnAttr.FileNameRecord);
+                FileNameRecord record = GetAttributeContent<FileNameRecord>(AttributeType.FileName);
+                return new DirectoryEntry(_fileSystem.MasterFileTable.GetDirectory(record.ParentDirectory), new FileReference(_baseRecord.MasterFileTableIndex), record);
             }
         }
 
@@ -258,7 +283,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "FILE (" + _baseRecord.ToString() + ")");
             writer.WriteLine(indent + "  File Number: " + _baseRecord.MasterFileTableIndex);
 
-            foreach (FileAttributeRecord attrRec in _baseRecord.Attributes)
+            foreach (AttributeRecord attrRec in _baseRecord.Attributes)
             {
                 BaseAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
             }
@@ -284,5 +309,30 @@ namespace DiscUtils.Ntfs
 
             return longName;
         }
+
+        private IEnumerable<AttributeRecord> AllAttributeRecords
+        {
+            get
+            {
+                AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
+                if (attrListRec != null)
+                {
+                    StructuredAttribute<AttributeList> attrList = new StructuredAttribute<AttributeList>(_fileSystem, attrListRec);
+                    foreach (var record in attrList.Content)
+                    {
+                        FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(record.BaseFileReference);
+                        yield return fileRec.GetAttribute(record.AttributeId);
+                    }
+                }
+                else
+                {
+                    foreach (var record in _baseRecord.Attributes)
+                    {
+                        yield return record;
+                    }
+                }
+            }
+        }
+
     }
 }

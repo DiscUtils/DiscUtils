@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,33 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    internal class AttributeListAttribute : BaseAttribute
+    internal class AttributeList : IByteArraySerializable, IDiagnosticTracer, ICollection<AttributeListRecord>
     {
         private List<AttributeListRecord> _records;
 
-        public AttributeListAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
-            : base(fileSystem, record)
+        public AttributeList()
         {
-            using (Stream s = Open(FileAccess.Read))
-            {
-                byte[] data = Utilities.ReadFully(s, (int)record.DataLength);
-
-                _records = new List<AttributeListRecord>();
-
-                int pos = 0;
-                while (pos < data.Length)
-                {
-                    AttributeListRecord r = new AttributeListRecord();
-                    pos += r.Read(data, pos);
-                    _records.Add(r);
-                }
-            }
+            _records = new List<AttributeListRecord>();
         }
 
         public IEnumerable<AttributeListRecord> Records
@@ -54,19 +42,97 @@ namespace DiscUtils.Ntfs.Attributes
             get { return _records; }
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        public void ReadFrom(byte[] buffer, int offset)
         {
-            writer.WriteLine(indent + "ATTRIBUTE LIST ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
-            foreach (AttributeListRecord r in _records)
+            _records.Clear();
+
+            int pos = 0;
+            while (pos < buffer.Length)
             {
-                r.Dump(writer, indent + "  ");
+                AttributeListRecord r = new AttributeListRecord();
+                pos += r.Read(buffer, pos);
+                _records.Add(r);
             }
         }
 
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public void Dump(TextWriter writer, string indent)
+        {
+            foreach (AttributeListRecord r in _records)
+            {
+                r.Dump(writer, indent);
+            }
+        }
+
+
+        #region ICollection<AttributeListRecord> Members
+
+        public void Add(AttributeListRecord item)
+        {
+            _records.Add(item);
+        }
+
+        public void Clear()
+        {
+            _records.Clear();
+        }
+
+        public bool Contains(AttributeListRecord item)
+        {
+            return _records.Contains(item);
+        }
+
+        public void CopyTo(AttributeListRecord[] array, int arrayIndex)
+        {
+            _records.CopyTo(array, arrayIndex);
+        }
+
+        public int Count
+        {
+            get { return _records.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
+
+        public bool Remove(AttributeListRecord item)
+        {
+            return _records.Remove(item);
+        }
+
+        #endregion
+
+        #region IEnumerable<AttributeListRecord> Members
+
+        public IEnumerator<AttributeListRecord> GetEnumerator()
+        {
+            return _records.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _records.GetEnumerator();
+        }
+
+        #endregion
     }
 
-
-    internal class AttributeListRecord
+    internal class AttributeListRecord : IDiagnosticTracer
     {
         public AttributeType Type;
         public ushort RecordLength;

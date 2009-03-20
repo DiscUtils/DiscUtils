@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,42 +20,46 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Globalization;
+using System;
 using System.IO;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    internal class BitmapAttribute : BaseAttribute
+    internal sealed class VolumeInformation : IByteArraySerializable, IDiagnosticTracer
     {
-        public BitmapAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
-            : base(fileSystem, record)
+        private byte _majorVersion;
+        private byte _minorVersion;
+        private VolumeInformationFlags _flags;
+
+        #region IByteArraySerializable Members
+
+        public void ReadFrom(byte[] buffer, int offset)
         {
+            _majorVersion = buffer[0x08];
+            _minorVersion = buffer[0x09];
+            _flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, 0x0A);
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        public void WriteTo(byte[] buffer, int offset)
         {
-            writer.WriteLine(indent + "BITMAP ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
-
-            writer.WriteLine(indent + "  Length: " + _record.DataLength + " bytes");
-            if (_record.DataLength == 0)
-            {
-                writer.WriteLine(indent + "    Data: <none>");
-            }
-            else
-            {
-                using (Stream s = Open(FileAccess.Read))
-                {
-                    string hex = "";
-                    byte[] buffer = new byte[5];
-                    int numBytes = s.Read(buffer, 0, 5);
-                    for (int i = 0; i < numBytes; ++i)
-                    {
-                        hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
-                    }
-
-                    writer.WriteLine(indent + "    Data: " + hex + "...");
-                }
-            }
+            throw new NotImplementedException();
         }
+
+        public int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
+
+        #region IDiagnosticTracer Members
+
+        public void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "  Version: " + _majorVersion + "." + _minorVersion);
+            writer.WriteLine(indent + "    Flags: " + _flags);
+        }
+
+        #endregion
     }
 }

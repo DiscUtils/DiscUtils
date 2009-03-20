@@ -25,20 +25,21 @@ using System.IO;
 
 namespace DiscUtils.Ntfs.Attributes
 {
-    internal class UnknownAttribute : BaseAttribute
+    internal class StreamAttribute : BaseAttribute
     {
-        public UnknownAttribute(NtfsFileSystem fileSystem, FileAttributeRecord record)
+        public StreamAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
             : base(fileSystem, record)
         {
         }
 
         public override void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "UNKNOWN ATTRIBUTE <" + _record.AttributeType + ">");
-            writer.WriteLine(indent + "  Name: " + Name);
+            writer.WriteLine(indent + AttributeTypeName + " ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+
+            writer.WriteLine(indent + "  Length: " + _record.DataLength + " bytes");
             if (_record.DataLength == 0)
             {
-                writer.WriteLine(indent + "  Data: <none>");
+                writer.WriteLine(indent + "    Data: <none>");
             }
             else
             {
@@ -52,9 +53,14 @@ namespace DiscUtils.Ntfs.Attributes
                         hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
                     }
 
-                    writer.WriteLine(indent + "  Data: " + hex + "...");
+                    writer.WriteLine(indent + "    Data: " + hex + "...");
                 }
             }
+        }
+
+        public override void Save()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

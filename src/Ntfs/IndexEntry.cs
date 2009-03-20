@@ -56,6 +56,14 @@ namespace DiscUtils.Ntfs
             _data = newData;
         }
 
+        public IndexEntry(K newKey, D newData)
+        {
+            _isFileIndexEntry = typeof(D) == typeof(FileReference);
+            _flags = IndexEntryFlags.None;
+            _key = newKey;
+            _data = newData;
+        }
+
         public IndexEntry(byte[] buffer, int offset)
         {
             _isFileIndexEntry = typeof(D) == typeof(FileReference);

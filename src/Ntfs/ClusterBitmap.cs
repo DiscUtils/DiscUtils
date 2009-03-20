@@ -35,7 +35,8 @@ namespace DiscUtils.Ntfs
         public ClusterBitmap(NtfsFileSystem fileSystem, FileRecord fileRecord)
             : base(fileSystem, fileRecord)
         {
-            _bitmap = new Bitmap(new BitmapAttribute(fileSystem, fileRecord.GetAttribute(AttributeType.Data)));
+            BaseAttribute attr = BaseAttribute.FromRecord(fileSystem, fileRecord.GetAttribute(AttributeType.Data));
+            _bitmap = new Bitmap(attr);
         }
 
         public Tuple<long, long>[] AllocateClusters(long count)

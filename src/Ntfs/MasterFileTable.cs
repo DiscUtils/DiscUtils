@@ -98,7 +98,7 @@ namespace DiscUtils.Ntfs
         public MasterFileTable(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            _bitmap = new Bitmap((BitmapAttribute)GetAttribute(AttributeType.Bitmap));
+            _bitmap = new Bitmap((StreamAttribute)GetAttribute(AttributeType.Bitmap));
             _records = GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
 
             _recordLength = _fileSystem.BiosParameterBlock.MftRecordSize;
@@ -169,8 +169,8 @@ namespace DiscUtils.Ntfs
             FileRecord record = GetRecord(fileReference);
             if (record != null)
             {
-                FileNameAttribute fnAttr = BaseAttribute.FromRecord(_fileSystem, record.GetAttribute(AttributeType.FileName)) as FileNameAttribute;
-                if ((fnAttr.Attributes & FileAttributes.Directory) != 0)
+                StructuredAttribute<FileNameRecord> sa = (StructuredAttribute<FileNameRecord>)BaseAttribute.FromRecord(_fileSystem, record.GetAttribute(AttributeType.FileName));
+                if ((sa.Content.FileAttributes & FileAttributes.Directory) != 0)
                 {
                     return new Directory(_fileSystem, record);
                 }
