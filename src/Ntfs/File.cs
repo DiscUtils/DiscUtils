@@ -160,6 +160,19 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Gets the content of the first (if more than one) instance of an unnamed attribute.
+        /// </summary>
+        /// <typeparam name="T">The attribute's content structure</typeparam>
+        /// <param name="type">The attribute type</param>
+        /// <param name="name">The attribute's name</param>
+        /// <returns>The attribute, or <c>null</c>.</returns>
+        public T GetAttributeContent<T>(AttributeType type, string name)
+            where T : IByteArraySerializable, IDiagnosticTracer, new()
+        {
+            return new StructuredAttribute<T>(_fileSystem, GetAttribute(type, name).Record).Content;
+        }
+
+        /// <summary>
         /// Sets the content of an attribute.
         /// </summary>
         /// <typeparam name="T">The attribute's content structure</typeparam>

@@ -98,7 +98,7 @@ namespace DiscUtils.Ntfs.Attributes
                 case AttributeType.VolumeInformation:
                     return new StructuredAttribute<VolumeInformation>(fileSystem, record);
                 case AttributeType.IndexRoot:
-                    return new IndexRootAttribute(record as ResidentFileAttributeRecord);
+                    return new StreamAttribute(fileSystem, record);
                 case AttributeType.IndexAllocation:
                     return new StreamAttribute(fileSystem, record);
                 case AttributeType.ObjectId:

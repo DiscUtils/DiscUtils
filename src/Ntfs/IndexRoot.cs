@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
+using System;
 
-namespace DiscUtils.Ntfs.Attributes
+namespace DiscUtils.Ntfs
 {
-    internal class IndexRootAttribute : BaseAttribute
+    internal sealed class IndexRoot : IByteArraySerializable, IDiagnosticTracer
     {
         private uint _attrType;
         private AttributeCollationRule _collationRule;
@@ -32,19 +32,6 @@ namespace DiscUtils.Ntfs.Attributes
         private byte _rawClustersPerIndexRecord;
 
         public const int HeaderOffset = 0x10;
-
-        public IndexRootAttribute(ResidentFileAttributeRecord record)
-            : base(null, record)
-        {
-            using (Stream s = Open(FileAccess.Read))
-            {
-                byte[] data = Utilities.ReadFully(s, 0x10);
-                _attrType = Utilities.ToUInt32LittleEndian(data, 0x00);
-                _collationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(data, 0x04);
-                _indexAllocationEntrySize = Utilities.ToUInt32LittleEndian(data, 0x08);
-                _rawClustersPerIndexRecord = data[0x0C];
-            }
-        }
 
         public AttributeCollationRule CollationRule
         {
@@ -56,30 +43,39 @@ namespace DiscUtils.Ntfs.Attributes
             get { return _indexAllocationEntrySize; }
         }
 
-        public override void Dump(TextWriter writer, string indent)
+
+        #region IByteArraySerializable Members
+
+        public void ReadFrom(byte[] buffer, int offset)
         {
-            writer.WriteLine(indent + "INDEX ROOT ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+            _attrType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
+            _collationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, 0x04);
+            _indexAllocationEntrySize = Utilities.ToUInt32LittleEndian(buffer, 0x08);
+            _rawClustersPerIndexRecord = buffer[0x0C];
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        #endregion
+
+        #region IDiagnosticTracer Members
+
+        public void Dump(System.IO.TextWriter writer, string indent)
+        {
             writer.WriteLine(indent + "                Attr Type: " + _attrType);
             writer.WriteLine(indent + "           Collation Rule: " + _collationRule);
             writer.WriteLine(indent + "         Index Alloc Size: " + _indexAllocationEntrySize);
             writer.WriteLine(indent + "  Raw Clusters Per Record: " + _rawClustersPerIndexRecord);
-
-            using (Stream s = Open(FileAccess.Read))
-            {
-                s.Position = HeaderOffset;
-                byte[] data = Utilities.ReadFully(s, IndexHeader.Size);
-                IndexHeader header = new IndexHeader(data, 0);
-                writer.WriteLine(indent + "    Offset To First Entry: " + header.OffsetToFirstEntry);
-                writer.WriteLine(indent + "    Total Size Of Entries: " + header.TotalSizeOfEntries);
-                writer.WriteLine(indent + "    Alloc Size Of Entries: " + header.AllocatedSizeOfEntries);
-                writer.WriteLine(indent + "          Has Child Nodes: " + header.HasChildNodes);
-            }
         }
 
-        public override void Save()
-        {
-            throw new System.NotImplementedException();
-        }
+        #endregion
     }
-
 }

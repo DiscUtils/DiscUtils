@@ -148,12 +148,12 @@
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
     <Compile Include="Ntfs\Attributes\StreamAttribute.cs" />
-    <Compile Include="Ntfs\Attributes\IndexRootAttribute.cs" />
     <Compile Include="Ntfs\Attributes\StructuredAttribute.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
     <Compile Include="Ntfs\Index.cs" />
     <Compile Include="Ntfs\IndexNode.cs" />
+    <Compile Include="Ntfs\IndexRoot.cs" />
     <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs">
       <SubType>Code</SubType>

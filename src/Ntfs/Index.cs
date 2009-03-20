@@ -39,7 +39,7 @@ namespace DiscUtils.Ntfs
 
         private IComparer<K> _comparer;
 
-        private IndexRootAttribute _rootAttr;
+        private IndexRoot _root;
         private IndexNode<K, D> _rootNode;
         private Stream _indexStream;
 
@@ -50,12 +50,12 @@ namespace DiscUtils.Ntfs
             _bpb = bpb;
             _comparer = comparer;
 
-            _rootAttr = (IndexRootAttribute)_file.GetAttribute(AttributeType.IndexRoot, _name);
+            _root = _file.GetAttributeContent<IndexRoot>(AttributeType.IndexRoot, _name);
 
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                _rootNode = new IndexNode<K, D>(StoreRootNode, this, null, buffer, IndexRootAttribute.HeaderOffset);
+                _rootNode = new IndexNode<K, D>(StoreRootNode, this, null, buffer, IndexRoot.HeaderOffset);
             }
 
             if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
@@ -254,7 +254,7 @@ namespace DiscUtils.Ntfs
 
         internal uint IndexBufferSize
         {
-            get { return _rootAttr.IndexAllocationSize; }
+            get { return _root.IndexAllocationSize; }
         }
 
         internal IndexBlock<K, D> GetSubBlock(IndexNode<K, D> parentNode, IndexEntry<K, D> parentEntry)
@@ -343,9 +343,11 @@ namespace DiscUtils.Ntfs
         {
             byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries];
             _rootNode.WriteTo(buffer, 0, 0);
-            using (Stream s = _rootAttr.Open(FileAccess.Write))
+            using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Write))
             {
+                s.Position = IndexRoot.HeaderOffset;
                 s.Write(buffer, 0, buffer.Length);
+                s.SetLength(s.Position);
             }
         }
     }
