@@ -20,22 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class ClusterBitmap : File
+    internal class ClusterBitmap
     {
+        private File _file;
         private Bitmap _bitmap;
 
-        public ClusterBitmap(NtfsFileSystem fileSystem, FileRecord fileRecord)
-            : base(fileSystem, fileRecord)
+        public ClusterBitmap(File file)
         {
-            NtfsAttribute attr = NtfsAttribute.FromRecord(fileSystem, fileRecord.GetAttribute(AttributeType.Data));
-            _bitmap = new Bitmap(attr);
+            _file = file;
+            NtfsAttribute attr = _file.GetAttribute(AttributeType.Data);
+            _bitmap = new Bitmap(
+                attr.Open(FileAccess.ReadWrite),
+                Utilities.Ceil(file.FileSystem.BiosParameterBlock.TotalSectors64, file.FileSystem.BiosParameterBlock.SectorsPerCluster));
         }
 
         public Tuple<long, long>[] AllocateClusters(long count)
@@ -44,7 +45,7 @@ namespace DiscUtils.Ntfs
 
             long numFound = 0;
 
-            long numClusters = _fileSystem.RawStream.Length / _fileSystem.BytesPerCluster;
+            long numClusters = _file.FileSystem.RawStream.Length / _file.FileSystem.BytesPerCluster;
             long focusCluster = numClusters / 8;
 
             while (numFound < count)

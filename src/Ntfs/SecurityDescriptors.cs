@@ -28,25 +28,23 @@ using System.Security.AccessControl;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class SecurityDescriptors : File
+    internal sealed class SecurityDescriptors : IDiagnosticTracer
     {
-        private static IComparer<HashIndexKey> _hashIndexComparer = new HashIndexKeyComparer();
-        private static IComparer<IdIndexKey> _idIndexComparer = new IdIndexKeyComparer();
-
+        private File _file;
         private Index<HashIndexKey, IndexData> _hashIndex;
         private Index<IdIndexKey, IndexData> _idIndex;
 
-        public SecurityDescriptors(NtfsFileSystem fileSystem, FileRecord fileRecord)
-            : base(fileSystem, fileRecord)
+        public SecurityDescriptors(File file)
         {
-            _hashIndex = new Index<HashIndexKey, IndexData>(this, "$SDH", _fileSystem.BiosParameterBlock, _hashIndexComparer);
-            _idIndex = new Index<IdIndexKey, IndexData>(this, "$SII", _fileSystem.BiosParameterBlock, _idIndexComparer);
+            _file = file;
+            _hashIndex = new Index<HashIndexKey, IndexData>(file, "$SDH", _file.FileSystem.BiosParameterBlock, null);
+            _idIndex = new Index<IdIndexKey, IndexData>(file, "$SII", _file.FileSystem.BiosParameterBlock, null);
         }
 
         public FileSecurity GetDescriptorById(uint id)
         {
-            IndexData data = _idIndex.FindFirst(new IndexQuery(id)).Value;
-            using(Stream s = OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
+            IndexData data = _idIndex[new IdIndexKey(id)];
+            using(Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
             {
                 s.Position = data.SdsOffset;
                 byte[] buffer = Utilities.ReadFully(s, data.SdsLength);
@@ -60,11 +58,28 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        public uint AddDescriptor(FileSecurity newDescriptor)
+        {
+            HashIndexKey key = new HashIndexKey();
+            key.Hash = SecurityDescriptor.CalcHash(newDescriptor);
+
+            if (_hashIndex.ContainsKey(key))
+            {
+                return _hashIndex[key].Id;
+            }
+            else
+            {
+                // TODO: Allocate space, add to both index's
+                _hashIndex[key] = new IndexData();
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "SECURITY DESCRIPTORS");
 
-            using (Stream s = OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
+            using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
 
@@ -123,36 +138,18 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class HashIndexKeyComparer : IComparer<HashIndexKey>
-        {
-            public int Compare(HashIndexKey x, HashIndexKey y)
-            {
-                if (x.Hash < y.Hash)
-                {
-                    return -1;
-                }
-                else if (x.Hash > y.Hash)
-                {
-                    return 1;
-                }
-                else if(x.Id < y.Id)
-                {
-                    return -1;
-                }
-                else if (x.Id > y.Id)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-
         private sealed class IdIndexKey : IByteArraySerializable
         {
             public uint Id;
+
+            public IdIndexKey()
+            {
+            }
+
+            public IdIndexKey(uint id)
+            {
+                Id = id;
+            }
 
             public void ReadFrom(byte[] buffer, int offset)
             {
@@ -172,25 +169,6 @@ namespace DiscUtils.Ntfs
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Id:{0}]", Id);
-            }
-        }
-
-        private sealed class IdIndexKeyComparer : IComparer<IdIndexKey>
-        {
-            public int Compare(IdIndexKey x, IdIndexKey y)
-            {
-                if (x.Id < y.Id)
-                {
-                    return -1;
-                }
-                else if (x.Id > y.Id)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
             }
         }
 
@@ -226,32 +204,6 @@ namespace DiscUtils.Ntfs
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Data-Hash:{0},Id:{1},SdsOffset:{2},SdsLength:{3}]", Hash, Id, SdsOffset, SdsLength);
-            }
-        }
-
-        private sealed class IndexQuery : IComparable<IdIndexKey>
-        {
-            private uint _id;
-
-            public IndexQuery(uint id)
-            {
-                _id = id;
-            }
-
-            public int CompareTo(IdIndexKey other)
-            {
-                if (_id < other.Id)
-                {
-                    return -1;
-                }
-                else if (_id > other.Id)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
             }
         }
     }

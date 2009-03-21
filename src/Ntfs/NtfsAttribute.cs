@@ -28,18 +28,23 @@ namespace DiscUtils.Ntfs
 {
     internal class NtfsAttribute : IDiagnosticTracer
     {
-        protected NtfsFileSystem _fileSystem;
+        protected File _file;
         protected AttributeRecord _record;
 
-        public NtfsAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
+        public NtfsAttribute(File file, AttributeRecord record)
         {
-            _fileSystem = fileSystem;
+            _file = file;
             _record = record;
         }
 
         public string Name
         {
             get { return _record.Name; }
+        }
+
+        public ushort Id
+        {
+            get { return _record.AttributeId; }
         }
 
         public long Length
@@ -71,8 +76,8 @@ namespace DiscUtils.Ntfs
                 attrStream.SetLength(0);
             }
 
-            _record = nonResident ? (AttributeRecord)new NonResidentFileAttributeRecord(_record)
-                : (AttributeRecord)new ResidentFileAttributeRecord(_record);
+            _record = nonResident ? (AttributeRecord)new NonResidentAttributeRecord(_record)
+                : (AttributeRecord)new ResidentAttributeRecord(_record);
 
             using (Stream attrStream = Open(FileAccess.Write))
             {
@@ -80,34 +85,34 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public static NtfsAttribute FromRecord(NtfsFileSystem fileSystem, AttributeRecord record)
+        public static NtfsAttribute FromRecord(File file, AttributeRecord record)
         {
             switch (record.AttributeType)
             {
                 case AttributeType.StandardInformation:
-                    return new StructuredNtfsAttribute<StandardInformation>(fileSystem, record);
+                    return new StructuredNtfsAttribute<StandardInformation>(file, record);
                 case AttributeType.FileName:
-                    return new StructuredNtfsAttribute<FileNameRecord>(fileSystem, record);
+                    return new StructuredNtfsAttribute<FileNameRecord>(file, record);
                 case AttributeType.SecurityDescriptor:
-                    return new StructuredNtfsAttribute<SecurityDescriptor>(fileSystem, record);
+                    return new StructuredNtfsAttribute<SecurityDescriptor>(file, record);
                 case AttributeType.Data:
-                    return new NtfsAttribute(fileSystem, record);
+                    return new NtfsAttribute(file, record);
                 case AttributeType.Bitmap:
-                    return new NtfsAttribute(fileSystem, record);
+                    return new NtfsAttribute(file, record);
                 case AttributeType.VolumeName:
-                    return new StructuredNtfsAttribute<VolumeName>(fileSystem, record);
+                    return new StructuredNtfsAttribute<VolumeName>(file, record);
                 case AttributeType.VolumeInformation:
-                    return new StructuredNtfsAttribute<VolumeInformation>(fileSystem, record);
+                    return new StructuredNtfsAttribute<VolumeInformation>(file, record);
                 case AttributeType.IndexRoot:
-                    return new NtfsAttribute(fileSystem, record);
+                    return new NtfsAttribute(file, record);
                 case AttributeType.IndexAllocation:
-                    return new NtfsAttribute(fileSystem, record);
+                    return new NtfsAttribute(file, record);
                 case AttributeType.ObjectId:
-                    return new StructuredNtfsAttribute<ObjectId>(fileSystem, record);
+                    return new StructuredNtfsAttribute<ObjectId>(file, record);
                 case AttributeType.AttributeList:
-                    return new StructuredNtfsAttribute<AttributeList>(fileSystem, record);
+                    return new StructuredNtfsAttribute<AttributeList>(file, record);
                 default:
-                    return new NtfsAttribute(fileSystem, record);
+                    return new NtfsAttribute(file, record);
             }
         }
 
@@ -125,8 +130,8 @@ namespace DiscUtils.Ntfs
                 using (Stream s = Open(FileAccess.Read))
                 {
                     string hex = "";
-                    byte[] buffer = new byte[5];
-                    int numBytes = s.Read(buffer, 0, 5);
+                    byte[] buffer = new byte[128];
+                    int numBytes = s.Read(buffer, 0, buffer.Length);
                     for (int i = 0; i < numBytes; ++i)
                     {
                         hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
@@ -139,14 +144,7 @@ namespace DiscUtils.Ntfs
 
         internal SparseStream Open(FileAccess access)
         {
-            if (_fileSystem != null)
-            {
-                return _record.Open(_fileSystem.ClusterBitmap, _fileSystem.RawStream, _fileSystem.BytesPerCluster, access);
-            }
-            else
-            {
-                return _record.Open(null, null, 0, access);
-            }
+            return _record.Open(_file, access);
         }
 
         protected string AttributeTypeName

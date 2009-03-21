@@ -52,10 +52,16 @@ namespace DiscUtils.Ntfs
             get { return new FileReference(_baseRecord.MasterFileTableIndex, _baseRecord.SequenceNumber); }
         }
 
+        public ushort UpdateSequenceNumber
+        {
+            get { return _baseRecord.UpdateSequenceNumber; }
+        }
+
+
         public void UpdateRecordInMft()
         {
             // Make attributes non-resident until the data in the record fits, start with DATA attributes
-            // by default.
+            // by default, then kick other 'can-be' attributes out, finally move indexes.
             bool fixedAttribute = true;
             while (_baseRecord.Size > _fileSystem.MasterFileTable.RecordSize && fixedAttribute)
             {
@@ -64,7 +70,7 @@ namespace DiscUtils.Ntfs
                 {
                     if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
                     {
-                        MakeAttributeNonResident(attr.AttributeType, attr.Name, (int)attr.DataLength);
+                        MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
                         fixedAttribute = true;
                         break;
                     }
@@ -76,9 +82,24 @@ namespace DiscUtils.Ntfs
                     {
                         if (!attr.IsNonResident && _fileSystem.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
                         {
-                            MakeAttributeNonResident(attr.AttributeType, attr.Name, (int)attr.DataLength);
+                            MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
                             fixedAttribute = true;
                             break;
+                        }
+                    }
+                }
+
+                if (!fixedAttribute)
+                {
+                    foreach (var attr in _baseRecord.Attributes)
+                    {
+                        if (attr.AttributeType == AttributeType.IndexRoot && GetAttribute(AttributeType.IndexAllocation, attr.Name) == null)
+                        {
+                            if (MakeIndexNonResident(attr.Name))
+                            {
+                                fixedAttribute = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -91,6 +112,20 @@ namespace DiscUtils.Ntfs
             }
 
             _fileSystem.MasterFileTable.WriteRecord(_baseRecord);
+        }
+
+        private bool MakeIndexNonResident(string name)
+        {
+            NtfsAttribute attr = GetAttribute(AttributeType.IndexAllocation, name);
+
+            // Nothing to win, can't make IndexRoot smaller than this
+            // 8 = min size of entry that points to IndexAllocation...
+            if (attr.Length <= IndexRoot.HeaderOffset + IndexHeader.Size + 8)
+            {
+                return false;
+            }
+
+            throw new NotImplementedException();
         }
 
         public ushort HardLinkCount
@@ -135,7 +170,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeId == id)
                 {
-                    return NtfsAttribute.FromRecord(_fileSystem, attr);
+                    return NtfsAttribute.FromRecord(this, attr);
                 }
             }
             return null;
@@ -160,7 +195,7 @@ namespace DiscUtils.Ntfs
         public T GetAttributeContent<T>(AttributeType type)
             where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            return new StructuredNtfsAttribute<T>(_fileSystem, GetAttribute(type).Record).Content;
+            return new StructuredNtfsAttribute<T>(this, GetAttribute(type).Record).Content;
         }
 
         /// <summary>
@@ -173,7 +208,7 @@ namespace DiscUtils.Ntfs
         public T GetAttributeContent<T>(AttributeType type, string name)
             where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            return new StructuredNtfsAttribute<T>(_fileSystem, GetAttribute(type, name).Record).Content;
+            return new StructuredNtfsAttribute<T>(this, GetAttribute(type, name).Record).Content;
         }
 
         /// <summary>
@@ -185,7 +220,7 @@ namespace DiscUtils.Ntfs
         public void SetAttributeContent<T>(ushort id, T value)
             where T : IByteArraySerializable, IDiagnosticTracer, new()
         {
-            StructuredNtfsAttribute<T> attr = new StructuredNtfsAttribute<T>(_fileSystem, GetAttribute(id).Record);
+            StructuredNtfsAttribute<T> attr = new StructuredNtfsAttribute<T>(this, GetAttribute(id).Record);
             attr.Content = value;
             attr.Save();
         }
@@ -202,7 +237,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == type && attr.Name == name)
                 {
-                    return NtfsAttribute.FromRecord(_fileSystem, attr);
+                    return NtfsAttribute.FromRecord(this, attr);
                 }
             }
             return null;
@@ -221,14 +256,26 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == type && string.IsNullOrEmpty(attr.Name))
                 {
-                    matches.Add(NtfsAttribute.FromRecord(_fileSystem, attr));
+                    matches.Add(NtfsAttribute.FromRecord(this, attr));
                 }
             }
 
             return matches.ToArray();
         }
 
-        public Stream OpenAttribute(AttributeType type, FileAccess access)
+        public SparseStream OpenAttribute(ushort id, FileAccess access)
+        {
+            NtfsAttribute attr = GetAttribute(id);
+
+            if (attr == null)
+            {
+                throw new IOException("No such attribute: " + id);
+            }
+
+            return new FileAttributeStream(this, id, access);
+        }
+
+        public SparseStream OpenAttribute(AttributeType type, FileAccess access)
         {
             NtfsAttribute attr = GetAttribute(type);
 
@@ -237,7 +284,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("No such attribute: " + type);
             }
 
-            return attr.Open(access);
+            return new FileAttributeStream(this, attr.Id, access);
         }
 
         public SparseStream OpenAttribute(AttributeType type, string name, FileAccess access)
@@ -249,12 +296,12 @@ namespace DiscUtils.Ntfs
                 throw new IOException("No such attribute: " + type + "(" + name + ")");
             }
 
-            return attr.Open(access);
+            return new FileAttributeStream(this, attr.Id, access);
         }
 
-        public void MakeAttributeNonResident(AttributeType attributeType, string name, int maxData)
+        public void MakeAttributeNonResident(ushort attrId, int maxData)
         {
-            NtfsAttribute attr = GetAttribute(attributeType, name);
+            NtfsAttribute attr = GetAttribute(attrId);
 
             if(attr.IsNonResident)
             {
@@ -265,9 +312,9 @@ namespace DiscUtils.Ntfs
             _baseRecord.SetAttribute(attr.Record);
         }
 
-        internal void MakeAttributeResident(AttributeType attributeType, string name, int maxData)
+        internal void MakeAttributeResident(ushort attrId, int maxData)
         {
-            NtfsAttribute attr = GetAttribute(attributeType, name);
+            NtfsAttribute attr = GetAttribute(attrId);
 
             if (!attr.IsNonResident)
             {
@@ -292,7 +339,10 @@ namespace DiscUtils.Ntfs
             StructuredNtfsAttribute<FileNameRecord> attr = null;
             if (String.IsNullOrEmpty(name))
             {
-                attr = (StructuredNtfsAttribute<FileNameRecord>)attrs[0];
+                if (attrs.Length != 0)
+                {
+                    attr = (StructuredNtfsAttribute<FileNameRecord>)attrs[0];
+                }
             }
             else
             {
@@ -309,7 +359,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            FileNameRecord fnr = new FileNameRecord(attr.Content);
+            FileNameRecord fnr = (attr == null ? new FileNameRecord() : new FileNameRecord(attr.Content));
 
             if (freshened)
             {
@@ -331,6 +381,7 @@ namespace DiscUtils.Ntfs
             fileName.ModificationTime = si.ModificationTime;
             fileName.MftChangedTime = si.MftChangedTime;
             fileName.LastAccessTime = si.LastAccessTime;
+            fileName.Flags = si.FileAttributes;
             fileName.RealSize = (ulong)anonDataAttr.Record.DataLength;
             fileName.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
         }
@@ -344,6 +395,14 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        internal NtfsFileSystem FileSystem
+        {
+            get
+            {
+                return _fileSystem;
+            }
+        }
+
         public virtual void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "FILE (" + _baseRecord.ToString() + ")");
@@ -351,7 +410,7 @@ namespace DiscUtils.Ntfs
 
             foreach (AttributeRecord attrRec in _baseRecord.Attributes)
             {
-                NtfsAttribute.FromRecord(_fileSystem, attrRec).Dump(writer, indent + "  ");
+                NtfsAttribute.FromRecord(this, attrRec).Dump(writer, indent + "  ");
             }
         }
 
@@ -383,7 +442,7 @@ namespace DiscUtils.Ntfs
                 AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
                 if (attrListRec != null)
                 {
-                    StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(_fileSystem, attrListRec);
+                    StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(this, attrListRec);
                     foreach (var record in attrList.Content)
                     {
                         FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(record.BaseFileReference);
@@ -400,5 +459,34 @@ namespace DiscUtils.Ntfs
             }
         }
 
+
+        internal static File CreateNew(NtfsFileSystem fileSystem)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            File newFile = fileSystem.MasterFileTable.AllocateFile();
+
+            ushort attrId = newFile.CreateAttribute(AttributeType.StandardInformation);
+            StandardInformation si = new StandardInformation();
+            si.CreationTime = now;
+            si.ModificationTime = now;
+            si.MftChangedTime = now;
+            si.LastAccessTime = now;
+            si.FileAttributes = FileAttributeFlags.Archive;
+            newFile.SetAttributeContent(attrId, si);
+
+            Guid newId = Guid.NewGuid();
+            attrId = newFile.CreateAttribute(AttributeType.ObjectId);
+            ObjectId objId = new ObjectId();
+            objId.Id = newId;
+            newFile.SetAttributeContent(attrId, objId);
+            fileSystem.ObjectIds.Add(newId, newFile.MftReference, newId, Guid.Empty, Guid.Empty);
+
+            newFile.CreateAttribute(AttributeType.Data);
+
+            newFile.UpdateRecordInMft();
+
+            return newFile;
+        }
     }
 }

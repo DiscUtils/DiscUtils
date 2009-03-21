@@ -25,17 +25,16 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class AttributeDefinitions : File
+    internal sealed class AttributeDefinitions
     {
         private Dictionary<AttributeType, AttributeDefinitionRecord> _attrDefs;
 
-        public AttributeDefinitions(NtfsFileSystem fileSystem, FileRecord fileRecord)
-            : base(fileSystem, fileRecord)
+        public AttributeDefinitions(File file)
         {
             _attrDefs = new Dictionary<AttributeType, AttributeDefinitionRecord>();
 
             byte[] buffer = new byte[AttributeDefinitionRecord.Size];
-            using (Stream s = OpenAttribute(AttributeType.Data, FileAccess.Read))
+            using (Stream s = file.OpenAttribute(AttributeType.Data, FileAccess.Read))
             {
                 while(Utilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
                 {

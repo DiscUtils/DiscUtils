@@ -28,30 +28,43 @@ namespace DiscUtils.Ntfs
 {
     internal class NonResidentAttributeStream : SparseStream
     {
+        private File _file;
         private Stream _fsStream;
         private ClusterBitmap _clusterBitmap;
         private long _bytesPerCluster;
         private List<CookedDataRun> _runs;
-        private NonResidentFileAttributeRecord _record;
+        private NonResidentAttributeRecord _record;
 
         private FileAccess _access;
         private long _length;
         private long _position;
 
         private bool _atEOF;
+        private bool _mftDirty;
 
         private byte[] _cachedDecompressedBlock;
         private long _cachedBlockStartVcn;
 
-        public NonResidentAttributeStream(Stream fsStream, ClusterBitmap clusterBitmap, long bytesPerCluster, FileAccess access, NonResidentFileAttributeRecord record)
+        public NonResidentAttributeStream(File file, FileAccess access, NonResidentAttributeRecord record)
         {
-            _fsStream = fsStream;
-            _clusterBitmap = clusterBitmap;
-            _bytesPerCluster = bytesPerCluster;
+            _file = file;
+            _fsStream = _file.FileSystem.RawStream;
+            _clusterBitmap = _file.FileSystem.ClusterBitmap;
+            _bytesPerCluster = file.FileSystem.BytesPerCluster;
             _runs = CookDataRuns(record.DataRuns);
             _record = record;
             _access = access;
             _length = record.DataLength;
+        }
+
+        public override void Close()
+        {
+            base.Close();
+            if (_mftDirty)
+            {
+                _file.UpdateRecordInMft();
+                _mftDirty = false;
+            }
         }
 
         public override bool CanRead
@@ -71,7 +84,11 @@ namespace DiscUtils.Ntfs
 
         public override void Flush()
         {
-            ;
+            if (_mftDirty)
+            {
+                _file.UpdateRecordInMft();
+                _mftDirty = false;
+            }
         }
 
         public override long Length
@@ -157,6 +174,18 @@ namespace DiscUtils.Ntfs
 
         public override void SetLength(long value)
         {
+            if (!CanWrite)
+            {
+                throw new IOException("Attempt to change length of file not opened for write");
+            }
+
+            if (value == _length)
+            {
+                return;
+            }
+
+            _mftDirty = true;
+
             if (value < Length)
             {
                 Truncate(value);
@@ -197,6 +226,8 @@ namespace DiscUtils.Ntfs
 
             if (_position + count > _record.AllocatedLength)
             {
+                _mftDirty = true;
+
                 long numToAllocate = Utilities.Ceil(_position + count - _record.AllocatedLength, _bytesPerCluster);
                 Tuple<long, long>[] runs = _clusterBitmap.AllocateClusters(numToAllocate);
                 foreach (var run in runs)
@@ -208,6 +239,8 @@ namespace DiscUtils.Ntfs
 
             if (_position > _record.InitializedDataLength + 1)
             {
+                _mftDirty = true;
+
                 byte[] wipeBuffer = new byte[_bytesPerCluster * 4];
                 for (long wipePos = _record.InitializedDataLength; wipePos < _position; wipePos += wipeBuffer.Length)
                 {
@@ -217,11 +250,15 @@ namespace DiscUtils.Ntfs
 
             if (_position + count > _record.InitializedDataLength)
             {
+                _mftDirty = true;
+
                 _record.InitializedDataLength = _position + count;
             }
 
             if (_position + count > _record.RealLength)
             {
+                _mftDirty = true;
+
                 _record.RealLength = _position + count;
                 _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;
             }

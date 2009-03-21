@@ -30,8 +30,8 @@ namespace DiscUtils.Ntfs
         private T _structure;
         private bool _initialized;
 
-        public StructuredNtfsAttribute(NtfsFileSystem fileSystem, AttributeRecord record)
-            : base(fileSystem, record)
+        public StructuredNtfsAttribute(File file, AttributeRecord record)
+            : base(file, record)
         {
             _structure = new T();
         }

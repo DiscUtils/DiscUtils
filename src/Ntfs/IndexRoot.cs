@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.IO;
 
 namespace DiscUtils.Ntfs
 {
@@ -68,7 +69,7 @@ namespace DiscUtils.Ntfs
 
         #region IDiagnosticTracer Members
 
-        public void Dump(System.IO.TextWriter writer, string indent)
+        public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "                Attr Type: " + _attrType);
             writer.WriteLine(indent + "           Collation Rule: " + _collationRule);

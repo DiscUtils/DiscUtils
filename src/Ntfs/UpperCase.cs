@@ -26,14 +26,13 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class UpperCase : File, IComparer<string>
+    internal sealed class UpperCase : IComparer<string>
     {
         private char[] _table;
 
-        public UpperCase(NtfsFileSystem fileSystem, FileRecord fileRecord)
-            : base(fileSystem, fileRecord)
+        public UpperCase(File file)
         {
-            using (Stream s = OpenAttribute(AttributeType.Data, FileAccess.Read))
+            using (Stream s = file.OpenAttribute(AttributeType.Data, FileAccess.Read))
             {
                 _table = new char[s.Length / 2];
 
@@ -44,11 +43,6 @@ namespace DiscUtils.Ntfs
                     _table[i] = (char)Utilities.ToUInt16LittleEndian(buffer, i * 2);
                 }
             }
-        }
-
-        public char ToUpper(char ch)
-        {
-            return _table[(int)ch];
         }
 
         public int Compare(string x, string y)
@@ -66,6 +60,26 @@ namespace DiscUtils.Ntfs
             // Identical out to the shortest string, so length is now the
             // determining factor.
             return x.Length - y.Length;
+        }
+
+        public int Compare(byte[] x, int xOffset, int xLength, byte[] y, int yOffset, int yLength)
+        {
+            int compLen = Math.Min(xLength, yLength) / 2;
+            for (int i = 0; i < compLen; ++i)
+            {
+                char xCh = (char)(x[xOffset + (i * 2)] | (x[xOffset + (i * 2 + 1)] << 8));
+                char yCh = (char)(y[yOffset + (i * 2)] | (y[yOffset + (i * 2 + 1)] << 8));
+
+                int result = _table[xCh] - _table[yCh];
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            // Identical out to the shortest string, so length is now the
+            // determining factor.
+            return xLength - yLength;
         }
     }
 }

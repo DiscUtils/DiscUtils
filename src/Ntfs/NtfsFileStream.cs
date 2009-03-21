@@ -30,23 +30,21 @@ namespace DiscUtils.Ntfs
 {
     internal sealed class NtfsFileStream : SparseStream
     {
-        private FileAccess _access;
         private DirectoryEntry _entry;
 
         private File _file;
-        private NtfsAttribute _attr;
+        private ushort _attrId;
         private SparseStream _attrStream;
 
         private bool _isDirty;
 
         public NtfsFileStream(NtfsFileSystem fileSystem, DirectoryEntry entry, AttributeType attrType, string attrName, FileAccess access)
         {
-            _access = access;
             _entry = entry;
 
             _file = fileSystem.MasterFileTable.GetFile(entry.Reference);
-            _attr = _file.GetAttribute(attrType, attrName);
-            _attrStream = _attr.Open(_access);
+            _attrId = _file.GetAttribute(attrType, attrName).Id;
+            _attrStream = _file.OpenAttribute(_attrId, access);
         }
 
         public override void Close()
@@ -59,22 +57,23 @@ namespace DiscUtils.Ntfs
 
         public override bool CanRead
         {
-            get { return _access != FileAccess.Write; }
+            get { return _attrStream.CanRead; }
         }
 
         public override bool CanSeek
         {
-            get { return true; }
+            get { return _attrStream.CanSeek; }
         }
 
         public override bool CanWrite
         {
-            get { return _access != FileAccess.Read; }
+            get { return _attrStream.CanWrite; }
         }
 
         public override void Flush()
         {
             _attrStream.Flush();
+
             UpdateMetadata();
         }
 
@@ -110,7 +109,6 @@ namespace DiscUtils.Ntfs
             if (value != Length)
             {
                 _isDirty = true;
-                ChangeAttributeResidencyByLength(value);
                 _attrStream.SetLength(value);
             }
         }
@@ -118,13 +116,12 @@ namespace DiscUtils.Ntfs
         public override void Write(byte[] buffer, int offset, int count)
         {
             _isDirty = true;
-            ChangeAttributeResidencyByLength(_attrStream.Position + count);
             _attrStream.Write(buffer, offset, count);
         }
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { throw new NotImplementedException(); }
+            get { return _attrStream.Extents; }
         }
 
         private void UpdateMetadata()
@@ -147,40 +144,6 @@ namespace DiscUtils.Ntfs
                 // Write attribute changes back to the Master File Table
                 _file.UpdateRecordInMft();
                 _isDirty = false;
-            }
-        }
-
-        private void ChangeAttributeResidencyByLength(long value)
-        {
-            AttributeType attrType = _attr.Record.AttributeType;
-            string attrName = _attr.Name;
-
-            if (!_attr.IsNonResident && value >= _file.MaxMftRecordSize)
-            {
-                long pos = _attrStream.Position;
-                _isDirty = true;
-                _attrStream.Dispose();
-
-                _file.MakeAttributeNonResident(attrType, attrName, (int)Math.Min(value, _attr.Length));
-
-                _attr = _file.GetAttribute(attrType, attrName);
-                _attrStream = _attr.Open(_access);
-                _attrStream.Position = pos;
-            }
-            else if (_attr.IsNonResident && value <= _file.MaxMftRecordSize / 4)
-            {
-                // Use of 1/4 of record size here is just a heuristic - the important thing is not to end up with
-                // zero-length non-resident attributes
-
-                long pos = _attrStream.Position;
-                _isDirty = true;
-                _attrStream.Dispose();
-
-                _file.MakeAttributeResident(attrType, attrName, (int)value);
-
-                _attr = _file.GetAttribute(attrType, attrName);
-                _attrStream = _attr.Open(_access);
-                _attrStream.Position = pos;
             }
         }
 

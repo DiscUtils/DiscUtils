@@ -40,6 +40,17 @@ namespace DiscUtils.Ntfs
             get { return _securityDescriptor; }
         }
 
+        public static uint CalcHash(FileSystemSecurity descriptor)
+        {
+            byte[] buffer = descriptor.GetSecurityDescriptorBinaryForm();
+            uint hash = 0;
+            for (int i = 0; i < buffer.Length / 4; ++i)
+            {
+                hash = Utilities.ToUInt32LittleEndian(buffer, i * 4) + ((hash << 3) | (hash >> 29));
+            }
+            return hash;
+        }
+
         #region IByteArraySerializable Members
 
         public void ReadFrom(byte[] buffer, int offset)

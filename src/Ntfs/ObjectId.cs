@@ -27,44 +27,23 @@ namespace DiscUtils.Ntfs
 {
     internal sealed class ObjectId : IByteArraySerializable, IDiagnosticTracer
     {
-        private Guid _objectId;
-        private Guid _birthVolumeId;
-        private Guid _birthObjectId;
-        private Guid _domainId;
+        public Guid Id;
 
         #region IByteArraySerializable Members
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            int bytesAvail = buffer.Length - offset;
-
-            if (bytesAvail > 0)
-            {
-                _objectId = Utilities.ToGuidLittleEndian(buffer, offset + 0);
-
-                if (bytesAvail > 16)
-                {
-                    _birthVolumeId = Utilities.ToGuidLittleEndian(buffer, offset + 16);
-                }
-                if (bytesAvail > 32)
-                {
-                    _birthObjectId = Utilities.ToGuidLittleEndian(buffer, offset + 32);
-                }
-                if (bytesAvail > 48)
-                {
-                    _domainId = Utilities.ToGuidLittleEndian(buffer, offset + 48);
-                }
-            }
+            Id = Utilities.ToGuidLittleEndian(buffer, offset);
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(Id, buffer, offset);
         }
 
         public int Size
         {
-            get { throw new NotImplementedException(); }
+            get { return 16; }
         }
 
         #endregion
@@ -73,10 +52,7 @@ namespace DiscUtils.Ntfs
 
         public void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "        Object ID: " + _objectId);
-            writer.WriteLine(indent + "  Birth Volume ID: " + _birthVolumeId);
-            writer.WriteLine(indent + "  Birth Object ID: " + _birthObjectId);
-            writer.WriteLine(indent + "        Domain ID: " + _domainId);
+            writer.WriteLine(indent + "  Object ID: " + Id);
         }
 
         #endregion

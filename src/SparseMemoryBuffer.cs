@@ -49,6 +49,33 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Accesses this memory buffer as an infinite byte array.
+        /// </summary>
+        /// <param name="pos">The buffer position to read.</param>
+        /// <returns>The byte stored at this position (or Zero if not explicitly stored)</returns>
+        public byte this[long pos]
+        {
+            get
+            {
+                byte[] buffer = new byte[1];
+                if (Read(pos, buffer, 0, 1) != 0)
+                {
+                    return buffer[0];
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                byte[] buffer = new byte[1];
+                buffer[0] = value;
+                Write(pos, buffer, 0, 1);
+            }
+        }
+
+        /// <summary>
         /// Reads a section of the sparse buffer into a byte array.
         /// </summary>
         /// <param name="pos">The offset within the sparse buffer to start reading.</param>

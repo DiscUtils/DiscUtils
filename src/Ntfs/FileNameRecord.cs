@@ -73,16 +73,6 @@ namespace DiscUtils.Ntfs
         {
         }
 
-        public FileNameRecord(byte[] data, int offset)
-        {
-            ReadFrom(data, offset);
-        }
-
-        public FileNameRecord(string name)
-        {
-            FileName = name;
-        }
-
         public FileNameRecord(FileNameRecord toCopy)
         {
             ParentDirectory = toCopy.ParentDirectory;

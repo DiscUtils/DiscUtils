@@ -25,23 +25,27 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class Bitmap
+    internal sealed class Bitmap
     {
-        private byte[] _bitmap;
-        private NtfsAttribute _fileAttr;
+        private Stream _stream;
+        private long _maxIndex;
 
-        public Bitmap(NtfsAttribute fileAttr)
+        private SparseMemoryBuffer _bitmap;
+
+
+        public Bitmap(Stream stream, long maxIndex)
         {
-            if (fileAttr.Length > 100 * 1024)
+            _stream = stream;
+            _maxIndex = maxIndex;
+            _bitmap = new SparseMemoryBuffer(128);
+
+            if (stream.Length > 100 * 1024)
             {
                 throw new NotImplementedException("Large Bitmap");
             }
 
-            _fileAttr = fileAttr;
-            using (Stream stream = _fileAttr.Open(FileAccess.Read))
-            {
-                _bitmap = Utilities.ReadFully(stream, (int)_fileAttr.Length);
-            }
+            byte[] buffer = Utilities.ReadFully(stream, (int)stream.Length);
+            _bitmap.Write(0, buffer, 0, buffer.Length);
         }
 
         public bool IsPresent(long index)
@@ -59,11 +63,14 @@ namespace DiscUtils.Ntfs
 
             _bitmap[byteIdx] |= mask;
 
-            using (Stream stream = _fileAttr.Open(FileAccess.ReadWrite))
+            if (byteIdx >= _stream.Length)
             {
-                stream.Position = byteIdx;
-                stream.WriteByte(_bitmap[byteIdx]);
+                _stream.SetLength(Utilities.RoundUp(byteIdx + 1, 8));
             }
+
+            _stream.Position = byteIdx;
+            _stream.WriteByte(_bitmap[byteIdx]);
+            _stream.Flush();
         }
 
         internal void MarkAbsentRange(long index, long count)
@@ -76,14 +83,31 @@ namespace DiscUtils.Ntfs
                 _bitmap[byteIdx] &= mask;
             }
 
-            using (Stream stream = _fileAttr.Open(FileAccess.ReadWrite))
-            {
-                long firstByte = index / 8;
-                long lastByte = (index + count) / 8;
+            long firstByte = index / 8;
+            long lastByte = (index + count) / 8;
 
-                stream.Position = firstByte;
-                stream.Write(_bitmap, (int)firstByte, (int)(lastByte - firstByte + 1));
+            if (lastByte >= _stream.Length)
+            {
+                _stream.SetLength(Utilities.RoundUp(lastByte + 1, 8));
             }
+
+            byte[] buffer = new byte[lastByte - firstByte + 1];
+            _bitmap.Read(firstByte, buffer, 0, buffer.Length);
+
+            _stream.Position = firstByte;
+            _stream.Write(buffer, 0, buffer.Length);
+            _stream.Flush();
+        }
+
+        internal long AllocateFirstAvailable(long minValue)
+        {
+            long i = minValue;
+            while (IsPresent(i))
+            {
+                ++i;
+            }
+            MarkPresent(i);
+            return i;
         }
     }
 }

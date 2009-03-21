@@ -26,10 +26,13 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class MasterFileTable : File
+    internal class MasterFileTable : IDiagnosticTracer
     {
+        private NtfsFileSystem _fileSystem;
+        private File _self;
         private Bitmap _bitmap;
         private Stream _records;
+        private Dictionary<long, WeakReference> _fileCache;
 
         private int _recordLength;
 
@@ -93,14 +96,21 @@ namespace DiscUtils.Ntfs
         /// </summary>
         public const long ExtendIndex = 11;
 
+        /// <summary>
+        /// First MFT Index available for 'normal' files.
+        /// </summary>
+        private const uint FirstAvailableMftIndex = 24;
 
         public MasterFileTable(NtfsFileSystem fileSystem, FileRecord baseRecord)
-            : base(fileSystem, baseRecord)
         {
-            _bitmap = new Bitmap(GetAttribute(AttributeType.Bitmap));
-            _records = GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
+            _fileSystem = fileSystem;
+            _self = new File(fileSystem, baseRecord);
 
-            _recordLength = _fileSystem.BiosParameterBlock.MftRecordSize;
+            _bitmap = new Bitmap(_self.GetAttribute(AttributeType.Bitmap).Open(FileAccess.ReadWrite), long.MaxValue);
+            _records = _self.GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
+            _fileCache = new Dictionary<long, WeakReference>();
+
+            _recordLength = fileSystem.BiosParameterBlock.MftRecordSize;
         }
 
         public IEnumerable<File> Files
@@ -153,6 +163,16 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
+        public File GetFile(long index)
+        {
+            FileRecord record = GetRecord(index);
+            if (record != null)
+            {
+                return new File(_fileSystem, record);
+            }
+            return null;
+        }
+
         public File GetFile(FileReference fileReference)
         {
             FileRecord record = GetRecord(fileReference);
@@ -168,8 +188,7 @@ namespace DiscUtils.Ntfs
             FileRecord record = GetRecord(fileReference);
             if (record != null)
             {
-                StructuredNtfsAttribute<FileNameRecord> sa = (StructuredNtfsAttribute<FileNameRecord>)NtfsAttribute.FromRecord(_fileSystem, record.GetAttribute(AttributeType.FileName));
-                if ((sa.Content.FileAttributes & FileAttributes.Directory) != 0)
+                if((record.Flags & FileRecordFlags.IsDirectory) != 0)
                 {
                     return new Directory(_fileSystem, record);
                 }
@@ -179,6 +198,24 @@ namespace DiscUtils.Ntfs
                 }
             }
             return null;
+        }
+
+        internal File AllocateFile()
+        {
+            uint index = (uint)_bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
+
+            FileRecord newRecord;
+            if ((index + 1) * _recordLength <= _records.Length)
+            {
+                newRecord = GetRecord(index);
+                newRecord.ReInitialize(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, index);
+            }
+            else
+            {
+                newRecord = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, index);
+            }
+            WriteRecord(newRecord);
+            return new File(_fileSystem, newRecord);
         }
 
         internal FileRecord GetRecord(FileReference fileReference)
@@ -230,14 +267,14 @@ namespace DiscUtils.Ntfs
             _records.Write(buffer, 0, _recordLength);
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        public void Dump(TextWriter writer, string indent)
         {
             int recordSize = _fileSystem.BiosParameterBlock.MftRecordSize;
             ushort bytesPerSector = _fileSystem.BiosParameterBlock.BytesPerSector;
 
             writer.WriteLine(indent + "MASTER FILE TABLE");
             writer.WriteLine(indent + "  Record Length: " + _recordLength);
-            using (Stream mftStream = OpenAttribute(AttributeType.Data, FileAccess.Read))
+            using (Stream mftStream = _self.OpenAttribute(AttributeType.Data, FileAccess.Read))
             {
                 while (mftStream.Position < mftStream.Length)
                 {
@@ -254,5 +291,6 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
+
     }
 }

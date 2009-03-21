@@ -27,13 +27,23 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
+    [Flags]
+    internal enum FileRecordFlags : ushort
+    {
+        None = 0x0000,
+        InUse = 0x0001,
+        IsDirectory = 0x0002,
+        IsMetaFile = 0x0004,
+        HasViewIndex = 0x0008
+    }
+
     internal class FileRecord : FixupRecordBase
     {
         private ulong _logFileSequenceNumber;
         private ushort _sequenceNumber;
         private ushort _hardLinkCount;
         private ushort _firstAttributeOffset;
-        private ushort _flags;
+        private FileRecordFlags _flags;
         private uint _recordRealSize;
         private uint _recordAllocatedSize;
         private FileReference _baseFile;
@@ -44,8 +54,28 @@ namespace DiscUtils.Ntfs
         private bool _haveIndex;
 
         public FileRecord(int sectorSize)
-            : base(sectorSize)
+            : base("FILE", sectorSize)
         {
+        }
+
+        public FileRecord(int sectorSize, int recordLength, uint index)
+            : base("FILE", sectorSize, recordLength)
+        {
+            _sequenceNumber = 0;
+            ReInitialize(sectorSize, recordLength, index);
+        }
+
+        public void ReInitialize(int sectorSize, int recordLength, uint index)
+        {
+            Initialize("FILE", sectorSize, recordLength);
+            _sequenceNumber++;
+            _flags = FileRecordFlags.InUse;
+            _recordAllocatedSize = (uint)recordLength;
+            _nextAttributeId = 1;
+            _index = index;
+
+            _attributes = new List<AttributeRecord>();
+            _haveIndex = true;
         }
 
         public uint MasterFileTableIndex
@@ -74,6 +104,11 @@ namespace DiscUtils.Ntfs
             get { return _recordAllocatedSize; }
         }
 
+        public FileRecordFlags Flags
+        {
+            get { return _flags; }
+        }
+
         public ICollection<AttributeRecord> Attributes
         {
             get { return new ReadOnlyCollection<AttributeRecord>(_attributes); }
@@ -89,7 +124,7 @@ namespace DiscUtils.Ntfs
         {
             ushort id = _nextAttributeId++;
             _attributes.Add(
-                new ResidentFileAttributeRecord(
+                new ResidentAttributeRecord(
                     type,
                     name,
                     id,
@@ -157,7 +192,10 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            throw new NotImplementedException("Adding new attributes");
+            ushort id = _nextAttributeId++;
+            _attributes.Add(record);
+            _attributes.Sort();
+            return;
         }
 
         protected override void Read(byte[] buffer, int offset)
@@ -166,7 +204,7 @@ namespace DiscUtils.Ntfs
             _sequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
             _hardLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x12);
             _firstAttributeOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x14);
-            _flags = Utilities.ToUInt16LittleEndian(buffer, offset + 0x16);
+            _flags = (FileRecordFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x16);
             _recordRealSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x18);
             _recordAllocatedSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x1C);
             _baseFile = new FileReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x20));
@@ -205,7 +243,7 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(_sequenceNumber, buffer, offset + 0x10);
             Utilities.WriteBytesLittleEndian(_hardLinkCount, buffer, offset + 0x12);
             Utilities.WriteBytesLittleEndian(_firstAttributeOffset, buffer, offset + 0x14);
-            Utilities.WriteBytesLittleEndian(_flags, buffer, offset + 0x16);
+            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x16);
             Utilities.WriteBytesLittleEndian(_recordRealSize, buffer, offset + 0x18);
             Utilities.WriteBytesLittleEndian(_recordAllocatedSize, buffer, offset + 0x1C);
             Utilities.WriteBytesLittleEndian(_baseFile.Value, buffer, offset + 0x20);

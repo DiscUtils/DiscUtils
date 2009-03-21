@@ -105,7 +105,7 @@ namespace DiscUtils.Ntfs
             get { return _flags; }
         }
 
-        public abstract SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access);
+        public abstract SparseStream Open(File file, FileAccess access);
 
         public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
@@ -116,11 +116,11 @@ namespace DiscUtils.Ntfs
             }
             else if (buffer[offset + 0x08] != 0x00)
             {
-                return new NonResidentFileAttributeRecord(buffer, offset, out length);
+                return new NonResidentAttributeRecord(buffer, offset, out length);
             }
             else
             {
-                return new ResidentFileAttributeRecord(buffer, offset, out length);
+                return new ResidentAttributeRecord(buffer, offset, out length);
             }
         }
 
@@ -184,24 +184,24 @@ namespace DiscUtils.Ntfs
         }
     }
 
-    internal sealed class ResidentFileAttributeRecord : AttributeRecord
+    internal sealed class ResidentAttributeRecord : AttributeRecord
     {
         private byte _indexedFlag;
         private SparseMemoryBuffer _memoryBuffer;
 
-        public ResidentFileAttributeRecord(byte[] buffer, int offset, out int length)
+        public ResidentAttributeRecord(byte[] buffer, int offset, out int length)
         {
             Read(buffer, offset, out length);
         }
 
-        public ResidentFileAttributeRecord(AttributeRecord toCopy)
+        public ResidentAttributeRecord(AttributeRecord toCopy)
             : base(toCopy)
         {
             base._nonResidentFlag = 0;
             _memoryBuffer = new SparseMemoryBuffer(1024);
         }
 
-        public ResidentFileAttributeRecord(AttributeType type, string name, ushort id, bool indexed)
+        public ResidentAttributeRecord(AttributeType type, string name, ushort id, bool indexed)
             : base(type, name, id)
         {
             base._nonResidentFlag = 0;
@@ -221,16 +221,9 @@ namespace DiscUtils.Ntfs
             set { throw new NotSupportedException(); }
         }
 
-        public byte[] GetData()
+        public override SparseStream Open(File file, FileAccess access)
         {
-            byte[] buffer = new byte[_memoryBuffer.Capacity];
-            _memoryBuffer.Read(0, buffer, 0, buffer.Length);
-            return buffer;
-        }
-
-        public override SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access)
-        {
-            return new SparseMemoryStream(_memoryBuffer, access);
+            return new ResidentAttributeStream(file, new SparseMemoryStream(_memoryBuffer, access));
         }
 
         protected override void Read(byte[] buffer, int offset, out int length)
@@ -309,7 +302,7 @@ namespace DiscUtils.Ntfs
         }
     }
 
-    internal sealed class NonResidentFileAttributeRecord : AttributeRecord
+    internal sealed class NonResidentAttributeRecord : AttributeRecord
     {
         private ulong _startingVCN;
         private ulong _lastVCN;
@@ -321,12 +314,12 @@ namespace DiscUtils.Ntfs
 
         private List<DataRun> _dataRuns;
 
-        public NonResidentFileAttributeRecord(byte[] buffer, int offset, out int length)
+        public NonResidentAttributeRecord(byte[] buffer, int offset, out int length)
         {
             Read(buffer, offset, out length);
         }
 
-        public NonResidentFileAttributeRecord(AttributeRecord toCopy)
+        public NonResidentAttributeRecord(AttributeRecord toCopy)
             : base(toCopy)
         {
             base._nonResidentFlag = 1;
@@ -388,9 +381,9 @@ namespace DiscUtils.Ntfs
             get { return _dataRuns; }
         }
 
-        public override SparseStream Open(ClusterBitmap clusterBitmap, Stream rawStream, long bytesPerCluster, FileAccess access)
+        public override SparseStream Open(File file, FileAccess access)
         {
-            return new NonResidentAttributeStream(rawStream, clusterBitmap, bytesPerCluster, access, this);
+            return new NonResidentAttributeStream(file, access, this);
         }
 
         protected override void Read(byte[] buffer, int offset, out int length)

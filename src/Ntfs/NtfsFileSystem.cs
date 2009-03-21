@@ -76,11 +76,11 @@ namespace DiscUtils.Ntfs
 
             // Initialize access to the well-known metadata files
             _mft = new MasterFileTable(this, mftSelfRecord);
-            _bitmap = new ClusterBitmap(this, _mft.GetRecord(MasterFileTable.BitmapIndex));
-            _attrDefs = new AttributeDefinitions(this, _mft.GetRecord(MasterFileTable.AttrDefIndex));
-            _upperCase = new UpperCase(this, _mft.GetRecord(MasterFileTable.UpCaseIndex));
-            _securityDescriptors = new SecurityDescriptors(this, _mft.GetRecord(MasterFileTable.SecureIndex));
-            _objectIds = new ObjectIds(this, _mft.GetRecord(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
+            _bitmap = new ClusterBitmap(_mft.GetFile(MasterFileTable.BitmapIndex));
+            _attrDefs = new AttributeDefinitions(_mft.GetFile(MasterFileTable.AttrDefIndex));
+            _upperCase = new UpperCase(_mft.GetFile(MasterFileTable.UpCaseIndex));
+            _securityDescriptors = new SecurityDescriptors(_mft.GetFile(MasterFileTable.SecureIndex));
+            _objectIds = new ObjectIds(_mft.GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
 
 #if false
             byte[] buffer = new byte[1024];
@@ -113,7 +113,7 @@ namespace DiscUtils.Ntfs
         /// <returns></returns>
         public Stream OpenMasterFileTable()
         {
-            return _mft.OpenAttribute(AttributeType.Data, FileAccess.Read);
+            return OpenRawAttribute("$MFT", AttributeType.Data, null);
         }
 
         /// <summary>
@@ -265,7 +265,11 @@ namespace DiscUtils.Ntfs
                 }
                 else
                 {
-                    throw new NotSupportedException("Can only open existing files");
+                    File file = File.CreateNew(this);
+
+                    DirectoryEntry dirDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
+                    Directory destDir = _mft.GetDirectory(dirDirEntry.Reference);
+                    entry = destDir.AddEntry(file, Path.GetFileName(path));
                 }
             }
 
@@ -468,19 +472,7 @@ namespace DiscUtils.Ntfs
             }
 
             File file = _mft.GetFile(sourceDirEntry.Reference);
-
-            FileNameRecord newNameRecord = file.GetFileNameRecord(Path.GetFileName(sourceName), true);
-            newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
-            newNameRecord.FileName = Path.GetFileName(destinationName);
-            newNameRecord.ParentDirectory = destinationDirDirEntry.Reference;
-
-            ushort newNameAttrId = file.CreateAttribute(AttributeType.FileName);
-            file.SetAttributeContent(newNameAttrId, newNameRecord);
-
-            file.HardLinkCount++;
-            file.UpdateRecordInMft();
-
-            destinationDir.AddEntry(newNameRecord, file.MftReference);
+            destinationDir.AddEntry(file, Path.GetFileName(destinationName));
         }
 
         internal Stream RawStream

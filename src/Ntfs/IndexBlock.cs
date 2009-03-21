@@ -26,32 +26,48 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class IndexBlock<K, D> : FixupRecordBase
-        where K : IByteArraySerializable, new()
-        where D : IByteArraySerializable, new()
+    internal class IndexBlock : FixupRecordBase
     {
+        /// <summary>
+        /// Size of meta-data placed at start of a block.
+        /// </summary>
+        private const int FieldSize = 0x18;
+
         public ulong LogSequenceNumber;
         public ulong IndexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
 
-        public IndexNode<K, D> Node;
+        public IndexNode Node;
 
-        private Index<K, D> _index;
-        private IndexNode<K, D> _parentNode;
-        private IndexEntry<K, D> _parentEntry;
+        private Index _index;
+        private IndexNode _parentNode;
         private long _streamPosition;
 
-        public IndexBlock(Index<K, D> index, IndexNode<K, D> parentNode, IndexEntry<K, D> parentEntry, BiosParameterBlock bpb)
-            : base(bpb.BytesPerSector)
+        public IndexBlock(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb)
+            : base("INDX", bpb.BytesPerSector)
         {
             _index = index;
             _parentNode = parentNode;
-            _parentEntry = parentEntry;
 
             Stream stream = index.AllocationStream;
-            _streamPosition = _parentEntry.ChildrenVirtualCluster * bpb.BytesPerSector * bpb.SectorsPerCluster;
+            _streamPosition = parentEntry.ChildrenVirtualCluster * bpb.BytesPerSector * bpb.SectorsPerCluster;
             stream.Position = _streamPosition;
             byte[] buffer = Utilities.ReadFully(stream, (int)index.IndexBufferSize);
             FromBytes(buffer, 0);
+        }
+
+        private IndexBlock(Index index, IndexNode parentNode, long vcn, BiosParameterBlock bpb)
+            : base("INDX", bpb.BytesPerSector, bpb.IndexBufferSize)
+        {
+            _index = index;
+            _parentNode = parentNode;
+
+            IndexBlockVcn = (ulong)vcn;
+
+            _streamPosition = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
+
+            Node = new IndexNode(Store, _index, _parentNode, (uint)bpb.IndexBufferSize - FieldSize);
+
+            WriteToDisk();
         }
 
         protected override void Read(byte[] buffer, int offset)
@@ -59,14 +75,14 @@ namespace DiscUtils.Ntfs
             // Skip FixupRecord fields...
             LogSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             IndexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            Node = new IndexNode<K, D>(Store, _index, _parentNode, buffer, offset + 0x18);
+            Node = new IndexNode(Store, _index, _parentNode, buffer, offset + FieldSize);
         }
 
         protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
         {
             Utilities.WriteBytesLittleEndian(LogSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(IndexBlockVcn, buffer, offset + 0x10);
-            return (ushort)(0x18 + Node.WriteTo(buffer, offset + 0x18, updateSeqSize));
+            return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize, updateSeqSize));
         }
 
         protected override int CalcSize(int updateSeqSize)
@@ -74,7 +90,7 @@ namespace DiscUtils.Ntfs
             throw new NotImplementedException();
         }
 
-        public void Store(IndexNode<K, D> node)
+        public void Store(IndexNode node)
         {
             Node = node;
             WriteToDisk();
@@ -88,6 +104,13 @@ namespace DiscUtils.Ntfs
             Stream stream = _index.AllocationStream;
             stream.Position = _streamPosition;
             stream.Write(buffer, 0, buffer.Length);
+        }
+
+        internal static IndexBlock Initialize(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb, IEnumerable<IndexEntry> initialEntries)
+        {
+            IndexBlock block = new IndexBlock(index, parentNode, parentEntry.ChildrenVirtualCluster, bpb);
+            block.Node.InternalAddEntries(initialEntries);
+            return block;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace DiscUtils.Ntfs
         public Directory(NtfsFileSystem fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, new FileNameComparer(_fileSystem.UpperCase));
+            _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
         }
 
         internal DirectoryEntry GetEntryByName(string name)
@@ -75,9 +75,22 @@ namespace DiscUtils.Ntfs
         }
 
 
-        internal void AddEntry(FileNameRecord newNameRecord, FileReference fileReference)
+        internal DirectoryEntry AddEntry(File file, string name)
         {
-            _index[newNameRecord] = fileReference;
+            FileNameRecord newNameRecord = file.GetFileNameRecord(null, true);
+            newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
+            newNameRecord.FileName = name;
+            newNameRecord.ParentDirectory = MftReference;
+
+            ushort newNameAttrId = file.CreateAttribute(AttributeType.FileName);
+            file.SetAttributeContent(newNameAttrId, newNameRecord);
+
+            file.HardLinkCount++;
+            file.UpdateRecordInMft();
+
+            _index[newNameRecord] = file.MftReference;
+
+            return new DirectoryEntry(this, file.MftReference, newNameRecord);
         }
 
         public override void Dump(TextWriter writer, string indent)
@@ -156,34 +169,6 @@ namespace DiscUtils.Ntfs
             }
 
             return entries;
-        }
-
-        private sealed class FileNameComparer : IComparer<FileNameRecord>
-        {
-            private IComparer<string> _nameComparer;
-
-            public FileNameComparer(IComparer<string> nameComparer)
-            {
-                _nameComparer = nameComparer;
-            }
-
-            public int Compare(FileNameRecord x, FileNameRecord y)
-            {
-                if (x == null && y == null)
-                {
-                    return 0;
-                }
-                else if (y == null) // Null is high (end of node value)
-                {
-                    return -1;
-                }
-                else if (x == null)
-                {
-                    return 1;
-                }
-
-                return _nameComparer.Compare(x.FileName, y.FileName);
-            }
         }
 
         private sealed class FileNameQuery : IComparable<FileNameRecord>

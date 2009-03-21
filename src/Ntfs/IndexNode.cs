@@ -26,33 +26,45 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal delegate void IndexNodeStore<K,D>(IndexNode<K,D> node)
-        where K : IByteArraySerializable, new()
-        where D : IByteArraySerializable, new();
+    internal delegate void IndexNodeStore(IndexNode node);
 
-    internal class IndexNode<K, D>
-        where K : IByteArraySerializable, new()
-        where D : IByteArraySerializable, new()
+    internal class IndexNode
     {
-        private IndexNodeStore<K, D> _store;
-        private Index<K, D> _index;
-        private IndexNode<K, D> _parent;
+        protected IndexNodeStore _store;
+        protected IndexHeader _header;
 
-        private IndexHeader _header;
-        private List<IndexEntry<K, D>> _entries;
+        private Index _index;
+        private IndexNode _parent;
 
-        public IndexNode(IndexNodeStore<K, D> store, Index<K,D> index, IndexNode<K, D> parent, byte[] buffer, int offset)
+        private List<IndexEntry> _entries;
+
+        public IndexNode(IndexNodeStore store, Index index, IndexNode parent, uint allocatedSize)
+        {
+            _store = store;
+            _index = index;
+            _parent = parent;
+            _header = new IndexHeader(allocatedSize);
+
+            IndexEntry endEntry = new IndexEntry(_index.IsFileIndex);
+            endEntry.Flags |= IndexEntryFlags.End;
+
+            _entries = new List<IndexEntry>();
+            _entries.Add(endEntry);
+        }
+
+        public IndexNode(IndexNodeStore store, Index index, IndexNode parent, byte[] buffer, int offset)
         {
             _store = store;
             _index = index;
             _parent = parent;
             _header = new IndexHeader(buffer, offset + 0);
 
-            _entries = new List<IndexEntry<K, D>>();
+            _entries = new List<IndexEntry>();
             int pos = (int)_header.OffsetToFirstEntry;
             while (pos < _header.TotalSizeOfEntries)
             {
-                IndexEntry<K, D> entry = new IndexEntry<K, D>(buffer, offset + pos);
+                IndexEntry entry = new IndexEntry(index.IsFileIndex);
+                entry.Read(buffer, offset + pos);
                 _entries.Add(entry);
 
                 if ((entry.Flags & IndexEntryFlags.End) != 0)
@@ -64,61 +76,121 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public ushort WriteTo(byte[] buffer, int offset, ushort updateSeqSize)
-        {
-            uint totalEntriesSize = 0;
-            foreach (var entry in _entries)
-            {
-                totalEntriesSize += (uint)entry.Size;
-            }
-
-            _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + updateSeqSize, 8);
-            _header.TotalSizeOfEntries = totalEntriesSize + _header.OffsetToFirstEntry;
-            _header.WriteTo(buffer, offset + 0);
-
-            int pos = (int)_header.OffsetToFirstEntry;
-            foreach (var entry in _entries)
-            {
-                entry.WriteTo(buffer, offset + pos);
-                pos += entry.Size;
-            }
-
-            return IndexHeader.Size;
-        }
-
         public IndexHeader Header
         {
             get { return _header; }
         }
 
-        public List<IndexEntry<K, D>> Entries
+        public List<IndexEntry> Entries
         {
             get { return _entries; }
         }
 
-        public void AddEntry(K key, IComparer<K> comparer, D data)
+        public void InternalAddEntries(IEnumerable<IndexEntry> newEntries)
+        {
+            uint totalNewSize = 0;
+            foreach (var newEntry in newEntries)
+            {
+                totalNewSize += (uint)newEntry.Size;
+            }
+
+            if (_header.AllocatedSizeOfEntries < _header.TotalSizeOfEntries + totalNewSize)
+            {
+                throw new ArgumentException("Too many new entries to fit into node", "newEntries");
+            }
+
+            foreach (var newEntry in newEntries)
+            {
+                if ((newEntry.Flags & IndexEntryFlags.End) != 0)
+                {
+                    if ((newEntry.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        throw new IOException("Trying to add 'end' node with children during internal processing - fault");
+                    }
+                    else
+                    {
+                        // Skip this one...
+                        continue;
+                    }
+                }
+
+                for (int i = 0; i < _entries.Count; ++i)
+                {
+                    var focus = _entries[i];
+                    int compVal;
+
+                    if ((focus.Flags & IndexEntryFlags.End) != 0)
+                    {
+                        // No value when End flag is set.  Logically these nodes always
+                        // compare 'bigger', so if there are children we'll visit them.
+                        compVal = -1;
+                    }
+                    else
+                    {
+                        compVal = _index.Compare(newEntry.KeyBuffer, focus.KeyBuffer);
+                    }
+
+                    if (compVal == 0)
+                    {
+                        throw new InvalidOperationException("Entry already exists");
+                    }
+                    else if (compVal < 0)
+                    {
+                        _entries.Insert(i, newEntry);
+                        break;
+                    }
+                }
+            }
+            _store(this);
+        }
+
+        public void AddEntry(byte[] key, byte[] data)
         {
             for (int i = 0; i < _entries.Count; ++i)
             {
                 var focus = _entries[i];
-                int compVal = comparer.Compare(key, focus.Key);
+                int compVal;
+
+                if ((focus.Flags & IndexEntryFlags.End) != 0)
+                {
+                    // No value when End flag is set.  Logically these nodes always
+                    // compare 'bigger', so if there are children we'll visit them.
+                    compVal = -1;
+                }
+                else
+                {
+                    compVal = _index.Compare(key, focus.KeyBuffer);
+                }
+
                 if (compVal == 0)
                 {
                     throw new InvalidOperationException("Entry already exists");
                 }
-                else if (compVal < 0 || (focus.Flags & IndexEntryFlags.End) != 0)
+                else if (compVal < 0)
                 {
                     if ((focus.Flags & IndexEntryFlags.Node) != 0)
                     {
-                        _index.GetSubBlock(this, focus).Node.AddEntry(key, comparer, data);
+                        _index.GetSubBlock(this, focus).Node.AddEntry(key, data);
                     }
                     else
                     {
                         // Insert before this entry
-                        IndexEntry<K, D> newEntry = new IndexEntry<K, D>(key, data);
+                        IndexEntry newEntry = new IndexEntry(key, data, _index.IsFileIndex);
                         if (_header.AllocatedSizeOfEntries < _header.TotalSizeOfEntries + newEntry.Size)
                         {
-                            throw new NotImplementedException("Re-balancing index nodes");
+                            if(_parent != null)
+                            {
+                                throw new NotImplementedException("Splitting a node");
+                            }
+
+                            IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
+                            newRootEntry.Flags = IndexEntryFlags.End;
+
+                            IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry, _entries);
+                            _entries.Clear();
+                            _entries.Add(newRootEntry);
+                            _store(this);
+                            newBlock.Node.AddEntry(key, data);
                         }
                         else
                         {
@@ -131,15 +203,15 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public void UpdateEntry(K key, IComparer<K> comparer, D data)
+        public void UpdateEntry(byte[] key, byte[] data)
         {
             for (int i = 0; i < _entries.Count; ++i)
             {
                 var focus = _entries[i];
-                int compVal = comparer.Compare(key, focus.Key);
+                int compVal = _index.Compare(key, focus.KeyBuffer);
                 if (compVal == 0)
                 {
-                    IndexEntry<K, D> newEntry = new IndexEntry<K, D>(focus, key, data);
+                    IndexEntry newEntry = new IndexEntry(focus, key, data);
                     if (_entries[i].Size != newEntry.Size)
                     {
                         throw new NotImplementedException("Changing index entry sizes");
@@ -153,7 +225,7 @@ namespace DiscUtils.Ntfs
             throw new IOException("No such index entry");
         }
 
-        public bool TryFindEntry(K key, IComparer<K> comparer, out IndexEntry<K, D> entry, out IndexNode<K, D> node)
+        public bool TryFindEntry(byte[] key, out IndexEntry entry, out IndexNode node)
         {
             foreach (var focus in _entries)
             {
@@ -161,14 +233,14 @@ namespace DiscUtils.Ntfs
                 {
                     if ((focus.Flags & IndexEntryFlags.Node) != 0)
                     {
-                        IndexBlock<K, D> subNode = _index.GetSubBlock(this, focus);
-                        return subNode.Node.TryFindEntry(key, comparer, out entry, out node);
+                        IndexBlock subNode = _index.GetSubBlock(this, focus);
+                        return subNode.Node.TryFindEntry(key, out entry, out node);
                     }
                     break;
                 }
                 else
                 {
-                    int compVal = comparer.Compare(key, focus.Key);
+                    int compVal = _index.Compare(key, focus.KeyBuffer);
                     if (compVal == 0)
                     {
                         entry = focus;
@@ -177,8 +249,8 @@ namespace DiscUtils.Ntfs
                     }
                     else if (compVal < 0 && (focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
                     {
-                        IndexBlock<K, D> subNode = _index.GetSubBlock(this, focus);
-                        return subNode.Node.TryFindEntry(key, comparer, out entry, out node);
+                        IndexBlock subNode = _index.GetSubBlock(this, focus);
+                        return subNode.Node.TryFindEntry(key, out entry, out node);
                     }
                 }
             }
@@ -186,6 +258,43 @@ namespace DiscUtils.Ntfs
             entry = null;
             node = null;
             return false;
+        }
+
+        public virtual ushort WriteTo(byte[] buffer, int offset, ushort updateSeqSize)
+        {
+            bool haveSubNodes = false;
+            uint totalEntriesSize = 0;
+            foreach (var entry in _entries)
+            {
+                totalEntriesSize += (uint)entry.Size;
+                haveSubNodes |= ((entry.Flags & IndexEntryFlags.Node) != 0);
+            }
+
+            _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + updateSeqSize, 8);
+            _header.TotalSizeOfEntries = totalEntriesSize + _header.OffsetToFirstEntry;
+            _header.HasChildNodes = (byte)(haveSubNodes ? 1 : 0);
+            _header.WriteTo(buffer, offset + 0);
+
+            int pos = (int)_header.OffsetToFirstEntry;
+            foreach (var entry in _entries)
+            {
+                entry.WriteTo(buffer, offset + pos);
+                pos += entry.Size;
+            }
+
+            return IndexHeader.Size;
+        }
+
+        public virtual int CalcSize(ushort updateSeqSize)
+        {
+            int totalEntriesSize = 0;
+            foreach (var entry in _entries)
+            {
+                totalEntriesSize += entry.Size;
+            }
+
+            int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + updateSeqSize, 8);
+            return firstEntryOffset + totalEntriesSize;
         }
 
     }

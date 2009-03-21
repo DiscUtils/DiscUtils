@@ -36,21 +36,34 @@ namespace DiscUtils.Ntfs
         private ushort _updateSequenceNumber;
         private ushort[] _updateSequenceArray;
 
-        public FixupRecordBase(int sectorSize)
+        public FixupRecordBase(string magic, int sectorSize)
         {
+            _magic = magic;
             _sectorSize = sectorSize;
+        }
+
+        public FixupRecordBase(string magic, int sectorSize, int recordLength)
+        {
+            Initialize(magic, sectorSize, recordLength);
+        }
+
+        protected void Initialize(string magic, int sectorSize, int recordLength)
+        {
+            _magic = magic;
+            _sectorSize = sectorSize;
+            _updateSequenceSize = (ushort)(1 + Utilities.Ceil(recordLength, sectorSize));
+            _updateSequenceNumber = 1;
+            _updateSequenceArray = new ushort[_updateSequenceSize - 1];
         }
 
         public string Magic
         {
             get { return _magic; }
-            set { _magic = value; }
         }
 
         public ushort UpdateSequenceOffset
         {
             get { return _updateSequenceOffset; }
-            set { _updateSequenceOffset = value; }
         }
 
         public ushort UpdateSequenceSize
@@ -65,7 +78,12 @@ namespace DiscUtils.Ntfs
 
         public void FromBytes(byte[] buffer, int offset)
         {
-            _magic = Utilities.BytesToString(buffer, offset + 0x00, 4);
+            string diskMagic = Utilities.BytesToString(buffer, offset + 0x00, 4);
+            if (diskMagic != _magic)
+            {
+                return;
+            }
+
             _updateSequenceOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x04);
             _updateSequenceSize = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
 

@@ -147,6 +147,8 @@
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
+    <Compile Include="Ntfs\FileAttributeStream.cs" />
+    <Compile Include="Ntfs\ResidentAttributeStream.cs" />
     <Compile Include="Ntfs\StructuredNtfsAttribute.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />

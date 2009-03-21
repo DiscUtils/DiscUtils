@@ -20,10 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 
 namespace DiscUtils.Ntfs
 {
-    internal struct FileReference : IByteArraySerializable
+    internal struct FileReference : IByteArraySerializable, IComparable<FileReference>
     {
         private ulong _val;
 
@@ -100,5 +101,25 @@ namespace DiscUtils.Ntfs
         {
             return a._val != b._val;
         }
+
+        #region IComparable<FileReference> Members
+
+        public int CompareTo(FileReference other)
+        {
+            if (_val < other._val)
+            {
+                return -1;
+            }
+            else if (_val > other._val)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        #endregion
     }
 }

@@ -27,17 +27,30 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class ObjectIds : File
+    internal sealed class ObjectIds
     {
         private Index<IndexKey, IndexData> _index;
 
-        public ObjectIds(NtfsFileSystem fileSystem, FileRecord fileRecord)
-            : base(fileSystem, fileRecord)
+        public ObjectIds(File file)
         {
-            _index = new Index<IndexKey, IndexData>(this, "$O", _fileSystem.BiosParameterBlock, new IndexKeyComparer());
+            _index = new Index<IndexKey, IndexData>(file, "$O", file.FileSystem.BiosParameterBlock, null);
         }
 
-        public override void Dump(TextWriter writer, string indent)
+        internal void Add(Guid objId, FileReference mftRef, Guid birthId, Guid birthVolumeId, Guid birthDomainId)
+        {
+            IndexKey newKey = new IndexKey();
+            newKey.Id = objId;
+
+            IndexData newData = new IndexData();
+            newData.MftReference = mftRef;
+            newData.BirthObjectId = birthId;
+            newData.BirthVolumeId = birthVolumeId;
+            newData.BirthDomainId = birthDomainId;
+
+            _index[newKey] = newData;
+        }
+
+        public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "OBJECT ID INDEX");
 
@@ -77,14 +90,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class IndexKeyComparer : IComparer<IndexKey>
-        {
-            public int Compare(IndexKey x, IndexKey y)
-            {
-                return x.Id.CompareTo(y.Id);
-            }
-        }
-
         private sealed class IndexData : IByteArraySerializable
         {
             public FileReference MftReference;
@@ -104,7 +109,10 @@ namespace DiscUtils.Ntfs
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                throw new NotImplementedException();
+                MftReference.WriteTo(buffer, offset);
+                Utilities.WriteBytesLittleEndian(BirthVolumeId, buffer, offset + 0x08);
+                Utilities.WriteBytesLittleEndian(BirthObjectId, buffer, offset + 0x18);
+                Utilities.WriteBytesLittleEndian(BirthDomainId, buffer, offset + 0x28);
             }
 
             public int Size

@@ -28,73 +28,230 @@ using System.Linq;
 
 namespace DiscUtils.Ntfs
 {
-    internal class Index<K,D> : IDictionary<K,D>
-        where K : IByteArraySerializable, new()
-        where D : IByteArraySerializable, new()
+    internal class Index : IDictionary<byte[], byte[]>
     {
-        private File _file;
-        private string _name;
-        private BiosParameterBlock _bpb;
+        protected File _file;
+        protected string _name;
+        protected BiosParameterBlock _bpb;
+        private UpperCase _upCase;
+        private bool _isFileIndex;
 
-        private IComparer<K> _comparer;
+        private IComparer<byte[]> _comparer;
 
         private IndexRoot _root;
-        private IndexNode<K, D> _rootNode;
+        private IndexNode _rootNode;
         private Stream _indexStream;
+        private Bitmap _indexBitmap;
 
-        public Index(File file, string name, BiosParameterBlock bpb, IComparer<K> comparer)
+
+        public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
         {
             _file = file;
             _name = name;
             _bpb = bpb;
-            _comparer = comparer;
+            _upCase = upCase;
+            _isFileIndex = (name == "$I30");
 
             _root = _file.GetAttributeContent<IndexRoot>(AttributeType.IndexRoot, _name);
+            _comparer = GetCollator(_root.CollationRule);
 
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                _rootNode = new IndexNode<K, D>(StoreRootNode, this, null, buffer, IndexRoot.HeaderOffset);
+                _rootNode = new IndexNode(StoreRootNode, this, null, buffer, IndexRoot.HeaderOffset);
             }
 
             if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
             {
                 _indexStream = _file.OpenAttribute(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
             }
+
+            NtfsAttribute bitmapAttr = _file.GetAttribute(AttributeType.Bitmap, _name);
+            if (bitmapAttr != null)
+            {
+                _indexBitmap = new Bitmap(_file.OpenAttribute(bitmapAttr.Id, FileAccess.ReadWrite), long.MaxValue);
+            }
         }
 
-        public IEnumerable<KeyValuePair<K, D>> Entries
+        private IComparer<byte[]> GetCollator(AttributeCollationRule attributeCollationRule)
+        {
+            switch (attributeCollationRule)
+            {
+                case AttributeCollationRule.Filename:
+                    return new FileNameComparer(_upCase);
+                case AttributeCollationRule.SecurityHash:
+                    return new SecurityHashComparer();
+                case AttributeCollationRule.UnsignedLong:
+                    return new UnsignedLongComparer();
+                case AttributeCollationRule.MultipleUnsignedLongs:
+                    return new MultipleUnsignedLongComparer();
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal Stream AllocationStream
+        {
+            get { return _indexStream; }
+        }
+
+        internal uint IndexBufferSize
+        {
+            get { return _root.IndexAllocationSize; }
+        }
+
+        public IEnumerable<KeyValuePair<byte[],byte[]>> Entries
         {
             get
             {
                 return from entry in Enumerate(_rootNode)
-                       select new KeyValuePair<K, D>(entry.Key, entry.Data);
+                       select new KeyValuePair<byte[],byte[]>(entry.KeyBuffer, entry.DataBuffer);
             }
         }
 
-        public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
-        {
-            return from entry in FindAllIn(query, _rootNode)
-                   select new KeyValuePair<K, D>(entry.Key, entry.Data);
-        }
-
-        public KeyValuePair<K, D> FindFirst(IComparable<K> query)
+        public KeyValuePair<byte[], byte[]> FindFirst(IComparable<byte[]> query)
         {
             foreach (var entry in FindAll(query))
             {
                 return entry;
             }
 
-            return default(KeyValuePair<K,D>);
+            return new KeyValuePair<byte[], byte[]>();
         }
 
-        #region IDictionary<K,D> Members
+        public IEnumerable<KeyValuePair<byte[],byte[]>> FindAll(IComparable<byte[]> query)
+        {
+            return from entry in FindAllIn(query, _rootNode)
+                   select new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
+        }
 
-        public D this[K key]
+        internal bool IsFileIndex
+        {
+            get { return _isFileIndex; }
+        }
+
+        internal void StoreRootNode(IndexNode node)
+        {
+            _rootNode = node;
+            WriteRootNodeToDisk();
+        }
+
+        internal IndexBlock GetSubBlock(IndexNode parentNode, IndexEntry parentEntry)
+        {
+            return new IndexBlock(this, parentNode, parentEntry, _bpb);
+        }
+
+        internal IndexBlock AllocateBlock(IndexNode parentNode, IndexEntry parentEntry, IEnumerable<IndexEntry> initialEntries)
+        {
+            if (_indexStream == null)
+            {
+                ushort iaId = _file.CreateAttribute(AttributeType.IndexAllocation, _name);
+                _indexStream = _file.OpenAttribute(iaId, FileAccess.ReadWrite);
+            }
+
+            if (_indexBitmap == null)
+            {
+                ushort ibId = _file.CreateAttribute(AttributeType.Bitmap, _name);
+                _indexBitmap = new Bitmap(_file.OpenAttribute(ibId, FileAccess.ReadWrite), long.MaxValue);
+            }
+
+            long idx = _indexBitmap.AllocateFirstAvailable(0);
+            parentEntry.ChildrenVirtualCluster = idx;
+            parentEntry.Flags |= IndexEntryFlags.Node;
+            return IndexBlock.Initialize(this, parentNode, parentEntry, _bpb, initialEntries);
+        }
+
+        internal int Compare(byte[] x, byte[] y)
+        {
+            return _comparer.Compare(x, y);
+        }
+
+        private void WriteRootNodeToDisk()
+        {
+            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize(0);
+            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries];
+            _rootNode.WriteTo(buffer, 0, 0);
+            using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Write))
+            {
+                s.Position = IndexRoot.HeaderOffset;
+                s.Write(buffer, 0, buffer.Length);
+                s.SetLength(s.Position);
+            }
+        }
+
+        protected IEnumerable<IndexEntry> Enumerate(IndexNode node)
+        {
+            foreach (var focus in node.Entries)
+            {
+                if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexBlock block = GetSubBlock(node, focus);
+                    foreach (var subEntry in Enumerate(block.Node))
+                    {
+                        yield return subEntry;
+                    }
+                }
+
+                if ((focus.Flags & IndexEntryFlags.End) == 0)
+                {
+                    yield return focus;
+                }
+            }
+        }
+
+        private IEnumerable<IndexEntry> FindAllIn(IComparable<byte[]> query, IndexNode node)
+        {
+            foreach (var focus in node.Entries)
+            {
+                bool searchChildren = true;
+                bool matches = false;
+                bool keepIterating = true;
+
+                if ((focus.Flags & IndexEntryFlags.End) == 0)
+                {
+                    int compVal = query.CompareTo(focus.KeyBuffer);
+                    if (compVal == 0)
+                    {
+                        matches = true;
+                    }
+                    else if (compVal > 0)
+                    {
+                        searchChildren = false;
+                    }
+                    else if (compVal < 0)
+                    {
+                        keepIterating = false;
+                    }
+                }
+
+                if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexBlock block = GetSubBlock(node, focus);
+                    foreach (var entry in FindAllIn(query, block.Node))
+                    {
+                        yield return entry;
+                    }
+                }
+
+                if (matches)
+                {
+                    yield return focus;
+                }
+
+                if (!keepIterating)
+                {
+                    yield break;
+                }
+            }
+        }
+
+        #region IDictionary<byte[],byte[]> Members
+
+        public byte[] this[byte[] key]
         {
             get
             {
-                D value;
+                byte[] value;
                 if (TryGetValue(key, out value))
                 {
                     return value;
@@ -107,56 +264,56 @@ namespace DiscUtils.Ntfs
 
             set
             {
-                IndexEntry<K,D> oldEntry;
-                IndexNode<K,D> node;
-                if (_rootNode.TryFindEntry(key, _comparer, out oldEntry, out node))
+                IndexEntry oldEntry;
+                IndexNode node;
+                if (_rootNode.TryFindEntry(key, out oldEntry, out node))
                 {
-                    node.UpdateEntry(key, _comparer, value);
+                    node.UpdateEntry(key, value);
                 }
                 else
                 {
-                    _rootNode.AddEntry(key, _comparer, value);
+                    _rootNode.AddEntry(key, value);
                 }
             }
         }
 
-        public ICollection<K> Keys
+        public ICollection<byte[]> Keys
         {
             get
             {
-                IEnumerable<K> keys = from entry in Entries
-                                      select entry.Key;
-                return new List<K>(keys);
+                IEnumerable<byte[]> keys = from entry in Entries
+                                           select entry.Key;
+                return new List<byte[]>(keys);
             }
         }
 
-        public ICollection<D> Values
+        public ICollection<byte[]> Values
         {
             get
             {
-                IEnumerable<D> values = from entry in Entries
-                                        select entry.Value;
-                return new List<D>(values);
+                IEnumerable<byte[]> values = from entry in Entries
+                                             select entry.Value;
+                return new List<byte[]>(values);
             }
         }
 
-        public void Add(K key, D value)
+        public void Add(byte[] key, byte[] value)
         {
             throw new NotImplementedException();
         }
 
-        public bool ContainsKey(K key)
+        public bool ContainsKey(byte[] key)
         {
-            D value;
+            byte[] value;
             return TryGetValue(key, out value);
         }
 
-        public bool Remove(K key)
+        public bool Remove(byte[] key)
         {
             throw new NotImplementedException();
         }
 
-        public bool TryGetValue(K key, out D value)
+        public bool TryGetValue(byte[] key, out byte[] value)
         {
             //
             // TODO: This is sucky, should be using the index rather than enumerating all items!
@@ -171,15 +328,15 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            value = default(D);
+            value = default(byte[]);
             return false;
         }
 
         #endregion
 
-        #region ICollection<KeyValuePair<K,D>> Members
+        #region ICollection<KeyValuePair<byte[],byte[]>> Members
 
-        public void Add(KeyValuePair<K, D> item)
+        public void Add(KeyValuePair<byte[], byte[]> item)
         {
             throw new NotImplementedException();
         }
@@ -189,13 +346,13 @@ namespace DiscUtils.Ntfs
             throw new NotImplementedException();
         }
 
-        public bool Contains(KeyValuePair<K, D> item)
+        public bool Contains(KeyValuePair<byte[], byte[]> item)
         {
-            D value;
+            byte[] value;
             return TryGetValue(item.Key, out value);
         }
 
-        public void CopyTo(KeyValuePair<K, D>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<byte[], byte[]>[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
@@ -218,16 +375,16 @@ namespace DiscUtils.Ntfs
             get { return true; }
         }
 
-        public bool Remove(KeyValuePair<K, D> item)
+        public bool Remove(KeyValuePair<byte[], byte[]> item)
         {
             throw new NotImplementedException();
         }
 
         #endregion
 
-        #region IEnumerable<KeyValuePair<K,D>> Members
+        #region IEnumerable<KeyValuePair<byte[],byte[]>> Members
 
-        public IEnumerator<KeyValuePair<K, D>> GetEnumerator()
+        public IEnumerator<KeyValuePair<byte[], byte[]>> GetEnumerator()
         {
             foreach (var entry in Entries)
             {
@@ -246,108 +403,185 @@ namespace DiscUtils.Ntfs
 
         #endregion
 
-        internal Stream AllocationStream
+        private sealed class SecurityHashComparer : IComparer<byte[]>
         {
-            get { return _indexStream; }
-        }
-
-        internal uint IndexBufferSize
-        {
-            get { return _root.IndexAllocationSize; }
-        }
-
-        internal IndexBlock<K, D> GetSubBlock(IndexNode<K, D> parentNode, IndexEntry<K, D> parentEntry)
-        {
-            return new IndexBlock<K, D>(this, parentNode, parentEntry, _bpb);
-        }
-
-        internal void StoreRootNode(IndexNode<K, D> node)
-        {
-            _rootNode = node;
-            WriteRootNodeToDisk();
-        }
-
-        private bool TryFindEntry(K key, out IndexEntry<K, D> entry, out IndexNode<K, D> node)
-        {
-            return _rootNode.TryFindEntry(key, _comparer, out entry, out node);
-        }
-
-        private IEnumerable<IndexEntry<K, D>> Enumerate(IndexNode<K,D> node)
-        {
-            foreach (var focus in node.Entries)
+            public int Compare(byte[] x, byte[] y)
             {
-                if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                uint xHash = Utilities.ToUInt32LittleEndian(x, 0);
+                uint yHash = Utilities.ToUInt32LittleEndian(y, 0);
+
+                if (xHash < yHash)
                 {
-                    IndexBlock<K, D> block = GetSubBlock(node, focus);
-                    foreach (var subEntry in Enumerate(block.Node))
-                    {
-                        yield return subEntry;
-                    }
+                    return -1;
+                }
+                else if (xHash > yHash)
+                {
+                    return 1;
                 }
 
-                if ((focus.Flags & IndexEntryFlags.End) == 0)
+                uint xId = Utilities.ToUInt32LittleEndian(x, 4);
+                uint yId = Utilities.ToUInt32LittleEndian(y, 4);
+                if (xId < yId)
                 {
-                    yield return focus;
+                    return -1;
+                }
+                else if (xId > yId)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
                 }
             }
         }
 
-        private IEnumerable<IndexEntry<K, D>> FindAllIn(IComparable<K> query, IndexNode<K, D> node)
+        private sealed class UnsignedLongComparer : IComparer<byte[]>
         {
-            foreach (var focus in node.Entries)
+            public int Compare(byte[] x, byte[] y)
             {
-                bool searchChildren = true;
-                bool matches = false;
-                bool keepIterating = true;
+                uint xVal = Utilities.ToUInt32LittleEndian(x, 0);
+                uint yVal = Utilities.ToUInt32LittleEndian(y, 0);
 
-                if ((focus.Flags & IndexEntryFlags.End) == 0)
+                if (xVal < yVal)
                 {
-                    int compVal = query.CompareTo(focus.Key);
-                    if (compVal == 0)
+                    return -1;
+                }
+                else if (xVal > yVal)
+                {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+
+        private sealed class MultipleUnsignedLongComparer : IComparer<byte[]>
+        {
+            public int Compare(byte[] x, byte[] y)
+            {
+                for (int i = 0; i < x.Length; ++i)
+                {
+                    uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
+                    uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);
+
+                    if (xVal < yVal)
                     {
-                        matches = true;
+                        return -1;
                     }
-                    else if (compVal > 0)
+                    else if (xVal > yVal)
                     {
-                        searchChildren = false;
-                    }
-                    else if (compVal < 0)
-                    {
-                        keepIterating = false;
+                        return 1;
                     }
                 }
+                return 0;
+            }
+        }
 
-                if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
-                {
-                    IndexBlock<K, D> block = GetSubBlock(node, focus);
-                    foreach (var entry in FindAllIn(query, block.Node))
-                    {
-                        yield return entry;
-                    }
-                }
+        private sealed class FileNameComparer : IComparer<byte[]>
+        {
+            private UpperCase _stringComparer;
 
-                if (matches)
-                {
-                    yield return focus;
-                }
+            public FileNameComparer(UpperCase upCase)
+            {
+                _stringComparer = upCase;
+            }
 
-                if (!keepIterating)
+            public int Compare(byte[] x, byte[] y)
+            {
+                byte xFnLen = x[0x40];
+                byte yFnLen = y[0x40];
+
+                return _stringComparer.Compare(x, 0x42, xFnLen * 2, y, 0x42, yFnLen * 2);
+            }
+        }
+    }
+
+    internal class Index<K, D> : Index
+        where K : IByteArraySerializable, new()
+        where D : IByteArraySerializable, new()
+    {
+        public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
+            : base(file, name, bpb, upCase)
+        {
+        }
+
+        public new IEnumerable<KeyValuePair<K, D>> Entries
+        {
+            get
+            {
+                foreach (var entry in base.Entries)
                 {
-                    yield break;
+                    yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
                 }
             }
         }
 
-        private void WriteRootNodeToDisk()
+        public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
         {
-            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries];
-            _rootNode.WriteTo(buffer, 0, 0);
-            using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Write))
+            foreach (var entry in FindAll(new ComparableConverter(query)))
             {
-                s.Position = IndexRoot.HeaderOffset;
-                s.Write(buffer, 0, buffer.Length);
-                s.SetLength(s.Position);
+                yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
             }
         }
+
+        public KeyValuePair<K, D> FindFirst(IComparable<K> query)
+        {
+            foreach (var entry in FindAll(query))
+            {
+                return entry;
+            }
+
+            return default(KeyValuePair<K, D>);
+        }
+
+        public D this[K key]
+        {
+            get
+            {
+                return Convert<D>(base[Unconvert(key)]);
+            }
+
+            set
+            {
+                base[Unconvert(key)] = Unconvert<D>(value);
+            }
+        }
+
+        public bool ContainsKey(K key)
+        {
+            return base.ContainsKey(Unconvert(key));
+        }
+
+        private static T Convert<T>(byte[] data)
+            where T : IByteArraySerializable, new()
+        {
+            T result = new T();
+            result.ReadFrom(data, 0);
+            return result;
+        }
+
+        private static byte[] Unconvert<T>(T value)
+            where T : IByteArraySerializable, new()
+        {
+            byte[] buffer = new byte[value.Size];
+            value.WriteTo(buffer, 0);
+            return buffer;
+        }
+
+        private class ComparableConverter : IComparable<byte[]>
+        {
+            private IComparable<K> _wrapped;
+
+            public ComparableConverter(IComparable<K> toWrap)
+            {
+                _wrapped = toWrap;
+            }
+
+            public int CompareTo(byte[] other)
+            {
+                return _wrapped.CompareTo(Convert<K>(other));
+            }
+        }
+
     }
 }

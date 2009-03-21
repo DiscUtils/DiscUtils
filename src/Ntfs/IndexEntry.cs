@@ -32,42 +32,56 @@ namespace DiscUtils.Ntfs
         End = 0x02
     }
 
-    internal class IndexEntry<K, D>
-        where K : IByteArraySerializable, new()
-        where D : IByteArraySerializable, new()
+    internal class IndexEntry
     {
+        public const int EndNodeSize = 0x18;
+
         private bool _isFileIndexEntry;
+        protected IndexEntryFlags _flags;
+        protected long _vcn; // Only valid if Node flag set
 
-        private IndexEntryFlags _flags;
+        protected byte[] _keyBuffer;
+        protected byte[] _dataBuffer;
 
-        // Only valid if Node flag set
-        private long _vcn;
+        public IndexEntry(bool isFileIndexEntry)
+        {
+            _isFileIndexEntry = isFileIndexEntry;
+        }
 
-        private K _key;
-        private D _data;
-
-        public IndexEntry(IndexEntry<K, D> toCopy, K newKey, D newData)
+        public IndexEntry(IndexEntry toCopy, byte[] newKey, byte[] newData)
         {
             _isFileIndexEntry = toCopy._isFileIndexEntry;
-            _flags = toCopy.Flags;
+            _flags = toCopy._flags;
             _vcn = toCopy._vcn;
-
-            _key = newKey;
-            _data = newData;
+            _keyBuffer = newKey;
+            _dataBuffer = newData;
         }
 
-        public IndexEntry(K newKey, D newData)
+        public IndexEntry(byte[] key, byte[] data, bool isFileIndexEntry)
         {
-            _isFileIndexEntry = typeof(D) == typeof(FileReference);
+            _isFileIndexEntry = isFileIndexEntry;
             _flags = IndexEntryFlags.None;
-            _key = newKey;
-            _data = newData;
+            _keyBuffer = key;
+            _dataBuffer = data;
         }
 
-        public IndexEntry(byte[] buffer, int offset)
+        protected bool IsFileIndexEntry
         {
-            _isFileIndexEntry = typeof(D) == typeof(FileReference);
+            get { return _isFileIndexEntry; }
+        }
 
+        public byte[] KeyBuffer
+        {
+            get { return _keyBuffer; }
+        }
+
+        public byte[] DataBuffer
+        {
+            get { return _dataBuffer; }
+        }
+
+        public virtual void Read(byte[] buffer, int offset)
+        {
             ushort dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x00);
             ushort dataLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             ushort length = Utilities.ToUInt16LittleEndian(buffer, offset + 0x08);
@@ -76,18 +90,19 @@ namespace DiscUtils.Ntfs
 
             if ((_flags & IndexEntryFlags.End) == 0)
             {
-                _key = new K();
-                _key.ReadFrom(buffer, offset + 0x10);
+                _keyBuffer = new byte[keyLength];
+                Array.Copy(buffer, offset + 0x10, _keyBuffer, 0, keyLength);
 
-                _data = new D();
-                if (_isFileIndexEntry)
+                if (IsFileIndexEntry)
                 {
                     // Special case, for file indexes, the MFT ref is held where the data offset & length go
-                    _data.ReadFrom(buffer, offset + 0x00);
+                    _dataBuffer = new byte[8];
+                    Array.Copy(buffer, offset + 0x00, _dataBuffer, 0, 8);
                 }
                 else
                 {
-                    _data.ReadFrom(buffer, offset + 0x10 + keyLength);
+                    _dataBuffer = new byte[dataLength];
+                    Array.Copy(buffer, offset + 0x10 + keyLength, _dataBuffer, 0, dataLength);
                 }
             }
 
@@ -95,37 +110,55 @@ namespace DiscUtils.Ntfs
             {
                 _vcn = Utilities.ToInt64LittleEndian(buffer, offset + length - 8);
             }
+        }
 
-            if (length != Size)
+        public virtual int Size
+        {
+            get
             {
-                throw new Exception();
+                int size = 0x10; // start of variable data
+
+                if ((_flags & IndexEntryFlags.End) == 0)
+                {
+                    size += _keyBuffer.Length;
+                    size += IsFileIndexEntry ? 0 : _dataBuffer.Length;
+                }
+
+                size = Utilities.RoundUp(size, 8);
+
+                if ((_flags & IndexEntryFlags.Node) != 0)
+                {
+                    size += 8;
+                }
+
+                return size;
             }
         }
 
-        public void WriteTo(byte[] buffer, int offset)
+        public virtual void WriteTo(byte[] buffer, int offset)
         {
             ushort length = (ushort)Size;
 
             if ((_flags & IndexEntryFlags.End) == 0)
             {
-                ushort keyLength = (ushort)_key.Size;
+                ushort keyLength = (ushort)_keyBuffer.Length;
 
-                if (_isFileIndexEntry)
+                if (IsFileIndexEntry)
                 {
-                    _data.WriteTo(buffer, offset + 0x00);
+                    Array.Copy(_dataBuffer, 0, buffer, offset + 0x00, 8);
                 }
                 else
                 {
-                    ushort dataOffset = (ushort)(_isFileIndexEntry ? 0 : (0x10 + keyLength));
-                    ushort dataLength = (ushort)_data.Size;
+                    ushort dataOffset = (ushort)(IsFileIndexEntry ? 0 : (0x10 + keyLength));
+                    ushort dataLength = (ushort)_dataBuffer.Length;
 
                     Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x00);
                     Utilities.WriteBytesLittleEndian(dataLength, buffer, offset + 0x02);
-                    _data.WriteTo(buffer, offset + dataOffset);
+                    Array.Copy(_dataBuffer, 0, buffer, offset + dataOffset, _dataBuffer.Length);
                 }
 
                 Utilities.WriteBytesLittleEndian(keyLength, buffer, offset + 0x0A);
-                _key.WriteTo(buffer, offset + 0x10);
+                Array.Copy(_keyBuffer, 0, buffer, offset + 0x10, _keyBuffer.Length);
             }
             else
             {
@@ -142,47 +175,16 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public int Size
-        {
-            get
-            {
-                int size = 0x10; // start of variable data
-
-                if ((_flags & IndexEntryFlags.End) == 0)
-                {
-                    size += _key.Size;
-                    size += _isFileIndexEntry ? 0 : _data.Size;
-                }
-
-                size = Utilities.RoundUp(size, 8);
-
-                if ((_flags & IndexEntryFlags.Node) != 0)
-                {
-                    size += 8;
-                }
-
-                return size;
-            }
-        }
-
         public IndexEntryFlags Flags
         {
             get { return _flags; }
+            set { _flags = value; }
         }
 
         public long ChildrenVirtualCluster
         {
             get { return _vcn; }
-        }
-
-        public K Key
-        {
-            get { return _key; }
-        }
-
-        public D Data
-        {
-            get { return _data; }
+            set { _vcn = value; }
         }
     }
 }

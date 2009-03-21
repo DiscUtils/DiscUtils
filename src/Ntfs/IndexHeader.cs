@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 
 namespace DiscUtils.Ntfs
 {
@@ -32,6 +31,11 @@ namespace DiscUtils.Ntfs
         public uint TotalSizeOfEntries;
         public uint AllocatedSizeOfEntries;
         public byte HasChildNodes;
+
+        public IndexHeader(uint allocatedSize)
+        {
+            AllocatedSizeOfEntries = allocatedSize;
+        }
 
         public IndexHeader(byte[] data, int offset)
         {

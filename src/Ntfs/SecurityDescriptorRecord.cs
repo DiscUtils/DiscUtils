@@ -50,15 +50,5 @@ namespace DiscUtils.Ntfs
                 return false;
             }
         }
-
-        private uint CalcHash()
-        {
-            uint hash = 0;
-            for (int i = 0; i < SecurityDescriptor.Length / 4; ++i)
-            {
-                hash = Utilities.ToUInt32LittleEndian(SecurityDescriptor, i * 4) + ((hash << 3) | (hash >> 29));
-            }
-            return hash;
-        }
     }
 }
