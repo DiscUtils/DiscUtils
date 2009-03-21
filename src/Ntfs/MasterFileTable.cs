@@ -30,6 +30,7 @@ namespace DiscUtils.Ntfs
     {
         private NtfsFileSystem _fileSystem;
         private File _self;
+        private File _mirror;
         private Bitmap _bitmap;
         private Stream _records;
         private Dictionary<long, WeakReference> _fileCache;
@@ -111,6 +112,8 @@ namespace DiscUtils.Ntfs
             _fileCache = new Dictionary<long, WeakReference>();
 
             _recordLength = fileSystem.BiosParameterBlock.MftRecordSize;
+
+            _mirror = GetFile(MftMirrorIndex);
         }
 
         public IEnumerable<File> Files
@@ -272,6 +275,17 @@ namespace DiscUtils.Ntfs
 
             _records.Position = record.MasterFileTableIndex * _recordLength;
             _records.Write(buffer, 0, _recordLength);
+            _records.Flush();
+
+            // Need to update Mirror...
+            if (record.MasterFileTableIndex < 4)
+            {
+                using (Stream s = _mirror.GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite))
+                {
+                    s.Position = record.MasterFileTableIndex * _recordLength;
+                    s.Write(buffer, 0, _recordLength);
+                }
+            }
         }
 
         public void Dump(TextWriter writer, string indent)

@@ -84,8 +84,23 @@ namespace DiscUtils.Ntfs
         {
             if (_mftDirty)
             {
-                _file.UpdateRecordInMft();
-                _mftDirty = false;
+                // Complex to avoid a recursive loop when extending the MFT.  If the dirty
+                // flag wasn't set to false, then updating the record in the MFT causes a
+                // Flush on it's own stream, ad-infinitum...
+                bool succeeded = false;
+                try
+                {
+                    _mftDirty = false;
+                    _file.UpdateRecordInMft();
+                    succeeded = true;
+                }
+                finally
+                {
+                    if (!succeeded)
+                    {
+                        _mftDirty = true;
+                    }
+                }
             }
         }
 
