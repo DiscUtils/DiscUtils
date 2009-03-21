@@ -130,14 +130,14 @@ namespace DiscUtils.Ntfs
                 using (Stream s = Open(FileAccess.Read))
                 {
                     string hex = "";
-                    byte[] buffer = new byte[128];
+                    byte[] buffer = new byte[32];
                     int numBytes = s.Read(buffer, 0, buffer.Length);
                     for (int i = 0; i < numBytes; ++i)
                     {
                         hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
                     }
 
-                    writer.WriteLine(indent + "    Data: " + hex + "...");
+                    writer.WriteLine(indent + "    Data: " + hex + ((numBytes < s.Length) ? "..." : ""));
                 }
             }
         }

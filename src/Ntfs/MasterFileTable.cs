@@ -237,12 +237,19 @@ namespace DiscUtils.Ntfs
         {
             if (_bitmap.IsPresent(index))
             {
-                _records.Position = index * _recordLength;
-                byte[] recordBuffer = Utilities.ReadFully(_records, _recordLength);
+                if ((index + 1) * _recordLength <= _records.Length)
+                {
+                    _records.Position = index * _recordLength;
+                    byte[] recordBuffer = Utilities.ReadFully(_records, _recordLength);
 
-                FileRecord record = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector);
-                record.FromBytes(recordBuffer, 0);
-                return record;
+                    FileRecord record = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector);
+                    record.FromBytes(recordBuffer, 0);
+                    return record;
+                }
+                else
+                {
+                    return new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, (uint)index);
+                }
             }
             return null;
         }
