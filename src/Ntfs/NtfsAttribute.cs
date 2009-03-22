@@ -31,7 +31,7 @@ namespace DiscUtils.Ntfs
         protected File _file;
         protected AttributeRecord _record;
 
-        public NtfsAttribute(File file, AttributeRecord record)
+        protected NtfsAttribute(File file, AttributeRecord record)
         {
             _file = file;
             _record = record;
@@ -70,13 +70,14 @@ namespace DiscUtils.Ntfs
             }
 
             byte[] buffer;
-            using (Stream attrStream = OpenRaw(FileAccess.Read))
+            using (Stream attrStream = OpenRaw(FileAccess.ReadWrite))
             {
                 buffer = Utilities.ReadFully(attrStream, Math.Min((int)attrStream.Length, maxData));
                 attrStream.SetLength(0);
             }
 
-            _record = nonResident ? (AttributeRecord)new NonResidentAttributeRecord(_record)
+            _record = nonResident
+                ? (AttributeRecord)new NonResidentAttributeRecord(_record)
                 : (AttributeRecord)new ResidentAttributeRecord(_record);
 
             using (Stream attrStream = OpenRaw(FileAccess.Write))
@@ -140,6 +141,8 @@ namespace DiscUtils.Ntfs
                     writer.WriteLine(indent + "    Data: " + hex + ((numBytes < s.Length) ? "..." : ""));
                 }
             }
+
+            _record.Dump(writer, indent + "  ");
         }
 
         internal SparseStream OpenRaw(FileAccess access)

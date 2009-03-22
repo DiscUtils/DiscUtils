@@ -24,6 +24,7 @@
   <AssemblyReferenceDirectories>
    <Directory>$(ProjectDir)/src/bin/Debug/</Directory>
   </AssemblyReferenceDirectories>
+  <Target Name="$(ProjectDir)/diag/bin/Release/DiscUtils.Diagnostics.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/src/bin/Release/DiscUtils.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>
@@ -65,6 +66,21 @@
  </Rules>
  <FxCopReport Version="1.36">
   <Namespaces>
+   <Namespace Name="DiscUtils.Diagnostics">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-03-22 22:16:33Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Diagnostics</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="45" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Fat">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-10 13:17:45Z">
@@ -291,6 +307,35 @@
    </Namespace>
   </Namespaces>
   <Targets>
+   <Target Name="$(ProjectDir)/diag/bin/Release/DiscUtils.Diagnostics.dll">
+    <Modules>
+     <Module Name="discutils.diagnostics.dll">
+      <Messages>
+       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Status="Excluded" Created="2009-03-22 22:16:33Z">
+        <Issue Name="NoStrongName">
+         <Item>'DiscUtils.Diagnostics.dll'</Item>
+        </Issue>
+        <Notes>
+         <User Name="Kenneth">
+          <Note Id="44" />
+         </User>
+        </Notes>
+       </Message>
+       <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-03-22 22:16:33Z">
+        <Issue Name="Assembly">
+         <Item>Utils</Item>
+         <Item>'DiscUtils.Diagnostics.dll'</Item>
+        </Issue>
+        <Notes>
+         <User Name="Kenneth">
+          <Note Id="45" />
+         </User>
+        </Notes>
+       </Message>
+      </Messages>
+     </Module>
+    </Modules>
+   </Target>
    <Target Name="$(ProjectDir)/src/bin/Release/DiscUtils.dll">
     <Modules>
      <Module Name="discutils.dll">
@@ -1152,6 +1197,8 @@
     <Note Id="40" Modified="2009-02-14 11:08:47Z">Vmdk is correct form of VMDK</Note>
     <Note Id="41" Modified="2009-02-22 11:33:46Z">Follows best-practice naming (VMFS is well-known), and names derived from public spec.</Note>
     <Note Id="42" Modified="2009-03-20 16:53:05Z">Despite the actual values, AttributeType is an enumeration, not flags.</Note>
+    <Note Id="44" Modified="2009-03-22 22:17:35Z">Deliberately not signing assemblies.</Note>
+    <Note Id="45" Modified="2009-03-22 22:17:50Z">DiscUtils is established project name</Note>
    </User>
   </Notes>
   <Rules>

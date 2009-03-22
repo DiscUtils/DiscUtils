@@ -415,6 +415,8 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "FILE (" + ToString() + ")");
             writer.WriteLine(indent + "  File Number: " + _baseRecord.MasterFileTableIndex);
 
+            _baseRecord.Dump(writer, indent + "  ");
+
             foreach (AttributeRecord attrRec in _baseRecord.Attributes)
             {
                 NtfsAttribute.FromRecord(this, attrRec).Dump(writer, indent + "  ");
@@ -425,17 +427,22 @@ namespace DiscUtils.Ntfs
         {
             NtfsAttribute[] attrs = GetAttributes(AttributeType.FileName);
 
+            string longName = "?????";
             int longest = 0;
-            string longName = attrs[0].ToString();
 
-            for (int i = 1; i < attrs.Length; ++i)
+            if (attrs != null && attrs.Length != 0)
             {
-                string name = attrs[i].ToString();
+                longName = attrs[0].ToString();
 
-                if (Utilities.Is8Dot3(longName))
+                for (int i = 1; i < attrs.Length; ++i)
                 {
-                    longest = i;
-                    longName = name;
+                    string name = attrs[i].ToString();
+
+                    if (Utilities.Is8Dot3(longName))
+                    {
+                        longest = i;
+                        longName = name;
+                    }
                 }
             }
 

@@ -312,12 +312,8 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "  Record Alloc Size: " + _recordAllocatedSize);
             writer.WriteLine(indent + "          Base File: " + _baseFile);
             writer.WriteLine(indent + "  Next Attribute Id: " + _nextAttributeId);
+            writer.WriteLine(indent + "    Attribute Count: " + _attributes.Count);
             writer.WriteLine(indent + "   Index (Self Ref): " + _index);
-
-            foreach (AttributeRecord attr in _attributes)
-            {
-                attr.Dump(writer, indent + "     ");
-            }
         }
 
     }

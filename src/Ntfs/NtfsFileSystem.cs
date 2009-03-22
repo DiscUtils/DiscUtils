@@ -32,7 +32,7 @@ namespace DiscUtils.Ntfs
     /// <summary>
     /// Class for accessing NTFS file systems.
     /// </summary>
-    public sealed class NtfsFileSystem : ReadOnlyDiscFileSystem
+    public sealed class NtfsFileSystem : ReadOnlyDiscFileSystem, IDiagnosticTraceable
     {
         private NtfsOptions _options;
 
@@ -601,7 +601,8 @@ namespace DiscUtils.Ntfs
         /// Writes a diagnostic dump of key NTFS structures.
         /// </summary>
         /// <param name="writer">The writer to receive the dump.</param>
-        public void Dump(TextWriter writer)
+        /// <param name="linePrefix">The indent to apply to the start of each line of output.</param>
+        public void Dump(TextWriter writer, string linePrefix)
         {
             writer.WriteLine("NTFS File System Dump");
             writer.WriteLine("=====================");
@@ -616,6 +617,15 @@ namespace DiscUtils.Ntfs
 
             writer.WriteLine();
             GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, "");
+
+            writer.WriteLine();
+            writer.WriteLine("FULL FILE LISTING");
+            foreach (var record in _mft.Records)
+            {
+                // Don't go through cache - these are short-lived, and this is (just!) diagnostics
+                File f = new File(this, _mft, record);
+                f.Dump(writer, "");
+            }
 
             writer.WriteLine();
             writer.WriteLine("DIRECTORY TREE");

@@ -20,20 +20,47 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
+using System;
+using System.Runtime.Serialization;
 
-namespace DiscUtils
+namespace DiscUtils.Diagnostics
 {
     /// <summary>
-    /// Interface exposed by objects that can provide a structured trace of their content.
+    /// Exception thrown when file system corruption is detected during verification.
     /// </summary>
-    public interface IDiagnosticTraceable
+    [Serializable]
+    public sealed class CorruptFileSystemException : Exception
     {
         /// <summary>
-        /// Writes a diagnostic report about the state of the object to a writer.
+        /// Creates a new instance.
         /// </summary>
-        /// <param name="writer">The writer to send the report to</param>
-        /// <param name="linePrefix">The prefix to place at the start of each line</param>
-        void Dump(TextWriter writer, string linePrefix);
+        public CorruptFileSystemException()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="message">The exception message.</param>
+        public CorruptFileSystemException(string message)
+            : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="message">The exception message</param>
+        /// <param name="innerException">The inner exception</param>
+        public CorruptFileSystemException(string message, Exception innerException)
+            :base(message, innerException)
+        {
+        }
+
+        private CorruptFileSystemException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
     }
 }

@@ -20,20 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
 using System.IO;
+using System.Text;
 
-namespace DiscUtils
+namespace DiscUtils.Diagnostics
 {
-    /// <summary>
-    /// Interface exposed by objects that can provide a structured trace of their content.
-    /// </summary>
-    public interface IDiagnosticTraceable
+    internal class NullTextWriter : TextWriter
     {
-        /// <summary>
-        /// Writes a diagnostic report about the state of the object to a writer.
-        /// </summary>
-        /// <param name="writer">The writer to send the report to</param>
-        /// <param name="linePrefix">The prefix to place at the start of each line</param>
-        void Dump(TextWriter writer, string linePrefix);
+        public NullTextWriter()
+            : base(CultureInfo.InvariantCulture)
+        {
+        }
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.Unicode; }
+        }
     }
 }

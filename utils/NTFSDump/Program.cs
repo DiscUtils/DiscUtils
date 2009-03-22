@@ -89,7 +89,7 @@ namespace NTFSDump
                         fs.Options.HideSystemFiles = !_showSystem.IsPresent;
                         fs.Options.HideMetafiles = !_showMeta.IsPresent;
 
-                        fs.Dump(Console.Out);
+                        fs.Dump(Console.Out, "");
                     }
                 }
             }

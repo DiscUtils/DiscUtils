@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Ntfs
@@ -147,6 +148,29 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public IEnumerable<FileRecord> Records
+        {
+            get
+            {
+                using (Stream mftStream = _self.OpenAttribute(AttributeType.Data, FileAccess.Read))
+                {
+                    while (mftStream.Position < mftStream.Length)
+                    {
+                        byte[] recordData = Utilities.ReadFully(mftStream, _recordLength);
+
+                        if (Utilities.BytesToString(recordData, 0, 4) != "FILE")
+                        {
+                            continue;
+                        }
+
+                        FileRecord record = new FileRecord(_bytesPerSector);
+                        record.FromBytes(recordData, 0);
+                        yield return record;
+                    }
+                }
+            }
+        }
+
         public FileRecord AllocateRecord()
         {
             uint index = (uint)_bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
@@ -232,20 +256,14 @@ namespace DiscUtils.Ntfs
         {
             writer.WriteLine(indent + "MASTER FILE TABLE");
             writer.WriteLine(indent + "  Record Length: " + _recordLength);
-            using (Stream mftStream = _self.OpenAttribute(AttributeType.Data, FileAccess.Read))
+
+            foreach (var record in Records)
             {
-                while (mftStream.Position < mftStream.Length)
+                record.Dump(writer, indent + "  ");
+
+                foreach (AttributeRecord attr in record.Attributes)
                 {
-                    byte[] recordData = Utilities.ReadFully(mftStream, _recordLength);
-
-                    if (Utilities.BytesToString(recordData, 0, 4) != "FILE")
-                    {
-                        continue;
-                    }
-
-                    FileRecord record = new FileRecord(_bytesPerSector);
-                    record.FromBytes(recordData, 0);
-                    record.Dump(writer, indent + "  ");
+                    attr.Dump(writer, indent + "     ");
                 }
             }
         }

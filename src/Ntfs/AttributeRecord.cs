@@ -298,7 +298,6 @@ namespace DiscUtils.Ntfs
             base.Dump(writer, indent);
             writer.WriteLine(indent + "     Data Length: " + DataLength);
             writer.WriteLine(indent + "         Indexed: " + _indexedFlag);
-            NtfsAttribute.FromRecord(null, this).Dump(writer, indent + "  ");
         }
     }
 
@@ -505,7 +504,6 @@ namespace DiscUtils.Ntfs
             }
 
             writer.WriteLine(indent + "       Data Runs:" + runStr);
-            writer.WriteLine(indent + "  NON-RESIDENT ATTRIBUTE <" + _type + ">");
         }
 
     }

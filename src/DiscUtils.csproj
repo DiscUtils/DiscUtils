@@ -73,7 +73,7 @@
     <Compile Include="Fat\FloppyDiskType.cs" />
     <Compile Include="FileLocator.cs" />
     <Compile Include="Geometry.cs" />
-    <Compile Include="IDiagnosticTracer.cs" />
+    <Compile Include="IDiagnosticTraceable.cs" />
     <Compile Include="Iso9660\BaseVolumeDescriptor.cs" />
     <Compile Include="Iso9660\BuildDirectoryInfo.cs" />
     <Compile Include="Iso9660\BuildDirectoryMember.cs" />
