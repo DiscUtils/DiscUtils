@@ -38,6 +38,8 @@ namespace DiscUtils.Ntfs
 
         private Stream _stream;
 
+
+        // Top-level file system structures
         private BiosParameterBlock _bpb;
 
         private MasterFileTable _mft;
@@ -53,6 +55,9 @@ namespace DiscUtils.Ntfs
         private ObjectIds _objectIds;
 
 
+        // Working state
+        private ObjectCache<long, File> _fileCache;
+
         /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
@@ -60,27 +65,27 @@ namespace DiscUtils.Ntfs
         public NtfsFileSystem(Stream stream)
         {
             _options = new NtfsOptions();
-
             _stream = stream;
 
+            _fileCache = new ObjectCache<long, File>();
 
             _stream.Position = 0;
             byte[] bytes = Utilities.ReadFully(_stream, 512);
 
             _bpb = BiosParameterBlock.FromBytes(bytes, 0);
 
-            _stream.Position = _bpb.MftCluster * _bpb.SectorsPerCluster * _bpb.BytesPerSector;
-            byte[] mftSelfRecordData = Utilities.ReadFully(_stream, _bpb.MftRecordSize * _bpb.SectorsPerCluster * _bpb.BytesPerSector);
-            FileRecord mftSelfRecord = new FileRecord(_bpb.BytesPerSector);
-            mftSelfRecord.FromBytes(mftSelfRecordData, 0);
+            // Bootstrap the Master File Table
+            _mft = new MasterFileTable();
+            File mftFile = new File(this, _mft, MasterFileTable.GetBootstrapRecord(_stream, _bpb));
+            _fileCache[MasterFileTable.MftIndex] = mftFile;
+            _mft.Initialize(mftFile);
 
-            // Initialize access to the well-known metadata files
-            _mft = new MasterFileTable(this, mftSelfRecord);
-            _bitmap = new ClusterBitmap(_mft.GetFile(MasterFileTable.BitmapIndex));
-            _attrDefs = new AttributeDefinitions(_mft.GetFile(MasterFileTable.AttrDefIndex));
-            _upperCase = new UpperCase(_mft.GetFile(MasterFileTable.UpCaseIndex));
-            _securityDescriptors = new SecurityDescriptors(_mft.GetFile(MasterFileTable.SecureIndex));
-            _objectIds = new ObjectIds(_mft.GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
+            // Initialize access to the other well-known metadata files
+            _bitmap = new ClusterBitmap(GetFile(MasterFileTable.BitmapIndex));
+            _attrDefs = new AttributeDefinitions(GetFile(MasterFileTable.AttrDefIndex));
+            _upperCase = new UpperCase(GetFile(MasterFileTable.UpCaseIndex));
+            _securityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
+            _objectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
 
 #if false
             byte[] buffer = new byte[1024];
@@ -201,7 +206,7 @@ namespace DiscUtils.Ntfs
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
             }
 
-            Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
+            Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
             return Utilities.Map<DirectoryEntry, string>(parentDir.GetAllEntries(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
         }
@@ -225,7 +230,7 @@ namespace DiscUtils.Ntfs
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
             }
 
-            Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
+            Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
             List<string> result = new List<string>();
             foreach (DirectoryEntry dirEntry in parentDir.GetAllEntries())
@@ -268,7 +273,7 @@ namespace DiscUtils.Ntfs
                     File file = File.CreateNew(this);
 
                     DirectoryEntry dirDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
-                    Directory destDir = _mft.GetDirectory(dirDirEntry.Reference);
+                    Directory destDir = GetDirectory(dirDirEntry.Reference);
                     entry = destDir.AddEntry(file, Path.GetFileName(path));
                 }
             }
@@ -280,7 +285,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                File file = _mft.GetFile(entry.Reference);
+                File file = GetFile(entry.Reference);
                 NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
 
                 if (attr == null)
@@ -322,7 +327,7 @@ namespace DiscUtils.Ntfs
                 throw new FileNotFoundException("No such file", file);
             }
 
-            File fileObj = _mft.GetFile(entry.Reference);
+            File fileObj = GetFile(entry.Reference);
             return fileObj.OpenAttribute(type, name, access);
         }
 
@@ -340,7 +345,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                File file = _mft.GetFile(dirEntry.Reference);
+                File file = GetFile(dirEntry.Reference);
 
                 NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
                 if (legacyAttr != null)
@@ -460,7 +465,7 @@ namespace DiscUtils.Ntfs
                 throw new FileNotFoundException("Destination directory not found", destinationDirName);
             }
 
-            Directory destinationDir = _mft.GetDirectory(destinationDirDirEntry.Reference);
+            Directory destinationDir = GetDirectory(destinationDirDirEntry.Reference);
             if (destinationDir == null)
             {
                 throw new FileNotFoundException("Destination directory not found", destinationDirName);
@@ -472,9 +477,90 @@ namespace DiscUtils.Ntfs
                 throw new IOException("A file with this name already exists: " + destinationName);
             }
 
-            File file = _mft.GetFile(sourceDirEntry.Reference);
+            File file = GetFile(sourceDirEntry.Reference);
             destinationDir.AddEntry(file, Path.GetFileName(destinationName));
         }
+
+        #region File access
+        internal Directory GetDirectory(long index)
+        {
+            return (Directory)GetFile(index);
+        }
+
+        internal Directory GetDirectory(FileReference fileReference)
+        {
+            return (Directory)GetFile(fileReference);
+        }
+
+        internal File GetFile(FileReference fileReference)
+        {
+            FileRecord record = _mft.GetRecord(fileReference);
+            if (record == null)
+            {
+                return null;
+            }
+
+            File file = _fileCache[fileReference.MftIndex];
+
+            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
+            {
+                file = null;
+            }
+
+            if (file == null)
+            {
+                if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
+                {
+                    file = new Directory(this, _mft, record);
+                }
+                else
+                {
+                    file = new File(this, _mft, record);
+                }
+                _fileCache[fileReference.MftIndex] = file;
+            }
+
+            return file;
+        }
+
+        internal File GetFile(long index)
+        {
+            FileRecord record = _mft.GetRecord(index);
+            if (record == null)
+            {
+                return null;
+            }
+
+            File file = _fileCache[index];
+
+            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
+            {
+                file = null;
+            }
+
+            if (file == null)
+            {
+                if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
+                {
+                    file = new Directory(this, _mft, record);
+                }
+                else
+                {
+                    file = new File(this, _mft, record);
+                }
+                _fileCache[index] = file;
+            }
+
+            return file;
+        }
+
+        internal File AllocateFile()
+        {
+            File file = new File(this, _mft, _mft.AllocateRecord());
+            _fileCache[file.MftReference.MftIndex] = file;
+            return file;
+        }
+        #endregion
 
         internal Stream RawStream
         {
@@ -484,11 +570,6 @@ namespace DiscUtils.Ntfs
         internal BiosParameterBlock BiosParameterBlock
         {
             get { return _bpb; }
-        }
-
-        internal MasterFileTable MasterFileTable
-        {
-            get { return _mft; }
         }
 
         internal ClusterBitmap ClusterBitmap
@@ -534,17 +615,17 @@ namespace DiscUtils.Ntfs
             _objectIds.Dump(writer, "");
 
             writer.WriteLine();
-            _mft.GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, "");
+            GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, "");
 
             writer.WriteLine();
             writer.WriteLine("DIRECTORY TREE");
             writer.WriteLine(@"\ (5)");
-            DumpDirectory(_mft.GetDirectory(MasterFileTable.RootDirIndex), writer, "");  // 5 = Root Dir
+            DumpDirectory(GetDirectory(MasterFileTable.RootDirIndex), writer, "");  // 5 = Root Dir
         }
 
         internal DirectoryEntry GetDirectoryEntry(string path)
         {
-            return GetDirectoryEntry(_mft.GetDirectory(MasterFileTable.RootDirIndex), path);
+            return GetDirectoryEntry(GetDirectory(MasterFileTable.RootDirIndex), path);
         }
 
         private DirectoryEntry GetDirectoryEntry(Directory dir, string path)
@@ -556,7 +637,7 @@ namespace DiscUtils.Ntfs
         private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
         {
             DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
-            Directory parentDir = _mft.GetDirectory(parentDirEntry.Reference);
+            Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
             foreach (DirectoryEntry de in parentDir.GetAllEntries())
             {
@@ -596,7 +677,7 @@ namespace DiscUtils.Ntfs
                     }
                     else if ((entry.Details.FileAttributes & FileAttributes.Directory) != 0)
                     {
-                        return GetDirectoryEntry(_mft.GetDirectory(entry.Reference), pathEntries, pathOffset + 1);
+                        return GetDirectoryEntry(GetDirectory(entry.Reference), pathEntries, pathOffset + 1);
                     }
                     else
                     {
@@ -614,7 +695,7 @@ namespace DiscUtils.Ntfs
         {
             foreach (DirectoryEntry dirEntry in dir.GetAllEntries())
             {
-                File file = _mft.GetFile(dirEntry.Reference);
+                File file = GetFile(dirEntry.Reference);
                 Directory asDir = file as Directory;
                 writer.WriteLine(indent + "+-" + file.ToString() + " (" + file.IndexInMft + ")");
 

@@ -35,7 +35,7 @@ namespace DiscUtils.Ntfs
             _file = file;
             NtfsAttribute attr = _file.GetAttribute(AttributeType.Data);
             _bitmap = new Bitmap(
-                attr.Open(FileAccess.ReadWrite),
+                attr.OpenRaw(FileAccess.ReadWrite),
                 Utilities.Ceil(file.FileSystem.BiosParameterBlock.TotalSectors64, file.FileSystem.BiosParameterBlock.SectorsPerCluster));
         }
 

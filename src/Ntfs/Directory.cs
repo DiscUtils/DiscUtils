@@ -32,8 +32,8 @@ namespace DiscUtils.Ntfs
         private Index<FileNameRecord, FileReference> _index;
 
 
-        public Directory(NtfsFileSystem fileSystem, FileRecord baseRecord)
-            : base(fileSystem, baseRecord)
+        public Directory(NtfsFileSystem fileSystem, MasterFileTable mft, FileRecord baseRecord)
+            : base(fileSystem, mft, baseRecord)
         {
             _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
         }
@@ -95,8 +95,8 @@ namespace DiscUtils.Ntfs
 
         public override void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "DIRECTORY (" + _baseRecord.ToString() + ")");
-            writer.WriteLine(indent + "  File Number: " + _baseRecord.MasterFileTableIndex);
+            writer.WriteLine(indent + "DIRECTORY (" + base.ToString() + ")");
+            writer.WriteLine(indent + "  File Number: " + IndexInMft);
 
             foreach (var entry in _index.Entries)
             {

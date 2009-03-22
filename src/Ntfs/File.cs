@@ -29,11 +29,14 @@ namespace DiscUtils.Ntfs
     internal class File
     {
         protected NtfsFileSystem _fileSystem;
-        protected FileRecord _baseRecord;
 
-        public File(NtfsFileSystem fileSystem, FileRecord baseRecord)
+        private MasterFileTable _mft;
+        private FileRecord _baseRecord;
+
+        public File(NtfsFileSystem fileSystem, MasterFileTable mft, FileRecord baseRecord)
         {
             _fileSystem = fileSystem;
+            _mft = mft;
             _baseRecord = baseRecord;
         }
 
@@ -67,7 +70,7 @@ namespace DiscUtils.Ntfs
             // Make attributes non-resident until the data in the record fits, start with DATA attributes
             // by default, then kick other 'can-be' attributes out, finally move indexes.
             bool fixedAttribute = true;
-            while (_baseRecord.Size > _fileSystem.MasterFileTable.RecordSize && fixedAttribute)
+            while (_baseRecord.Size > _mft.RecordSize && fixedAttribute)
             {
                 fixedAttribute = false;
                 foreach (var attr in _baseRecord.Attributes)
@@ -110,12 +113,12 @@ namespace DiscUtils.Ntfs
             }
 
             // Still too large?  Error.
-            if (_baseRecord.Size > _fileSystem.MasterFileTable.RecordSize)
+            if (_baseRecord.Size > _mft.RecordSize)
             {
                 throw new NotSupportedException("Spanning over multiple FileRecord entries - TBD");
             }
 
-            _fileSystem.MasterFileTable.WriteRecord(_baseRecord);
+            _mft.WriteRecord(_baseRecord);
         }
 
         private bool MakeIndexNonResident(string name)
@@ -395,7 +398,7 @@ namespace DiscUtils.Ntfs
             get
             {
                 FileNameRecord record = GetAttributeContent<FileNameRecord>(AttributeType.FileName);
-                return new DirectoryEntry(_fileSystem.MasterFileTable.GetDirectory(record.ParentDirectory), MftReference, record);
+                return new DirectoryEntry(_fileSystem.GetDirectory(record.ParentDirectory), MftReference, record);
             }
         }
 
@@ -409,7 +412,7 @@ namespace DiscUtils.Ntfs
 
         public virtual void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "FILE (" + _baseRecord.ToString() + ")");
+            writer.WriteLine(indent + "FILE (" + ToString() + ")");
             writer.WriteLine(indent + "  File Number: " + _baseRecord.MasterFileTableIndex);
 
             foreach (AttributeRecord attrRec in _baseRecord.Attributes)
@@ -449,7 +452,7 @@ namespace DiscUtils.Ntfs
                     StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(this, attrListRec);
                     foreach (var record in attrList.Content)
                     {
-                        FileRecord fileRec = _fileSystem.MasterFileTable.GetRecord(record.BaseFileReference);
+                        FileRecord fileRec = _mft.GetRecord(record.BaseFileReference);
                         yield return fileRec.GetAttribute(record.AttributeId);
                     }
                 }
@@ -468,7 +471,7 @@ namespace DiscUtils.Ntfs
         {
             DateTime now = DateTime.UtcNow;
 
-            File newFile = fileSystem.MasterFileTable.AllocateFile();
+            File newFile = fileSystem.AllocateFile();
 
             ushort attrId = newFile.CreateAttribute(AttributeType.StandardInformation);
             StandardInformation si = new StandardInformation();

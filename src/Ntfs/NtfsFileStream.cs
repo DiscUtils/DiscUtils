@@ -42,7 +42,7 @@ namespace DiscUtils.Ntfs
         {
             _entry = entry;
 
-            _file = fileSystem.MasterFileTable.GetFile(entry.Reference);
+            _file = fileSystem.GetFile(entry.Reference);
             _attrId = _file.GetAttribute(attrType, attrName).Id;
             _attrStream = _file.OpenAttribute(_attrId, access);
         }

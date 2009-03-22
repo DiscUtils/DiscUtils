@@ -46,7 +46,7 @@ namespace DiscUtils.Ntfs
             _access = access;
 
             _lastKnownUsn = _file.UpdateSequenceNumber;
-            _wrapped = _file.GetAttribute(_attrId).Open(_access);
+            _wrapped = _file.GetAttribute(_attrId).OpenRaw(_access);
         }
 
         public override void Close()
@@ -158,7 +158,7 @@ namespace DiscUtils.Ntfs
             long pos = _wrapped.Position;
             _wrapped.Dispose();
             _lastKnownUsn = _file.UpdateSequenceNumber;
-            _wrapped = _file.GetAttribute(_attrId).Open(_access);
+            _wrapped = _file.GetAttribute(_attrId).OpenRaw(_access);
             _wrapped.Position = pos;
         }
 

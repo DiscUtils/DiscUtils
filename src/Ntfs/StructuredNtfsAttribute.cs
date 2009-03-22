@@ -53,7 +53,7 @@ namespace DiscUtils.Ntfs
         {
             byte[] buffer = new byte[_structure.Size];
             _structure.WriteTo(buffer, 0);
-            using (Stream s = Open(FileAccess.Write))
+            using (Stream s = OpenRaw(FileAccess.Write))
             {
                 s.Write(buffer, 0, buffer.Length);
                 s.SetLength(buffer.Length);
@@ -77,7 +77,7 @@ namespace DiscUtils.Ntfs
         {
             if (!_initialized)
             {
-                using (Stream s = Open(FileAccess.Read))
+                using (Stream s = OpenRaw(FileAccess.Read))
                 {
                     byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
                     _structure.ReadFrom(buffer, 0);

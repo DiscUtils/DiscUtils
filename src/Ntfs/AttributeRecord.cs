@@ -105,7 +105,7 @@ namespace DiscUtils.Ntfs
             get { return _flags; }
         }
 
-        public abstract SparseStream Open(File file, FileAccess access);
+        public abstract SparseStream OpenRaw(File file, FileAccess access);
 
         public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
@@ -221,7 +221,7 @@ namespace DiscUtils.Ntfs
             set { throw new NotSupportedException(); }
         }
 
-        public override SparseStream Open(File file, FileAccess access)
+        public override SparseStream OpenRaw(File file, FileAccess access)
         {
             return new ResidentAttributeStream(file, new SparseMemoryStream(_memoryBuffer, access));
         }
@@ -381,7 +381,7 @@ namespace DiscUtils.Ntfs
             get { return _dataRuns; }
         }
 
-        public override SparseStream Open(File file, FileAccess access)
+        public override SparseStream OpenRaw(File file, FileAccess access)
         {
             return new NonResidentAttributeStream(file, access, this);
         }

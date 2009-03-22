@@ -26,16 +26,21 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
+    /// <summary>
+    /// Class representing the $MFT file on disk, including mirror.
+    /// </summary>
+    /// <remarks>This class only understands basic record structure, and is
+    /// ignorant of files that span multiple records.  This class should only
+    /// be used by the NtfsFileSystem and File classes.</remarks>
     internal class MasterFileTable : IDiagnosticTracer
     {
-        private NtfsFileSystem _fileSystem;
         private File _self;
         private File _mirror;
         private Bitmap _bitmap;
         private Stream _records;
-        private ObjectCache<long, File> _fileCache;
 
         private int _recordLength;
+        private int _bytesPerSector;
 
         /// <summary>
         /// MFT index of the MFT file itself.
@@ -102,94 +107,48 @@ namespace DiscUtils.Ntfs
         /// </summary>
         private const uint FirstAvailableMftIndex = 24;
 
-        public MasterFileTable(NtfsFileSystem fileSystem, FileRecord baseRecord)
+        public MasterFileTable()
         {
-            _fileSystem = fileSystem;
-            _self = new File(fileSystem, baseRecord);
-
-            _bitmap = new Bitmap(_self.GetAttribute(AttributeType.Bitmap).Open(FileAccess.ReadWrite), long.MaxValue);
-            _records = _self.GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
-            _fileCache = new ObjectCache<long,File>();
-            _fileCache[MftIndex] = _self;
-
-            _recordLength = fileSystem.BiosParameterBlock.MftRecordSize;
-
-            _mirror = GetFile(MftMirrorIndex);
         }
 
-        public Directory GetDirectory(long index)
+        public static FileRecord GetBootstrapRecord(Stream fsStream, BiosParameterBlock bpb)
         {
-            return (Directory)GetFile(index);
+            fsStream.Position = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
+            byte[] mftSelfRecordData = Utilities.ReadFully(fsStream, bpb.MftRecordSize * bpb.SectorsPerCluster * bpb.BytesPerSector);
+            FileRecord mftSelfRecord = new FileRecord(bpb.BytesPerSector);
+            mftSelfRecord.FromBytes(mftSelfRecordData, 0);
+            return mftSelfRecord;
         }
 
-        public Directory GetDirectory(FileReference fileReference)
+        public void Initialize(File file)
         {
-            return (Directory)GetFile(fileReference);
+            _self = file;
+
+            _bitmap = new Bitmap(_self.GetAttribute(AttributeType.Bitmap).OpenRaw(FileAccess.ReadWrite), long.MaxValue);
+            _records = _self.GetAttribute(AttributeType.Data).OpenRaw(FileAccess.ReadWrite);
+
+            _recordLength = _self.FileSystem.BiosParameterBlock.MftRecordSize;
+            _bytesPerSector = _self.FileSystem.BiosParameterBlock.BytesPerSector;
         }
 
-        public File GetFile(FileReference fileReference)
+        public int RecordSize
         {
-            FileRecord record = GetRecord(fileReference);
-            if (record == null)
-            {
-                return null;
-            }
+            get { return _recordLength; }
+        }
 
-            File file = _fileCache[fileReference.MftIndex];
-
-            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
+        private File Mirror
+        {
+            get
             {
-                file = null;
-            }
-
-            if (file == null)
-            {
-                if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
+                if (_mirror == null)
                 {
-                    file = new Directory(_fileSystem, record);
+                    _mirror = _self.FileSystem.GetFile(MftMirrorIndex);
                 }
-                else
-                {
-                    file = new File(_fileSystem, record);
-                }
-                _fileCache[fileReference.MftIndex] = file;
+                return _mirror;
             }
-
-            return file;
         }
 
-        public File GetFile(long index)
-        {
-            FileRecord record = GetRecord(index);
-            if (record == null)
-            {
-                return null;
-            }
-
-            File file = _fileCache[index];
-
-            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
-            {
-                file = null;
-            }
-
-            if (file == null)
-            {
-                if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
-                {
-                    file = new Directory(_fileSystem, record);
-                }
-                else
-                {
-                    file = new File(_fileSystem, record);
-                }
-                _fileCache[index] = file;
-            }
-
-            return file;
-        }
-
-        internal File AllocateFile()
+        public FileRecord AllocateRecord()
         {
             uint index = (uint)_bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
 
@@ -197,19 +156,17 @@ namespace DiscUtils.Ntfs
             if ((index + 1) * _recordLength <= _records.Length)
             {
                 newRecord = GetRecord(index);
-                newRecord.ReInitialize(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, index);
+                newRecord.ReInitialize(_bytesPerSector, _recordLength, index);
             }
             else
             {
-                newRecord = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, index);
+                newRecord = new FileRecord(_bytesPerSector, _recordLength, index);
             }
             WriteRecord(newRecord);
-            File file = new File(_fileSystem, newRecord);
-            _fileCache[file.MftReference.MftIndex] = file;
-            return file;
+            return newRecord;
         }
 
-        internal FileRecord GetRecord(FileReference fileReference)
+        public FileRecord GetRecord(FileReference fileReference)
         {
             FileRecord result = GetRecord(fileReference.MftIndex);
 
@@ -224,7 +181,7 @@ namespace DiscUtils.Ntfs
             return result;
         }
 
-        internal FileRecord GetRecord(long index)
+        public FileRecord GetRecord(long index)
         {
             if (_bitmap.IsPresent(index))
             {
@@ -233,24 +190,19 @@ namespace DiscUtils.Ntfs
                     _records.Position = index * _recordLength;
                     byte[] recordBuffer = Utilities.ReadFully(_records, _recordLength);
 
-                    FileRecord record = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector);
+                    FileRecord record = new FileRecord(_bytesPerSector);
                     record.FromBytes(recordBuffer, 0);
                     return record;
                 }
                 else
                 {
-                    return new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, (uint)index);
+                    return new FileRecord(_bytesPerSector, _recordLength, (uint)index);
                 }
             }
             return null;
         }
 
-        public int RecordSize
-        {
-            get { return _recordLength; }
-        }
-
-        internal void WriteRecord(FileRecord record)
+        public void WriteRecord(FileRecord record)
         {
             int recordSize = record.Size;
             if (recordSize > _recordLength)
@@ -265,10 +217,11 @@ namespace DiscUtils.Ntfs
             _records.Write(buffer, 0, _recordLength);
             _records.Flush();
 
-            // Need to update Mirror...
+            // Need to update Mirror.  OpenRaw is OK because this is short duration, and we don't
+            // extend or otherwise modify any meta-data, just the content of the Data stream.
             if (record.MasterFileTableIndex < 4)
             {
-                using (Stream s = _mirror.GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite))
+                using (Stream s = Mirror.GetAttribute(AttributeType.Data).OpenRaw(FileAccess.ReadWrite))
                 {
                     s.Position = record.MasterFileTableIndex * _recordLength;
                     s.Write(buffer, 0, _recordLength);
@@ -278,23 +231,20 @@ namespace DiscUtils.Ntfs
 
         public void Dump(TextWriter writer, string indent)
         {
-            int recordSize = _fileSystem.BiosParameterBlock.MftRecordSize;
-            ushort bytesPerSector = _fileSystem.BiosParameterBlock.BytesPerSector;
-
             writer.WriteLine(indent + "MASTER FILE TABLE");
             writer.WriteLine(indent + "  Record Length: " + _recordLength);
             using (Stream mftStream = _self.OpenAttribute(AttributeType.Data, FileAccess.Read))
             {
                 while (mftStream.Position < mftStream.Length)
                 {
-                    byte[] recordData = Utilities.ReadFully(mftStream, recordSize);
+                    byte[] recordData = Utilities.ReadFully(mftStream, _recordLength);
 
                     if (Utilities.BytesToString(recordData, 0, 4) != "FILE")
                     {
                         continue;
                     }
 
-                    FileRecord record = new FileRecord(bytesPerSector);
+                    FileRecord record = new FileRecord(_bytesPerSector);
                     record.FromBytes(recordData, 0);
                     record.Dump(writer, indent + "  ");
                 }
