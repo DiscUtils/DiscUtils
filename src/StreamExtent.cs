@@ -65,6 +65,19 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Calculates the union of a list of extents with another extent.
+        /// </summary>
+        /// <param name="extents">The list of extents</param>
+        /// <param name="other">The other extent</param>
+        /// <returns>The union of the extents.</returns>
+        public static IEnumerable<StreamExtent> Union(IEnumerable<StreamExtent> extents, StreamExtent other)
+        {
+            List<StreamExtent> otherList = new List<StreamExtent>();
+            otherList.Add(other);
+            return Union(extents, otherList);
+        }
+
+        /// <summary>
         /// Calculates the union of the extents of multiple streams.
         /// </summary>
         /// <param name="streams">The stream extents</param>
@@ -99,9 +112,10 @@ namespace DiscUtils
             while (validStreamsRemaining > 0)
             {
                 // Find the end of this extent
-                bool foundIntersection = false;
+                bool foundIntersection;
                 do
                 {
+                    foundIntersection = false;
                     validStreamsRemaining = 0;
                     for (int i = 0; i < streams.Length; ++i)
                     {
@@ -143,6 +157,19 @@ namespace DiscUtils
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Calculates the intersection of the extents of a stream with another extent.
+        /// </summary>
+        /// <param name="extents">The stream extents</param>
+        /// <param name="other">The extent to intersect</param>
+        /// <returns>The intersection of the extents.</returns>
+        public static IEnumerable<StreamExtent> Intersect(IEnumerable<StreamExtent> extents, StreamExtent other)
+        {
+            List<StreamExtent> otherList = new List<StreamExtent>(1);
+            otherList.Add(other);
+            return Intersect(extents, otherList);
         }
 
         /// <summary>

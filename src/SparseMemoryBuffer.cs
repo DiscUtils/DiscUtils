@@ -93,13 +93,14 @@ namespace DiscUtils
                 int chunkOffset = (int)(pos % _chunkSize);
                 int numToRead = (int)Math.Min(Math.Min(_chunkSize - chunkOffset, _capacity - (pos + totalRead)), count - totalRead);
 
-                if (_buffers.Count <= chunk || _buffers[chunk] == null)
+                byte[] chunkBuffer;
+                if (!_buffers.TryGetValue(chunk, out chunkBuffer))
                 {
                     Array.Clear(buffer, offset + totalRead, numToRead);
                 }
                 else
                 {
-                    Array.Copy(_buffers[chunk], chunkOffset, buffer, offset + totalRead, numToRead);
+                    Array.Copy(chunkBuffer, chunkOffset, buffer, offset + totalRead, numToRead);
                 }
 
                 totalRead += numToRead;
@@ -126,11 +127,14 @@ namespace DiscUtils
                 int chunkOffset = (int)(pos % _chunkSize);
                 int numToWrite = (int)Math.Min(_chunkSize - chunkOffset, count - totalWritten);
 
-                if (_buffers.Count <= chunk || _buffers[chunk] == null)
+                byte[] chunkBuffer;
+                if (!_buffers.TryGetValue(chunk, out chunkBuffer))
                 {
-                    _buffers[chunk] = new byte[_chunkSize];
+                    chunkBuffer = new byte[_chunkSize];
+                    _buffers[chunk] = chunkBuffer;
                 }
-                Array.Copy(buffer, offset + totalWritten, _buffers[chunk], chunkOffset, numToWrite);
+
+                Array.Copy(buffer, offset + totalWritten, chunkBuffer, chunkOffset, numToWrite);
 
                 totalWritten += numToWrite;
                 pos += numToWrite;
