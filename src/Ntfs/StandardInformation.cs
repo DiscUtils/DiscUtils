@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class StandardInformation : IByteArraySerializable, IDiagnosticTracer
+    internal sealed class StandardInformation : IByteArraySerializable, IDiagnosticTraceable
     {
         public DateTime CreationTime;
         public DateTime ModificationTime;

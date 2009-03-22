@@ -28,7 +28,7 @@ using System.Security.AccessControl;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class SecurityDescriptors : IDiagnosticTracer
+    internal sealed class SecurityDescriptors : IDiagnosticTraceable
     {
         private File _file;
         private Index<HashIndexKey, IndexData> _hashIndex;

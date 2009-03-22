@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Ntfs
@@ -32,7 +31,7 @@ namespace DiscUtils.Ntfs
     /// <remarks>This class only understands basic record structure, and is
     /// ignorant of files that span multiple records.  This class should only
     /// be used by the NtfsFileSystem and File classes.</remarks>
-    internal class MasterFileTable : IDiagnosticTracer
+    internal class MasterFileTable : IDiagnosticTraceable
     {
         private File _self;
         private File _mirror;

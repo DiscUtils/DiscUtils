@@ -26,7 +26,7 @@ using System.Text;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class VolumeName : IByteArraySerializable, IDiagnosticTracer
+    internal sealed class VolumeName : IByteArraySerializable, IDiagnosticTraceable
     {
         private string _name;
 

@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class ObjectId : IByteArraySerializable, IDiagnosticTracer
+    internal sealed class ObjectId : IByteArraySerializable, IDiagnosticTraceable
     {
         public Guid Id;
 

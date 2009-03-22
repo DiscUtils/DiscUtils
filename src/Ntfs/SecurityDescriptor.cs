@@ -26,7 +26,7 @@ using System.Security.AccessControl;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class SecurityDescriptor : IByteArraySerializable, IDiagnosticTracer
+    internal sealed class SecurityDescriptor : IByteArraySerializable, IDiagnosticTraceable
     {
         private FileSystemSecurity _securityDescriptor;
 

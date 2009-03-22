@@ -28,7 +28,7 @@ using System.Text;
 
 namespace DiscUtils.Ntfs
 {
-    internal class AttributeList : IByteArraySerializable, IDiagnosticTracer, ICollection<AttributeListRecord>
+    internal class AttributeList : IByteArraySerializable, IDiagnosticTraceable, ICollection<AttributeListRecord>
     {
         private List<AttributeListRecord> _records;
 
@@ -132,7 +132,7 @@ namespace DiscUtils.Ntfs
         #endregion
     }
 
-    internal class AttributeListRecord : IDiagnosticTracer
+    internal class AttributeListRecord : IDiagnosticTraceable
     {
         public AttributeType Type;
         public ushort RecordLength;

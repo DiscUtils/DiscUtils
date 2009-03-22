@@ -27,7 +27,7 @@ namespace DiscUtils
     /// <summary>
     /// Interface exposed by objects that can provide a structured trace of their content.
     /// </summary>
-    internal interface IDiagnosticTracer
+    internal interface IDiagnosticTraceable
     {
         void Dump(TextWriter writer, string indent);
     }

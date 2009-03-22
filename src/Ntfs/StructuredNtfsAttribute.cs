@@ -25,7 +25,7 @@ using System.IO;
 namespace DiscUtils.Ntfs
 {
     internal class StructuredNtfsAttribute<T> : NtfsAttribute
-        where T : IByteArraySerializable, IDiagnosticTracer, new()
+        where T : IByteArraySerializable, IDiagnosticTraceable, new()
     {
         private T _structure;
         private bool _initialized;

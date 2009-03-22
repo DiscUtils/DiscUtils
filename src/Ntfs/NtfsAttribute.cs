@@ -26,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class NtfsAttribute : IDiagnosticTracer
+    internal class NtfsAttribute : IDiagnosticTraceable
     {
         protected File _file;
         protected AttributeRecord _record;

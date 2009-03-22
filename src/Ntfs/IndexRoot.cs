@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class IndexRoot : IByteArraySerializable, IDiagnosticTracer
+    internal sealed class IndexRoot : IByteArraySerializable, IDiagnosticTraceable
     {
         private uint _attrType;
         private AttributeCollationRule _collationRule;

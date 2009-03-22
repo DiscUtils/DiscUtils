@@ -55,7 +55,7 @@ namespace DiscUtils.Ntfs
         Win32AndDos = 3
     }
 
-    internal class FileNameRecord : IByteArraySerializable, IDiagnosticTracer
+    internal class FileNameRecord : IByteArraySerializable, IDiagnosticTraceable
     {
         public FileReference ParentDirectory;
         public DateTime CreationTime;

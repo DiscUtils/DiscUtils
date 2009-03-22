@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class VolumeInformation : IByteArraySerializable, IDiagnosticTracer
+    internal sealed class VolumeInformation : IByteArraySerializable, IDiagnosticTraceable
     {
         private byte _majorVersion;
         private byte _minorVersion;

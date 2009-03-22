@@ -200,7 +200,7 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The attribute type</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
         public T GetAttributeContent<T>(AttributeType type)
-            where T : IByteArraySerializable, IDiagnosticTracer, new()
+            where T : IByteArraySerializable, IDiagnosticTraceable, new()
         {
             return new StructuredNtfsAttribute<T>(this, GetAttribute(type).Record).Content;
         }
@@ -213,7 +213,7 @@ namespace DiscUtils.Ntfs
         /// <param name="name">The attribute's name</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
         public T GetAttributeContent<T>(AttributeType type, string name)
-            where T : IByteArraySerializable, IDiagnosticTracer, new()
+            where T : IByteArraySerializable, IDiagnosticTraceable, new()
         {
             return new StructuredNtfsAttribute<T>(this, GetAttribute(type, name).Record).Content;
         }
@@ -225,7 +225,7 @@ namespace DiscUtils.Ntfs
         /// <param name="id">The attribute's id</param>
         /// <param name="value">The new value for the attribute</param>
         public void SetAttributeContent<T>(ushort id, T value)
-            where T : IByteArraySerializable, IDiagnosticTracer, new()
+            where T : IByteArraySerializable, IDiagnosticTraceable, new()
         {
             StructuredNtfsAttribute<T> attr = new StructuredNtfsAttribute<T>(this, GetAttribute(id).Record);
             attr.Content = value;
