@@ -36,7 +36,7 @@ namespace DiscUtils.Ntfs
         public ulong LogSequenceNumber;
         public ulong IndexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
 
-        public IndexNode Node;
+        private IndexNode _node;
 
         private Index _index;
         private IndexNode _parentNode;
@@ -65,9 +65,14 @@ namespace DiscUtils.Ntfs
 
             _streamPosition = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
 
-            Node = new IndexNode(Store, _index, _parentNode, (uint)bpb.IndexBufferSize - FieldSize);
+            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _parentNode, (uint)bpb.IndexBufferSize - FieldSize);
 
             WriteToDisk();
+        }
+
+        public IndexNode Node
+        {
+            get { return _node; }
         }
 
         protected override void Read(byte[] buffer, int offset)
@@ -75,25 +80,19 @@ namespace DiscUtils.Ntfs
             // Skip FixupRecord fields...
             LogSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             IndexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            Node = new IndexNode(Store, _index, _parentNode, buffer, offset + FieldSize);
+            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _parentNode, buffer, offset + FieldSize);
         }
 
-        protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
+        protected override ushort Write(byte[] buffer, int offset)
         {
             Utilities.WriteBytesLittleEndian(LogSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(IndexBlockVcn, buffer, offset + 0x10);
-            return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize, updateSeqSize));
+            return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize));
         }
 
-        protected override int CalcSize(int updateSeqSize)
+        protected override int CalcSize()
         {
             throw new NotImplementedException();
-        }
-
-        public void Store(IndexNode node)
-        {
-            Node = node;
-            WriteToDisk();
         }
 
         internal void WriteToDisk()
@@ -104,13 +103,12 @@ namespace DiscUtils.Ntfs
             Stream stream = _index.AllocationStream;
             stream.Position = _streamPosition;
             stream.Write(buffer, 0, buffer.Length);
+            stream.Flush();
         }
 
-        internal static IndexBlock Initialize(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb, IEnumerable<IndexEntry> initialEntries)
+        internal static IndexBlock Initialize(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb)
         {
-            IndexBlock block = new IndexBlock(index, parentNode, parentEntry.ChildrenVirtualCluster, bpb);
-            block.Node.InternalAddEntries(initialEntries);
-            return block;
+            return new IndexBlock(index, parentNode, parentEntry.ChildrenVirtualCluster, bpb);
         }
     }
 }

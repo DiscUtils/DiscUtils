@@ -44,7 +44,7 @@ namespace DiscUtils.Ntfs
 
         public uint MaxMftRecordSize
         {
-            get { return _baseRecord.MaxSize; }
+            get { return _baseRecord.AllocatedSize; }
         }
 
         public FileReference MftReference
@@ -57,6 +57,10 @@ namespace DiscUtils.Ntfs
             get { return _baseRecord.UpdateSequenceNumber; }
         }
 
+        public uint MftRecordFreeSpace
+        {
+            get { return _baseRecord.AllocatedSize - _baseRecord.RealSize; }
+        }
 
         public void UpdateRecordInMft()
         {

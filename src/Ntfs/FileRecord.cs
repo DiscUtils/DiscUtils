@@ -99,9 +99,14 @@ namespace DiscUtils.Ntfs
             set { _hardLinkCount = value; }
         }
 
-        public uint MaxSize
+        public uint AllocatedSize
         {
             get { return _recordAllocatedSize; }
+        }
+
+        public uint RealSize
+        {
+            get { return _recordRealSize; }
         }
 
         public FileRecordFlags Flags
@@ -232,12 +237,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        protected override ushort Write(byte[] buffer, int offset, ushort updateSeqSize)
+        protected override ushort Write(byte[] buffer, int offset)
         {
             ushort headerEnd = (ushort)(_haveIndex ? 0x30 : 0x2A);
 
-            _firstAttributeOffset = (ushort)Utilities.RoundUp(headerEnd + updateSeqSize, 0x08);
-            _recordRealSize = (uint)CalcSize(updateSeqSize);
+            _firstAttributeOffset = (ushort)Utilities.RoundUp(headerEnd + UpdateSequenceSize, 0x08);
+            _recordRealSize = (uint)CalcSize();
 
             Utilities.WriteBytesLittleEndian(_logFileSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(_sequenceNumber, buffer, offset + 0x10);
@@ -265,11 +270,11 @@ namespace DiscUtils.Ntfs
             return headerEnd;
         }
 
-        protected override int CalcSize(int updateSeqSize)
+        protected override int CalcSize()
         {
             int headerEnd = _haveIndex ? 0x30 : 0x2A;
 
-            int size = headerEnd + updateSeqSize;
+            int size = headerEnd + UpdateSequenceSize;
             foreach (var attr in _attributes)
             {
                 size += attr.Size;
@@ -297,7 +302,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "FILE RECORD (" + ToString() + ")");
             writer.WriteLine(indent + "              Magic: " + Magic);
             writer.WriteLine(indent + "  Update Seq Offset: " + UpdateSequenceOffset);
-            writer.WriteLine(indent + "    Update Seq Size: " + UpdateSequenceSize);
+            writer.WriteLine(indent + "   Update Seq Count: " + UpdateSequenceCount);
             writer.WriteLine(indent + "  Update Seq Number: " + UpdateSequenceNumber);
             writer.WriteLine(indent + "   Log File Seq Num: " + _logFileSequenceNumber);
             writer.WriteLine(indent + "    Sequence Number: " + _sequenceNumber);

@@ -43,6 +43,7 @@ namespace DiscUtils.Ntfs
         private Stream _indexStream;
         private Bitmap _indexBitmap;
 
+        private ObjectCache<long, IndexBlock> _blockCache;
 
         public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
         {
@@ -52,13 +53,19 @@ namespace DiscUtils.Ntfs
             _upCase = upCase;
             _isFileIndex = (name == "$I30");
 
+            _blockCache = new ObjectCache<long, IndexBlock>();
+
             _root = _file.GetAttributeContent<IndexRoot>(AttributeType.IndexRoot, _name);
             _comparer = GetCollator(_root.CollationRule);
 
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                _rootNode = new IndexNode(StoreRootNode, this, null, buffer, IndexRoot.HeaderOffset);
+                _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, buffer, IndexRoot.HeaderOffset);
+
+                // Give the attribute some room to breathe, so long as it doesn't squeeze others out
+                // BROKEN, BROKEN, BROKEN - how to figure this out?  Query at the point of adding entries to the root node?
+                _rootNode.TotalSpaceAvailable += _file.MftRecordFreeSpace - 100;
             }
 
             if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
@@ -130,18 +137,19 @@ namespace DiscUtils.Ntfs
             get { return _isFileIndex; }
         }
 
-        internal void StoreRootNode(IndexNode node)
-        {
-            _rootNode = node;
-            WriteRootNodeToDisk();
-        }
-
         internal IndexBlock GetSubBlock(IndexNode parentNode, IndexEntry parentEntry)
         {
-            return new IndexBlock(this, parentNode, parentEntry, _bpb);
+            IndexBlock block = _blockCache[parentEntry.ChildrenVirtualCluster];
+            if (block == null)
+            {
+                block = new IndexBlock(this, parentNode, parentEntry, _bpb);
+                _blockCache[parentEntry.ChildrenVirtualCluster] = block;
+            }
+
+            return block;
         }
 
-        internal IndexBlock AllocateBlock(IndexNode parentNode, IndexEntry parentEntry, IEnumerable<IndexEntry> initialEntries)
+        internal IndexBlock AllocateBlock(IndexNode parentNode, IndexEntry parentEntry)
         {
             if (_indexStream == null)
             {
@@ -156,9 +164,10 @@ namespace DiscUtils.Ntfs
             }
 
             long idx = _indexBitmap.AllocateFirstAvailable(0);
-            parentEntry.ChildrenVirtualCluster = idx;
+            parentEntry.ChildrenVirtualCluster = idx * Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             parentEntry.Flags |= IndexEntryFlags.Node;
-            return IndexBlock.Initialize(this, parentNode, parentEntry, _bpb, initialEntries);
+
+            return IndexBlock.Initialize(this, parentNode, parentEntry, _bpb);
         }
 
         internal int Compare(byte[] x, byte[] y)
@@ -168,9 +177,9 @@ namespace DiscUtils.Ntfs
 
         private void WriteRootNodeToDisk()
         {
-            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize(0);
+            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize();
             byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries];
-            _rootNode.WriteTo(buffer, 0, 0);
+            _rootNode.WriteTo(buffer, 0);
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Write))
             {
                 s.Position = IndexRoot.HeaderOffset;
@@ -459,7 +468,7 @@ namespace DiscUtils.Ntfs
         {
             public int Compare(byte[] x, byte[] y)
             {
-                for (int i = 0; i < x.Length; ++i)
+                for (int i = 0; i < x.Length / 4; ++i)
                 {
                     uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
                     uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);

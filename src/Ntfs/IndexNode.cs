@@ -26,24 +26,30 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal delegate void IndexNodeStore(IndexNode node);
+    internal delegate void IndexNodeSaveFn();
 
     internal class IndexNode
     {
-        protected IndexNodeStore _store;
-        protected IndexHeader _header;
+        private IndexNodeSaveFn _store;
+        private int _storageOverhead;
+        private long _totalSpaceAvailable;
+
+        private IndexHeader _header;
 
         private Index _index;
         private IndexNode _parent;
 
         private List<IndexEntry> _entries;
 
-        public IndexNode(IndexNodeStore store, Index index, IndexNode parent, uint allocatedSize)
+
+        public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, IndexNode parent, uint allocatedSize)
         {
             _store = store;
+            _storageOverhead = storeOverhead;
             _index = index;
             _parent = parent;
             _header = new IndexHeader(allocatedSize);
+            _totalSpaceAvailable = allocatedSize;
 
             IndexEntry endEntry = new IndexEntry(_index.IsFileIndex);
             endEntry.Flags |= IndexEntryFlags.End;
@@ -52,12 +58,14 @@ namespace DiscUtils.Ntfs
             _entries.Add(endEntry);
         }
 
-        public IndexNode(IndexNodeStore store, Index index, IndexNode parent, byte[] buffer, int offset)
+        public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, IndexNode parent, byte[] buffer, int offset)
         {
             _store = store;
+            _storageOverhead = storeOverhead;
             _index = index;
             _parent = parent;
             _header = new IndexHeader(buffer, offset + 0);
+            _totalSpaceAvailable = _header.AllocatedSizeOfEntries;
 
             _entries = new List<IndexEntry>();
             int pos = (int)_header.OffsetToFirstEntry;
@@ -86,121 +94,15 @@ namespace DiscUtils.Ntfs
             get { return _entries; }
         }
 
-        public void InternalAddEntries(IEnumerable<IndexEntry> newEntries)
+        internal long TotalSpaceAvailable
         {
-            uint totalNewSize = 0;
-            foreach (var newEntry in newEntries)
-            {
-                totalNewSize += (uint)newEntry.Size;
-            }
-
-            if (_header.AllocatedSizeOfEntries < _header.TotalSizeOfEntries + totalNewSize)
-            {
-                throw new ArgumentException("Too many new entries to fit into node", "newEntries");
-            }
-
-            foreach (var newEntry in newEntries)
-            {
-                if ((newEntry.Flags & IndexEntryFlags.End) != 0)
-                {
-                    if ((newEntry.Flags & IndexEntryFlags.Node) != 0)
-                    {
-                        throw new IOException("Trying to add 'end' node with children during internal processing - fault");
-                    }
-                    else
-                    {
-                        // Skip this one...
-                        continue;
-                    }
-                }
-
-                for (int i = 0; i < _entries.Count; ++i)
-                {
-                    var focus = _entries[i];
-                    int compVal;
-
-                    if ((focus.Flags & IndexEntryFlags.End) != 0)
-                    {
-                        // No value when End flag is set.  Logically these nodes always
-                        // compare 'bigger', so if there are children we'll visit them.
-                        compVal = -1;
-                    }
-                    else
-                    {
-                        compVal = _index.Compare(newEntry.KeyBuffer, focus.KeyBuffer);
-                    }
-
-                    if (compVal == 0)
-                    {
-                        throw new InvalidOperationException("Entry already exists");
-                    }
-                    else if (compVal < 0)
-                    {
-                        _entries.Insert(i, newEntry);
-                        break;
-                    }
-                }
-            }
-            _store(this);
+            get { return _totalSpaceAvailable; }
+            set { _totalSpaceAvailable = value; }
         }
 
         public void AddEntry(byte[] key, byte[] data)
         {
-            for (int i = 0; i < _entries.Count; ++i)
-            {
-                var focus = _entries[i];
-                int compVal;
-
-                if ((focus.Flags & IndexEntryFlags.End) != 0)
-                {
-                    // No value when End flag is set.  Logically these nodes always
-                    // compare 'bigger', so if there are children we'll visit them.
-                    compVal = -1;
-                }
-                else
-                {
-                    compVal = _index.Compare(key, focus.KeyBuffer);
-                }
-
-                if (compVal == 0)
-                {
-                    throw new InvalidOperationException("Entry already exists");
-                }
-                else if (compVal < 0)
-                {
-                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
-                    {
-                        _index.GetSubBlock(this, focus).Node.AddEntry(key, data);
-                    }
-                    else
-                    {
-                        // Insert before this entry
-                        IndexEntry newEntry = new IndexEntry(key, data, _index.IsFileIndex);
-                        if (_header.AllocatedSizeOfEntries < _header.TotalSizeOfEntries + newEntry.Size)
-                        {
-                            if(_parent != null)
-                            {
-                                throw new NotImplementedException("Splitting a node");
-                            }
-
-                            IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
-                            newRootEntry.Flags = IndexEntryFlags.End;
-
-                            IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry, _entries);
-                            _entries.Clear();
-                            _entries.Add(newRootEntry);
-                            _store(this);
-                            newBlock.Node.AddEntry(key, data);
-                        }
-                        else
-                        {
-                            _entries.Insert(i, newEntry);
-                            _store(this);
-                        }
-                        break;
-                    }
-                }
-            }
+            AddEntry(new IndexEntry(key, data, _index.IsFileIndex), false);
         }
 
         public void UpdateEntry(byte[] key, byte[] data)
@@ -217,7 +119,7 @@ namespace DiscUtils.Ntfs
                         throw new NotImplementedException("Changing index entry sizes");
                     }
                     _entries[i] = newEntry;
-                    _store(this);
+                    _store();
                     return;
                 }
             }
@@ -260,7 +162,7 @@ namespace DiscUtils.Ntfs
             return false;
         }
 
-        public virtual ushort WriteTo(byte[] buffer, int offset, ushort updateSeqSize)
+        public virtual ushort WriteTo(byte[] buffer, int offset)
         {
             bool haveSubNodes = false;
             uint totalEntriesSize = 0;
@@ -270,7 +172,7 @@ namespace DiscUtils.Ntfs
                 haveSubNodes |= ((entry.Flags & IndexEntryFlags.Node) != 0);
             }
 
-            _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + updateSeqSize, 8);
+            _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
             _header.TotalSizeOfEntries = totalEntriesSize + _header.OffsetToFirstEntry;
             _header.HasChildNodes = (byte)(haveSubNodes ? 1 : 0);
             _header.WriteTo(buffer, offset + 0);
@@ -285,7 +187,7 @@ namespace DiscUtils.Ntfs
             return IndexHeader.Size;
         }
 
-        public virtual int CalcSize(ushort updateSeqSize)
+        public virtual int CalcSize()
         {
             int totalEntriesSize = 0;
             foreach (var entry in _entries)
@@ -293,8 +195,153 @@ namespace DiscUtils.Ntfs
                 totalEntriesSize += entry.Size;
             }
 
-            int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + updateSeqSize, 8);
+            int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
             return firstEntryOffset + totalEntriesSize;
+        }
+
+        private long SpaceFree
+        {
+            get
+            {
+                long entriesTotal = 0;
+                for (int i = 0; i < _entries.Count; ++i)
+                {
+                    entriesTotal += _entries[i].Size;
+                }
+
+                int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+
+                return _totalSpaceAvailable - (entriesTotal + firstEntryOffset);
+            }
+        }
+
+        private void AddEntry(IndexEntry newEntry, bool promoting)
+        {
+            for (int i = 0; i < _entries.Count; ++i)
+            {
+                var focus = _entries[i];
+                int compVal;
+
+                if ((focus.Flags & IndexEntryFlags.End) != 0)
+                {
+                    // No value when End flag is set.  Logically these nodes always
+                    // compare 'bigger', so if there are children we'll visit them.
+                    compVal = -1;
+                }
+                else
+                {
+                    compVal = _index.Compare(newEntry.KeyBuffer, focus.KeyBuffer);
+                }
+
+                if (compVal == 0)
+                {
+                    throw new InvalidOperationException("Entry already exists");
+                }
+                else if (compVal < 0)
+                {
+                    if (!promoting && (focus.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        _index.GetSubBlock(this, focus).Node.AddEntry(newEntry, false);
+                    }
+                    else
+                    {
+                        _entries.Insert(i, newEntry);
+
+                        if (SpaceFree < 0)
+                        {
+                            // The node is too small to hold the entry, so need to juggle...
+
+                            if (_parent != null)
+                            {
+                                Divide();
+                            }
+                            else
+                            {
+                                Depose();
+                            }
+                        }
+
+                        _store();
+                    }
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Only valid on the root node, this method moves all entries into a
+        /// single child node.
+        /// </summary>
+        private void Depose()
+        {
+            IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
+            newRootEntry.Flags = IndexEntryFlags.End;
+
+            IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry);
+            newBlock.Node.SetEntries(_entries, 0, _entries.Count);
+
+            _entries.Clear();
+            _entries.Add(newRootEntry);
+        }
+
+        /// <summary>
+        /// Only valid on non-root nodes, this method divides the node in two,
+        /// adding the new node to the current parent.
+        /// </summary>
+        private void Divide()
+        {
+            int midEntryIdx = _entries.Count / 2;
+            IndexEntry midEntry = _entries[midEntryIdx];
+
+            // The terminating entry (aka end) for the new node
+            IndexEntry newTerm = new IndexEntry(_index.IsFileIndex);
+            newTerm.Flags |= IndexEntryFlags.End;
+
+            // The set of entries in the new node
+            List<IndexEntry> newEntries = new List<IndexEntry>(midEntryIdx + 1);
+            for (int i = 0; i < midEntryIdx; ++i)
+            {
+                newEntries.Add(_entries[i]);
+            }
+            newEntries.Add(newTerm);
+
+            // Copy the node pointer from the elected 'mid' entry to the new node
+            if ((midEntry.Flags & IndexEntryFlags.Node) != 0)
+            {
+                newTerm.ChildrenVirtualCluster = midEntry.ChildrenVirtualCluster;
+                newTerm.Flags |= IndexEntryFlags.Node;
+            }
+
+            // Set the new entries into the new node
+            IndexBlock newBlock = _index.AllocateBlock(_parent, midEntry);
+            newBlock.Node.SetEntries(newEntries, 0, newEntries.Count);
+
+            // Forget about the entries moved into the new node, and the entry about
+            // to be promoted as the new node's pointer
+            _entries.RemoveRange(0, midEntryIdx + 1);
+
+            // Promote the old mid entry
+            _parent.AddEntry(midEntry, true);
+        }
+
+        private void SetEntries(IList<IndexEntry> newEntries, int offset, int count)
+        {
+            _entries.Clear();
+            for (int i = 0; i < count; ++i)
+            {
+                _entries.Add(newEntries[i + offset]);
+            }
+
+            // Add an end entry, if not present
+            if (count == 0 || (_entries[_entries.Count - 1].Flags & IndexEntryFlags.End) == 0)
+            {
+                IndexEntry end = new IndexEntry(_index.IsFileIndex);
+                end.Flags = IndexEntryFlags.End;
+                _entries.Add(end);
+            }
+
+            // Persist the new entries to disk
+            _store();
         }
 
     }

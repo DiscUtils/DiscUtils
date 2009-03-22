@@ -47,133 +47,113 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuilderBufferExtent.cs" />
+    <Compile Include="BuilderExtent.cs" />
+    <Compile Include="BuilderExtentSource.cs" />
+    <Compile Include="BuilderFileExtent.cs" />
+    <Compile Include="BuilderStreamExtent.cs" />
+    <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
-    <Compile Include="DiscFileInfo.cs" />
-    <Compile Include="DiscFileSystemInfo.cs" />
+    <Compile Include="ConcatStream.cs" />
     <Compile Include="DiscDirectoryInfo.cs" />
+    <Compile Include="DiscFileInfo.cs" />
     <Compile Include="DiscFileSystem.cs" />
-    <Compile Include="Geometry.cs" />
+    <Compile Include="DiscFileSystemInfo.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
-    <Compile Include="Fat\Directory.cs" />
-    <Compile Include="Fat\FatBuffer.cs" />
-    <Compile Include="Fat\FatAttributes.cs" />
     <Compile Include="Fat\ClusterStream.cs" />
+    <Compile Include="Fat\Directory.cs" />
+    <Compile Include="Fat\DirectoryEntry.cs" />
+    <Compile Include="Fat\FatAttributes.cs" />
+    <Compile Include="Fat\FatBuffer.cs" />
     <Compile Include="Fat\FatFileStream.cs" />
+    <Compile Include="Fat\FatFileSystem.cs" />
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
     <Compile Include="Fat\FloppyDiskType.cs" />
+    <Compile Include="FileLocator.cs" />
+    <Compile Include="Geometry.cs" />
+    <Compile Include="IDiagnosticTracer.cs" />
     <Compile Include="Iso9660\BaseVolumeDescriptor.cs" />
+    <Compile Include="Iso9660\BuildDirectoryInfo.cs" />
+    <Compile Include="Iso9660\BuildDirectoryMember.cs" />
+    <Compile Include="Iso9660\BuildFileInfo.cs" />
     <Compile Include="Iso9660\BuildParameters.cs" />
     <Compile Include="Iso9660\CDBuilder.cs" />
     <Compile Include="Iso9660\CDReader.cs" />
     <Compile Include="Iso9660\CommonVolumeDescriptor.cs" />
     <Compile Include="Iso9660\DirectoryExtent.cs" />
-    <Compile Include="Iso9660\BuildDirectoryInfo.cs" />
-    <Compile Include="Iso9660\BuildDirectoryMember.cs" />
     <Compile Include="Iso9660\DirectoryRecord.cs" />
     <Compile Include="Iso9660\ExtentStream.cs" />
     <Compile Include="Iso9660\FileExtent.cs" />
-    <Compile Include="Iso9660\BuildFileInfo.cs" />
+    <Compile Include="Iso9660\IsoUtilities.cs" />
     <Compile Include="Iso9660\PathTable.cs" />
     <Compile Include="Iso9660\PathTableRecord.cs" />
     <Compile Include="Iso9660\PrimaryVolumeDescriptor.cs" />
     <Compile Include="Iso9660\ReaderDirectory.cs" />
     <Compile Include="Iso9660\SupplementaryVolumeDescriptor.cs" />
-    <Compile Include="Iso9660\IsoUtilities.cs" />
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminator.cs" />
-    <Compile Include="Ntfs\AttributeType.cs" />
-    <Compile Include="Ntfs\BiosParameterBlock.cs" />
-    <Compile Include="Ntfs\Bitmap.cs" />
-    <Compile Include="Ntfs\DataRun.cs" />
-    <Compile Include="Ntfs\Directory.cs" />
-    <Compile Include="Ntfs\File.cs" />
-    <Compile Include="Ntfs\NtfsAttribute.cs" />
-    <Compile Include="Ntfs\AttributeRecord.cs" />
-    <Compile Include="Ntfs\FileNameRecord.cs" />
-    <Compile Include="Ntfs\IByteArraySerializable.cs" />
-    <Compile Include="Ntfs\IndexBlock.cs" />
-    <Compile Include="Ntfs\IndexEntry.cs" />
-    <Compile Include="Ntfs\IndexHeader.cs" />
-    <Compile Include="Ntfs\MasterFileTable.cs" />
-    <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
-    <Compile Include="Ntfs\FileRecord.cs" />
-    <Compile Include="Ntfs\FileReference.cs" />
-    <Compile Include="Ntfs\FixupRecordBase.cs" />
-    <Compile Include="Ntfs\NtfsFileSystem.cs" />
-    <Compile Include="Ntfs\VolumeInformationFlags.cs" />
-    <Compile Include="Tuple.cs" />
-    <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
-    <Compile Include="Partitions\BiosPartitionInfo.cs" />
-    <Compile Include="Partitions\BiosPartitionRecord.cs" />
-    <Compile Include="Partitions\BiosPartitionTable.cs" />
-    <Compile Include="Partitions\PartitionInfo.cs" />
-    <Compile Include="Partitions\PartitionTable.cs" />
-    <Compile Include="Partitions\BiosPartitionTypes.cs" />
-    <Compile Include="Partitions\WellKnownPartitionType.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Fat\DirectoryEntry.cs" />
-    <Compile Include="Fat\FatFileSystem.cs" />
-    <Compile Include="ReadOnlyDiscFileSystem.cs" />
-    <Compile Include="SubStream.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Utilities.cs" />
-    <Compile Include="Vhd\Disk.cs" />
-    <Compile Include="Vhd\DiskImageFile.cs" />
-    <Compile Include="Vhd\DynamicHeader.cs" />
-    <Compile Include="Vhd\DynamicStream.cs" />
-    <Compile Include="Vhd\FileType.cs" />
-    <Compile Include="Vhd\Footer.cs" />
-    <Compile Include="Vhd\Header.cs" />
-    <Compile Include="Vhd\ParentLocator.cs" />
-    <Compile Include="VirtualDisk.cs" />
-    <Compile Include="VirtualDiskLayer.cs" />
-    <Compile Include="ZeroStream.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="BuilderBufferExtent.cs" />
-    <Compile Include="BuilderExtent.cs" />
-    <Compile Include="BuilderStreamExtent.cs" />
-    <Compile Include="BuiltStream.cs" />
-    <Compile Include="BuilderExtentSource.cs" />
-    <Compile Include="BuilderFileExtent.cs" />
-    <Compile Include="ConcatStream.cs" />
-    <Compile Include="FileLocator.cs" />
-    <Compile Include="IDiagnosticTracer.cs" />
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
-    <Compile Include="Ntfs\FileAttributeStream.cs" />
-    <Compile Include="Ntfs\ResidentAttributeStream.cs" />
-    <Compile Include="Ntfs\StructuredNtfsAttribute.cs" />
+    <Compile Include="Ntfs\AttributeRecord.cs" />
+    <Compile Include="Ntfs\AttributeType.cs" />
+    <Compile Include="Ntfs\BiosParameterBlock.cs" />
+    <Compile Include="Ntfs\Bitmap.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
+    <Compile Include="Ntfs\DataRun.cs" />
+    <Compile Include="Ntfs\Directory.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
+    <Compile Include="Ntfs\File.cs" />
+    <Compile Include="Ntfs\FileAttributeStream.cs" />
+    <Compile Include="Ntfs\FileNameRecord.cs" />
+    <Compile Include="Ntfs\FileRecord.cs" />
+    <Compile Include="Ntfs\FileReference.cs" />
+    <Compile Include="Ntfs\FixupRecordBase.cs" />
+    <Compile Include="Ntfs\IByteArraySerializable.cs" />
     <Compile Include="Ntfs\Index.cs" />
+    <Compile Include="Ntfs\IndexBlock.cs" />
+    <Compile Include="Ntfs\IndexEntry.cs" />
+    <Compile Include="Ntfs\IndexHeader.cs" />
     <Compile Include="Ntfs\IndexNode.cs" />
     <Compile Include="Ntfs\IndexRoot.cs" />
+    <Compile Include="Ntfs\MasterFileTable.cs" />
+    <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
+    <Compile Include="Ntfs\NtfsAttribute.cs" />
     <Compile Include="Ntfs\NtfsFileStream.cs" />
-    <Compile Include="Ntfs\NtfsOptions.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Ntfs\NtfsFileSystem.cs" />
+    <Compile Include="Ntfs\NtfsOptions.cs" />
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
+    <Compile Include="Ntfs\ResidentAttributeStream.cs" />
     <Compile Include="Ntfs\SecurityDescriptor.cs" />
     <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />
     <Compile Include="Ntfs\SecurityDescriptors.cs" />
     <Compile Include="Ntfs\StandardInformation.cs" />
+    <Compile Include="Ntfs\StructuredNtfsAttribute.cs" />
     <Compile Include="Ntfs\UpperCase.cs" />
     <Compile Include="Ntfs\VolumeInformation.cs" />
+    <Compile Include="Ntfs\VolumeInformationFlags.cs" />
     <Compile Include="Ntfs\VolumeName.cs" />
+    <Compile Include="ObjectCache.cs" />
+    <Compile Include="Ownership.cs" />
+    <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
+    <Compile Include="Partitions\BiosPartitionInfo.cs" />
+    <Compile Include="Partitions\BiosPartitionRecord.cs" />
+    <Compile Include="Partitions\BiosPartitionTable.cs" />
+    <Compile Include="Partitions\BiosPartitionTypes.cs" />
     <Compile Include="Partitions\Crc32.cs" />
     <Compile Include="Partitions\GptEntry.cs" />
     <Compile Include="Partitions\GptHeader.cs" />
     <Compile Include="Partitions\GuidPartitionInfo.cs" />
     <Compile Include="Partitions\GuidPartitionTable.cs" />
     <Compile Include="Partitions\GuidPartitionTypes.cs" />
+    <Compile Include="Partitions\PartitionInfo.cs" />
+    <Compile Include="Partitions\PartitionTable.cs" />
+    <Compile Include="Partitions\WellKnownPartitionType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadOnlyDiscFileSystem.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -185,7 +165,9 @@
     <Compile Include="SparseStream.cs" />
     <Compile Include="StreamBuilder.cs" />
     <Compile Include="StreamExtent.cs" />
-    <Compile Include="Ownership.cs" />
+    <Compile Include="SubStream.cs" />
+    <Compile Include="Tuple.cs" />
+    <Compile Include="Utilities.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />
@@ -195,7 +177,17 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Vhd\Disk.cs" />
+    <Compile Include="Vhd\DiskImageFile.cs" />
     <Compile Include="Vhd\DiskImageFileInfo.cs" />
+    <Compile Include="Vhd\DynamicHeader.cs" />
+    <Compile Include="Vhd\DynamicStream.cs" />
+    <Compile Include="Vhd\FileType.cs" />
+    <Compile Include="Vhd\Footer.cs" />
+    <Compile Include="Vhd\Header.cs" />
+    <Compile Include="Vhd\ParentLocator.cs" />
+    <Compile Include="VirtualDisk.cs" />
+    <Compile Include="VirtualDiskLayer.cs" />
     <Compile Include="Vmdk\CommonSparseExtentHeader.cs" />
     <Compile Include="Vmdk\CommonSparseExtentStream.cs" />
     <Compile Include="Vmdk\DescriptorFile.cs" />
@@ -206,8 +198,8 @@
     <Compile Include="Vmdk\DiskImageFile.cs" />
     <Compile Include="Vmdk\ExtentDescriptor.cs" />
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
-    <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
+    <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
@@ -223,6 +215,7 @@
     <Compile Include="Xva\TarHeaderExtent.cs" />
     <Compile Include="Xva\VirtualMachine.cs" />
     <Compile Include="Xva\VirtualMachineBuilder.cs" />
+    <Compile Include="ZeroStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
@@ -233,21 +226,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\XVA_ova_base.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\XVA_ova_sr.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\XVA_ova_vbd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\XVA_ova_vdi.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\XVA_ova_vm.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\XVA_ova_ref.xml" />
+    <None Include="Resources\XVA_ova_sr.xml" />
+    <None Include="Resources\XVA_ova_vbd.xml" />
+    <None Include="Resources\XVA_ova_vdi.xml" />
+    <None Include="Resources\XVA_ova_vm.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

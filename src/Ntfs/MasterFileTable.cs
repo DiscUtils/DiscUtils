@@ -33,7 +33,7 @@ namespace DiscUtils.Ntfs
         private File _mirror;
         private Bitmap _bitmap;
         private Stream _records;
-        private Dictionary<long, WeakReference> _fileCache;
+        private ObjectCache<long, File> _fileCache;
 
         private int _recordLength;
 
@@ -109,98 +109,84 @@ namespace DiscUtils.Ntfs
 
             _bitmap = new Bitmap(_self.GetAttribute(AttributeType.Bitmap).Open(FileAccess.ReadWrite), long.MaxValue);
             _records = _self.GetAttribute(AttributeType.Data).Open(FileAccess.ReadWrite);
-            _fileCache = new Dictionary<long, WeakReference>();
+            _fileCache = new ObjectCache<long,File>();
+            _fileCache[MftIndex] = _self;
 
             _recordLength = fileSystem.BiosParameterBlock.MftRecordSize;
 
             _mirror = GetFile(MftMirrorIndex);
         }
 
-        public IEnumerable<File> Files
-        {
-            get
-            {
-                List<File> files = new List<File>();
-
-                byte[] recordBuffer = new byte[_recordLength];
-
-                long numEntries = _records.Length / _recordLength;
-                for (long i = 0; i < numEntries; ++i)
-                {
-                    if (_bitmap.IsPresent(i))
-                    {
-                        _records.Position = i * _recordLength;
-                        int numRead = Utilities.ReadFully(_records, recordBuffer, 0, _recordLength);
-                        if (numRead != _recordLength)
-                        {
-                            throw new IOException("Truncated File Record in MFT");
-                        }
-
-                        FileRecord record = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector);
-                        record.FromBytes(recordBuffer, 0);
-                        files.Add(new File(_fileSystem, record));
-                    }
-                }
-
-                return files;
-            }
-        }
-
         public Directory GetDirectory(long index)
         {
-            FileRecord record = GetRecord(index);
-            if (record != null)
-            {
-                return new Directory(_fileSystem, record);
-            }
-            return null;
+            return (Directory)GetFile(index);
         }
 
         public Directory GetDirectory(FileReference fileReference)
         {
-            FileRecord record = GetRecord(fileReference);
-            if (record != null)
-            {
-                return new Directory(_fileSystem, record);
-            }
-            return null;
-        }
-
-        public File GetFile(long index)
-        {
-            FileRecord record = GetRecord(index);
-            if (record != null)
-            {
-                return new File(_fileSystem, record);
-            }
-            return null;
+            return (Directory)GetFile(fileReference);
         }
 
         public File GetFile(FileReference fileReference)
         {
             FileRecord record = GetRecord(fileReference);
-            if (record != null)
+            if (record == null)
             {
-                return new File(_fileSystem, record);
+                return null;
             }
-            return null;
-        }
 
-        public File GetFileOrDirectory(FileReference fileReference)
-        {
-            FileRecord record = GetRecord(fileReference);
-            if (record != null)
+            File file = _fileCache[fileReference.MftIndex];
+
+            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
             {
-                if((record.Flags & FileRecordFlags.IsDirectory) != 0)
+                file = null;
+            }
+
+            if (file == null)
+            {
+                if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
                 {
-                    return new Directory(_fileSystem, record);
+                    file = new Directory(_fileSystem, record);
                 }
                 else
                 {
-                    return new File(_fileSystem, record);
+                    file = new File(_fileSystem, record);
                 }
+                _fileCache[fileReference.MftIndex] = file;
             }
-            return null;
+
+            return file;
+        }
+
+        public File GetFile(long index)
+        {
+            FileRecord record = GetRecord(index);
+            if (record == null)
+            {
+                return null;
+            }
+
+            File file = _fileCache[index];
+
+            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
+            {
+                file = null;
+            }
+
+            if (file == null)
+            {
+                if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
+                {
+                    file = new Directory(_fileSystem, record);
+                }
+                else
+                {
+                    file = new File(_fileSystem, record);
+                }
+                _fileCache[index] = file;
+            }
+
+            return file;
         }
 
         internal File AllocateFile()
@@ -218,7 +204,9 @@ namespace DiscUtils.Ntfs
                 newRecord = new FileRecord(_fileSystem.BiosParameterBlock.BytesPerSector, _recordLength, index);
             }
             WriteRecord(newRecord);
-            return new File(_fileSystem, newRecord);
+            File file = new File(_fileSystem, newRecord);
+            _fileCache[file.MftReference.MftIndex] = file;
+            return file;
         }
 
         internal FileRecord GetRecord(FileReference fileReference)

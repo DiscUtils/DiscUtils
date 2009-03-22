@@ -113,7 +113,7 @@ namespace DiscUtils.Ntfs
         /// <returns></returns>
         public Stream OpenMasterFileTable()
         {
-            return OpenRawAttribute("$MFT", AttributeType.Data, null);
+            return OpenRawAttribute("$MFT", AttributeType.Data, null, FileAccess.Read);
         }
 
         /// <summary>
@@ -307,13 +307,14 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Opens an existing attribute for read access.
+        /// Opens an existing attribute.
         /// </summary>
         /// <param name="file">The file containing the attribute</param>
         /// <param name="type">The type of the attribute</param>
         /// <param name="name">The name of the attribute</param>
+        /// <param name="access">The desired access to the attribute</param>
         /// <returns>A stream with read access to the attribute</returns>
-        public Stream OpenRawAttribute(string file, AttributeType type, string name)
+        public Stream OpenRawAttribute(string file, AttributeType type, string name, FileAccess access)
         {
             DirectoryEntry entry = GetDirectoryEntry(file);
             if (entry == null)
@@ -322,7 +323,7 @@ namespace DiscUtils.Ntfs
             }
 
             File fileObj = _mft.GetFile(entry.Reference);
-            return fileObj.OpenAttribute(type, name, FileAccess.Read);
+            return fileObj.OpenAttribute(type, name, access);
         }
 
         /// <summary>
@@ -613,7 +614,7 @@ namespace DiscUtils.Ntfs
         {
             foreach (DirectoryEntry dirEntry in dir.GetAllEntries())
             {
-                File file = _mft.GetFileOrDirectory(dirEntry.Reference);
+                File file = _mft.GetFile(dirEntry.Reference);
                 Directory asDir = file as Directory;
                 writer.WriteLine(indent + "+-" + file.ToString() + " (" + file.IndexInMft + ")");
 

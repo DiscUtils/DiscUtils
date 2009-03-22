@@ -31,7 +31,7 @@ namespace DiscUtils.Ntfs
 
         private string _magic;
         private ushort _updateSequenceOffset;
-        private ushort _updateSequenceSize;
+        private ushort _updateSequenceCount;
 
         private ushort _updateSequenceNumber;
         private ushort[] _updateSequenceArray;
@@ -51,9 +51,9 @@ namespace DiscUtils.Ntfs
         {
             _magic = magic;
             _sectorSize = sectorSize;
-            _updateSequenceSize = (ushort)(1 + Utilities.Ceil(recordLength, sectorSize));
+            _updateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, sectorSize));
             _updateSequenceNumber = 1;
-            _updateSequenceArray = new ushort[_updateSequenceSize - 1];
+            _updateSequenceArray = new ushort[_updateSequenceCount - 1];
         }
 
         public string Magic
@@ -66,14 +66,19 @@ namespace DiscUtils.Ntfs
             get { return _updateSequenceOffset; }
         }
 
-        public ushort UpdateSequenceSize
+        public ushort UpdateSequenceCount
         {
-            get { return _updateSequenceSize; }
+            get { return _updateSequenceCount; }
         }
 
         public ushort UpdateSequenceNumber
         {
             get { return _updateSequenceNumber; }
+        }
+
+        protected int UpdateSequenceSize
+        {
+            get { return _updateSequenceCount * 2; }
         }
 
         public void FromBytes(byte[] buffer, int offset)
@@ -85,10 +90,10 @@ namespace DiscUtils.Ntfs
             }
 
             _updateSequenceOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x04);
-            _updateSequenceSize = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
+            _updateSequenceCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
 
             _updateSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + _updateSequenceOffset);
-            _updateSequenceArray = new ushort[_updateSequenceSize - 1];
+            _updateSequenceArray = new ushort[_updateSequenceCount - 1];
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
                 _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + _updateSequenceOffset + 2 * (i + 1));
@@ -103,19 +108,19 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return CalcSize(_updateSequenceSize * 2);
+                return CalcSize();
             }
         }
 
         public void ToBytes(byte[] buffer, int offset)
         {
-            _updateSequenceOffset = Write(buffer, offset, (ushort)(_updateSequenceSize * 2));
+            _updateSequenceOffset = Write(buffer, offset);
 
             ProtectBuffer(buffer, offset);
 
             Utilities.StringToBytes(_magic, buffer, offset + 0x00, 4);
             Utilities.WriteBytesLittleEndian(_updateSequenceOffset, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(_updateSequenceSize, buffer, offset + 0x06);
+            Utilities.WriteBytesLittleEndian(_updateSequenceCount, buffer, offset + 0x06);
 
             Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + _updateSequenceOffset);
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
@@ -125,8 +130,8 @@ namespace DiscUtils.Ntfs
         }
 
         protected abstract void Read(byte[] buffer, int offset);
-        protected abstract ushort Write(byte[] buffer, int offset, ushort updateSeqSize);
-        protected abstract int CalcSize(int updateSeqSize);
+        protected abstract ushort Write(byte[] buffer, int offset);
+        protected abstract int CalcSize();
 
         private void UnprotectBuffer(byte[] buffer, int offset)
         {
