@@ -65,7 +65,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class IndexKey : IByteArraySerializable
+        internal sealed class IndexKey : IByteArraySerializable
         {
             public Guid Id;
 
@@ -90,7 +90,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class IndexData : IByteArraySerializable
+        internal sealed class IndexData : IByteArraySerializable
         {
             public FileReference MftReference;
             public Guid BirthVolumeId;

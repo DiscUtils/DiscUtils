@@ -24,14 +24,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace DiscUtils.Diagnostics
+namespace DiscUtils
 {
     /// <summary>
     /// A wrapper stream that enables you to take a snapshot, pushing changes into a side buffer.
     /// </summary>
     /// <remarks>Once a snapshot is taken, you can discard subsequent changes or merge them back
     /// into the wrapped stream.</remarks>
-    public class SnapshotStream : Stream
+    public sealed class SnapshotStream : Stream
     {
         private Stream _baseStream;
 
@@ -47,7 +47,7 @@ namespace DiscUtils.Diagnostics
         /// </summary>
         /// <remarks>Can't use _diffStream's own tracking because that's based on it's
         /// internal block size, not on the _actual_ bytes stored.</remarks>
-        private IEnumerable<StreamExtent> _diffExtents;
+        private List<StreamExtent> _diffExtents;
 
         /// <summary>
         /// The saved stream position (if the diffStream is active).
@@ -376,7 +376,11 @@ namespace DiscUtils.Diagnostics
             {
                 _diffStream.Position = _position;
                 _diffStream.Write(buffer, offset, count);
-                _diffExtents = StreamExtent.Union(_diffExtents, new StreamExtent(_position, count));
+
+                // Beware of Linq's delayed model - force execution now by placing into a list.
+                // Without this, large execution chains can build up (v. slow) and potential for stack overflow.
+                _diffExtents = new List<StreamExtent>(StreamExtent.Union(_diffExtents, new StreamExtent(_position, count)));
+
                 _position += count;
             }
             else

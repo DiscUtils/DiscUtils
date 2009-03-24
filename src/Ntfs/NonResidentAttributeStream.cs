@@ -48,8 +48,8 @@ namespace DiscUtils.Ntfs
         {
             _file = file;
             _fsStream = _file.FileSystem.RawStream;
-            _bytesPerCluster = file.FileSystem.BytesPerCluster;
-            _runs = CookDataRuns(record.DataRuns);
+            _bytesPerCluster = file.FileSystem.BiosParameterBlock.BytesPerSector;
+            _runs = CookedDataRun.Cook(record.DataRuns);
             _record = record;
             _access = access;
             _length = record.DataLength;
@@ -653,66 +653,6 @@ namespace DiscUtils.Ntfs
         {
             _runs.RemoveRange(index, count);
             _record.DataRuns.RemoveRange(index, count);
-        }
-
-        private static List<CookedDataRun> CookDataRuns(List<DataRun> runs)
-        {
-            List<CookedDataRun> result = new List<CookedDataRun>(runs.Count);
-
-            long vcn = 0;
-            long lcn = 0;
-            for (int i = 0; i < runs.Count; ++i)
-            {
-                result.Add(new CookedDataRun(runs[i], vcn, lcn + runs[i].RunOffset));
-                vcn += runs[i].RunLength;
-                lcn += runs[i].RunOffset;
-            }
-
-            return result;
-        }
-
-        private class CookedDataRun
-        {
-            private long _startVcn;
-            private long _startLcn;
-            private DataRun _raw;
-
-            public CookedDataRun(DataRun raw, long startVcn, long startLcn)
-            {
-                _raw = raw;
-                _startVcn = startVcn;
-                _startLcn = startLcn;
-
-                if (startVcn < 0)
-                {
-                    throw new ArgumentOutOfRangeException("startVcn", startVcn, "VCN must be >= 0");
-                }
-                if (_startLcn < 0)
-                {
-                    throw new ArgumentOutOfRangeException("startLcn", startLcn, "LCN must be >= 0");
-                }
-            }
-
-            public long StartVcn
-            {
-                get { return _startVcn; }
-            }
-
-            public long StartLcn
-            {
-                get { return _startLcn; }
-            }
-
-            public long Length
-            {
-                get { return _raw.RunLength; }
-                set { _raw.RunLength = value; }
-            }
-
-            public bool IsSparse
-            {
-                get { return _raw.IsSparse; }
-            }
         }
 
         public override IEnumerable<StreamExtent> Extents

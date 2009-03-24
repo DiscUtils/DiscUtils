@@ -110,7 +110,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class HashIndexKey : IByteArraySerializable
+        internal sealed class HashIndexKey : IByteArraySerializable
         {
             public uint Hash;
             public uint Id;
@@ -138,7 +138,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class IdIndexKey : IByteArraySerializable
+        internal sealed class IdIndexKey : IByteArraySerializable
         {
             public uint Id;
 
@@ -172,7 +172,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class IndexData : IByteArraySerializable
+        internal sealed class IndexData : IByteArraySerializable
         {
             public uint Hash;
             public uint Id;

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,51 +20,53 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Runtime.Serialization;
+using System.IO;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils
 {
     /// <summary>
-    /// Class whose instances hold options controlling how <see cref="NtfsFileSystem"/> works.
+    /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
-    public sealed class NtfsOptions : DiscFileSystemOptions
+    [Serializable]
+    public class InvalidFileSystemException : IOException
     {
-        private bool _hideMetaFiles;
-        private bool _hideHiddenFiles;
-        private bool _hideSystemFiles;
-
-        internal NtfsOptions()
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        public InvalidFileSystemException()
         {
-            _hideMetaFiles = true;
-            _hideHiddenFiles = true;
-            _hideSystemFiles = true;
         }
 
         /// <summary>
-        /// Gets and sets whether to include file system meta-files when enumerating directories.
+        /// Creates a new instance.
         /// </summary>
-        /// <remarks>Meta-files are those with an MFT (Master File Table) index less than 24.</remarks>
-        public bool HideMetafiles
+        /// <param name="message">The exception message.</param>
+        public InvalidFileSystemException(string message)
+            : base(message)
         {
-            get { return _hideMetaFiles; }
-            set { _hideMetaFiles = value; }
         }
 
         /// <summary>
-        /// Get and sets whether to include hidden files when enumerating directories.
+        /// Creates a new instance.
         /// </summary>
-        public bool HideHiddenFiles
+        /// <param name="message">The exception message</param>
+        /// <param name="innerException">The inner exception</param>
+        public InvalidFileSystemException(string message, Exception innerException)
+            : base(message, innerException)
         {
-            get { return _hideHiddenFiles; }
-            set { _hideHiddenFiles = value; }
         }
 
         /// <summary>
-        /// Gets and sets whether to include system files when enumerating directories.
+        /// Deserializes an instance.
         /// </summary>
-        public bool HideSystemFiles
+        /// <param name="info">The serialization info</param>
+        /// <param name="context">The streaming context</param>
+        protected InvalidFileSystemException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
-            get { return _hideSystemFiles; }
-            set { _hideSystemFiles = value; }
         }
+
     }
 }

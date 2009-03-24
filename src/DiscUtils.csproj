@@ -54,11 +54,15 @@
     <Compile Include="BuilderStreamExtent.cs" />
     <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
+    <Compile Include="ClusterBasedFileSystem.cs" />
+    <Compile Include="ClusterMap.cs" />
     <Compile Include="ConcatStream.cs" />
     <Compile Include="DiscDirectoryInfo.cs" />
     <Compile Include="DiscFileInfo.cs" />
     <Compile Include="DiscFileSystem.cs" />
+    <Compile Include="DiscFileSystemChecker.cs" />
     <Compile Include="DiscFileSystemInfo.cs" />
+    <Compile Include="DiscFileSystemOptions.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
     <Compile Include="Fat\ClusterStream.cs" />
     <Compile Include="Fat\Directory.cs" />
@@ -74,6 +78,7 @@
     <Compile Include="FileLocator.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="IDiagnosticTraceable.cs" />
+    <Compile Include="InvalidFileSystemException.cs" />
     <Compile Include="Iso9660\BaseVolumeDescriptor.cs" />
     <Compile Include="Iso9660\BuildDirectoryInfo.cs" />
     <Compile Include="Iso9660\BuildDirectoryMember.cs" />
@@ -118,11 +123,13 @@
     <Compile Include="Ntfs\IndexHeader.cs" />
     <Compile Include="Ntfs\IndexNode.cs" />
     <Compile Include="Ntfs\IndexRoot.cs" />
+    <Compile Include="Ntfs\NtfsContext.cs" />
     <Compile Include="Ntfs\MasterFileTable.cs" />
     <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
     <Compile Include="Ntfs\NtfsAttribute.cs" />
     <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsFileSystem.cs" />
+    <Compile Include="Ntfs\NtfsFileSystemChecker.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs" />
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
@@ -153,6 +160,7 @@
     <Compile Include="Partitions\PartitionTable.cs" />
     <Compile Include="Partitions\WellKnownPartitionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Range.cs" />
     <Compile Include="ReadOnlyDiscFileSystem.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -160,6 +168,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Sizes.cs" />
+    <Compile Include="SnapshotStream.cs" />
     <Compile Include="SparseMemoryBuffer.cs" />
     <Compile Include="SparseMemoryStream.cs" />
     <Compile Include="SparseStream.cs" />

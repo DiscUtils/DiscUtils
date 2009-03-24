@@ -89,6 +89,11 @@ namespace DiscUtils.Ntfs
             get { return CalcRecordSize(RawIndexBufferSize); }
         }
 
+        public int BytesPerCluster
+        {
+            get { return ((int)BytesPerSector) * ((int)SectorsPerCluster); }
+        }
+
         internal int CalcRecordSize(byte rawSize)
         {
             if ((rawSize & 0x80) != 0)

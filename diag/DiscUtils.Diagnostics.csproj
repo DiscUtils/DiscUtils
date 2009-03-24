@@ -47,15 +47,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HexDump.cs" />
     <Compile Include="NullTextWriter.cs" />
     <Compile Include="ReplayReport.cs" />
-    <Compile Include="SnapshotStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamTraceRecord.cs" />
     <Compile Include="TracingStream.cs" />
     <Compile Include="ValidatingFileSystem.cs" />
     <Compile Include="ValidatingFileSystemWrapperStream.cs" />
-    <Compile Include="CorruptFileSystemException.cs" />
+    <Compile Include="ValidatingFileSystemException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\DiscUtils.csproj">

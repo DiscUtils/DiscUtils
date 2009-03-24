@@ -192,15 +192,17 @@ namespace DiscUtils.Ntfs
             {
                 if (_attributes[i].AttributeType == record.AttributeType && _attributes[i].Name == record.Name)
                 {
+                    if (record.AttributeId != _attributes[i].AttributeId)
+                    {
+                        throw new InvalidOperationException("Attempt to set attribute where (type,name,id) don't match");
+                    }
+
                     _attributes[i] = record;
                     return;
                 }
             }
 
-            ushort id = _nextAttributeId++;
-            _attributes.Add(record);
-            _attributes.Sort();
-            return;
+            throw new InvalidOperationException("Attempt to create attribute by setting it");
         }
 
         protected override void Read(byte[] buffer, int offset)

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,51 +20,37 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils
 {
     /// <summary>
-    /// Class whose instances hold options controlling how <see cref="NtfsFileSystem"/> works.
+    /// Common file system options.
     /// </summary>
-    public sealed class NtfsOptions : DiscFileSystemOptions
+    /// <remarks>Not all options are honoured by all file systems.</remarks>
+    public class DiscFileSystemOptions
     {
-        private bool _hideMetaFiles;
-        private bool _hideHiddenFiles;
-        private bool _hideSystemFiles;
+        private Random _rng;
 
-        internal NtfsOptions()
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <remarks>You shouldn't normally create a new instance.  File systems will provide
+        /// an instance of the correct derived type.</remarks>
+        public DiscFileSystemOptions()
         {
-            _hideMetaFiles = true;
-            _hideHiddenFiles = true;
-            _hideSystemFiles = true;
         }
 
         /// <summary>
-        /// Gets and sets whether to include file system meta-files when enumerating directories.
+        /// Gets and sets the random number generator the file system should use.
         /// </summary>
-        /// <remarks>Meta-files are those with an MFT (Master File Table) index less than 24.</remarks>
-        public bool HideMetafiles
+        /// <remarks>This option is normally <c>null</c>, which is fine for most purposes.
+        /// Use this option when you need to finely control the filesystem for
+        /// reproducibility of behaviour (for example in a test harness).</remarks>
+        public Random RandomNumberGenerator
         {
-            get { return _hideMetaFiles; }
-            set { _hideMetaFiles = value; }
-        }
-
-        /// <summary>
-        /// Get and sets whether to include hidden files when enumerating directories.
-        /// </summary>
-        public bool HideHiddenFiles
-        {
-            get { return _hideHiddenFiles; }
-            set { _hideHiddenFiles = value; }
-        }
-
-        /// <summary>
-        /// Gets and sets whether to include system files when enumerating directories.
-        /// </summary>
-        public bool HideSystemFiles
-        {
-            get { return _hideSystemFiles; }
-            set { _hideSystemFiles = value; }
+            get { return _rng; }
+            set { _rng = value; }
         }
     }
 }

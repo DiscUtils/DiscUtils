@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Diagnostics;
 
 namespace DiscUtils.Diagnostics
@@ -27,13 +28,14 @@ namespace DiscUtils.Diagnostics
     /// <summary>
     /// A record of an individual stream activity.
     /// </summary>
-    public class StreamTraceRecord
+    public sealed class StreamTraceRecord
     {
         private int _id;
         private string _fileAction;
         private long _filePosition;
         private long _countArg;
         private long _result;
+        private Exception _exThrown;
         private StackTrace _stack;
 
         internal StreamTraceRecord(int id, string fileAction, long filePosition, StackTrace stack)
@@ -87,6 +89,15 @@ namespace DiscUtils.Diagnostics
         }
 
         /// <summary>
+        /// The exception thrown during processing of this action.
+        /// </summary>
+        public Exception ExceptionThrown
+        {
+            get { return _exThrown; }
+            internal set { _exThrown = value; }
+        }
+
+        /// <summary>
         /// A full stack trace at the point the action was performed.
         /// </summary>
         public StackTrace Stack
@@ -100,7 +111,7 @@ namespace DiscUtils.Diagnostics
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0:D3}:{1,5}  @{2:X8}  [count={3}, result={4}]", _id, _fileAction, _filePosition, _countArg, _result);
+            return string.Format("{0:D3}{1,1}:{2,5}  @{3:X8}  [count={4}, result={5}]", _id, _exThrown != null ? "E" : " ", _fileAction, _filePosition, _countArg, _result);
         }
     }
 }

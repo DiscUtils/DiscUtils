@@ -178,7 +178,7 @@ namespace DiscUtils.Ntfs
             FileRecord newRecord;
             if ((index + 1) * _recordLength <= _records.Length)
             {
-                newRecord = GetRecord(index);
+                newRecord = GetRecord(index, true);
                 newRecord.ReInitialize(_bytesPerSector, _recordLength, index);
             }
             else
@@ -191,7 +191,7 @@ namespace DiscUtils.Ntfs
 
         public FileRecord GetRecord(FileReference fileReference)
         {
-            FileRecord result = GetRecord(fileReference.MftIndex);
+            FileRecord result = GetRecord(fileReference.MftIndex, false);
 
             if (fileReference.SequenceNumber != 0 && result.SequenceNumber != 0)
             {
@@ -204,7 +204,7 @@ namespace DiscUtils.Ntfs
             return result;
         }
 
-        public FileRecord GetRecord(long index)
+        public FileRecord GetRecord(long index, bool ignoreMagic)
         {
             if (_bitmap.IsPresent(index))
             {
@@ -214,7 +214,7 @@ namespace DiscUtils.Ntfs
                     byte[] recordBuffer = Utilities.ReadFully(_records, _recordLength);
 
                     FileRecord record = new FileRecord(_bytesPerSector);
-                    record.FromBytes(recordBuffer, 0);
+                    record.FromBytes(recordBuffer, 0, ignoreMagic);
                     return record;
                 }
                 else
@@ -250,6 +250,37 @@ namespace DiscUtils.Ntfs
                     s.Write(buffer, 0, _recordLength);
                 }
             }
+        }
+
+        public ClusterMap GetClusterMap()
+        {
+            int totalClusters = (int)Utilities.Ceil(_self.FileSystem.BiosParameterBlock.TotalSectors64, _self.FileSystem.BiosParameterBlock.SectorsPerCluster);
+
+            ClusterRole[] clusterToRole = new ClusterRole[totalClusters];
+            object[] clusterToFile = new object[totalClusters];
+            Dictionary<object, string[]> fileToPaths = new Dictionary<object, string[]>();
+
+            foreach (FileRecord fr in Records)
+            {
+                File f = new File(_self.FileSystem, fr);
+                foreach (var attr in f.AllAttributes)
+                {
+                    string fileName = f.BestName + "(" + f.IndexInMft + "):" + attr.Record.AttributeType + "@" + attr.Name + "(" + attr.Id + ")";
+
+                    fileToPaths[fileName] = new string[] { fileName };
+
+                    foreach (var range in attr.GetClusters())
+                    {
+                        for (long cluster = range.Offset; cluster < range.Offset + range.Count; ++cluster)
+                        {
+                            clusterToRole[cluster] |= ClusterRole.DataFile;
+                            clusterToFile[cluster] = fileName;
+                        }
+                    }
+                }
+            }
+
+            return new ClusterMap(clusterToRole, clusterToFile, fileToPaths);
         }
 
         public void Dump(TextWriter writer, string indent)

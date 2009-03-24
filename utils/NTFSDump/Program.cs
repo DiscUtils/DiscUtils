@@ -85,9 +85,9 @@ namespace NTFSDump
                     using (Stream partitionStream = vhdDisk.Partitions[partition].Open())
                     {
                         NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
-                        fs.Options.HideHiddenFiles = !_showHidden.IsPresent;
-                        fs.Options.HideSystemFiles = !_showSystem.IsPresent;
-                        fs.Options.HideMetafiles = !_showMeta.IsPresent;
+                        fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
+                        fs.NtfsOptions.HideSystemFiles = !_showSystem.IsPresent;
+                        fs.NtfsOptions.HideMetafiles = !_showMeta.IsPresent;
 
                         fs.Dump(Console.Out, "");
                     }

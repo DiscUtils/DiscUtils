@@ -28,16 +28,18 @@ namespace DiscUtils.Ntfs
 {
     internal class File
     {
-        protected NtfsFileSystem _fileSystem;
+        protected INtfsContext _fileSystem;
 
         private MasterFileTable _mft;
         private FileRecord _baseRecord;
+        private ObjectCache<ushort, NtfsAttribute> _attributeCache;
 
-        public File(NtfsFileSystem fileSystem, MasterFileTable mft, FileRecord baseRecord)
+        public File(INtfsContext fileSystem, FileRecord baseRecord)
         {
             _fileSystem = fileSystem;
-            _mft = mft;
+            _mft = _fileSystem.Mft;
             _baseRecord = baseRecord;
+            _attributeCache = new ObjectCache<ushort, NtfsAttribute>();
         }
 
         public uint IndexInMft
@@ -177,7 +179,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeId == id)
                 {
-                    return NtfsAttribute.FromRecord(this, attr);
+                    return InnerGetAttribute(attr);
                 }
             }
             return null;
@@ -215,7 +217,15 @@ namespace DiscUtils.Ntfs
         public T GetAttributeContent<T>(AttributeType type, string name)
             where T : IByteArraySerializable, IDiagnosticTraceable, new()
         {
-            return new StructuredNtfsAttribute<T>(this, GetAttribute(type, name).Record).Content;
+            byte[] buffer;
+            using (Stream s = GetAttribute(type, name).OpenRaw(FileAccess.Read))
+            {
+                buffer = Utilities.ReadFully(s, (int)s.Length);
+            }
+
+            T value = new T();
+            value.ReadFrom(buffer, 0);
+            return value;
         }
 
         /// <summary>
@@ -227,9 +237,13 @@ namespace DiscUtils.Ntfs
         public void SetAttributeContent<T>(ushort id, T value)
             where T : IByteArraySerializable, IDiagnosticTraceable, new()
         {
-            StructuredNtfsAttribute<T> attr = new StructuredNtfsAttribute<T>(this, GetAttribute(id).Record);
-            attr.Content = value;
-            attr.Save();
+            byte[] buffer = new byte[value.Size];
+            value.WriteTo(buffer, 0);
+            using (Stream s = GetAttribute(id).OpenRaw(FileAccess.Write))
+            {
+                s.Write(buffer, 0, buffer.Length);
+                s.SetLength(buffer.Length);
+            }
         }
 
         /// <summary>
@@ -244,10 +258,24 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == type && attr.Name == name)
                 {
-                    return NtfsAttribute.FromRecord(this, attr);
+                    return InnerGetAttribute(attr);
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Enumerates through all attributes.
+        /// </summary>
+        public IEnumerable<NtfsAttribute> AllAttributes
+        {
+            get
+            {
+                foreach (var attr in AllAttributeRecords)
+                {
+                    yield return InnerGetAttribute(attr);
+                }
+            }
         }
 
         /// <summary>
@@ -263,7 +291,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == type && string.IsNullOrEmpty(attr.Name))
                 {
-                    matches.Add(NtfsAttribute.FromRecord(this, attr));
+                    matches.Add(InnerGetAttribute(attr));
                 }
             }
 
@@ -402,7 +430,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal NtfsFileSystem FileSystem
+        internal INtfsContext FileSystem
         {
             get
             {
@@ -423,30 +451,57 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override string ToString()
+        public string BestName
         {
-            NtfsAttribute[] attrs = GetAttributes(AttributeType.FileName);
-
-            string longName = "?????";
-            int longest = 0;
-
-            if (attrs != null && attrs.Length != 0)
+            get
             {
-                longName = attrs[0].ToString();
+                NtfsAttribute[] attrs = GetAttributes(AttributeType.FileName);
 
-                for (int i = 1; i < attrs.Length; ++i)
+                string longName = null;
+                int longest = 0;
+
+                if (attrs != null && attrs.Length != 0)
                 {
-                    string name = attrs[i].ToString();
+                    longName = attrs[0].ToString();
 
-                    if (Utilities.Is8Dot3(longName))
+                    for (int i = 1; i < attrs.Length; ++i)
                     {
-                        longest = i;
-                        longName = name;
+                        string name = attrs[i].ToString();
+
+                        if (Utilities.Is8Dot3(longName))
+                        {
+                            longest = i;
+                            longName = name;
+                        }
                     }
                 }
-            }
 
-            return longName;
+                return longName;
+            }
+        }
+
+        public override string ToString()
+        {
+            string bestName = BestName;
+            if (bestName == null)
+            {
+                return "?????";
+            }
+            else
+            {
+                return bestName;
+            }
+        }
+
+        private NtfsAttribute InnerGetAttribute(AttributeRecord record)
+        {
+            NtfsAttribute result = _attributeCache[record.AttributeId];
+            if (result == null)
+            {
+                result = NtfsAttribute.FromRecord(this, record);
+                _attributeCache[record.AttributeId] = result;
+            }
+            return result;
         }
 
         private IEnumerable<AttributeRecord> AllAttributeRecords
@@ -474,7 +529,7 @@ namespace DiscUtils.Ntfs
         }
 
 
-        internal static File CreateNew(NtfsFileSystem fileSystem)
+        internal static File CreateNew(INtfsContext fileSystem)
         {
             DateTime now = DateTime.UtcNow;
 
@@ -489,7 +544,7 @@ namespace DiscUtils.Ntfs
             si.FileAttributes = FileAttributeFlags.Archive;
             newFile.SetAttributeContent(attrId, si);
 
-            Guid newId = Guid.NewGuid();
+            Guid newId = CreateNewGuid(fileSystem);
             attrId = newFile.CreateAttribute(AttributeType.ObjectId);
             ObjectId objId = new ObjectId();
             objId.Id = newId;
@@ -501,6 +556,21 @@ namespace DiscUtils.Ntfs
             newFile.UpdateRecordInMft();
 
             return newFile;
+        }
+
+        private static Guid CreateNewGuid(INtfsContext fileSystem)
+        {
+            Random rng = fileSystem.Options.RandomNumberGenerator;
+            if (rng != null)
+            {
+                byte[] buffer = new byte[16];
+                rng.NextBytes(buffer);
+                return new Guid(buffer);
+            }
+            else
+            {
+                return Guid.NewGuid();
+            }
         }
     }
 }

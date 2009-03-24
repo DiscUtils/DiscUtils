@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace DiscUtils.Diagnostics
 {
@@ -35,30 +36,91 @@ namespace DiscUtils.Diagnostics
     /// <returns>A return value that is made available after the activity is run</returns>
     /// <remarks>The <c>context</c> information is reset (i.e. empty) at the start of a particular
     /// replay.  It's purpose is to enable multiple activites that operate in sequence to co-ordinate.</remarks>
-    public delegate object Activity<T>(T fs, Dictionary<string, object> context)
-        where T : DiscFileSystem, IDiagnosticTraceable;
+    public delegate object Activity<Tfs>(Tfs fs, Dictionary<string, object> context)
+        where Tfs : DiscFileSystem, IDiagnosticTraceable;
+
+    /// <summary>
+    /// Enumeration of stream views that can be requested.
+    /// </summary>
+    public enum StreamView
+    {
+        /// <summary>
+        /// The current state of the stream under test.
+        /// </summary>
+        Current = 0,
+
+        /// <summary>
+        /// The state of the stream at the last good checkpoint.
+        /// </summary>
+        LastCheckpoint = 1
+    }
 
     /// <summary>
     /// Class that wraps a DiscFileSystem, validating file system integrity.
     /// </summary>
-    /// <typeparam name="T">The concrete type of file system to validate.</typeparam>
-    public class ValidatingFileSystem<T> : DiscFileSystem
-        where T : DiscFileSystem, IDiagnosticTraceable
+    /// <typeparam name="Tfs">The concrete type of file system to validate.</typeparam>
+    /// <typeparam name="Tc">The concrete type of the file system checker.</typeparam>
+    public class ValidatingFileSystem<Tfs, Tc> : DiscFileSystem
+        where Tfs : DiscFileSystem, IDiagnosticTraceable
+        where Tc : DiscFileSystemChecker
     {
-        internal delegate Stream StreamOpenFn(T fs);
+        internal delegate Stream StreamOpenFn(Tfs fs);
 
         private Stream _baseStream;
-        private SnapshotStream _snapStream;
-        private T _liveTarget;
-        private Dictionary<string, object> _activityContext;
 
+        //-------------------------------------
+        // CONFIG
+
+        /// <summary>
+        /// How often a check point is run (in number of 'activities').
+        /// </summary>
         private int _checkpointPeriod = 1;
+
+        /// <summary>
+        /// Indicates if a read/write trace should run all the time.
+        /// </summary>
+        private bool _runGlobalTrace = false;
+
+        /// <summary>
+        /// Indicates whether to capture full stack traces when doing a global trace.
+        /// </summary>
+        private bool _globalTraceCaptureStackTraces = false;
+
+
+        //-------------------------------------
+        // INITIALIZED STATE
+
+        private SnapshotStream _snapStream;
+        private Tfs _liveTarget;
+        private bool _initialized;
+        private Dictionary<string, object> _activityContext;
+        private TracingStream _globalTrace;
+
+        /// <summary>
+        /// The random number generator used to generate seeds for checkpoint-specific generators.
+        /// </summary>
+        private Random _masterRng;
+
+
+
+        //-------------------------------------
+        // RUNNING STATE
 
         /// <summary>
         /// Activities get logged here until a checkpoint is hit, so we can replay between
         /// checkpoints.
         /// </summary>
-        private List<Activity<T>> _checkpointBuffer;
+        private List<Activity<Tfs>> _checkpointBuffer;
+
+        /// <summary>
+        /// The random number generator seed value (set at checkpoint).
+        /// </summary>
+        private int _checkpointRngSeed;
+
+        /// <summary>
+        /// The last verification report generated at a scheduled checkpoint.
+        /// </summary>
+        private string _lastCheckpointReport;
 
         /// <summary>
         /// Flag set when a validation failure is observed, preventing further file system activity.
@@ -71,6 +133,16 @@ namespace DiscUtils.Diagnostics
         private Exception _failureException;
 
         /// <summary>
+        /// The total number of events carried out before lock-down occured.
+        /// </summary>
+        private long _totalEventsBeforeLockDown;
+
+
+
+        private int _numScheduledCheckpoints;
+
+
+        /// <summary>
         /// Creates a new instance.
         /// </summary>
         /// <param name="stream">A stream containing an existing (valid) file system.</param>
@@ -78,17 +150,6 @@ namespace DiscUtils.Diagnostics
         public ValidatingFileSystem(Stream stream)
         {
             _baseStream = stream;
-            _snapStream = new SnapshotStream(stream, Ownership.None);
-
-            _liveTarget = CreateFileSystem(_snapStream);
-            _activityContext = new Dictionary<string, object>();
-
-            _checkpointBuffer = new List<Activity<T>>();
-
-            // Take a snapshot, to preserve the stream state before we perform
-            // an operation (assumption is that merely creating a file system object
-            // (above) is not significant...
-            _snapStream.Snapshot();
         }
 
         /// <summary>
@@ -99,7 +160,14 @@ namespace DiscUtils.Diagnostics
         {
             if (disposing)
             {
-                Checkpoint();
+                try
+                {
+                    CheckpointAndThrow();
+                }
+                finally
+                {
+                    _globalTrace.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
@@ -117,58 +185,137 @@ namespace DiscUtils.Diagnostics
         }
 
         /// <summary>
+        /// Gets and sets whether an inter-checkpoint trace should be run (useful for non-reproducible failures).
+        /// </summary>
+        public bool RunGlobalIOTrace
+        {
+            get { return _runGlobalTrace; }
+            set { _runGlobalTrace = value; }
+        }
+
+        /// <summary>
+        /// Gets and sets whether a global I/O trace should be run (useful for non-reproducible failures).
+        /// </summary>
+        public bool GlobalIOTraceCapturesStackTraces
+        {
+            get { return _globalTraceCaptureStackTraces; }
+            set { _globalTraceCaptureStackTraces = value; }
+        }
+
+        /// <summary>
+        /// Gets access to a view of the stream being validated, forcing 'lock-down'.
+        /// </summary>
+        /// <param name="view">The view to open.</param>
+        /// <param name="readOnly">Whether to fail changes to the stream.</param>
+        /// <returns>The new stream, the caller must dispose.</returns>
+        /// <remarks>Always use this method to access the stream, rather than keeping
+        /// a reference to the stream passed to the constructor.  This method never
+        /// lets changes through to the underlying stream, so ensures the integrity
+        /// of the underlying stream.  Any changes made to the returned stream are held
+        /// as a private delta and discarded when the stream is disposed.</remarks>
+        public Stream OpenStreamView(StreamView view, bool readOnly)
+        {
+            // Prevent further changes.
+            _lockdown = true;
+
+            Stream s;
+
+            // Perversely, the snap stream has the current view (squirrelled away in it's
+            // delta).  The base stream is actually the stream state back at the last checkpoint.
+            if (view == StreamView.Current)
+            {
+                s = _snapStream;
+            }
+            else
+            {
+                s = _baseStream;
+            }
+
+            // Return a protective wrapping stream, so the original stream is preserved.
+            SnapshotStream snapStream = new SnapshotStream(s, Ownership.None);
+            snapStream.Snapshot();
+            if (readOnly)
+            {
+                snapStream.Freeze();
+            }
+            return snapStream;
+        }
+
+        /// <summary>
         /// Verifies the file system integrity.
         /// </summary>
+        /// <param name="reportOutput">The destination for the verification report, or <c>null</c></param>
+        /// <param name="levels">The amount of detail to include in the report (if not <c>null</c>)</param>
+        /// <returns><c>true</c> if the file system is OK, else <c>false</c>.</returns>
         /// <remarks>This method may place this object into "lock-down", where no further
         /// changes are permitted (if corruption is detected).  Unlike Checkpoint, this method
         /// doesn't cause the snapshot to be re-taken.</remarks>
-        public void Verify()
+        public bool Verify(TextWriter reportOutput, ReportLevels levels)
         {
+            bool ok = true;
             _snapStream.Freeze();
 
             // Note the trace stream means that we can guarantee no further stream access after
             // the file system object is disposed - when we dispose it, it forcibly severes the
             // connection to the snapshot stream.
             using (TracingStream traceStream = new TracingStream(_snapStream, Ownership.None))
-            using (T testFs = CreateFileSystem(traceStream))
             {
                 try
                 {
-                    // For now, a diagnostic dump has to pass for validation...
-                    using (TextWriter writer = new NullTextWriter())
+                    if (!DoVerify(traceStream, reportOutput, levels))
                     {
-                        testFs.Dump(writer, "");
+                        ok = false;
                     }
                 }
                 catch (Exception e)
                 {
-                    _lockdown = true;
-
                     _failureException = e;
-
-                    Debugger.Break();
-
-                    throw new CorruptFileSystemException("File system failed verification", e);
+                    ok = false;
                 }
             }
 
-            _snapStream.Thaw();
+            if (ok)
+            {
+                _snapStream.Thaw();
+                return true;
+            }
+            else
+            {
+                _lockdown = true;
+                _globalTrace.Stop();
+                _globalTrace.WriteToFile(null);
+                return false;
+            }
         }
 
         /// <summary>
         /// Verifies the file system integrity (as seen on disk), and resets the disk checkpoint.
         /// </summary>
+        /// <param name="reportOutput">The destination for the verification report, or <c>null</c></param>
+        /// <param name="levels">The amount of detail to include in the report (if not <c>null</c>)</param>
         /// <remarks>This method is automatically invoked according to the CheckpointInterval property,
         /// but can be called manually as well.</remarks>
-        public void Checkpoint()
+        public bool Checkpoint(TextWriter reportOutput, ReportLevels levels)
         {
-            Verify();
+            if (!Verify(reportOutput, levels))
+            {
+                return false;
+            }
 
             // Since the file system is OK, reset the snapshot (keeping changes).
             _snapStream.ForgetSnapshot();
             _snapStream.Snapshot();
 
             _checkpointBuffer.Clear();
+
+            // Set the file system's RNG to a known, but unpredictable, state.
+            _checkpointRngSeed = _masterRng.Next();
+            _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
+
+            // Reset the global trace stream - no longer interested in what it captured.
+            _globalTrace.Reset(_runGlobalTrace);
+
+            return true;
         }
 
         /// <summary>
@@ -177,6 +324,30 @@ namespace DiscUtils.Diagnostics
         /// </summary>
         public ReplayReport ReplayFromLastCheckpoint()
         {
+            // TODO - do full replay, check for failure - is this reproducible?
+
+            // Binary chop for activity that causes failure
+            int lowPoint = 0;
+            int highPoint = _checkpointBuffer.Count;
+
+            int midPoint = highPoint / 2;
+            while (highPoint - lowPoint > 1)
+            {
+                if (DoReplayAndVerify(midPoint))
+                {
+                    // This was OK, so must be mid-point or higher
+                    lowPoint = midPoint;
+                }
+                else
+                {
+                    // Failed, so must be below mid-point
+                    highPoint = midPoint;
+                }
+                midPoint = lowPoint + ((highPoint - lowPoint) / 2);
+            }
+
+            // Replay again, up to lowPoint - capturing all info desired
+
             using (SnapshotStream replayCapture = new SnapshotStream(_baseStream, Ownership.None))
             {
                 // Preserve the base stream
@@ -184,44 +355,83 @@ namespace DiscUtils.Diagnostics
 
                 // Use tracing to capture changes to the stream
                 using (TracingStream ts = new TracingStream(replayCapture, Ownership.None))
-                using (T replayFs = CreateFileSystem(ts))
                 {
-                    Dictionary<string, object> replayContext = new Dictionary<string, object>();
-
-                    int replayEventsProcessed = 0;
                     Exception replayException = null;
 
-                    ts.Start();
                     try
                     {
-                        for (int i = 0; i < _checkpointBuffer.Count; ++i)
+                        using (Tfs replayFs = CreateFileSystem(ts))
                         {
-                            replayEventsProcessed++;
-                            object retVal = _checkpointBuffer[i](replayFs, replayContext);
-                            Verify();
+                            // Re-init the RNG to it's state when the checkpoint started, so we get reproducibility.
+                            replayFs.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
+
+                            Dictionary<string, object> replayContext = new Dictionary<string, object>();
+
+                            for (int i = 0; i < lowPoint - 1; ++i)
+                            {
+                                _checkpointBuffer[i](replayFs, replayContext);
+                            }
+
+                            ts.Start();
+                            _checkpointBuffer[lowPoint](replayFs, replayContext);
+                            ts.Stop();
                         }
+
                     }
                     catch (Exception e)
                     {
                         replayException = e;
-
-                        // TODO - useful stuff (dump streams, etc).
-                        Debugger.Break();
-
                     }
-                    ts.Stop();
 
-                    // TODO - useful stuff (dump streams, etc).
-                    Debugger.Break();
+                    StringWriter verificationReport = new StringWriter();
+                    bool failedVerificationOnReplay = DoVerify(ts, verificationReport, ReportLevels.All);
 
-                    ReplayReport report = new ReplayReport(
+                    return new ReplayReport(
                         _failureException,
                         replayException,
+                        _globalTrace,
                         ts,
                         _checkpointBuffer.Count,
-                        replayEventsProcessed);
+                        lowPoint + 1,
+                        _totalEventsBeforeLockDown,
+                        failedVerificationOnReplay,
+                        verificationReport.GetStringBuilder().ToString(),
+                        _lastCheckpointReport);
+                }
+            }
+        }
 
-                    return report;
+        /// <summary>
+        /// Replays a specified number of activities.
+        /// </summary>
+        /// <param name="activityCount">Number of activities to replay</param>
+        private bool DoReplayAndVerify(int activityCount)
+        {
+            using (SnapshotStream replayCapture = new SnapshotStream(_baseStream, Ownership.None))
+            {
+                // Preserve the base stream
+                replayCapture.Snapshot();
+
+                try
+                {
+                    using (Tfs replayFs = CreateFileSystem(replayCapture))
+                    {
+                        // Re-init the RNG to it's state when the checkpoint started, so we get reproducibility.
+                        replayFs.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
+
+                        Dictionary<string, object> replayContext = new Dictionary<string, object>();
+
+                        for (int i = 0; i < activityCount; ++i)
+                        {
+                            _checkpointBuffer[i](replayFs, replayContext);
+                        }
+
+                        return DoVerify(replayCapture, null, ReportLevels.None);
+                    }
+                }
+                catch
+                {
+                    return false;
                 }
             }
         }
@@ -234,13 +444,19 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The supplied activity may be executed multiple times, against multiple instances of the
         /// file system if a replay is requested.  Always drive the file system object supplied as a parameter and
         /// do not persist references to that object.</remarks>
-        public object PerformActivity(Activity<T> activity)
+        public object PerformActivity(Activity<Tfs> activity)
         {
             if (_lockdown)
             {
                 throw new InvalidOperationException("Validator in lock-down, file system corruption has been detected.");
             }
 
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            _totalEventsBeforeLockDown++;
             _checkpointBuffer.Add(activity);
 
             bool doCheckpoint = false;
@@ -255,26 +471,135 @@ namespace DiscUtils.Diagnostics
                 // If a checkpoint is due...
                 if (_checkpointBuffer.Count >= _checkpointPeriod)
                 {
+                    // Roll over the on-disk trace
+                    _globalTrace.WriteToFile(string.Format(@"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
+
                     // We only do a full checkpoint, if the activity didn't throw an exception.  Otherwise,
                     // we'll discard all replay info just when the caller might want it.  Instead, just do a
                     // verify until (and unless), an activity that doesn't throw an exception happens.
                     if (doCheckpoint)
                     {
-                        Checkpoint();
+                        CheckpointAndThrow();
                     }
                     else
                     {
-                        Verify();
+                        VerifyAndThrow();
                     }
                 }
             }
         }
 
-        private static T CreateFileSystem(Stream stream)
+        private void Initialize()
         {
-            return (T)typeof(T).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+            if (_initialized)
+            {
+                throw new InvalidOperationException();
+            }
+
+            _snapStream = new SnapshotStream(_baseStream, Ownership.None);
+
+            _masterRng = new Random(56456456);
+
+            _globalTrace = new TracingStream(_snapStream, Ownership.None);
+            _globalTrace.CaptureStackTraces = _globalTraceCaptureStackTraces;
+            _globalTrace.Reset(_runGlobalTrace);
+            _globalTrace.WriteToFile(string.Format(@"C:\temp\working\trace{0:X3}.log",_numScheduledCheckpoints++));
+
+            _liveTarget = CreateFileSystem(_globalTrace);
+            _checkpointRngSeed = _masterRng.Next();
+            _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
+
+            _activityContext = new Dictionary<string, object>();
+
+            _checkpointBuffer = new List<Activity<Tfs>>();
+
+            // Take a snapshot, to preserve the stream state before we perform
+            // an operation (assumption is that merely creating a file system object
+            // (above) is not significant...
+            _snapStream.Snapshot();
+
+            _initialized = true;
+
+            // Preliminary test, lets make sure we think the file system's good before we start...
+            VerifyAndThrow();
         }
 
+        private static bool DoVerify(Stream s, TextWriter w, ReportLevels levels)
+        {
+            Tc checker = CreateChecker(s);
+
+            if (w != null)
+            {
+                return checker.Check(w, levels);
+            }
+            else
+            {
+                using (NullTextWriter nullWriter = new NullTextWriter())
+                {
+                    return checker.Check(nullWriter, ReportLevels.None);
+                }
+            }
+        }
+
+        private void CheckpointAndThrow()
+        {
+            using (StringWriter writer = new StringWriter())
+            {
+                bool passed = Checkpoint(writer, ReportLevels.Errors);
+
+                _lastCheckpointReport = writer.GetStringBuilder().ToString();
+
+                if(!passed)
+                {
+                    throw new ValidatingFileSystemException("File system failed verification", _failureException);
+                }
+            }
+        }
+
+        private void VerifyAndThrow()
+        {
+            using (StringWriter writer = new StringWriter())
+            {
+                bool passed = Verify(writer, ReportLevels.Errors);
+
+                _lastCheckpointReport = writer.GetStringBuilder().ToString();
+
+                if (!passed)
+                {
+                    throw new ValidatingFileSystemException("File system failed verification", _failureException);
+                }
+            }
+        }
+
+        private static Tfs CreateFileSystem(Stream stream)
+        {
+            try
+            {
+                return (Tfs)typeof(Tfs).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+            }
+            catch (TargetInvocationException tie)
+            {
+                FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+                remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
+
+                throw tie.InnerException; 
+            }
+        }
+
+        private static Tc CreateChecker(Stream stream)
+        {
+            try
+            {
+                return (Tc)typeof(Tc).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+            }
+            catch (TargetInvocationException tie)
+            {
+                FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+                remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
+
+                throw tie.InnerException;
+            }
+        }
 
         #region DiscFileSystem Implementation
         /// <summary>
@@ -283,7 +608,7 @@ namespace DiscUtils.Diagnostics
         public override string FriendlyName
         {
             get {
-                Activity<T> fn = delegate(T fs, Dictionary<string, object> context)
+                Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
                 {
                     return fs.FriendlyName;
                 };
@@ -530,14 +855,14 @@ namespace DiscUtils.Diagnostics
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
             // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
-            StreamOpenFn reopenFn = delegate(T fs)
+            StreamOpenFn reopenFn = delegate(Tfs fs)
             {
                 return fs.OpenFile(path, mode, access);
             };
 
-            ValidatingFileSystemWrapperStream<T> wrapper = new ValidatingFileSystemWrapperStream<T>(this, reopenFn);
+            ValidatingFileSystemWrapperStream<Tfs, Tc> wrapper = new ValidatingFileSystemWrapperStream<Tfs, Tc>(this, reopenFn);
 
-            Activity<T> activity = delegate(T fs, Dictionary<string, object> context)
+            Activity<Tfs> activity = delegate(Tfs fs, Dictionary<string, object> context)
             {
                 Stream s = fs.OpenFile(path, mode, access);
                 wrapper.SetNativeStream(context, s);

@@ -62,6 +62,11 @@ namespace DiscUtils.Ntfs
             get { return _record.IsNonResident; }
         }
 
+        public Range<long, long>[] GetClusters()
+        {
+            return _record.GetClusters();
+        }
+
         public void SetNonResident(bool nonResident, int maxData)
         {
             if (nonResident == _record.IsNonResident)
@@ -183,7 +188,6 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
-
     }
 
 }

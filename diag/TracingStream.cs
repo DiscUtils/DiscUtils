@@ -30,14 +30,19 @@ namespace DiscUtils.Diagnostics
     /// <summary>
     /// Stream wrapper that traces all read and write activity.
     /// </summary>
-    public class TracingStream : Stream
+    public sealed class TracingStream : Stream
     {
         private Stream _wrapped;
         private Ownership _ownsWrapped;
 
         private List<StreamTraceRecord> _records;
         private bool _active;
+        private bool _captureStack;
+        private bool _captureStackFileDetails = false;
+        private bool _traceReads;
+        private bool _traceWrites = true;
 
+        private StreamWriter _fileOut;
 
         /// <summary>
         /// Creates a new instance, wrapping an existing stream.
@@ -48,6 +53,7 @@ namespace DiscUtils.Diagnostics
         {
             _wrapped = toWrap;
             _ownsWrapped = ownsWrapped;
+            _records = new List<StreamTraceRecord>();
         }
 
         /// <summary>
@@ -63,6 +69,12 @@ namespace DiscUtils.Diagnostics
                     _wrapped.Dispose();
                 }
                 _wrapped = null;
+
+                if (_fileOut != null)
+                {
+                    _fileOut.Dispose();
+                }
+                _fileOut = null;
             }
             base.Dispose(disposing);
         }
@@ -72,10 +84,6 @@ namespace DiscUtils.Diagnostics
         /// </summary>
         public void Start()
         {
-            if (_records == null)
-            {
-                _records = new List<StreamTraceRecord>();
-            }
             _active = true;
         }
 
@@ -95,10 +103,57 @@ namespace DiscUtils.Diagnostics
         public void Reset(bool start)
         {
             _active = false;
-            _records = null;
+            _records.Clear();
             if (start)
             {
                 Start();
+            }
+        }
+
+        /// <summary>
+        /// Gets and sets whether to capture stack traces for every read/write
+        /// </summary>
+        public bool CaptureStackTraces
+        {
+            get { return _captureStack; }
+            set { _captureStack = value; }
+        }
+
+        /// <summary>
+        /// Gets and sets whether to trace read activity (default is false).
+        /// </summary>
+        public bool TraceReads
+        {
+            get { return _traceReads; }
+            set { _traceReads = value; }
+        }
+
+        /// <summary>
+        /// Gets and sets whether to trace write activity (default is true).
+        /// </summary>
+        public bool TraceWrites
+        {
+            get { return _traceWrites; }
+            set { _traceWrites = value; }
+        }
+
+        /// <summary>
+        /// Directs trace output to a file as well as storing internally.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <remarks>Call this method after tracing has started to migrate to a new
+        /// output file.</remarks>
+        public void WriteToFile(string path)
+        {
+            if (_fileOut != null)
+            {
+                _fileOut.Dispose();
+                _fileOut = null;
+            }
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                _fileOut = new StreamWriter(path, false);
             }
         }
 
@@ -177,16 +232,27 @@ namespace DiscUtils.Diagnostics
         /// <returns>The number of bytes read</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int result = _wrapped.Read(buffer, offset, count);
-            if (_active)
+            long position = _wrapped.Position;
+            try
             {
-                StreamTraceRecord record = new StreamTraceRecord(_records.Count, "READ", Position, new StackTrace(1, true));
-                record.CountArg = count;
-                record.Result = result;
-                _records.Add(record);
-                Console.WriteLine(record);
+                int result = _wrapped.Read(buffer, offset, count);
+                if (_active && _traceReads)
+                {
+                    StreamTraceRecord record = CreateAndAddRecord("READ", position, count);
+                    record.Result = result;
+                }
+                return result;
             }
-            return result;
+            catch(Exception e)
+            {
+                if (_active && _traceReads)
+                {
+                    StreamTraceRecord record = CreateAndAddRecord("READ", position, count);
+                    record.Result = -1;
+                    record.ExceptionThrown = e;
+                }
+                throw;
+            }
         }
 
         /// <summary>
@@ -217,14 +283,39 @@ namespace DiscUtils.Diagnostics
         /// <param name="count">The number of bytes to write</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (_active)
+            long position = _wrapped.Position;
+            try
             {
-                StreamTraceRecord record = new StreamTraceRecord(_records.Count, "WRITE", Position, new StackTrace(1, true));
-                record.CountArg = count;
-                _records.Add(record);
-                Console.WriteLine(record);
+                _wrapped.Write(buffer, offset, count);
+                if (_active && _traceWrites)
+                {
+                    CreateAndAddRecord("WRITE", position, count);
+                }
             }
-            _wrapped.Write(buffer, offset, count);
+            catch (Exception e)
+            {
+                if (_active && _traceWrites)
+                {
+                    StreamTraceRecord record = CreateAndAddRecord("WRITE", position, count);
+                    record.ExceptionThrown = e;
+                }
+                throw;
+            }
+        }
+
+        private StreamTraceRecord CreateAndAddRecord(string activity, long position, long count)
+        {
+            StackTrace trace = (_captureStack ? new StackTrace(2, _captureStackFileDetails) : null);
+            StreamTraceRecord record = new StreamTraceRecord(_records.Count, "WRITE", position, trace);
+            record.CountArg = count;
+            _records.Add(record);
+
+            if (_fileOut != null)
+            {
+                _fileOut.Write(record);
+                _fileOut.Write(trace.ToString());
+            }
+            return record;
         }
     }
 }

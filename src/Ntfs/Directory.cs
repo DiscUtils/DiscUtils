@@ -32,8 +32,8 @@ namespace DiscUtils.Ntfs
         private Index<FileNameRecord, FileReference> _index;
 
 
-        public Directory(NtfsFileSystem fileSystem, MasterFileTable mft, FileRecord baseRecord)
-            : base(fileSystem, mft, baseRecord)
+        public Directory(INtfsContext fileSystem, MasterFileTable mft, FileRecord baseRecord)
+            : base(fileSystem, baseRecord)
         {
             _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
         }

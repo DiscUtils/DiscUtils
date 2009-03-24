@@ -21,46 +21,56 @@
 //
 
 using System;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace DiscUtils.Diagnostics
+namespace DiscUtils
 {
     /// <summary>
-    /// Exception thrown when file system corruption is detected during verification.
+    /// Represents a range of values.
     /// </summary>
-    [Serializable]
-    public sealed class CorruptFileSystemException : Exception
+    /// <typeparam name="Toffset">The type of the offset element</typeparam>
+    /// <typeparam name="Tcount">The type of the size element</typeparam>
+    public class Range<Toffset, Tcount>
     {
-        /// <summary>
-        /// Creates a new instance.
-        /// </summary>
-        public CorruptFileSystemException()
-        {
-        }
+        private Toffset _offset;
+        private Tcount _count;
 
         /// <summary>
         /// Creates a new instance.
         /// </summary>
-        /// <param name="message">The exception message.</param>
-        public CorruptFileSystemException(string message)
-            : base(message)
+        /// <param name="offset">The offset (i.e. start) of the range</param>
+        /// <param name="count">The size of the range</param>
+        public Range(Toffset offset, Tcount count)
         {
+            _offset = offset;
+            _count = count;
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Gets the offset (i.e. start) of the range
         /// </summary>
-        /// <param name="message">The exception message</param>
-        /// <param name="innerException">The inner exception</param>
-        public CorruptFileSystemException(string message, Exception innerException)
-            :base(message, innerException)
+        public Toffset Offset
         {
+            get { return _offset; }
         }
 
-        private CorruptFileSystemException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        /// <summary>
+        /// Gets the size of the range.
+        /// </summary>
+        public Tcount Count
         {
+            get { return _count; }
         }
 
+        /// <summary>
+        /// Returns a string representation of the extent as [start:+length].
+        /// </summary>
+        /// <returns>The string representation</returns>
+        public override string ToString()
+        {
+            return "[" + _offset + ":+" + _count + "]";
+        }
     }
 }

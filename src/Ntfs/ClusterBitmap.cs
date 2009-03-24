@@ -45,7 +45,7 @@ namespace DiscUtils.Ntfs
 
             long numFound = 0;
 
-            long numClusters = _file.FileSystem.RawStream.Length / _file.FileSystem.BytesPerCluster;
+            long numClusters = _file.FileSystem.RawStream.Length / _file.FileSystem.BiosParameterBlock.BytesPerCluster;
             long focusCluster = numClusters / 8;
 
             while (numFound < count)

@@ -105,6 +105,8 @@ namespace DiscUtils.Ntfs
             get { return _flags; }
         }
 
+        public abstract Range<long, long>[] GetClusters();
+
         public abstract SparseStream OpenRaw(File file, FileAccess access);
 
         public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
@@ -224,6 +226,11 @@ namespace DiscUtils.Ntfs
         public override SparseStream OpenRaw(File file, FileAccess access)
         {
             return new ResidentAttributeStream(file, new SparseMemoryStream(_memoryBuffer, access));
+        }
+
+        public override Range<long, long>[] GetClusters()
+        {
+            return new Range<long, long>[0];
         }
 
         protected override void Read(byte[] buffer, int offset, out int length)
@@ -380,6 +387,22 @@ namespace DiscUtils.Ntfs
             get { return _dataRuns; }
         }
 
+        public override Range<long, long>[] GetClusters()
+        {
+            var cookedRuns = CookedDataRun.Cook(_dataRuns);
+
+            List<Range<long, long>> result = new List<Range<long, long>>(cookedRuns.Count);
+            foreach(var run in cookedRuns)
+            {
+                if (!run.IsSparse)
+                {
+                    result.Add(new Range<long, long>(run.StartLcn, run.Length));
+                }
+            }
+
+            return result.ToArray();
+        }
+
         public override SparseStream OpenRaw(File file, FileAccess access)
         {
             return new NonResidentAttributeStream(file, access, this);
@@ -504,6 +527,66 @@ namespace DiscUtils.Ntfs
             }
 
             writer.WriteLine(indent + "       Data Runs:" + runStr);
+        }
+    }
+
+    internal class CookedDataRun
+    {
+        private long _startVcn;
+        private long _startLcn;
+        private DataRun _raw;
+
+        public CookedDataRun(DataRun raw, long startVcn, long startLcn)
+        {
+            _raw = raw;
+            _startVcn = startVcn;
+            _startLcn = startLcn;
+
+            if (startVcn < 0)
+            {
+                throw new ArgumentOutOfRangeException("startVcn", startVcn, "VCN must be >= 0");
+            }
+            if (_startLcn < 0)
+            {
+                throw new ArgumentOutOfRangeException("startLcn", startLcn, "LCN must be >= 0");
+            }
+        }
+
+        public long StartVcn
+        {
+            get { return _startVcn; }
+        }
+
+        public long StartLcn
+        {
+            get { return _startLcn; }
+        }
+
+        public long Length
+        {
+            get { return _raw.RunLength; }
+            set { _raw.RunLength = value; }
+        }
+
+        public bool IsSparse
+        {
+            get { return _raw.IsSparse; }
+        }
+
+        public static List<CookedDataRun> Cook(List<DataRun> runs)
+        {
+            List<CookedDataRun> result = new List<CookedDataRun>(runs.Count);
+
+            long vcn = 0;
+            long lcn = 0;
+            for (int i = 0; i < runs.Count; ++i)
+            {
+                result.Add(new CookedDataRun(runs[i], vcn, lcn + runs[i].RunOffset));
+                vcn += runs[i].RunLength;
+                lcn += runs[i].RunOffset;
+            }
+
+            return result;
         }
 
     }

@@ -32,6 +32,22 @@ namespace DiscUtils
     public abstract class ReadOnlyDiscFileSystem : DiscFileSystem
     {
         /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        protected ReadOnlyDiscFileSystem()
+        {
+        }
+
+        /// <summary>
+        /// Create a new instance with a default set of options.
+        /// </summary>
+        /// <param name="defaultOptions">The options instance to use for this file system instance.</param>
+        protected ReadOnlyDiscFileSystem(DiscFileSystemOptions defaultOptions)
+            : base(defaultOptions)
+        {
+        }
+
+        /// <summary>
         /// Indicates whether the file system is read-only or read-write.
         /// </summary>
         /// <returns>Always false.</returns>

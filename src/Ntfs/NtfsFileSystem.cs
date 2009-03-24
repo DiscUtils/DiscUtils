@@ -32,27 +32,11 @@ namespace DiscUtils.Ntfs
     /// <summary>
     /// Class for accessing NTFS file systems.
     /// </summary>
-    public sealed class NtfsFileSystem : ReadOnlyDiscFileSystem, IDiagnosticTraceable
+    public sealed class NtfsFileSystem : ClusterBasedFileSystem, IDiagnosticTraceable
     {
-        private NtfsOptions _options;
-
-        private Stream _stream;
-
+        private NtfsContext _context;
 
         // Top-level file system structures
-        private BiosParameterBlock _bpb;
-
-        private MasterFileTable _mft;
-
-        private ClusterBitmap _bitmap;
-
-        private AttributeDefinitions _attrDefs;
-
-        private UpperCase _upperCase;
-
-        private SecurityDescriptors _securityDescriptors;
-
-        private ObjectIds _objectIds;
 
 
         // Working state
@@ -63,29 +47,37 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="stream">The stream containing the NTFS file system</param>
         public NtfsFileSystem(Stream stream)
+            : base(new NtfsOptions())
         {
-            _options = new NtfsOptions();
-            _stream = stream;
+            _context = new NtfsContext();
+            _context.RawStream = stream;
+            _context.Options = NtfsOptions;
+
+            _context.GetFile = GetFile;
+            _context.GetDirectory = GetDirectory;
+            _context.GetDirectoryByIndex = GetDirectory;
+            _context.AllocateFile = AllocateFile;
 
             _fileCache = new ObjectCache<long, File>();
 
-            _stream.Position = 0;
-            byte[] bytes = Utilities.ReadFully(_stream, 512);
+            stream.Position = 0;
+            byte[] bytes = Utilities.ReadFully(stream, 512);
 
-            _bpb = BiosParameterBlock.FromBytes(bytes, 0);
+
+            _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
             // Bootstrap the Master File Table
-            _mft = new MasterFileTable();
-            File mftFile = new File(this, _mft, MasterFileTable.GetBootstrapRecord(_stream, _bpb));
+            _context.Mft = new MasterFileTable();
+            File mftFile = new File(_context, MasterFileTable.GetBootstrapRecord(stream, _context.BiosParameterBlock));
             _fileCache[MasterFileTable.MftIndex] = mftFile;
-            _mft.Initialize(mftFile);
+            _context.Mft.Initialize(mftFile);
 
             // Initialize access to the other well-known metadata files
-            _bitmap = new ClusterBitmap(GetFile(MasterFileTable.BitmapIndex));
-            _attrDefs = new AttributeDefinitions(GetFile(MasterFileTable.AttrDefIndex));
-            _upperCase = new UpperCase(GetFile(MasterFileTable.UpCaseIndex));
-            _securityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
-            _objectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
+            _context.ClusterBitmap = new ClusterBitmap(GetFile(MasterFileTable.BitmapIndex));
+            _context.AttributeDefinitions = new AttributeDefinitions(GetFile(MasterFileTable.AttrDefIndex));
+            _context.UpperCase = new UpperCase(GetFile(MasterFileTable.UpCaseIndex));
+            _context.SecurityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
+            _context.ObjectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
 
 #if false
             byte[] buffer = new byte[1024];
@@ -107,9 +99,9 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the options that control how the file system is interpreted.
         /// </summary>
-        public NtfsOptions Options
+        public NtfsOptions NtfsOptions
         {
-            get { return _options; }
+            get { return (NtfsOptions)Options; }
         }
 
         /// <summary>
@@ -128,6 +120,57 @@ namespace DiscUtils.Ntfs
         {
             get { return "Microsoft NTFS"; }
         }
+
+        /// <summary>
+        /// Indicates if the file system supports write operations.
+        /// </summary>
+        public override bool CanWrite
+        {
+            // For now, we don't...
+            get { return false; }
+        }
+
+        #region Cluster Information
+        /// <summary>
+        /// Gets the size of each cluster (in bytes).
+        /// </summary>
+        public override long ClusterSize
+        {
+            get { return _context.BiosParameterBlock.BytesPerCluster; }
+        }
+
+        /// <summary>
+        /// Gets the total number of clusters managed by the file system.
+        /// </summary>
+        public override long TotalClusters
+        {
+            get { return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64, _context.BiosParameterBlock.SectorsPerCluster); }
+        }
+
+        public override Range<long, long>[] PathToClusters(string path)
+        {
+            string plainPath;
+            string attributeName;
+            SplitPath(path, out plainPath, out attributeName);
+
+
+            DirectoryEntry dirEntry = GetDirectoryEntry(plainPath);
+            File file = GetFile(dirEntry.Reference);
+
+            NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+            return attr.GetClusters();
+        }
+
+        public override StreamExtent[] PathToExtents(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ClusterMap GetClusterMap()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
 
         /// <summary>
         /// Indicates if a directory exists.
@@ -270,7 +313,7 @@ namespace DiscUtils.Ntfs
                 }
                 else
                 {
-                    File file = File.CreateNew(this);
+                    File file = File.CreateNew(_context);
 
                     DirectoryEntry dirDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
                     Directory destDir = GetDirectory(dirDirEntry.Reference);
@@ -331,6 +374,56 @@ namespace DiscUtils.Ntfs
             return fileObj.OpenAttribute(type, name, access);
         }
 
+        public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void CreateDirectory(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DeleteDirectory(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DeleteFile(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void MoveFile(string sourceName, string destinationName, bool overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetAttributes(string path, FileAttributes newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetCreationTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetLastAccessTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetLastWriteTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Gets the security descriptor associated with the file or directory.
         /// </summary>
@@ -354,7 +447,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
-                return _securityDescriptors.GetDescriptorById(si.SecurityId);
+                return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
             }
         }
 
@@ -494,7 +587,7 @@ namespace DiscUtils.Ntfs
 
         internal File GetFile(FileReference fileReference)
         {
-            FileRecord record = _mft.GetRecord(fileReference);
+            FileRecord record = _context.Mft.GetRecord(fileReference);
             if (record == null)
             {
                 return null;
@@ -511,11 +604,11 @@ namespace DiscUtils.Ntfs
             {
                 if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
                 {
-                    file = new Directory(this, _mft, record);
+                    file = new Directory(_context, _context.Mft, record);
                 }
                 else
                 {
-                    file = new File(this, _mft, record);
+                    file = new File(_context, record);
                 }
                 _fileCache[fileReference.MftIndex] = file;
             }
@@ -525,7 +618,7 @@ namespace DiscUtils.Ntfs
 
         internal File GetFile(long index)
         {
-            FileRecord record = _mft.GetRecord(index);
+            FileRecord record = _context.Mft.GetRecord(index, false);
             if (record == null)
             {
                 return null;
@@ -542,11 +635,11 @@ namespace DiscUtils.Ntfs
             {
                 if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
                 {
-                    file = new Directory(this, _mft, record);
+                    file = new Directory(_context, _context.Mft, record);
                 }
                 else
                 {
-                    file = new File(this, _mft, record);
+                    file = new File(_context, record);
                 }
                 _fileCache[index] = file;
             }
@@ -556,46 +649,11 @@ namespace DiscUtils.Ntfs
 
         internal File AllocateFile()
         {
-            File file = new File(this, _mft, _mft.AllocateRecord());
+            File file = new File(_context, _context.Mft.AllocateRecord());
             _fileCache[file.MftReference.MftIndex] = file;
             return file;
         }
         #endregion
-
-        internal Stream RawStream
-        {
-            get { return _stream; }
-        }
-
-        internal BiosParameterBlock BiosParameterBlock
-        {
-            get { return _bpb; }
-        }
-
-        internal ClusterBitmap ClusterBitmap
-        {
-            get { return _bitmap; }
-        }
-
-        internal AttributeDefinitions AttributeDefinitions
-        {
-            get { return _attrDefs; }
-        }
-
-        internal UpperCase UpperCase
-        {
-            get { return _upperCase; }
-        }
-
-        internal ObjectIds ObjectIds
-        {
-            get { return _objectIds; }
-        }
-
-        internal long BytesPerCluster
-        {
-            get { return _bpb.BytesPerSector * _bpb.SectorsPerCluster; }
-        }
 
         /// <summary>
         /// Writes a diagnostic dump of key NTFS structures.
@@ -604,33 +662,33 @@ namespace DiscUtils.Ntfs
         /// <param name="linePrefix">The indent to apply to the start of each line of output.</param>
         public void Dump(TextWriter writer, string linePrefix)
         {
-            writer.WriteLine("NTFS File System Dump");
-            writer.WriteLine("=====================");
+            writer.WriteLine(linePrefix + "NTFS File System Dump");
+            writer.WriteLine(linePrefix + "=====================");
 
-            _mft.Dump(writer, "");
+            _context.Mft.Dump(writer, linePrefix);
 
-            writer.WriteLine();
-            _securityDescriptors.Dump(writer, "");
+            writer.WriteLine(linePrefix);
+            _context.SecurityDescriptors.Dump(writer, linePrefix);
 
-            writer.WriteLine();
-            _objectIds.Dump(writer, "");
+            writer.WriteLine(linePrefix);
+            _context.ObjectIds.Dump(writer, linePrefix);
 
-            writer.WriteLine();
-            GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, "");
+            writer.WriteLine(linePrefix);
+            GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, linePrefix);
 
-            writer.WriteLine();
-            writer.WriteLine("FULL FILE LISTING");
-            foreach (var record in _mft.Records)
+            writer.WriteLine(linePrefix);
+            writer.WriteLine(linePrefix + "FULL FILE LISTING");
+            foreach (var record in _context.Mft.Records)
             {
                 // Don't go through cache - these are short-lived, and this is (just!) diagnostics
-                File f = new File(this, _mft, record);
-                f.Dump(writer, "");
+                File f = new File(_context, record);
+                f.Dump(writer, linePrefix);
             }
 
-            writer.WriteLine();
-            writer.WriteLine("DIRECTORY TREE");
-            writer.WriteLine(@"\ (5)");
-            DumpDirectory(GetDirectory(MasterFileTable.RootDirIndex), writer, "");  // 5 = Root Dir
+            writer.WriteLine(linePrefix);
+            writer.WriteLine(linePrefix + "DIRECTORY TREE");
+            writer.WriteLine(linePrefix + @"\ (5)");
+            DumpDirectory(GetDirectory(MasterFileTable.RootDirIndex), writer, linePrefix);  // 5 = Root Dir
         }
 
         internal DirectoryEntry GetDirectoryEntry(string path)
@@ -716,5 +774,21 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
+
+        private static void SplitPath(string path, out string plainPath, out string attributeName)
+        {
+            plainPath = path;
+            string fileName = Utilities.GetFileFromPath(path);
+            attributeName = null;
+
+
+            int streamSepPos = fileName.IndexOf(':');
+            if (streamSepPos >= 0)
+            {
+                attributeName = fileName.Substring(streamSepPos + 1);
+                plainPath = plainPath.Substring(0, path.Length - (fileName.Length - streamSepPos));
+            }
+        }
+
     }
 }

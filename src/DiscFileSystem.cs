@@ -30,12 +30,39 @@ namespace DiscUtils
     /// </summary>
     public abstract class DiscFileSystem : IDisposable
     {
+        private DiscFileSystemOptions _options;
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        protected DiscFileSystem()
+        {
+            _options = new DiscFileSystemOptions();
+        }
+
+        /// <summary>
+        /// Create a new instance with a default set of options.
+        /// </summary>
+        /// <param name="defaultOptions">The options instance to use for this file system instance.</param>
+        protected DiscFileSystem(DiscFileSystemOptions defaultOptions)
+        {
+            _options = defaultOptions;
+        }
+
         /// <summary>
         /// Destructor.
         /// </summary>
         ~DiscFileSystem()
         {
             Dispose(false);
+        }
+
+        /// <summary>
+        /// Gets the file system options, which can be modified.
+        /// </summary>
+        public DiscFileSystemOptions Options
+        {
+            get { return _options; }
         }
 
         /// <summary>

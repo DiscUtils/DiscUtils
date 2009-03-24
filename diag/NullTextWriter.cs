@@ -26,7 +26,7 @@ using System.Text;
 
 namespace DiscUtils.Diagnostics
 {
-    internal class NullTextWriter : TextWriter
+    internal sealed class NullTextWriter : TextWriter
     {
         public NullTextWriter()
             : base(CultureInfo.InvariantCulture)
