@@ -88,6 +88,10 @@ namespace DiscUtils.Ntfs
             return (_levelsDetected & _levelsConsideredFail) == 0;
         }
 
+        /// <summary>
+        /// Gets an object that can convert between clusters and files.
+        /// </summary>
+        /// <returns>The cluster map</returns>
         public ClusterMap GetClusterMap()
         {
             _context = new NtfsContext();

@@ -98,6 +98,9 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path to inspect</param>
         /// <returns>The file extents, as absolute byte positions in the underlying stream</returns>
+        /// <remarks>Use this method with caution - not all file systems will store all bytes
+        /// directly in extents.  Files may be compressed, sparse or encrypted.  This method
+        /// merely indicates where file data is stored, not what's stored.</remarks>
         public abstract StreamExtent[] PathToExtents(string path);
 
         /// <summary>

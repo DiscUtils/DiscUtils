@@ -113,6 +113,7 @@ namespace DiscUtils.Ntfs
             return OpenRawAttribute("$MFT", AttributeType.Data, null, FileAccess.Read);
         }
 
+        #region DiscFileSystem Implementation
         /// <summary>
         /// Gets the friendly name for the file system.
         /// </summary>
@@ -130,47 +131,43 @@ namespace DiscUtils.Ntfs
             get { return false; }
         }
 
-        #region Cluster Information
         /// <summary>
-        /// Gets the size of each cluster (in bytes).
+        /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
-        public override long ClusterSize
-        {
-            get { return _context.BiosParameterBlock.BytesPerCluster; }
-        }
-
-        /// <summary>
-        /// Gets the total number of clusters managed by the file system.
-        /// </summary>
-        public override long TotalClusters
-        {
-            get { return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64, _context.BiosParameterBlock.SectorsPerCluster); }
-        }
-
-        public override Range<long, long>[] PathToClusters(string path)
-        {
-            string plainPath;
-            string attributeName;
-            SplitPath(path, out plainPath, out attributeName);
-
-
-            DirectoryEntry dirEntry = GetDirectoryEntry(plainPath);
-            File file = GetFile(dirEntry.Reference);
-
-            NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
-            return attr.GetClusters();
-        }
-
-        public override StreamExtent[] PathToExtents(string path)
+        /// <param name="sourceFile">The source file</param>
+        /// <param name="destinationFile">The destination file</param>
+        /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
+        public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
             throw new NotImplementedException();
         }
 
-        public override ClusterMap GetClusterMap()
+        /// <summary>
+        /// Creates a directory.
+        /// </summary>
+        /// <param name="path">The path of the new directory</param>
+        public override void CreateDirectory(string path)
         {
             throw new NotImplementedException();
         }
-        #endregion
+
+        /// <summary>
+        /// Deletes a directory.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        public override void DeleteDirectory(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes a file.
+        /// </summary>
+        /// <param name="path">The path of the file to delete.</param>
+        public override void DeleteFile(string path)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Indicates if a directory exists.
@@ -287,6 +284,27 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Moves a directory.
+        /// </summary>
+        /// <param name="sourceDirectoryName">The directory to move.</param>
+        /// <param name="destinationDirectoryName">The target directory name.</param>
+        public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Moves a file, allowing an existing file to be overwritten.
+        /// </summary>
+        /// <param name="sourceName">The file to move.</param>
+        /// <param name="destinationName">The target file name.</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        public override void MoveFile(string sourceName, string destinationName, bool overwrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Opens the specified file.
         /// </summary>
         /// <param name="path">The full path of the file to open.</param>
@@ -374,83 +392,6 @@ namespace DiscUtils.Ntfs
             return fileObj.OpenAttribute(type, name, access);
         }
 
-        public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void CreateDirectory(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void DeleteDirectory(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void DeleteFile(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void MoveFile(string sourceName, string destinationName, bool overwrite)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetAttributes(string path, FileAttributes newValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetCreationTimeUtc(string path, DateTime newTime)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetLastAccessTimeUtc(string path, DateTime newTime)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetLastWriteTimeUtc(string path, DateTime newTime)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the security descriptor associated with the file or directory.
-        /// </summary>
-        /// <param name="path">The file or directory to inspect.</param>
-        /// <returns>The security descriptor.</returns>
-        public FileSystemSecurity GetAccessControl(string path)
-        {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
-            {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else
-            {
-                File file = GetFile(dirEntry.Reference);
-
-                NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
-                if (legacyAttr != null)
-                {
-                    return ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
-                }
-
-                StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
-                return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
-            }
-        }
-
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
@@ -467,6 +408,16 @@ namespace DiscUtils.Ntfs
             {
                 return dirEntry.Details.FileAttributes;
             }
+        }
+
+        /// <summary>
+        /// Sets the attributes of a file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to change</param>
+        /// <param name="newValue">The new attributes of the file or directory</param>
+        public override void SetAttributes(string path, FileAttributes newValue)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -488,6 +439,16 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Sets the creation time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetCreationTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
@@ -503,6 +464,16 @@ namespace DiscUtils.Ntfs
             {
                 return dirEntry.Details.LastAccessTime;
             }
+        }
+
+        /// <summary>
+        /// Sets the last access time (in UTC) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastAccessTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -524,6 +495,16 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Sets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastWriteTimeUtc(string path, DateTime newTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets the length of a file.
         /// </summary>
         /// <param name="path">The path to the file</param>
@@ -537,6 +518,70 @@ namespace DiscUtils.Ntfs
             }
             return (long)dirEntry.Details.RealSize;
         }
+        #endregion
+
+        #region Cluster Information
+        /// <summary>
+        /// Gets the size of each cluster (in bytes).
+        /// </summary>
+        public override long ClusterSize
+        {
+            get { return _context.BiosParameterBlock.BytesPerCluster; }
+        }
+
+        /// <summary>
+        /// Gets the total number of clusters managed by the file system.
+        /// </summary>
+        public override long TotalClusters
+        {
+            get { return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64, _context.BiosParameterBlock.SectorsPerCluster); }
+        }
+
+        /// <summary>
+        /// Converts a file name to the list of clusters occupied by the file's data.
+        /// </summary>
+        /// <param name="path">The path to inspect</param>
+        /// <returns>The clusters</returns>
+        /// <remarks>Note that in some file systems, small files may not have dedicated
+        /// clusters.  Only dedicated clusters will be returned.</remarks>
+        public override Range<long, long>[] PathToClusters(string path)
+        {
+            string plainPath;
+            string attributeName;
+            SplitPath(path, out plainPath, out attributeName);
+
+
+            DirectoryEntry dirEntry = GetDirectoryEntry(plainPath);
+            File file = GetFile(dirEntry.Reference);
+
+            NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+            return attr.GetClusters();
+        }
+
+        /// <summary>
+        /// Converts a file name to the extents containing its data.
+        /// </summary>
+        /// <param name="path">The path to inspect</param>
+        /// <returns>The file extents, as absolute byte positions in the underlying stream</returns>
+        /// <remarks>Use this method with caution - NTFS supports encrypted, sparse and compressed files
+        /// where bytes are not directly stored in extents.  This method
+        /// merely indicates where file data is stored, not what's stored.</remarks>
+        public override StreamExtent[] PathToExtents(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets an object that can convert between clusters and files.
+        /// </summary>
+        /// <returns>The cluster map</returns>
+        public override ClusterMap GetClusterMap()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region NTFS-specific public methods
 
         /// <summary>
         /// Creates an NTFS hard link to an existing file.
@@ -574,7 +619,36 @@ namespace DiscUtils.Ntfs
             destinationDir.AddEntry(file, Path.GetFileName(destinationName));
         }
 
-        #region File access
+        /// <summary>
+        /// Gets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The security descriptor.</returns>
+        public FileSystemSecurity GetAccessControl(string path)
+        {
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+            else
+            {
+                File file = GetFile(dirEntry.Reference);
+
+                NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
+                if (legacyAttr != null)
+                {
+                    return ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
+                }
+
+                StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
+            }
+        }
+
+        #endregion
+
+        #region Internal File access methods (exposed via NtfsContext)
         internal Directory GetDirectory(long index)
         {
             return (Directory)GetFile(index);
