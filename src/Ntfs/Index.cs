@@ -56,7 +56,7 @@ namespace DiscUtils.Ntfs
             _blockCache = new ObjectCache<long, IndexBlock>();
 
             _root = _file.GetAttributeContent<IndexRoot>(AttributeType.IndexRoot, _name);
-            _comparer = GetCollator(_root.CollationRule);
+            _comparer = _root.GetCollator(upCase);
 
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
@@ -77,23 +77,6 @@ namespace DiscUtils.Ntfs
             if (bitmapAttr != null)
             {
                 _indexBitmap = new Bitmap(_file.OpenAttribute(bitmapAttr.Id, FileAccess.ReadWrite), long.MaxValue);
-            }
-        }
-
-        private IComparer<byte[]> GetCollator(AttributeCollationRule attributeCollationRule)
-        {
-            switch (attributeCollationRule)
-            {
-                case AttributeCollationRule.Filename:
-                    return new FileNameComparer(_upCase);
-                case AttributeCollationRule.SecurityHash:
-                    return new SecurityHashComparer();
-                case AttributeCollationRule.UnsignedLong:
-                    return new UnsignedLongComparer();
-                case AttributeCollationRule.MultipleUnsignedLongs:
-                    return new MultipleUnsignedLongComparer();
-                default:
-                    throw new NotImplementedException();
             }
         }
 
@@ -149,6 +132,11 @@ namespace DiscUtils.Ntfs
             return block;
         }
 
+        internal IndexBlock GetSubBlockIfCached(IndexNode parentNode, IndexEntry parentEntry)
+        {
+            return _blockCache[parentEntry.ChildrenVirtualCluster];
+        }
+
         internal IndexBlock AllocateBlock(IndexNode parentNode, IndexEntry parentEntry)
         {
             if (_indexStream == null)
@@ -167,7 +155,9 @@ namespace DiscUtils.Ntfs
             parentEntry.ChildrenVirtualCluster = idx * Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             parentEntry.Flags |= IndexEntryFlags.Node;
 
-            return IndexBlock.Initialize(this, parentNode, parentEntry, _bpb);
+            IndexBlock block = IndexBlock.Initialize(this, parentNode, parentEntry, _bpb);
+            _blockCache[parentEntry.ChildrenVirtualCluster] = block;
+            return block;
         }
 
         internal int Compare(byte[] x, byte[] y)
@@ -412,97 +402,6 @@ namespace DiscUtils.Ntfs
 
         #endregion
 
-        private sealed class SecurityHashComparer : IComparer<byte[]>
-        {
-            public int Compare(byte[] x, byte[] y)
-            {
-                uint xHash = Utilities.ToUInt32LittleEndian(x, 0);
-                uint yHash = Utilities.ToUInt32LittleEndian(y, 0);
-
-                if (xHash < yHash)
-                {
-                    return -1;
-                }
-                else if (xHash > yHash)
-                {
-                    return 1;
-                }
-
-                uint xId = Utilities.ToUInt32LittleEndian(x, 4);
-                uint yId = Utilities.ToUInt32LittleEndian(y, 4);
-                if (xId < yId)
-                {
-                    return -1;
-                }
-                else if (xId > yId)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-
-        private sealed class UnsignedLongComparer : IComparer<byte[]>
-        {
-            public int Compare(byte[] x, byte[] y)
-            {
-                uint xVal = Utilities.ToUInt32LittleEndian(x, 0);
-                uint yVal = Utilities.ToUInt32LittleEndian(y, 0);
-
-                if (xVal < yVal)
-                {
-                    return -1;
-                }
-                else if (xVal > yVal)
-                {
-                    return 1;
-                }
-                return 0;
-            }
-        }
-
-        private sealed class MultipleUnsignedLongComparer : IComparer<byte[]>
-        {
-            public int Compare(byte[] x, byte[] y)
-            {
-                for (int i = 0; i < x.Length / 4; ++i)
-                {
-                    uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
-                    uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);
-
-                    if (xVal < yVal)
-                    {
-                        return -1;
-                    }
-                    else if (xVal > yVal)
-                    {
-                        return 1;
-                    }
-                }
-                return 0;
-            }
-        }
-
-        private sealed class FileNameComparer : IComparer<byte[]>
-        {
-            private UpperCase _stringComparer;
-
-            public FileNameComparer(UpperCase upCase)
-            {
-                _stringComparer = upCase;
-            }
-
-            public int Compare(byte[] x, byte[] y)
-            {
-                byte xFnLen = x[0x40];
-                byte yFnLen = y[0x40];
-
-                return _stringComparer.Compare(x, 0x42, xFnLen * 2, y, 0x42, yFnLen * 2);
-            }
-        }
     }
 
     internal class Index<K, D> : Index

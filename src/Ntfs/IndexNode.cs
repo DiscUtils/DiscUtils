@@ -89,7 +89,7 @@ namespace DiscUtils.Ntfs
             get { return _header; }
         }
 
-        public List<IndexEntry> Entries
+        public IEnumerable<IndexEntry> Entries
         {
             get { return _entries; }
         }
@@ -280,6 +280,20 @@ namespace DiscUtils.Ntfs
             IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry);
             newBlock.Node.SetEntries(_entries, 0, _entries.Count);
 
+            // All of the nodes that used to be one layer beneath us, are now two layers
+            // beneath, they need their parent pointers updating.
+            foreach (var entry in _entries)
+            {
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexBlock block = _index.GetSubBlockIfCached(this, entry);
+                    if (block != null)
+                    {
+                        block.Node._parent = newBlock.Node;
+                    }
+                }
+            }
+
             _entries.Clear();
             _entries.Add(newRootEntry);
         }
@@ -315,6 +329,21 @@ namespace DiscUtils.Ntfs
             // Set the new entries into the new node
             IndexBlock newBlock = _index.AllocateBlock(_parent, midEntry);
             newBlock.Node.SetEntries(newEntries, 0, newEntries.Count);
+
+            // All of the nodes that used to be referenced by an entry that's just gone
+            // into the new block, need to have their parent references updated to point
+            // to the new block.
+            foreach (var entry in newEntries)
+            {
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexBlock block = _index.GetSubBlockIfCached(this, entry);
+                    if (block != null)
+                    {
+                        block.Node._parent = newBlock.Node;
+                    }
+                }
+            }
 
             // Forget about the entries moved into the new node, and the entry about
             // to be promoted as the new node's pointer

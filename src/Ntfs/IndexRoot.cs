@@ -22,6 +22,8 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Security.AccessControl;
 
 namespace DiscUtils.Ntfs
 {
@@ -44,6 +46,24 @@ namespace DiscUtils.Ntfs
             get { return _indexAllocationEntrySize; }
         }
 
+        public IComparer<byte[]> GetCollator(UpperCase upCase)
+        {
+            switch (_collationRule)
+            {
+                case AttributeCollationRule.Filename:
+                    return new FileNameComparer(upCase);
+                case AttributeCollationRule.SecurityHash:
+                    return new SecurityHashComparer();
+                case AttributeCollationRule.UnsignedLong:
+                    return new UnsignedLongComparer();
+                case AttributeCollationRule.MultipleUnsignedLongs:
+                    return new MultipleUnsignedLongComparer();
+                case AttributeCollationRule.Sid:
+                    return new SidComparer();
+                default:
+                    throw new NotImplementedException();
+            }
+        }
 
         #region IByteArraySerializable Members
 
@@ -75,6 +95,193 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "           Collation Rule: " + _collationRule);
             writer.WriteLine(indent + "         Index Alloc Size: " + _indexAllocationEntrySize);
             writer.WriteLine(indent + "  Raw Clusters Per Record: " + _rawClustersPerIndexRecord);
+        }
+
+        #endregion
+
+        #region Collators
+        private sealed class SecurityHashComparer : IComparer<byte[]>
+        {
+            public int Compare(byte[] x, byte[] y)
+            {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+                else if (y == null)
+                {
+                    return -1;
+                }
+                else if (x == null)
+                {
+                    return 1;
+                }
+
+
+                uint xHash = Utilities.ToUInt32LittleEndian(x, 0);
+                uint yHash = Utilities.ToUInt32LittleEndian(y, 0);
+
+                if (xHash < yHash)
+                {
+                    return -1;
+                }
+                else if (xHash > yHash)
+                {
+                    return 1;
+                }
+
+                uint xId = Utilities.ToUInt32LittleEndian(x, 4);
+                uint yId = Utilities.ToUInt32LittleEndian(y, 4);
+                if (xId < yId)
+                {
+                    return -1;
+                }
+                else if (xId > yId)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
+        private sealed class UnsignedLongComparer : IComparer<byte[]>
+        {
+            public int Compare(byte[] x, byte[] y)
+            {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+                else if (y == null)
+                {
+                    return -1;
+                }
+                else if (x == null)
+                {
+                    return 1;
+                }
+
+                uint xVal = Utilities.ToUInt32LittleEndian(x, 0);
+                uint yVal = Utilities.ToUInt32LittleEndian(y, 0);
+
+                if (xVal < yVal)
+                {
+                    return -1;
+                }
+                else if (xVal > yVal)
+                {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+
+        private sealed class MultipleUnsignedLongComparer : IComparer<byte[]>
+        {
+            public int Compare(byte[] x, byte[] y)
+            {
+                for (int i = 0; i < x.Length / 4; ++i)
+                {
+                    if (x == null && y == null)
+                    {
+                        return 0;
+                    }
+                    else if (y == null)
+                    {
+                        return -1;
+                    }
+                    else if (x == null)
+                    {
+                        return 1;
+                    }
+
+                    uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
+                    uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);
+
+                    if (xVal < yVal)
+                    {
+                        return -1;
+                    }
+                    else if (xVal > yVal)
+                    {
+                        return 1;
+                    }
+                }
+                return 0;
+            }
+        }
+
+        private sealed class FileNameComparer : IComparer<byte[]>
+        {
+            private UpperCase _stringComparer;
+
+            public FileNameComparer(UpperCase upCase)
+            {
+                _stringComparer = upCase;
+            }
+
+            public int Compare(byte[] x, byte[] y)
+            {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+                else if (y == null)
+                {
+                    return -1;
+                }
+                else if (x == null)
+                {
+                    return 1;
+                }
+
+                byte xFnLen = x[0x40];
+                byte yFnLen = y[0x40];
+
+                return _stringComparer.Compare(x, 0x42, xFnLen * 2, y, 0x42, yFnLen * 2);
+            }
+        }
+
+        private sealed class SidComparer : IComparer<byte[]>
+        {
+            public int Compare(byte[] x, byte[] y)
+            {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+                else if (y == null)
+                {
+                    return -1;
+                }
+                else if (x == null)
+                {
+                    return 1;
+                }
+
+                int toComp = Math.Min(x.Length, y.Length);
+                for (int i = 0; i < toComp; ++i)
+                {
+                    int val = ((int)x[i]) - ((int)y[i]);
+                    if (val != 0)
+                    {
+                        return val;
+                    }
+                }
+
+                if (x.Length < y.Length)
+                {
+                    return -1;
+                }
+                else if (x.Length > y.Length)
+                {
+                    return 1;
+                }
+                return 0;
+            }
         }
 
         #endregion
