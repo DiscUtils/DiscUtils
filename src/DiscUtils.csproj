@@ -116,6 +116,7 @@
     <Compile Include="Ntfs\FileRecord.cs" />
     <Compile Include="Ntfs\FileReference.cs" />
     <Compile Include="Ntfs\FixupRecordBase.cs" />
+    <Compile Include="Ntfs\GenericFixupRecord.cs" />
     <Compile Include="Ntfs\IByteArraySerializable.cs" />
     <Compile Include="Ntfs\Index.cs" />
     <Compile Include="Ntfs\IndexBlock.cs" />

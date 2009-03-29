@@ -87,11 +87,11 @@ namespace DiscUtils
         {
             int totalRead = 0;
 
-            while (totalRead < count && (pos + totalRead) < _capacity)
+            while (totalRead < count && pos < _capacity)
             {
                 int chunk = (int)(pos / _chunkSize);
                 int chunkOffset = (int)(pos % _chunkSize);
-                int numToRead = (int)Math.Min(Math.Min(_chunkSize - chunkOffset, _capacity - (pos + totalRead)), count - totalRead);
+                int numToRead = (int)Math.Min(Math.Min(_chunkSize - chunkOffset, _capacity - pos), count - totalRead);
 
                 byte[] chunkBuffer;
                 if (!_buffers.TryGetValue(chunk, out chunkBuffer))

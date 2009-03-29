@@ -608,7 +608,8 @@ namespace DiscUtils.Diagnostics
         /// </summary>
         public override string FriendlyName
         {
-            get {
+            get
+            {
                 Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
                 {
                     return fs.FriendlyName;
@@ -632,7 +633,11 @@ namespace DiscUtils.Diagnostics
         /// </summary>
         public override DiscDirectoryInfo Root
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                ConstructorInfo ctor = typeof(DiscDirectoryInfo).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(DiscFileSystem), typeof(string) }, null);
+                return (DiscDirectoryInfo)ctor.Invoke(new object[] { this, @"" });
+            }
         }
 
         /// <summary>
@@ -755,7 +760,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files.</returns>
         public override string[] GetFiles(string path)
         {
-            throw new NotImplementedException();
+            Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
+            {
+                return fs.GetFiles(path);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>

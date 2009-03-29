@@ -416,10 +416,43 @@ namespace DiscUtils.Ntfs
 
         private bool VerifyMftRecord(byte[] recordData, bool presentInBitmap, int bytesPerSector)
         {
+            bool ok = true;
+
+            //
+            // Verify the attributes seem OK...
+            //
+            byte[] tempBuffer = new byte[recordData.Length];
+            Array.Copy(recordData, tempBuffer, tempBuffer.Length);
+            GenericFixupRecord genericRecord = new GenericFixupRecord(bytesPerSector);
+            genericRecord.FromBytes(tempBuffer, 0);
+
+            int pos = Utilities.ToUInt16LittleEndian(genericRecord.Content, 0x14);
+            while (Utilities.ToUInt32LittleEndian(genericRecord.Content, pos) != 0xFFFFFFFF)
+            {
+                int attrLen;
+                try
+                {
+                    AttributeRecord ar = AttributeRecord.FromBytes(genericRecord.Content, pos, out attrLen);
+                    if (attrLen != ar.Size)
+                    {
+                        ReportError("Attribute size is different to calculated size.  AttrId={0}", ar.AttributeId);
+                        ok = false;
+                    }
+                }
+                catch
+                {
+                    ReportError("Failure parsing attribute at pos={0}", pos);
+                    return false;
+                }
+                pos += attrLen;
+            }
+
+
+            //
+            // Now consider record as a whole
+            //
             FileRecord record = new FileRecord(bytesPerSector);
             record.FromBytes(recordData, 0);
-
-            bool ok = true;
 
             bool inUse = (record.Flags & FileRecordFlags.InUse) != 0;
             if (inUse != presentInBitmap)

@@ -145,6 +145,11 @@ namespace DiscUtils.Ntfs
             _wrapped.Write(buffer, offset, count);
         }
 
+        public override string ToString()
+        {
+            return _file.ToString() + ".attr[" + _attrId + "]";
+        }
+
         private void CheckUsn()
         {
             if (_lastKnownUsn != _file.UpdateSequenceNumber)

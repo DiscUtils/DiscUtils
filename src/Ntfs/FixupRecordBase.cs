@@ -89,13 +89,20 @@ namespace DiscUtils.Ntfs
         public void FromBytes(byte[] buffer, int offset, bool ignoreMagic)
         {
             string diskMagic = Utilities.BytesToString(buffer, offset + 0x00, 4);
-            if (diskMagic != _magic && ignoreMagic)
+            if (_magic == null)
             {
-                return;
+                _magic = diskMagic;
             }
-            if (diskMagic != _magic)
+            else
             {
-                throw new IOException("Corrupt record");
+                if (diskMagic != _magic && ignoreMagic)
+                {
+                    return;
+                }
+                if (diskMagic != _magic)
+                {
+                    throw new IOException("Corrupt record");
+                }
             }
 
             _updateSequenceOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x04);
