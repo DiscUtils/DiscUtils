@@ -170,6 +170,11 @@ namespace DiscUtils.Ntfs
                 buffer[offset + pos] = 0;
                 pos++;
             }
+            else if (!isPositive && (buffer[offset + pos - 1] & 0x80) != 0x80)
+            {
+                buffer[offset + pos] = 0xFF;
+                pos++;
+            }
 
             return pos;
         }
@@ -192,7 +197,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            if (isPositive && lastByteHighBitSet)
+            if ((isPositive && lastByteHighBitSet) || (!isPositive && !lastByteHighBitSet))
             {
                 len++;
             }
