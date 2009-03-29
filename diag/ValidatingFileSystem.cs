@@ -505,13 +505,14 @@ namespace DiscUtils.Diagnostics
             _globalTrace.Reset(_runGlobalTrace);
             _globalTrace.WriteToFile(string.Format(@"C:\temp\working\trace{0:X3}.log",_numScheduledCheckpoints++));
 
-            _liveTarget = CreateFileSystem(_globalTrace);
             _checkpointRngSeed = _masterRng.Next();
-            _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
 
             _activityContext = new Dictionary<string, object>();
 
             _checkpointBuffer = new List<Activity<Tfs>>();
+
+            _liveTarget = CreateFileSystem(_globalTrace);
+            _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
 
             // Take a snapshot, to preserve the stream state before we perform
             // an operation (assumption is that merely creating a file system object

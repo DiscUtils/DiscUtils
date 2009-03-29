@@ -38,6 +38,7 @@ namespace DiscUtils.Diagnostics
         private static long s_nextReplayHandle;
 
         private long _shadowPosition;
+        private bool _disposed;
 
 
         public ValidatingFileSystemWrapperStream(ValidatingFileSystem<Tfs, Tc> fileSystem, ValidatingFileSystem<Tfs, Tc>.StreamOpenFn openFn)
@@ -48,20 +49,25 @@ namespace DiscUtils.Diagnostics
             _replayHandle = Interlocked.Increment(ref s_nextReplayHandle);
         }
 
-        public override void Close()
+        protected override void Dispose(bool disposing)
         {
-            long pos = _shadowPosition;
-
-            Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
+            if (disposing && !_disposed)
             {
-                GetNativeStream(fs, context, pos).Close();
-                ForgetNativeStream(context);
-                return 0;
-            };
+                long pos = _shadowPosition;
+                Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
+                {
+                    GetNativeStream(fs, context, pos).Dispose();
+                    _disposed = true;
+                    ForgetNativeStream(context);
+                    return 0;
+                };
 
-            _fileSystem.PerformActivity(fn);
+                _fileSystem.PerformActivity(fn);
 
-            base.Close();
+            }
+
+            // Don't call base.Dispose because it calls close 
+            base.Dispose(disposing);
         }
 
         public override bool CanRead
