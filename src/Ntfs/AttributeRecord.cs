@@ -317,6 +317,7 @@ namespace DiscUtils.Ntfs
         private ulong _dataAllocatedSize;
         private ulong _dataRealSize;
         private ulong _initializedDataSize;
+        private ulong _compressedSize;
 
         private List<DataRun> _dataRuns;
 
@@ -419,6 +420,10 @@ namespace DiscUtils.Ntfs
             _dataAllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
             _dataRealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
             _initializedDataSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
+            if ((Flags & AttributeFlags.Compressed) != 0)
+            {
+                _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
+            }
 
             _dataRuns = new List<DataRun>();
             int pos = _dataRunsOffset;
@@ -440,14 +445,21 @@ namespace DiscUtils.Ntfs
 
         public override int Write(byte[] buffer, int offset)
         {
+            ushort headerLength = 0x40;
+            if ((Flags & AttributeFlags.Compressed) != 0)
+            {
+                headerLength += 0x08;
+            }
+
             byte nameLength = 0;
             ushort nameOffset = 0;
             if (Name != null)
             {
-                nameOffset = 0x40;
+                nameOffset = headerLength;
                 nameLength = (byte)Name.Length;
             }
-            ushort dataOffset = (ushort)Utilities.RoundUp(0x40 + (nameLength * 2), 8);
+
+            ushort dataOffset = (ushort)Utilities.RoundUp(headerLength + (nameLength * 2), 8);
 
             // Write out data first, since we know where it goes...
             int dataLen = 0;
@@ -476,6 +488,10 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(_dataAllocatedSize, buffer, offset + 0x28);
             Utilities.WriteBytesLittleEndian(_dataRealSize, buffer, offset + 0x30);
             Utilities.WriteBytesLittleEndian(_initializedDataSize, buffer, offset + 0x38);
+            if ((Flags & AttributeFlags.Compressed) != 0)
+            {
+                Utilities.WriteBytesLittleEndian(_compressedSize, buffer, offset + 0x40);
+            }
 
             if (Name != null)
             {
@@ -490,7 +506,7 @@ namespace DiscUtils.Ntfs
             get
             {
                 byte nameLength = 0;
-                ushort nameOffset = 0x40;
+                ushort nameOffset = (ushort)(((Flags & AttributeFlags.Compressed) != 0) ? 0x48 : 0x40);
                 if (Name != null)
                 {
                     nameLength = (byte)Name.Length;
@@ -512,12 +528,16 @@ namespace DiscUtils.Ntfs
         public override void Dump(TextWriter writer, string indent)
         {
             base.Dump(writer, indent);
-            writer.WriteLine(indent + "    Starting VCN: " + _startingVCN);
-            writer.WriteLine(indent + "        Last VCN: " + _lastVCN);
-            writer.WriteLine(indent + "  Comp Unit Size: " + _compressionUnitSize);
-            writer.WriteLine(indent + "  Allocated Size: " + _dataAllocatedSize);
-            writer.WriteLine(indent + "       Real Size: " + _dataRealSize);
-            writer.WriteLine(indent + "  Init Data Size: " + _initializedDataSize);
+            writer.WriteLine(indent + "     Starting VCN: " + _startingVCN);
+            writer.WriteLine(indent + "         Last VCN: " + _lastVCN);
+            writer.WriteLine(indent + "   Comp Unit Size: " + _compressionUnitSize);
+            writer.WriteLine(indent + "   Allocated Size: " + _dataAllocatedSize);
+            writer.WriteLine(indent + "        Real Size: " + _dataRealSize);
+            writer.WriteLine(indent + "   Init Data Size: " + _initializedDataSize);
+            if ((Flags & AttributeFlags.Compressed) != 0)
+            {
+                writer.WriteLine(indent + "  Compressed Size: " + _compressedSize);
+            }
 
             string runStr = "";
 
@@ -526,7 +546,7 @@ namespace DiscUtils.Ntfs
                 runStr += " " + run.ToString();
             }
 
-            writer.WriteLine(indent + "       Data Runs:" + runStr);
+            writer.WriteLine(indent + "        Data Runs:" + runStr);
         }
     }
 

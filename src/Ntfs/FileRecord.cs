@@ -274,9 +274,9 @@ namespace DiscUtils.Ntfs
 
         protected override int CalcSize()
         {
-            int headerEnd = _haveIndex ? 0x30 : 0x2A;
+            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
 
-            int size = headerEnd + UpdateSequenceSize;
+            int size = firstAttrPos;
             foreach (var attr in _attributes)
             {
                 size += attr.Size;

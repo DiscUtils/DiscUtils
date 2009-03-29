@@ -176,9 +176,13 @@ namespace DiscUtils.Ntfs
 
         private static int VarLongSize(long val)
         {
+            bool isPositive = val > 0;
+            bool lastByteHighBitSet = false;
+
             int len = 0;
             while (val != 0)
             {
+                lastByteHighBitSet = ((val & 0x80) != 0);
                 val >>= 8;
                 len++;
 
@@ -187,6 +191,12 @@ namespace DiscUtils.Ntfs
                     break;
                 }
             }
+
+            if (isPositive && lastByteHighBitSet)
+            {
+                len++;
+            }
+
             return len;
         }
 

@@ -366,9 +366,16 @@ namespace DiscUtils.Ntfs
                     }
                     else
                     {
-                        FileRecord record = new FileRecord(bytesPerSector);
-                        record.FromBytes(recordData, 0);
-                        VerifyMftRecord(record, bitmap.IsPresent(index));
+                        if (!VerifyMftRecord(recordData, bitmap.IsPresent(index), bytesPerSector))
+                        {
+                            ReportError("Invalid MFT record at index {0}", index);
+                            StringBuilder bldr = new StringBuilder();
+                            for (int i = 0; i < recordData.Length; ++i)
+                            {
+                                bldr.Append(string.Format(CultureInfo.InvariantCulture, " {0:X2}", recordData[i]));
+                            }
+                            ReportInfo("MFT record binary data for index {0}:{1}", index, bldr.ToString());
+                        }
                     }
 
                     index++;
@@ -407,13 +414,33 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private void VerifyMftRecord(FileRecord record, bool presentInBitmap)
+        private bool VerifyMftRecord(byte[] recordData, bool presentInBitmap, int bytesPerSector)
         {
+            FileRecord record = new FileRecord(bytesPerSector);
+            record.FromBytes(recordData, 0);
+
+            bool ok = true;
+
             bool inUse = (record.Flags & FileRecordFlags.InUse) != 0;
             if (inUse != presentInBitmap)
             {
                 ReportError("MFT bitmap and record in-use flag don't agree.  Mft={0}, Record={1}", presentInBitmap ? "InUse" : "Free", inUse ? "InUse" : "Free");
+                ok = false;
             }
+
+            if (record.Size != record.RealSize)
+            {
+                ReportError("MFT record real size is different to calculated size.  Stored in MFT={0}, Calculated={1}", record.RealSize, record.Size);
+                ok = false;
+            }
+
+            if (Utilities.ToUInt32LittleEndian(recordData, (int)record.RealSize - 8) != uint.MaxValue)
+            {
+                ReportError("MFT record is not correctly terminated with 0xFFFFFFFF");
+                ok = false;
+            }
+
+            return ok;
         }
 
         private bool VerifyClusterRange(Range<long, long> range)
