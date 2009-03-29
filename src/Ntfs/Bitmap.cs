@@ -39,7 +39,7 @@ namespace DiscUtils.Ntfs
             _maxIndex = maxIndex;
             _bitmap = new SparseMemoryBuffer(128);
 
-            if (stream.Length > 100 * 1024)
+            if (stream.Length > Sizes.OneMiB)
             {
                 throw new NotImplementedException("Large Bitmap");
             }

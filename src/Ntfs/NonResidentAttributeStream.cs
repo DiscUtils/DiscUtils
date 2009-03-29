@@ -48,7 +48,7 @@ namespace DiscUtils.Ntfs
         {
             _file = file;
             _fsStream = _file.FileSystem.RawStream;
-            _bytesPerCluster = file.FileSystem.BiosParameterBlock.BytesPerSector;
+            _bytesPerCluster = file.FileSystem.BiosParameterBlock.BytesPerCluster;
             _runs = CookedDataRun.Cook(record.DataRuns);
             _record = record;
             _access = access;
