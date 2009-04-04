@@ -82,12 +82,18 @@ namespace DiscUtils.Vmdk
         /// <param name="ownsStream">Indicates if the created instance should own the stream</param>
         public DiskImageFile(Stream stream, Ownership ownsStream)
         {
+            _access = stream.CanWrite ? FileAccess.ReadWrite : FileAccess.Read;
+
             LoadDescriptor(stream);
 
-            if (_descriptor.CreateType != DiskCreateType.MonolithicSparse || _descriptor.Extents.Count != 1
+            bool createTypeIsSparse =
+                _descriptor.CreateType != DiskCreateType.MonolithicSparse
+                || _descriptor.CreateType == DiskCreateType.StreamOptimized;
+
+            if (!createTypeIsSparse || _descriptor.Extents.Count != 1
                 || _descriptor.Extents[0].Type != ExtentType.Sparse || _descriptor.ParentContentId != uint.MaxValue)
             {
-                throw new ArgumentException("Only Monolithic Sparse disks can be accessed via a stream", "stream");
+                throw new ArgumentException("Only Monolithic Sparse and Streaming Optimized disks can be accessed via a stream", "stream");
             }
 
             _monolithicStream = stream;

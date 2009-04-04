@@ -21,8 +21,8 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 
 namespace DiscUtils.Vmdk
 {
@@ -47,14 +47,9 @@ namespace DiscUtils.Vmdk
             _hostedHeader = HostedSparseExtentHeader.Read(firstSector, 0);
             _header = _hostedHeader;
 
-            if (_hostedHeader.CompressAlgorithm != 0)
+            if (_hostedHeader.CompressAlgorithm != 0 && _hostedHeader.CompressAlgorithm != 1)
             {
-                throw new NotImplementedException("No support for compressed disks");
-            }
-
-            if ((_hostedHeader.Flags & (HostedSparseExtentFlags.MarkersInUse | HostedSparseExtentFlags.CompressedGrains)) != 0)
-            {
-                throw new NotImplementedException("No support for streamed disk format");
+                throw new NotSupportedException("Only uncompressed and DEFLATE compressed disks supported");
             }
 
             _gtCoverage = _header.NumGTEsPerGT * _header.GrainSize * Sizes.Sector;
@@ -62,9 +57,23 @@ namespace DiscUtils.Vmdk
             LoadGlobalDirectory();
         }
 
+        public override bool CanWrite
+        {
+            get
+            {
+                // No write support for streamOptimized disks
+                return (_hostedHeader.Flags & (HostedSparseExtentFlags.CompressedGrains | HostedSparseExtentFlags.MarkersInUse)) == 0;
+            }
+        }
+
         public override void Write(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
+
+            if (!CanWrite)
+            {
+                throw new InvalidOperationException("Cannot write to this stream");
+            }
 
             int totalWritten = 0;
             while (totalWritten < count)
@@ -89,6 +98,39 @@ namespace DiscUtils.Vmdk
 
                 _position += numToWrite;
                 totalWritten += numToWrite;
+            }
+        }
+
+        protected override int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
+        {
+            if ((_hostedHeader.Flags & HostedSparseExtentFlags.CompressedGrains) != 0)
+            {
+                _fileStream.Position = grainStart;
+
+                byte[] readBuffer = Utilities.ReadFully(_fileStream, CompressedGrainHeader.Size);
+                CompressedGrainHeader hdr = new CompressedGrainHeader();
+                hdr.Read(readBuffer, 0);
+
+                readBuffer = Utilities.ReadFully(_fileStream, hdr.DataSize);
+
+                // This is really a zlib stream, so has header and footer.  We ignore this right now, but we sanity
+                // check against expected header values...
+                if (readBuffer[0] != 0x78 || readBuffer[1] != 0x01)
+                {
+                    throw new NotSupportedException("ZLib compression not using DEFLATE or non-default window size or preset dictionary");
+                }
+
+                Stream readStream = new MemoryStream(readBuffer, 2, hdr.DataSize - 2, false);
+                DeflateStream deflateStream = new DeflateStream(readStream, CompressionMode.Decompress);
+
+                // Need to skip some bytes, but DefaultStream doesn't support seeking...
+                Utilities.ReadFully(deflateStream, grainOffset);
+
+                return deflateStream.Read(buffer, bufferOffset, numToRead);
+            }
+            else
+            {
+                return base.ReadGrain(buffer, bufferOffset, grainStart, grainOffset, numToRead);
             }
         }
 

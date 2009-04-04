@@ -205,8 +205,9 @@ namespace DiscUtils.Vmdk
                     }
                     else
                     {
-                        _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
-                        numRead = _fileStream.Read(buffer, offset + totalRead, numToRead);
+                        int bufferOffset = offset + totalRead;
+                        long grainStart = _grainTable[grain] * Sizes.Sector;
+                        numRead = ReadGrain(buffer, bufferOffset, grainStart, grainOffset, numToRead);
                     }
                 }
 
@@ -288,6 +289,12 @@ namespace DiscUtils.Vmdk
             }
         }
 
+
+        protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
+        {
+            _fileStream.Position = grainStart + grainOffset;
+            return _fileStream.Read(buffer, bufferOffset, numToRead);
+        }
 
         protected virtual void LoadGlobalDirectory()
         {
