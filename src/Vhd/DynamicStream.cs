@@ -38,6 +38,7 @@ namespace DiscUtils.Vhd
         private bool _atEof;
         private uint[] _blockAllocationTable;
         private byte[][] _blockBitmaps;
+        private int _blockBitmapSize;
 
         public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, Ownership ownsParentStream)
         {
@@ -67,6 +68,7 @@ namespace DiscUtils.Vhd
             ReadBlockAllocationTable();
 
             _blockBitmaps = new byte[_dynamicHeader.MaxTableEntries][];
+            _blockBitmapSize = (int)Utilities.RoundUp((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8, Utilities.SectorSize);
         }
 
         protected override void Dispose(bool disposing)
@@ -177,8 +179,7 @@ namespace DiscUtils.Vhd
                     byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
                     if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
                     {
-                        int blockBitmapSize = Utilities.RoundUp(_blockBitmaps[block].Length, Utilities.SectorSize);
-                        _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + blockBitmapSize + offsetInSector;
+                        _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize + offsetInSector;
                         if (Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
                         {
                             throw new IOException("Failed to read entire sector");
@@ -260,7 +261,6 @@ namespace DiscUtils.Vhd
                     AllocateBlock(block);
                 }
 
-                int blockBitmapSize = Utilities.RoundUp(_blockBitmaps[block].Length, Utilities.SectorSize);
                 int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
                 int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
                 int toWrite = (int)Math.Min(count - numWritten, _dynamicHeader.BlockSize - offsetInBlock);
@@ -273,7 +273,7 @@ namespace DiscUtils.Vhd
 
                     byte sectorMask = (byte)(1 << (7 - (sectorInBlock % 8)));
 
-                    long sectorStart = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + blockBitmapSize;
+                    long sectorStart = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
 
                     // Get the existing sector data (if any), or otherwise the parent's content
                     byte[] sectorBuffer;
@@ -303,7 +303,7 @@ namespace DiscUtils.Vhd
                     // Processing at least one whole sector, just write (after making sure to trim any partial sectors from the end)...
                     toWrite = (toWrite / Utilities.SectorSize) * Utilities.SectorSize;
 
-                    _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + blockBitmapSize;
+                    _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
                     _fileStream.Write(buffer, offset + numWritten, toWrite);
 
                     // Update all of the bits in the block bitmap
@@ -389,9 +389,8 @@ namespace DiscUtils.Vhd
             }
 
             // Read in bitmap
-            int bitmapSize = (int)((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8);
             _fileStream.Position = _blockAllocationTable[block] * Utilities.SectorSize;
-            _blockBitmaps[block] = Utilities.ReadFully(_fileStream, bitmapSize);
+            _blockBitmaps[block] = Utilities.ReadFully(_fileStream, _blockBitmapSize);
             return true;
         }
 
@@ -416,14 +415,13 @@ namespace DiscUtils.Vhd
             }
 
             // Create and write new sector bitmap
-            int bitmapSize = (int)((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8);
-            byte[] bitmap = new byte[bitmapSize];
+            byte[] bitmap = new byte[_blockBitmapSize];
             _fileStream.Position = newBlockStart;
-            _fileStream.Write(bitmap, 0, bitmapSize);
+            _fileStream.Write(bitmap, 0, _blockBitmapSize);
             _blockBitmaps[block] = bitmap;
 
             // Write the new footer
-            _fileStream.Position = newBlockStart + bitmapSize + _dynamicHeader.BlockSize;
+            _fileStream.Position = newBlockStart + _blockBitmapSize + _dynamicHeader.BlockSize;
             _fileStream.Write(footer, 0, footer.Length);
 
             // Update the BAT entry for the new block
@@ -437,9 +435,8 @@ namespace DiscUtils.Vhd
         private void WriteBlockBitmap(long block)
         {
             // Read in bitmap
-            int bitmapSize = (int)((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8);
             _fileStream.Position = _blockAllocationTable[block] * Utilities.SectorSize;
-            _fileStream.Write(_blockBitmaps[block], 0, bitmapSize);
+            _fileStream.Write(_blockBitmaps[block], 0, _blockBitmapSize);
         }
 
         private void CheckDisposed()
