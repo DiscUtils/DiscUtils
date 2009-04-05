@@ -33,7 +33,6 @@ namespace DiscUtils.Ntfs
         protected File _file;
         protected string _name;
         protected BiosParameterBlock _bpb;
-        private UpperCase _upCase;
         private bool _isFileIndex;
 
         private IComparer<byte[]> _comparer;
@@ -45,12 +44,33 @@ namespace DiscUtils.Ntfs
 
         private ObjectCache<long, IndexBlock> _blockCache;
 
+        private Index(AttributeType attrType, AttributeCollationRule collationRule, File file, string name, BiosParameterBlock bpb, UpperCase upCase)
+        {
+            _file = file;
+            _name = name;
+            _bpb = bpb;
+            _isFileIndex = (name == "$I30");
+
+            _blockCache = new ObjectCache<long, IndexBlock>();
+
+            _file.CreateAttribute(AttributeType.IndexRoot, _name);
+
+            _root = new IndexRoot()
+            {
+                AttributeType = (uint)attrType,
+                CollationRule = collationRule,
+                IndexAllocationSize = (uint)bpb.IndexBufferSize,
+                RawClustersPerIndexRecord = bpb.RawIndexBufferSize };
+            _comparer = _root.GetCollator(upCase);
+
+            _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, 32);
+        }
+
         public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
         {
             _file = file;
             _name = name;
             _bpb = bpb;
-            _upCase = upCase;
             _isFileIndex = (name == "$I30");
 
             _blockCache = new ObjectCache<long, IndexBlock>();
@@ -115,6 +135,13 @@ namespace DiscUtils.Ntfs
                    select new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
         }
 
+        public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
+        {
+            Index idx = new Index(attrType, collationRule, file, name, file.FileSystem.BiosParameterBlock, file.FileSystem.UpperCase);
+
+            idx.WriteRootNodeToDisk();
+        }
+
         internal bool IsFileIndex
         {
             get { return _isFileIndex; }
@@ -168,11 +195,12 @@ namespace DiscUtils.Ntfs
         private void WriteRootNodeToDisk()
         {
             _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize();
-            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries];
-            _rootNode.WriteTo(buffer, 0);
+            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries + _root.Size];
+            _root.WriteTo(buffer, 0);
+            _rootNode.WriteTo(buffer, _root.Size);
             using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Write))
             {
-                s.Position = IndexRoot.HeaderOffset;
+                s.Position = 0;
                 s.Write(buffer, 0, buffer.Length);
                 s.SetLength(s.Position);
             }

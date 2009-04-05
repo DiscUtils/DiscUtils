@@ -34,6 +34,8 @@ namespace DiscUtils.Ntfs
         private FileRecord _baseRecord;
         private ObjectCache<ushort, NtfsAttribute> _attributeCache;
 
+        private bool _baseRecordDirty;
+
         public File(INtfsContext fileSystem, FileRecord baseRecord)
         {
             _fileSystem = fileSystem;
@@ -67,60 +69,107 @@ namespace DiscUtils.Ntfs
             get { return _baseRecord.AllocatedSize - _baseRecord.RealSize; }
         }
 
+        public void Modified()
+        {
+            DateTime now = DateTime.UtcNow;
+            StructuredNtfsAttribute<StandardInformation> attr = (StructuredNtfsAttribute<StandardInformation>)GetAttribute(AttributeType.StandardInformation);
+            attr.Content.LastAccessTime = now;
+            attr.Content.ModificationTime = now;
+            attr.Save();
+            MarkMftRecordDirty();
+        }
+
+        public void Accessed()
+        {
+            StructuredNtfsAttribute<StandardInformation> attr = (StructuredNtfsAttribute<StandardInformation>)GetAttribute(AttributeType.StandardInformation);
+            attr.Content.LastAccessTime = DateTime.UtcNow;
+            attr.Save();
+            MarkMftRecordDirty();
+        }
+
+        public void MarkMftRecordDirty()
+        {
+            _baseRecordDirty = true;
+        }
+
+        public bool MftRecordIsDirty
+        {
+            get
+            {
+                return _baseRecordDirty;
+            }
+        }
+
         public void UpdateRecordInMft()
         {
-            // Make attributes non-resident until the data in the record fits, start with DATA attributes
-            // by default, then kick other 'can-be' attributes out, finally move indexes.
-            bool fixedAttribute = true;
-            while (_baseRecord.Size > _mft.RecordSize && fixedAttribute)
+            UpdateRecordInMft(false);
+        }
+
+        public void UpdateRecordInMft(bool suppressTimeChange)
+        {
+            if(_baseRecordDirty)
             {
-                fixedAttribute = false;
-                foreach (var attr in _baseRecord.Attributes)
+                if (!suppressTimeChange)
                 {
-                    if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
-                    {
-                        MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
-                        fixedAttribute = true;
-                        break;
-                    }
+                    StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)GetAttribute(AttributeType.StandardInformation);
+                    saAttr.Content.MftChangedTime = DateTime.UtcNow;
+                    saAttr.Save();
                 }
 
-                if (!fixedAttribute)
+                // Make attributes non-resident until the data in the record fits, start with DATA attributes
+                // by default, then kick other 'can-be' attributes out, finally move indexes.
+                bool fixedAttribute = true;
+                while (_baseRecord.Size > _mft.RecordSize && fixedAttribute)
                 {
+                    fixedAttribute = false;
                     foreach (var attr in _baseRecord.Attributes)
                     {
-                        if (!attr.IsNonResident && _fileSystem.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
+                        if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
                         {
                             MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
                             fixedAttribute = true;
                             break;
                         }
                     }
-                }
 
-                if (!fixedAttribute)
-                {
-                    foreach (var attr in _baseRecord.Attributes)
+                    if (!fixedAttribute)
                     {
-                        if (attr.AttributeType == AttributeType.IndexRoot && GetAttribute(AttributeType.IndexAllocation, attr.Name) == null)
+                        foreach (var attr in _baseRecord.Attributes)
                         {
-                            if (MakeIndexNonResident(attr.Name))
+                            if (!attr.IsNonResident && _fileSystem.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
                             {
+                                MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
                                 fixedAttribute = true;
                                 break;
                             }
                         }
                     }
+
+                    if (!fixedAttribute)
+                    {
+                        foreach (var attr in _baseRecord.Attributes)
+                        {
+                            if (attr.AttributeType == AttributeType.IndexRoot && GetAttribute(AttributeType.IndexAllocation, attr.Name) == null)
+                            {
+                                if (MakeIndexNonResident(attr.Name))
+                                {
+                                    fixedAttribute = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
-            }
 
-            // Still too large?  Error.
-            if (_baseRecord.Size > _mft.RecordSize)
-            {
-                throw new NotSupportedException("Spanning over multiple FileRecord entries - TBD");
-            }
+                // Still too large?  Error.
+                if (_baseRecord.Size > _mft.RecordSize)
+                {
+                    throw new NotSupportedException("Spanning over multiple FileRecord entries - TBD");
+                }
 
-            _mft.WriteRecord(_baseRecord);
+                _baseRecordDirty = false;
+                _mft.WriteRecord(_baseRecord);
+            }
         }
 
         private bool MakeIndexNonResident(string name)
@@ -151,7 +200,7 @@ namespace DiscUtils.Ntfs
         {
             bool indexed = _fileSystem.AttributeDefinitions.IsIndexed(type);
             ushort id = _baseRecord.CreateAttribute(type, null, indexed);
-            UpdateRecordInMft();
+            MarkMftRecordDirty();
             return id;
         }
 
@@ -164,7 +213,7 @@ namespace DiscUtils.Ntfs
         {
             bool indexed = _fileSystem.AttributeDefinitions.IsIndexed(type);
             ushort id = _baseRecord.CreateAttribute(type, name, indexed);
-            UpdateRecordInMft();
+            MarkMftRecordDirty();
             return id;
         }
 
@@ -398,13 +447,13 @@ namespace DiscUtils.Ntfs
 
             if (freshened)
             {
-                FreshenFileName(fnr);
+                FreshenFileName(fnr, false);
             }
 
             return fnr;
         }
 
-        public void FreshenFileName(FileNameRecord fileName)
+        public void FreshenFileName(FileNameRecord fileName, bool updateMftRecord)
         {
             //
             // Freshen the record from the definitive info in the other attributes
@@ -417,8 +466,31 @@ namespace DiscUtils.Ntfs
             fileName.MftChangedTime = si.MftChangedTime;
             fileName.LastAccessTime = si.LastAccessTime;
             fileName.Flags = si.FileAttributes;
-            fileName.RealSize = (ulong)anonDataAttr.Record.DataLength;
-            fileName.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
+
+            // Root dir doesn't have directory flags set in StandardAttributes, so force it now...
+            if (_baseRecord.MasterFileTableIndex == MasterFileTable.RootDirIndex)
+            {
+                fileName.Flags |= FileAttributeFlags.Directory;
+            }
+
+            if (anonDataAttr != null)
+            {
+                fileName.RealSize = (ulong)anonDataAttr.Record.DataLength;
+                fileName.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
+            }
+
+            if (updateMftRecord)
+            {
+                foreach (StructuredNtfsAttribute<FileNameRecord> attr in GetAttributes(AttributeType.FileName))
+                {
+                    if (attr.Content.ParentDirectory == fileName.ParentDirectory
+                        && attr.Content.FileNameNamespace == fileName.FileNameNamespace
+                        && attr.Content.FileName == fileName.FileName)
+                    {
+                        SetAttributeContent<FileNameRecord>(attr.Id, fileName);
+                    }
+                }
+            }
         }
 
         public DirectoryEntry DirectoryEntry
@@ -426,6 +498,13 @@ namespace DiscUtils.Ntfs
             get
             {
                 FileNameRecord record = GetAttributeContent<FileNameRecord>(AttributeType.FileName);
+
+                // Root dir is stored without root directory flag set in FileNameRecord, simulate it.
+                if (_baseRecord.MasterFileTableIndex == MasterFileTable.RootDirIndex)
+                {
+                    record.Flags |= FileAttributeFlags.Directory;
+                }
+
                 return new DirectoryEntry(_fileSystem.GetDirectory(record.ParentDirectory), MftReference, record);
             }
         }
@@ -529,11 +608,11 @@ namespace DiscUtils.Ntfs
         }
 
 
-        internal static File CreateNew(INtfsContext fileSystem)
+        internal static File CreateNew(INtfsContext fileSystem, FileRecordFlags flags)
         {
             DateTime now = DateTime.UtcNow;
 
-            File newFile = fileSystem.AllocateFile();
+            File newFile = fileSystem.AllocateFile(flags);
 
             ushort attrId = newFile.CreateAttribute(AttributeType.StandardInformation);
             StandardInformation si = new StandardInformation();
@@ -541,7 +620,7 @@ namespace DiscUtils.Ntfs
             si.ModificationTime = now;
             si.MftChangedTime = now;
             si.LastAccessTime = now;
-            si.FileAttributes = FileAttributeFlags.Archive;
+            si.FileAttributes = FileAttributeFlags.Archive | (((flags & FileRecordFlags.IsDirectory) != 0) ? FileAttributeFlags.Directory : FileAttributeFlags.None);
             newFile.SetAttributeContent(attrId, si);
 
             Guid newId = CreateNewGuid(fileSystem);

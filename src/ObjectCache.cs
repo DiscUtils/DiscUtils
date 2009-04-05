@@ -21,11 +21,12 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace DiscUtils
 {
-    internal class ObjectCache<K,V>
+    internal class ObjectCache<K,V> : IEnumerable<V>
     {
         private Dictionary<K, WeakReference> _entries;
 
@@ -55,5 +56,37 @@ namespace DiscUtils
         {
             return _entries.ContainsKey(key);
         }
+
+        #region IEnumerable<V> Members
+
+        public IEnumerator<V> GetEnumerator()
+        {
+            foreach (var wRef in _entries.Values)
+            {
+                V value = (V)wRef.Target;
+                if (value != null)
+                {
+                    yield return value;
+                }
+            }
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            foreach (var wRef in _entries.Values)
+            {
+                V value = (V)wRef.Target;
+                if (value != null)
+                {
+                    yield return value;
+                }
+            }
+        }
+
+        #endregion
     }
 }

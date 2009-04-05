@@ -32,10 +32,9 @@ namespace DiscUtils.Ntfs
         private Index<FileNameRecord, FileReference> _index;
 
 
-        public Directory(INtfsContext fileSystem, MasterFileTable mft, FileRecord baseRecord)
+        public Directory(INtfsContext fileSystem, FileRecord baseRecord)
             : base(fileSystem, baseRecord)
         {
-            _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
         }
 
         internal DirectoryEntry GetEntryByName(string name)
@@ -48,7 +47,7 @@ namespace DiscUtils.Ntfs
                 searchName = name.Substring(0, streamSepPos);
             }
 
-            DirectoryIndexEntry entry = _index.FindFirst(new FileNameQuery(searchName, _fileSystem.UpperCase));
+            DirectoryIndexEntry entry = Index.FindFirst(new FileNameQuery(searchName, _fileSystem.UpperCase));
             if (entry.Key != null && entry.Value != null)
             {
                 return new DirectoryEntry(this, entry.Value, entry.Key);
@@ -61,7 +60,7 @@ namespace DiscUtils.Ntfs
 
         public IEnumerable<DirectoryEntry> GetAllEntries()
         {
-            List<DirectoryIndexEntry> entries = FilterEntries(_index.Entries);
+            List<DirectoryIndexEntry> entries = FilterEntries(Index.Entries);
 
             foreach (var entry in entries)
             {
@@ -71,7 +70,8 @@ namespace DiscUtils.Ntfs
 
         public void UpdateEntry(DirectoryEntry entry)
         {
-            _index[entry.Details] = entry.Reference;
+            Index[entry.Details] = entry.Reference;
+            UpdateRecordInMft();
         }
 
 
@@ -88,9 +88,35 @@ namespace DiscUtils.Ntfs
             file.HardLinkCount++;
             file.UpdateRecordInMft();
 
-            _index[newNameRecord] = file.MftReference;
+            Index[newNameRecord] = file.MftReference;
+
+            Modified();
+            UpdateRecordInMft();
 
             return new DirectoryEntry(this, file.MftReference, newNameRecord);
+        }
+
+        internal static Directory CreateNew(INtfsContext fileSystem)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            Directory dir = (Directory)fileSystem.AllocateFile(FileRecordFlags.IsDirectory);
+
+            ushort attrId = dir.CreateAttribute(AttributeType.StandardInformation);
+            StandardInformation si = new StandardInformation();
+            si.CreationTime = now;
+            si.ModificationTime = now;
+            si.MftChangedTime = now;
+            si.LastAccessTime = now;
+            si.FileAttributes = FileAttributeFlags.Archive | FileAttributeFlags.Directory;
+            dir.SetAttributeContent(attrId, si);
+
+            // Create the index root attribute by instantiating a new index
+            Ntfs.Index.Create(AttributeType.FileName, AttributeCollationRule.Filename, dir, "$I30");
+
+            dir.UpdateRecordInMft();
+
+            return dir;
         }
 
         public override void Dump(TextWriter writer, string indent)
@@ -98,11 +124,14 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "DIRECTORY (" + base.ToString() + ")");
             writer.WriteLine(indent + "  File Number: " + IndexInMft);
 
-            foreach (var entry in _index.Entries)
+            if (Index != null)
             {
-                writer.WriteLine(indent + "  DIRECTORY ENTRY (" + entry.Key.FileName + ")");
-                writer.WriteLine(indent + "    MFT Ref: " + entry.Value);
-                entry.Key.Dump(writer, indent + "    ");
+                foreach (var entry in Index.Entries)
+                {
+                    writer.WriteLine(indent + "  DIRECTORY ENTRY (" + entry.Key.FileName + ")");
+                    writer.WriteLine(indent + "    MFT Ref: " + entry.Value);
+                    entry.Key.Dump(writer, indent + "    ");
+                }
             }
         }
 
@@ -111,13 +140,24 @@ namespace DiscUtils.Ntfs
             return base.ToString() + @"\";
         }
 
+        private Index<FileNameRecord, FileReference> Index
+        {
+            get
+            {
+                if (_index == null && GetAttribute(AttributeType.IndexRoot, "$I30") != null)
+                {
+                    _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
+                }
+
+                return _index;
+            }
+        }
+
         private List<DirectoryIndexEntry> FilterEntries(IEnumerable<DirectoryIndexEntry> entriesIter)
         {
             List<DirectoryIndexEntry> entries = new List<DirectoryIndexEntry>(entriesIter);
 
-            // Weed out short-name versions of files where there's a long name
-            // and any hidden / system / metadata files.
-            Dictionary<FileReference, DirectoryIndexEntry> byRefIndex = new Dictionary<FileReference, DirectoryIndexEntry>();
+            // Weed out short-name entries for files and any hidden / system / metadata files.
             int i = 0;
             while (i < entries.Count)
             {
@@ -135,35 +175,12 @@ namespace DiscUtils.Ntfs
                 {
                     entries.RemoveAt(i);
                 }
-                else if (byRefIndex.ContainsKey(entry.Value))
+                else if (entry.Key.FileNameNamespace == FileNameNamespace.Dos && _fileSystem.Options.HideDosFileNames)
                 {
-                    DirectoryIndexEntry storedEntry = byRefIndex[entry.Value];
-                    if (Utilities.Is8Dot3(storedEntry.Key.FileName))
-                    {
-                        // Make this the definitive entry for the file
-                        byRefIndex[entry.Value] = entry;
-
-                        // Remove the old one from the 'entries' array.
-                        for (int j = i - 1; j >= 0; --j)
-                        {
-                            if (entries[j].Value == entry.Value)
-                            {
-                                entries.RemoveAt(j);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Remove this entry
-                        entries.RemoveAt(i);
-                    }
+                    entries.RemoveAt(i);
                 }
                 else
                 {
-                    // Only increment if there's no collision - if there was one
-                    // we'll have removed an earlier entry in the array, effectively
-                    // moving us on one.
-                    byRefIndex.Add(entry.Value, entry);
                     ++i;
                 }
             }

@@ -112,6 +112,7 @@ namespace DiscUtils.Ntfs
         public FileRecordFlags Flags
         {
             get { return _flags; }
+            set { _flags = value; }
         }
 
         public ICollection<AttributeRecord> Attributes

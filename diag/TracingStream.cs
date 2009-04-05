@@ -306,7 +306,7 @@ namespace DiscUtils.Diagnostics
         private StreamTraceRecord CreateAndAddRecord(string activity, long position, long count)
         {
             StackTrace trace = (_captureStack ? new StackTrace(2, _captureStackFileDetails) : null);
-            StreamTraceRecord record = new StreamTraceRecord(_records.Count, "WRITE", position, trace);
+            StreamTraceRecord record = new StreamTraceRecord(_records.Count, activity, position, trace);
             record.CountArg = count;
             _records.Add(record);
 

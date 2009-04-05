@@ -21,10 +21,11 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
-using System.Collections.Generic;
 
 namespace DiscUtils.Ntfs
 {
@@ -145,6 +146,12 @@ namespace DiscUtils.Ntfs
             SelfCheckIndexes();
 
             //-----------------------------------------------------------------------
+            // DIRECTORIES
+            //
+            VerifyDirectories();
+
+
+            //-----------------------------------------------------------------------
             // WELL KNOWN FILES
             //
             VerifyWellKnownFiles();
@@ -165,7 +172,7 @@ namespace DiscUtils.Ntfs
 
         private void VerifyWellKnownFiles()
         {
-            Directory rootDir = new Directory(_context, _context.Mft, _context.Mft.GetRecord(MasterFileTable.RootDirIndex, false));
+            Directory rootDir = new Directory(_context, _context.Mft.GetRecord(MasterFileTable.RootDirIndex, false));
 
             DirectoryEntry extendDirEntry = rootDir.GetEntryByName("$Extend");
             if (extendDirEntry == null)
@@ -173,13 +180,44 @@ namespace DiscUtils.Ntfs
                 ReportError("$Extend does not exist in root directory");
                 Abort();
             }
-            Directory extendDir = new Directory(_context, _context.Mft, _context.Mft.GetRecord(extendDirEntry.Reference));
+            Directory extendDir = new Directory(_context, _context.Mft.GetRecord(extendDirEntry.Reference));
 
             DirectoryEntry objIdDirEntry = extendDir.GetEntryByName("$ObjId");
             if (objIdDirEntry == null)
             {
                 ReportError("$ObjId does not exist in $Extend directory");
                 Abort();
+            }
+
+            DirectoryEntry sysVolInfDirEntry = rootDir.GetEntryByName("System Volume Information");
+            if (sysVolInfDirEntry == null)
+            {
+                ReportError("'System Volume Information' does not exist in root directory");
+                Abort();
+            }
+            //Directory sysVolInfDir = new Directory(_context, _context.Mft.GetRecord(sysVolInfDirEntry.Reference));
+        }
+
+        private void VerifyDirectories()
+        {
+            foreach (FileRecord fr in _context.Mft.Records)
+            {
+                File f = new File(_context, fr);
+                foreach (var attr in f.AllAttributes)
+                {
+                    if (attr.Record.AttributeType == AttributeType.IndexRoot && attr.Record.Name == "$I30")
+                    {
+                        Index<FileNameRecord, FileReference> dir = new Index<FileNameRecord, FileReference>(f, "$I30", _context.BiosParameterBlock, _context.UpperCase);
+                        foreach (var entry in dir.Entries)
+                        {
+                            // Make sure each referenced file actually exists...
+                            if (_context.Mft.GetRecord(entry.Value) == null)
+                            {
+                                ReportError("Directory {0} references non-existent file {1}", f, entry.Key);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -274,7 +312,7 @@ namespace DiscUtils.Ntfs
             return ok;
         }
 
-        private String IndexEntryToString(IndexEntry entry, string fileName, string indexName)
+        private static String IndexEntryToString(IndexEntry entry, string fileName, string indexName)
         {
             IByteArraySerializable keyValue = null;
             IByteArraySerializable dataValue = null;
@@ -499,7 +537,7 @@ namespace DiscUtils.Ntfs
         }
 
 
-        private void Abort()
+        private static void Abort()
         {
             throw new AbortException();
         }
@@ -531,21 +569,18 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private sealed class NullTextWriter : TextWriter
-        {
-            public NullTextWriter()
-                : base(CultureInfo.InvariantCulture)
-            {
-            }
-
-            public override Encoding Encoding
-            {
-                get { return Encoding.Unicode; }
-            }
-        }
-
+        [Serializable]
         private sealed class AbortException : InvalidFileSystemException
         {
+            public AbortException()
+                : base()
+            {
+            }
+
+            private AbortException(SerializationInfo info, StreamingContext ctxt)
+                : base(info, ctxt)
+            {
+            }
         }
     }
 }

@@ -29,6 +29,7 @@ namespace DiscUtils.Ntfs
     {
         private T _structure;
         private bool _initialized;
+        private bool _hasContent;
 
         public StructuredNtfsAttribute(File file, AttributeRecord record)
             : base(file, record)
@@ -46,6 +47,16 @@ namespace DiscUtils.Ntfs
             set
             {
                 _structure = value;
+                _hasContent = true;
+            }
+        }
+
+        public bool HasContent
+        {
+            get
+            {
+                Initialize();
+                return _hasContent;
             }
         }
 
@@ -81,8 +92,9 @@ namespace DiscUtils.Ntfs
             {
                 using (Stream s = OpenRaw(FileAccess.Read))
                 {
-                    byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                    _structure.ReadFrom(buffer, 0);
+                        byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                        _structure.ReadFrom(buffer, 0);
+                        _hasContent = (s.Length != 0);
                 }
                 _initialized = true;
             }

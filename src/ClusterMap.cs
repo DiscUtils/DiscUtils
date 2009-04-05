@@ -32,7 +32,7 @@ namespace DiscUtils
     /// </summary>
     /// <remarks>A cluster may be in more than one role.</remarks>
     [Flags]
-    public enum ClusterRole
+    public enum ClusterRoles
     {
         /// <summary>
         /// Unknown, or unspecified role.
@@ -78,11 +78,11 @@ namespace DiscUtils
     /// </summary>
     public sealed class ClusterMap
     {
-        private ClusterRole[] _clusterToRole;
+        private ClusterRoles[] _clusterToRole;
         private object[] _clusterToFileId;
         private Dictionary<object, string[]> _fileIdToPaths;
 
-        internal ClusterMap(ClusterRole[] clusterToRole, object[] clusterToFileId, Dictionary<object, string[]> fileIdToPaths)
+        internal ClusterMap(ClusterRoles[] clusterToRole, object[] clusterToFileId, Dictionary<object, string[]> fileIdToPaths)
         {
             _clusterToRole = clusterToRole;
             _clusterToFileId = clusterToFileId;
@@ -94,11 +94,11 @@ namespace DiscUtils
         /// </summary>
         /// <param name="cluster">The cluster to inspect</param>
         /// <returns>The clusters role (or roles)</returns>
-        public ClusterRole GetRole(long cluster)
+        public ClusterRoles GetRole(long cluster)
         {
             if (_clusterToRole == null || _clusterToRole.Length < cluster)
             {
-                return ClusterRole.None;
+                return ClusterRoles.None;
             }
             else
             {
@@ -115,7 +115,7 @@ namespace DiscUtils
         /// hard links, a cluster may correspond to multiple directory entries.</remarks>
         public string[] ClusterToPaths(long cluster)
         {
-            if ((GetRole(cluster) & (ClusterRole.DataFile | ClusterRole.SystemFile)) != 0)
+            if ((GetRole(cluster) & (ClusterRoles.DataFile | ClusterRoles.SystemFile)) != 0)
             {
                 object fileId = _clusterToFileId[cluster];
                 return _fileIdToPaths[fileId];

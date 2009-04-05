@@ -54,7 +54,7 @@ namespace DiscUtils
         /// <summary>
         /// Report all items.
         /// </summary>
-        All = 0xFF
+        All = 0x07
     }
 
     /// <summary>

@@ -107,6 +107,6 @@ namespace DiscUtils
         /// Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
-        public abstract ClusterMap GetClusterMap();
+        public abstract ClusterMap BuildClusterMap();
     }
 }

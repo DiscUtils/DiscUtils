@@ -31,12 +31,14 @@ namespace DiscUtils.Ntfs
         private bool _hideMetaFiles;
         private bool _hideHiddenFiles;
         private bool _hideSystemFiles;
+        private bool _hideDosFileNames;
 
         internal NtfsOptions()
         {
             _hideMetaFiles = true;
             _hideHiddenFiles = true;
             _hideSystemFiles = true;
+            _hideDosFileNames = true;
         }
 
         /// <summary>
@@ -65,6 +67,15 @@ namespace DiscUtils.Ntfs
         {
             get { return _hideSystemFiles; }
             set { _hideSystemFiles = value; }
+        }
+
+        /// <summary>
+        /// Gets and sets whether to hide DOS (8.3-style) file names when enumerating directories.
+        /// </summary>
+        public bool HideDosFileNames
+        {
+            get { return _hideDosFileNames; }
+            set { _hideDosFileNames = value; }
         }
     }
 }

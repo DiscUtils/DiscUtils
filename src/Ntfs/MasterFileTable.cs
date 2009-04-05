@@ -171,7 +171,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public FileRecord AllocateRecord()
+        public FileRecord AllocateRecord(FileRecordFlags flags)
         {
             uint index = (uint)_bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
 
@@ -185,7 +185,11 @@ namespace DiscUtils.Ntfs
             {
                 newRecord = new FileRecord(_bytesPerSector, _recordLength, index);
             }
+
+            newRecord.Flags = FileRecordFlags.InUse | flags;
+
             WriteRecord(newRecord);
+            _self.UpdateRecordInMft();
             return newRecord;
         }
 
@@ -193,11 +197,14 @@ namespace DiscUtils.Ntfs
         {
             FileRecord result = GetRecord(fileReference.MftIndex, false);
 
-            if (fileReference.SequenceNumber != 0 && result.SequenceNumber != 0)
+            if (result != null)
             {
-                if (fileReference.SequenceNumber != result.SequenceNumber)
+                if (fileReference.SequenceNumber != 0 && result.SequenceNumber != 0)
                 {
-                    throw new IOException("Attempt to get an MFT record with an old reference");
+                    if (fileReference.SequenceNumber != result.SequenceNumber)
+                    {
+                        throw new IOException("Attempt to get an MFT record with an old reference");
+                    }
                 }
             }
 
@@ -236,9 +243,25 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[_recordLength];
             record.ToBytes(buffer, 0);
 
+            long len = _records.Length;
+
             _records.Position = record.MasterFileTableIndex * _recordLength;
             _records.Write(buffer, 0, _recordLength);
             _records.Flush();
+
+            if (_records.Length != len)
+            {
+            }
+
+            // We may have modified our own meta-data by extending the data stream, so
+            // (carefully) make sure our records are up-to-date.
+            if(_self.MftRecordIsDirty)
+            {
+                _self.UpdateRecordInMft();
+                DirectoryEntry dirEntry = _self.DirectoryEntry;
+                dirEntry.UpdateFrom(_self);
+                _self.UpdateRecordInMft(true);
+            }
 
             // Need to update Mirror.  OpenRaw is OK because this is short duration, and we don't
             // extend or otherwise modify any meta-data, just the content of the Data stream.
@@ -256,7 +279,7 @@ namespace DiscUtils.Ntfs
         {
             int totalClusters = (int)Utilities.Ceil(_self.FileSystem.BiosParameterBlock.TotalSectors64, _self.FileSystem.BiosParameterBlock.SectorsPerCluster);
 
-            ClusterRole[] clusterToRole = new ClusterRole[totalClusters];
+            ClusterRoles[] clusterToRole = new ClusterRoles[totalClusters];
             object[] clusterToFile = new object[totalClusters];
             Dictionary<object, string[]> fileToPaths = new Dictionary<object, string[]>();
 
@@ -273,7 +296,7 @@ namespace DiscUtils.Ntfs
                     {
                         for (long cluster = range.Offset; cluster < range.Offset + range.Count; ++cluster)
                         {
-                            clusterToRole[cluster] |= ClusterRole.DataFile;
+                            clusterToRole[cluster] |= ClusterRoles.DataFile;
                             clusterToFile[cluster] = fileName;
                         }
                     }

@@ -39,7 +39,6 @@ namespace DiscUtils.Ntfs
         private long _position;
 
         private bool _atEOF;
-        private bool _mftDirty;
 
         private byte[] _cachedDecompressedBlock;
         private long _cachedBlockStartVcn;
@@ -58,11 +57,6 @@ namespace DiscUtils.Ntfs
         public override void Close()
         {
             base.Close();
-            if (_mftDirty)
-            {
-                _file.UpdateRecordInMft();
-                _mftDirty = false;
-            }
         }
 
         public override bool CanRead
@@ -82,26 +76,6 @@ namespace DiscUtils.Ntfs
 
         public override void Flush()
         {
-            if (_mftDirty)
-            {
-                // Complex to avoid a recursive loop when extending the MFT.  If the dirty
-                // flag wasn't set to false, then updating the record in the MFT causes a
-                // Flush on it's own stream, ad-infinitum...
-                bool succeeded = false;
-                try
-                {
-                    _mftDirty = false;
-                    _file.UpdateRecordInMft();
-                    succeeded = true;
-                }
-                finally
-                {
-                    if (!succeeded)
-                    {
-                        _mftDirty = true;
-                    }
-                }
-            }
         }
 
         public override long Length
@@ -197,7 +171,7 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            _mftDirty = true;
+            _file.MarkMftRecordDirty();
 
             if (value < Length)
             {
@@ -239,7 +213,7 @@ namespace DiscUtils.Ntfs
 
             if (_position + count > _record.AllocatedLength)
             {
-                _mftDirty = true;
+                _file.MarkMftRecordDirty();
 
                 long numToAllocate = Utilities.Ceil(_position + count - _record.AllocatedLength, _bytesPerCluster);
                 Tuple<long, long>[] runs = _file.FileSystem.ClusterBitmap.AllocateClusters(numToAllocate);
@@ -252,7 +226,7 @@ namespace DiscUtils.Ntfs
 
             if (_position > _record.InitializedDataLength + 1)
             {
-                _mftDirty = true;
+                _file.MarkMftRecordDirty();
 
                 byte[] wipeBuffer = new byte[_bytesPerCluster * 4];
                 for (long wipePos = _record.InitializedDataLength; wipePos < _position; wipePos += wipeBuffer.Length)
@@ -263,14 +237,14 @@ namespace DiscUtils.Ntfs
 
             if (_position + count > _record.InitializedDataLength)
             {
-                _mftDirty = true;
+                _file.MarkMftRecordDirty();
 
                 _record.InitializedDataLength = _position + count;
             }
 
             if (_position + count > _record.RealLength)
             {
-                _mftDirty = true;
+                _file.MarkMftRecordDirty();
 
                 _record.RealLength = _position + count;
                 _record.LastVcn = Utilities.Ceil(_record.RealLength, _bytesPerCluster) - 1;

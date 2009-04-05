@@ -36,14 +36,28 @@ namespace DiscUtils.Ntfs
 
         public const int HeaderOffset = 0x10;
 
+        public uint AttributeType
+        {
+            get { return _attrType; }
+            set { _attrType = value; }
+        }
+
         public AttributeCollationRule CollationRule
         {
             get { return _collationRule; }
+            set { _collationRule = value; }
         }
 
         public uint IndexAllocationSize
         {
             get { return _indexAllocationEntrySize; }
+            set { _indexAllocationEntrySize = value; }
+        }
+
+        public byte RawClustersPerIndexRecord
+        {
+            get { return _rawClustersPerIndexRecord; }
+            set { _rawClustersPerIndexRecord = value; }
         }
 
         public IComparer<byte[]> GetCollator(UpperCase upCase)
@@ -77,12 +91,15 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(_attrType, buffer, 0);
+            Utilities.WriteBytesLittleEndian((uint)_collationRule, buffer, 0x04);
+            Utilities.WriteBytesLittleEndian(_indexAllocationEntrySize, buffer, 0x08);
+            Utilities.WriteBytesLittleEndian(_rawClustersPerIndexRecord, buffer, 0x0C);
         }
 
         public int Size
         {
-            get { throw new NotImplementedException(); }
+            get { return 16; }
         }
 
         #endregion

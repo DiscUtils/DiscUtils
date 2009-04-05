@@ -51,8 +51,25 @@ namespace DiscUtils.Ntfs
             get { return _fileDetails; }
         }
 
-        internal void Update()
+        public string SearchName
         {
+            get
+            {
+                string fileName = _fileDetails.FileName;
+                if (fileName.IndexOf('.') == -1)
+                {
+                    return fileName + ".";
+                }
+                else
+                {
+                    return fileName;
+                }
+            }
+        }
+
+        internal void UpdateFrom(File file)
+        {
+            file.FreshenFileName(_fileDetails, true);
             _directory.UpdateEntry(this);
         }
     }

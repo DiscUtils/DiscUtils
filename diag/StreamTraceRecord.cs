@@ -22,6 +22,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace DiscUtils.Diagnostics
 {
@@ -111,7 +112,7 @@ namespace DiscUtils.Diagnostics
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0:D3}{1,1}:{2,5}  @{3:X8}  [count={4}, result={5}]", _id, _exThrown != null ? "E" : " ", _fileAction, _filePosition, _countArg, _result);
+            return string.Format(CultureInfo.InvariantCulture, "{0:D3}{1,1}:{2,5}  @{3:X8}  [count={4}, result={5}]", _id, _exThrown != null ? "E" : " ", _fileAction, _filePosition, _countArg, _result);
         }
     }
 }

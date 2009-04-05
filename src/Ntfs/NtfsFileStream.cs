@@ -138,8 +138,7 @@ namespace DiscUtils.Ntfs
                 saAttr.Save();
 
                 // Update the directory entry used to open the file, so it's accurate
-                _file.FreshenFileName(_entry.Details);
-                _entry.Update();
+                _entry.UpdateFrom(_file);
 
                 // Write attribute changes back to the Master File Table
                 _file.UpdateRecordInMft();

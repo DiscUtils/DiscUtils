@@ -148,7 +148,31 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path of the new directory</param>
         public override void CreateDirectory(string path)
         {
-            throw new NotImplementedException();
+            string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+            Directory focusDir = GetDirectory(MasterFileTable.RootDirIndex);
+            DirectoryEntry focusDirEntry = focusDir.DirectoryEntry;
+
+            for (int i = 0; i < pathElements.Length; ++i)
+            {
+                DirectoryEntry childDirEntry = focusDir.GetEntryByName(pathElements[i]);
+                if (childDirEntry == null)
+                {
+                    Directory childDir = Directory.CreateNew(_context);
+                    childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
+
+                    // Update the directory entry by which we found the directory we've just modified
+                    focusDirEntry.UpdateFrom(focusDir);
+
+                    focusDir = childDir;
+                }
+                else
+                {
+                    focusDir = GetDirectory(childDirEntry.Reference);
+                }
+
+                focusDirEntry = childDirEntry;
+            }
         }
 
         /// <summary>
@@ -331,12 +355,17 @@ namespace DiscUtils.Ntfs
                 }
                 else
                 {
-                    File file = File.CreateNew(_context);
+                    File file = File.CreateNew(_context, FileRecordFlags.None);
 
-                    DirectoryEntry dirDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
-                    Directory destDir = GetDirectory(dirDirEntry.Reference);
-                    entry = destDir.AddEntry(file, Path.GetFileName(path));
+                    DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
+                    Directory parentDir = GetDirectory(parentDirEntry.Reference);
+                    entry = parentDir.AddEntry(file, Path.GetFileName(path));
+                    parentDirEntry.UpdateFrom(parentDir);
                 }
+            }
+            else if (mode == FileMode.CreateNew)
+            {
+                throw new IOException("File already exists");
             }
 
 
@@ -445,7 +474,7 @@ namespace DiscUtils.Ntfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTimeUtc(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            UpdateStandardInformation(path, delegate(StandardInformation si) { si.CreationTime = newTime; });
         }
 
         /// <summary>
@@ -473,7 +502,7 @@ namespace DiscUtils.Ntfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            UpdateStandardInformation(path, delegate(StandardInformation si) { si.LastAccessTime = newTime; });
         }
 
         /// <summary>
@@ -501,7 +530,7 @@ namespace DiscUtils.Ntfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            UpdateStandardInformation(path, delegate(StandardInformation si) { si.ModificationTime = newTime; });
         }
 
         /// <summary>
@@ -575,7 +604,7 @@ namespace DiscUtils.Ntfs
         /// Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
-        public override ClusterMap GetClusterMap()
+        public override ClusterMap BuildClusterMap()
         {
             throw new NotImplementedException();
         }
@@ -597,13 +626,13 @@ namespace DiscUtils.Ntfs
             }
 
             string destinationDirName = Path.GetDirectoryName(destinationName);
-            DirectoryEntry destinationDirDirEntry = GetDirectoryEntry(destinationDirName);
-            if (destinationDirDirEntry == null || (destinationDirDirEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
+            DirectoryEntry destinationDirSelfEntry = GetDirectoryEntry(destinationDirName);
+            if (destinationDirSelfEntry == null || (destinationDirSelfEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
             {
                 throw new FileNotFoundException("Destination directory not found", destinationDirName);
             }
 
-            Directory destinationDir = GetDirectory(destinationDirDirEntry.Reference);
+            Directory destinationDir = GetDirectory(destinationDirSelfEntry.Reference);
             if (destinationDir == null)
             {
                 throw new FileNotFoundException("Destination directory not found", destinationDirName);
@@ -617,6 +646,7 @@ namespace DiscUtils.Ntfs
 
             File file = GetFile(sourceDirEntry.Reference);
             destinationDir.AddEntry(file, Path.GetFileName(destinationName));
+            destinationDirSelfEntry.UpdateFrom(destinationDir);
         }
 
         /// <summary>
@@ -678,7 +708,7 @@ namespace DiscUtils.Ntfs
             {
                 if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
                 {
-                    file = new Directory(_context, _context.Mft, record);
+                    file = new Directory(_context, record);
                 }
                 else
                 {
@@ -709,7 +739,7 @@ namespace DiscUtils.Ntfs
             {
                 if ((record.Flags & FileRecordFlags.IsDirectory) != 0)
                 {
-                    file = new Directory(_context, _context.Mft, record);
+                    file = new Directory(_context, record);
                 }
                 else
                 {
@@ -721,12 +751,21 @@ namespace DiscUtils.Ntfs
             return file;
         }
 
-        internal File AllocateFile()
+        internal File AllocateFile(FileRecordFlags flags)
         {
-            File file = new File(_context, _context.Mft.AllocateRecord());
-            _fileCache[file.MftReference.MftIndex] = file;
-            return file;
+            File result = null;
+            if ((flags & FileRecordFlags.IsDirectory) != 0)
+            {
+                result = new Directory(_context, _context.Mft.AllocateRecord(FileRecordFlags.IsDirectory));
+            }
+            else
+            {
+                result = new File(_context, _context.Mft.AllocateRecord(FileRecordFlags.None));
+            }
+            _fileCache[result.MftReference.MftIndex] = result;
+            return result;
         }
+
         #endregion
 
         /// <summary>
@@ -787,7 +826,7 @@ namespace DiscUtils.Ntfs
 
                 if ((isDir && dirs) || (!isDir && files))
                 {
-                    if (regex.IsMatch(de.Details.FileName))
+                    if (regex.IsMatch(de.SearchName))
                     {
                         results.Add(Path.Combine(path, de.Details.FileName));
                     }
@@ -861,6 +900,32 @@ namespace DiscUtils.Ntfs
             {
                 attributeName = fileName.Substring(streamSepPos + 1);
                 plainPath = plainPath.Substring(0, path.Length - (fileName.Length - streamSepPos));
+            }
+        }
+
+        private delegate void StandardInformationModifier(StandardInformation si);
+
+        private void UpdateStandardInformation(string path, StandardInformationModifier modifier)
+        {
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+            else
+            {
+                File file = GetFile(dirEntry.Reference);
+
+                // Update the standard information attribute - so it reflects the actual file state
+                StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)file.GetAttribute(AttributeType.StandardInformation);
+                modifier(saAttr.Content);
+                saAttr.Save();
+
+                // Update the directory entry used to open the file, so it's accurate
+                dirEntry.UpdateFrom(file);
+
+                // Write attribute changes back to the Master File Table
+                file.UpdateRecordInMft();
             }
         }
 

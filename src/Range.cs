@@ -30,19 +30,19 @@ namespace DiscUtils
     /// <summary>
     /// Represents a range of values.
     /// </summary>
-    /// <typeparam name="Toffset">The type of the offset element</typeparam>
-    /// <typeparam name="Tcount">The type of the size element</typeparam>
-    public class Range<Toffset, Tcount>
+    /// <typeparam name="TOffset">The type of the offset element</typeparam>
+    /// <typeparam name="TCount">The type of the size element</typeparam>
+    public class Range<TOffset, TCount>
     {
-        private Toffset _offset;
-        private Tcount _count;
+        private TOffset _offset;
+        private TCount _count;
 
         /// <summary>
         /// Creates a new instance.
         /// </summary>
         /// <param name="offset">The offset (i.e. start) of the range</param>
         /// <param name="count">The size of the range</param>
-        public Range(Toffset offset, Tcount count)
+        public Range(TOffset offset, TCount count)
         {
             _offset = offset;
             _count = count;
@@ -51,7 +51,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the offset (i.e. start) of the range
         /// </summary>
-        public Toffset Offset
+        public TOffset Offset
         {
             get { return _offset; }
         }
@@ -59,7 +59,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the size of the range.
         /// </summary>
-        public Tcount Count
+        public TCount Count
         {
             get { return _count; }
         }

@@ -30,9 +30,11 @@ namespace DiscUtils.Ntfs
     internal sealed class ObjectIds
     {
         private Index<IndexKey, IndexData> _index;
+        private File _file;
 
         public ObjectIds(File file)
         {
+            _file = file;
             _index = new Index<IndexKey, IndexData>(file, "$O", file.FileSystem.BiosParameterBlock, null);
         }
 
@@ -48,6 +50,7 @@ namespace DiscUtils.Ntfs
             newData.BirthDomainId = birthDomainId;
 
             _index[newKey] = newData;
+            _file.UpdateRecordInMft();
         }
 
         public void Dump(TextWriter writer, string indent)

@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
@@ -33,11 +33,12 @@ namespace DiscUtils.Diagnostics
     /// </summary>
     /// <param name="fs">The file system instance to perform the activity on</param>
     /// <param name="context">Contextual information shared by all activities during a 'run'</param>
+    /// <typeparam name="TFileSystem">The concrete type of the file system the action is performed on.</typeparam>
     /// <returns>A return value that is made available after the activity is run</returns>
     /// <remarks>The <c>context</c> information is reset (i.e. empty) at the start of a particular
     /// replay.  It's purpose is to enable multiple activites that operate in sequence to co-ordinate.</remarks>
-    public delegate object Activity<Tfs>(Tfs fs, Dictionary<string, object> context)
-        where Tfs : DiscFileSystem, IDiagnosticTraceable;
+    public delegate object Activity<TFileSystem>(TFileSystem fs, Dictionary<string, object> context)
+        where TFileSystem : DiscFileSystem, IDiagnosticTraceable;
 
     /// <summary>
     /// Enumeration of stream views that can be requested.
@@ -58,13 +59,13 @@ namespace DiscUtils.Diagnostics
     /// <summary>
     /// Class that wraps a DiscFileSystem, validating file system integrity.
     /// </summary>
-    /// <typeparam name="Tfs">The concrete type of file system to validate.</typeparam>
-    /// <typeparam name="Tc">The concrete type of the file system checker.</typeparam>
-    public class ValidatingFileSystem<Tfs, Tc> : DiscFileSystem
-        where Tfs : DiscFileSystem, IDiagnosticTraceable
-        where Tc : DiscFileSystemChecker
+    /// <typeparam name="TFileSystem">The concrete type of file system to validate.</typeparam>
+    /// <typeparam name="TChecker">The concrete type of the file system checker.</typeparam>
+    public class ValidatingFileSystem<TFileSystem, TChecker> : DiscFileSystem
+        where TFileSystem : DiscFileSystem, IDiagnosticTraceable
+        where TChecker : DiscFileSystemChecker
     {
-        internal delegate Stream StreamOpenFn(Tfs fs);
+        internal delegate Stream StreamOpenFn(TFileSystem fs);
 
         private Stream _baseStream;
 
@@ -91,7 +92,7 @@ namespace DiscUtils.Diagnostics
         // INITIALIZED STATE
 
         private SnapshotStream _snapStream;
-        private Tfs _liveTarget;
+        private TFileSystem _liveTarget;
         private bool _initialized;
         private Dictionary<string, object> _activityContext;
         private TracingStream _globalTrace;
@@ -110,7 +111,7 @@ namespace DiscUtils.Diagnostics
         /// Activities get logged here until a checkpoint is hit, so we can replay between
         /// checkpoints.
         /// </summary>
-        private List<Activity<Tfs>> _checkpointBuffer;
+        private List<Activity<TFileSystem>> _checkpointBuffer;
 
         /// <summary>
         /// The random number generator seed value (set at checkpoint).
@@ -324,6 +325,11 @@ namespace DiscUtils.Diagnostics
         /// </summary>
         public ReplayReport ReplayFromLastCheckpoint()
         {
+            if (!DoReplayAndVerify(0))
+            {
+                throw new ValidatingFileSystemException("Previous checkpoint now shows as invalid, the underlying storage stream may be broken");
+            }
+
             // TODO - do full replay, check for failure - is this reproducible?
 
             // Binary chop for activity that causes failure
@@ -360,7 +366,7 @@ namespace DiscUtils.Diagnostics
 
                     try
                     {
-                        using (Tfs replayFs = CreateFileSystem(ts))
+                        using (TFileSystem replayFs = CreateFileSystem(ts))
                         {
                             // Re-init the RNG to it's state when the checkpoint started, so we get reproducibility.
                             replayFs.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
@@ -372,6 +378,7 @@ namespace DiscUtils.Diagnostics
                                 _checkpointBuffer[i](replayFs, replayContext);
                             }
 
+                            ts.CaptureStackTraces = true;
                             ts.Start();
                             _checkpointBuffer[lowPoint](replayFs, replayContext);
                             ts.Stop();
@@ -383,7 +390,7 @@ namespace DiscUtils.Diagnostics
                         replayException = e;
                     }
 
-                    StringWriter verificationReport = new StringWriter();
+                    StringWriter verificationReport = new StringWriter(CultureInfo.InvariantCulture);
                     bool failedVerificationOnReplay = DoVerify(ts, verificationReport, ReportLevels.All);
 
                     return new ReplayReport(
@@ -402,6 +409,14 @@ namespace DiscUtils.Diagnostics
         }
 
         /// <summary>
+        /// Indicates if we're in lock-down (i.e. corruption has been detected).
+        /// </summary>
+        internal bool InLockdown
+        {
+            get { return _lockdown; }
+        }
+
+        /// <summary>
         /// Replays a specified number of activities.
         /// </summary>
         /// <param name="activityCount">Number of activities to replay</param>
@@ -414,7 +429,7 @@ namespace DiscUtils.Diagnostics
 
                 try
                 {
-                    using (Tfs replayFs = CreateFileSystem(replayCapture))
+                    using (TFileSystem replayFs = CreateFileSystem(replayCapture))
                     {
                         // Re-init the RNG to it's state when the checkpoint started, so we get reproducibility.
                         replayFs.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
@@ -444,7 +459,7 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The supplied activity may be executed multiple times, against multiple instances of the
         /// file system if a replay is requested.  Always drive the file system object supplied as a parameter and
         /// do not persist references to that object.</remarks>
-        public object PerformActivity(Activity<Tfs> activity)
+        public object PerformActivity(Activity<TFileSystem> activity)
         {
             if (_lockdown)
             {
@@ -472,7 +487,7 @@ namespace DiscUtils.Diagnostics
                 if (_checkpointBuffer.Count >= _checkpointPeriod)
                 {
                     // Roll over the on-disk trace
-                    _globalTrace.WriteToFile(string.Format(@"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
+                    _globalTrace.WriteToFile(string.Format(CultureInfo.InvariantCulture, @"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
 
                     // We only do a full checkpoint, if the activity didn't throw an exception.  Otherwise,
                     // we'll discard all replay info just when the caller might want it.  Instead, just do a
@@ -503,13 +518,13 @@ namespace DiscUtils.Diagnostics
             _globalTrace = new TracingStream(_snapStream, Ownership.None);
             _globalTrace.CaptureStackTraces = _globalTraceCaptureStackTraces;
             _globalTrace.Reset(_runGlobalTrace);
-            _globalTrace.WriteToFile(string.Format(@"C:\temp\working\trace{0:X3}.log",_numScheduledCheckpoints++));
+            _globalTrace.WriteToFile(string.Format(CultureInfo.InvariantCulture, @"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
 
             _checkpointRngSeed = _masterRng.Next();
 
             _activityContext = new Dictionary<string, object>();
 
-            _checkpointBuffer = new List<Activity<Tfs>>();
+            _checkpointBuffer = new List<Activity<TFileSystem>>();
 
             _liveTarget = CreateFileSystem(_globalTrace);
             _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
@@ -527,7 +542,7 @@ namespace DiscUtils.Diagnostics
 
         private static bool DoVerify(Stream s, TextWriter w, ReportLevels levels)
         {
-            Tc checker = CreateChecker(s);
+            TChecker checker = CreateChecker(s);
 
             if (w != null)
             {
@@ -544,7 +559,7 @@ namespace DiscUtils.Diagnostics
 
         private void CheckpointAndThrow()
         {
-            using (StringWriter writer = new StringWriter())
+            using (StringWriter writer = new StringWriter(CultureInfo.InvariantCulture))
             {
                 bool passed = Checkpoint(writer, ReportLevels.Errors);
 
@@ -559,7 +574,7 @@ namespace DiscUtils.Diagnostics
 
         private void VerifyAndThrow()
         {
-            using (StringWriter writer = new StringWriter())
+            using (StringWriter writer = new StringWriter(CultureInfo.InvariantCulture))
             {
                 bool passed = Verify(writer, ReportLevels.Errors);
 
@@ -572,11 +587,11 @@ namespace DiscUtils.Diagnostics
             }
         }
 
-        private static Tfs CreateFileSystem(Stream stream)
+        private static TFileSystem CreateFileSystem(Stream stream)
         {
             try
             {
-                return (Tfs)typeof(Tfs).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+                return (TFileSystem)typeof(TFileSystem).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
             }
             catch (TargetInvocationException tie)
             {
@@ -587,11 +602,11 @@ namespace DiscUtils.Diagnostics
             }
         }
 
-        private static Tc CreateChecker(Stream stream)
+        private static TChecker CreateChecker(Stream stream)
         {
             try
             {
-                return (Tc)typeof(Tc).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+                return (TChecker)typeof(TChecker).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
             }
             catch (TargetInvocationException tie)
             {
@@ -610,7 +625,7 @@ namespace DiscUtils.Diagnostics
         {
             get
             {
-                Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
+                Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
                 {
                     return fs.FriendlyName;
                 };
@@ -625,7 +640,15 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the file system is read-write.</returns>
         public override bool CanWrite
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+                {
+                    return fs.CanWrite;
+                };
+
+                return (bool)PerformActivity(fn);
+            }
         }
 
         /// <summary>
@@ -667,7 +690,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The path of the new directory</param>
         public override void CreateDirectory(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.CreateDirectory(path);
+                return 0;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -760,7 +789,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files.</returns>
         public override string[] GetFiles(string path)
         {
-            Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFiles(path);
             };
@@ -853,7 +882,24 @@ namespace DiscUtils.Diagnostics
         /// <returns>The new stream.</returns>
         public override Stream OpenFile(string path, FileMode mode)
         {
-            throw new NotImplementedException();
+            // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
+            StreamOpenFn reopenFn = delegate(TFileSystem fs)
+            {
+                return fs.OpenFile(path, mode);
+            };
+
+            ValidatingFileSystemWrapperStream<TFileSystem, TChecker> wrapper = new ValidatingFileSystemWrapperStream<TFileSystem, TChecker>(this, reopenFn);
+
+            Activity<TFileSystem> activity = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                Stream s = fs.OpenFile(path, mode);
+                wrapper.SetNativeStream(context, s);
+                return s;
+            };
+
+            PerformActivity(activity);
+
+            return wrapper;
         }
 
         /// <summary>
@@ -866,14 +912,14 @@ namespace DiscUtils.Diagnostics
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
             // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
-            StreamOpenFn reopenFn = delegate(Tfs fs)
+            StreamOpenFn reopenFn = delegate(TFileSystem fs)
             {
                 return fs.OpenFile(path, mode, access);
             };
 
-            ValidatingFileSystemWrapperStream<Tfs, Tc> wrapper = new ValidatingFileSystemWrapperStream<Tfs, Tc>(this, reopenFn);
+            ValidatingFileSystemWrapperStream<TFileSystem, TChecker> wrapper = new ValidatingFileSystemWrapperStream<TFileSystem, TChecker>(this, reopenFn);
 
-            Activity<Tfs> activity = delegate(Tfs fs, Dictionary<string, object> context)
+            Activity<TFileSystem> activity = delegate(TFileSystem fs, Dictionary<string, object> context)
             {
                 Stream s = fs.OpenFile(path, mode, access);
                 wrapper.SetNativeStream(context, s);

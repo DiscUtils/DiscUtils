@@ -56,6 +56,9 @@ namespace DiscUtils.Ntfs
 
             _entries = new List<IndexEntry>();
             _entries.Add(endEntry);
+
+            _header.OffsetToFirstEntry = (uint)(IndexHeader.Size + storeOverhead);
+            _header.TotalSizeOfEntries = (uint)(_header.OffsetToFirstEntry + endEntry.Size);
         }
 
         public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, IndexNode parent, byte[] buffer, int offset)

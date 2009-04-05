@@ -116,8 +116,21 @@ namespace DiscUtils
         /// </summary>
         public bool IsReadOnly
         {
-            get { return (Attributes & FileAttributes.ReadOnly) != 0; }
-            set { Attributes = Attributes | FileAttributes.ReadOnly; }
+            get
+            {
+                return (Attributes & FileAttributes.ReadOnly) != 0;
+            }
+
+            set {
+                if (value)
+                {
+                    Attributes = Attributes | FileAttributes.ReadOnly;
+                }
+                else
+                {
+                    Attributes = Attributes & ~FileAttributes.ReadOnly;
+                }
+            }
         }
 
         /// <summary>

@@ -31,8 +31,6 @@ namespace DiscUtils.Ntfs
         private File _file;
         private SparseStream _wrapped;
 
-        private bool _dirty;
-
         public ResidentAttributeStream(File file, SparseStream wrapped)
         {
             _file = file;
@@ -42,11 +40,6 @@ namespace DiscUtils.Ntfs
         public override void Close()
         {
             base.Close();
-            if (_dirty)
-            {
-                _file.UpdateRecordInMft();
-                _dirty = false;
-            }
         }
 
         public override bool CanRead
@@ -67,11 +60,6 @@ namespace DiscUtils.Ntfs
         public override void Flush()
         {
             _wrapped.Flush();
-            if (_dirty)
-            {
-                _file.UpdateRecordInMft();
-                _dirty = false;
-            }
         }
 
         public override long Length
@@ -105,7 +93,7 @@ namespace DiscUtils.Ntfs
         {
             if (value != _wrapped.Length)
             {
-                _dirty = true;
+                _file.MarkMftRecordDirty();
                 _wrapped.SetLength(value);
             }
         }
@@ -114,7 +102,7 @@ namespace DiscUtils.Ntfs
         {
             if (CanWrite && count != 0)
             {
-                _dirty = true;
+                _file.MarkMftRecordDirty();
             }
             _wrapped.Write(buffer, offset, count);
         }

@@ -32,8 +32,8 @@ namespace LibraryTests
         static void Main(string[] args)
         {
             AppDomainSetup domSetup = new AppDomainSetup();
-            domSetup.ApplicationBase = @"C:\Program Files\NUnit 2.4.8\";
-            domSetup.PrivateBinPath = @"C:\Program Files\NUnit 2.4.8\bin\";
+            domSetup.ApplicationBase = @"C:\Program Files\NUnit 2.5\";
+            domSetup.PrivateBinPath = @"C:\Program Files\NUnit 2.5\bin\net-2.0";
 
             AppDomain dom = AppDomain.CreateDomain("Test Run", null, domSetup);
 
@@ -47,7 +47,7 @@ namespace LibraryTests
     {
         public void DoUnitTests(string assembly)
         {
-            ObjectHandle objHandle = Activator.CreateInstanceFrom(@"C:\Program Files\NUnit 2.4.8\bin\nunit-gui-runner.dll", "NUnit.Gui.AppEntry");
+            ObjectHandle objHandle = Activator.CreateInstanceFrom(@"C:\Program Files\NUnit 2.5\bin\net-2.0\nunit-gui-runner.dll", "NUnit.Gui.AppEntry");
             objHandle.Unwrap().GetType().GetMethod("Main").Invoke(objHandle.Unwrap(), new object[] { new string[] { assembly } });
         }
     }

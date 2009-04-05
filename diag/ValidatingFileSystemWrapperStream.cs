@@ -51,7 +51,7 @@ namespace DiscUtils.Diagnostics
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !_disposed)
+            if (disposing && !_disposed && !_fileSystem.InLockdown)
             {
                 long pos = _shadowPosition;
                 Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)

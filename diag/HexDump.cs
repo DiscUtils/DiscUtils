@@ -27,14 +27,14 @@ namespace DiscUtils.Diagnostics
     /// <summary>
     /// Provides utility methods to produce hex dumps of binary data.
     /// </summary>
-    public sealed class HexDump
+    public static class HexDump
     {
         /// <summary>
         /// Creates a hex dump from a stream.
         /// </summary>
         /// <param name="stream">The stream to generate the hex dump from.</param>
         /// <param name="output">The destination for the hex dump.</param>
-        public void Generate(Stream stream, TextWriter output)
+        public static void Generate(Stream stream, TextWriter output)
         {
             stream.Position = 0;
             byte[] buffer = new byte[1024 * 1024];
