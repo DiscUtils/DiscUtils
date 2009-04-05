@@ -210,6 +210,7 @@
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
+    <Compile Include="Vmdk\CompressedGrainHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
