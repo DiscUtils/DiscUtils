@@ -67,9 +67,28 @@ namespace DiscUtils.Vmdk
                 fileShare = FileShare.None;
             }
 
-            using (FileStream s = new FileStream(path, FileMode.Open, fileAccess, fileShare))
+            FileStream fileStream = null;
+            try
             {
-                LoadDescriptor(s);
+                fileStream = new FileStream(path, FileMode.Open, fileAccess, fileShare);
+                LoadDescriptor(fileStream);
+
+                // For monolithic disks, keep hold of the stream - we won't try to use the file name
+                // from the embedded descriptor because the file may have been renamed, making the 
+                // descriptor out of date.
+                if (_descriptor.CreateType == DiskCreateType.StreamOptimized || _descriptor.CreateType == DiskCreateType.MonolithicSparse)
+                {
+                    _monolithicStream = fileStream;
+                    _ownsMonolithicStream = Ownership.Dispose;
+                    fileStream = null;
+                }
+            }
+            finally
+            {
+                if (fileStream != null)
+                {
+                    fileStream.Dispose();
+                }
             }
 
             _extentLocator = new LocalFileLocator(Path.GetDirectoryName(path));

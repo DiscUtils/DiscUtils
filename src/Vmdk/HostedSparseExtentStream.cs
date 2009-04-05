@@ -43,8 +43,21 @@ namespace DiscUtils.Vmdk
             _ownsParentDiskStream = ownsParentDiskStream;
 
             file.Position = 0;
-            byte[] firstSector = Utilities.ReadFully(file, Sizes.Sector);
-            _hostedHeader = HostedSparseExtentHeader.Read(firstSector, 0);
+            byte[] headerSector = Utilities.ReadFully(file, Sizes.Sector);
+            _hostedHeader = HostedSparseExtentHeader.Read(headerSector, 0);
+            if (_hostedHeader.GdOffset == -1)
+            {
+                // Fall back to secondary copy that (should) be at the end of the stream, just before the end-of-stream sector marker
+                file.Position = file.Length - Sizes.OneKiB;
+                headerSector = Utilities.ReadFully(file, Sizes.Sector);
+                _hostedHeader = HostedSparseExtentHeader.Read(headerSector, 0);
+
+                if (_hostedHeader.MagicNumber != HostedSparseExtentHeader.VmdkMagicNumber)
+                {
+                    throw new IOException("Unable to locate valid VMDK header or footer");
+                }
+            }
+
             _header = _hostedHeader;
 
             if (_hostedHeader.CompressAlgorithm != 0 && _hostedHeader.CompressAlgorithm != 1)

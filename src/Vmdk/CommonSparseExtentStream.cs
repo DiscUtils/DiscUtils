@@ -213,7 +213,7 @@ namespace DiscUtils.Vmdk
 
                 _position += numRead;
                 totalRead += numRead;
-            } while (numRead != 0);
+            } while (numRead != 0 && totalRead < count);
 
             return totalRead;
         }
