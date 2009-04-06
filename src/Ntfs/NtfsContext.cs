@@ -107,6 +107,11 @@ namespace DiscUtils.Ntfs
         {
             get;
         }
+
+        bool ReadOnly
+        {
+            get;
+        }
     }
 
     internal sealed class NtfsContext : INtfsContext
@@ -126,6 +131,7 @@ namespace DiscUtils.Ntfs
         private GetDirectoryByRefFn _getDirByRefFn;
         private AllocateFileFn _allocateFileFn;
         private DeleteFileFn _deleteFileFn;
+        private bool _readOnly;
 
         public Stream RawStream
         {
@@ -215,6 +221,12 @@ namespace DiscUtils.Ntfs
         {
             get { return _deleteFileFn; }
             set { _deleteFileFn = value; }
+        }
+
+        public bool ReadOnly
+        {
+            get { return _readOnly; }
+            set { _readOnly = value; }
         }
     }
 }

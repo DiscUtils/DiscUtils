@@ -34,6 +34,8 @@ namespace DiscUtils.Ntfs
     /// </summary>
     public sealed class NtfsFileSystem : ClusterBasedFileSystem, IDiagnosticTraceable
     {
+        private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.NotContentIndexed | FileAttributes.Offline | FileAttributes.ReparsePoint | FileAttributes.Temporary;
+
         private NtfsContext _context;
 
         // Top-level file system structures
@@ -59,6 +61,7 @@ namespace DiscUtils.Ntfs
             _context.GetDirectoryByIndex = GetDirectory;
             _context.AllocateFile = AllocateFile;
             _context.DeleteFile = DeleteFile;
+            _context.ReadOnly = !stream.CanWrite;
 
             _fileCache = new ObjectCache<long, File>();
 
@@ -231,7 +234,7 @@ namespace DiscUtils.Ntfs
             Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
             DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
-            if (dirEntry == null)
+            if (dirEntry == null || (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0)
             {
                 throw new FileNotFoundException("No such file", path);
             }
@@ -495,7 +498,17 @@ namespace DiscUtils.Ntfs
         /// <param name="newValue">The new attributes of the file or directory</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
-            throw new NotImplementedException();
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+            else if((dirEntry.Details.FileAttributes & NonSettableFileAttributes) != (newValue & NonSettableFileAttributes))
+            {
+                throw new ArgumentException("Attempt to change attributes that are read-only");
+            }
+
+            UpdateStandardInformation(path, delegate(StandardInformation si) { si.FileAttributes = FileNameRecord.SetAttributes(newValue, si.FileAttributes); });
         }
 
         /// <summary>

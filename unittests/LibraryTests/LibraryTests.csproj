@@ -51,9 +51,8 @@
     <Compile Include="ChsAddressTest.cs" />
     <Compile Include="Combined\CombinedTest.cs" />
     <Compile Include="DiscFileSystemDirectoryTest.cs" />
+    <Compile Include="DiscFileSystemFileTest.cs" />
     <Compile Include="GeometryTest.cs" />
-    <Compile Include="Fat\FatDirectoryInfoTest.cs" />
-    <Compile Include="Fat\FatFileInfoTest.cs" />
     <Compile Include="InMemoryFileSystem.cs" />
     <Compile Include="Iso9660\IsoDirectoryInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileInfoTest.cs" />

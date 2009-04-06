@@ -126,14 +126,17 @@ namespace DiscUtils.Ntfs
 
         private void UpdateMetadata()
         {
-            if (_isDirty)
+            if (!_file.FileSystem.ReadOnly)
             {
                 DateTime now = DateTime.UtcNow;
 
                 // Update the standard information attribute - so it reflects the actual file state
                 StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)_file.GetAttribute(AttributeType.StandardInformation);
-                saAttr.Content.ModificationTime = now;
-                saAttr.Content.MftChangedTime = now;
+                if (_isDirty)
+                {
+                    saAttr.Content.ModificationTime = now;
+                }
+
                 saAttr.Content.LastAccessTime = now;
                 saAttr.Save();
 

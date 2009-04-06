@@ -32,31 +32,6 @@ namespace DiscUtils
     public class DiscFileSystemDirectoryTest
     {
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void TestCreateInRoot(DiscFileSystem testFs)
-        {
-            using (Stream s = testFs.OpenFile(@"NEWROOT.TXT", FileMode.Create, FileAccess.ReadWrite))
-            {
-                Assert.AreEqual(0, s.Length);
-            }
-            Assert.IsTrue(testFs.FileExists("NEWROOT.TXT"));
-        }
-
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        [ExpectedException(typeof(IOException), UserMessage = "File already exists")]
-        [Category("ThrowsException")]
-        public void TestCreateFailInRoot(DiscFileSystem testFs)
-        {
-            using (Stream s = testFs.OpenFile(@"NEWROOT.TXT", FileMode.Create, FileAccess.ReadWrite))
-            {
-                s.WriteByte(1);
-            }
-
-            using (Stream s = testFs.OpenFile(@"NEWROOT.TXT", FileMode.CreateNew, FileAccess.ReadWrite))
-            {
-            }
-        }
-
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         public void Create(DiscFileSystem fs)
         {
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOMEDIR");
@@ -335,26 +310,207 @@ namespace DiscUtils
         {
             get
             {
-                SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
-                SparseMemoryStream ms = new SparseMemoryStream();
-                Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-                yield return new TestCaseData(Fat.FatFileSystem.FormatFloppy(ms, Fat.FloppyDiskType.Extended, null)).SetName("FAT");
+                yield return new TestCaseData(
+                    new DelayLoadFileSystem(
+                    delegate()
+                    {
+                        SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
+                        SparseMemoryStream ms = new SparseMemoryStream();
+                        Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
+                        return Fat.FatFileSystem.FormatFloppy(ms, Fat.FloppyDiskType.Extended, null);
+                    })).SetName("FAT");
 
                 // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
-                string baseFile = "ntfsblank.vhd";
-                DiskImageFile parent = new DiskImageFile(
-                    new FileStream(@"C:\temp\" + baseFile, FileMode.Open, FileAccess.Read),
-                    Ownership.Dispose);
-                Stream diffStream = new SparseMemoryStream();
-                Disk disk = Disk.InitializeDifferencing(
-                    diffStream,
-                    Ownership.Dispose,
-                    parent,
-                    Ownership.Dispose,
-                    @"C:\temp\" + baseFile,
-                    @".\" + baseFile,
-                    File.GetLastWriteTimeUtc(@"C:\temp\" + baseFile));
-                yield return new TestCaseData(new Ntfs.NtfsFileSystem(disk.Partitions[0].Open())).SetName("NTFS");
+                yield return new TestCaseData(
+                    new DelayLoadFileSystem(
+                    delegate()
+                    {
+                        string baseFile = "ntfsblank.vhd";
+                        DiskImageFile parent = new DiskImageFile(
+                            new FileStream(@"C:\temp\" + baseFile, FileMode.Open, FileAccess.Read),
+                            Ownership.Dispose);
+                        Stream diffStream = new SparseMemoryStream();
+                        Disk disk = Disk.InitializeDifferencing(
+                            diffStream,
+                            Ownership.Dispose,
+                            parent,
+                            Ownership.Dispose,
+                            @"C:\temp\" + baseFile,
+                            @".\" + baseFile,
+                            File.GetLastWriteTimeUtc(@"C:\temp\" + baseFile));
+                        return new Ntfs.NtfsFileSystem(disk.Partitions[0].Open());
+                    })).SetName("NTFS");
+            }
+        }
+
+        private delegate DiscFileSystem FileSystemLoaderDelegate();
+
+        private class DelayLoadFileSystem : DiscFileSystem
+        {
+            private FileSystemLoaderDelegate _loader;
+            private DiscFileSystem _wrapped;
+
+            public DelayLoadFileSystem(FileSystemLoaderDelegate loader)
+            {
+                _loader = loader;
+            }
+
+            private void Load()
+            {
+                if (_wrapped == null)
+                {
+                    _wrapped = _loader();
+                }
+            }
+
+            public override string FriendlyName
+            {
+                get
+                {
+                    Load();
+                    return _wrapped.FriendlyName;
+                }
+            }
+
+            public override bool CanWrite
+            {
+                get
+                {
+                    Load();
+                    return _wrapped.CanWrite;
+                }
+            }
+
+            public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
+            {
+                Load();
+                _wrapped.CopyFile(sourceFile, destinationFile, overwrite);
+            }
+
+            public override void CreateDirectory(string path)
+            {
+                Load();
+                _wrapped.CreateDirectory(path);
+            }
+
+            public override void DeleteDirectory(string path)
+            {
+                Load();
+                _wrapped.DeleteDirectory(path);
+            }
+
+            public override void DeleteFile(string path)
+            {
+                Load();
+                _wrapped.DeleteFile(path);
+            }
+
+            public override bool DirectoryExists(string path)
+            {
+                Load();
+                return _wrapped.DirectoryExists(path);
+            }
+
+            public override bool FileExists(string path)
+            {
+                Load();
+                return _wrapped.FileExists(path);
+            }
+
+            public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
+            {
+                Load();
+                return _wrapped.GetDirectories(path, searchPattern, searchOption);
+            }
+
+            public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
+            {
+                Load();
+                return _wrapped.GetFiles(path, searchPattern, searchOption);
+            }
+
+            public override string[] GetFileSystemEntries(string path)
+            {
+                Load();
+                return _wrapped.GetFileSystemEntries(path);
+            }
+
+            public override string[] GetFileSystemEntries(string path, string searchPattern)
+            {
+                Load();
+                return _wrapped.GetFileSystemEntries(path, searchPattern);
+            }
+
+            public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
+            {
+                Load();
+                _wrapped.MoveDirectory(sourceDirectoryName, destinationDirectoryName);
+            }
+
+            public override void MoveFile(string sourceName, string destinationName, bool overwrite)
+            {
+                Load();
+                _wrapped.MoveFile(sourceName, destinationName, overwrite);
+            }
+
+            public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+            {
+                Load();
+                return _wrapped.OpenFile(path, mode, access);
+            }
+
+            public override FileAttributes GetAttributes(string path)
+            {
+                Load();
+                return _wrapped.GetAttributes(path);
+            }
+
+            public override void SetAttributes(string path, FileAttributes newValue)
+            {
+                Load();
+                _wrapped.SetAttributes(path, newValue);
+            }
+
+            public override DateTime GetCreationTimeUtc(string path)
+            {
+                Load();
+                return _wrapped.GetCreationTimeUtc(path);
+            }
+
+            public override void SetCreationTimeUtc(string path, DateTime newTime)
+            {
+                Load();
+                _wrapped.SetCreationTimeUtc(path, newTime);
+            }
+
+            public override DateTime GetLastAccessTimeUtc(string path)
+            {
+                Load();
+                return _wrapped.GetLastAccessTimeUtc(path);
+            }
+
+            public override void SetLastAccessTimeUtc(string path, DateTime newTime)
+            {
+                Load();
+                _wrapped.SetLastAccessTimeUtc(path, newTime);
+            }
+
+            public override DateTime GetLastWriteTimeUtc(string path)
+            {
+                Load();
+                return _wrapped.GetLastWriteTimeUtc(path);
+            }
+
+            public override void SetLastWriteTimeUtc(string path, DateTime newTime)
+            {
+                Load();
+                _wrapped.SetLastWriteTimeUtc(path, newTime);
+            }
+
+            public override long GetFileLength(string path)
+            {
+                Load();
+                return _wrapped.GetFileLength(path);
             }
         }
     }

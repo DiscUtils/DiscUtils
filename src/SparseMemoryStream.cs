@@ -113,6 +113,11 @@ namespace DiscUtils
         /// <returns>The number of bytes read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (!CanRead)
+            {
+                throw new IOException("Attempt to read from write-only stream");
+            }
+
             int numRead = _buffer.Read(_position, buffer, offset, count);
             _position += numRead;
             return numRead;
@@ -164,6 +169,11 @@ namespace DiscUtils
         /// <param name="count">The number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
+            if (!CanWrite)
+            {
+                throw new IOException("Attempt to write to read-only stream");
+            }
+
             _buffer.Write(_position, buffer, offset, count);
             _position += count;
         }

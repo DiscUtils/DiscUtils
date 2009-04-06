@@ -35,7 +35,6 @@ namespace DiscUtils.Ntfs
         private NonResidentAttributeRecord _record;
 
         private FileAccess _access;
-        private long _length;
         private long _position;
 
         private bool _atEOF;
@@ -51,7 +50,6 @@ namespace DiscUtils.Ntfs
             _runs = CookedDataRun.Cook(record.DataRuns);
             _record = record;
             _access = access;
-            _length = record.DataLength;
         }
 
         public override void Close()
@@ -80,7 +78,7 @@ namespace DiscUtils.Ntfs
 
         public override long Length
         {
-            get { return _length; }
+            get { return _record.RealLength; }
         }
 
         public override long Position
@@ -113,14 +111,14 @@ namespace DiscUtils.Ntfs
                 throw new ArgumentOutOfRangeException("count", "Attempt to read negative number of bytes");
             }
 
-            if (_position >= _length)
+            if (_position >= Length)
             {
                 _atEOF = true;
                 return 0;
             }
 
             // Limit read to length of attribute
-            int toRead = (int)Math.Min(count, _length - _position);
+            int toRead = (int)Math.Min(count, Length - _position);
 
             // Handle uninitialized bytes at end of attribute
             if (_position + toRead > _record.InitializedDataLength)
@@ -166,7 +164,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to change length of file not opened for write");
             }
 
-            if (value == _length)
+            if (value == Length)
             {
                 return;
             }
@@ -252,7 +250,6 @@ namespace DiscUtils.Ntfs
 
             RawWrite(_position, buffer, offset, count);
             _position += count;
-            _length = Math.Max(_length, _position);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -283,7 +280,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                int firstRunToDelete = FindDataRun(Utilities.Ceil(value - 1, _bytesPerCluster)) + 1;
+                int firstRunToDelete = FindDataRun((value - 1) / _bytesPerCluster) + 1;
 
                 RemoveAndFreeRuns(firstRunToDelete);
 
