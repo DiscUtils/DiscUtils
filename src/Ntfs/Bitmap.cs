@@ -73,6 +73,21 @@ namespace DiscUtils.Ntfs
             _stream.Flush();
         }
 
+        public void MarkAbsent(long index)
+        {
+            long byteIdx = index / 8;
+            byte mask = (byte)(1 << (byte)(index % 8));
+
+            if (byteIdx < _stream.Length)
+            {
+                _bitmap[byteIdx] &= (byte)~mask;
+
+                _stream.Position = byteIdx;
+                _stream.WriteByte(_bitmap[byteIdx]);
+                _stream.Flush();
+            }
+        }
+
         internal void MarkAbsentRange(long index, long count)
         {
             for (long i = index; i < index + count; ++i)

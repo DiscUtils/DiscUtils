@@ -29,7 +29,7 @@ namespace DiscUtils.Ntfs
 {
     internal class Directory : File
     {
-        private Index<FileNameRecord, FileReference> _index;
+        private IndexView<FileNameRecord, FileReference> _index;
 
 
         public Directory(INtfsContext fileSystem, FileRecord baseRecord)
@@ -56,6 +56,11 @@ namespace DiscUtils.Ntfs
             {
                 return null;
             }
+        }
+
+        public bool IsEmpty
+        {
+            get { return Index.Count == 0; }
         }
 
         public IEnumerable<DirectoryEntry> GetAllEntries()
@@ -96,6 +101,29 @@ namespace DiscUtils.Ntfs
             return new DirectoryEntry(this, file.MftReference, newNameRecord);
         }
 
+        internal void RemoveEntry(DirectoryEntry dirEntry)
+        {
+            File file = _fileSystem.GetFileByRef(dirEntry.Reference);
+
+            FileNameRecord nameRecord = dirEntry.Details;
+
+            Index.Remove(dirEntry.Details);
+
+            foreach (StructuredNtfsAttribute<FileNameRecord> fnrAttr in file.GetAttributes(AttributeType.FileName))
+            {
+                if (nameRecord.Equals(fnrAttr.Content))
+                {
+                    file.RemoveAttribute(fnrAttr.Id);
+                }
+            }
+
+            file.HardLinkCount--;
+            file.UpdateRecordInMft();
+
+            Modified();
+            UpdateRecordInMft();
+        }
+
         internal static Directory CreateNew(INtfsContext fileSystem)
         {
             DateTime now = DateTime.UtcNow;
@@ -112,7 +140,7 @@ namespace DiscUtils.Ntfs
             dir.SetAttributeContent(attrId, si);
 
             // Create the index root attribute by instantiating a new index
-            Ntfs.Index.Create(AttributeType.FileName, AttributeCollationRule.Filename, dir, "$I30");
+            dir.CreateIndex("$I30", AttributeType.FileName, AttributeCollationRule.Filename);
 
             dir.UpdateRecordInMft();
 
@@ -140,13 +168,13 @@ namespace DiscUtils.Ntfs
             return base.ToString() + @"\";
         }
 
-        private Index<FileNameRecord, FileReference> Index
+        private IndexView<FileNameRecord, FileReference> Index
         {
             get
             {
                 if (_index == null && GetAttribute(AttributeType.IndexRoot, "$I30") != null)
                 {
-                    _index = new Index<FileNameRecord, FileReference>(this, "$I30", _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
+                    _index = new IndexView<FileNameRecord, FileReference>(GetIndex("$I30"));
                 }
 
                 return _index;

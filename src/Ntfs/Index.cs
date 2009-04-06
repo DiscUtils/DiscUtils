@@ -21,14 +21,13 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace DiscUtils.Ntfs
 {
-    internal class Index : IDictionary<byte[], byte[]>
+    internal class Index
     {
         protected File _file;
         protected string _name;
@@ -119,16 +118,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public KeyValuePair<byte[], byte[]> FindFirst(IComparable<byte[]> query)
-        {
-            foreach (var entry in FindAll(query))
-            {
-                return entry;
-            }
-
-            return new KeyValuePair<byte[], byte[]>();
-        }
-
         public IEnumerable<KeyValuePair<byte[],byte[]>> FindAll(IComparable<byte[]> query)
         {
             return from entry in FindAllIn(query, _rootNode)
@@ -140,6 +129,18 @@ namespace DiscUtils.Ntfs
             Index idx = new Index(attrType, collationRule, file, name, file.FileSystem.BiosParameterBlock, file.FileSystem.UpperCase);
 
             idx.WriteRootNodeToDisk();
+        }
+
+        internal bool ShrinkRoot()
+        {
+            if (_rootNode.Depose())
+            {
+                WriteRootNodeToDisk();
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace;
+                return true;
+            }
+
+            return false;
         }
 
         internal bool IsFileIndex
@@ -185,6 +186,13 @@ namespace DiscUtils.Ntfs
             IndexBlock block = IndexBlock.Initialize(this, parentNode, parentEntry, _bpb);
             _blockCache[parentEntry.ChildrenVirtualCluster] = block;
             return block;
+        }
+
+        internal void FreeBlock(long vcn)
+        {
+            long idx = vcn / Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
+            _indexBitmap.MarkAbsent(idx);
+            _blockCache.Remove(vcn);
         }
 
         internal int Compare(byte[] x, byte[] y)
@@ -272,8 +280,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        #region IDictionary<byte[],byte[]> Members
-
         public byte[] this[byte[] key]
         {
             get
@@ -293,6 +299,7 @@ namespace DiscUtils.Ntfs
             {
                 IndexEntry oldEntry;
                 IndexNode node;
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace;
                 if (_rootNode.TryFindEntry(key, out oldEntry, out node))
                 {
                     node.UpdateEntry(key, value);
@@ -304,31 +311,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public ICollection<byte[]> Keys
-        {
-            get
-            {
-                IEnumerable<byte[]> keys = from entry in Entries
-                                           select entry.Key;
-                return new List<byte[]>(keys);
-            }
-        }
-
-        public ICollection<byte[]> Values
-        {
-            get
-            {
-                IEnumerable<byte[]> values = from entry in Entries
-                                             select entry.Value;
-                return new List<byte[]>(values);
-            }
-        }
-
-        public void Add(byte[] key, byte[] value)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool ContainsKey(byte[] key)
         {
             byte[] value;
@@ -337,7 +319,8 @@ namespace DiscUtils.Ntfs
 
         public bool Remove(byte[] key)
         {
-            throw new NotImplementedException();
+            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace;
+            return _rootNode.RemoveEntry(key);
         }
 
         public bool TryGetValue(byte[] key, out byte[] value)
@@ -359,29 +342,10 @@ namespace DiscUtils.Ntfs
             return false;
         }
 
-        #endregion
-
-        #region ICollection<KeyValuePair<byte[],byte[]>> Members
-
-        public void Add(KeyValuePair<byte[], byte[]> item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
         public bool Contains(KeyValuePair<byte[], byte[]> item)
         {
             byte[] value;
             return TryGetValue(item.Key, out value);
-        }
-
-        public void CopyTo(KeyValuePair<byte[], byte[]>[] array, int arrayIndex)
-        {
-            throw new NotImplementedException();
         }
 
         public int Count
@@ -397,55 +361,100 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public bool IsReadOnly
+        internal void Dump(TextWriter writer, string prefix)
         {
-            get { return true; }
+            NodeAsString(writer, prefix, _rootNode, "R");
         }
 
-        public bool Remove(KeyValuePair<byte[], byte[]> item)
+        private void NodeAsString(TextWriter writer, string prefix, IndexNode node, string id)
         {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region IEnumerable<KeyValuePair<byte[],byte[]>> Members
-
-        public IEnumerator<KeyValuePair<byte[], byte[]>> GetEnumerator()
-        {
-            foreach (var entry in Entries)
+            writer.WriteLine(prefix + id + ":");
+            foreach (var entry in node.Entries)
             {
-                yield return entry;
+                if ((entry.Flags & IndexEntryFlags.End) != 0)
+                {
+                    writer.WriteLine(prefix + "      E");
+                }
+                else
+                {
+                    writer.WriteLine(prefix + "      " + EntryAsString(entry, _file.BestName, _name));
+                }
+                
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    NodeAsString(writer, prefix + "        ", GetSubBlock(node, entry).Node, ":i" + entry.ChildrenVirtualCluster);
+                }
             }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
+        internal static String EntryAsString(IndexEntry entry, string fileName, string indexName)
         {
-            return GetEnumerator();
+            IByteArraySerializable keyValue = null;
+            IByteArraySerializable dataValue = null;
+
+            // Try to guess the type of data in the key and data fields from the filename and index name
+            if (indexName == "$I30")
+            {
+                keyValue = new FileNameRecord();
+                dataValue = new FileReference();
+            }
+            else if (fileName == "$ObjId" && indexName == "$O")
+            {
+                keyValue = new ObjectIds.IndexKey();
+                dataValue = new ObjectIdRecord();
+            }
+            else if (fileName == "$Secure")
+            {
+                if (indexName == "$SII")
+                {
+                    keyValue = new SecurityDescriptors.IdIndexKey();
+                    dataValue = new SecurityDescriptors.IndexData();
+                }
+                else if (indexName == "$SDH")
+                {
+                    keyValue = new SecurityDescriptors.HashIndexKey();
+                    dataValue = new SecurityDescriptors.IndexData();
+                }
+            }
+
+            try
+            {
+                if (keyValue != null && dataValue != null)
+                {
+                    keyValue.ReadFrom(entry.KeyBuffer, 0);
+                    dataValue.ReadFrom(entry.DataBuffer, 0);
+                    return "{" + keyValue + "-->" + dataValue + "}";
+                }
+            }
+            catch
+            {
+            }
+
+            return "{Unknown-Index-Type}";
         }
-
-        #endregion
-
     }
 
-    internal class Index<K, D> : Index
+    internal class IndexView<K, D>
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
     {
-        public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
-            : base(file, name, bpb, upCase)
+        private Index _index;
+
+        public IndexView(Index index)
         {
+            _index = index;
         }
 
-        public new IEnumerable<KeyValuePair<K, D>> Entries
+        public int Count
+        {
+            get { return _index.Count; }
+        }
+
+        public IEnumerable<KeyValuePair<K, D>> Entries
         {
             get
             {
-                foreach (var entry in base.Entries)
+                foreach (var entry in _index.Entries)
                 {
                     yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
                 }
@@ -454,7 +463,7 @@ namespace DiscUtils.Ntfs
 
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
         {
-            foreach (var entry in FindAll(new ComparableConverter(query)))
+            foreach (var entry in _index.FindAll(new ComparableConverter(query)))
             {
                 yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
             }
@@ -474,18 +483,38 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return Convert<D>(base[Unconvert(key)]);
+                return Convert<D>(_index[Unconvert(key)]);
             }
 
             set
             {
-                base[Unconvert(key)] = Unconvert<D>(value);
+                _index[Unconvert(key)] = Unconvert<D>(value);
+            }
+        }
+
+        public bool TryGetValue(K key, out D data)
+        {
+            byte[] value;
+            if (_index.TryGetValue(Unconvert(key), out value))
+            {
+                data = Convert<D>(value);
+                return true;
+            }
+            else
+            {
+                data = default(D);
+                return false;
             }
         }
 
         public bool ContainsKey(K key)
         {
-            return base.ContainsKey(Unconvert(key));
+            return _index.ContainsKey(Unconvert(key));
+        }
+
+        public void Remove(K key)
+        {
+            _index.Remove(Unconvert(key));
         }
 
         private static T Convert<T>(byte[] data)

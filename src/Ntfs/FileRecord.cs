@@ -73,6 +73,7 @@ namespace DiscUtils.Ntfs
             _recordAllocatedSize = (uint)recordLength;
             _nextAttributeId = 1;
             _index = index;
+            _hardLinkCount = 0;
 
             _attributes = new List<AttributeRecord>();
             _haveIndex = true;
@@ -141,6 +142,21 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Removes an attribute by it's id.
+        /// </summary>
+        /// <param name="id">The attribute's id</param>
+        internal void RemoveAttribute(ushort id)
+        {
+            for (int i = 0; i < _attributes.Count; ++i)
+            {
+                if (_attributes[i].AttributeId == id)
+                {
+                    _attributes.RemoveAt(i);
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets an attribute by it's id.
         /// </summary>
         /// <param name="id">The attribute's id</param>
@@ -204,6 +220,15 @@ namespace DiscUtils.Ntfs
             }
 
             throw new InvalidOperationException("Attempt to create attribute by setting it");
+        }
+
+        internal void Reset()
+        {
+            _attributes.Clear();
+            _flags = FileRecordFlags.None;
+            _hardLinkCount = 0;
+            _nextAttributeId = 0;
+            _recordRealSize = 0;
         }
 
         protected override void Read(byte[] buffer, int offset)
@@ -318,6 +343,5 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "    Attribute Count: " + _attributes.Count);
             writer.WriteLine(indent + "   Index (Self Ref): " + _index);
         }
-
     }
 }

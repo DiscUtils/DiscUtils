@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
@@ -29,13 +28,13 @@ namespace DiscUtils.Ntfs
 {
     internal sealed class ObjectIds
     {
-        private Index<IndexKey, IndexData> _index;
+        private IndexView<IndexKey, ObjectIdRecord> _index;
         private File _file;
 
         public ObjectIds(File file)
         {
             _file = file;
-            _index = new Index<IndexKey, IndexData>(file, "$O", file.FileSystem.BiosParameterBlock, null);
+            _index = new IndexView<IndexKey, ObjectIdRecord>(file.GetIndex("$O"));
         }
 
         internal void Add(Guid objId, FileReference mftRef, Guid birthId, Guid birthVolumeId, Guid birthDomainId)
@@ -43,7 +42,7 @@ namespace DiscUtils.Ntfs
             IndexKey newKey = new IndexKey();
             newKey.Id = objId;
 
-            IndexData newData = new IndexData();
+            ObjectIdRecord newData = new ObjectIdRecord();
             newData.MftReference = mftRef;
             newData.BirthObjectId = birthId;
             newData.BirthVolumeId = birthVolumeId;
@@ -51,6 +50,23 @@ namespace DiscUtils.Ntfs
 
             _index[newKey] = newData;
             _file.UpdateRecordInMft();
+        }
+
+        internal void Remove(Guid objId)
+        {
+            IndexKey key = new IndexKey();
+            key.Id = objId;
+
+            _index.Remove(key);
+            _file.UpdateRecordInMft();
+        }
+
+        internal bool TryGetValue(Guid objId, out ObjectIdRecord value)
+        {
+            IndexKey key = new IndexKey();
+            key.Id = objId;
+
+            return _index.TryGetValue(key, out value);
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -90,42 +106,6 @@ namespace DiscUtils.Ntfs
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Id:{0}]", Id);
-            }
-        }
-
-        internal sealed class IndexData : IByteArraySerializable
-        {
-            public FileReference MftReference;
-            public Guid BirthVolumeId;
-            public Guid BirthObjectId;
-            public Guid BirthDomainId;
-
-            public void ReadFrom(byte[] buffer, int offset)
-            {
-                MftReference = new FileReference();
-                MftReference.ReadFrom(buffer, offset);
-
-                BirthVolumeId = Utilities.ToGuidLittleEndian(buffer, offset + 0x08);
-                BirthObjectId = Utilities.ToGuidLittleEndian(buffer, offset + 0x18);
-                BirthDomainId = Utilities.ToGuidLittleEndian(buffer, offset + 0x28);
-            }
-
-            public void WriteTo(byte[] buffer, int offset)
-            {
-                MftReference.WriteTo(buffer, offset);
-                Utilities.WriteBytesLittleEndian(BirthVolumeId, buffer, offset + 0x08);
-                Utilities.WriteBytesLittleEndian(BirthObjectId, buffer, offset + 0x18);
-                Utilities.WriteBytesLittleEndian(BirthDomainId, buffer, offset + 0x28);
-            }
-
-            public int Size
-            {
-                get { return 0x38; }
-            }
-
-            public override string ToString()
-            {
-                return string.Format(CultureInfo.InvariantCulture, "[Data-MftRef:{0},BirthVolId:{1},BirthObjId:{2},BirthDomId:{3}]", MftReference, BirthVolumeId, BirthObjectId, BirthDomainId);
             }
         }
     }

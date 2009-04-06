@@ -150,11 +150,16 @@ namespace DiscUtils.Ntfs
             //
             VerifyDirectories();
 
-
             //-----------------------------------------------------------------------
             // WELL KNOWN FILES
             //
-            VerifyWellKnownFiles();
+            VerifyWellKnownFilesExist();
+
+            //-----------------------------------------------------------------------
+            // OBJECT IDS
+            //
+            VerifyObjectIds();
+
 
             //-----------------------------------------------------------------------
             // FINISHED
@@ -170,7 +175,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private void VerifyWellKnownFiles()
+        private void VerifyWellKnownFilesExist()
         {
             Directory rootDir = new Directory(_context, _context.Mft.GetRecord(MasterFileTable.RootDirIndex, false));
 
@@ -189,6 +194,9 @@ namespace DiscUtils.Ntfs
                 Abort();
             }
 
+            // Stash ObjectIds
+            _context.ObjectIds = new ObjectIds(new File(_context, _context.Mft.GetRecord(objIdDirEntry.Reference)));
+
             DirectoryEntry sysVolInfDirEntry = rootDir.GetEntryByName("System Volume Information");
             if (sysVolInfDirEntry == null)
             {
@@ -196,6 +204,28 @@ namespace DiscUtils.Ntfs
                 Abort();
             }
             //Directory sysVolInfDir = new Directory(_context, _context.Mft.GetRecord(sysVolInfDirEntry.Reference));
+        }
+
+        private void VerifyObjectIds()
+        {
+            foreach (FileRecord fr in _context.Mft.Records)
+            {
+                File f = new File(_context, fr);
+                foreach (var attr in f.GetAttributes(AttributeType.ObjectId))
+                {
+                    ObjectId objId = f.GetAttributeContent<ObjectId>(attr.Id);
+                    ObjectIdRecord objIdRec;
+                    if (!_context.ObjectIds.TryGetValue(objId.Id, out objIdRec))
+                    {
+                        ReportError("ObjectId {0} for file {1} is not indexed", objId.Id, f.BestName);
+                    }
+                    else if(objIdRec.MftReference != f.MftReference)
+                    {
+                        ReportError("ObjectId {0} for file {1} points to {2}", objId.Id, f.BestName, objIdRec.MftReference);
+                    }
+                }
+
+            }
         }
 
         private void VerifyDirectories()
@@ -207,7 +237,7 @@ namespace DiscUtils.Ntfs
                 {
                     if (attr.Record.AttributeType == AttributeType.IndexRoot && attr.Record.Name == "$I30")
                     {
-                        Index<FileNameRecord, FileReference> dir = new Index<FileNameRecord, FileReference>(f, "$I30", _context.BiosParameterBlock, _context.UpperCase);
+                        IndexView<FileNameRecord, FileReference> dir = new IndexView<FileNameRecord, FileReference>(f.GetIndex("$I30"));
                         foreach (var entry in dir.Entries)
                         {
                             // Make sure each referenced file actually exists...
@@ -283,10 +313,10 @@ namespace DiscUtils.Ntfs
 
                 if((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    long bitmapIdx = entry.ChildrenVirtualCluster / root.IndexAllocationSize;
+                    long bitmapIdx = entry.ChildrenVirtualCluster / Utilities.Ceil(root.IndexAllocationSize, _context.BiosParameterBlock.SectorsPerCluster * _context.BiosParameterBlock.BytesPerSector);
                     if(!bitmap.IsPresent(bitmapIdx))
                     {
-                        ReportError("Index entry {0} is non-leaf, but child vcn {1} is not in bitmap at index {2}", IndexEntryToString(entry, fileName, indexName), entry.ChildrenVirtualCluster, bitmapIdx);
+                        ReportError("Index entry {0} is non-leaf, but child vcn {1} is not in bitmap at index {2}", Index.EntryAsString(entry, fileName, indexName), entry.ChildrenVirtualCluster, bitmapIdx);
                     }
                 }
 
@@ -294,14 +324,14 @@ namespace DiscUtils.Ntfs
                 {
                     if (pos != header.TotalSizeOfEntries)
                     {
-                        ReportError("Found END index entry {0}, but not at end of node", IndexEntryToString(entry, fileName, indexName));
+                        ReportError("Found END index entry {0}, but not at end of node", Index.EntryAsString(entry, fileName, indexName));
                         ok = false;
                     }
                 }
 
                 if (lastEntry != null && collator.Compare(lastEntry.KeyBuffer, entry.KeyBuffer) >= 0)
                 {
-                    ReportError("Found entries out of order {0} was before {1}", IndexEntryToString(lastEntry, fileName, indexName), IndexEntryToString(entry, fileName, indexName));
+                    ReportError("Found entries out of order {0} was before {1}", Index.EntryAsString(lastEntry, fileName, indexName), Index.EntryAsString(entry, fileName, indexName));
                     ok = false;
                 }
 
@@ -312,52 +342,6 @@ namespace DiscUtils.Ntfs
             return ok;
         }
 
-        private static String IndexEntryToString(IndexEntry entry, string fileName, string indexName)
-        {
-            IByteArraySerializable keyValue = null;
-            IByteArraySerializable dataValue = null;
-
-            // Try to guess the type of data in the key and data fields from the filename and index name
-            if (indexName == "$I30")
-            {
-                keyValue = new FileNameRecord();
-                dataValue = new FileReference();
-            }
-            else if (fileName == "$ObjId" && indexName == "$O")
-            {
-                keyValue = new ObjectIds.IndexKey();
-                dataValue = new ObjectIds.IndexData();
-            }
-            else if (fileName == "$Secure")
-            {
-                if (indexName == "$SII")
-                {
-                    keyValue = new SecurityDescriptors.IdIndexKey();
-                    dataValue = new SecurityDescriptors.IndexData();
-                }
-                else if (indexName == "$SDH")
-                {
-                    keyValue = new SecurityDescriptors.HashIndexKey();
-                    dataValue = new SecurityDescriptors.IndexData();
-                }
-            }
-
-            try
-            {
-                if (keyValue != null && dataValue != null)
-                {
-                    keyValue.ReadFrom(entry.KeyBuffer, 0);
-                    dataValue.ReadFrom(entry.DataBuffer, 0);
-                }
-
-                return "{" + keyValue.ToString() + "-->" + dataValue.ToString() + "}";
-            }
-            catch
-            {
-            }
-
-            return "{Unknown-Index-Type}";
-        }
 
         private void PreVerifyMft(File file)
         {

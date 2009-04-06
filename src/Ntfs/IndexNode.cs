@@ -190,16 +190,20 @@ namespace DiscUtils.Ntfs
             return IndexHeader.Size;
         }
 
-        public virtual int CalcSize()
+        public int CalcEntriesSize()
         {
             int totalEntriesSize = 0;
             foreach (var entry in _entries)
             {
                 totalEntriesSize += entry.Size;
             }
+            return totalEntriesSize;
+        }
 
+        public virtual int CalcSize()
+        {
             int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
-            return firstEntryOffset + totalEntriesSize;
+            return firstEntryOffset + CalcEntriesSize();
         }
 
         private long SpaceFree
@@ -271,12 +275,162 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public bool RemoveEntry(byte[] key)
+        {
+            for (int i = 0; i < _entries.Count; ++i)
+            {
+                var focus = _entries[i];
+                int compVal;
+
+                if ((focus.Flags & IndexEntryFlags.End) != 0)
+                {
+                    // No value when End flag is set.  Logically these nodes always
+                    // compare 'bigger', so if there are children we'll visit them.
+                    compVal = -1;
+                }
+                else
+                {
+                    compVal = _index.Compare(key, focus.KeyBuffer);
+                }
+
+                if (compVal == 0)
+                {
+                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        IndexNode childNode = _index.GetSubBlock(this, focus).Node;
+                        IndexEntry biggestLeaf = childNode.FindBiggestLeaf();
+
+                        childNode.RemoveEntry(biggestLeaf.KeyBuffer);
+
+                        // Just over-write our key & data with the replacement
+                        focus.KeyBuffer = biggestLeaf.KeyBuffer;
+                        focus.DataBuffer = biggestLeaf.DataBuffer;
+                    }
+                    else
+                    {
+                        _entries.RemoveAt(i);
+                    }
+
+                    Rebalance();
+
+                    _store();
+                    return true;
+                }
+                else if (compVal < 0)
+                {
+                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        IndexNode childNode = _index.GetSubBlock(this, focus).Node;
+                        if (childNode.RemoveEntry(key))
+                        {
+                            Rebalance();
+                            _store();
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool Rebalance()
+        {
+            bool result = false;
+
+            for (int i = 0; i < _entries.Count; ++i)
+            {
+                var focus = _entries[i];
+                if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexNode childNode = _index.GetSubBlock(this, focus).Node;
+                    if (childNode.CalcEntriesSize() <= SpaceFree)
+                    {
+                        Merge(childNode, focus);
+                        result = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private IndexEntry FindBiggestLeaf()
+        {
+            if ((_entries[_entries.Count - 1].Flags & IndexEntryFlags.Node)!=0)
+            {
+                // If the end-node has children, the leaf is in the children
+                return _index.GetSubBlock(this, _entries[_entries.Count - 1]).Node.FindBiggestLeaf();
+            }
+            else
+            {
+                return _entries[_entries.Count - 2];
+            }
+        }
+
+        /// <summary>
+        /// Merges the contents of a child node into this node.
+        /// </summary>
+        private void Merge(IndexNode childNode, IndexEntry focus)
+        {
+            long targetVcn = focus.ChildrenVirtualCluster;
+
+            foreach(IndexEntry childEntry in childNode._entries)
+            {
+                if ((childEntry.Flags & IndexEntryFlags.End) == 0)
+                {
+                    AddEntry(childEntry, true);
+                }
+                else
+                {
+                    if ((childEntry.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        focus.ChildrenVirtualCluster = childEntry.ChildrenVirtualCluster;
+                    }
+                    else
+                    {
+                        focus.Flags &= ~IndexEntryFlags.Node;
+                        focus.ChildrenVirtualCluster = 0;
+                    }
+                }
+            }
+
+            // All of the nodes that used to be one layer beneath us, are now peers,
+            // they need their parent pointers updating.
+            foreach (var entry in childNode._entries)
+            {
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexBlock block = _index.GetSubBlockIfCached(this, entry);
+                    if (block != null)
+                    {
+                        block.Node._parent = this;
+                    }
+                }
+            }
+
+            _index.FreeBlock(targetVcn);
+        }
+
         /// <summary>
         /// Only valid on the root node, this method moves all entries into a
         /// single child node.
         /// </summary>
-        private void Depose()
+        internal bool Depose()
         {
+            if (_parent != null)
+            {
+                throw new InvalidOperationException("Only valid on root node");
+            }
+
+            if (_entries.Count == 1)
+            {
+                return false;
+            }
+
             IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
             newRootEntry.Flags = IndexEntryFlags.End;
 
@@ -299,6 +453,8 @@ namespace DiscUtils.Ntfs
 
             _entries.Clear();
             _entries.Add(newRootEntry);
+
+            return true;
         }
 
         /// <summary>
@@ -375,6 +531,5 @@ namespace DiscUtils.Ntfs
             // Persist the new entries to disk
             _store();
         }
-
     }
 }

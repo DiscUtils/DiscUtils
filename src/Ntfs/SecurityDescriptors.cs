@@ -31,14 +31,14 @@ namespace DiscUtils.Ntfs
     internal sealed class SecurityDescriptors : IDiagnosticTraceable
     {
         private File _file;
-        private Index<HashIndexKey, IndexData> _hashIndex;
-        private Index<IdIndexKey, IndexData> _idIndex;
+        private IndexView<HashIndexKey, IndexData> _hashIndex;
+        private IndexView<IdIndexKey, IndexData> _idIndex;
 
         public SecurityDescriptors(File file)
         {
             _file = file;
-            _hashIndex = new Index<HashIndexKey, IndexData>(file, "$SDH", _file.FileSystem.BiosParameterBlock, null);
-            _idIndex = new Index<IdIndexKey, IndexData>(file, "$SII", _file.FileSystem.BiosParameterBlock, null);
+            _hashIndex = new IndexView<HashIndexKey, IndexData>(file.GetIndex("$SDH"));
+            _idIndex = new IndexView<IdIndexKey, IndexData>(file.GetIndex("$SII"));
         }
 
         public FileSecurity GetDescriptorById(uint id)

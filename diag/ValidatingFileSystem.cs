@@ -705,7 +705,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The path of the directory to delete.</param>
         public override void DeleteDirectory(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.DeleteDirectory(path);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -714,7 +720,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The path of the file to delete.</param>
         public override void DeleteFile(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.DeleteFile(path);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -754,7 +766,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of directories.</returns>
         public override string[] GetDirectories(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetDirectories(path);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>
@@ -766,7 +783,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetDirectories(path, searchPattern);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>
@@ -779,7 +801,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetDirectories(path, searchPattern, searchOption);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>
@@ -805,7 +832,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFiles(path, searchPattern);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>
@@ -818,7 +850,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFiles(path, searchPattern, searchOption);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace DiscUtils.Ntfs
     internal delegate Directory GetDirectoryByIndexFn(long index);
     internal delegate Directory GetDirectoryByRefFn(FileReference reference);
     internal delegate File AllocateFileFn(FileRecordFlags flags);
+    internal delegate void DeleteFileFn(File file);
 
     internal interface INtfsContext
     {
@@ -77,7 +78,12 @@ namespace DiscUtils.Ntfs
             get;
         }
 
-        GetFileByIndexFn GetFile
+        GetFileByIndexFn GetFileByIndex
+        {
+            get;
+        }
+
+        GetFileByRefFn GetFileByRef
         {
             get;
         }
@@ -87,12 +93,17 @@ namespace DiscUtils.Ntfs
             get;
         }
 
-        GetDirectoryByRefFn GetDirectory
+        GetDirectoryByRefFn GetDirectoryByRef
         {
             get;
         }
 
         AllocateFileFn AllocateFile
+        {
+            get;
+        }
+
+        DeleteFileFn DeleteFile
         {
             get;
         }
@@ -110,9 +121,11 @@ namespace DiscUtils.Ntfs
         private ObjectIds _objectIds;
         private NtfsOptions _options;
         private GetFileByIndexFn _getFileByIndexFn;
+        private GetFileByRefFn _getFileByRefFn;
         private GetDirectoryByIndexFn _getDirByIndexFn;
         private GetDirectoryByRefFn _getDirByRefFn;
         private AllocateFileFn _allocateFileFn;
+        private DeleteFileFn _deleteFileFn;
 
         public Stream RawStream
         {
@@ -168,10 +181,16 @@ namespace DiscUtils.Ntfs
             set { _options = value; }
         }
 
-        public GetFileByIndexFn GetFile
+        public GetFileByIndexFn GetFileByIndex
         {
             get { return _getFileByIndexFn; }
             set { _getFileByIndexFn = value; }
+        }
+
+        public GetFileByRefFn GetFileByRef
+        {
+            get { return _getFileByRefFn; }
+            set { _getFileByRefFn = value; }
         }
 
         public GetDirectoryByIndexFn GetDirectoryByIndex
@@ -180,7 +199,7 @@ namespace DiscUtils.Ntfs
             set { _getDirByIndexFn = value; }
         }
 
-        public GetDirectoryByRefFn GetDirectory
+        public GetDirectoryByRefFn GetDirectoryByRef
         {
             get { return _getDirByRefFn; }
             set { _getDirByRefFn = value; }
@@ -190,6 +209,12 @@ namespace DiscUtils.Ntfs
         {
             get { return _allocateFileFn; }
             set { _allocateFileFn = value; }
+        }
+
+        public DeleteFileFn DeleteFile
+        {
+            get { return _deleteFileFn; }
+            set { _deleteFileFn = value; }
         }
     }
 }

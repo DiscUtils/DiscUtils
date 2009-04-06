@@ -73,11 +73,13 @@ namespace DiscUtils.Ntfs
         public byte[] KeyBuffer
         {
             get { return _keyBuffer; }
+            set { _keyBuffer = value; }
         }
 
         public byte[] DataBuffer
         {
             get { return _dataBuffer; }
+            set { _dataBuffer = value; }
         }
 
         public virtual void Read(byte[] buffer, int offset)

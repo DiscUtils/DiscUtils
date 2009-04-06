@@ -33,6 +33,7 @@ namespace DiscUtils.Ntfs
         private MasterFileTable _mft;
         private FileRecord _baseRecord;
         private ObjectCache<ushort, NtfsAttribute> _attributeCache;
+        private ObjectCache<string, Index> _indexCache;
 
         private bool _baseRecordDirty;
 
@@ -42,6 +43,7 @@ namespace DiscUtils.Ntfs
             _mft = _fileSystem.Mft;
             _baseRecord = baseRecord;
             _attributeCache = new ObjectCache<ushort, NtfsAttribute>();
+            _indexCache = new ObjectCache<string, Index>();
         }
 
         public uint IndexInMft
@@ -64,9 +66,9 @@ namespace DiscUtils.Ntfs
             get { return _baseRecord.UpdateSequenceNumber; }
         }
 
-        public uint MftRecordFreeSpace
+        public int MftRecordFreeSpace
         {
-            get { return _baseRecord.AllocatedSize - _baseRecord.RealSize; }
+            get { return _mft.RecordSize - _baseRecord.Size; }
         }
 
         public void Modified()
@@ -149,13 +151,11 @@ namespace DiscUtils.Ntfs
                     {
                         foreach (var attr in _baseRecord.Attributes)
                         {
-                            if (attr.AttributeType == AttributeType.IndexRoot && GetAttribute(AttributeType.IndexAllocation, attr.Name) == null)
+                            if (attr.AttributeType == AttributeType.IndexRoot
+                                && ShrinkIndexRoot(attr.Name))
                             {
-                                if (MakeIndexNonResident(attr.Name))
-                                {
-                                    fixedAttribute = true;
-                                    break;
-                                }
+                                fixedAttribute = true;
+                                break;
                             }
                         }
                     }
@@ -172,9 +172,9 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private bool MakeIndexNonResident(string name)
+        private bool ShrinkIndexRoot(string indexName)
         {
-            NtfsAttribute attr = GetAttribute(AttributeType.IndexAllocation, name);
+            NtfsAttribute attr = GetAttribute(AttributeType.IndexRoot, indexName);
 
             // Nothing to win, can't make IndexRoot smaller than this
             // 8 = min size of entry that points to IndexAllocation...
@@ -183,13 +183,33 @@ namespace DiscUtils.Ntfs
                 return false;
             }
 
-            throw new NotImplementedException();
+            Index idx = GetIndex(indexName);
+            return idx.ShrinkRoot();
         }
 
         public ushort HardLinkCount
         {
             get { return _baseRecord.HardLinkCount; }
             set { _baseRecord.HardLinkCount = value; }
+        }
+
+        public Index CreateIndex(string name, AttributeType attrType, AttributeCollationRule collRule)
+        {
+            Index.Create(attrType, collRule, this, name);
+            return GetIndex(name);
+        }
+
+        public Index GetIndex(string name)
+        {
+            Index idx = _indexCache[name];
+
+            if (idx == null)
+            {
+                idx = new Index(this, name, _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
+                _indexCache[name] = idx;
+            }
+
+            return idx;
         }
 
         /// <summary>
@@ -217,6 +237,26 @@ namespace DiscUtils.Ntfs
             return id;
         }
 
+        public void RemoveAttribute(ushort id)
+        {
+            NtfsAttribute attr = GetAttribute(id);
+            if (attr != null)
+            {
+                if (attr.Record.AttributeType == AttributeType.IndexRoot)
+                {
+                    _indexCache.Remove(attr.Record.Name);
+                }
+
+                using (Stream s = new FileAttributeStream(this, id, FileAccess.Write))
+                {
+                    s.SetLength(0);
+                }
+
+                _baseRecord.RemoveAttribute(id);
+                _attributeCache.Remove(id);
+            }
+        }
+
         /// <summary>
         /// Gets an attribute by it's id.
         /// </summary>
@@ -242,6 +282,18 @@ namespace DiscUtils.Ntfs
         public NtfsAttribute GetAttribute(AttributeType type)
         {
             return GetAttribute(type, null);
+        }
+
+        /// <summary>
+        /// Gets the content of an attribute.
+        /// </summary>
+        /// <typeparam name="T">The attribute's content structure</typeparam>
+        /// <param name="id">The attribute's id</param>
+        /// <returns>The attribute, or <c>null</c>.</returns>
+        public T GetAttributeContent<T>(ushort id)
+            where T : IByteArraySerializable, IDiagnosticTraceable, new()
+        {
+            return new StructuredNtfsAttribute<T>(this, GetAttribute(id).Record).Content;
         }
 
         /// <summary>
@@ -505,7 +557,7 @@ namespace DiscUtils.Ntfs
                     record.Flags |= FileAttributeFlags.Directory;
                 }
 
-                return new DirectoryEntry(_fileSystem.GetDirectory(record.ParentDirectory), MftReference, record);
+                return new DirectoryEntry(_fileSystem.GetDirectoryByRef(record.ParentDirectory), MftReference, record);
             }
         }
 
@@ -635,6 +687,28 @@ namespace DiscUtils.Ntfs
             newFile.UpdateRecordInMft();
 
             return newFile;
+        }
+
+        internal void Delete()
+        {
+            if (_baseRecord.HardLinkCount != 0)
+            {
+                throw new InvalidOperationException("Attempt to delete in-use file: " + ToString());
+            }
+
+            StructuredNtfsAttribute<ObjectId> objIdAttr = (StructuredNtfsAttribute<ObjectId>)GetAttribute(AttributeType.ObjectId);
+            if (objIdAttr != null)
+            {
+                FileSystem.ObjectIds.Remove(objIdAttr.Content.Id);
+            }
+
+            List<NtfsAttribute> attrs = new List<NtfsAttribute>(AllAttributes);
+            foreach (var attr in attrs)
+            {
+                RemoveAttribute(attr.Id);
+            }
+
+            _fileSystem.DeleteFile(this);
         }
 
         private static Guid CreateNewGuid(INtfsContext fileSystem)

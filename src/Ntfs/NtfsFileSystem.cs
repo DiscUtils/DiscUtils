@@ -53,10 +53,12 @@ namespace DiscUtils.Ntfs
             _context.RawStream = stream;
             _context.Options = NtfsOptions;
 
-            _context.GetFile = GetFile;
-            _context.GetDirectory = GetDirectory;
+            _context.GetFileByIndex = GetFile;
+            _context.GetFileByRef = GetFile;
+            _context.GetDirectoryByRef = GetDirectory;
             _context.GetDirectoryByIndex = GetDirectory;
             _context.AllocateFile = AllocateFile;
+            _context.DeleteFile = DeleteFile;
 
             _fileCache = new ObjectCache<long, File>();
 
@@ -181,7 +183,36 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path of the directory to delete.</param>
         public override void DeleteDirectory(string path)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new IOException("Unable to delete root directory");
+            }
+
+            string parent = Path.GetDirectoryName(path);
+
+            DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
+            if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+            {
+                throw new DirectoryNotFoundException("No such directory: " + path);
+            }
+            Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+            DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
+            if ((dirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+            {
+                throw new DirectoryNotFoundException("No such directory: " + path);
+            }
+
+            FileReference fileRef = dirEntry.Reference;
+            Directory dir = GetDirectory(fileRef);
+
+            if (!dir.IsEmpty)
+            {
+                throw new IOException("Unable to delete non-empty directory");
+            }
+
+            parentDir.RemoveEntry(dirEntry);
+            dir.Delete();
         }
 
         /// <summary>
@@ -190,7 +221,25 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path of the file to delete.</param>
         public override void DeleteFile(string path)
         {
-            throw new NotImplementedException();
+            string parent = Path.GetDirectoryName(path);
+
+            DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
+            if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+            {
+                throw new FileNotFoundException("No such file", path);
+            }
+            Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+            DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("No such file", path);
+            }
+
+            File file = GetFile(dirEntry.Reference);
+
+            parentDir.RemoveEntry(dirEntry);
+            file.Delete();
         }
 
         /// <summary>
@@ -766,6 +815,17 @@ namespace DiscUtils.Ntfs
             return result;
         }
 
+        internal void DeleteFile(File file)
+        {
+            if (file.HardLinkCount != 0)
+            {
+                throw new InvalidOperationException("Attempt to delete an in-use file");
+            }
+
+            _context.Mft.RemoveRecord(file.MftReference);
+            _fileCache.Remove(file.IndexInMft);
+        }
+
         #endregion
 
         /// <summary>
@@ -778,7 +838,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(linePrefix + "NTFS File System Dump");
             writer.WriteLine(linePrefix + "=====================");
 
-            _context.Mft.Dump(writer, linePrefix);
+            //_context.Mft.Dump(writer, linePrefix);
 
             writer.WriteLine(linePrefix);
             _context.SecurityDescriptors.Dump(writer, linePrefix);
@@ -796,6 +856,15 @@ namespace DiscUtils.Ntfs
                 // Don't go through cache - these are short-lived, and this is (just!) diagnostics
                 File f = new File(_context, record);
                 f.Dump(writer, linePrefix);
+
+                foreach (var attr in f.AllAttributes)
+                {
+                    if (attr.Record.AttributeType == AttributeType.IndexRoot)
+                    {
+                        writer.WriteLine(linePrefix + "  INDEX (" + attr.Name + ")");
+                        f.GetIndex(attr.Name).Dump(writer, linePrefix + "    ");
+                    }
+                }
             }
 
             writer.WriteLine(linePrefix);

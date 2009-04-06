@@ -57,6 +57,11 @@ namespace DiscUtils
             return _entries.ContainsKey(key);
         }
 
+        internal void Remove(K key)
+        {
+            _entries.Remove(key);
+        }
+
         #region IEnumerable<V> Members
 
         public IEnumerator<V> GetEnumerator()

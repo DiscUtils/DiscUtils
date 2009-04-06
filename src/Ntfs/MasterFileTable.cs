@@ -142,7 +142,7 @@ namespace DiscUtils.Ntfs
             {
                 if (_mirror == null)
                 {
-                    _mirror = _self.FileSystem.GetFile(MftMirrorIndex);
+                    _mirror = _self.FileSystem.GetFileByIndex(MftMirrorIndex);
                 }
                 return _mirror;
             }
@@ -191,6 +191,16 @@ namespace DiscUtils.Ntfs
             WriteRecord(newRecord);
             _self.UpdateRecordInMft();
             return newRecord;
+        }
+
+        public void RemoveRecord(FileReference fileRef)
+        {
+            FileRecord record = GetRecord(fileRef.MftIndex, false);
+            record.Reset();
+            WriteRecord(record);
+
+            _bitmap.MarkAbsent(fileRef.MftIndex);
+            _self.UpdateRecordInMft();
         }
 
         public FileRecord GetRecord(FileReference fileReference)
@@ -243,15 +253,9 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[_recordLength];
             record.ToBytes(buffer, 0);
 
-            long len = _records.Length;
-
             _records.Position = record.MasterFileTableIndex * _recordLength;
             _records.Write(buffer, 0, _recordLength);
             _records.Flush();
-
-            if (_records.Length != len)
-            {
-            }
 
             // We may have modified our own meta-data by extending the data stream, so
             // (carefully) make sure our records are up-to-date.
@@ -321,6 +325,5 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
-
     }
 }

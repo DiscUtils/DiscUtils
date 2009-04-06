@@ -55,7 +55,7 @@ namespace DiscUtils.Ntfs
         Win32AndDos = 3
     }
 
-    internal class FileNameRecord : IByteArraySerializable, IDiagnosticTraceable
+    internal class FileNameRecord : IByteArraySerializable, IDiagnosticTraceable, IEquatable<FileNameRecord>
     {
         public FileReference ParentDirectory;
         public DateTime CreationTime;
@@ -174,5 +174,21 @@ namespace DiscUtils.Ntfs
             }
             return result;
         }
+
+        #region IEquatable<FileNameRecord> Members
+
+        public bool Equals(FileNameRecord other)
+        {
+            if(other == null)
+            {
+                return false;
+            }
+
+            return ParentDirectory == other.ParentDirectory
+                && FileNameNamespace == other.FileNameNamespace
+                && FileName == other.FileName;
+        }
+
+        #endregion
     }
 }
