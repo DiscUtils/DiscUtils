@@ -73,12 +73,13 @@ namespace DiscUtils
             set
             {
                 _position = value;
+                _atEof = false;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_atEof || _position > _length)
+            if (_position > _length)
             {
                 _atEof = true;
                 throw new IOException("Attempt to read beyond end of stream");
@@ -86,8 +87,15 @@ namespace DiscUtils
 
             if (_position == _length)
             {
-                _atEof = true;
-                return 0;
+                if (_atEof)
+                {
+                    throw new IOException("Attempt to read beyond end of stream");
+                }
+                else
+                {
+                    _atEof = true;
+                    return 0;
+                }
             }
 
             int numToClear = (int)Math.Min(count, _length - _position);
