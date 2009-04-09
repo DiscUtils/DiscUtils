@@ -54,6 +54,11 @@ namespace DiscUtils.Vmdk
         {
             CheckDisposed();
 
+            if (_position + count > Length)
+            {
+                throw new IOException("Attempt to write beyond end of stream");
+            }
+
             int totalWritten = 0;
             while (totalWritten < count)
             {
@@ -81,6 +86,7 @@ namespace DiscUtils.Vmdk
                 _position += numToWrite;
                 totalWritten += numToWrite;
             }
+            _atEof = _position == Length;
         }
 
         private void AllocateGrain(int grainTable, int grain)

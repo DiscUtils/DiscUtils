@@ -88,6 +88,12 @@ namespace DiscUtils.Vmdk
                 throw new InvalidOperationException("Cannot write to this stream");
             }
 
+            if (_position + count > Length)
+            {
+                throw new IOException("Attempt to write beyond end of stream");
+            }
+
+
             int totalWritten = 0;
             while (totalWritten < count)
             {
@@ -112,6 +118,8 @@ namespace DiscUtils.Vmdk
                 _position += numToWrite;
                 totalWritten += numToWrite;
             }
+
+            _atEof = _position == Length;
         }
 
         protected override int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)

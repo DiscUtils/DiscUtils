@@ -90,6 +90,10 @@ namespace DiscUtils.Vmdk
         /// </summary>
         protected long _position;
 
+        /// <summary>
+        /// Indicator to whether end-of-stream has been reached.
+        /// </summary>
+        protected bool _atEof;
 
         protected override void Dispose(bool disposing)
         {
@@ -168,12 +172,32 @@ namespace DiscUtils.Vmdk
             {
                 CheckDisposed();
                 _position = value;
+                _atEof = false;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
+
+            if (_position > Length)
+            {
+                _atEof = true;
+                throw new IOException("Attempt to read beyond end of stream");
+            }
+
+            if (_position == Length)
+            {
+                if (_atEof)
+                {
+                    throw new IOException("Attempt to read beyond end of stream");
+                }
+                else
+                {
+                    _atEof = true;
+                    return 0;
+                }
+            }
 
             int totalRead = 0;
             int numRead;
@@ -238,6 +262,8 @@ namespace DiscUtils.Vmdk
             {
                 effectiveOffset += _header.Capacity * Sizes.Sector;
             }
+
+            _atEof = false;
 
             if (offset < 0)
             {
