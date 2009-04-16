@@ -240,10 +240,20 @@ namespace DiscUtils.Ntfs
                         IndexView<FileNameRecord, FileReference> dir = new IndexView<FileNameRecord, FileReference>(f.GetIndex("$I30"));
                         foreach (var entry in dir.Entries)
                         {
+                            FileRecord refFile = _context.Mft.GetRecord(entry.Value);
+
                             // Make sure each referenced file actually exists...
-                            if (_context.Mft.GetRecord(entry.Value) == null)
+                            if (refFile == null)
                             {
                                 ReportError("Directory {0} references non-existent file {1}", f, entry.Key);
+                            }
+
+                            File referencedFile = new File(_context, refFile);
+                            StandardInformation si = referencedFile.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                            if (si.CreationTime != entry.Key.CreationTime || si.MftChangedTime != entry.Key.MftChangedTime
+                                || si.ModificationTime != entry.Key.ModificationTime)
+                            {
+                                ReportInfo("Directory entry {0} in {1} is out of date", entry.Key, f);
                             }
                         }
                     }

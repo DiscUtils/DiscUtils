@@ -167,7 +167,10 @@ namespace DiscUtils.Diagnostics
                 }
                 finally
                 {
-                    _globalTrace.Dispose();
+                    if (_globalTrace != null)
+                    {
+                        _globalTrace.Dispose();
+                    }
                 }
             }
             base.Dispose(disposing);
@@ -283,8 +286,11 @@ namespace DiscUtils.Diagnostics
             else
             {
                 _lockdown = true;
-                _globalTrace.Stop();
-                _globalTrace.WriteToFile(null);
+                if (_runGlobalTrace)
+                {
+                    _globalTrace.Stop();
+                    _globalTrace.WriteToFile(null);
+                }
                 return false;
             }
         }
@@ -314,7 +320,10 @@ namespace DiscUtils.Diagnostics
             _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
 
             // Reset the global trace stream - no longer interested in what it captured.
-            _globalTrace.Reset(_runGlobalTrace);
+            if (_runGlobalTrace)
+            {
+                _globalTrace.Reset(_runGlobalTrace);
+            }
 
             return true;
         }
@@ -487,7 +496,10 @@ namespace DiscUtils.Diagnostics
                 if (_checkpointBuffer.Count >= _checkpointPeriod)
                 {
                     // Roll over the on-disk trace
-                    _globalTrace.WriteToFile(string.Format(CultureInfo.InvariantCulture, @"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
+                    if (_runGlobalTrace)
+                    {
+                        _globalTrace.WriteToFile(string.Format(CultureInfo.InvariantCulture, @"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
+                    }
 
                     // We only do a full checkpoint, if the activity didn't throw an exception.  Otherwise,
                     // we'll discard all replay info just when the caller might want it.  Instead, just do a
@@ -512,13 +524,18 @@ namespace DiscUtils.Diagnostics
             }
 
             _snapStream = new SnapshotStream(_baseStream, Ownership.None);
+            Stream focusStream = _snapStream;
 
             _masterRng = new Random(56456456);
 
-            _globalTrace = new TracingStream(_snapStream, Ownership.None);
-            _globalTrace.CaptureStackTraces = _globalTraceCaptureStackTraces;
-            _globalTrace.Reset(_runGlobalTrace);
-            _globalTrace.WriteToFile(string.Format(CultureInfo.InvariantCulture, @"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
+            if (_runGlobalTrace)
+            {
+                _globalTrace = new TracingStream(_snapStream, Ownership.None);
+                _globalTrace.CaptureStackTraces = _globalTraceCaptureStackTraces;
+                _globalTrace.Reset(_runGlobalTrace);
+                _globalTrace.WriteToFile(string.Format(CultureInfo.InvariantCulture, @"C:\temp\working\trace{0:X3}.log", _numScheduledCheckpoints++));
+                focusStream = _globalTrace;
+            }
 
             _checkpointRngSeed = _masterRng.Next();
 
@@ -526,7 +543,7 @@ namespace DiscUtils.Diagnostics
 
             _checkpointBuffer = new List<Activity<TFileSystem>>();
 
-            _liveTarget = CreateFileSystem(_globalTrace);
+            _liveTarget = CreateFileSystem(focusStream);
             _liveTarget.Options.RandomNumberGenerator = new Random(_checkpointRngSeed);
 
             // Take a snapshot, to preserve the stream state before we perform
@@ -670,7 +687,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="destinationFile">The destination file</param>
         public override void CopyFile(string sourceFile, string destinationFile)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.CopyFile(sourceFile, destinationFile);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -681,7 +704,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.CopyFile(sourceFile, destinationFile, overwrite);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -736,7 +765,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.DirectoryExists(path);
+            };
+
+            return (bool)PerformActivity(fn);
         }
 
         /// <summary>
@@ -746,7 +780,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the file exists</returns>
         public override bool FileExists(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.FileExists(path);
+            };
+
+            return (bool)PerformActivity(fn);
         }
 
         /// <summary>
@@ -756,7 +795,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the file or directory exists</returns>
         public override bool Exists(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.Exists(path);
+            };
+
+            return (bool)PerformActivity(fn);
         }
 
         /// <summary>
@@ -865,7 +909,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFileSystemEntries(path);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>
@@ -877,7 +926,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFileSystemEntries(path, searchPattern);
+            };
+
+            return (string[])PerformActivity(fn);
         }
 
         /// <summary>
@@ -887,7 +941,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="destinationDirectoryName">The target directory name.</param>
         public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.MoveDirectory(sourceDirectoryName, destinationDirectoryName);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -897,7 +957,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="destinationName">The target file name.</param>
         public override void MoveFile(string sourceName, string destinationName)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.MoveFile(sourceName, destinationName);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -908,7 +974,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.MoveFile(sourceName, destinationName, overwrite);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -975,7 +1047,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetAttributes(path);
+            };
+
+            return (FileAttributes)PerformActivity(fn);
         }
 
         /// <summary>
@@ -985,7 +1062,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newValue">The new attributes of the file or directory</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetAttributes(path, newValue);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -995,7 +1078,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetCreationTime(path);
+            };
+
+            return (DateTime)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1005,7 +1093,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTime(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetCreationTime(path, newTime);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -1015,7 +1109,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetCreationTimeUtc(path);
+            };
+
+            return (DateTime)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1025,7 +1124,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTimeUtc(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetCreationTimeUtc(path, newTime);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -1035,7 +1140,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTime(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetLastAccessTime(path);
+            };
+
+            return (DateTime)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1045,7 +1155,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTime(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetLastAccessTime(path, newTime);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -1055,7 +1171,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetLastAccessTimeUtc(path);
+            };
+
+            return (DateTime)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1065,7 +1186,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetLastAccessTimeUtc(path, newTime);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -1075,7 +1202,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTime(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetLastWriteTime(path);
+            };
+
+            return (DateTime)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1085,7 +1217,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTime(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetLastWriteTime(path, newTime);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -1095,7 +1233,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetLastWriteTime(path);
+            };
+
+            return (DateTime)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1105,7 +1248,13 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                fs.SetLastWriteTimeUtc(path, newTime);
+                return null;
+            };
+
+            PerformActivity(fn);
         }
 
         /// <summary>
@@ -1115,7 +1264,12 @@ namespace DiscUtils.Diagnostics
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFileLength(path);
+            };
+
+            return (long)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1126,7 +1280,12 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The file does not need to exist</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFileInfo(path);
+            };
+
+            return (DiscFileInfo)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1137,7 +1296,12 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The directory does not need to exist</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetDirectoryInfo(path);
+            };
+
+            return (DiscDirectoryInfo)PerformActivity(fn);
         }
 
         /// <summary>
@@ -1148,7 +1312,12 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The file system object does not need to exist</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
-            throw new NotImplementedException();
+            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            {
+                return fs.GetFileSystemInfo(path);
+            };
+
+            return (DiscFileSystemInfo)PerformActivity(fn);
         }
         #endregion
     }

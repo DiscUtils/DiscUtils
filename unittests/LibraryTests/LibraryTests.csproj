@@ -73,6 +73,10 @@
     <Compile Include="Xva\VirtualMachineBuilderTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\diag\DiscUtils.Diagnostics.csproj">
+      <Project>{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}</Project>
+      <Name>DiscUtils.Diagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\DiscUtils.csproj">
       <Project>{DBB340F9-2386-43C2-A473-FA496CBE07A4}</Project>
       <Name>DiscUtils</Name>

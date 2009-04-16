@@ -133,7 +133,7 @@ namespace DiscUtils.Ntfs
         public override bool CanWrite
         {
             // For now, we don't...
-            get { return false; }
+            get { return !_context.ReadOnly; }
         }
 
         /// <summary>
@@ -144,7 +144,10 @@ namespace DiscUtils.Ntfs
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
-            throw new NotImplementedException();
+            using (new NtfsTransaction())
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -153,30 +156,33 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path of the new directory</param>
         public override void CreateDirectory(string path)
         {
-            string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-
-            Directory focusDir = GetDirectory(MasterFileTable.RootDirIndex);
-            DirectoryEntry focusDirEntry = focusDir.DirectoryEntry;
-
-            for (int i = 0; i < pathElements.Length; ++i)
+            using (new NtfsTransaction())
             {
-                DirectoryEntry childDirEntry = focusDir.GetEntryByName(pathElements[i]);
-                if (childDirEntry == null)
+                string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+                Directory focusDir = GetDirectory(MasterFileTable.RootDirIndex);
+                DirectoryEntry focusDirEntry = focusDir.DirectoryEntry;
+
+                for (int i = 0; i < pathElements.Length; ++i)
                 {
-                    Directory childDir = Directory.CreateNew(_context);
-                    childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
+                    DirectoryEntry childDirEntry = focusDir.GetEntryByName(pathElements[i]);
+                    if (childDirEntry == null)
+                    {
+                        Directory childDir = Directory.CreateNew(_context);
+                        childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
 
-                    // Update the directory entry by which we found the directory we've just modified
-                    focusDirEntry.UpdateFrom(focusDir);
+                        // Update the directory entry by which we found the directory we've just modified
+                        focusDirEntry.UpdateFrom(focusDir);
 
-                    focusDir = childDir;
+                        focusDir = childDir;
+                    }
+                    else
+                    {
+                        focusDir = GetDirectory(childDirEntry.Reference);
+                    }
+
+                    focusDirEntry = childDirEntry;
                 }
-                else
-                {
-                    focusDir = GetDirectory(childDirEntry.Reference);
-                }
-
-                focusDirEntry = childDirEntry;
             }
         }
 
@@ -186,36 +192,39 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path of the directory to delete.</param>
         public override void DeleteDirectory(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            using (new NtfsTransaction())
             {
-                throw new IOException("Unable to delete root directory");
+                if (string.IsNullOrEmpty(path))
+                {
+                    throw new IOException("Unable to delete root directory");
+                }
+
+                string parent = Path.GetDirectoryName(path);
+
+                DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
+                if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+                {
+                    throw new DirectoryNotFoundException("No such directory: " + path);
+                }
+                Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+                DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
+                if ((dirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+                {
+                    throw new DirectoryNotFoundException("No such directory: " + path);
+                }
+
+                FileReference fileRef = dirEntry.Reference;
+                Directory dir = GetDirectory(fileRef);
+
+                if (!dir.IsEmpty)
+                {
+                    throw new IOException("Unable to delete non-empty directory");
+                }
+
+                parentDir.RemoveEntry(dirEntry);
+                dir.Delete();
             }
-
-            string parent = Path.GetDirectoryName(path);
-
-            DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
-            if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
-            {
-                throw new DirectoryNotFoundException("No such directory: " + path);
-            }
-            Directory parentDir = GetDirectory(parentDirEntry.Reference);
-
-            DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
-            if ((dirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
-            {
-                throw new DirectoryNotFoundException("No such directory: " + path);
-            }
-
-            FileReference fileRef = dirEntry.Reference;
-            Directory dir = GetDirectory(fileRef);
-
-            if (!dir.IsEmpty)
-            {
-                throw new IOException("Unable to delete non-empty directory");
-            }
-
-            parentDir.RemoveEntry(dirEntry);
-            dir.Delete();
         }
 
         /// <summary>
@@ -224,25 +233,28 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path of the file to delete.</param>
         public override void DeleteFile(string path)
         {
-            string parent = Path.GetDirectoryName(path);
-
-            DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
-            if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("No such file", path);
+                string parent = Path.GetDirectoryName(path);
+
+                DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
+                if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+                {
+                    throw new FileNotFoundException("No such file", path);
+                }
+                Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+                DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
+                if (dirEntry == null || (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0)
+                {
+                    throw new FileNotFoundException("No such file", path);
+                }
+
+                File file = GetFile(dirEntry.Reference);
+
+                parentDir.RemoveEntry(dirEntry);
+                file.Delete();
             }
-            Directory parentDir = GetDirectory(parentDirEntry.Reference);
-
-            DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
-            if (dirEntry == null || (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0)
-            {
-                throw new FileNotFoundException("No such file", path);
-            }
-
-            File file = GetFile(dirEntry.Reference);
-
-            parentDir.RemoveEntry(dirEntry);
-            file.Delete();
         }
 
         /// <summary>
@@ -252,15 +264,18 @@ namespace DiscUtils.Ntfs
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
-            // Special case - root directory
-            if (String.IsNullOrEmpty(path))
+            using (new NtfsTransaction())
             {
-                return true;
-            }
-            else
-            {
-                DirectoryEntry dirEntry = GetDirectoryEntry(path);
-                return (dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0);
+                // Special case - root directory
+                if (String.IsNullOrEmpty(path))
+                {
+                    return true;
+                }
+                else
+                {
+                    DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                    return (dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0);
+                }
             }
         }
 
@@ -271,8 +286,11 @@ namespace DiscUtils.Ntfs
         /// <returns>true if the file exists</returns>
         public override bool FileExists(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            return (dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) == 0);
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                return (dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) == 0);
+            }
         }
 
         /// <summary>
@@ -285,11 +303,14 @@ namespace DiscUtils.Ntfs
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+            using (new NtfsTransaction())
+            {
+                Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
-            List<string> dirs = new List<string>();
-            DoSearch(dirs, path, re, searchOption == SearchOption.AllDirectories, true, false);
-            return dirs.ToArray();
+                List<string> dirs = new List<string>();
+                DoSearch(dirs, path, re, searchOption == SearchOption.AllDirectories, true, false);
+                return dirs.ToArray();
+            }
         }
 
         /// <summary>
@@ -302,11 +323,14 @@ namespace DiscUtils.Ntfs
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+            using (new NtfsTransaction())
+            {
+                Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
-            List<string> results = new List<string>();
-            DoSearch(results, path, re, searchOption == SearchOption.AllDirectories, false, true);
-            return results.ToArray();
+                List<string> results = new List<string>();
+                DoSearch(results, path, re, searchOption == SearchOption.AllDirectories, false, true);
+                return results.ToArray();
+            }
         }
 
         /// <summary>
@@ -316,15 +340,18 @@ namespace DiscUtils.Ntfs
         /// <returns>Array of files and subdirectories.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
-            if (parentDirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
+                DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
+                if (parentDirEntry == null)
+                {
+                    throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
+                }
+
+                Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+                return Utilities.Map<DirectoryEntry, string>(parentDir.GetAllEntries(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
             }
-
-            Directory parentDir = GetDirectory(parentDirEntry.Reference);
-
-            return Utilities.Map<DirectoryEntry, string>(parentDir.GetAllEntries(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
         }
 
         /// <summary>
@@ -336,27 +363,30 @@ namespace DiscUtils.Ntfs
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            // TODO: Be smarter, use the B*Tree for better performance when the start of the pattern is known
-            // characters
-            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
-
-            DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
-            if (parentDirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
-            }
+                // TODO: Be smarter, use the B*Tree for better performance when the start of the pattern is known
+                // characters
+                Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
-            Directory parentDir = GetDirectory(parentDirEntry.Reference);
-
-            List<string> result = new List<string>();
-            foreach (DirectoryEntry dirEntry in parentDir.GetAllEntries())
-            {
-                if (re.IsMatch(dirEntry.Details.FileName))
+                DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
+                if (parentDirEntry == null)
                 {
-                    result.Add(Path.Combine(path, dirEntry.Details.FileName));
+                    throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
                 }
+
+                Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+                List<string> result = new List<string>();
+                foreach (DirectoryEntry dirEntry in parentDir.GetAllEntries())
+                {
+                    if (re.IsMatch(dirEntry.Details.FileName))
+                    {
+                        result.Add(Path.Combine(path, dirEntry.Details.FileName));
+                    }
+                }
+                return result.ToArray();
             }
-            return result.ToArray();
         }
 
         /// <summary>
@@ -366,7 +396,10 @@ namespace DiscUtils.Ntfs
         /// <param name="destinationDirectoryName">The target directory name.</param>
         public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
-            throw new NotImplementedException();
+            using (new NtfsTransaction())
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -377,7 +410,10 @@ namespace DiscUtils.Ntfs
         /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
-            throw new NotImplementedException();
+            using (new NtfsTransaction())
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -389,67 +425,70 @@ namespace DiscUtils.Ntfs
         /// <returns>The new stream.</returns>
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
-            string fileName = Utilities.GetFileFromPath(path);
-            string attributeName = null;
-
-            int streamSepPos = fileName.IndexOf(':');
-            if (streamSepPos >= 0)
+            using (new NtfsTransaction())
             {
-                attributeName = fileName.Substring(streamSepPos + 1);
-            }
+                string fileName = Utilities.GetFileFromPath(path);
+                string attributeName = null;
 
-            DirectoryEntry entry = GetDirectoryEntry(Path.Combine(Path.GetDirectoryName(path),fileName));
-            if (entry == null)
-            {
-                if (mode == FileMode.Open)
+                int streamSepPos = fileName.IndexOf(':');
+                if (streamSepPos >= 0)
                 {
-                    throw new FileNotFoundException("No such file", path);
+                    attributeName = fileName.Substring(streamSepPos + 1);
                 }
-                else
+
+                DirectoryEntry entry = GetDirectoryEntry(Path.Combine(Path.GetDirectoryName(path), fileName));
+                if (entry == null)
                 {
-                    File file = File.CreateNew(_context, FileRecordFlags.None);
-
-                    DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
-                    Directory parentDir = GetDirectory(parentDirEntry.Reference);
-                    entry = parentDir.AddEntry(file, Path.GetFileName(path));
-                    parentDirEntry.UpdateFrom(parentDir);
-                }
-            }
-            else if (mode == FileMode.CreateNew)
-            {
-                throw new IOException("File already exists");
-            }
-
-
-            if ((entry.Details.FileAttributes & FileAttributes.Directory) != 0)
-            {
-                throw new IOException("Attempt to open directory as a file");
-            }
-            else
-            {
-                File file = GetFile(entry.Reference);
-                NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
-
-                if (attr == null)
-                {
-                    if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
+                    if (mode == FileMode.Open)
                     {
-                        file.CreateAttribute(AttributeType.Data, attributeName);
+                        throw new FileNotFoundException("No such file", path);
                     }
                     else
                     {
-                        throw new FileNotFoundException("No such attribute on file", path);
+                        File file = File.CreateNew(_context, FileRecordFlags.None);
+
+                        DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
+                        Directory parentDir = GetDirectory(parentDirEntry.Reference);
+                        entry = parentDir.AddEntry(file, Path.GetFileName(path));
+                        parentDirEntry.UpdateFrom(parentDir);
                     }
                 }
-
-                SparseStream stream = new NtfsFileStream(this, entry, AttributeType.Data, attributeName, access);
-
-                if (mode == FileMode.Create || mode == FileMode.Truncate)
+                else if (mode == FileMode.CreateNew)
                 {
-                    stream.SetLength(0);
+                    throw new IOException("File already exists");
                 }
 
-                return stream;
+
+                if ((entry.Details.FileAttributes & FileAttributes.Directory) != 0)
+                {
+                    throw new IOException("Attempt to open directory as a file");
+                }
+                else
+                {
+                    File file = GetFile(entry.Reference);
+                    NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+
+                    if (attr == null)
+                    {
+                        if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
+                        {
+                            file.CreateAttribute(AttributeType.Data, attributeName);
+                        }
+                        else
+                        {
+                            throw new FileNotFoundException("No such attribute on file", path);
+                        }
+                    }
+
+                    SparseStream stream = new NtfsFileStream(this, entry, AttributeType.Data, attributeName, access);
+
+                    if (mode == FileMode.Create || mode == FileMode.Truncate)
+                    {
+                        stream.SetLength(0);
+                    }
+
+                    return stream;
+                }
             }
         }
 
@@ -463,14 +502,17 @@ namespace DiscUtils.Ntfs
         /// <returns>A stream with read access to the attribute</returns>
         public Stream OpenRawAttribute(string file, AttributeType type, string name, FileAccess access)
         {
-            DirectoryEntry entry = GetDirectoryEntry(file);
-            if (entry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("No such file", file);
-            }
+                DirectoryEntry entry = GetDirectoryEntry(file);
+                if (entry == null)
+                {
+                    throw new FileNotFoundException("No such file", file);
+                }
 
-            File fileObj = GetFile(entry.Reference);
-            return fileObj.OpenAttribute(type, name, access);
+                File fileObj = GetFile(entry.Reference);
+                return fileObj.OpenAttribute(type, name, access);
+            }
         }
 
         /// <summary>
@@ -480,14 +522,17 @@ namespace DiscUtils.Ntfs
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else
-            {
-                return dirEntry.Details.FileAttributes;
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    return dirEntry.Details.FileAttributes;
+                }
             }
         }
 
@@ -498,17 +543,20 @@ namespace DiscUtils.Ntfs
         /// <param name="newValue">The new attributes of the file or directory</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else if((dirEntry.Details.FileAttributes & NonSettableFileAttributes) != (newValue & NonSettableFileAttributes))
-            {
-                throw new ArgumentException("Attempt to change attributes that are read-only");
-            }
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else if ((dirEntry.Details.FileAttributes & NonSettableFileAttributes) != (newValue & NonSettableFileAttributes))
+                {
+                    throw new ArgumentException("Attempt to change attributes that are read-only");
+                }
 
-            UpdateStandardInformation(path, delegate(StandardInformation si) { si.FileAttributes = FileNameRecord.SetAttributes(newValue, si.FileAttributes); });
+                UpdateStandardInformation(path, delegate(StandardInformation si) { si.FileAttributes = FileNameRecord.SetAttributes(newValue, si.FileAttributes); });
+            }
         }
 
         /// <summary>
@@ -518,14 +566,17 @@ namespace DiscUtils.Ntfs
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else
-            {
-                return dirEntry.Details.CreationTime;
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    return dirEntry.Details.CreationTime;
+                }
             }
         }
 
@@ -536,7 +587,10 @@ namespace DiscUtils.Ntfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTimeUtc(string path, DateTime newTime)
         {
-            UpdateStandardInformation(path, delegate(StandardInformation si) { si.CreationTime = newTime; });
+            using (new NtfsTransaction())
+            {
+                UpdateStandardInformation(path, delegate(StandardInformation si) { si.CreationTime = newTime; });
+            }
         }
 
         /// <summary>
@@ -546,14 +600,17 @@ namespace DiscUtils.Ntfs
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else
-            {
-                return dirEntry.Details.LastAccessTime;
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    return dirEntry.Details.LastAccessTime;
+                }
             }
         }
 
@@ -564,7 +621,10 @@ namespace DiscUtils.Ntfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
-            UpdateStandardInformation(path, delegate(StandardInformation si) { si.LastAccessTime = newTime; });
+            using (new NtfsTransaction())
+            {
+                UpdateStandardInformation(path, delegate(StandardInformation si) { si.LastAccessTime = newTime; });
+            }
         }
 
         /// <summary>
@@ -574,14 +634,17 @@ namespace DiscUtils.Ntfs
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else
-            {
-                return dirEntry.Details.ModificationTime;
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    return dirEntry.Details.ModificationTime;
+                }
             }
         }
 
@@ -592,7 +655,10 @@ namespace DiscUtils.Ntfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
-            UpdateStandardInformation(path, delegate(StandardInformation si) { si.ModificationTime = newTime; });
+            using (new NtfsTransaction())
+            {
+                UpdateStandardInformation(path, delegate(StandardInformation si) { si.ModificationTime = newTime; });
+            }
         }
 
         /// <summary>
@@ -602,12 +668,15 @@ namespace DiscUtils.Ntfs
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                return (long)dirEntry.Details.RealSize;
             }
-            return (long)dirEntry.Details.RealSize;
         }
         #endregion
 
@@ -681,34 +750,37 @@ namespace DiscUtils.Ntfs
         /// <param name="destinationName">The name of the new hard link to the file.</param>
         public void CreateHardLink(string sourceName, string destinationName)
         {
-            DirectoryEntry sourceDirEntry = GetDirectoryEntry(sourceName);
-            if (sourceDirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("Source file not found", sourceName);
-            }
+                DirectoryEntry sourceDirEntry = GetDirectoryEntry(sourceName);
+                if (sourceDirEntry == null)
+                {
+                    throw new FileNotFoundException("Source file not found", sourceName);
+                }
 
-            string destinationDirName = Path.GetDirectoryName(destinationName);
-            DirectoryEntry destinationDirSelfEntry = GetDirectoryEntry(destinationDirName);
-            if (destinationDirSelfEntry == null || (destinationDirSelfEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
-            {
-                throw new FileNotFoundException("Destination directory not found", destinationDirName);
-            }
+                string destinationDirName = Path.GetDirectoryName(destinationName);
+                DirectoryEntry destinationDirSelfEntry = GetDirectoryEntry(destinationDirName);
+                if (destinationDirSelfEntry == null || (destinationDirSelfEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
+                {
+                    throw new FileNotFoundException("Destination directory not found", destinationDirName);
+                }
 
-            Directory destinationDir = GetDirectory(destinationDirSelfEntry.Reference);
-            if (destinationDir == null)
-            {
-                throw new FileNotFoundException("Destination directory not found", destinationDirName);
-            }
+                Directory destinationDir = GetDirectory(destinationDirSelfEntry.Reference);
+                if (destinationDir == null)
+                {
+                    throw new FileNotFoundException("Destination directory not found", destinationDirName);
+                }
 
-            DirectoryEntry destinationDirEntry = GetDirectoryEntry(destinationDir, Path.GetFileName(destinationName));
-            if (destinationDirEntry != null)
-            {
-                throw new IOException("A file with this name already exists: " + destinationName);
-            }
+                DirectoryEntry destinationDirEntry = GetDirectoryEntry(destinationDir, Path.GetFileName(destinationName));
+                if (destinationDirEntry != null)
+                {
+                    throw new IOException("A file with this name already exists: " + destinationName);
+                }
 
-            File file = GetFile(sourceDirEntry.Reference);
-            destinationDir.AddEntry(file, Path.GetFileName(destinationName));
-            destinationDirSelfEntry.UpdateFrom(destinationDir);
+                File file = GetFile(sourceDirEntry.Reference);
+                destinationDir.AddEntry(file, Path.GetFileName(destinationName));
+                destinationDirSelfEntry.UpdateFrom(destinationDir);
+            }
         }
 
         /// <summary>
@@ -718,23 +790,26 @@ namespace DiscUtils.Ntfs
         /// <returns>The security descriptor.</returns>
         public FileSystemSecurity GetAccessControl(string path)
         {
-            DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
+            using (new NtfsTransaction())
             {
-                throw new FileNotFoundException("File not found", path);
-            }
-            else
-            {
-                File file = GetFile(dirEntry.Reference);
-
-                NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
-                if (legacyAttr != null)
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
                 {
-                    return ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
+                    throw new FileNotFoundException("File not found", path);
                 }
+                else
+                {
+                    File file = GetFile(dirEntry.Reference);
 
-                StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
-                return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
+                    NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
+                    if (legacyAttr != null)
+                    {
+                        return ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
+                    }
+
+                    StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                    return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
+                }
             }
         }
 

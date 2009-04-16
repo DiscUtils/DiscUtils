@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VHDCreate", "utils\VHDCreat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VHDDump", "utils\VHDDump\VHDDump.csproj", "{B1078068-FF37-426C-A478-0CB964081E5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.Diagnostics", "diag\DiscUtils.Diagnostics.csproj", "{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{B1078068-FF37-426C-A478-0CB964081E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1078068-FF37-426C-A478-0CB964081E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1078068-FF37-426C-A478-0CB964081E5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

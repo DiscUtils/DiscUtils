@@ -258,13 +258,12 @@ namespace DiscUtils.Ntfs
             _records.Flush();
 
             // We may have modified our own meta-data by extending the data stream, so
-            // (carefully) make sure our records are up-to-date.
+            // make sure our records are up-to-date.
             if(_self.MftRecordIsDirty)
             {
-                _self.UpdateRecordInMft();
                 DirectoryEntry dirEntry = _self.DirectoryEntry;
                 dirEntry.UpdateFrom(_self);
-                _self.UpdateRecordInMft(true);
+                _self.UpdateRecordInMft();
             }
 
             // Need to update Mirror.  OpenRaw is OK because this is short duration, and we don't

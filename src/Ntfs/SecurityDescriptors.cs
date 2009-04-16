@@ -94,9 +94,13 @@ namespace DiscUtils.Ntfs
                         break;
                     }
 
-                    FileSecurity secDesc = new FileSecurity();
-                    secDesc.SetSecurityDescriptorBinaryForm(rec.SecurityDescriptor, AccessControlSections.All);
-                    string secDescStr = secDesc.GetSecurityDescriptorSddlForm(AccessControlSections.All);
+                    string secDescStr = "--unknown--";
+                    if (rec.SecurityDescriptor[0] != 0)
+                    {
+                        FileSecurity secDesc = new FileSecurity();
+                        secDesc.SetSecurityDescriptorBinaryForm(rec.SecurityDescriptor, AccessControlSections.All);
+                        secDescStr = secDesc.GetSecurityDescriptorSddlForm(AccessControlSections.All);
+                    }
 
                     writer.WriteLine(indent + "  SECURITY DESCRIPTOR RECORD");
                     writer.WriteLine(indent + "           Hash: " + rec.Hash);

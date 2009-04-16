@@ -186,7 +186,7 @@ namespace DiscUtils.Diagnostics
 
             int numRead = (int)_fileSystem.PerformActivity(fn);
 
-            Array.Copy(tempBuffer, buffer, buffer.Length);
+            Array.Copy(tempBuffer, buffer, numRead);
 
             _shadowPosition += numRead;
 

@@ -104,17 +104,12 @@ namespace DiscUtils.Ntfs
 
         public void UpdateRecordInMft()
         {
-            UpdateRecordInMft(false);
-        }
-
-        public void UpdateRecordInMft(bool suppressTimeChange)
-        {
             if(_baseRecordDirty)
             {
-                if (!suppressTimeChange)
+                if (NtfsTransaction.Current != null)
                 {
                     StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)GetAttribute(AttributeType.StandardInformation);
-                    saAttr.Content.MftChangedTime = DateTime.UtcNow;
+                    saAttr.Content.MftChangedTime = NtfsTransaction.Current.Timestamp;
                     saAttr.Save();
                 }
 
@@ -518,6 +513,11 @@ namespace DiscUtils.Ntfs
             fileName.MftChangedTime = si.MftChangedTime;
             fileName.LastAccessTime = si.LastAccessTime;
             fileName.Flags = si.FileAttributes;
+
+            if (_baseRecordDirty && NtfsTransaction.Current != null)
+            {
+                fileName.MftChangedTime = NtfsTransaction.Current.Timestamp;
+            }
 
             // Root dir doesn't have directory flags set in StandardAttributes, so force it now...
             if (_baseRecord.MasterFileTableIndex == MasterFileTable.RootDirIndex)

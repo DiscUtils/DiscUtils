@@ -138,7 +138,7 @@ namespace DiscUtils
             fs.Root.GetDirectories(@"Fred")[0].Delete();
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), "QuickReadWriteFileSystems")]
         [Category("SlowTest")]
         public void CreateDeleteLeakTest(DiscFileSystem fs)
         {
@@ -306,41 +306,83 @@ namespace DiscUtils
 
     public class FileSystemSource
     {
-        public static IEnumerable<TestCaseData> ReadWriteFileSystems
+        private Stream ntfsBaseStream;
+
+        public FileSystemSource()
+        {
+            ntfsBaseStream = new FileStream(@"c:\temp\ntfsblank.vhd", FileMode.Open, FileAccess.Read);
+        }
+
+        public IEnumerable<TestCaseData> ReadWriteFileSystems
         {
             get
             {
                 yield return new TestCaseData(
-                    new DelayLoadFileSystem(
-                    delegate()
-                    {
-                        SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
-                        SparseMemoryStream ms = new SparseMemoryStream();
-                        Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-                        return Fat.FatFileSystem.FormatFloppy(ms, Fat.FloppyDiskType.Extended, null);
-                    })).SetName("FAT");
+                    new DelayLoadFileSystem(FatFileSystem)).SetName("FAT");
 
                 // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
                 yield return new TestCaseData(
-                    new DelayLoadFileSystem(
-                    delegate()
-                    {
-                        string baseFile = "ntfsblank.vhd";
-                        DiskImageFile parent = new DiskImageFile(
-                            new FileStream(@"C:\temp\" + baseFile, FileMode.Open, FileAccess.Read),
-                            Ownership.Dispose);
-                        Stream diffStream = new SparseMemoryStream();
-                        Disk disk = Disk.InitializeDifferencing(
-                            diffStream,
-                            Ownership.Dispose,
-                            parent,
-                            Ownership.Dispose,
-                            @"C:\temp\" + baseFile,
-                            @".\" + baseFile,
-                            File.GetLastWriteTimeUtc(@"C:\temp\" + baseFile));
-                        return new Ntfs.NtfsFileSystem(disk.Partitions[0].Open());
-                    })).SetName("NTFS");
+                    new DelayLoadFileSystem(DiagnosticNtfsFileSystem)).SetName("NTFS");
             }
+        }
+
+
+        public IEnumerable<TestCaseData> QuickReadWriteFileSystems
+        {
+            get
+            {
+                yield return new TestCaseData(
+                    new DelayLoadFileSystem(FatFileSystem)).SetName("FAT");
+
+                // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
+                yield return new TestCaseData(
+                    new DelayLoadFileSystem(QuickNtfsFileSystem)).SetName("NTFS");
+            }
+        }
+
+        private static DiscFileSystem FatFileSystem()
+        {
+            SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
+            SparseMemoryStream ms = new SparseMemoryStream();
+            Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
+            return Fat.FatFileSystem.FormatFloppy(ms, Fat.FloppyDiskType.Extended, null);
+        }
+
+        private DiscFileSystem DiagnosticNtfsFileSystem()
+        {
+            DiskImageFile parent = new DiskImageFile(
+                ntfsBaseStream,
+                Ownership.None);
+            Stream diffStream = new SparseMemoryStream();
+            Disk disk = Disk.InitializeDifferencing(
+                diffStream,
+                Ownership.Dispose,
+                parent,
+                Ownership.Dispose,
+                @"C:\temp\ntfsblank.vhd",
+                @".\ntfsblank.vhd",
+                File.GetLastWriteTimeUtc(@"C:\temp\ntfsblank.vhd"));
+            var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<Ntfs.NtfsFileSystem, Ntfs.NtfsFileSystemChecker>(disk.Partitions[0].Open());
+            discFs.CheckpointInterval = 1;
+            discFs.GlobalIOTraceCapturesStackTraces = false;
+            return discFs;
+        }
+
+        private DiscFileSystem QuickNtfsFileSystem()
+        {
+            DiskImageFile parent = new DiskImageFile(
+                ntfsBaseStream,
+                Ownership.None);
+            Stream diffStream = new SparseMemoryStream();
+            Disk disk = Disk.InitializeDifferencing(
+                diffStream,
+                Ownership.Dispose,
+                parent,
+                Ownership.Dispose,
+                @"C:\temp\ntfsblank.vhd",
+                @".\ntfsblank.vhd",
+                File.GetLastWriteTimeUtc(@"C:\temp\ntfsblank.vhd"));
+            return new Ntfs.NtfsFileSystem(disk.Partitions[0].Open());
         }
 
         private delegate DiscFileSystem FileSystemLoaderDelegate();

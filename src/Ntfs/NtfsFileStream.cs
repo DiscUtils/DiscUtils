@@ -49,10 +49,13 @@ namespace DiscUtils.Ntfs
 
         public override void Close()
         {
-            base.Close();
-            _attrStream.Close();
+            using (new NtfsTransaction())
+            {
+                base.Close();
+                _attrStream.Close();
 
-            UpdateMetadata();
+                UpdateMetadata();
+            }
         }
 
         public override bool CanRead
@@ -72,9 +75,12 @@ namespace DiscUtils.Ntfs
 
         public override void Flush()
         {
-            _attrStream.Flush();
+            using (new NtfsTransaction())
+            {
+                _attrStream.Flush();
 
-            UpdateMetadata();
+                UpdateMetadata();
+            }
         }
 
         public override long Length
@@ -90,33 +96,48 @@ namespace DiscUtils.Ntfs
             }
             set
             {
-                _attrStream.Position = value;
+                using (new NtfsTransaction())
+                {
+                    _attrStream.Position = value;
+                }
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            return _attrStream.Read(buffer, offset, count);
+            using (new NtfsTransaction())
+            {
+                return _attrStream.Read(buffer, offset, count);
+            }
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            return _attrStream.Seek(offset, origin);
+            using (new NtfsTransaction())
+            {
+                return _attrStream.Seek(offset, origin);
+            }
         }
 
         public override void SetLength(long value)
         {
-            if (value != Length)
+            using (new NtfsTransaction())
             {
-                _isDirty = true;
-                _attrStream.SetLength(value);
+                if (value != Length)
+                {
+                    _isDirty = true;
+                    _attrStream.SetLength(value);
+                }
             }
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _isDirty = true;
-            _attrStream.Write(buffer, offset, count);
+            using (new NtfsTransaction())
+            {
+                _isDirty = true;
+                _attrStream.Write(buffer, offset, count);
+            }
         }
 
         public override IEnumerable<StreamExtent> Extents
@@ -131,14 +152,14 @@ namespace DiscUtils.Ntfs
                 DateTime now = DateTime.UtcNow;
 
                 // Update the standard information attribute - so it reflects the actual file state
-                StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)_file.GetAttribute(AttributeType.StandardInformation);
                 if (_isDirty)
                 {
-                    saAttr.Content.ModificationTime = now;
+                    _file.Modified();
                 }
-
-                saAttr.Content.LastAccessTime = now;
-                saAttr.Save();
+                else
+                {
+                    _file.Accessed();
+                }
 
                 // Update the directory entry used to open the file, so it's accurate
                 _entry.UpdateFrom(_file);

@@ -132,6 +132,7 @@
     <Compile Include="Ntfs\NtfsFileSystem.cs" />
     <Compile Include="Ntfs\NtfsFileSystemChecker.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs" />
+    <Compile Include="Ntfs\NtfsTransaction.cs" />
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIdRecord.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
