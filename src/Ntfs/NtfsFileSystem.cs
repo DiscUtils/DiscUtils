@@ -202,20 +202,19 @@ namespace DiscUtils.Ntfs
                 string parent = Path.GetDirectoryName(path);
 
                 DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
-                if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+                if (parentDirEntry == null || !parentDirEntry.IsDirectory)
                 {
                     throw new DirectoryNotFoundException("No such directory: " + path);
                 }
                 Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
                 DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
-                if ((dirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+                if (dirEntry == null || !dirEntry.IsDirectory)
                 {
                     throw new DirectoryNotFoundException("No such directory: " + path);
                 }
 
-                FileReference fileRef = dirEntry.Reference;
-                Directory dir = GetDirectory(fileRef);
+                Directory dir = GetDirectory(dirEntry.Reference);
 
                 if (!dir.IsEmpty)
                 {
@@ -238,14 +237,14 @@ namespace DiscUtils.Ntfs
                 string parent = Path.GetDirectoryName(path);
 
                 DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
-                if (parentDirEntry == null || (parentDirEntry.Details.Flags & FileAttributeFlags.Directory) == 0)
+                if (parentDirEntry == null || !parentDirEntry.IsDirectory)
                 {
                     throw new FileNotFoundException("No such file", path);
                 }
                 Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
                 DirectoryEntry dirEntry = parentDir.GetEntryByName(Path.GetFileName(path));
-                if (dirEntry == null || (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0)
+                if (dirEntry == null || dirEntry.IsDirectory)
                 {
                     throw new FileNotFoundException("No such file", path);
                 }
@@ -398,7 +397,41 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                throw new NotImplementedException();
+                using (new NtfsTransaction())
+                {
+                    DirectoryEntry sourceParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(sourceDirectoryName));
+                    if (sourceParentDirEntry == null || !sourceParentDirEntry.IsDirectory)
+                    {
+                        throw new DirectoryNotFoundException("No such directory: " + sourceDirectoryName);
+                    }
+
+                    Directory sourceParentDir = GetDirectory(sourceParentDirEntry.Reference);
+
+                    DirectoryEntry sourceEntry = sourceParentDir.GetEntryByName(Path.GetFileName(sourceDirectoryName));
+                    if (sourceEntry == null || !sourceEntry.IsDirectory)
+                    {
+                        throw new DirectoryNotFoundException("No such directory: " + sourceDirectoryName);
+                    }
+
+                    File file = GetFile(sourceEntry.Reference);
+
+                    DirectoryEntry destParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(destinationDirectoryName));
+                    if (destParentDirEntry == null || !destParentDirEntry.IsDirectory)
+                    {
+                        throw new DirectoryNotFoundException("Destination directory not found: " + destinationDirectoryName);
+                    }
+
+                    Directory destParentDir = GetDirectory(destParentDirEntry.Reference);
+
+                    DirectoryEntry destDirEntry = destParentDir.GetEntryByName(Path.GetFileName(destinationDirectoryName));
+                    if (destDirEntry != null)
+                    {
+                        throw new IOException("Destination directory already exists");
+                    }
+
+                    destParentDir.AddEntry(file, Path.GetFileName(destinationDirectoryName));
+                    sourceParentDir.RemoveEntry(sourceEntry);
+                }
             }
         }
 
@@ -412,7 +445,55 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                throw new NotImplementedException();
+                DirectoryEntry sourceParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(sourceName));
+                if(sourceParentDirEntry == null || !sourceParentDirEntry.IsDirectory)
+                {
+                    throw new FileNotFoundException("No such file", sourceName);
+                }
+
+                Directory sourceParentDir = GetDirectory(sourceParentDirEntry.Reference);
+
+                DirectoryEntry sourceEntry = sourceParentDir.GetEntryByName(Path.GetFileName(sourceName));
+                if (sourceEntry == null || sourceEntry.IsDirectory)
+                {
+                    throw new FileNotFoundException("No such file", sourceName);
+                }
+
+                File file = GetFile(sourceEntry.Reference);
+
+                DirectoryEntry destParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(destinationName));
+                if (destParentDirEntry == null || !destParentDirEntry.IsDirectory)
+                {
+                    throw new FileNotFoundException("Destination directory not found", destinationName);
+                }
+
+                Directory destParentDir = GetDirectory(destParentDirEntry.Reference);
+
+                DirectoryEntry destDirEntry = destParentDir.GetEntryByName(Path.GetFileName(destinationName));
+                if (destDirEntry != null && !destDirEntry.IsDirectory)
+                {
+                    if (overwrite)
+                    {
+                        if (destDirEntry.Reference.MftIndex == sourceEntry.Reference.MftIndex)
+                        {
+                            throw new IOException("Destination file already exists and is the source file");
+                        }
+
+                        File oldFile = GetFile(destDirEntry.Reference);
+                        destParentDir.RemoveEntry(destDirEntry);
+                        if (oldFile.HardLinkCount == 0)
+                        {
+                            oldFile.Delete();
+                        }
+                    }
+                    else
+                    {
+                        throw new IOException("Destination file already exists");
+                    }
+                }
+
+                destParentDir.AddEntry(file, Path.GetFileName(destinationName));
+                sourceParentDir.RemoveEntry(sourceEntry);
             }
         }
 

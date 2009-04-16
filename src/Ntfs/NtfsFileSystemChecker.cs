@@ -93,7 +93,7 @@ namespace DiscUtils.Ntfs
         /// Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
-        public ClusterMap GetClusterMap()
+        public ClusterMap BuildClusterMap()
         {
             _context = new NtfsContext();
             _context.RawStream = _target;

@@ -395,6 +395,27 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        public void MoveFile_Overwrite(DiscFileSystem fs)
+        {
+            DiscFileInfo fi = fs.GetFileInfo("foo.txt");
+            using (Stream s = fi.Create())
+            {
+                s.WriteByte(1);
+            }
+
+            DiscFileInfo fi2 = fs.GetFileInfo("foo2.txt");
+            using (Stream s = fi2.Create())
+            {
+            }
+
+            fs.MoveFile("foo.txt", "foo2.txt", true);
+
+            Assert.IsFalse(fi.Exists);
+            Assert.IsTrue(fi2.Exists);
+            Assert.AreEqual(1, fi2.Length);
+        }
+
+        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         public void Equals(DiscFileSystem fs)
         {
             Assert.AreEqual(fs.GetFileInfo("foo.txt"), fs.GetFileInfo("foo.txt"));

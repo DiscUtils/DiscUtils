@@ -51,6 +51,11 @@ namespace DiscUtils.Ntfs
             get { return _fileDetails; }
         }
 
+        public bool IsDirectory
+        {
+            get { return (_fileDetails.Flags & FileAttributeFlags.Directory) != 0; }
+        }
+
         public string SearchName
         {
             get
