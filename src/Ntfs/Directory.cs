@@ -124,7 +124,7 @@ namespace DiscUtils.Ntfs
             UpdateRecordInMft();
         }
 
-        internal static Directory CreateNew(INtfsContext fileSystem)
+        internal new static Directory CreateNew(INtfsContext fileSystem)
         {
             DateTime now = DateTime.UtcNow;
 
@@ -136,7 +136,7 @@ namespace DiscUtils.Ntfs
             si.ModificationTime = now;
             si.MftChangedTime = now;
             si.LastAccessTime = now;
-            si.FileAttributes = FileAttributeFlags.Archive | FileAttributeFlags.Directory;
+            si.FileAttributes = FileAttributeFlags.Archive;
             dir.SetAttributeContent(attrId, si);
 
             // Create the index root attribute by instantiating a new index

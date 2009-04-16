@@ -194,7 +194,7 @@ namespace DiscUtils.Ntfs
                 }
 
 
-                File newFile = File.CreateNew(_context, FileRecordFlags.None);
+                File newFile = File.CreateNew(_context);
                 foreach (var attr in origFile.AllAttributes)
                 {
                     NtfsAttribute newAttr = newFile.GetAttribute(attr.Record.AttributeType, attr.Name);
@@ -612,7 +612,7 @@ namespace DiscUtils.Ntfs
                     }
                     else
                     {
-                        File file = File.CreateNew(_context, FileRecordFlags.None);
+                        File file = File.CreateNew(_context);
 
                         DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
                         Directory parentDir = GetDirectory(parentDirEntry.Reference);

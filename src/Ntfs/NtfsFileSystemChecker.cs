@@ -421,26 +421,35 @@ namespace DiscUtils.Ntfs
             Dictionary<long, string> clusterMap = new Dictionary<long, string>();
             foreach (FileRecord fr in _context.Mft.Records)
             {
-                File f = new File(_context, fr);
-                foreach (var attr in f.AllAttributes)
+                if ((fr.Flags & FileRecordFlags.InUse) != 0)
                 {
-                    string attrKey = fr.MasterFileTableIndex + ":" + attr.Id;
-
-                    foreach (var range in attr.GetClusters())
+                    File f = new File(_context, fr);
+                    foreach (var attr in f.AllAttributes)
                     {
-                        if (!VerifyClusterRange(range))
-                        {
-                            ReportError("Attribute {0} contains bad cluster range {1}", attrKey, range);
-                        }
+                        string attrKey = fr.MasterFileTableIndex + ":" + attr.Id;
 
-                        for (long cluster = range.Offset; cluster < range.Offset + range.Count; ++cluster)
+                        foreach (var range in attr.GetClusters())
                         {
-                            string existingKey;
-                            if (clusterMap.TryGetValue(cluster, out existingKey))
+                            if (!VerifyClusterRange(range))
                             {
-                                ReportError("Two attributes referencing cluster {0} (0x{0:X16}) - {1} and {2} (as MftIndex:AttrId)", cluster, existingKey, attrKey);
+                                ReportError("Attribute {0} contains bad cluster range {1}", attrKey, range);
+                            }
+
+                            for (long cluster = range.Offset; cluster < range.Offset + range.Count; ++cluster)
+                            {
+                                string existingKey;
+                                if (clusterMap.TryGetValue(cluster, out existingKey))
+                                {
+                                    ReportError("Two attributes referencing cluster {0} (0x{0:X16}) - {1} and {2} (as MftIndex:AttrId)", cluster, existingKey, attrKey);
+                                }
                             }
                         }
+                    }
+
+                    StandardInformation si = f.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                    if ((si.FileAttributes & FileAttributeFlags.Directory) != 0)
+                    {
+                        ReportError("Directory attribute set in StandardInformation");
                     }
                 }
             }

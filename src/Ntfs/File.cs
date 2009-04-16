@@ -519,8 +519,8 @@ namespace DiscUtils.Ntfs
                 fileName.MftChangedTime = NtfsTransaction.Current.Timestamp;
             }
 
-            // Root dir doesn't have directory flags set in StandardAttributes, so force it now...
-            if (_baseRecord.MasterFileTableIndex == MasterFileTable.RootDirIndex)
+            // Directories don't have directory flag set in StandardInformation, so set from MFT record
+            if ((_baseRecord.Flags & FileRecordFlags.IsDirectory) != 0)
             {
                 fileName.Flags |= FileAttributeFlags.Directory;
             }
@@ -660,11 +660,11 @@ namespace DiscUtils.Ntfs
         }
 
 
-        internal static File CreateNew(INtfsContext fileSystem, FileRecordFlags flags)
+        internal static File CreateNew(INtfsContext fileSystem)
         {
             DateTime now = DateTime.UtcNow;
 
-            File newFile = fileSystem.AllocateFile(flags);
+            File newFile = fileSystem.AllocateFile(FileRecordFlags.None);
 
             ushort attrId = newFile.CreateAttribute(AttributeType.StandardInformation);
             StandardInformation si = new StandardInformation();
@@ -672,7 +672,7 @@ namespace DiscUtils.Ntfs
             si.ModificationTime = now;
             si.MftChangedTime = now;
             si.LastAccessTime = now;
-            si.FileAttributes = FileAttributeFlags.Archive | (((flags & FileRecordFlags.IsDirectory) != 0) ? FileAttributeFlags.Directory : FileAttributeFlags.None);
+            si.FileAttributes = FileAttributeFlags.Archive;
             newFile.SetAttributeContent(attrId, si);
 
             Guid newId = CreateNewGuid(fileSystem);
