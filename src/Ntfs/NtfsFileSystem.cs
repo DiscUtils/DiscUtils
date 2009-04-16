@@ -146,7 +146,93 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                throw new NotImplementedException();
+                DirectoryEntry sourceParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(sourceFile));
+                if (sourceParentDirEntry == null || !sourceParentDirEntry.IsDirectory)
+                {
+                    throw new FileNotFoundException("No such file", sourceFile);
+                }
+
+                Directory sourceParentDir = GetDirectory(sourceParentDirEntry.Reference);
+
+                DirectoryEntry sourceEntry = sourceParentDir.GetEntryByName(Path.GetFileName(sourceFile));
+                if (sourceEntry == null || sourceEntry.IsDirectory)
+                {
+                    throw new FileNotFoundException("No such file", sourceFile);
+                }
+
+                File origFile = GetFile(sourceEntry.Reference);
+
+                DirectoryEntry destParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(destinationFile));
+                if (destParentDirEntry == null || !destParentDirEntry.IsDirectory)
+                {
+                    throw new FileNotFoundException("Destination directory not found", destinationFile);
+                }
+
+                Directory destParentDir = GetDirectory(destParentDirEntry.Reference);
+
+                DirectoryEntry destDirEntry = destParentDir.GetEntryByName(Path.GetFileName(destinationFile));
+                if (destDirEntry != null && !destDirEntry.IsDirectory)
+                {
+                    if (overwrite)
+                    {
+                        if (destDirEntry.Reference.MftIndex == sourceEntry.Reference.MftIndex)
+                        {
+                            throw new IOException("Destination file already exists and is the source file");
+                        }
+
+                        File oldFile = GetFile(destDirEntry.Reference);
+                        destParentDir.RemoveEntry(destDirEntry);
+                        if (oldFile.HardLinkCount == 0)
+                        {
+                            oldFile.Delete();
+                        }
+                    }
+                    else
+                    {
+                        throw new IOException("Destination file already exists");
+                    }
+                }
+
+
+                File newFile = File.CreateNew(_context, FileRecordFlags.None);
+                foreach (var attr in origFile.AllAttributes)
+                {
+                    NtfsAttribute newAttr = newFile.GetAttribute(attr.Record.AttributeType, attr.Name);
+
+                    switch (attr.Record.AttributeType)
+                    {
+                        case AttributeType.Data:
+                            if (attr == null)
+                            {
+                                ushort newAttrId = newFile.CreateAttribute(attr.Record.AttributeType, attr.Name);
+                                newAttr = newFile.GetAttribute(newAttrId);
+                            }
+
+                            using (SparseStream s = origFile.OpenAttribute(attr.Id, FileAccess.Read))
+                            using (SparseStream d = newFile.OpenAttribute(newAttr.Id, FileAccess.Write))
+                            {
+                                byte[] buffer = new byte[64 * Sizes.OneKiB];
+                                int numRead;
+
+                                do
+                                {
+                                    numRead = s.Read(buffer, 0, buffer.Length);
+                                    d.Write(buffer, 0, numRead);
+                                } while (numRead != 0);
+                            }
+                            break;
+
+                        case AttributeType.StandardInformation:
+                            StandardInformation newSi = ((StructuredNtfsAttribute<StandardInformation>)attr).Content;
+                            StructuredNtfsAttribute<StandardInformation> newSiAttr = (StructuredNtfsAttribute<StandardInformation>)newAttr;
+                            newSiAttr.Content = newSi;
+                            newSiAttr.Save();
+                            break;
+                    }
+                }
+
+                destParentDir.AddEntry(newFile, Path.GetFileName(destinationFile));
+                destParentDirEntry.UpdateFrom(destParentDir);
             }
         }
 
