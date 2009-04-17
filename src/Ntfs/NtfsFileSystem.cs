@@ -109,15 +109,6 @@ namespace DiscUtils.Ntfs
             get { return (NtfsOptions)Options; }
         }
 
-        /// <summary>
-        /// Opens the Master File Table as a raw stream.
-        /// </summary>
-        /// <returns></returns>
-        public Stream OpenMasterFileTable()
-        {
-            return OpenRawAttribute("$MFT", AttributeType.Data, null, FileAccess.Read);
-        }
-
         #region DiscFileSystem Implementation
         /// <summary>
         /// Gets the friendly name for the file system.

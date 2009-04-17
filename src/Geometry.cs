@@ -159,6 +159,7 @@ namespace DiscUtils
         /// Converts a LBA (Logical Block Address) to a CHS (Cylinder, Head, Sector) address.
         /// </summary>
         /// <param name="logicalBlockAddress">The logical block address (in sectors)</param>
+        /// <returns>The address in CHS form.</returns>
         public ChsAddress ToChsAddress(int logicalBlockAddress)
         {
             if (logicalBlockAddress < 0)

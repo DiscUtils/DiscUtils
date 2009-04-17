@@ -11,6 +11,8 @@
         <namespaceSummaryItem name="DiscUtils.Partitions" isDocumented="True">Classes to initialize, access and modify hard disk partition tables.  Currently, only legacy BIOS-style partition tables are fully supported (GUID Partition Tables are read-only).</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Vdi" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VirtualBox .vdi format.  Fixed and Dynamic disks are currently supported.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Vhd" isDocumented="True">Classes to create, read and modify virtual hard-disks in the Microsoft VHD format.  Fixed, Dynamic and Differencing disks are supported.</namespaceSummaryItem>
+        <namespaceSummaryItem name="DiscUtils.Vmdk" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VMWare VMDK format.  Most disk forms (dynamic, static, etc) are supported.  Stream optimized disks can be read from a seekable stream, but can not be read as a sequential stream, nor written to.</namespaceSummaryItem>
+        <namespaceSummaryItem name="DiscUtils.Xva" isDocumented="True">Classes to create and read virtual hard-disks held within a XenServer Virtual Appliance (XVA).  Disks cannot be directly modified within an XVA itself.</namespaceSummaryItem>
     </namespaceSummaries>
     <ProjectSummary />
     <MissingTags>Summary, Parameter, Returns, AutoDocumentCtors, Namespace, TypeParameter</MissingTags>

@@ -37,7 +37,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Creates a new instance from an existing disk file.
         /// </summary>
-        /// <param name="file"></param>
+        /// <param name="file">The file containing the disk image.</param>
         public Disk(DiskImageFile file)
         {
             _diskImage = file;

@@ -339,7 +339,7 @@ namespace DiscUtils.Iso9660
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The time the file or directory was last accessed</returns>
         public override DateTime GetLastAccessTime(string path)
         {
             return GetCreationTime(path);
@@ -349,7 +349,7 @@ namespace DiscUtils.Iso9660
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The time the file or directory was last accessed</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             return GetCreationTimeUtc(path);
@@ -359,7 +359,7 @@ namespace DiscUtils.Iso9660
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The time the file or directory was last modified</returns>
         public override DateTime GetLastWriteTime(string path)
         {
             return GetCreationTime(path);
@@ -369,7 +369,7 @@ namespace DiscUtils.Iso9660
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
-        /// <returns></returns>
+        /// <returns>The time the file or directory was last modified</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             return GetCreationTimeUtc(path);

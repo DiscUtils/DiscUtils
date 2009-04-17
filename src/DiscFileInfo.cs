@@ -90,7 +90,7 @@ namespace DiscUtils
         /// <summary>
         /// Creates a new <see cref="StreamWriter"/> that writes a new text file.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A new stream writer that can write to the file contents.</returns>
         public StreamWriter CreateText()
         {
             return new StreamWriter(Open(FileMode.Create));

@@ -31,9 +31,9 @@ namespace DiscUtils
     public abstract class StreamBuilder
     {
         /// <summary>
-        /// Creates a new stream.
+        /// Builds a new stream.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The stream created by the StreamBuilder instance.</returns>
         public virtual SparseStream Build()
         {
             long totalLength;
