@@ -66,7 +66,7 @@ namespace DiscUtils
         [Category("ThrowsException")]
         public void CreateInvalid_Long(DiscFileSystem fs)
         {
-            DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOMEDIRWITHANAMETHATISTOOLONG");
+            DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(new String('X', 256));
             dirInfo.Create();
         }
 
@@ -75,7 +75,7 @@ namespace DiscUtils
         [Category("ThrowsException")]
         public void CreateInvalid_Characters(DiscFileSystem fs)
         {
-            DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOME*DIR");
+            DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOME\0DIR");
             dirInfo.Create();
         }
 

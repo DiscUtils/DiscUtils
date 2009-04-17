@@ -255,12 +255,22 @@ namespace DiscUtils.Ntfs
                     if (childDirEntry == null)
                     {
                         Directory childDir = Directory.CreateNew(_context);
-                        childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
+                        try
+                        {
+                            childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
 
-                        // Update the directory entry by which we found the directory we've just modified
-                        focusDirEntry.UpdateFrom(focusDir);
+                            // Update the directory entry by which we found the directory we've just modified
+                            focusDirEntry.UpdateFrom(focusDir);
 
-                        focusDir = childDir;
+                            focusDir = childDir;
+                        }
+                        finally
+                        {
+                            if (childDir.HardLinkCount == 0)
+                            {
+                                childDir.Delete();
+                            }
+                        }
                     }
                     else
                     {
@@ -603,7 +613,17 @@ namespace DiscUtils.Ntfs
                     attributeName = fileName.Substring(streamSepPos + 1);
                 }
 
-                DirectoryEntry entry = GetDirectoryEntry(Path.Combine(Path.GetDirectoryName(path), fileName));
+                string dirName;
+                try
+                {
+                    dirName = Path.GetDirectoryName(path);
+                }
+                catch (ArgumentException)
+                {
+                    throw new IOException("Invalid path: " + path);
+                }
+
+                DirectoryEntry entry = GetDirectoryEntry(Path.Combine(dirName, fileName));
                 if (entry == null)
                 {
                     if (mode == FileMode.Open)
@@ -613,11 +633,20 @@ namespace DiscUtils.Ntfs
                     else
                     {
                         File file = File.CreateNew(_context);
-
-                        DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
-                        Directory parentDir = GetDirectory(parentDirEntry.Reference);
-                        entry = parentDir.AddEntry(file, Path.GetFileName(path));
-                        parentDirEntry.UpdateFrom(parentDir);
+                        try
+                        {
+                            DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
+                            Directory parentDir = GetDirectory(parentDirEntry.Reference);
+                            entry = parentDir.AddEntry(file, Path.GetFileName(path));
+                            parentDirEntry.UpdateFrom(parentDir);
+                        }
+                        finally
+                        {
+                            if (file.HardLinkCount == 0)
+                            {
+                                file.Delete();
+                            }
+                        }
                     }
                 }
                 else if (mode == FileMode.CreateNew)

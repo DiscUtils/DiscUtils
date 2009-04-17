@@ -50,6 +50,28 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void CreateFileInvalid_Long(DiscFileSystem fs)
+        {
+            using (Stream s = fs.GetFileInfo(new string('X', 256)).Open(FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.WriteByte(1);
+            }
+        }
+
+        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [ExpectedException(typeof(IOException))]
+        [Category("ThrowsException")]
+        public void CreateFileInvalid_Characters(DiscFileSystem fs)
+        {
+            using (Stream s = fs.GetFileInfo("A\0File").Open(FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.WriteByte(1);
+            }
+        }
+
+        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         public void DeleteFile(DiscFileSystem fs)
         {
             using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite)) { }

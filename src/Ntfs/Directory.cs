@@ -82,6 +82,15 @@ namespace DiscUtils.Ntfs
 
         internal DirectoryEntry AddEntry(File file, string name)
         {
+            if (name.Length > 255)
+            {
+                throw new IOException("Invalid file name, more than 255 characters: " + name);
+            }
+            else if(name.IndexOfAny(new char[] { '\0', '/' }) != -1)
+            {
+                throw new IOException(@"Invalid file name, contains '\0' or '/': " + name);
+            }
+
             FileNameRecord newNameRecord = file.GetFileNameRecord(null, true);
             newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
             newNameRecord.FileName = name;

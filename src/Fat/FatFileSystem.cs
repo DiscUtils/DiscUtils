@@ -357,7 +357,15 @@ namespace DiscUtils.Fat
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
             Directory parent;
-            long entryId = GetDirectoryEntry(_rootDir, path, out parent);
+            long entryId;
+            try
+            {
+                entryId = GetDirectoryEntry(_rootDir, path, out parent);
+            }
+            catch(ArgumentException)
+            {
+                throw new IOException("Invalid path: " + path);
+            }
 
             if (parent == null)
             {
