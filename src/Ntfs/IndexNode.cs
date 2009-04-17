@@ -300,11 +300,16 @@ namespace DiscUtils.Ntfs
                         IndexNode childNode = _index.GetSubBlock(this, focus).Node;
                         IndexEntry biggestLeaf = childNode.FindBiggestLeaf();
 
+                        // Take a reference to the byte arrays because in the recursive case, these arrays
+                        // may be changed as a new node is promoted.
+                        byte[] biggestLeafKey = biggestLeaf.KeyBuffer;
+                        byte[] biggestLeafData = biggestLeaf.DataBuffer;
+
                         childNode.RemoveEntry(biggestLeaf.KeyBuffer);
 
                         // Just over-write our key & data with the replacement
-                        focus.KeyBuffer = biggestLeaf.KeyBuffer;
-                        focus.DataBuffer = biggestLeaf.DataBuffer;
+                        focus.KeyBuffer = biggestLeafKey;
+                        focus.DataBuffer = biggestLeafData;
                     }
                     else
                     {

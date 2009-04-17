@@ -38,6 +38,7 @@ namespace DiscUtils.Diagnostics
         private int _replayBufferSize;
         private int _eventsReplayed;
         private long _eventsBeforeLockdown;
+        private string _replayPreVerificationReport;
         private bool _failedVerifyOnReplay;
         private string _replayVerificationReport;
         private string _lastCheckpointReport;
@@ -50,6 +51,7 @@ namespace DiscUtils.Diagnostics
             int replayBufferSize,
             int eventsReplayed,
             long eventsBeforeLockdown,
+            string replayPreVerificationReport,
             bool failedVerifyOnReplay,
             string replayVerificationReport,
             string lastCheckpointReport)
@@ -61,6 +63,7 @@ namespace DiscUtils.Diagnostics
             _replayBufferSize = replayBufferSize;
             _eventsReplayed = eventsReplayed;
             _eventsBeforeLockdown = eventsBeforeLockdown;
+            _replayPreVerificationReport = replayPreVerificationReport;
             _failedVerifyOnReplay = failedVerifyOnReplay;
             _replayVerificationReport = replayVerificationReport;
             _lastCheckpointReport = lastCheckpointReport;
@@ -152,6 +155,17 @@ namespace DiscUtils.Diagnostics
             get
             {
                 return _lastCheckpointReport;
+            }
+        }
+
+        /// <summary>
+        /// Gets the file system verification report generated whilst just before replaying the file system action that failed.
+        /// </summary>
+        public string ReplayPreVerificationReport
+        {
+            get
+            {
+                return _replayPreVerificationReport;
             }
         }
 

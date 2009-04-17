@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
@@ -67,6 +68,17 @@ namespace DiscUtils.Ntfs
             key.Id = objId;
 
             return _index.TryGetValue(key, out value);
+        }
+
+        internal IEnumerable<KeyValuePair<Guid,ObjectIdRecord>> All
+        {
+            get
+            {
+                foreach (var record in _index.Entries)
+                {
+                    yield return new KeyValuePair<Guid, ObjectIdRecord>(record.Key.Id, record.Value);
+                }
+            }
         }
 
         public void Dump(TextWriter writer, string indent)

@@ -373,6 +373,8 @@ namespace DiscUtils.Diagnostics
                 {
                     Exception replayException = null;
 
+                    StringWriter preVerificationReport = new StringWriter(CultureInfo.InvariantCulture);
+
                     try
                     {
                         using (TFileSystem replayFs = CreateFileSystem(ts))
@@ -386,6 +388,8 @@ namespace DiscUtils.Diagnostics
                             {
                                 _checkpointBuffer[i](replayFs, replayContext);
                             }
+
+                            DoVerify(ts, preVerificationReport, ReportLevels.All);
 
                             ts.CaptureStackTraces = true;
                             ts.Start();
@@ -410,6 +414,7 @@ namespace DiscUtils.Diagnostics
                         _checkpointBuffer.Count,
                         lowPoint + 1,
                         _totalEventsBeforeLockDown,
+                        preVerificationReport.GetStringBuilder().ToString(),
                         failedVerificationOnReplay,
                         verificationReport.GetStringBuilder().ToString(),
                         _lastCheckpointReport);

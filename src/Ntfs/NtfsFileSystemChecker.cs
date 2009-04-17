@@ -224,7 +224,14 @@ namespace DiscUtils.Ntfs
                         ReportError("ObjectId {0} for file {1} points to {2}", objId.Id, f.BestName, objIdRec.MftReference);
                     }
                 }
+            }
 
+            foreach (var objIdRec in _context.ObjectIds.All)
+            {
+                if (_context.Mft.GetRecord(objIdRec.Value.MftReference) == null)
+                {
+                    ReportError("ObjectId {0} refers to non-existant file {1}", objIdRec.Key, objIdRec.Value.MftReference);
+                }
             }
         }
 
