@@ -404,6 +404,23 @@ namespace DiscUtils.Ntfs
             return result.ToArray();
         }
 
+        public long NextCluster
+        {
+            get
+            {
+                var cookedRuns = CookedDataRun.Cook(_dataRuns);
+                if (cookedRuns.Count > 0)
+                {
+                    CookedDataRun lastRun = cookedRuns[cookedRuns.Count - 1];
+                    return lastRun.StartLcn + lastRun.Length;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
+
         public override SparseStream OpenRaw(File file, FileAccess access)
         {
             return new NonResidentAttributeStream(file, access, this);
