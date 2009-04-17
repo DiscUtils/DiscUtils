@@ -34,6 +34,8 @@ Copy-Item "${basedir}\utils\ISOCreate\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\ISOExtract\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\FATExtract\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\NTFSDump\bin\Release\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VHDCreate\bin\Release\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VHDDump\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\bin\LICENSE.TXT"
 pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"
