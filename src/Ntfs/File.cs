@@ -569,6 +569,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        internal long GetAttributeOffset(ushort id)
+        {
+            return _baseRecord.GetAttributeOffset(id);
+        }
+
+
         public virtual void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "FILE (" + ToString() + ")");

@@ -278,6 +278,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public long GetRecordOffset(FileReference fileReference)
+        {
+            return fileReference.MftIndex * _recordLength;
+        }
+
         public ClusterMap GetClusterMap()
         {
             int totalClusters = (int)Utilities.Ceil(_self.FileSystem.BiosParameterBlock.TotalSectors64, _self.FileSystem.BiosParameterBlock.SectorsPerCluster);

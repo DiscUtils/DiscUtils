@@ -888,7 +888,7 @@ namespace DiscUtils.Ntfs
         /// Converts a file name to the list of clusters occupied by the file's data.
         /// </summary>
         /// <param name="path">The path to inspect</param>
-        /// <returns>The clusters</returns>
+        /// <returns>The clusters as a list of cluster ranges</returns>
         /// <remarks>Note that in some file systems, small files may not have dedicated
         /// clusters.  Only dedicated clusters will be returned.</remarks>
         public override Range<long, long>[] PathToClusters(string path)
@@ -899,9 +899,19 @@ namespace DiscUtils.Ntfs
 
 
             DirectoryEntry dirEntry = GetDirectoryEntry(plainPath);
+            if (dirEntry == null || dirEntry.IsDirectory)
+            {
+                throw new FileNotFoundException("No such file", path);
+            }
+
             File file = GetFile(dirEntry.Reference);
 
             NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+            if (attr == null)
+            {
+                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "File does not contain '{0}' data attribute", attributeName), path);
+            }
+
             return attr.GetClusters();
         }
 
@@ -911,15 +921,51 @@ namespace DiscUtils.Ntfs
         /// <param name="path">The path to inspect</param>
         /// <returns>The file extents, as absolute byte positions in the underlying stream</returns>
         /// <remarks>Use this method with caution - NTFS supports encrypted, sparse and compressed files
-        /// where bytes are not directly stored in extents.  This method
-        /// merely indicates where file data is stored, not what's stored.</remarks>
+        /// where bytes are not directly stored in extents.  Small files may be entirely stored in the 
+        /// Master File Table, where corruption protection algorithms mean that some bytes do not contain
+        /// the expected values.  This method merely indicates where file data is stored,
+        /// not what's stored.  To access the contents of a file, use OpenFile.</remarks>
         public override StreamExtent[] PathToExtents(string path)
         {
-            throw new NotImplementedException();
+            string plainPath;
+            string attributeName;
+            SplitPath(path, out plainPath, out attributeName);
+
+
+            DirectoryEntry dirEntry = GetDirectoryEntry(plainPath);
+            if (dirEntry == null || dirEntry.IsDirectory)
+            {
+                throw new FileNotFoundException("No such file", path);
+            }
+
+            File file = GetFile(dirEntry.Reference);
+
+            NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+            if (attr == null)
+            {
+                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "File does not contain '{0}' data attribute", attributeName), path);
+            }
+
+            if (attr.IsNonResident)
+            {
+                Range<long, long>[] clusters = attr.GetClusters();
+                List<StreamExtent> result = new List<StreamExtent>(clusters.Length);
+                foreach (var clusterRange in clusters)
+                {
+                    result.Add(new StreamExtent(clusterRange.Offset * ClusterSize, clusterRange.Count * ClusterSize));
+                }
+                return result.ToArray();
+            }
+            else
+            {
+                StreamExtent[] result = new StreamExtent[1];
+                result[0] = new StreamExtent(attr.OffsetToAbsolutePos(0), attr.Length);
+                return result;
+            }
         }
 
         /// <summary>
-        /// Gets an object that can convert between clusters and files.
+        /// Not Implemented: Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
         public override ClusterMap BuildClusterMap()

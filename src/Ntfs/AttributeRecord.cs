@@ -109,6 +109,8 @@ namespace DiscUtils.Ntfs
 
         public abstract SparseStream OpenRaw(File file, FileAccess access);
 
+        public abstract long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster);
+
         public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
             if (Utilities.ToUInt32LittleEndian(buffer, offset) == 0xFFFFFFFF)
@@ -228,6 +230,11 @@ namespace DiscUtils.Ntfs
             return new ResidentAttributeStream(file, new SparseMemoryStream(_memoryBuffer, access));
         }
 
+        public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
+        {
+            return recordStart + DataOffset + offset;
+        }
+
         public override Range<long, long>[] GetClusters()
         {
             return new Range<long, long>[0];
@@ -297,6 +304,20 @@ namespace DiscUtils.Ntfs
 
                 ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
                 return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
+            }
+        }
+
+        public int DataOffset
+        {
+            get
+            {
+                byte nameLength = 0;
+                if (Name != null)
+                {
+                    nameLength = (byte)Name.Length;
+                }
+                
+                return Utilities.RoundUp(0x18 + (nameLength * 2), 8);
             }
         }
 
@@ -424,6 +445,28 @@ namespace DiscUtils.Ntfs
         public override SparseStream OpenRaw(File file, FileAccess access)
         {
             return new NonResidentAttributeStream(file, access, this);
+        }
+
+        public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
+        {
+            var cookedRuns = CookedDataRun.Cook(_dataRuns);
+
+            int i = 0;
+            while (i < cookedRuns[i].Length)
+            {
+                if (cookedRuns[i].StartVcn * bytesPerCluster > offset)
+                {
+                    return -1;
+                }
+                else if ((cookedRuns[i].StartVcn + cookedRuns[i].Length) * bytesPerCluster > offset)
+                {
+                    return (offset - (cookedRuns[i].StartVcn * bytesPerCluster)) + (cookedRuns[i].StartLcn * bytesPerCluster);
+                }
+
+                ++i;
+            }
+
+            return -1;
         }
 
         protected override void Read(byte[] buffer, int offset, out int length)

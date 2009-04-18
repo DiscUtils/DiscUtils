@@ -311,6 +311,23 @@ namespace DiscUtils.Ntfs
             return Utilities.RoundUp(size + 4, 8); // 0xFFFFFFFF terminator on attributes
         }
 
+        internal long GetAttributeOffset(ushort id)
+        {
+            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
+
+            int offset = firstAttrPos;
+            foreach (var attr in _attributes)
+            {
+                if (attr.AttributeId == id)
+                {
+                    return offset;
+                }
+                offset += attr.Size;
+            }
+
+            return -1;
+        }
+
         public override string ToString()
         {
             foreach (AttributeRecord attr in _attributes)

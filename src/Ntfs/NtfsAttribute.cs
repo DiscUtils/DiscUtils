@@ -67,6 +67,22 @@ namespace DiscUtils.Ntfs
             return _record.GetClusters();
         }
 
+        internal long OffsetToAbsolutePos(long offset)
+        {
+            if (_record.IsNonResident)
+            {
+                return _record.OffsetToAbsolutePos(offset, 0, _file.FileSystem.BiosParameterBlock.BytesPerCluster);
+            }
+            else
+            {
+                long recordStart = _file.FileSystem.Mft.GetRecordOffset(_file.MftReference);
+                long attrStart = recordStart + _file.GetAttributeOffset(_record.AttributeId);
+                long attrPos = _file.FileSystem.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data).OffsetToAbsolutePos(attrStart);
+
+                return _record.OffsetToAbsolutePos(offset, attrPos, 0);
+            }
+        }
+
         public void SetNonResident(bool nonResident, int maxData)
         {
             if (nonResident == _record.IsNonResident)
