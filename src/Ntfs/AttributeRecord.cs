@@ -392,7 +392,6 @@ namespace DiscUtils.Ntfs
 
         public long LastVcn
         {
-            get { return (long)_lastVCN; }
             set { _lastVCN = (ulong)value; }
         }
 

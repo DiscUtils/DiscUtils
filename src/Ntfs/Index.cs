@@ -160,7 +160,7 @@ namespace DiscUtils.Ntfs
             return block;
         }
 
-        internal IndexBlock GetSubBlockIfCached(IndexNode parentNode, IndexEntry parentEntry)
+        internal IndexBlock GetSubBlockIfCached(IndexEntry parentEntry)
         {
             return _blockCache[parentEntry.ChildrenVirtualCluster];
         }
@@ -340,12 +340,6 @@ namespace DiscUtils.Ntfs
 
             value = default(byte[]);
             return false;
-        }
-
-        public bool Contains(KeyValuePair<byte[], byte[]> item)
-        {
-            byte[] value;
-            return TryGetValue(item.Key, out value);
         }
 
         public int Count

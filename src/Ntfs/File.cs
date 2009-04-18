@@ -71,22 +71,6 @@ namespace DiscUtils.Ntfs
             get { return _mft.RecordSize - _baseRecord.Size; }
         }
 
-        public string CanonicalName
-        {
-            get
-            {
-                if (IndexInMft == MasterFileTable.RootDirIndex)
-                {
-                    return "";
-                }
-                else
-                {
-                    FileNameRecord firstName = GetAttributeContent<FileNameRecord>(AttributeType.FileName);
-                    return Path.Combine(_context.GetDirectoryByRef(firstName.ParentDirectory).CanonicalName, firstName.FileName);
-                }
-            }
-        }
-
         public List<string> Names
         {
             get
@@ -497,14 +481,6 @@ namespace DiscUtils.Ntfs
 
             attr.SetNonResident(false, maxData);
             _baseRecord.SetAttribute(attr.Record);
-        }
-
-        public FileAttributes FileAttributes
-        {
-            get
-            {
-                return GetAttributeContent<FileNameRecord>(AttributeType.FileName).FileAttributes;
-            }
         }
 
         public FileNameRecord GetFileNameRecord(string name, bool freshened)

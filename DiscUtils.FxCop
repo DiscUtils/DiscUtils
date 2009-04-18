@@ -899,6 +899,34 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="SecurityDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-04-18 23:06:11Z">
+            <Issue>
+             <Item>'SecurityDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="47" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VolumeInformation">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-04-18 23:06:11Z">
+            <Issue>
+             <Item>'VolumeInformation'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="48" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="DiscUtils.Partitions">
@@ -1295,6 +1323,8 @@
     <Note Id="44" Modified="2009-03-22 22:17:35Z">Deliberately not signing assemblies.</Note>
     <Note Id="45" Modified="2009-03-22 22:17:50Z">DiscUtils is established project name</Note>
     <Note Id="46" Modified="2009-04-16 21:57:27Z">Deliberately using wide catch - this is diagnostic code that should not cause an exception should it fail.</Note>
+    <Note Id="47" Modified="2009-04-18 23:12:33Z">SecurityDescriptor is instantiated via template arguments</Note>
+    <Note Id="48" Modified="2009-04-18 23:12:53Z">VolumeInformation is instantiated via template arguments</Note>
    </User>
   </Notes>
   <Rules>
@@ -1306,6 +1336,9 @@
    </Rule>
    <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
     <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812">
+    <Resolution Name="Default">{0} is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.</Resolution>
    </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>

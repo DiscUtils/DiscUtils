@@ -36,11 +36,6 @@ namespace DiscUtils.Ntfs
             _fileDetails = fileDetails;
         }
 
-        public Directory Directory
-        {
-            get { return _directory; }
-        }
-
         public FileReference Reference
         {
             get { return _fileReference; }

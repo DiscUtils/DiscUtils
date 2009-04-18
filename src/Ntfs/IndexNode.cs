@@ -409,7 +409,7 @@ namespace DiscUtils.Ntfs
             {
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock block = _index.GetSubBlockIfCached(this, entry);
+                    IndexBlock block = _index.GetSubBlockIfCached(entry);
                     if (block != null)
                     {
                         block.Node._parent = this;
@@ -448,7 +448,7 @@ namespace DiscUtils.Ntfs
             {
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock block = _index.GetSubBlockIfCached(this, entry);
+                    IndexBlock block = _index.GetSubBlockIfCached(entry);
                     if (block != null)
                     {
                         block.Node._parent = newBlock.Node;
@@ -501,7 +501,7 @@ namespace DiscUtils.Ntfs
             {
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock block = _index.GetSubBlockIfCached(this, entry);
+                    IndexBlock block = _index.GetSubBlockIfCached(entry);
                     if (block != null)
                     {
                         block.Node._parent = newBlock.Node;

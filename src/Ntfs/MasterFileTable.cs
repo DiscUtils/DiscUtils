@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace DiscUtils.Ntfs
@@ -306,12 +307,12 @@ namespace DiscUtils.Ntfs
 
                     if (attr.Record.AttributeType == AttributeType.Data && !string.IsNullOrEmpty(attr.Name))
                     {
-                        fileId = f.IndexInMft.ToString() + ":" + attr.Name;
+                        fileId = f.IndexInMft.ToString(CultureInfo.InvariantCulture) + ":" + attr.Name;
                         fileToPaths[fileId] = Utilities.Map(f.Names, n => n + ":" + attr.Name);
                     }
                     else
                     {
-                        fileId = f.IndexInMft.ToString();
+                        fileId = f.IndexInMft.ToString(CultureInfo.InvariantCulture);
                         fileToPaths[fileId] = f.Names.ToArray();
                     }
 

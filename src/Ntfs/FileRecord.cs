@@ -61,7 +61,6 @@ namespace DiscUtils.Ntfs
         public FileRecord(int sectorSize, int recordLength, uint index)
             : base("FILE", sectorSize, recordLength)
         {
-            _sequenceNumber = 0;
             ReInitialize(sectorSize, recordLength, index);
         }
 
@@ -82,11 +81,6 @@ namespace DiscUtils.Ntfs
         public uint MasterFileTableIndex
         {
             get { return _index; }
-            set
-            {
-                _index = value;
-                _haveIndex = true;
-            }
         }
 
         public ushort SequenceNumber
