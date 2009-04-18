@@ -127,8 +127,8 @@ namespace DiscUtils.Ntfs
             _bitmap = new Bitmap(_self.GetAttribute(AttributeType.Bitmap).OpenRaw(FileAccess.ReadWrite), long.MaxValue);
             _records = _self.GetAttribute(AttributeType.Data).OpenRaw(FileAccess.ReadWrite);
 
-            _recordLength = _self.FileSystem.BiosParameterBlock.MftRecordSize;
-            _bytesPerSector = _self.FileSystem.BiosParameterBlock.BytesPerSector;
+            _recordLength = _self.Context.BiosParameterBlock.MftRecordSize;
+            _bytesPerSector = _self.Context.BiosParameterBlock.BytesPerSector;
         }
 
         public int RecordSize
@@ -142,7 +142,7 @@ namespace DiscUtils.Ntfs
             {
                 if (_mirror == null)
                 {
-                    _mirror = _self.FileSystem.GetFileByIndex(MftMirrorIndex);
+                    _mirror = _self.Context.GetFileByIndex(MftMirrorIndex);
                 }
                 return _mirror;
             }
@@ -285,7 +285,7 @@ namespace DiscUtils.Ntfs
 
         public ClusterMap GetClusterMap()
         {
-            int totalClusters = (int)Utilities.Ceil(_self.FileSystem.BiosParameterBlock.TotalSectors64, _self.FileSystem.BiosParameterBlock.SectorsPerCluster);
+            int totalClusters = (int)Utilities.Ceil(_self.Context.BiosParameterBlock.TotalSectors64, _self.Context.BiosParameterBlock.SectorsPerCluster);
 
             ClusterRoles[] clusterToRole = new ClusterRoles[totalClusters];
             object[] clusterToFile = new object[totalClusters];
@@ -293,7 +293,7 @@ namespace DiscUtils.Ntfs
 
             foreach (FileRecord fr in Records)
             {
-                File f = new File(_self.FileSystem, fr);
+                File f = new File(_self.Context, fr);
                 foreach (var attr in f.AllAttributes)
                 {
                     string fileName = f.BestName + "(" + f.IndexInMft + "):" + attr.Record.AttributeType + "@" + attr.Name + "(" + attr.Id + ")";

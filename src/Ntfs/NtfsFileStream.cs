@@ -147,7 +147,7 @@ namespace DiscUtils.Ntfs
 
         private void UpdateMetadata()
         {
-            if (!_file.FileSystem.ReadOnly)
+            if (!_file.Context.ReadOnly)
             {
                 DateTime now = DateTime.UtcNow;
 

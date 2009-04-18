@@ -32,8 +32,8 @@ namespace DiscUtils.Ntfs
         private IndexView<FileNameRecord, FileReference> _index;
 
 
-        public Directory(INtfsContext fileSystem, FileRecord baseRecord)
-            : base(fileSystem, baseRecord)
+        public Directory(INtfsContext context, FileRecord baseRecord)
+            : base(context, baseRecord)
         {
         }
 
@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
                 searchName = name.Substring(0, streamSepPos);
             }
 
-            DirectoryIndexEntry entry = Index.FindFirst(new FileNameQuery(searchName, _fileSystem.UpperCase));
+            DirectoryIndexEntry entry = Index.FindFirst(new FileNameQuery(searchName, _context.UpperCase));
             if (entry.Key != null && entry.Value != null)
             {
                 return new DirectoryEntry(this, entry.Value, entry.Key);
@@ -112,7 +112,7 @@ namespace DiscUtils.Ntfs
 
         internal void RemoveEntry(DirectoryEntry dirEntry)
         {
-            File file = _fileSystem.GetFileByRef(dirEntry.Reference);
+            File file = _context.GetFileByRef(dirEntry.Reference);
 
             FileNameRecord nameRecord = dirEntry.Details;
 
@@ -133,11 +133,11 @@ namespace DiscUtils.Ntfs
             UpdateRecordInMft();
         }
 
-        internal new static Directory CreateNew(INtfsContext fileSystem)
+        internal new static Directory CreateNew(INtfsContext context)
         {
             DateTime now = DateTime.UtcNow;
 
-            Directory dir = (Directory)fileSystem.AllocateFile(FileRecordFlags.IsDirectory);
+            Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
 
             ushort attrId = dir.CreateAttribute(AttributeType.StandardInformation);
             StandardInformation si = new StandardInformation();
@@ -200,19 +200,19 @@ namespace DiscUtils.Ntfs
             {
                 DirectoryIndexEntry entry = entries[i];
 
-                if (((entry.Key.Flags & FileAttributeFlags.Hidden) != 0) && _fileSystem.Options.HideHiddenFiles)
+                if (((entry.Key.Flags & FileAttributeFlags.Hidden) != 0) && _context.Options.HideHiddenFiles)
                 {
                     entries.RemoveAt(i);
                 }
-                else if (((entry.Key.Flags & FileAttributeFlags.System) != 0) && _fileSystem.Options.HideSystemFiles)
+                else if (((entry.Key.Flags & FileAttributeFlags.System) != 0) && _context.Options.HideSystemFiles)
                 {
                     entries.RemoveAt(i);
                 }
-                else if (entry.Value.MftIndex < 24 && _fileSystem.Options.HideMetafiles)
+                else if (entry.Value.MftIndex < 24 && _context.Options.HideMetafiles)
                 {
                     entries.RemoveAt(i);
                 }
-                else if (entry.Key.FileNameNamespace == FileNameNamespace.Dos && _fileSystem.Options.HideDosFileNames)
+                else if (entry.Key.FileNameNamespace == FileNameNamespace.Dos && _context.Options.HideDosFileNames)
                 {
                     entries.RemoveAt(i);
                 }

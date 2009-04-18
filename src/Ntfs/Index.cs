@@ -126,7 +126,7 @@ namespace DiscUtils.Ntfs
 
         public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
         {
-            Index idx = new Index(attrType, collationRule, file, name, file.FileSystem.BiosParameterBlock, file.FileSystem.UpperCase);
+            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock, file.Context.UpperCase);
 
             idx.WriteRootNodeToDisk();
         }

@@ -45,8 +45,8 @@ namespace DiscUtils.Ntfs
         public NonResidentAttributeStream(File file, FileAccess access, NonResidentAttributeRecord record)
         {
             _file = file;
-            _fsStream = _file.FileSystem.RawStream;
-            _bytesPerCluster = file.FileSystem.BiosParameterBlock.BytesPerCluster;
+            _fsStream = _file.Context.RawStream;
+            _bytesPerCluster = file.Context.BiosParameterBlock.BytesPerCluster;
             _runs = CookedDataRun.Cook(record.DataRuns);
             _record = record;
             _access = access;
@@ -180,7 +180,7 @@ namespace DiscUtils.Ntfs
                 if (value > _record.AllocatedLength)
                 {
                     long numToAllocate = Utilities.Ceil(value - _record.AllocatedLength, _bytesPerCluster);
-                    Tuple<long, long>[] runs = _file.FileSystem.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster);
+                    Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster);
                     foreach (var run in runs)
                     {
                         AddDataRun(run.First, run.Second);
@@ -214,7 +214,7 @@ namespace DiscUtils.Ntfs
                 _file.MarkMftRecordDirty();
 
                 long numToAllocate = Utilities.Ceil(_position + count - _record.AllocatedLength, _bytesPerCluster);
-                Tuple<long, long>[] runs = _file.FileSystem.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster);
+                Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster);
                 foreach (var run in runs)
                 {
                     AddDataRun(run.First, run.Second);
@@ -299,7 +299,7 @@ namespace DiscUtils.Ntfs
 
             long oldLength = _runs[index].Length;
             _runs[index].Length = firstClusterToFree;
-            _file.FileSystem.ClusterBitmap.FreeClusters(new Tuple<long, long>(_runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
+            _file.Context.ClusterBitmap.FreeClusters(new Tuple<long, long>(_runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
         }
 
         private void RemoveAndFreeRuns(int firstRunToDelete)
@@ -311,7 +311,7 @@ namespace DiscUtils.Ntfs
             }
 
             RemoveDataRuns(firstRunToDelete, _runs.Count - firstRunToDelete);
-            _file.FileSystem.ClusterBitmap.FreeClusters(runs);
+            _file.Context.ClusterBitmap.FreeClusters(runs);
         }
 
         private int DoReadNormal(byte[] buffer, int offset, int count)

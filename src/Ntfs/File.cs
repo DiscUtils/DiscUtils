@@ -28,7 +28,7 @@ namespace DiscUtils.Ntfs
 {
     internal class File
     {
-        protected INtfsContext _fileSystem;
+        protected INtfsContext _context;
 
         private MasterFileTable _mft;
         private FileRecord _baseRecord;
@@ -37,10 +37,10 @@ namespace DiscUtils.Ntfs
 
         private bool _baseRecordDirty;
 
-        public File(INtfsContext fileSystem, FileRecord baseRecord)
+        public File(INtfsContext context, FileRecord baseRecord)
         {
-            _fileSystem = fileSystem;
-            _mft = _fileSystem.Mft;
+            _context = context;
+            _mft = _context.Mft;
             _baseRecord = baseRecord;
             _attributeCache = new ObjectCache<ushort, NtfsAttribute>();
             _indexCache = new ObjectCache<string, Index>();
@@ -133,7 +133,7 @@ namespace DiscUtils.Ntfs
                     {
                         foreach (var attr in _baseRecord.Attributes)
                         {
-                            if (!attr.IsNonResident && _fileSystem.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
+                            if (!attr.IsNonResident && _context.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
                             {
                                 MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
                                 fixedAttribute = true;
@@ -200,7 +200,7 @@ namespace DiscUtils.Ntfs
 
             if (idx == null)
             {
-                idx = new Index(this, name, _fileSystem.BiosParameterBlock, _fileSystem.UpperCase);
+                idx = new Index(this, name, _context.BiosParameterBlock, _context.UpperCase);
                 _indexCache[name] = idx;
             }
 
@@ -213,7 +213,7 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The type of the new attribute</param>
         public ushort CreateAttribute(AttributeType type)
         {
-            bool indexed = _fileSystem.AttributeDefinitions.IsIndexed(type);
+            bool indexed = _context.AttributeDefinitions.IsIndexed(type);
             ushort id = _baseRecord.CreateAttribute(type, null, indexed);
             MarkMftRecordDirty();
             return id;
@@ -226,7 +226,7 @@ namespace DiscUtils.Ntfs
         /// <param name="name">The name of the new attribute</param>
         public ushort CreateAttribute(AttributeType type, string name)
         {
-            bool indexed = _fileSystem.AttributeDefinitions.IsIndexed(type);
+            bool indexed = _context.AttributeDefinitions.IsIndexed(type);
             ushort id = _baseRecord.CreateAttribute(type, name, indexed);
             MarkMftRecordDirty();
             return id;
@@ -479,7 +479,7 @@ namespace DiscUtils.Ntfs
             {
                 foreach (StructuredNtfsAttribute<FileNameRecord> a in attrs)
                 {
-                    if (_fileSystem.UpperCase.Compare(a.Content.FileName, name) == 0)
+                    if (_context.UpperCase.Compare(a.Content.FileName, name) == 0)
                     {
                         attr = a;
                     }
@@ -557,15 +557,15 @@ namespace DiscUtils.Ntfs
                     record.Flags |= FileAttributeFlags.Directory;
                 }
 
-                return new DirectoryEntry(_fileSystem.GetDirectoryByRef(record.ParentDirectory), MftReference, record);
+                return new DirectoryEntry(_context.GetDirectoryByRef(record.ParentDirectory), MftReference, record);
             }
         }
 
-        internal INtfsContext FileSystem
+        internal INtfsContext Context
         {
             get
             {
-                return _fileSystem;
+                return _context;
             }
         }
 
@@ -666,11 +666,11 @@ namespace DiscUtils.Ntfs
         }
 
 
-        internal static File CreateNew(INtfsContext fileSystem)
+        internal static File CreateNew(INtfsContext context)
         {
             DateTime now = DateTime.UtcNow;
 
-            File newFile = fileSystem.AllocateFile(FileRecordFlags.None);
+            File newFile = context.AllocateFile(FileRecordFlags.None);
 
             ushort attrId = newFile.CreateAttribute(AttributeType.StandardInformation);
             StandardInformation si = new StandardInformation();
@@ -681,12 +681,12 @@ namespace DiscUtils.Ntfs
             si.FileAttributes = FileAttributeFlags.Archive;
             newFile.SetAttributeContent(attrId, si);
 
-            Guid newId = CreateNewGuid(fileSystem);
+            Guid newId = CreateNewGuid(context);
             attrId = newFile.CreateAttribute(AttributeType.ObjectId);
             ObjectId objId = new ObjectId();
             objId.Id = newId;
             newFile.SetAttributeContent(attrId, objId);
-            fileSystem.ObjectIds.Add(newId, newFile.MftReference, newId, Guid.Empty, Guid.Empty);
+            context.ObjectIds.Add(newId, newFile.MftReference, newId, Guid.Empty, Guid.Empty);
 
             newFile.CreateAttribute(AttributeType.Data);
 
@@ -705,7 +705,7 @@ namespace DiscUtils.Ntfs
             StructuredNtfsAttribute<ObjectId> objIdAttr = (StructuredNtfsAttribute<ObjectId>)GetAttribute(AttributeType.ObjectId);
             if (objIdAttr != null)
             {
-                FileSystem.ObjectIds.Remove(objIdAttr.Content.Id);
+                Context.ObjectIds.Remove(objIdAttr.Content.Id);
             }
 
             List<NtfsAttribute> attrs = new List<NtfsAttribute>(AllAttributes);
@@ -714,12 +714,12 @@ namespace DiscUtils.Ntfs
                 RemoveAttribute(attr.Id);
             }
 
-            _fileSystem.DeleteFile(this);
+            _context.DeleteFile(this);
         }
 
-        private static Guid CreateNewGuid(INtfsContext fileSystem)
+        private static Guid CreateNewGuid(INtfsContext context)
         {
-            Random rng = fileSystem.Options.RandomNumberGenerator;
+            Random rng = context.Options.RandomNumberGenerator;
             if (rng != null)
             {
                 byte[] buffer = new byte[16];

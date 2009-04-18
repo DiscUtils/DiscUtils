@@ -71,13 +71,13 @@ namespace DiscUtils.Ntfs
         {
             if (_record.IsNonResident)
             {
-                return _record.OffsetToAbsolutePos(offset, 0, _file.FileSystem.BiosParameterBlock.BytesPerCluster);
+                return _record.OffsetToAbsolutePos(offset, 0, _file.Context.BiosParameterBlock.BytesPerCluster);
             }
             else
             {
-                long recordStart = _file.FileSystem.Mft.GetRecordOffset(_file.MftReference);
+                long recordStart = _file.Context.Mft.GetRecordOffset(_file.MftReference);
                 long attrStart = recordStart + _file.GetAttributeOffset(_record.AttributeId);
-                long attrPos = _file.FileSystem.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data).OffsetToAbsolutePos(attrStart);
+                long attrPos = _file.Context.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data).OffsetToAbsolutePos(attrStart);
 
                 return _record.OffsetToAbsolutePos(offset, attrPos, 0);
             }

@@ -38,7 +38,7 @@ namespace DiscUtils.Ntfs
             NtfsAttribute attr = _file.GetAttribute(AttributeType.Data);
             _bitmap = new Bitmap(
                 attr.OpenRaw(FileAccess.ReadWrite),
-                Utilities.Ceil(file.FileSystem.BiosParameterBlock.TotalSectors64, file.FileSystem.BiosParameterBlock.SectorsPerCluster));
+                Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64, file.Context.BiosParameterBlock.SectorsPerCluster));
         }
 
         public Tuple<long, long>[] AllocateClusters(long count, long proposedStart)
@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
 
             long numFound = 0;
 
-            long numClusters = _file.FileSystem.RawStream.Length / _file.FileSystem.BiosParameterBlock.BytesPerCluster;
+            long numClusters = _file.Context.RawStream.Length / _file.Context.BiosParameterBlock.BytesPerCluster;
 
             numFound += FindClusters(count - numFound, result, numClusters / 8, numClusters, proposedStart);
 
@@ -140,7 +140,7 @@ namespace DiscUtils.Ntfs
 
         private Random GetRandom()
         {
-            Random rng = _file.FileSystem.Options.RandomNumberGenerator;
+            Random rng = _file.Context.Options.RandomNumberGenerator;
             if (rng == null)
             {
                 rng = s_rng;
