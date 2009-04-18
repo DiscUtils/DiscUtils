@@ -71,6 +71,49 @@ namespace DiscUtils.Ntfs
             get { return _mft.RecordSize - _baseRecord.Size; }
         }
 
+        public string CanonicalName
+        {
+            get
+            {
+                if (IndexInMft == MasterFileTable.RootDirIndex)
+                {
+                    return "";
+                }
+                else
+                {
+                    FileNameRecord firstName = GetAttributeContent<FileNameRecord>(AttributeType.FileName);
+                    return Path.Combine(_context.GetDirectoryByRef(firstName.ParentDirectory).CanonicalName, firstName.FileName);
+                }
+            }
+        }
+
+        public List<string> Names
+        {
+            get
+            {
+                List<string> result = new List<string>();
+
+                if (IndexInMft == MasterFileTable.RootDirIndex)
+                {
+                    result.Add("");
+                }
+                else
+                {
+                    foreach (StructuredNtfsAttribute<FileNameRecord> attr in GetAttributes(AttributeType.FileName))
+                    {
+                        string name = attr.Content.FileName;
+
+                        foreach (string dirName in _context.GetDirectoryByRef(attr.Content.ParentDirectory).Names)
+                        {
+                            result.Add(Path.Combine(dirName, name));
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
+
         public void Modified()
         {
             DateTime now = DateTime.UtcNow;

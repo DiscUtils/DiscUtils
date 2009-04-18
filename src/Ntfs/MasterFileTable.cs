@@ -291,21 +291,56 @@ namespace DiscUtils.Ntfs
             object[] clusterToFile = new object[totalClusters];
             Dictionary<object, string[]> fileToPaths = new Dictionary<object, string[]>();
 
+            for (int i = 0; i < totalClusters; ++i)
+            {
+                clusterToRole[i] = ClusterRoles.Free;
+            }
+
             foreach (FileRecord fr in Records)
             {
                 File f = new File(_self.Context, fr);
+
                 foreach (var attr in f.AllAttributes)
                 {
-                    string fileName = f.BestName + "(" + f.IndexInMft + "):" + attr.Record.AttributeType + "@" + attr.Name + "(" + attr.Id + ")";
+                    string fileId;
 
-                    fileToPaths[fileName] = new string[] { fileName };
+                    if (attr.Record.AttributeType == AttributeType.Data && !string.IsNullOrEmpty(attr.Name))
+                    {
+                        fileId = f.IndexInMft.ToString() + ":" + attr.Name;
+                        fileToPaths[fileId] = Utilities.Map(f.Names, n => n + ":" + attr.Name);
+                    }
+                    else
+                    {
+                        fileId = f.IndexInMft.ToString();
+                        fileToPaths[fileId] = f.Names.ToArray();
+                    }
+
+                    ClusterRoles roles = ClusterRoles.None;
+                    if (f.IndexInMft < MasterFileTable.FirstAvailableMftIndex)
+                    {
+                        roles |= ClusterRoles.SystemFile;
+
+                        if (f.IndexInMft == MasterFileTable.BootIndex)
+                        {
+                            roles |= ClusterRoles.BootArea;
+                        }
+                    }
+                    else
+                    {
+                        roles |= ClusterRoles.DataFile;
+                    }
+
+                    if (attr.Record.AttributeType != AttributeType.Data)
+                    {
+                        roles |= ClusterRoles.Metadata;
+                    }
 
                     foreach (var range in attr.GetClusters())
                     {
                         for (long cluster = range.Offset; cluster < range.Offset + range.Count; ++cluster)
                         {
-                            clusterToRole[cluster] |= ClusterRoles.DataFile;
-                            clusterToFile[cluster] = fileName;
+                            clusterToRole[cluster] = roles;
+                            clusterToFile[cluster] = fileId;
                         }
                     }
                 }

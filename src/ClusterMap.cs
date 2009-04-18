@@ -60,17 +60,17 @@ namespace DiscUtils
         /// <summary>
         /// Cluster is in use for meta-data.
         /// </summary>
-        Metadata = 0x04,
+        Metadata = 0x08,
 
         /// <summary>
         /// Cluster contains the boot region.
         /// </summary>
-        BootArea = 0x08,
+        BootArea = 0x10,
 
         /// <summary>
         /// Cluster is marked bad.
         /// </summary>
-        Bad      = 0x10,
+        Bad      = 0x20,
     }
 
     /// <summary>

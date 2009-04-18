@@ -965,12 +965,12 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Not Implemented: Gets an object that can convert between clusters and files.
+        /// Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
         public override ClusterMap BuildClusterMap()
         {
-            throw new NotImplementedException();
+            return _context.Mft.GetClusterMap();
         }
         #endregion
 
