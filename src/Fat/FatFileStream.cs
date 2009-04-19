@@ -45,22 +45,25 @@ namespace DiscUtils.Fat
 
         public override void Close()
         {
-            try
+            if (_dir.FileSystem.CanWrite)
             {
-                DateTime now = _dir.FileSystem.ConvertFromUtc(DateTime.UtcNow);
-
-                DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
-                dirEntry.LastAccessTime = now;
-                if (didWrite)
+                try
                 {
-                    dirEntry.FileSize = (int)_stream.Length;
-                    dirEntry.LastWriteTime = now;
+                    DateTime now = _dir.FileSystem.ConvertFromUtc(DateTime.UtcNow);
+
+                    DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
+                    dirEntry.LastAccessTime = now;
+                    if (didWrite)
+                    {
+                        dirEntry.FileSize = (int)_stream.Length;
+                        dirEntry.LastWriteTime = now;
+                    }
+                    _dir.UpdateEntry(_dirId, dirEntry);
                 }
-                _dir.UpdateEntry(_dirId, dirEntry);
-            }
-            finally
-            {
-                base.Close();
+                finally
+                {
+                    base.Close();
+                }
             }
         }
 
