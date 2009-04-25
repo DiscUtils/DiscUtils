@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,13 +20,43 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils.Registry
 {
-    internal interface IByteArraySerializable
+    internal class BinHeader : IByteArraySerializable
     {
-        void ReadFrom(byte[] buffer, int offset);
-        void WriteTo(byte[] buffer, int offset);
-        int Size { get; }
+        public const int HeaderSize = 0x20;
+        private const uint Signature = 0x6E696268;
+
+        public int FileOffset;
+        public int BinSize;
+
+        #region IByteArraySerializable Members
+
+        public void ReadFrom(byte[] buffer, int offset)
+        {
+            uint sig = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
+            if (sig != Signature)
+            {
+                throw new IOException("Invalid signature for registry bin");
+            }
+
+            FileOffset = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            BinSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Size
+        {
+            get { return HeaderSize; }
+        }
+
+        #endregion
     }
 }
