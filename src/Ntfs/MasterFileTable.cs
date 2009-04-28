@@ -115,7 +115,7 @@ namespace DiscUtils.Ntfs
         public static FileRecord GetBootstrapRecord(Stream fsStream, BiosParameterBlock bpb)
         {
             fsStream.Position = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
-            byte[] mftSelfRecordData = Utilities.ReadFully(fsStream, bpb.MftRecordSize * bpb.SectorsPerCluster * bpb.BytesPerSector);
+            byte[] mftSelfRecordData = Utilities.ReadFully(fsStream, bpb.MftRecordSize);
             FileRecord mftSelfRecord = new FileRecord(bpb.BytesPerSector);
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
             return mftSelfRecord;
