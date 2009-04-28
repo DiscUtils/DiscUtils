@@ -6,9 +6,11 @@
         <namespaceSummaryItem name="" isDocumented="False" />
         <namespaceSummaryItem name="DiscUtils" isDocumented="True">Shared classes common to multiple file systems.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Fat" isDocumented="True">Classes to access and modify disks formatted with a FAT file system.  FAT12, FAT16 and FAT32 are supported.</namespaceSummaryItem>
+        <namespaceSummaryItem name="DiscUtils.Iscsi" isDocumented="True">Provides access to disk images available over iSCSI, supporting CHAP authentication.  Currently read-only.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Iso9660" isDocumented="True">Classes to create and read ISO 9660 (aka CDROM) disc images.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Ntfs" isDocumented="True">Classes providing read-only access to NTFS file systems.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Partitions" isDocumented="True">Classes to initialize, access and modify hard disk partition tables.  Currently, only legacy BIOS-style partition tables are fully supported (GUID Partition Tables are read-only).</namespaceSummaryItem>
+        <namespaceSummaryItem name="DiscUtils.Registry" isDocumented="True">Provides access to NT-style registry hives.  Currently read-only.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Vdi" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VirtualBox .vdi format.  Fixed and Dynamic disks are currently supported.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Vhd" isDocumented="True">Classes to create, read and modify virtual hard-disks in the Microsoft VHD format.  Fixed, Dynamic and Differencing disks are supported.</namespaceSummaryItem>
         <namespaceSummaryItem name="DiscUtils.Vmdk" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VMWare VMDK format.  Most disk forms (dynamic, static, etc) are supported.  Stream optimized disks can be read from a seekable stream, but can not be read as a sequential stream, nor written to.</namespaceSummaryItem>
