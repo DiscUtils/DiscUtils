@@ -48,7 +48,7 @@ namespace DiscUtils.Iso9660
         {
             base.WriteTo(buffer, offset);
             IsoUtilities.WriteAChars(buffer, offset + 8, 32, SystemIdentifier);
-            IsoUtilities.WriteAChars(buffer, offset + 40, 32, VolumeIdentifier);
+            IsoUtilities.WriteString(buffer, offset + 40, 32, true, VolumeIdentifier, Encoding.ASCII);
             IsoUtilities.ToBothFromUInt32(buffer, offset + 80, VolumeSpaceSize);
             IsoUtilities.ToBothFromUInt16(buffer, offset + 120, VolumeSetSize);
             IsoUtilities.ToBothFromUInt16(buffer, offset + 124, VolumeSequenceNumber);

@@ -74,7 +74,7 @@ namespace DiscUtils.Iso9660
         {
             get { return _buildParams.VolumeIdentifier; }
             set {
-                if (value.Length > 32 || !IsoUtilities.isValidDString(value))
+                if (value.Length > 32)
                 {
                     throw new ArgumentException("Not a valid volume identifier");
                 }
