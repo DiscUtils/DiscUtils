@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Iscsi
 {
@@ -32,6 +33,7 @@ namespace DiscUtils.Iscsi
     {
         private Session _session;
         private long _lun;
+        private LunCapacity _capacity;
 
         private DiskStream _stream;
 
@@ -48,8 +50,17 @@ namespace DiscUtils.Iscsi
         {
             get
             {
-                // TODO: Query target for geometry...
-                return Geometry.FromCapacity(Capacity);
+                // We detect the geometry (which will return a sensible default if the disk has no partitions).
+                // We don't rely on asking the iSCSI target for the geometry because frequently values are returned
+                // that are not valid as BIOS disk geometries.
+                Stream stream = Content;
+                long pos = stream.Position;
+
+                Geometry result = DiscUtils.Partitions.BiosPartitionTable.DetectGeometry(stream);
+
+                stream.Position = pos;
+
+                return result;
             }
         }
 
@@ -58,7 +69,29 @@ namespace DiscUtils.Iscsi
         /// </summary>
         public override long Capacity
         {
-            get { return _session.GetCapacity(_lun); }
+            get
+            {
+                if (_capacity == null)
+                {
+                    _capacity = _session.GetCapacity(_lun);
+                }
+                return _capacity.BlockSize * _capacity.LogicalBlockCount;
+            }
+        }
+
+        /// <summary>
+        /// Gets the size of the disk's logical blocks (in bytes).
+        /// </summary>
+        public override int BlockSize
+        {
+            get
+            {
+                if (_capacity == null)
+                {
+                    _capacity = _session.GetCapacity(_lun);
+                }
+                return _capacity.BlockSize;
+            }
         }
 
         /// <summary>

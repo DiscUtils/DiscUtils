@@ -75,6 +75,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the size of the disk's logical blocks (in bytes).
+        /// </summary>
+        public virtual int BlockSize
+        {
+            get { return Sizes.Sector; }
+        }
+
+        /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
         /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position

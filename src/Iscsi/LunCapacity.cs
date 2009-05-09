@@ -20,50 +20,51 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 
 namespace DiscUtils.Iscsi
 {
-    internal class ScsiReadCapacityCommand : ScsiCommand
+    /// <summary>
+    /// Class representing the capacity of a LUN.
+    /// </summary>
+    public class LunCapacity
     {
-        private uint _responseDataLength = 32;
+        private long _logicalBlockCount;
+        private int _blockSize;
 
-        public ScsiReadCapacityCommand(ulong targetLun)
-            : base(targetLun)
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="logicalBlockCount">The number of logical blocks</param>
+        /// <param name="blockSize">The size of each block</param>
+        public LunCapacity(long logicalBlockCount, int blockSize)
         {
+            _logicalBlockCount = logicalBlockCount;
+            _blockSize = blockSize;
         }
 
-        public override uint ExpectedResponseDataLength
+        /// <summary>
+        /// Gets the number of logical blocks in the LUN.
+        /// </summary>
+        public long LogicalBlockCount
         {
-            get
-            {
-                return _responseDataLength;
-            }
-            set
-            {
-                _responseDataLength = value;
-            }
+            get { return _logicalBlockCount; }
         }
 
-        public override TaskAttributes TaskAttributes
+        /// <summary>
+        /// Gets the size of each logical block.
+        /// </summary>
+        public int BlockSize
         {
-            get { return TaskAttributes.Simple; }
+            get { return _blockSize; }
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        /// <summary>
+        /// Gets the capacity (in bytes) as a string.
+        /// </summary>
+        /// <returns>A string</returns>
+        public override string ToString()
         {
-            throw new NotImplementedException();
-        }
-
-        public override void WriteTo(byte[] buffer, int offset)
-        {
-            Array.Clear(buffer, offset, 10);
-            buffer[offset] = 0x25; // OpCode
-        }
-
-        public override int Size
-        {
-            get { return 10; }
+            return (_blockSize * _logicalBlockCount).ToString();
         }
     }
 }

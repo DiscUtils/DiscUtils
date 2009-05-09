@@ -48,7 +48,7 @@ namespace DiscUtils.Iscsi
         public byte[] GetBytes(ScsiCommand cmd, byte[] data, int offset, int count, bool isFinalData, bool expectInput, bool expectOutput)
         {
             BasicHeaderSegment _basicHeader = new BasicHeaderSegment();
-            _basicHeader.Immediate = true;
+            _basicHeader.Immediate = cmd.ImmediateDelivery;
             _basicHeader.OpCode = OpCode.ScsiCommand;
             _basicHeader.FinalPdu = isFinalData;
             _basicHeader.TotalAhsLength = 0;
@@ -57,7 +57,7 @@ namespace DiscUtils.Iscsi
 
             byte[] buffer = new byte[48 + Utilities.RoundUp(count, 4)];
             _basicHeader.WriteTo(buffer, 0);
-            buffer[1] = PackAttrByte(isFinalData, expectInput, expectOutput, TaskAttributes.Untagged);
+            buffer[1] = PackAttrByte(isFinalData, expectInput, expectOutput, cmd.TaskAttributes);
             Utilities.WriteBytesBigEndian(_lun, buffer, 8);
             Utilities.WriteBytesBigEndian(cmd.ExpectedResponseDataLength, buffer, 20);
             Utilities.WriteBytesBigEndian(_connection.Session.NextCommandSequenceNumber(), buffer, 24);

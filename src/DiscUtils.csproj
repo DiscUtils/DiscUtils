@@ -77,6 +77,7 @@
     <Compile Include="Fat\FloppyDiskType.cs" />
     <Compile Include="FileLocator.cs" />
     <Compile Include="Geometry.cs" />
+    <Compile Include="IByteArraySerializable.cs" />
     <Compile Include="IDiagnosticTraceable.cs" />
     <Compile Include="InvalidFileSystemException.cs" />
     <Compile Include="Iscsi\Authenticator.cs" />
@@ -94,6 +95,8 @@
     <Compile Include="Iscsi\LoginStatusClass.cs" />
     <Compile Include="Iscsi\LogoutRequest.cs" />
     <Compile Include="Iscsi\LogoutResponse.cs" />
+    <Compile Include="Iscsi\LunCapacity.cs" />
+    <Compile Include="Iscsi\LunInfo.cs" />
     <Compile Include="Iscsi\NullAuthenticator.cs" />
     <Compile Include="Iscsi\OpCode.cs" />
     <Compile Include="Iscsi\ProtocolDataUnit.cs" />
@@ -101,6 +104,8 @@
     <Compile Include="Iscsi\ScsiCommand.cs" />
     <Compile Include="Iscsi\ScsiCommandRequest.cs" />
     <Compile Include="Iscsi\ScsiDataIn.cs" />
+    <Compile Include="Iscsi\ScsiInquiryCommand.cs" />
+    <Compile Include="Iscsi\ScsiInquiryStandardResponse.cs" />
     <Compile Include="Iscsi\ScsiReadCapacityCommand.cs" />
     <Compile Include="Iscsi\ScsiReadCapacityResponse.cs" />
     <Compile Include="Iscsi\ScsiReadCommand.cs" />
@@ -152,7 +157,6 @@
     <Compile Include="Ntfs\FileReference.cs" />
     <Compile Include="Ntfs\FixupRecordBase.cs" />
     <Compile Include="Ntfs\GenericFixupRecord.cs" />
-    <Compile Include="IByteArraySerializable.cs" />
     <Compile Include="Ntfs\Index.cs" />
     <Compile Include="Ntfs\IndexBlock.cs" />
     <Compile Include="Ntfs\IndexEntry.cs" />

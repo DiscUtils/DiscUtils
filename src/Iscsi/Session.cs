@@ -22,7 +22,8 @@
 
 
 using System;
-using System.Security;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DiscUtils.Iscsi
 {
@@ -109,10 +110,10 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Gets the LUNs available from the Target.
+        /// Gets information about the LUNs available from the Target.
         /// </summary>
         /// <returns>The LUNs available</returns>
-        public long[] GetLuns()
+        public LunInfo[] GetLuns()
         {
             ScsiReportLunsCommand cmd = new ScsiReportLunsCommand();
 
@@ -128,12 +129,40 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Truncated response");
             }
 
-            long[] result = new long[resp.Luns.Count];
+            LunInfo[] result = new LunInfo[resp.Luns.Count];
             for (int i = 0; i < resp.Luns.Count; ++i)
             {
-                result[i] = (long)resp.Luns[i];
+                result[i] = GetInfo((long)resp.Luns[i]);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Gets all the block-device LUNs available from the Target.
+        /// </summary>
+        /// <returns>The block-device LUNs</returns>
+        public long[] GetBlockDeviceLuns()
+        {
+            IEnumerable<long> luns =
+                from info in GetLuns()
+                where info.DeviceType == LunClass.BlockStorage
+                select (long)info.Lun;
+
+            return luns.ToArray();
+        }
+
+        /// <summary>
+        /// Gets information about a particular LUN.
+        /// </summary>
+        /// <param name="lun">The LUN to query</param>
+        /// <returns>Information about the LUN.</returns>
+        public LunInfo GetInfo(long lun)
+        {
+            ScsiInquiryCommand cmd = new ScsiInquiryCommand((ulong)lun);
+
+            ScsiInquiryStandardResponse resp = Send<ScsiInquiryStandardResponse>(cmd);
+
+            return new LunInfo(lun, resp.DeviceType, resp.Removable, resp.VendorId, resp.ProductId, resp.ProductRevision);
         }
 
         /// <summary>
@@ -141,7 +170,7 @@ namespace DiscUtils.Iscsi
         /// </summary>
         /// <param name="lun">The LUN to query</param>
         /// <returns>The LUN's capacity</returns>
-        public long GetCapacity(long lun)
+        public LunCapacity GetCapacity(long lun)
         {
             ScsiReadCapacityCommand cmd = new ScsiReadCapacityCommand((ulong)lun);
 
@@ -152,7 +181,7 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Truncated response");
             }
 
-            return ((long)resp.LogicalBlockSize) * ((long)resp.NumLogicalBlocks);
+            return new LunCapacity(resp.NumLogicalBlocks, (int)resp.LogicalBlockSize);
         }
 
         /// <summary>

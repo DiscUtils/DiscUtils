@@ -43,6 +43,16 @@ namespace DiscUtils.Iscsi
             set;
         }
 
+        public virtual TaskAttributes TaskAttributes
+        {
+            get { return TaskAttributes.Untagged; }
+        }
+
+        public virtual bool ImmediateDelivery
+        {
+            get { return false; }
+        }
+
         #region IByteArraySerializable Members
 
         public abstract void ReadFrom(byte[] buffer, int offset);

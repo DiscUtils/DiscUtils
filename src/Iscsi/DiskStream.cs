@@ -42,7 +42,8 @@ namespace DiscUtils.Iscsi
             _session = session;
             _lun = lun;
 
-            _length = session.GetCapacity(lun);
+            LunCapacity capacity = session.GetCapacity(lun);
+            _length = capacity.LogicalBlockCount * capacity.BlockSize;
         }
         
         public override bool CanRead

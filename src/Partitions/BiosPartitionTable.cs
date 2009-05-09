@@ -293,6 +293,34 @@ namespace DiscUtils.Partitions
             }
         }
 
+        /// <summary>
+        /// Makes a best guess at the geometry of a disk.
+        /// </summary>
+        /// <returns>The detected geometry</returns>
+        public static Geometry DetectGeometry(Stream disk)
+        {
+            disk.Position = 0;
+            byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+            if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
+            {
+                byte maxHead = 0;
+                byte maxSector = 0;
+                foreach (var record in ReadPrimaryRecords(bootSector))
+                {
+                    maxHead = Math.Max(maxHead, record.EndHead);
+                    maxSector = Math.Max(maxSector, record.EndSector);
+                }
+
+                if (maxHead > 0 && maxSector > 0)
+                {
+                    int cylSize = (maxHead + 1) * maxSector * 512;
+                    return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
+                }
+            }
+
+            return Geometry.FromCapacity(disk.Length);
+        }
+
         private BiosPartitionRecord[] GetAllRecords()
         {
             List<BiosPartitionRecord> newList = new List<BiosPartitionRecord>();
@@ -306,12 +334,16 @@ namespace DiscUtils.Partitions
             _diskData.Position = 0;
             byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
 
-            BiosPartitionRecord[] records = new BiosPartitionRecord[4];
-            records[0] = new BiosPartitionRecord(bootSector, 0x01BE, 0);
-            records[1] = new BiosPartitionRecord(bootSector, 0x01CE, 0);
-            records[2] = new BiosPartitionRecord(bootSector, 0x01DE, 0);
-            records[3] = new BiosPartitionRecord(bootSector, 0x01EE, 0);
+            return ReadPrimaryRecords(bootSector);
+        }
 
+        private static BiosPartitionRecord[] ReadPrimaryRecords(byte[] bootSector)
+        {
+            BiosPartitionRecord[] records = new BiosPartitionRecord[4];
+            for (int i = 0; i < 4; ++i)
+            {
+                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0);
+            }
             return records;
         }
 
