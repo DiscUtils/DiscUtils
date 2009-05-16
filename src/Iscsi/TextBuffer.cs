@@ -67,6 +67,23 @@ namespace DiscUtils.Iscsi
             }
         }
 
+        internal void Remove(string key)
+        {
+            for (int i = 0; i < _records.Count; ++i)
+            {
+                if (_records[i].Key == key)
+                {
+                    _records.RemoveAt(i);
+                    return;
+                }
+            }
+        }
+
+        internal int Count
+        {
+            get { return _records.Count; }
+        }
+
         public IEnumerable<KeyValuePair<string, string>> Lines
         {
             get
@@ -77,6 +94,11 @@ namespace DiscUtils.Iscsi
 
         public void ReadFrom(byte[] buffer, int offset, int length)
         {
+            if (buffer == null)
+            {
+                return;
+            }
+
             int end = offset + length;
             int i = offset;
             while (i < end)

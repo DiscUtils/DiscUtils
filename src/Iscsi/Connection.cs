@@ -24,9 +24,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 
 namespace DiscUtils.Iscsi
 {
+    internal enum Digest
+    {
+        [ProtocolKeyValue("None")]
+        None,
+        [ProtocolKeyValue("CRC32C")]
+        Crc32c
+    }
+
     internal sealed class Connection : IDisposable
     {
         private Session _session;
@@ -37,6 +46,11 @@ namespace DiscUtils.Iscsi
         private ushort _id;
         private uint _expectedStatusSequenceNumber = 1;
         private LoginStages _loginStage = LoginStages.SecurityNegotiation;
+
+        /// <summary>
+        /// The set of all 'parameters' we've negotiated.
+        /// </summary>
+        private Dictionary<string, string> _negotiatedParameters;
 
         public Connection(Session session, TargetAddress address, Authenticator[] authenticators)
         {
@@ -49,6 +63,13 @@ namespace DiscUtils.Iscsi
 
             _id = session.NextConnectionId();
 
+            // Default negotiated values
+            HeaderDigest = Digest.None;
+            DataDigest = Digest.None;
+            MaxReceiveDataSegmentLength = 8192;
+            MaxTransmitDataSegmentLength = 8192;
+
+            _negotiatedParameters = new Dictionary<string, string>();
             NegotiateSecurity();
             NegotiateFeatures();
         }
@@ -57,6 +78,21 @@ namespace DiscUtils.Iscsi
         {
             Close(LogoutReason.CloseConnection);
         }
+
+        #region Protocol Features
+        [ProtocolKey("HeaderDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
+        public Digest HeaderDigest { get; set; }
+
+        [ProtocolKey("DataDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
+        public Digest DataDigest { get; set; }
+
+        [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Initiator, KeyType.Declarative)]
+        internal int MaxReceiveDataSegmentLength { get; set; }
+
+        [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Target, KeyType.Declarative)]
+        internal int MaxTransmitDataSegmentLength { get; set; }
+        #endregion
+
 
         internal ushort Id
         {
@@ -80,7 +116,7 @@ namespace DiscUtils.Iscsi
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
 
-            ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+            ProtocolDataUnit pdu = ReadPdu();
             LogoutResponse resp = ParseResponse<LogoutResponse>(pdu);
 
             if (resp.Response != LogoutResponseCode.ClosedSuccessfully)
@@ -91,50 +127,106 @@ namespace DiscUtils.Iscsi
             _stream.Close();
         }
 
-        public T Send<T>(ScsiCommand cmd)
-            where T : ScsiResponse, new()
+        /// <summary>
+        /// Sends an SCSI command (aka task) to a LUN via the connected target.
+        /// </summary>
+        /// <param name="cmd">The command to send</param>
+        /// <param name="outBuffer">The data to send with the command</param>
+        /// <param name="outBufferOffset">The offset of the first byte to send</param>
+        /// <param name="outBufferCount">The number of bytes to send, if any</param>
+        /// <param name="inBuffer">The buffer to fill with returned data</param>
+        /// <param name="inBufferOffset">The first byte to fill with returned data</param>
+        /// <param name="inBufferMax">The maximum amount of data to receive</param>
+        /// <returns>The number of bytes received</returns>
+        public int Send(ScsiCommand cmd, byte[] outBuffer, int outBufferOffset, int outBufferCount, byte[] inBuffer, int inBufferOffset, int inBufferMax)
         {
-            ScsiCommandRequest req = new ScsiCommandRequest(this, cmd.TargetLun);
-            byte[] packet = req.GetBytes(cmd, null, 0, 0, true, true, false);
+            CommandRequest req = new CommandRequest(this, cmd.TargetLun);
+
+            int toSend = Math.Min(Math.Min(outBufferCount, _session.ImmediateData ? _session.FirstBurstLength : 0), MaxTransmitDataSegmentLength);
+            byte[] packet = req.GetBytes(cmd, outBuffer, outBufferOffset, toSend, true, inBufferMax != 0, outBufferCount != 0, (uint)(outBufferCount != 0 ? outBufferCount : inBufferMax));
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
 
-            ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+            int numApproved = 0;
+            int numSent = toSend;
+            int pktsSent = 0;
+            while (numSent < outBufferCount)
+            {
+                ProtocolDataUnit pdu = ReadPdu();
 
-            ScsiDataIn resp = ParseResponse<ScsiDataIn>(pdu);
+                ReadyToTransferPacket resp = ParseResponse<ReadyToTransferPacket>(pdu);
+                numApproved = (int)resp.DesiredTransferLength;
+                uint targetTransferTag = resp.TargetTransferTag;
 
-            T result = new T();
-            result.ReadFrom(resp.ReadData, 0, resp.ReadData.Length);
-            return result;
-        }
+                while (numApproved > 0)
+                {
+                    toSend = Math.Min(Math.Min(outBufferCount - numSent, numApproved), MaxTransmitDataSegmentLength);
 
-        public int Read(ScsiReadCommand readCmd, byte[] buffer, int offset)
-        {
-            ScsiCommandRequest req = new ScsiCommandRequest(this, readCmd.TargetLun);
-            byte[] packet = req.GetBytes(readCmd, null, 0, 0, true, true, false);
-            _stream.Write(packet, 0, packet.Length);
-            _stream.Flush();
+                    // toSend = numSent
+
+                    DataOutPacket pkt = new DataOutPacket(this, cmd.TargetLun);
+                    packet = pkt.GetBytes(outBuffer, outBufferOffset + numSent, toSend, /*numSent + toSend == outBufferCount*/toSend == numApproved, pktsSent++, (uint)numSent, targetTransferTag);
+                    _stream.Write(packet, 0, packet.Length);
+                    _stream.Flush();
+
+                    numApproved -= toSend;
+                    numSent += toSend;
+                }
+            }
 
             bool isFinal = false;
             int numRead = 0;
             while (!isFinal)
             {
-                ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                ProtocolDataUnit pdu = ReadPdu();
 
-                ScsiDataIn resp = ParseResponse<ScsiDataIn>(pdu);
-
-                if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
+                if (pdu.OpCode == OpCode.ScsiResponse)
                 {
-                    throw new InvalidProtocolException("Target indicated failure during read: " + resp.Status);
+                    Response resp = ParseResponse<Response>(pdu);
+
+                    if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
+                    {
+                        throw new InvalidProtocolException("Target indicated failure: " + resp.Status);
+                    }
+
+                    isFinal = resp.Header.FinalPdu;
+                }
+                else if (pdu.OpCode == OpCode.ScsiDataIn)
+                {
+                    DataInPacket resp = ParseResponse<DataInPacket>(pdu);
+
+                    if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
+                    {
+                        throw new InvalidProtocolException("Target indicated failure: " + resp.Status);
+                    }
+
+
+                    if (resp.ReadData != null)
+                    {
+                        Array.Copy(resp.ReadData, 0, inBuffer, inBufferOffset + resp.BufferOffset, resp.ReadData.Length);
+                        numRead += resp.ReadData.Length;
+                    }
+
+                    isFinal = resp.Header.FinalPdu;
                 }
 
-                Array.Copy(resp.ReadData, 0, buffer, offset + resp.BufferOffset, resp.ReadData.Length);
-                numRead += resp.ReadData.Length;
-
-                isFinal = resp.Header.FinalPdu;
             }
 
+            _session.NextTaskTag();
+            _session.NextCommandSequenceNumber();
+
             return numRead;
+        }
+
+        public T Send<T>(ScsiCommand cmd, byte[] buffer, int offset, int count, int expected)
+            where T : ScsiResponse, new()
+        {
+            byte[] tempBuffer = new byte[expected];
+            int numRead = Send(cmd, buffer, offset, count, tempBuffer, 0, expected);
+
+            T result = new T();
+            result.ReadFrom(tempBuffer, 0, numRead);
+            return result;
         }
 
         public TargetInfo[] EnumerateTargets()
@@ -151,7 +243,7 @@ namespace DiscUtils.Iscsi
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
 
-            ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+            ProtocolDataUnit pdu = ReadPdu();
             TextResponse resp = ParseResponse<TextResponse>(pdu);
 
             TextBuffer buffer = new TextBuffer();
@@ -226,20 +318,12 @@ namespace DiscUtils.Iscsi
             _loginStage = LoginStages.SecurityNegotiation;
 
             //
-            // Send the request...
+            // Establish the contents of the request
             //
             TextBuffer parameters = new TextBuffer();
-            parameters.Add(InitiatorNameParameter, "iqn.2009-04.discutils.codeplex.com");
-            if (_session.Type == SessionType.Discovery)
-            {
-                parameters.Add(SessionTypeParameter, "Discovery");
-            }
-            else
-            {
-                parameters.Add(SessionTypeParameter, "Normal");
-                parameters.Add(TargetNameParameter, _session.TargetName);
-            }
 
+            GetParametersToNegotiate(parameters, KeyUsagePhase.SecurityNegotiation, _session.SessionType);
+            _session.GetParametersToNegotiate(parameters, KeyUsagePhase.SecurityNegotiation);
 
             string authParam = _authenticators[0].Identifier;
             for (int i = 1; i < _authenticators.Length; ++i)
@@ -249,6 +333,9 @@ namespace DiscUtils.Iscsi
             parameters.Add(AuthMethodParameter, authParam);
 
 
+            //
+            // Send the request...
+            //
             byte[] paramBuffer = new byte[parameters.Size];
             parameters.WriteTo(paramBuffer, 0);
 
@@ -264,7 +351,7 @@ namespace DiscUtils.Iscsi
             //
             TextBuffer settings = new TextBuffer();
 
-            ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+            ProtocolDataUnit pdu = ReadPdu();
             LoginResponse resp = ParseResponse<LoginResponse>(pdu);
 
             if (resp.StatusCode != LoginStatusCode.Success)
@@ -279,14 +366,14 @@ namespace DiscUtils.Iscsi
 
                 while (resp.Continue)
                 {
-                    pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                    pdu = ReadPdu();
                     resp = ParseResponse<LoginResponse>(pdu);
                     ms.Write(resp.TextData, 0, resp.TextData.Length);
                 }
 
                 settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
             }
-            else
+            else if(resp.TextData != null)
             {
                 settings.ReadFrom(resp.TextData, 0, resp.TextData.Length);
             }
@@ -300,18 +387,23 @@ namespace DiscUtils.Iscsi
                     break;
                 }
             }
+            settings.Remove(AuthMethodParameter);
+            settings.Remove("TargetPortalGroupTag");
 
             if (authenticator == null)
             {
                 throw new LoginException("iSCSI Target specified an unsupported authentication method: " + settings[AuthMethodParameter]);
             }
 
+            parameters = new TextBuffer();
+            ConsumeParameters(settings, parameters);
+
+
             while (!resp.Transit)
             {
                 //
                 // Send the request...
                 //
-                parameters = new TextBuffer();
                 authenticator.GetParameters(parameters);
                 paramBuffer = new byte[parameters.Size];
                 parameters.WriteTo(paramBuffer, 0);
@@ -328,7 +420,7 @@ namespace DiscUtils.Iscsi
                 //
                 settings = new TextBuffer();
 
-                pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                pdu = ReadPdu();
                 resp = ParseResponse<LoginResponse>(pdu);
 
                 if (resp.StatusCode != LoginStatusCode.Success)
@@ -345,7 +437,7 @@ namespace DiscUtils.Iscsi
 
                         while (resp.Continue)
                         {
-                            pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                            pdu = ReadPdu();
                             resp = ParseResponse<LoginResponse>(pdu);
                             ms.Write(resp.TextData, 0, resp.TextData.Length);
                         }
@@ -375,11 +467,8 @@ namespace DiscUtils.Iscsi
             // Send the request...
             //
             TextBuffer parameters = new TextBuffer();
-            parameters.Add(HeaderDigestParameter, NoneValue);
-            parameters.Add(DataDigestParameter, NoneValue);
-            parameters.Add(MaxRecvDataSegmentLengthParameter, "65536");
-            parameters.Add(DefaultTime2WaitParameter, "0");
-            parameters.Add(DefaultTime2RetainParameter, "60");
+            GetParametersToNegotiate(parameters, KeyUsagePhase.OperationalNegotiation, _session.SessionType);
+            _session.GetParametersToNegotiate(parameters, KeyUsagePhase.OperationalNegotiation);
 
             byte[] paramBuffer = new byte[parameters.Size];
             parameters.WriteTo(paramBuffer, 0);
@@ -397,7 +486,7 @@ namespace DiscUtils.Iscsi
             //
             TextBuffer settings = new TextBuffer();
 
-            ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+            ProtocolDataUnit pdu = ReadPdu();
             LoginResponse resp = ParseResponse<LoginResponse>(pdu);
 
             if (resp.StatusCode != LoginStatusCode.Success)
@@ -412,33 +501,23 @@ namespace DiscUtils.Iscsi
 
                 while (resp.Continue)
                 {
-                    pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                    pdu = ReadPdu();
                     resp = ParseResponse<LoginResponse>(pdu);
                     ms.Write(resp.TextData, 0, resp.TextData.Length);
                 }
 
                 settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
             }
-            else
+            else if (resp.TextData != null)
             {
                 settings.ReadFrom(resp.TextData, 0, resp.TextData.Length);
             }
 
-            while (!resp.Transit)
+            parameters = new TextBuffer();
+            ConsumeParameters(settings, parameters);
+
+            while (!resp.Transit || parameters.Count != 0)
             {
-                // Any settings in the response that weren't in the request are considered
-                // a new negotiation.  For now, just pretend we don't understand...
-                TextBuffer oldParameters = parameters;
-                parameters = new TextBuffer();
-                foreach (var line in settings.Lines)
-                {
-                    if (oldParameters[line.Key] == null)
-                    {
-                        parameters.Add(line.Key, "NotUnderstood");
-                    }
-                }
-
-
                 paramBuffer = new byte[parameters.Size];
                 parameters.WriteTo(paramBuffer, 0);
 
@@ -455,13 +534,15 @@ namespace DiscUtils.Iscsi
                 //
                 settings = new TextBuffer();
 
-                pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                pdu = ReadPdu();
                 resp = ParseResponse<LoginResponse>(pdu);
 
                 if (resp.StatusCode != LoginStatusCode.Success)
                 {
                     throw new LoginException("iSCSI Target indicated login failure: " + resp.StatusCode);
                 }
+
+                parameters = new TextBuffer();
 
                 if (resp.TextData != null)
                 {
@@ -472,7 +553,7 @@ namespace DiscUtils.Iscsi
 
                         while (resp.Continue)
                         {
-                            pdu = ProtocolDataUnit.ReadFrom(_stream, false, false);
+                            pdu = ReadPdu();
                             resp = ParseResponse<LoginResponse>(pdu);
                             ms.Write(resp.TextData, 0, resp.TextData.Length);
                         }
@@ -483,6 +564,8 @@ namespace DiscUtils.Iscsi
                     {
                         settings.ReadFrom(resp.TextData, 0, resp.TextData.Length);
                     }
+
+                    ConsumeParameters(settings, parameters);
                 }
             }
 
@@ -494,15 +577,122 @@ namespace DiscUtils.Iscsi
             _loginStage = resp.NextStage;
         }
 
-        private T ParseResponse<T>(ProtocolDataUnit pdu)
-            where T : Response, new()
+        private ProtocolDataUnit ReadPdu()
         {
-            T result = new T();
-            result.Parse(pdu);
+            ProtocolDataUnit pdu = ProtocolDataUnit.ReadFrom(_stream, HeaderDigest != Digest.None, DataDigest != Digest.None);
 
-            if (result.StatusPresent)
+            if (pdu.OpCode == OpCode.Reject)
             {
-                SeenStatusSequenceNumber(result.StatusSequenceNumber);
+                RejectPacket pkt = new RejectPacket();
+                pkt.Parse(pdu);
+
+                throw new IscsiException("Target sent reject packet, reason " + pkt.Reason);
+            }
+
+            return pdu;
+        }
+
+        private void GetParametersToNegotiate(TextBuffer parameters, KeyUsagePhase phase, SessionType sessionType)
+        {
+            PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var propInfo in properties)
+            {
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                if (attr != null)
+                {
+                    object value = propInfo.GetGetMethod(true).Invoke(this, null);
+
+                    if (attr.ShouldTransmit(value, propInfo.PropertyType, phase, sessionType == SessionType.Discovery))
+                    {
+                        parameters.Add(attr.Name, ProtocolKeyAttribute.GetValueAsString(value, propInfo.PropertyType));
+                        _negotiatedParameters.Add(attr.Name, "");
+                    }
+                }
+            }
+        }
+
+        private void ConsumeParameters(TextBuffer inParameters, TextBuffer outParameters)
+        {
+            PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var propInfo in properties)
+            {
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                if (attr != null)
+                {
+                    if (inParameters[attr.Name] != null)
+                    {
+                        object value = ProtocolKeyAttribute.GetValueAsObject(inParameters[attr.Name], propInfo.PropertyType);
+
+                        propInfo.GetSetMethod(true).Invoke(this, new object[] { value });
+                        inParameters.Remove(attr.Name);
+
+                        if (attr.Type == KeyType.Negotiated && !_negotiatedParameters.ContainsKey(attr.Name))
+                        {
+                            value = propInfo.GetGetMethod(true).Invoke(this, null);
+                            outParameters.Add(attr.Name, ProtocolKeyAttribute.GetValueAsString(value, propInfo.PropertyType));
+                            _negotiatedParameters.Add(attr.Name, "");
+                        }
+                    }
+                }
+            }
+
+            _session.ConsumeParameters(inParameters, outParameters);
+
+            foreach (var param in inParameters.Lines)
+            {
+                outParameters.Add(param.Key, "NotUnderstood");
+            }
+        }
+
+        private T ParseResponse<T>(ProtocolDataUnit pdu)
+            where T : BaseResponse, new()
+        {
+            BaseResponse resp;
+
+            switch (pdu.OpCode)
+            {
+                case OpCode.LoginResponse:
+                    resp = new LoginResponse();
+                    break;
+
+                case OpCode.LogoutResponse:
+                    resp = new LogoutResponse();
+                    break;
+
+                case OpCode.ReadyToTransfer:
+                    resp = new ReadyToTransferPacket();
+                    break;
+
+                case OpCode.Reject:
+                    resp = new RejectPacket();
+                    break;
+
+                case OpCode.ScsiDataIn:
+                    resp = new DataInPacket();
+                    break;
+
+                case OpCode.ScsiResponse:
+                    resp = new Response();
+                    break;
+
+                case OpCode.TextResponse:
+                    resp = new TextResponse();
+                    break;
+
+                default:
+                    throw new InvalidProtocolException("Unrecognized response opcode: " + pdu.OpCode);
+            }
+
+            resp.Parse(pdu);
+            if (resp.StatusPresent)
+            {
+                SeenStatusSequenceNumber(resp.StatusSequenceNumber);
+            }
+
+            T result = resp as T;
+            if (result == null)
+            {
+                throw new InvalidProtocolException("Unexpected response, expected " + typeof(T) + ", got " + result.GetType());
             }
 
             return result;
@@ -525,17 +715,6 @@ namespace DiscUtils.Iscsi
 
         private const string NoneValue = "None";
         private const string ChapValue = "CHAP";
-
-        private string CombineValues(params string[] values)
-        {
-            string result = values[0];
-            for (int i = 1; i < values.Length; ++i)
-            {
-                result += "," + values[i];
-            }
-            return result;
-        }
-
         #endregion
     }
 }

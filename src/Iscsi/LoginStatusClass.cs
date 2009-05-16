@@ -86,7 +86,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// The Target does not support session spanning to this connection (address).
         /// </summary>
-        CantIncludeInSession = 0x0208,
+        CannotIncludeInSession = 0x0208,
 
         /// <summary>
         /// The Target does not support this type of session (or not from this Initiator).

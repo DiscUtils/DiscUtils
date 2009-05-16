@@ -24,16 +24,43 @@ using System;
 
 namespace DiscUtils.Iscsi
 {
-    internal class ScsiReportLunsCommand : ScsiCommand
+    internal class ScsiWriteCommand : ScsiCommand
     {
-        public const int InitialResponseSize = 16;
+        private uint _dataLength;
 
-        private uint _expected;
+        private uint _logicalBlockAddress;
+        private ushort _numBlocks;
 
-        public ScsiReportLunsCommand(uint expected)
-            : base(0)
+        public ScsiWriteCommand(ulong targetLun, uint logicalBlockAddress, ushort numBlocks)
+            : base(targetLun)
         {
-            _expected = expected;
+            _logicalBlockAddress = logicalBlockAddress;
+            _numBlocks = numBlocks;
+        }
+
+        public ushort NumBlocks
+        {
+            get { return _numBlocks; }
+        }
+
+        public override TaskAttributes TaskAttributes
+        {
+            get
+            {
+                return TaskAttributes.Simple;
+            }
+        }
+
+        public uint ExpectedDataTransferLength
+        {
+            get
+            {
+                return _dataLength;
+            }
+            set
+            {
+                _dataLength = value;
+            }
         }
 
         public override void ReadFrom(byte[] buffer, int offset)
@@ -43,20 +70,17 @@ namespace DiscUtils.Iscsi
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            buffer[offset] = 0xA0;
-            buffer[offset + 1] = 0; // Reserved
-            buffer[offset + 2] = 0; // Report Type = 0
-            buffer[offset + 3] = 0; // Reserved
-            buffer[offset + 4] = 0; // Reserved
-            buffer[offset + 5] = 0; // Reserved
-            Utilities.WriteBytesBigEndian(_expected, buffer, offset + 6);
-            buffer[offset + 10] = 0; // Reserved
-            buffer[offset + 11] = 0; // Control
+            buffer[offset] = 0x2A;
+            buffer[offset + 1] = 0;
+            Utilities.WriteBytesBigEndian(_logicalBlockAddress, buffer, offset + 2);
+            buffer[offset + 6] = 0;
+            Utilities.WriteBytesBigEndian(_numBlocks, buffer, offset + 7);
+            buffer[offset + 9] = 0;
         }
 
         public override int Size
         {
-            get { return 12; }
+            get { return 10; }
         }
     }
 }

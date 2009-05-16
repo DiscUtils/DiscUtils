@@ -74,30 +74,20 @@ namespace DiscUtils.Iscsi
             switch (_state)
             {
                 case State.ReceiveChallenge:
-                    _algorithm = int.Parse(textBuffer["CHAP_A"]);
-                    _identifier = byte.Parse(textBuffer["CHAP_I"]);
+                    _algorithm = int.Parse(textBuffer["CHAP_A"], CultureInfo.InvariantCulture);
+                    _identifier = byte.Parse(textBuffer["CHAP_I"], CultureInfo.InvariantCulture);
                     _challenge = ParseByteString(textBuffer["CHAP_C"]);
                     _state = State.SendResponse;
+
+                    if (_algorithm != 0x5)
+                    {
+                        throw new LoginException("Unexpected CHAP authentication algorithm: " + _algorithm);
+                    }
+
                     return;
                 default:
                     throw new InvalidOperationException("Unknown authentication state: " + _state);
             }
-        }
-
-        private byte[] ParseByteString(string p)
-        {
-            if (!p.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidProtocolException("Invalid value in CHAP exchange");
-            }
-
-            byte[] data = new byte[(p.Length - 2) / 2];
-            for (int i = 0; i < data.Length; ++i)
-            {
-                data[i] = byte.Parse(p.Substring(2 + i * 2, 2), NumberStyles.HexNumber);
-            }
-
-            return data;
         }
 
         private string CalcResponse()
@@ -114,10 +104,26 @@ namespace DiscUtils.Iscsi
             StringBuilder result = new StringBuilder("0x");
             for (int i = 0; i < hash.Length; ++i)
             {
-                result.Append(hash[i].ToString("x2"));
+                result.Append(hash[i].ToString("x2", CultureInfo.InvariantCulture));
             }
 
             return result.ToString();
+        }
+
+        private static byte[] ParseByteString(string p)
+        {
+            if (!p.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidProtocolException("Invalid value in CHAP exchange");
+            }
+
+            byte[] data = new byte[(p.Length - 2) / 2];
+            for (int i = 0; i < data.Length; ++i)
+            {
+                data[i] = byte.Parse(p.Substring(2 + i * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+
+            return data;
         }
 
 

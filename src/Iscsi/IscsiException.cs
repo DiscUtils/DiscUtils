@@ -20,21 +20,51 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace DiscUtils.Iscsi
 {
     /// <summary>
     /// Base exception for any iSCSI-related failures.
     /// </summary>
+    [Serializable]
     public class IscsiException : IOException
     {
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        public IscsiException()
+        {
+        }
+
         /// <summary>
         /// Creates a new instance containing a message.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         public IscsiException(string message)
             : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance containing a message and an inner exception.
+        /// </summary>
+        /// <param name="message">The reason for the exception</param>
+        /// <param name="innerException">The inner exception</param>
+        public IscsiException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new deserialized instance.
+        /// </summary>
+        /// <param name="info">The serialization info</param>
+        /// <param name="context">Ther context</param>
+        protected IscsiException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

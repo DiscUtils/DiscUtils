@@ -21,6 +21,8 @@
 //
 
 
+using System.Globalization;
+
 namespace DiscUtils.Iscsi
 {
     /// <summary>
@@ -77,41 +79,41 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Parses a Target address in string form.
         /// </summary>
-        /// <param name="str">The address to parse</param>
+        /// <param name="address">The address to parse</param>
         /// <returns>The structured address</returns>
-        public static TargetAddress Parse(string str)
+        public static TargetAddress Parse(string address)
         {
-            int addrEnd = str.IndexOfAny(new char[] { ':', ',' });
+            int addrEnd = address.IndexOfAny(new char[] { ':', ',' });
             if (addrEnd == -1)
             {
-                return new TargetAddress(str, DefaultPort, "");
+                return new TargetAddress(address, DefaultPort, "");
             }
 
-            string addr = str.Substring(0, addrEnd);
+            string addr = address.Substring(0, addrEnd);
             int port = DefaultPort;
             string targetGroupTag = "";
 
             int focus = addrEnd;
-            if (str[focus] == ':')
+            if (address[focus] == ':')
             {
                 int portStart = addrEnd + 1;
-                int portEnd = str.IndexOf(',', portStart);
+                int portEnd = address.IndexOf(',', portStart);
 
                 if (portEnd == -1)
                 {
-                    port = int.Parse(str.Substring(portStart));
-                    focus = str.Length;
+                    port = int.Parse(address.Substring(portStart), CultureInfo.InvariantCulture);
+                    focus = address.Length;
                 }
                 else
                 {
-                    port = int.Parse(str.Substring(portStart, portEnd - portStart));
+                    port = int.Parse(address.Substring(portStart, portEnd - portStart), CultureInfo.InvariantCulture);
                     focus = portEnd;
                 }
             }
 
-            if (focus < str.Length)
+            if (focus < address.Length)
             {
-                targetGroupTag = str.Substring(focus + 1);
+                targetGroupTag = address.Substring(focus + 1);
             }
 
             return new TargetAddress(addr, port, targetGroupTag);

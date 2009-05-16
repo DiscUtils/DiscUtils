@@ -26,11 +26,11 @@ namespace DiscUtils.Iscsi
 {
     internal class ScsiReadCommand : ScsiCommand
     {
-        private long _logicalBlockAddress;
+        private uint _logicalBlockAddress;
         private ushort _numBlocks;
         private uint _responseDataLength;
 
-        public ScsiReadCommand(ulong targetLun, long logicalBlockAddress, ushort numBlocks)
+        public ScsiReadCommand(ulong targetLun, uint logicalBlockAddress, ushort numBlocks)
             : base(targetLun)
         {
             _logicalBlockAddress = logicalBlockAddress;
@@ -38,7 +38,7 @@ namespace DiscUtils.Iscsi
             _responseDataLength = _numBlocks * 512u;
         }
 
-        public override uint ExpectedResponseDataLength
+        public uint ExpectedDataTransferLength
         {
             get
             {
@@ -59,7 +59,7 @@ namespace DiscUtils.Iscsi
         {
             buffer[offset + 0] = 0x28; // OpCode: READ(10)
             buffer[offset + 1] = 0;
-            Utilities.WriteBytesBigEndian((uint)_logicalBlockAddress, buffer, offset + 2);
+            Utilities.WriteBytesBigEndian(_logicalBlockAddress, buffer, offset + 2);
             buffer[offset + 6] = 0;
             Utilities.WriteBytesBigEndian(_numBlocks, buffer, offset + 7);
             buffer[offset + 9] = 0;

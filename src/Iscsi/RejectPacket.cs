@@ -23,60 +23,50 @@
 
 namespace DiscUtils.Iscsi
 {
-    internal class ScsiDataIn : Response
+    internal enum RejectReason : byte
+    {
+        None = 0x00,
+        Reserved = 0x01,
+        DataDigestError = 0x02,
+        SNACKReject = 0x03,
+        ProtocolError = 0x04,
+        CommandNotSupported = 0x05,
+        ImmediateCommandReject = 0x06,
+        TaskInProgress = 0x07,
+        InvalidDataAck = 0x08,
+        InvalidPduField = 0x09,
+        LongOperationReject = 0x0a,
+        NegotiationReset = 0x0b,
+        WaitingForLogout = 0x0c
+    }
+
+    internal class RejectPacket : BaseResponse
     {
         public BasicHeaderSegment Header;
-        public bool Acknowledge;
-        public bool O;
-        public bool U;
-
-        public ScsiStatus Status;
-        public ulong Lun;
-        public uint TargetTransferTag;
-
+        public RejectReason Reason;
         public uint DataSequenceNumber;
-        public uint BufferOffset;
-        public uint ResidualCount;
-        public byte[] ReadData;
+
 
         public override void Parse(ProtocolDataUnit pdu)
         {
-            Parse(pdu.HeaderData, 0, pdu.ContentData, 0);
+            Parse(pdu.HeaderData, 0);
         }
 
-        public void Parse(byte[] headerData, int headerOffset, byte[] bodyData, int bodyOffset)
+        public void Parse(byte[] headerData, int headerOffset)
         {
             Header = new BasicHeaderSegment();
             Header.ReadFrom(headerData, headerOffset);
 
-            if (Header.OpCode != OpCode.ScsiDataIn)
+            if (Header.OpCode != OpCode.Reject)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiDataIn + " was " + Header.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.Reject + " was " + Header.OpCode);
             }
 
-            UnpackFlags(headerData[headerOffset + 1]);
-            if (StatusPresent)
-            {
-                Status = (ScsiStatus)headerData[headerOffset + 3];
-            }
-            Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
-            TargetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
+            Reason = (RejectReason)headerData[headerOffset + 2];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
             DataSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 36);
-            BufferOffset = Utilities.ToUInt32BigEndian(headerData, headerOffset + 40);
-            ResidualCount = Utilities.ToUInt32BigEndian(headerData, headerOffset + 44);
-
-            ReadData = bodyData;
-        }
-
-        private void UnpackFlags(byte value)
-        {
-            Acknowledge = (value & 0x40) != 0;
-            O = (value & 0x04) != 0;
-            U = (value & 0x02) != 0;
-            StatusPresent = (value & 0x01) != 0;
         }
     }
 }

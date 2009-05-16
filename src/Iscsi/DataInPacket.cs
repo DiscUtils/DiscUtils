@@ -23,29 +23,21 @@
 
 namespace DiscUtils.Iscsi
 {
-    internal enum StatusClass
+    internal class DataInPacket : BaseResponse
     {
-        Success = 0,
-        Redirection = 1,
-        InitiatorError = 2,
-        TargetError = 3
-    }
+        public BasicHeaderSegment Header;
+        public bool Acknowledge;
+        public bool O;
+        public bool U;
 
+        public ScsiStatus Status;
+        public ulong Lun;
+        public uint TargetTransferTag;
 
-    internal class LoginResponse : BaseResponse
-    {
-        public bool Transit;
-        public bool Continue;
-        public LoginStages CurrentStage;
-        public LoginStages NextStage;
-
-        public byte MaxVersion;
-        public byte ActiveVersion;
-
-        public ushort TargetSessionId;
-        public byte StatusClass;
-        public LoginStatusCode StatusCode;
-        public byte[] TextData;
+        public uint DataSequenceNumber;
+        public uint BufferOffset;
+        public uint ResidualCount;
+        public byte[] ReadData;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -54,34 +46,37 @@ namespace DiscUtils.Iscsi
 
         public void Parse(byte[] headerData, int headerOffset, byte[] bodyData)
         {
-            BasicHeaderSegment _headerSegment = new BasicHeaderSegment();
-            _headerSegment.ReadFrom(headerData, headerOffset);
+            Header = new BasicHeaderSegment();
+            Header.ReadFrom(headerData, headerOffset);
 
-            if (_headerSegment.OpCode != OpCode.LoginResponse)
+            if (Header.OpCode != OpCode.ScsiDataIn)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LoginResponse + " was " + _headerSegment.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiDataIn + " was " + Header.OpCode);
             }
 
-            UnpackState(headerData[headerOffset + 1]);
-            MaxVersion = headerData[headerOffset + 2];
-            ActiveVersion = headerData[headerOffset + 3];
-            TargetSessionId = Utilities.ToUInt16BigEndian(headerData, headerOffset + 14);
-            StatusPresent = true;
+            UnpackFlags(headerData[headerOffset + 1]);
+            if (StatusPresent)
+            {
+                Status = (ScsiStatus)headerData[headerOffset + 3];
+            }
+            Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
+            TargetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
-            StatusClass = headerData[headerOffset + 36];
-            StatusCode = (LoginStatusCode)Utilities.ToUInt16BigEndian(headerData, headerOffset + 36);
+            DataSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 36);
+            BufferOffset = Utilities.ToUInt32BigEndian(headerData, headerOffset + 40);
+            ResidualCount = Utilities.ToUInt32BigEndian(headerData, headerOffset + 44);
 
-            TextData = bodyData;
+            ReadData = bodyData;
         }
 
-        private void UnpackState(byte value)
+        private void UnpackFlags(byte value)
         {
-            Transit = ((value & 0x80) != 0);
-            Continue = ((value & 0x40) != 0);
-            CurrentStage = (LoginStages)((value >> 2) & 0x3);
-            NextStage = (LoginStages)(value & 0x3);
+            Acknowledge = (value & 0x40) != 0;
+            O = (value & 0x04) != 0;
+            U = (value & 0x02) != 0;
+            StatusPresent = (value & 0x01) != 0;
         }
     }
 }

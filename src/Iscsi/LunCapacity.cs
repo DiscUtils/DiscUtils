@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
 
 namespace DiscUtils.Iscsi
 {
@@ -64,7 +65,7 @@ namespace DiscUtils.Iscsi
         /// <returns>A string</returns>
         public override string ToString()
         {
-            return (_blockSize * _logicalBlockCount).ToString();
+            return (_blockSize * _logicalBlockCount).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

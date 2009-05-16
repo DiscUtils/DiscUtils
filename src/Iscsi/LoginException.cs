@@ -21,19 +21,50 @@
 //
 
 
+using System;
+using System.Runtime.Serialization;
+
 namespace DiscUtils.Iscsi
 {
     /// <summary>
     /// Exception thrown when an authentication exception occurs.
     /// </summary>
+    [Serializable]
     public class LoginException : IscsiException
     {
         /// <summary>
-        /// Creates a new instance, containing a message.
+        /// Creates a new instance.
+        /// </summary>
+        public LoginException()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance containing a message.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         public LoginException(string message)
             : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance containing a message and an inner exception.
+        /// </summary>
+        /// <param name="message">The reason for the exception</param>
+        /// <param name="innerException">The inner exception</param>
+        public LoginException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new deserialized instance.
+        /// </summary>
+        /// <param name="info">The serialization info</param>
+        /// <param name="context">Ther context</param>
+        protected LoginException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
 

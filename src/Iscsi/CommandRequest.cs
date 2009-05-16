@@ -33,19 +33,19 @@ namespace DiscUtils.Iscsi
         Aca = 4
     }
 
-    internal class ScsiCommandRequest
+    internal class CommandRequest
     {
         private Connection _connection;
 
         private ulong _lun;
 
-        public ScsiCommandRequest(Connection connection, ulong lun)
+        public CommandRequest(Connection connection, ulong lun)
         {
             _connection = connection;
             _lun = lun;
         }
 
-        public byte[] GetBytes(ScsiCommand cmd, byte[] data, int offset, int count, bool isFinalData, bool expectInput, bool expectOutput)
+        public byte[] GetBytes(ScsiCommand cmd, byte[] immediateData, int offset, int count, bool isFinalData, bool willRead, bool willWrite, uint expected)
         {
             BasicHeaderSegment _basicHeader = new BasicHeaderSegment();
             _basicHeader.Immediate = cmd.ImmediateDelivery;
@@ -53,32 +53,32 @@ namespace DiscUtils.Iscsi
             _basicHeader.FinalPdu = isFinalData;
             _basicHeader.TotalAhsLength = 0;
             _basicHeader.DataSegmentLength = count;
-            _basicHeader.InitiatorTaskTag = _connection.Session.NextTaskTag();
+            _basicHeader.InitiatorTaskTag = _connection.Session.CurrentTaskTag;
 
             byte[] buffer = new byte[48 + Utilities.RoundUp(count, 4)];
             _basicHeader.WriteTo(buffer, 0);
-            buffer[1] = PackAttrByte(isFinalData, expectInput, expectOutput, cmd.TaskAttributes);
+            buffer[1] = PackAttrByte(isFinalData, willRead, willWrite, cmd.TaskAttributes);
             Utilities.WriteBytesBigEndian(_lun, buffer, 8);
-            Utilities.WriteBytesBigEndian(cmd.ExpectedResponseDataLength, buffer, 20);
-            Utilities.WriteBytesBigEndian(_connection.Session.NextCommandSequenceNumber(), buffer, 24);
+            Utilities.WriteBytesBigEndian(expected, buffer, 20);
+            Utilities.WriteBytesBigEndian(_connection.Session.CommandSequenceNumber, buffer, 24);
             Utilities.WriteBytesBigEndian(_connection.ExpectedStatusSequenceNumber, buffer, 28);
             cmd.WriteTo(buffer, 32);
 
-            if (data != null && count != 0)
+            if (immediateData != null && count != 0)
             {
-                Array.Copy(data, offset, buffer, 48, count);
+                Array.Copy(immediateData, offset, buffer, 48, count);
             }
 
             return buffer;
         }
 
-        public byte PackAttrByte(bool isFinalData, bool expectInput, bool expectOutput, TaskAttributes taskAttr)
+        public static byte PackAttrByte(bool isFinalData, bool expectReadFromTarget, bool expectWriteToTarget, TaskAttributes taskAttr)
         {
             byte value = 0;
 
             if (isFinalData) value |= 0x80;
-            if (expectInput) value |= 0x40;
-            if (expectOutput) value |= 0x20;
+            if (expectReadFromTarget) value |= 0x40;
+            if (expectWriteToTarget) value |= 0x20;
             value |= (byte)((int)taskAttr & 0x3);
 
             return value;

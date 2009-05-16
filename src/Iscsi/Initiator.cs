@@ -21,7 +21,7 @@
 //
 
 
-using System.Security;
+using System.Collections.Generic;
 
 namespace DiscUtils.Iscsi
 {
@@ -88,7 +88,7 @@ namespace DiscUtils.Iscsi
         /// <param name="target">The Target to connect to</param>
         /// <param name="addresses">The list of addresses for the target</param>
         /// <returns>The session representing the target connection.</returns>
-        public Session ConnectTo(string target, params TargetAddress[] addresses)
+        public Session ConnectTo(string target, IList<TargetAddress> addresses)
         {
             return new Session(SessionType.Normal, target, _userName, _password, addresses);
         }
@@ -112,7 +112,7 @@ namespace DiscUtils.Iscsi
         /// <remarks>If you just have an IP address, use this method to discover the available Targets.</remarks>
         public TargetInfo[] GetTargets(TargetAddress address)
         {
-            using(Session session = new Session(SessionType.Discovery, null, _userName, _password, address))
+            using (Session session = new Session(SessionType.Discovery, null, _userName, _password, new TargetAddress[] { address }))
             {
                 return session.EnumerateTargets();
             }

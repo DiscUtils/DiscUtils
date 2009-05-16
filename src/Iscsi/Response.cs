@@ -23,13 +23,33 @@
 
 namespace DiscUtils.Iscsi
 {
-    internal abstract class Response
+    internal class Response : BaseResponse
     {
-        public bool StatusPresent;
-        public uint StatusSequenceNumber;
-        public uint ExpectedCommandSequenceNumber;
-        public uint MaxCommandSequenceNumber;
+        public BasicHeaderSegment Header;
+        public byte ResponseCode;
+        public ScsiStatus Status;
 
-        public abstract void Parse(ProtocolDataUnit pdu);
+        public override void Parse(ProtocolDataUnit pdu)
+        {
+            Parse(pdu.HeaderData, 0);
+        }
+
+        public void Parse(byte[] headerData, int headerOffset)
+        {
+            Header = new BasicHeaderSegment();
+            Header.ReadFrom(headerData, headerOffset);
+
+            if (Header.OpCode != OpCode.ScsiResponse)
+            {
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiResponse + " was " + Header.OpCode);
+            }
+
+            ResponseCode = headerData[headerOffset + 2];
+            StatusPresent = true;
+            Status = (ScsiStatus)headerData[headerOffset + 3];
+            StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
+            ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
+            MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+        }
     }
 }

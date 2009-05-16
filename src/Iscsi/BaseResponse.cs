@@ -20,43 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 
 namespace DiscUtils.Iscsi
 {
-    internal class ScsiReportLunsCommand : ScsiCommand
+    internal abstract class BaseResponse
     {
-        public const int InitialResponseSize = 16;
+        public bool StatusPresent;
+        public uint StatusSequenceNumber;
+        public uint ExpectedCommandSequenceNumber;
+        public uint MaxCommandSequenceNumber;
 
-        private uint _expected;
-
-        public ScsiReportLunsCommand(uint expected)
-            : base(0)
-        {
-            _expected = expected;
-        }
-
-        public override void ReadFrom(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void WriteTo(byte[] buffer, int offset)
-        {
-            buffer[offset] = 0xA0;
-            buffer[offset + 1] = 0; // Reserved
-            buffer[offset + 2] = 0; // Report Type = 0
-            buffer[offset + 3] = 0; // Reserved
-            buffer[offset + 4] = 0; // Reserved
-            buffer[offset + 5] = 0; // Reserved
-            Utilities.WriteBytesBigEndian(_expected, buffer, offset + 6);
-            buffer[offset + 10] = 0; // Reserved
-            buffer[offset + 11] = 0; // Control
-        }
-
-        public override int Size
-        {
-            get { return 12; }
-        }
+        public abstract void Parse(ProtocolDataUnit pdu);
     }
 }

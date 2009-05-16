@@ -106,6 +106,32 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Iscsi">
+    <Messages>
+     <Message Id="Iscsi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+      <Issue Name="Namespace">
+       <Item>Iscsi</Item>
+       <Item>DiscUtils.Iscsi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="49" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Iscsi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="49" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Iso9660">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
@@ -156,6 +182,21 @@
       <Notes>
        <User Name="Kenneth">
         <Note Id="7" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
+   <Namespace Name="DiscUtils.Registry">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Registry</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="58" />
        </User>
       </Notes>
      </Message>
@@ -616,20 +657,6 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ToInt16LittleEndian(System.Byte[],System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
-              <Issue>
-               <Item>'Utilities.ToInt16LittleEndian(byte[], int)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="25" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#WriteBytesBigEndian(System.Int16,System.Byte[],System.Int32)">
             <Messages>
              <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-23 10:19:36Z">
@@ -788,6 +815,1145 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Iscsi">
+        <Types>
+         <Type Name="BaseResponse">
+          <Members>
+           <Member Name="#ExpectedCommandSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'BaseResponse.ExpectedCommandSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxCommandSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'BaseResponse.MaxCommandSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Connection">
+          <Members>
+           <Member Name="#MaxReceiveDataSegmentLength">
+            <Accessors>
+             <Accessor Name="#get_MaxReceiveDataSegmentLength()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Connection.MaxReceiveDataSegmentLength.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DataInPacket">
+          <Members>
+           <Member Name="#Acknowledge">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.Acknowledge'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DataSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.DataSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Lun">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.Lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#O">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.O'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ResidualCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.ResidualCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TargetTransferTag">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.TargetTransferTag'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#U">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'DataInPacket.U'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="IscsiException">
+          <Messages>
+           <Message Id="Iscsi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue Name="Type">
+             <Item>Iscsi</Item>
+             <Item>'IscsiException'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="52" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="LoginException">
+          <Messages>
+           <Message Id="Login" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue Name="Type">
+             <Item>Login</Item>
+             <Item>'LoginException'</Item>
+             <Item>LogOn</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="53" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="LoginResponse">
+          <Members>
+           <Member Name="#ActiveVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LoginResponse.ActiveVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CurrentStage">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LoginResponse.CurrentStage'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LoginResponse.MaxVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#StatusClass">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LoginResponse.StatusClass'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TargetSessionId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LoginResponse.TargetSessionId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="LoginStatusCode">
+          <Messages>
+           <Message Id="Login" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue Name="Type">
+             <Item>Login</Item>
+             <Item>'LoginStatusCode'</Item>
+             <Item>LogOn</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="53" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#InvalidDuringLogin">
+            <Messages>
+             <Message Id="Login" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="Member">
+               <Item>Login</Item>
+               <Item>'LoginStatusCode.InvalidDuringLogin'</Item>
+               <Item>LogOn</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="53" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="LogoutResponse">
+          <Members>
+           <Member Name="#Time2Retain">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LogoutResponse.Time2Retain'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Time2Wait">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'LogoutResponse.Time2Wait'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="LunCapacity">
+          <Messages>
+           <Message Id="Lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue Name="Type">
+             <Item>Lun</Item>
+             <Item>'LunCapacity'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="51" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="LunClass">
+          <Messages>
+           <Message Id="Lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue Name="Type">
+             <Item>Lun</Item>
+             <Item>'LunClass'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="51" />
+             </User>
+            </Notes>
+           </Message>
+           <Message TypeName="MarkEnumsWithFlags" Category="Microsoft.Design" CheckId="CA1027" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue>
+             <Item>'LunClass'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="54" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="LunInfo">
+          <Messages>
+           <Message Id="Lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue Name="Type">
+             <Item>Lun</Item>
+             <Item>'LunInfo'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="51" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Lun">
+            <Messages>
+             <Message Id="Lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="Member">
+               <Item>Lun</Item>
+               <Item>'LunInfo.Lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ReadyToTransferPacket">
+          <Members>
+           <Member Name="#BufferOffset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'ReadyToTransferPacket.BufferOffset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Lun">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'ReadyToTransferPacket.Lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ReadyToTransferSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'ReadyToTransferPacket.ReadyToTransferSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="RejectPacket">
+          <Members>
+           <Member Name="#DataSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'RejectPacket.DataSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Response">
+          <Members>
+           <Member Name="#ResponseCode">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue>
+               <Item>'Response.ResponseCode'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ScsiInquiryStandardResponse">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue>
+             <Item>'ScsiInquiryStandardResponse'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="55" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="ScsiReadCapacityResponse">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue>
+             <Item>'ScsiReadCapacityResponse'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="55" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="ScsiReadCommand">
+          <Members>
+           <Member Name="#ExpectedDataTransferLength">
+            <Accessors>
+             <Accessor Name="#get_ExpectedDataTransferLength()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'ScsiReadCommand.ExpectedDataTransferLength.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+             <Accessor Name="#set_ExpectedDataTransferLength(System.UInt32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'ScsiReadCommand.ExpectedDataTransferLength.set(uint)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ScsiReportLunsResponse">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-09 08:55:03Z">
+            <Issue>
+             <Item>'ScsiReportLunsResponse'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="55" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="ScsiWriteCommand">
+          <Members>
+           <Member Name="#ExpectedDataTransferLength">
+            <Accessors>
+             <Accessor Name="#get_ExpectedDataTransferLength()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'ScsiWriteCommand.ExpectedDataTransferLength.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+             <Accessor Name="#set_ExpectedDataTransferLength(System.UInt32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'ScsiWriteCommand.ExpectedDataTransferLength.set(uint)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#NumBlocks">
+            <Accessors>
+             <Accessor Name="#get_NumBlocks()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'ScsiWriteCommand.NumBlocks.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Session">
+          <Members>
+           <Member Name="#.ctor(DiscUtils.Iscsi.SessionType,System.String,DiscUtils.Iscsi.TargetAddress[])">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'Session.Session(SessionType, string, params TargetAddress[])'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ActiveConnection">
+            <Accessors>
+             <Accessor Name="#get_ActiveConnection()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-09 08:55:03Z">
+                <Issue>
+                 <Item>'Session.ActiveConnection.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#DataPDUInOrder">
+            <Accessors>
+             <Accessor Name="#get_DataPDUInOrder()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.DataPDUInOrder.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#DataSequenceInOrder">
+            <Accessors>
+             <Accessor Name="#get_DataSequenceInOrder()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.DataSequenceInOrder.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#DefaultTime2Retain">
+            <Accessors>
+             <Accessor Name="#get_DefaultTime2Retain()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.DefaultTime2Retain.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#DefaultTime2Wait">
+            <Accessors>
+             <Accessor Name="#get_DefaultTime2Wait()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.DefaultTime2Wait.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#ErrorRecoveryLevel">
+            <Accessors>
+             <Accessor Name="#get_ErrorRecoveryLevel()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.ErrorRecoveryLevel.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+             <Accessor Name="#set_ErrorRecoveryLevel(System.Int32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.ErrorRecoveryLevel.set(int)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#GetBlockDeviceLuns()">
+            <Messages>
+             <Message Id="Luns" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="Member">
+               <Item>Luns</Item>
+               <Item>'Session.GetBlockDeviceLuns()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetCapacity(System.Int64)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.GetCapacity(long)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetInfo(System.Int64)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.GetInfo(long)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetLuns()">
+            <Messages>
+             <Message Id="Luns" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="Member">
+               <Item>Luns</Item>
+               <Item>'Session.GetLuns()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InitialR2T">
+            <Accessors>
+             <Accessor Name="#get_InitialR2T()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.InitialR2T.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#InitiatorAlias">
+            <Accessors>
+             <Accessor Name="#get_InitiatorAlias()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.InitiatorAlias.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+             <Accessor Name="#set_InitiatorAlias(System.String)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.InitiatorAlias.set(string)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#InitiatorName">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2009-05-16 10:32:27Z" FixCategory="DependsOnFix">
+              <Issue>
+               <Item>'Session.InitiatorName'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxBurstLength">
+            <Accessors>
+             <Accessor Name="#get_MaxBurstLength()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.MaxBurstLength.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#MaxConnections">
+            <Accessors>
+             <Accessor Name="#get_MaxConnections()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.MaxConnections.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#MaxOutstandingR2T">
+            <Accessors>
+             <Accessor Name="#get_MaxOutstandingR2T()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.MaxOutstandingR2T.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#OpenDisk(System.Int64)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.OpenDisk(long)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Read(System.Int64,System.Int64,System.Int16,System.Byte[],System.Int32)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.Read(long, long, short, byte[], int)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TargetAlias">
+            <Accessors>
+             <Accessor Name="#set_TargetAlias(System.String)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.TargetAlias.set(string)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#TargetPortalGroupTag">
+            <Accessors>
+             <Accessor Name="#get_TargetPortalGroupTag()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.TargetPortalGroupTag.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+             <Accessor Name="#set_TargetPortalGroupTag(System.Int32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+                <Issue>
+                 <Item>'Session.TargetPortalGroupTag.set(int)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#TargetSessionId">
+            <Accessors>
+             <Accessor Name="#set_TargetSessionId(System.UInt16)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-09 08:55:03Z">
+                <Issue>
+                 <Item>'Session.TargetSessionId.set(ushort)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#Write(System.Int64,System.Int64,System.Int16,System.Int32,System.Byte[],System.Int32)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-16 10:32:27Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.Write(long, long, short, int, byte[], int)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="51" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="TextBuffer">
+          <Members>
+           <Member Name="#Item[System.String]">
+            <Accessors>
+             <Accessor Name="#set_Item(System.String,System.String)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-09 08:55:03Z">
+                <Issue>
+                 <Item>'TextBuffer.this.set(string, string)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="56" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="TextRequest">
+          <Members>
+           <Member Name="#_lun">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'TextRequest._lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="TextResponse">
+          <Members>
+           <Member Name="#Continue">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'TextResponse.Continue'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Lun">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'TextResponse.Lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TargetTransferTag">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'TextResponse.TargetTransferTag'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="56" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Iso9660">
         <Types>
          <Type Name="BuildDirectoryInfo">
@@ -845,6 +2011,248 @@
             </Notes>
            </Message>
           </Messages>
+         </Type>
+         <Type Name="BiosParameterBlock">
+          <Members>
+           <Member Name="#BiosDriveNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.BiosDriveNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ChkDskFlags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.ChkDskFlags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FatRootEntriesCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.FatRootEntriesCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FatSize16">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.FatSize16'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#HiddenSectors">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.HiddenSectors'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Media">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.Media'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MftMirrorCluster">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.MftMirrorCluster'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#NumFats">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.NumFats'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#NumHeads">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.NumHeads'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OemId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.OemId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PaddingByte">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.PaddingByte'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ReservedSectors">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.ReservedSectors'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SectorsPerTrack">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.SectorsPerTrack'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SignatureByte">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.SignatureByte'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TotalSectors16">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.TotalSectors16'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TotalSectors32">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.TotalSectors32'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeSerialNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
+              <Issue>
+               <Item>'BiosParameterBlock.VolumeSerialNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
          </Type>
          <Type Name="Index">
           <Members>
@@ -1325,6 +2733,15 @@
     <Note Id="46" Modified="2009-04-16 21:57:27Z">Deliberately using wide catch - this is diagnostic code that should not cause an exception should it fail.</Note>
     <Note Id="47" Modified="2009-04-18 23:12:33Z">SecurityDescriptor is instantiated via template arguments</Note>
     <Note Id="48" Modified="2009-04-18 23:12:53Z">VolumeInformation is instantiated via template arguments</Note>
+    <Note Id="49" Modified="2009-05-09 08:55:57Z">Iscsi matches normal naming convention for namespaces</Note>
+    <Note Id="51" Modified="2009-05-16 10:41:11Z">Lun is correct form of LUN, which is a common concept in iSCSI.</Note>
+    <Note Id="52" Modified="2009-05-16 10:41:52Z">Iscsi is acceptable</Note>
+    <Note Id="53" Modified="2009-05-16 10:53:30Z">Login is the name used in iSCSI</Note>
+    <Note Id="54" Modified="2009-05-16 11:07:19Z">This is not a flags enumeration</Note>
+    <Note Id="55" Modified="2009-05-16 11:19:41Z">Instantiated via generic parameter.</Note>
+    <Note Id="56" Modified="2009-05-16 11:32:30Z">Uncalled private code corresponding to fields of the iSCSI protocol not implemented yet.</Note>
+    <Note Id="57" Modified="2009-05-16 11:33:24Z">BPB fields that are not used.</Note>
+    <Note Id="58" Modified="2009-05-16 11:33:58Z">DiscUtils is the project name.</Note>
    </User>
   </Notes>
   <Rules>
@@ -1340,6 +2757,9 @@
    <Rule TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812">
     <Resolution Name="Default">{0} is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.</Resolution>
    </Rule>
+   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
+    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
+   </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
    </Rule>
@@ -1352,8 +2772,10 @@
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
     <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+    <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
+    <Resolution Name="Type">Correct the spelling of '{0}' in type name {1}.</Resolution>
    </Rule>
    <Rule TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810">
     <Resolution Name="Default">Initialize all static fields in {0} when those fields are declared and remove the explicit static constructor.</Resolution>
@@ -1369,6 +2791,12 @@
    </Rule>
    <Rule TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001">
     <Resolution Name="NonBreaking">Implement IDisposable on {0} because it creates members of the following IDisposable types: {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726">
+    <Resolution Name="Member">Replace the term '{0}' in member name {1} with the preferred alternate '{2}'.</Resolution>
+    <Resolution Name="MemberNoAlternate">Replace the term '{0}' in member name {1} with an appropriate alternate or remove it entirely.</Resolution>
+    <Resolution Name="Type">Replace the term '{0}' in type name {1} with the preferred alternate '{2}'.</Resolution>
+    <Resolution Name="TypeNoAlternate">Replace the term '{0}' in type name {1} with an appropriate alternate or remove it entirely.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

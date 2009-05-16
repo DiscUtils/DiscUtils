@@ -21,6 +21,8 @@
 //
 
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Iscsi
 {
     /// <summary>
@@ -56,7 +58,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the network addresses of the Target.
         /// </summary>
-        public TargetAddress[] Addresses
+        public IList<TargetAddress> Addresses
         {
             get { return _addresses; }
         }

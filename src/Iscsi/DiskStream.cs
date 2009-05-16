@@ -34,8 +34,8 @@ namespace DiscUtils.Iscsi
         private long _length;
         private long _position;
 
-        private ushort _blockSize = 512; // TODO - use real value...
-        private bool _canWrite = false; // TODO - use real value...
+        private int _blockSize;
+        private bool _canWrite = true; // TODO - use real value...
 
         public DiskStream(Session session, long lun)
         {
@@ -43,6 +43,7 @@ namespace DiscUtils.Iscsi
             _lun = lun;
 
             LunCapacity capacity = session.GetCapacity(lun);
+            _blockSize = capacity.BlockSize;
             _length = capacity.LogicalBlockCount * capacity.BlockSize;
         }
         
@@ -63,7 +64,6 @@ namespace DiscUtils.Iscsi
 
         public override void Flush()
         {
-            throw new NotImplementedException();
         }
 
         public override long Length
@@ -100,7 +100,25 @@ namespace DiscUtils.Iscsi
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            long effectiveOffset = offset;
+            if (origin == SeekOrigin.Current)
+            {
+                effectiveOffset += _position;
+            }
+            else if (origin == SeekOrigin.End)
+            {
+                effectiveOffset += _length;
+            }
+
+            if (offset < 0)
+            {
+                throw new IOException("Attempt to move before beginning of disk");
+            }
+            else
+            {
+                _position = effectiveOffset;
+                return _position;
+            }
         }
 
         public override void SetLength(long value)
@@ -110,7 +128,49 @@ namespace DiscUtils.Iscsi
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            if (!CanWrite)
+            {
+                throw new IOException("Attempt to write to read-only stream");
+            }
+
+            int numWritten = 0;
+
+            while (numWritten < count)
+            {
+                long block = _position / _blockSize;
+                uint offsetInBlock = (uint)(_position % _blockSize);
+
+                int toWrite = (int)Math.Min(count - numWritten, _blockSize - offsetInBlock);
+
+                // Need to read - we're not handling a full block
+                if (offsetInBlock != 0 || toWrite < _blockSize)
+                {
+                    byte[] blockBuffer = new byte[_blockSize];
+                    int numRead = _session.Read(_lun, block, 1, blockBuffer, 0);
+
+                    if (numRead != _blockSize)
+                    {
+                        throw new IOException("Incomplete read, received " + numRead + " bytes from 1 block");
+                    }
+
+                    // Overlay as much data as we have for this block
+                    Array.Copy(buffer, offset + numWritten, blockBuffer, offsetInBlock, toWrite);
+
+                    // Write the block back
+                    _session.Write(_lun, block, 1, _blockSize, blockBuffer, 0);
+                }
+                else
+                {
+                    // Processing at least one whole sector, just write (after making sure to trim any partial sectors from the end)...
+                    short numBlocks = (short)(toWrite / _blockSize);
+                    toWrite = numBlocks * _blockSize;
+
+                    _session.Write(_lun, block, numBlocks, _blockSize, buffer, offset + numWritten);
+                }
+
+                numWritten += toWrite;
+                _position += toWrite;
+            }
         }
 
         public override IEnumerable<StreamExtent> Extents

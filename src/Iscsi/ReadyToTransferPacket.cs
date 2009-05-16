@@ -21,22 +21,16 @@
 //
 
 
-
 namespace DiscUtils.Iscsi
 {
-    internal enum LogoutResponseCode
+    internal class ReadyToTransferPacket : BaseResponse
     {
-        ClosedSuccessfully = 0,
-        ConnectionIdNotFound = 1,
-        RecoveryNotSupported = 2,
-        CleanupFailed = 3
-    }
-
-    internal class LogoutResponse : BaseResponse
-    {
-        public LogoutResponseCode Response;
-        public ushort Time2Wait;
-        public ushort Time2Retain;
+        public BasicHeaderSegment Header;
+        public ulong Lun;
+        public uint TargetTransferTag;
+        public uint ReadyToTransferSequenceNumber;
+        public uint BufferOffset;
+        public uint DesiredTransferLength;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -45,21 +39,24 @@ namespace DiscUtils.Iscsi
 
         public void Parse(byte[] headerData, int headerOffset)
         {
-            BasicHeaderSegment _headerSegment = new BasicHeaderSegment();
-            _headerSegment.ReadFrom(headerData, headerOffset);
+            StatusPresent = false;
 
-            if (_headerSegment.OpCode != OpCode.LogoutResponse)
+            Header = new BasicHeaderSegment();
+            Header.ReadFrom(headerData, headerOffset);
+
+            if (Header.OpCode != OpCode.ReadyToTransfer)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LogoutResponse + " was " + _headerSegment.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ReadyToTransfer + " was " + Header.OpCode);
             }
 
-
-            Response = (LogoutResponseCode)headerData[headerOffset + 2];
+            Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
+            TargetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
-            Time2Wait = Utilities.ToUInt16BigEndian(headerData, headerOffset + 40);
-            Time2Retain = Utilities.ToUInt16BigEndian(headerData, headerOffset + 42);
+            ReadyToTransferSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 36);
+            BufferOffset = Utilities.ToUInt32BigEndian(headerData, headerOffset + 40);
+            DesiredTransferLength = Utilities.ToUInt32BigEndian(headerData, headerOffset + 44);
         }
     }
 }

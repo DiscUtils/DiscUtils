@@ -36,12 +36,19 @@ namespace DiscUtils.Iscsi
 
         public override void ReadFrom(byte[] buffer, int offset, int count)
         {
+            _luns = new List<ulong>();
+
+            if (count == 0)
+            {
+                return;
+            }
+
             if (count < 8)
             {
                 throw new InvalidProtocolException("Data truncated too far");
             }
 
-            _luns = new List<ulong>();
+
             _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset) / 8;
             int pos = 8;
             while (pos <= count - 8 && _luns.Count < _availableLuns)

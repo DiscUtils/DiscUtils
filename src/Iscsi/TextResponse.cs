@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Iscsi
 {
-    internal class TextResponse : Response
+    internal class TextResponse : BaseResponse
     {
         public bool Continue;
         private ulong Lun;
@@ -32,10 +32,10 @@ namespace DiscUtils.Iscsi
 
         public override void Parse(ProtocolDataUnit pdu)
         {
-            Parse(pdu.HeaderData, 0, pdu.ContentData, 0);
+            Parse(pdu.HeaderData, 0, pdu.ContentData);
         }
 
-        public void Parse(byte[] headerData, int headerOffset, byte[] bodyData, int bodyOffset)
+        public void Parse(byte[] headerData, int headerOffset, byte[] bodyData)
         {
             BasicHeaderSegment _headerSegment = new BasicHeaderSegment();
             _headerSegment.ReadFrom(headerData, headerOffset);

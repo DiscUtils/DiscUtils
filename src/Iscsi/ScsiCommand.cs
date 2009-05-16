@@ -37,12 +37,6 @@ namespace DiscUtils.Iscsi
             get { return _targetLun; }
         }
 
-        public abstract uint ExpectedResponseDataLength
-        {
-            get;
-            set;
-        }
-
         public virtual TaskAttributes TaskAttributes
         {
             get { return TaskAttributes.Untagged; }

@@ -26,35 +26,25 @@ namespace DiscUtils.Iscsi
 {
     internal class ScsiInquiryCommand : ScsiCommand
     {
-        private uint _responseDataLength = 36;
+        public const int InitialResponseDataLength = 36;
 
         private bool _askForPage = false;
         private byte _pageCode = 0;
+        private uint _expected = 0;
 
-
-        public ScsiInquiryCommand(ulong targetLun)
+        public ScsiInquiryCommand(ulong targetLun, uint expected)
             : base(targetLun)
         {
+            _expected = expected;
         }
 
-        public ScsiInquiryCommand(ulong targetLun, byte pageCode)
-            : base(targetLun)
-        {
-            _askForPage = true;
-            _pageCode = pageCode;
-        }
-
-        public override uint ExpectedResponseDataLength
-        {
-            get
-            {
-                return _responseDataLength;
-            }
-            set
-            {
-                _responseDataLength = value;
-            }
-        }
+        //public ScsiInquiryCommand(ulong targetLun, byte pageCode, uint expected)
+        //    : base(targetLun)
+        //{
+        //    _askForPage = true;
+        //    _pageCode = pageCode;
+        //    _expected = expected;
+        //}
 
         public override TaskAttributes TaskAttributes
         {
@@ -72,7 +62,7 @@ namespace DiscUtils.Iscsi
             buffer[offset] = 0x12; // OpCode
             buffer[offset + 1] = (byte)(_askForPage ? 0x01 : 0x00);
             buffer[offset + 2] = _pageCode;
-            Utilities.WriteBytesBigEndian((byte)ExpectedResponseDataLength, buffer, offset + 3);
+            Utilities.WriteBytesBigEndian((ushort)_expected, buffer, offset + 3);
             buffer[offset + 5] = 0;
         }
 

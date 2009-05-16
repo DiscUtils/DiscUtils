@@ -26,23 +26,11 @@ namespace DiscUtils.Iscsi
 {
     internal class ScsiReadCapacityCommand : ScsiCommand
     {
-        private uint _responseDataLength = 32;
+        public const int ResponseDataLength = 32;
 
         public ScsiReadCapacityCommand(ulong targetLun)
             : base(targetLun)
         {
-        }
-
-        public override uint ExpectedResponseDataLength
-        {
-            get
-            {
-                return _responseDataLength;
-            }
-            set
-            {
-                _responseDataLength = value;
-            }
         }
 
         public override TaskAttributes TaskAttributes
