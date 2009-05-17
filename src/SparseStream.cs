@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -53,6 +54,81 @@ namespace DiscUtils
         public static SparseStream FromStream(Stream stream, Ownership takeOwnership)
         {
             return new SparseWrapperStream(stream, takeOwnership);
+        }
+
+        /// <summary>
+        /// Efficiently pumps data from a sparse stream to another stream.
+        /// </summary>
+        /// <param name="inStream">The sparse stream to pump from.</param>
+        /// <param name="outStream">The stream to pump to.</param>
+        /// <remarks><paramref name="outStream"/> must support seeking.</remarks>
+        public static void Pump(SparseStream inStream, Stream outStream)
+        {
+            Pump(inStream, outStream, Sizes.Sector);
+        }
+
+        /// <summary>
+        /// Efficiently pumps data from a sparse stream to another stream.
+        /// </summary>
+        /// <param name="inStream">The sparse stream to pump from.</param>
+        /// <param name="outStream">The stream to pump to.</param>
+        /// <param name="chunkSize">The smallest sequence of zero bytes that will be skipped when writing to <paramref name="outStream"/></param>
+        /// <remarks><paramref name="outStream"/> must support seeking.</remarks>
+        public static void Pump(SparseStream inStream, Stream outStream, int chunkSize)
+        {
+            if (!outStream.CanSeek)
+            {
+                throw new ArgumentException("Stream does not support seek operations", "outStream");
+            }
+
+            byte[] copyBuffer = new byte[Math.Max(512 * Sizes.OneKiB, chunkSize)];
+
+            foreach (var extent in inStream.Extents)
+            {
+                inStream.Position = extent.Start;
+
+                long extentOffset = 0;
+                while (extentOffset < extent.Length)
+                {
+                    int toRead = (int)Math.Min(copyBuffer.Length, extent.Length - extentOffset);
+                    int numRead = Utilities.ReadFully(inStream, copyBuffer, 0, toRead);
+
+                    int copyBufferOffset = 0;
+                    for (int i = 0; i < numRead; i += chunkSize)
+                    {
+                        if (IsAllZeros(copyBuffer, i, Math.Min(chunkSize, numRead - i)))
+                        {
+                            if (copyBufferOffset < i)
+                            {
+                                outStream.Position = extent.Start + extentOffset + copyBufferOffset;
+                                outStream.Write(copyBuffer, copyBufferOffset, i - copyBufferOffset);
+                            }
+                            copyBufferOffset = i + chunkSize;
+                        }
+                    }
+
+                    if (copyBufferOffset < numRead)
+                    {
+                        outStream.Position = extent.Start + extentOffset + copyBufferOffset;
+                        outStream.Write(copyBuffer, copyBufferOffset, numRead - copyBufferOffset);
+                    }
+
+                    extentOffset += numRead;
+                }
+            }
+        }
+
+        private static bool IsAllZeros(byte[] buffer, int offset, int count)
+        {
+            for (int j = 0; j < count; j++)
+            {
+                if (buffer[offset + j] != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private class SparseWrapperStream : SparseStream

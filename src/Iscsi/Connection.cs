@@ -617,7 +617,7 @@ namespace DiscUtils.Iscsi
             foreach (var propInfo in properties)
             {
                 ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
-                if (attr != null)
+                if (attr != null && (attr.Sender & KeySender.Target) != 0)
                 {
                     if (inParameters[attr.Name] != null)
                     {

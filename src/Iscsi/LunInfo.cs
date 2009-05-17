@@ -21,6 +21,8 @@
 //
 
 
+using System.Globalization;
+
 namespace DiscUtils.Iscsi
 {
     /// <summary>
@@ -195,6 +197,22 @@ namespace DiscUtils.Iscsi
         public string ProductRevision
         {
             get { return _productRevision; }
+        }
+
+        /// <summary>
+        /// Gets the LUN as a string.
+        /// </summary>
+        /// <returns>The LUN</returns>
+        public override string ToString()
+        {
+            if ((((ulong)_lun) & 0xFF00000000000000) == 0)
+            {
+                return (_lun >> (6 * 8)).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return _lun.ToString(CultureInfo.InvariantCulture);
+            }
         }
     }
 }

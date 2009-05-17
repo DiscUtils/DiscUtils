@@ -140,7 +140,7 @@ namespace DiscUtils.Iscsi
                 long block = _position / _blockSize;
                 uint offsetInBlock = (uint)(_position % _blockSize);
 
-                int toWrite = (int)Math.Min(count - numWritten, _blockSize - offsetInBlock);
+                int toWrite = count - numWritten;
 
                 // Need to read - we're not handling a full block
                 if (offsetInBlock != 0 || toWrite < _blockSize)
@@ -161,7 +161,7 @@ namespace DiscUtils.Iscsi
                 }
                 else
                 {
-                    // Processing at least one whole sector, just write (after making sure to trim any partial sectors from the end)...
+                    // Processing at least one whole block, just write (after making sure to trim any partial sectors from the end)...
                     short numBlocks = (short)(toWrite / _blockSize);
                     toWrite = numBlocks * _blockSize;
 

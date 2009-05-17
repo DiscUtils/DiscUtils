@@ -352,7 +352,8 @@ namespace DiscUtils.Vhd
 
                     if (start != i)
                     {
-                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
+                        long end = Math.Min(i * blockSize, _length);
+                        extents.Add(new StreamExtent(start * blockSize, end - (start * blockSize)));
                     }
                 }
 

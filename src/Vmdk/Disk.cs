@@ -137,7 +137,20 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static Disk Initialize(string path, long capacity, DiskCreateType type)
         {
-            return new Disk(DiskImageFile.Initialize(path, capacity, type), Ownership.Dispose);
+            return Initialize(path, capacity, null, type);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(string path, long capacity, Geometry geometry, DiskCreateType type)
+        {
+            return new Disk(DiskImageFile.Initialize(path, capacity, geometry, type), Ownership.Dispose);
         }
 
         /// <summary>

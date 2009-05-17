@@ -62,5 +62,14 @@ namespace DiscUtils.Iscsi
         {
             get { return _addresses; }
         }
+
+        /// <summary>
+        /// Gets the primary address of the Target as a string.
+        /// </summary>
+        /// <returns>String of the form host[:port][,group]/name</returns>
+        public override string ToString()
+        {
+            return _addresses[0] + "/" + _name;
+        }
     }
 }

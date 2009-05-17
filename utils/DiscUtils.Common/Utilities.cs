@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace DiscUtils.Common
 {
-    internal class Utilities
+    public class Utilities
     {
         public static string[] WordWrap(string text, int width)
         {
@@ -51,6 +51,23 @@ namespace DiscUtils.Common
             lines.Add(text.Substring(pos));
 
             return lines.ToArray();
+        }
+
+        public static string PromptForPassword()
+        {
+            Console.WriteLine();
+            Console.Write("Password: ");
+
+            ConsoleColor restoreColor = Console.ForegroundColor;
+            Console.ForegroundColor = Console.BackgroundColor;
+            try
+            {
+                return Console.ReadLine();
+            }
+            finally
+            {
+                Console.ForegroundColor = restoreColor;
+            }
         }
     }
 }

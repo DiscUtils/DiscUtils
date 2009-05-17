@@ -202,7 +202,20 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(capacity, type);
+            return Initialize(path, capacity, null, type);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType type)
+        {
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry ?? DefaultGeometry(capacity), type);
 
             FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
             return DoInitialize(locator, Path.GetFileName(path), capacity, type, baseDescriptor);
@@ -218,7 +231,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type)
         {
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(capacity, type);
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(DefaultGeometry(capacity), type);
 
             FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
             return DoInitialize(locator, Path.GetFileName(path), capacity, type, baseDescriptor);
@@ -775,10 +788,10 @@ namespace DiscUtils.Vmdk
             return new Geometry(cylinders, heads, sectors);
         }
 
-        private static DescriptorFile CreateSimpleDiskDescriptor(long capacity, DiskCreateType type)
+        private static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, DiskCreateType type)
         {
             DescriptorFile baseDescriptor = new DescriptorFile();
-            baseDescriptor.DiskGeometry = DefaultGeometry(capacity);
+            baseDescriptor.DiskGeometry = geometry;
             baseDescriptor.ContentId = (uint)_rng.Next();
             baseDescriptor.CreateType = type;
             baseDescriptor.UniqueId = Guid.NewGuid();

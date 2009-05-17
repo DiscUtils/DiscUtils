@@ -113,13 +113,34 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
-            Geometry geometry = Geometry.FromCapacity(capacity);
-            Footer footer = new Footer(geometry, FileType.Fixed);
+            return InitializeFixed(stream, ownsStream, capacity, null);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a fixed-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
+        {
+            if (geometry == null)
+            {
+                geometry = Geometry.FromCapacity(capacity);
+
+                // This is to maintain legacy behaviour - if no geometry specified, we make the actual capacity exactly
+                // fit the disk geometry, rather than allowing it to be different.
+                capacity = geometry.Capacity;
+            }
+
+            Footer footer = new Footer(geometry, capacity, FileType.Fixed);
             footer.UpdateChecksum();
 
             byte[] sector = new byte[Utilities.SectorSize];
             footer.ToBytes(sector, 0);
-            stream.Position = geometry.Capacity;
+            stream.Position = Utilities.RoundUp(capacity, Utilities.SectorSize);
             stream.Write(sector, 0, sector.Length);
             stream.SetLength(stream.Position);
 
@@ -136,7 +157,20 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
-            return InitializeDynamic(stream, ownsStream, capacity, DynamicHeader.DefaultBlockSize);
+            return InitializeDynamic(stream, ownsStream, capacity, null, DynamicHeader.DefaultBlockSize);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
+        {
+            return InitializeDynamic(stream, ownsStream, capacity, geometry, DynamicHeader.DefaultBlockSize);
         }
 
         /// <summary>
@@ -149,13 +183,35 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, long blockSize)
         {
+            return InitializeDynamic(stream, ownsStream, capacity, null, blockSize);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <param name="blockSize">The size of each block (unit of allocation)</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry, long blockSize)
+        {
             if (blockSize > uint.MaxValue || blockSize < 0)
             {
                 throw new ArgumentOutOfRangeException("blockSize", "Must be in the range 0 to uint.MaxValue");
             }
 
-            Geometry geometry = Geometry.FromCapacity(capacity);
-            Footer footer = new Footer(geometry, FileType.Dynamic);
+            if (geometry == null)
+            {
+                geometry = Geometry.FromCapacity(capacity);
+
+                // This is to maintain legacy behaviour - if no geometry specified, we make the actual capacity exactly
+                // fit the disk geometry, rather than allowing it to be different.
+                capacity = geometry.Capacity;
+            }
+
+            Footer footer = new Footer(geometry, capacity, FileType.Dynamic);
             footer.DataOffset = 512; // Offset of Dynamic Header
             footer.UpdateChecksum();
             byte[] footerBlock = new byte[512];
@@ -196,9 +252,8 @@ namespace DiscUtils.Vhd
             Stream stream, Ownership ownsStream, DiskImageFile parent,
             string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
-            Footer footer = new Footer(parent.Geometry, FileType.Differencing);
+            Footer footer = new Footer(parent.Geometry, parent._footer.CurrentSize, FileType.Differencing);
             footer.DataOffset = 512; // Offset of Dynamic Header
-            footer.CurrentSize = parent._footer.CurrentSize;
             footer.OriginalSize = parent._footer.OriginalSize;
             footer.UpdateChecksum();
             byte[] footerBlock = new byte[512];

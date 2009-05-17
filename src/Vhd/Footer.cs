@@ -62,7 +62,7 @@ namespace DiscUtils.Vhd
         {
         }
 
-        public Footer(Geometry geometry, FileType type)
+        public Footer(Geometry geometry, long capacity, FileType type)
         {
             Cookie = FileCookie;
             Features = FeatureReservedMustBeSet;
@@ -72,8 +72,8 @@ namespace DiscUtils.Vhd
             CreatorApp = "dutl";
             CreatorVersion = Version1;
             CreatorHostOS = WindowsHostOS;
-            OriginalSize = geometry.Capacity;
-            CurrentSize = geometry.Capacity;
+            OriginalSize = capacity;
+            CurrentSize = capacity;
             Geometry = geometry;
             DiskType = type;
             UniqueId = Guid.NewGuid();

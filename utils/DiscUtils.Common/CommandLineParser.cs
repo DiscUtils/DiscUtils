@@ -51,7 +51,7 @@ namespace DiscUtils.Common
             _switches.Add(clSwitch);
         }
 
-        public void DisplayHelp()
+        public void DisplayHelp(params string[] remarks)
         {
             Console.Write("{0}", _utilityName);
             if (_switches.Count > 0)
@@ -93,6 +93,20 @@ namespace DiscUtils.Common
             {
                 s.WriteDescription(Console.Out, "  {0,-" + maxSwitchLen + "}  {1}", 70 - maxSwitchLen);
                 Console.WriteLine();
+            }
+
+            if (remarks.Length > 0)
+            {
+                Console.WriteLine("Remarks:");
+                foreach (var remark in remarks)
+                {
+                    string[] text = Utilities.WordWrap(remark, 70);
+
+                    foreach(string line in text)
+                    {
+                        Console.WriteLine("  " + line);
+                    }
+                }
             }
         }
 

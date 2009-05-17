@@ -37,7 +37,7 @@ namespace DiscUtils.Vhd
             using (Disk disk = Disk.InitializeFixed(ms, Ownership.None, 8 * 1024 * 1024))
             {
                 Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity < 8 * 1024 * 1024);
+                Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity <= 8 * 1024 * 1024);
                 Assert.That(disk.Geometry.Capacity == disk.Content.Length);
             }
 
@@ -64,7 +64,7 @@ namespace DiscUtils.Vhd
             using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
                 Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Geometry.Capacity == disk.Content.Length);
             }
 
@@ -72,7 +72,7 @@ namespace DiscUtils.Vhd
 
             using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
                 Assert.That(disk.Geometry.Capacity == disk.Content.Length);
             }
         }
@@ -86,8 +86,8 @@ namespace DiscUtils.Vhd
             using (Disk disk = Disk.InitializeDifferencing(diffStream, Ownership.None, baseFile, Ownership.Dispose, @"C:\TEMP\Base.vhd", @".\Base.vhd", DateTime.UtcNow))
             {
                 Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
+                Assert.That(disk.Geometry.Capacity == baseFile.Geometry.Capacity);
                 Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
             }
             Assert.Greater(1 * 1024 * 1024, diffStream.Length);

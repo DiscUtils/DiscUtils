@@ -286,27 +286,14 @@ namespace DiscUtils.Vmdk
                 // grain tables themselves to indicate which sectors are present.
                 List<StreamExtent> extents = new List<StreamExtent>();
 
-                long blockSize = _gtCoverage;
-                int i = 0;
-                while (i < _globalDirectory.Length)
+                long length = Length;
+                long start = FindNextPresentGrain(0);
+                while (start < length)
                 {
-                    // Find next stored block
-                    while (i < _globalDirectory.Length && _globalDirectory[i] == 0)
-                    {
-                        ++i;
-                    }
-                    int start = i;
+                    long end = FindNextAbsentGrain(start);
+                    extents.Add(new StreamExtent(start, end - start));
 
-                    // Find next absent block
-                    while (i < _globalDirectory.Length && _globalDirectory[i] != 0)
-                    {
-                        ++i;
-                    }
-
-                    if (start != i)
-                    {
-                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
-                    }
+                    start = FindNextPresentGrain(end);
                 }
 
                 var parentExtents = StreamExtent.Intersect(_parentDiskStream.Extents, new StreamExtent[] { new StreamExtent(_diskOffset, Length) });
@@ -315,6 +302,72 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        private long FindNextPresentGrain(long pos)
+        {
+            long length = Length;
+            int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+
+            bool foundStart = false;
+            while (pos < length && !foundStart)
+            {
+                int grainTable = (int)(pos / _gtCoverage);
+
+                if (!LoadGrainTable(grainTable))
+                {
+                    pos += _gtCoverage;
+                }
+                else
+                {
+                    int grainTableOffset = (int)(pos - (grainTable * _gtCoverage));
+
+                    int grain = grainTableOffset / grainSize;
+
+                    if (_grainTable[grain] == 0)
+                    {
+                        pos += grainSize;
+                    }
+                    else
+                    {
+                        foundStart = true;
+                    }
+                }
+            }
+            long start = pos;
+            return start;
+        }
+
+        private long FindNextAbsentGrain(long pos)
+        {
+            long length = Length;
+            int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+
+            bool foundEnd = false;
+            while (pos < length && !foundEnd)
+            {
+                int grainTable = (int)(pos / _gtCoverage);
+
+                if (!LoadGrainTable(grainTable))
+                {
+                    foundEnd = true;
+                }
+                else
+                {
+                    int grainTableOffset = (int)(pos - (grainTable * _gtCoverage));
+
+                    int grain = grainTableOffset / grainSize;
+
+                    if (_grainTable[grain] == 0)
+                    {
+                        foundEnd = true;
+                    }
+                    else
+                    {
+                        pos += grainSize;
+                    }
+                }
+            }
+            return pos;
+        }
 
         protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
         {

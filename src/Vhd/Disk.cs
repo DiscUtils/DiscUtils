@@ -177,7 +177,20 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
-            return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity), Ownership.Dispose);
+            return InitializeFixed(stream, ownsStream, capacity, null);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a fixed-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
+        {
+            return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity, geometry), Ownership.Dispose);
         }
 
         /// <summary>
@@ -189,7 +202,20 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
-            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity), Ownership.Dispose);
+            return InitializeDynamic(stream, ownsStream, capacity, null);
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
+        {
+            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity, geometry), Ownership.Dispose);
         }
 
         /// <summary>
