@@ -66,8 +66,8 @@ namespace DiscUtils.Iscsi
             // Default negotiated values
             HeaderDigest = Digest.None;
             DataDigest = Digest.None;
-            MaxReceiveDataSegmentLength = 8192;
-            MaxTransmitDataSegmentLength = 8192;
+            MaxInitiatorTransmitDataSegmentLength = 131072;
+            MaxTargetReceiveDataSegmentLength = 8192;
 
             _negotiatedParameters = new Dictionary<string, string>();
             NegotiateSecurity();
@@ -87,10 +87,10 @@ namespace DiscUtils.Iscsi
         public Digest DataDigest { get; set; }
 
         [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Initiator, KeyType.Declarative)]
-        internal int MaxReceiveDataSegmentLength { get; set; }
+        internal int MaxInitiatorTransmitDataSegmentLength { get; set; }
 
         [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Target, KeyType.Declarative)]
-        internal int MaxTransmitDataSegmentLength { get; set; }
+        internal int MaxTargetReceiveDataSegmentLength { get; set; }
         #endregion
 
 
@@ -142,7 +142,7 @@ namespace DiscUtils.Iscsi
         {
             CommandRequest req = new CommandRequest(this, cmd.TargetLun);
 
-            int toSend = Math.Min(Math.Min(outBufferCount, _session.ImmediateData ? _session.FirstBurstLength : 0), MaxTransmitDataSegmentLength);
+            int toSend = Math.Min(Math.Min(outBufferCount, _session.ImmediateData ? _session.FirstBurstLength : 0), MaxTargetReceiveDataSegmentLength);
             byte[] packet = req.GetBytes(cmd, outBuffer, outBufferOffset, toSend, true, inBufferMax != 0, outBufferCount != 0, (uint)(outBufferCount != 0 ? outBufferCount : inBufferMax));
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
@@ -160,7 +160,7 @@ namespace DiscUtils.Iscsi
 
                 while (numApproved > 0)
                 {
-                    toSend = Math.Min(Math.Min(outBufferCount - numSent, numApproved), MaxTransmitDataSegmentLength);
+                    toSend = Math.Min(Math.Min(outBufferCount - numSent, numApproved), MaxTargetReceiveDataSegmentLength);
 
                     // toSend = numSent
 
