@@ -97,7 +97,7 @@ namespace DiscUtils.Registry
 
         #endregion
 
-        private uint CalcChecksum(byte[] buffer, int offset)
+        private static uint CalcChecksum(byte[] buffer, int offset)
         {
             uint sum = 0;
 

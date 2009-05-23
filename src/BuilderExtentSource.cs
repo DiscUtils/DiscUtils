@@ -59,18 +59,4 @@ namespace DiscUtils
         }
     }
 
-    internal class BuilderFileExtentSource : BuilderExtentSource
-    {
-        private string _file;
-
-        public BuilderFileExtentSource(string file)
-        {
-            _file = file;
-        }
-
-        public override BuilderExtent Fix(long pos)
-        {
-            return new BuilderFileExtent(pos, _file);
-        }
-    }
 }

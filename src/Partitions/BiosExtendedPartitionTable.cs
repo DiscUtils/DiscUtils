@@ -28,13 +28,11 @@ namespace DiscUtils.Partitions
     internal class BiosExtendedPartitionTable
     {
         private Stream _disk;
-        private Geometry _geometry;
         private uint _firstSector;
 
-        public BiosExtendedPartitionTable(Stream disk, Geometry geometry, uint firstSector)
+        public BiosExtendedPartitionTable(Stream disk, uint firstSector)
         {
             _disk = disk;
-            _geometry = geometry;
             _firstSector = firstSector;
         }
 

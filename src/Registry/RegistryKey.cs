@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -128,7 +129,7 @@ namespace DiscUtils.Registry
             RegistryValue regVal = GetRegistryValue(name);
             if (regVal != null)
             {
-                return regVal.Type;
+                return regVal.DataType;
             }
             return RegistryValueType.None;
         }
@@ -325,7 +326,7 @@ namespace DiscUtils.Registry
                 {
                     int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
                     ValueCell cell = _hive.GetCell<ValueCell>(valueIndex);
-                    if (string.Compare(cell.Name, name, true) == 0)
+                    if (string.Compare(cell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         return new RegistryValue(_hive, cell);
                     }

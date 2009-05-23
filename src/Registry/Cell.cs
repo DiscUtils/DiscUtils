@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.AccessControl;
 
 namespace DiscUtils.Registry
@@ -30,17 +31,17 @@ namespace DiscUtils.Registry
     /// The per-key flags present on registry keys.
     /// </summary>
     [Flags]
-    public enum RegistryKeyFlags : short
+    public enum RegistryKeyFlags : int
     {
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0001 = 0x0001,
+        Unknown0001 = 0x0001,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0002 = 0x0002,
+        Unknown0002 = 0x0002,
 
         /// <summary>
         /// The key is the root key in the registry hive.
@@ -50,7 +51,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0008 = 0x0008,
+        Unknown0008 = 0x0008,
 
         /// <summary>
         /// The key is a link to another key.
@@ -65,52 +66,52 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0040 = 0x0040,
+        Unknown0040 = 0x0040,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0080 = 0x0080,
+        Unknown0080 = 0x0080,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0100 = 0x0100,
+        Unknown0100 = 0x0100,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0200 = 0x0200,
+        Unknown0200 = 0x0200,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0400 = 0x0400,
+        Unknown0400 = 0x0400,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_0800 = 0x0800,
+        Unknown0800 = 0x0800,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_1000 = 0x1000,
+        Unknown1000 = 0x1000,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_2000 = 0x2000,
+        Unknown2000 = 0x2000,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_4000 = 0x4000,
+        Unknown4000 = 0x4000,
 
         /// <summary>
         /// Unknown purpose.
         /// </summary>
-        Unknown_8000 = unchecked((short)0x8000)
+        Unknown8000 = 0x8000
     }
 
     /// <summary>
@@ -183,21 +184,21 @@ namespace DiscUtils.Registry
     internal enum ValueFlags : ushort
     {
         Named = 0x0001,
-        Unknown_0002 = 0x0002,
-        Unknown_0004 = 0x0004,
-        Unknown_0008 = 0x0008,
-        Unknown_0010 = 0x0010,
-        Unknown_0020 = 0x0020,
-        Unknown_0040 = 0x0040,
-        Unknown_0080 = 0x0080,
-        Unknown_0100 = 0x0100,
-        Unknown_0200 = 0x0200,
-        Unknown_0400 = 0x0400,
-        Unknown_0800 = 0x0800,
-        Unknown_1000 = 0x1000,
-        Unknown_2000 = 0x2000,
-        Unknown_4000 = 0x4000,
-        Unknown_8000 = 0x8000
+        Unknown0002 = 0x0002,
+        Unknown0004 = 0x0004,
+        Unknown0008 = 0x0008,
+        Unknown0010 = 0x0010,
+        Unknown0020 = 0x0020,
+        Unknown0040 = 0x0040,
+        Unknown0080 = 0x0080,
+        Unknown0100 = 0x0100,
+        Unknown0200 = 0x0200,
+        Unknown0400 = 0x0400,
+        Unknown0800 = 0x0800,
+        Unknown1000 = 0x1000,
+        Unknown2000 = 0x2000,
+        Unknown4000 = 0x4000,
+        Unknown8000 = 0x8000
     }
 
 
@@ -364,11 +365,6 @@ namespace DiscUtils.Registry
         private int _numElements;
         private int[] _listIndexes;
 
-        public int ListCount
-        {
-            get { return _numElements; }
-        }
-
         public IEnumerable<int> Lists
         {
             get { return _listIndexes; }
@@ -403,11 +399,6 @@ namespace DiscUtils.Registry
         private int _numElements;
         private int[] _subKeyIndexes;
         private uint[] _nameHashes;
-
-        public int SubKeyCount
-        {
-            get { return _numElements; }
-        }
 
         public IEnumerable<int> SubKeys
         {
@@ -447,7 +438,8 @@ namespace DiscUtils.Registry
             }
             else
             {
-                return FindByPrefix(name, start);
+                //return FindByPrefix(name, start);
+                throw new NotImplementedException("FindByPrefix");
             }
         }
 
@@ -457,7 +449,7 @@ namespace DiscUtils.Registry
             for (int i = 0; i < name.Length; ++i)
             {
                 hash *= 37;
-                hash += char.ToUpper(name[i]);
+                hash += char.ToUpper(name[i], CultureInfo.InvariantCulture);
             }
 
             for (int i = start; i < _nameHashes.Length; ++i)
@@ -469,11 +461,6 @@ namespace DiscUtils.Registry
             }
 
             return -1;
-        }
-
-        private int FindByPrefix(string name, int start)
-        {
-            throw new NotImplementedException();
         }
     }
 
@@ -551,14 +538,9 @@ namespace DiscUtils.Registry
             get { return _dataIndex; }
         }
 
-        public RegistryValueType Type
+        public RegistryValueType DataType
         {
             get { return _type; }
-        }
-
-        public ValueFlags Flags
-        {
-            get { return _flags; }
         }
 
         public string Name

@@ -51,30 +51,27 @@ namespace DiscUtils.Registry
         /// <summary>
         /// The type of the value.
         /// </summary>
-        public RegistryValueType Type
+        public RegistryValueType DataType
         {
-            get { return _cell.Type; }
+            get { return _cell.DataType; }
         }
 
         /// <summary>
         /// The raw value data as a byte array.
         /// </summary>
-        public byte[] Data
+        public byte[] GetData()
         {
-            get
+            if (_cell.DataLength < 0)
             {
-                if (_cell.DataLength < 0)
-                {
-                    int len = _cell.DataLength & 0x7FFFFFFF;
-                    byte[] buffer = new byte[4];
-                    Utilities.WriteBytesLittleEndian(_cell.DataIndex, buffer, 0);
+                int len = _cell.DataLength & 0x7FFFFFFF;
+                byte[] buffer = new byte[4];
+                Utilities.WriteBytesLittleEndian(_cell.DataIndex, buffer, 0);
 
-                    byte[] result = new byte[len];
-                    Array.Copy(buffer, result, len);
-                    return result;
-                }
-                return _hive.RawCellData(_cell.DataIndex, _cell.DataLength);
+                byte[] result = new byte[len];
+                Array.Copy(buffer, result, len);
+                return result;
             }
+            return _hive.RawCellData(_cell.DataIndex, _cell.DataLength);
         }
 
         /// <summary>
@@ -120,7 +117,7 @@ namespace DiscUtils.Registry
         {
             get
             {
-                return ConvertToObject(Data, Type);
+                return ConvertToObject(GetData(), DataType);
             }
         }
 
@@ -130,12 +127,12 @@ namespace DiscUtils.Registry
         /// <returns></returns>
         public override string ToString()
         {
-            return Name + ":" + Type + ":" + DataAsString();
+            return Name + ":" + DataType + ":" + DataAsString();
         }
 
         private string DataAsString()
         {
-            switch (Type)
+            switch (DataType)
             {
                 case RegistryValueType.String:
                 case RegistryValueType.ExpandString:
@@ -143,13 +140,13 @@ namespace DiscUtils.Registry
                 case RegistryValueType.Dword:
                 case RegistryValueType.DwordBigEndian:
                 case RegistryValueType.QWord:
-                    return ConvertToObject(Data, Type).ToString();
+                    return ConvertToObject(GetData(), DataType).ToString();
 
                 case RegistryValueType.MultiString:
-                    return string.Join(",", (string[])ConvertToObject(Data, Type));
+                    return string.Join(",", (string[])ConvertToObject(GetData(), DataType));
 
                 default:
-                    byte[] data = Data;
+                    byte[] data = GetData();
                     string result = "";
                     for (int i = 0; i < Math.Min(data.Length, 8); ++i)
                     {

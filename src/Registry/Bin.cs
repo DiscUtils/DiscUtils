@@ -69,30 +69,5 @@ namespace DiscUtils.Registry
             Array.Copy(_buffer, index + 4, result, 0, result.Length);
             return result;
         }
-
-        public IEnumerable<Cell> Cells
-        {
-            get
-            {
-                int pos = 0x20;
-                while (pos < _buffer.Length)
-                {
-                    int cellLength = Utilities.ToInt32LittleEndian(_buffer, pos);
-
-                    Console.WriteLine("Cell @" + pos + " (len=" + cellLength + ")");
-
-                    if (cellLength < 0)
-                    {
-                        Cell cell = Cell.Parse(_buffer, pos + 4);
-                        KeyNodeCell knCell = cell as KeyNodeCell;
-
-                        yield return cell;
-                    }
-
-
-                    pos += Math.Abs(cellLength);
-                }
-            }
-        }
     }
 }

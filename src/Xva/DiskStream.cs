@@ -36,7 +36,6 @@ namespace DiscUtils.Xva
 
         private long _position;
 
-        private BitArray _dirtyChunks;
         private int _currentChunkIndex;
         private Stream _currentChunkData;
 
@@ -52,7 +51,6 @@ namespace DiscUtils.Xva
             }
 
             int numChunks = (int)((length + Sizes.OneMiB - 1) / Sizes.OneMiB);
-            _dirtyChunks = new BitArray(numChunks);
         }
 
         public override bool CanRead

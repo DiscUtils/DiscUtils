@@ -461,21 +461,6 @@
       <Namespaces>
        <Namespace Name="DiscUtils">
         <Types>
-         <Type Name="BuilderFileExtent">
-          <Messages>
-           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Excluded" Created="2009-02-08 22:31:04Z" FixCategory="NonBreaking">
-            <Issue Name="NonBreaking">
-             <Item>'BuilderFileExtent'</Item>
-             <Item>'FileStream'</Item>
-            </Issue>
-            <Notes>
-             <User Name="Kenneth">
-              <Note Id="38" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
-         </Type>
          <Type Name="ChsAddress">
           <Members>
            <Member Name="#First">
@@ -851,17 +836,17 @@
          </Type>
          <Type Name="Connection">
           <Members>
-           <Member Name="#MaxReceiveDataSegmentLength">
+           <Member Name="#MaxInitiatorTransmitDataSegmentLength">
             <Accessors>
-             <Accessor Name="#get_MaxReceiveDataSegmentLength()">
+             <Accessor Name="#get_MaxInitiatorTransmitDataSegmentLength()">
               <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
                 <Issue>
-                 <Item>'Connection.MaxReceiveDataSegmentLength.get()'</Item>
+                 <Item>'Connection.MaxInitiatorTransmitDataSegmentLength.get()'</Item>
                 </Issue>
                 <Notes>
                  <User Name="Kenneth">
-                  <Note Id="56" />
+                  <Note Id="65" />
                  </User>
                 </Notes>
                </Message>
@@ -1998,6 +1983,94 @@
        </Namespace>
        <Namespace Name="DiscUtils.Ntfs">
         <Types>
+         <Type Name="AttributeDefinitionRecord">
+          <Members>
+           <Member Name="#CollationRule">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'AttributeDefinitionRecord.CollationRule'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="66" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DisplayRule">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'AttributeDefinitionRecord.DisplayRule'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="66" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'AttributeDefinitionRecord.MaxSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="66" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MinSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'AttributeDefinitionRecord.MinSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="66" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Name">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'AttributeDefinitionRecord.Name'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="66" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="AttributeList">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-23 13:41:59Z">
+            <Issue>
+             <Item>'AttributeList'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="69" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="AttributeType">
           <Messages>
            <Message TypeName="MarkEnumsWithFlags" Category="Microsoft.Design" CheckId="CA1027" Status="Excluded" Created="2009-03-20 16:51:42Z">
@@ -2273,6 +2346,64 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="IndexRoot">
+          <Members>
+           <Member Name="#AttributeType">
+            <Accessors>
+             <Accessor Name="#get_AttributeType()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'IndexRoot.AttributeType.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="68" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#CollationRule">
+            <Accessors>
+             <Accessor Name="#get_CollationRule()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'IndexRoot.CollationRule.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="68" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#RawClustersPerIndexRecord">
+            <Accessors>
+             <Accessor Name="#get_RawClustersPerIndexRecord()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'IndexRoot.RawClustersPerIndexRecord.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="68" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="NtfsFileSystemChecker">
           <Members>
            <Member Name="#Check(System.IO.TextWriter,DiscUtils.ReportLevels)">
@@ -2330,6 +2461,20 @@
             <Notes>
              <User Name="Kenneth">
               <Note Id="48" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VolumeName">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-23 13:41:59Z">
+            <Issue>
+             <Item>'VolumeName'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="69" />
              </User>
             </Notes>
            </Message>
@@ -2506,8 +2651,423 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Registry">
+        <Types>
+         <Type Name="HiveHeader">
+          <Members>
+           <Member Name="#Guid1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'HiveHeader.Guid1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="64" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Guid2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'HiveHeader.Guid2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="64" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MajorVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'HiveHeader.MajorVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="64" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MinorVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'HiveHeader.MinorVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="64" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Path">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'HiveHeader.Path'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="64" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Timestamp">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'HiveHeader.Timestamp'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="64" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="RegistryKey">
+          <Members>
+           <Member Name="#Flags">
+            <Messages>
+             <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="MemberNoAlternate">
+               <Item>Flags</Item>
+               <Item>'RegistryKey.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="62" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetAccessControl()">
+            <Messages>
+             <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Certainty="50">
+               <Item>'RegistryKey.GetAccessControl()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="63" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetSubKeyNames()">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.GetSubKeyNames()'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="61" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OpenSubKey(System.String)">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.OpenSubKey(string)'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="60" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SubKeyCount">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.SubKeyCount'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="61" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SubKeys">
+            <Messages>
+             <Message Id="SubKeys" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKeys</Item>
+               <Item>'RegistryKey.SubKeys'</Item>
+               <Item>Subkeys</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="61" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="RegistryKeyFlags">
+          <Messages>
+           <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-05-23 13:41:59Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>Flags</Item>
+             <Item>'RegistryKeyFlags'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="59" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="RegistryValueType">
+          <Members>
+           <Member Name="#Dword">
+            <Messages>
+             <Message Id="Dword" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="Member">
+               <Item>Dword</Item>
+               <Item>'RegistryValueType.Dword'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="50" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DwordBigEndian">
+            <Messages>
+             <Message Id="Dword" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="Member">
+               <Item>Dword</Item>
+               <Item>'RegistryValueType.DwordBigEndian'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="50" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MultiString">
+            <Messages>
+             <Message Id="Multi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue Name="Member">
+               <Item>Multi</Item>
+               <Item>'RegistryValueType.MultiString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="50" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="SecurityCell">
+          <Members>
+           <Member Name="#NextIndex">
+            <Accessors>
+             <Accessor Name="#get_NextIndex()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'SecurityCell.NextIndex.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="64" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#PreviousIndex">
+            <Accessors>
+             <Accessor Name="#get_PreviousIndex()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'SecurityCell.PreviousIndex.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="64" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#UsageCount">
+            <Accessors>
+             <Accessor Name="#get_UsageCount()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'SecurityCell.UsageCount.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="64" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Vmdk">
         <Types>
+         <Type Name="CompressedGrainHeader">
+          <Members>
+           <Member Name="#LogicalBlockAddress">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'CompressedGrainHeader.LogicalBlockAddress'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="66" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DescriptorFile">
+          <Members>
+           <Member Name="#AdapterType">
+            <Accessors>
+             <Accessor Name="#get_AdapterType()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'DescriptorFile.AdapterType.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="67" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#HardwareVersion">
+            <Accessors>
+             <Accessor Name="#get_HardwareVersion()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'DescriptorFile.HardwareVersion.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="67" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#ParseAdapterType(System.String)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'DescriptorFile.ParseAdapterType(string)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="67" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ParseUuid(System.String)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+              <Issue>
+               <Item>'DescriptorFile.ParseUuid(string)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="67" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UniqueId">
+            <Accessors>
+             <Accessor Name="#get_UniqueId()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
+                <Issue>
+                 <Item>'DescriptorFile.UniqueId.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="67" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="DiskCreateType">
           <Members>
            <Member Name="#TwoGbMaxExtentFlat">
@@ -2722,7 +3282,6 @@
     <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
     <Note Id="36" Modified="2009-03-01 15:12:07Z">This is a part of the data structure, but no extent types that use it are supported</Note>
     <Note Id="37" Modified="2009-02-08 22:43:49Z">Parameter names are arbitrary</Note>
-    <Note Id="38" Modified="2009-02-08 22:45:11Z">Equivalent disposal pattern implemented, but not using IDisposable because instances can be re-used.</Note>
     <Note Id="39" Modified="2009-02-14 11:08:37Z">Utils is part of project name</Note>
     <Note Id="40" Modified="2009-02-14 11:08:47Z">Vmdk is correct form of VMDK</Note>
     <Note Id="41" Modified="2009-02-22 11:33:46Z">Follows best-practice naming (VMFS is well-known), and names derived from public spec.</Note>
@@ -2734,6 +3293,7 @@
     <Note Id="47" Modified="2009-04-18 23:12:33Z">SecurityDescriptor is instantiated via template arguments</Note>
     <Note Id="48" Modified="2009-04-18 23:12:53Z">VolumeInformation is instantiated via template arguments</Note>
     <Note Id="49" Modified="2009-05-09 08:55:57Z">Iscsi matches normal naming convention for namespaces</Note>
+    <Note Id="50" Modified="2009-05-23 13:44:01Z">Names follow normal conventions</Note>
     <Note Id="51" Modified="2009-05-16 10:41:11Z">Lun is correct form of LUN, which is a common concept in iSCSI.</Note>
     <Note Id="52" Modified="2009-05-16 10:41:52Z">Iscsi is acceptable</Note>
     <Note Id="53" Modified="2009-05-16 10:53:30Z">Login is the name used in iSCSI</Note>
@@ -2742,6 +3302,17 @@
     <Note Id="56" Modified="2009-05-16 11:32:30Z">Uncalled private code corresponding to fields of the iSCSI protocol not implemented yet.</Note>
     <Note Id="57" Modified="2009-05-16 11:33:24Z">BPB fields that are not used.</Note>
     <Note Id="58" Modified="2009-05-16 11:33:58Z">DiscUtils is the project name.</Note>
+    <Note Id="59" Modified="2009-05-23 13:47:43Z">Flags is appropriate name</Note>
+    <Note Id="60" Modified="2009-05-23 13:50:02Z">Following convention set by framework class RegistryKey</Note>
+    <Note Id="61" Modified="2009-05-23 13:53:26Z">Using SubKey per framework class RegistryKey</Note>
+    <Note Id="62" Modified="2009-05-23 13:53:40Z">Flags is appropriate term</Note>
+    <Note Id="63" Modified="2009-05-23 14:02:57Z">Get is appropriate because it involves file access to retrieve ACL.</Note>
+    <Note Id="64" Modified="2009-05-23 14:08:05Z">Members reflect structure of registry data.</Note>
+    <Note Id="65" Modified="2009-05-23 14:08:29Z">Invoked by reflection</Note>
+    <Note Id="66" Modified="2009-05-23 14:11:32Z">Fields reflect data structure.</Note>
+    <Note Id="67" Modified="2009-05-23 14:12:40Z">Methods reflect structure of descriptor files.</Note>
+    <Note Id="68" Modified="2009-05-23 14:18:31Z">Reflects data structure</Note>
+    <Note Id="69" Modified="2009-05-23 14:19:02Z">Reflect disk structures, not used yet.</Note>
    </User>
   </Notes>
   <Rules>
@@ -2759,6 +3330,9 @@
    </Rule>
    <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
     <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
+   </Rule>
+   <Rule TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702">
+    <Resolution Name="MemberShouldBeDiscreteTerm">The compound word '{0}' in member name {1} exists as a discrete term. If your usage is intended to be single word, case it as '{2}' or strip the first token entirely if it represents any sort of Hungarian notation.</Resolution>
    </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
@@ -2789,14 +3363,14 @@
    <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
     <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
-   <Rule TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001">
-    <Resolution Name="NonBreaking">Implement IDisposable on {0} because it creates members of the following IDisposable types: {1}.</Resolution>
-   </Rule>
    <Rule TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726">
     <Resolution Name="Member">Replace the term '{0}' in member name {1} with the preferred alternate '{2}'.</Resolution>
     <Resolution Name="MemberNoAlternate">Replace the term '{0}' in member name {1} with an appropriate alternate or remove it entirely.</Resolution>
     <Resolution Name="Type">Replace the term '{0}' in type name {1} with the preferred alternate '{2}'.</Resolution>
     <Resolution Name="TypeNoAlternate">Replace the term '{0}' in type name {1} with an appropriate alternate or remove it entirely.</Resolution>
+   </Rule>
+   <Rule TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024">
+    <Resolution Name="Default">Change {0} to a property if appropriate.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

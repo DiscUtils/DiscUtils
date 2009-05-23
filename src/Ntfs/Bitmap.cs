@@ -117,12 +117,20 @@ namespace DiscUtils.Ntfs
         internal long AllocateFirstAvailable(long minValue)
         {
             long i = minValue;
-            while (IsPresent(i))
+            while (IsPresent(i) && i < _maxIndex)
             {
                 ++i;
             }
-            MarkPresent(i);
-            return i;
+
+            if (i < _maxIndex)
+            {
+                MarkPresent(i);
+                return i;
+            }
+            else
+            {
+                return -1;
+            }
         }
     }
 }

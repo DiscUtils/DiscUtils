@@ -205,11 +205,6 @@ namespace DiscUtils.Ntfs
             return len;
         }
 
-        public void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + ">" + _runOffset + " [+" + _runLength + "]");
-        }
-
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:+##;-##;0}[+{1}]", _runOffset, _runLength);

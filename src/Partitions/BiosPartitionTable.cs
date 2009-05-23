@@ -367,7 +367,7 @@ namespace DiscUtils.Partitions
                     && (r.PartitionType == BiosPartitionTypes.Extended
                         || r.PartitionType == BiosPartitionTypes.ExtendedLba))
                 {
-                    result.Add(new BiosExtendedPartitionTable(_diskData, _diskGeometry, r.LBAStart));
+                    result.Add(new BiosExtendedPartitionTable(_diskData, r.LBAStart));
                 }
             }
 
