@@ -172,6 +172,24 @@ namespace DiscUtils
             return true;
         }
 
+        public static bool AreEqual(byte[] a, byte[] b)
+        {
+            if (a.Length != b.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < a.Length; ++i)
+            {
+                if (a[i] != b[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static ushort BitSwap(ushort value)
         {
             return (ushort)(((value & 0x00FF) << 8) | ((value & 0xFF00) >> 8));
