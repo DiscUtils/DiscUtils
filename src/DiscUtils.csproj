@@ -222,6 +222,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Sdi\FileHeader.cs" />
+    <Compile Include="Sdi\SdiFile.cs" />
+    <Compile Include="Sdi\Section.cs" />
+    <Compile Include="Sdi\SectionRecord.cs" />
     <Compile Include="Sizes.cs" />
     <Compile Include="SnapshotStream.cs" />
     <Compile Include="SparseMemoryBuffer.cs" />
