@@ -306,9 +306,11 @@ namespace DiscUtils.Wim
                         _repeatedOffsets[0] = matchOffset;
                     }
 
+                    int destOffset = _bufferCount + (int)numRead;
+                    int srcOffset = destOffset - (int)matchOffset;
                     for (int i = 0; i < matchLength; ++i)
                     {
-                        _buffer[_bufferCount + numRead + i] = _buffer[_bufferCount + numRead + i - matchOffset];
+                        _buffer[destOffset + i] = _buffer[srcOffset + i];
                     }
 
                     numRead += matchLength;

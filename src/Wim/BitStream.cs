@@ -40,8 +40,10 @@ namespace DiscUtils.Wim
 
         private long _position;
 
-        private ulong _buffer;
+        private uint _buffer;
         private int _bufferAvailable;
+
+        byte[] _readBuffer = new byte[2];
 
         public BitStream(Stream byteStream)
         {
@@ -50,37 +52,48 @@ namespace DiscUtils.Wim
 
         public uint Read(int count)
         {
-            if (count > 32)
+            if (count > 16)
             {
                 throw new ArgumentOutOfRangeException("count", count, "Maximum 32 bits can be read");
             }
 
-            Need(count);
+            if (_bufferAvailable < count)
+            {
+                Need(count);
+            }
+
             _bufferAvailable -= count;
             _position += count;
 
-            ulong mask = (ulong)((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
             return (uint)((_buffer >> _bufferAvailable) & mask);
         }
 
         public uint Peek(int count)
         {
-            if (count > 32)
+            if (count > 16)
             {
                 throw new ArgumentOutOfRangeException("count", count, "Maximum 32 bits can be read");
             }
 
-            Need(count);
+            if (_bufferAvailable < count)
+            {
+                Need(count);
+            }
 
-            ulong mask = (ulong)((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
             return (uint)((_buffer >> (_bufferAvailable - count)) & mask);
         }
 
         public void Consume(int count)
         {
-            Need(count);
+            if (_bufferAvailable < count)
+            {
+                Need(count);
+            }
+
             _bufferAvailable -= count;
             _position += count;
         }
@@ -136,17 +149,13 @@ namespace DiscUtils.Wim
 
         private void Need(int count)
         {
-            if (count > 48)
-            {
-                throw new ArgumentOutOfRangeException("count", count, "Maximum 48 bits can be buffered at once");
-            }
-
             while (_bufferAvailable < count)
             {
-                byte[] buffer = new byte[2];
-                Utilities.ReadFully(_byteStream, buffer, 0, 2);
+                _readBuffer[0] = 0;
+                _readBuffer[1] = 0;
+                _byteStream.Read(_readBuffer, 0, 2);
 
-                _buffer = _buffer << 16 | (ulong)Utilities.ToUInt16LittleEndian(buffer, 0);
+                _buffer = (uint)((uint)(_buffer << 16) | (uint)(_readBuffer[1] << 8) | (uint)_readBuffer[0]);
                 _bufferAvailable += 16;
             }
         }

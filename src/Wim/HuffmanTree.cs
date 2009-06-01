@@ -68,8 +68,6 @@ namespace DiscUtils.Wim
 
         public uint NextSymbol(BitStream bitStream)
         {
-            long pos = bitStream.Position;
-
             uint symbol = _buffer[bitStream.Peek(_numBits)];
 
             // We may have over-read, reset bitstream position
