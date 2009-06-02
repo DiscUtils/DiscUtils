@@ -63,7 +63,7 @@ namespace DiscUtils.Ntfs
             int runOffsetSize = (buffer[offset] >> 4) & 0x0F;
             int runLengthSize = buffer[offset] & 0x0F;
 
-            _runLength = (long)ReadVarULong(buffer, offset + 1, runLengthSize);
+            _runLength = ReadVarLong(buffer, offset + 1, runLengthSize);
             _runOffset = ReadVarLong(buffer, offset + 1 + runLengthSize, runOffsetSize);
             _isSparse = (runOffsetSize == 0);
 
@@ -72,7 +72,7 @@ namespace DiscUtils.Ntfs
 
         internal int Write(byte[] buffer, int offset)
         {
-            int runLengthSize = WriteVarULong(buffer, offset + 1, (ulong)_runLength);
+            int runLengthSize = WriteVarLong(buffer, offset + 1, _runLength);
             int runOffsetSize = WriteVarLong(buffer, offset + 1 + runLengthSize, _runOffset);
 
             buffer[offset] = (byte)((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
@@ -84,43 +84,10 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                int runLengthSize = VarULongSize((ulong)_runLength);
+                int runLengthSize = VarLongSize(_runLength);
                 int runOffsetSize = VarLongSize(_runOffset);
                 return 1 + runLengthSize + runOffsetSize;
             }
-        }
-
-        private static ulong ReadVarULong(byte[] buffer, int offset, int size)
-        {
-            ulong val = 0;
-            for (int i = 0; i < size; ++i)
-            {
-                val = val | (((ulong)buffer[offset + i]) << (i * 8));
-            }
-            return val;
-        }
-
-        private static int WriteVarULong(byte[] buffer, int offset, ulong val)
-        {
-            int pos = 0;
-            while (val != 0)
-            {
-                buffer[offset + pos] = (byte)(val & 0xFF);
-                val >>= 8;
-                pos++;
-            }
-            return pos;
-        }
-
-        private static int VarULongSize(ulong val)
-        {
-            int len = 0;
-            while (val != 0)
-            {
-                val >>= 8;
-                len++;
-            }
-            return len;
         }
 
         private static long ReadVarLong(byte[] buffer, int offset, int size)

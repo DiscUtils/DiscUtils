@@ -116,7 +116,7 @@ namespace DiscUtils.Ntfs
                     _bitmap.MarkPresent(focusCluster);
                     ++focusCluster;
 
-                    while (!_bitmap.IsPresent(focusCluster) && focusCluster - runStart < count)
+                    while (!_bitmap.IsPresent(focusCluster) && focusCluster - runStart < (count - numFound))
                     {
                         _bitmap.MarkPresent(focusCluster);
                         ++focusCluster;
