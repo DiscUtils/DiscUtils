@@ -31,7 +31,7 @@ namespace NTFSDump
 {
     class Program
     {
-        private static CommandLineParameter _vhdFile;
+        private static CommandLineParameter _diskFile;
         private static CommandLineSwitch _partition;
         private static CommandLineSwitch _showHidden;
         private static CommandLineSwitch _showSystem;
@@ -41,7 +41,7 @@ namespace NTFSDump
 
         static void Main(string[] args)
         {
-            _vhdFile = new CommandLineParameter("vhd_file", "The name of the VHD file to inspect.", false);
+            _diskFile = new CommandLineParameter("disk_file", "The name of the VHD or VMDK file to inspect.", false);
             _partition = new CommandLineSwitch("p", "partition", "num", "The number of the partition to inspect, in the range 0-n.  If not specified, 0 (the first partition) is the default.");
             _showHidden = new CommandLineSwitch("H", "hidden", null, "Don't hide files & directories with the hidden attribute set in the directory listing.");
             _showSystem = new CommandLineSwitch("S", "system", null, "Don't hide files & directories with the system attribute set in the directory listing.");
@@ -50,7 +50,7 @@ namespace NTFSDump
             _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
             CommandLineParser parser = new CommandLineParser("NTFSDump");
-            parser.AddParameter(_vhdFile);
+            parser.AddParameter(_diskFile);
             parser.AddSwitch(_partition);
             parser.AddSwitch(_showHidden);
             parser.AddSwitch(_showSystem);
@@ -78,21 +78,31 @@ namespace NTFSDump
                 return;
             }
 
-            using (Stream fileStream = File.OpenRead(_vhdFile.Value))
+            using (VirtualDisk disk = OpenDisk(_diskFile.Value))
             {
-                using (Disk vhdDisk = new Disk(fileStream, Ownership.None))
+                using (Stream partitionStream = disk.Partitions[partition].Open())
                 {
-                    using (Stream partitionStream = vhdDisk.Partitions[partition].Open())
-                    {
-                        NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
-                        fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
-                        fs.NtfsOptions.HideSystemFiles = !_showSystem.IsPresent;
-                        fs.NtfsOptions.HideMetafiles = !_showMeta.IsPresent;
+                    NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
+                    fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
+                    fs.NtfsOptions.HideSystemFiles = !_showSystem.IsPresent;
+                    fs.NtfsOptions.HideMetafiles = !_showMeta.IsPresent;
 
-                        fs.Dump(Console.Out, "");
-                    }
+                    fs.Dump(Console.Out, "");
                 }
             }
+        }
+
+        private static VirtualDisk OpenDisk(string path)
+        {
+            if (path.EndsWith(".VHD", StringComparison.OrdinalIgnoreCase))
+            {
+                return new DiscUtils.Vhd.Disk(new FileStream(path, FileMode.Open, FileAccess.Read), Ownership.Dispose);
+            }
+            else if (path.EndsWith(".VMDK", StringComparison.OrdinalIgnoreCase))
+            {
+                return new DiscUtils.Vmdk.Disk(path, FileAccess.Read);
+            }
+            throw new NotSupportedException("Unrecognised file extension");
         }
 
         private static void ShowHeader()
