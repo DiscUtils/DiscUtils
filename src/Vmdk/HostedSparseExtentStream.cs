@@ -112,7 +112,7 @@ namespace DiscUtils.Vmdk
                 }
 
                 int numToWrite = Math.Min(count - totalWritten, grainSize - grainOffset);
-                _fileStream.Position = (_grainTable[grain] * Sizes.Sector) + grainOffset;
+                _fileStream.Position = (((long)_grainTable[grain]) * Sizes.Sector) + grainOffset;
                 _fileStream.Write(buffer, offset + totalWritten, numToWrite);
 
                 _position += numToWrite;

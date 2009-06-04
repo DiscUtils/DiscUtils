@@ -165,8 +165,8 @@ namespace DiscUtils.Vdi
                 }
                 else
                 {
-                    long blockOffset = _blockTable[block] * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
-                    long filePos = _fileHeader.DataOffset + _fileHeader.BlockExtraSize + blockOffset + offsetInBlock;
+                    long blockOffset = ((long)_blockTable[block]) * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
+                    long filePos = ((long)_fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset + offsetInBlock;
                     _fileStream.Position = filePos;
                     Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead);
                 }
@@ -277,8 +277,8 @@ namespace DiscUtils.Vdi
                         writeBufferOffset = 0;
                     }
 
-                    long blockOffset = _fileHeader.BlocksAllocated * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
-                    long filePos = _fileHeader.DataOffset + _fileHeader.BlockExtraSize + blockOffset;
+                    long blockOffset = ((long)_fileHeader.BlocksAllocated) * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
+                    long filePos = ((long)_fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset;
 
                     _fileStream.Position = filePos;
                     _fileStream.Write(writeBuffer, writeBufferOffset, _fileHeader.BlockSize);
@@ -296,8 +296,8 @@ namespace DiscUtils.Vdi
                 else
                 {
                     // Existing block, simply overwrite the existing data
-                    long blockOffset = _blockTable[block] * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
-                    long filePos = _fileHeader.DataOffset + _fileHeader.BlockExtraSize + blockOffset + offsetInBlock;
+                    long blockOffset = ((long)_blockTable[block]) * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
+                    long filePos = ((long)_fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset + offsetInBlock;
                     _fileStream.Position = filePos;
                     _fileStream.Write(buffer, offset + numWritten, toWrite);
                 }

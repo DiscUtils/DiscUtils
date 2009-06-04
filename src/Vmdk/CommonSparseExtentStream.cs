@@ -230,7 +230,7 @@ namespace DiscUtils.Vmdk
                     else
                     {
                         int bufferOffset = offset + totalRead;
-                        long grainStart = _grainTable[grain] * Sizes.Sector;
+                        long grainStart = ((long)_grainTable[grain]) * Sizes.Sector;
                         numRead = ReadGrain(buffer, bufferOffset, grainStart, grainOffset, numToRead);
                     }
                 }

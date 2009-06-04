@@ -179,7 +179,7 @@ namespace DiscUtils.Vhd
                     byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
                     if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
                     {
-                        _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize + offsetInSector;
+                        _fileStream.Position = (((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize + offsetInSector;
                         if (Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
                         {
                             throw new IOException("Failed to read entire sector");
@@ -273,7 +273,7 @@ namespace DiscUtils.Vhd
 
                     byte sectorMask = (byte)(1 << (7 - (sectorInBlock % 8)));
 
-                    long sectorStart = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
+                    long sectorStart = (((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
 
                     // Get the existing sector data (if any), or otherwise the parent's content
                     byte[] sectorBuffer;
@@ -303,7 +303,7 @@ namespace DiscUtils.Vhd
                     // Processing at least one whole sector, just write (after making sure to trim any partial sectors from the end)...
                     toWrite = (toWrite / Utilities.SectorSize) * Utilities.SectorSize;
 
-                    _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
+                    _fileStream.Position = (((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
                     _fileStream.Write(buffer, offset + numWritten, toWrite);
 
                     // Update all of the bits in the block bitmap
@@ -390,7 +390,7 @@ namespace DiscUtils.Vhd
             }
 
             // Read in bitmap
-            _fileStream.Position = _blockAllocationTable[block] * Utilities.SectorSize;
+            _fileStream.Position = ((long)_blockAllocationTable[block]) * Utilities.SectorSize;
             _blockBitmaps[block] = Utilities.ReadFully(_fileStream, _blockBitmapSize);
             return true;
         }
@@ -436,7 +436,7 @@ namespace DiscUtils.Vhd
         private void WriteBlockBitmap(long block)
         {
             // Read in bitmap
-            _fileStream.Position = _blockAllocationTable[block] * Utilities.SectorSize;
+            _fileStream.Position = ((long)_blockAllocationTable[block]) * Utilities.SectorSize;
             _fileStream.Write(_blockBitmaps[block], 0, _blockBitmapSize);
         }
 
