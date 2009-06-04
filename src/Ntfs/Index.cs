@@ -325,17 +325,13 @@ namespace DiscUtils.Ntfs
 
         public bool TryGetValue(byte[] key, out byte[] value)
         {
-            //
-            // TODO: This is sucky, should be using the index rather than enumerating all items!
-            //
+            IndexEntry entry;
+            IndexNode node;
 
-            foreach (var entry in Entries)
+            if (_rootNode.TryFindEntry(key, out entry, out node))
             {
-                if (_comparer.Compare(entry.Key, key) == 0)
-                {
-                    value = entry.Value;
-                    return true;
-                }
+                value = entry.DataBuffer;
+                return true;
             }
 
             value = default(byte[]);
