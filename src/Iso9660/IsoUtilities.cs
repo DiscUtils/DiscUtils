@@ -308,14 +308,22 @@ namespace DiscUtils.Iso9660
         /// <returns></returns>
         public static DateTime ToUTCDateTimeFromDirectoryTime(byte[] data, int offset)
         {
-            DateTime relTime = new DateTime(
-                1900 + data[offset],
-                data[offset + 1],
-                data[offset + 2],
-                data[offset + 3],
-                data[offset + 4],
-                data[offset + 5]);
-            return relTime + TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
+            try
+            {
+                DateTime relTime = new DateTime(
+                    1900 + data[offset],
+                    data[offset + 1],
+                    data[offset + 2],
+                    data[offset + 3],
+                    data[offset + 4],
+                    data[offset + 5]);
+                return relTime + TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
+            }
+            catch(ArgumentOutOfRangeException)
+            {
+                // In case the ISO has a bad date encoded, we'll just fall back to using a fixed date
+                return new DateTime(1980, 1, 1);
+            }
         }
 
         internal static void ToDirectoryTimeFromUTC(byte[] data, int offset, DateTime dateTime)
