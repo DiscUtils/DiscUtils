@@ -89,7 +89,7 @@ namespace DiscUtils.Iso9660
 
             int toRead = (int)Math.Min((uint)count, _dataLength - _position);
 
-            _isoStream.Position = _position + (_startBlock * IsoUtilities.SectorSize);
+            _isoStream.Position = _position + (_startBlock * (long)IsoUtilities.SectorSize);
             int numRead = _isoStream.Read(buffer, offset, toRead);
             _position += numRead;
             return numRead;

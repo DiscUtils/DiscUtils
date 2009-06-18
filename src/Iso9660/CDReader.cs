@@ -99,7 +99,7 @@ namespace DiscUtils.Iso9660
             }
 
             // Skip to Path Table
-            data.Position = _volDesc.LogicalBlockSize * _volDesc.TypeLPathTableLocation;
+            data.Position = _volDesc.LogicalBlockSize * (long)_volDesc.TypeLPathTableLocation;
             byte[] pathTableBuffer = new byte[_volDesc.PathTableSize];
             data.Read(pathTableBuffer, 0, pathTableBuffer.Length);
 
