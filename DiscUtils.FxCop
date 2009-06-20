@@ -202,6 +202,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Sdi">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2009-06-20 10:33:23Z">
+      <Issue>
+       <Item>DiscUtils.Sdi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="74" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-06-20 10:33:23Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Sdi</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="73" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Vdi">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-12-15 22:03:38Z">
@@ -2998,6 +3023,172 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Sdi">
+        <Types>
+         <Type Name="FileHeader">
+          <Members>
+           <Member Name="#BootCodeOffset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.BootCodeOffset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BootCodeSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.BootCodeSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Checksum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.Checksum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.DeviceId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceModel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.DeviceModel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceRole">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.DeviceRole'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RuntimeGuid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.RuntimeGuid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RuntimeOEMRev">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.RuntimeOEMRev'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Type">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.Type'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VendorId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'FileHeader.VendorId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="SectionRecord">
+          <Members>
+           <Member Name="#Attr">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-06-20 10:33:23Z">
+              <Issue>
+               <Item>'SectionRecord.Attr'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="75" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Vmdk">
         <Types>
          <Type Name="CompressedGrainHeader">
@@ -3405,6 +3596,9 @@
     <Note Id="70" Modified="2009-05-31 08:40:46Z">Wim is correct form of WIM acronym.</Note>
     <Note Id="71" Modified="2009-05-31 08:48:01Z">Need initialization ordering guarantee between the two static fields.</Note>
     <Note Id="72" Modified="2009-05-31 08:48:34Z">Namespace appropriate for new file system format</Note>
+    <Note Id="73" Modified="2009-06-20 10:33:49Z">Utils is part of project name</Note>
+    <Note Id="74" Modified="2009-06-20 10:34:03Z">Following convention of separating file formats by namespace</Note>
+    <Note Id="75" Modified="2009-06-20 10:34:23Z">Currently unused fields</Note>
    </User>
   </Notes>
   <Rules>
