@@ -296,6 +296,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Makes a best guess at the geometry of a disk.
         /// </summary>
+        /// <param name="disk">String containing the disk image to detect the geometry from</param>
         /// <returns>The detected geometry</returns>
         public static Geometry DetectGeometry(Stream disk)
         {

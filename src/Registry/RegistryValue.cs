@@ -59,6 +59,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// The raw value data as a byte array.
         /// </summary>
+        /// <returns>The value as a raw byte array.</returns>
         public byte[] GetData()
         {
             if (_cell.DataLength < 0)
@@ -124,7 +125,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets a string representation of the registry value.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The registry value as a string.</returns>
         public override string ToString()
         {
             return Name + ":" + DataType + ":" + DataAsString();

@@ -45,7 +45,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets the Security Descriptor applied to the registry key.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The security descriptor as a RegistrySecurity instance.</returns>
         public RegistrySecurity GetAccessControl()
         {
             if (_cell.SecurityIndex > 0)
@@ -59,7 +59,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets the names of all child sub keys.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The names of the sub keys</returns>
         public string[] GetSubKeyNames()
         {
             List<string> names = new List<string>();
@@ -113,7 +113,7 @@ namespace DiscUtils.Registry
         /// </summary>
         /// <param name="name">The name of the value to retrieve.</param>
         /// <param name="defaultValue">The default value to return, if no existing value is stored.</param>
-        /// <returns></returns>
+        /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
         public object GetValue(string name, object defaultValue)
         {
             return GetValue(name) ?? defaultValue;
@@ -137,7 +137,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets the names of all values in this key.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>An array of strings containing the value names</returns>
         public string[] GetValueNames()
         {
             List<string> names = new List<string>();
