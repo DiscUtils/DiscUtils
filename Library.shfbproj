@@ -37,8 +37,7 @@
     <PresentationStyle>vs2005</PresentationStyle>
     <NamingMethod>MemberName</NamingMethod>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\trunk\src\bin\Release\DiscUtils.dll" xmlns="" />
-      <DocumentationSource sourceFile="..\trunk\src\bin\Release\DiscUtils.dll.xml" xmlns="" />
+      <DocumentationSource sourceFile="src\DiscUtils.csproj" />
     </DocumentationSources>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="(global)" isDocumented="False" xmlns="" />

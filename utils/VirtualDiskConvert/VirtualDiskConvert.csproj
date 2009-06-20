@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C88BC611-BFBF-4A16-8499-B4297A4FA77B}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -49,11 +49,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\DiscUtils\trunk\src\DiscUtils.csproj">
+    <ProjectReference Include="..\..\src\DiscUtils.csproj">
       <Project>{DBB340F9-2386-43C2-A473-FA496CBE07A4}</Project>
       <Name>DiscUtils</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\DiscUtils\trunk\utils\DiscUtils.Common\DiscUtils.Common.csproj">
+    <ProjectReference Include="..\DiscUtils.Common\DiscUtils.Common.csproj">
       <Project>{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}</Project>
       <Name>DiscUtils.Common</Name>
     </ProjectReference>
