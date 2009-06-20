@@ -83,10 +83,9 @@ namespace DiscUtils.Ntfs
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
 
-
-                int pos = 0;
-                while (pos < buffer.Length)
+                foreach (var entry in _idIndex.Entries)
                 {
+                    int pos = (int)entry.Value.SdsOffset;
 
                     SecurityDescriptorRecord rec = new SecurityDescriptorRecord();
                     if (!rec.Read(buffer, pos))
@@ -108,8 +107,6 @@ namespace DiscUtils.Ntfs
                     writer.WriteLine(indent + "    File Offset: " + rec.OffsetInFile);
                     writer.WriteLine(indent + "           Size: " + rec.EntrySize);
                     writer.WriteLine(indent + "          Value: " + secDescStr);
-
-                    pos = (int)Utilities.RoundUp(rec.OffsetInFile + rec.EntrySize, 16);
                 }
             }
         }
