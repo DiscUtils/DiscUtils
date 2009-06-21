@@ -20,35 +20,48 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
 
 namespace DiscUtils.Wim
 {
-    /// <summary>
-    /// Base class for bit streams.
-    /// </summary>
-    /// <remarks>The rules for conversion of a byte stream to a bit stream vary
-    /// between implementations.</remarks>
-    internal abstract class BitStream
+    internal class AlternateStreamEntry
     {
-        /// <summary>
-        /// Reads up to 16 bits of data from the stream.
-        /// </summary>
-        /// <param name="count">The number of bits to read.</param>
-        /// <returns>The bits as a UInt32</returns>
-        public abstract uint Read(int count);
+        public long Length;
+        public byte[] Hash;
+        public string Name;
 
-        /// <summary>
-        /// Queries up to 16 bits of data from the stream.
-        /// </summary>
-        /// <param name="count">The number of bits to query.</param>
-        /// <returns>The bits as a UInt32</returns>
-        /// <remarks>This method does not consume the bits (i.e. move the file pointer)</remarks>
-        public abstract uint Peek(int count);
+        public static AlternateStreamEntry ReadFrom(DataReader reader)
+        {
+            long startPos = reader.Position;
 
-        /// <summary>
-        /// Consumes up to 16 bits of data from the stream.
-        /// </summary>
-        /// <param name="count">The number of bits to consume</param>
-        public abstract void Consume(int count);
+            long length = reader.ReadInt64();
+            if (length == 0)
+            {
+                return null;
+            }
+
+            reader.Skip(8);
+
+            AlternateStreamEntry result = new AlternateStreamEntry();
+            result.Length = length;
+            result.Hash = reader.ReadBytes(20);
+            int nameLength = reader.ReadUInt16();
+            if (nameLength > 0)
+            {
+                result.Name = Encoding.Unicode.GetString(reader.ReadBytes(nameLength + 2)).TrimEnd('\0');
+            }
+            else
+            {
+                result.Name = "";
+            }
+
+            if (startPos + length > reader.Position)
+            {
+                int toRead = (int)(startPos + length - reader.Position);
+                reader.Skip(toRead);
+            }
+
+            return result;
+        }
     }
 }

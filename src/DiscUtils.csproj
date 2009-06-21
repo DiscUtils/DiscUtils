@@ -271,7 +271,9 @@
     <Compile Include="Vmdk\CompressedGrainHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
+    <Compile Include="Wim\AlternateStreamEntry.cs" />
     <Compile Include="Wim\BitStream.cs" />
+    <Compile Include="Wim\LzxBitStream.cs" />
     <Compile Include="Wim\DirectoryEntry.cs" />
     <Compile Include="Wim\FileResourceStream.cs" />
     <Compile Include="Wim\WimFileSystem.cs" />
@@ -281,6 +283,8 @@
     <Compile Include="Wim\WimFile.cs" />
     <Compile Include="Wim\FileHeader.cs" />
     <Compile Include="Wim\ShortResourceHeader.cs" />
+    <Compile Include="Wim\XpressBitStream.cs" />
+    <Compile Include="Wim\XpressStream.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

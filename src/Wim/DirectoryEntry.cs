@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 
 namespace DiscUtils.Wim
 {
@@ -41,6 +42,7 @@ namespace DiscUtils.Wim
         public ushort StreamCount;
         public string ShortName;
         public string FileName;
+        public Dictionary<string, AlternateStreamEntry> AlternateStreams;
 
         public static DirectoryEntry ReadFrom(DataReader reader)
         {
@@ -95,10 +97,34 @@ namespace DiscUtils.Wim
 
             if (result.StreamCount > 0)
             {
-                throw new NotImplementedException("Streams");
+                result.AlternateStreams = new Dictionary<string, AlternateStreamEntry>();
+                for (int i = 0; i < result.StreamCount; ++i)
+                {
+                    AlternateStreamEntry stream = AlternateStreamEntry.ReadFrom(reader);
+                    result.AlternateStreams.Add(stream.Name, stream);
+                }
             }
 
             return result;
+        }
+
+        public byte[] GetStreamHash(string streamName)
+        {
+            if (string.IsNullOrEmpty(streamName))
+            {
+                if (!Utilities.IsAllZeros(Hash, 0, 20))
+                {
+                    return Hash;
+                }
+            }
+
+            AlternateStreamEntry streamEntry;
+            if (AlternateStreams.TryGetValue(streamName, out streamEntry))
+            {
+                return streamEntry.Hash;
+            }
+
+            return new byte[20];
         }
 
         public string SearchName

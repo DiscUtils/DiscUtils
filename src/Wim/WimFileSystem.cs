@@ -185,18 +185,11 @@ namespace DiscUtils.Wim
                 throw new NotSupportedException("No write support for WIM files");
             }
 
-            DirectoryEntry dirEntry = GetEntry(path);
-            if (dirEntry == null)
-            {
-                throw new FileNotFoundException("No such file or directory", path);
-            }
-
-            ShortResourceHeader hdr = _file.LocateResource(dirEntry.Hash);
+            byte[] streamHash = GetFileHash(path);
+            ShortResourceHeader hdr = _file.LocateResource(streamHash);
             if (hdr == null)
             {
-                // For some reason, some files have zero hashs (but non-zero lengths), very odd.
-                // For now, assuming this means file contents couldn't be captured, so simulate a zero-length file.
-                if (Utilities.IsAllZeros(dirEntry.Hash, 0, dirEntry.Hash.Length))
+                if (Utilities.IsAllZeros(streamHash, 0, streamHash.Length))
                 {
                     return new ZeroStream(0);
                 }
@@ -274,13 +267,13 @@ namespace DiscUtils.Wim
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            DirectoryEntry dirEntry = GetEntry(path);
-            if (dirEntry == null)
+            byte[] hash = GetFileHash(path);
+            if (Utilities.IsAllZeros(hash, 0, hash.Length))
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
 
-            return _file.LocateResource(dirEntry.Hash).OriginalSize;
+            return _file.LocateResource(hash).OriginalSize;
         }
         #endregion
 
@@ -295,15 +288,23 @@ namespace DiscUtils.Wim
         /// the integrity of the file contents.</remarks>
         public byte[] GetFileHash(string path)
         {
-            DirectoryEntry dirEntry = GetEntry(path);
+            string filePart = path;
+            string altStreamPart = "";
+            int streamSepPos = path.IndexOf(":");
+
+            if (streamSepPos >= 0)
+            {
+                filePart = path.Substring(0, streamSepPos);
+                altStreamPart = path.Substring(streamSepPos + 1);
+            }
+
+            DirectoryEntry dirEntry = GetEntry(filePart);
             if (dirEntry == null)
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
 
-            byte[] hash = new byte[20];
-            Array.Copy(dirEntry.Hash, hash, 20);
-            return hash;
+            return dirEntry.GetStreamHash(altStreamPart);
         }
 
         private void ReadMetaData(Stream stream)

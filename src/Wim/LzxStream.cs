@@ -57,7 +57,7 @@ namespace DiscUtils.Wim
             }
         }
 
-        private BitStream _bitStream;
+        private LzxBitStream _bitStream;
         private int _windowBits;
         private int _fileSize;
         private int _numPositionSlots;
@@ -76,7 +76,7 @@ namespace DiscUtils.Wim
 
         public LzxStream(Stream stream, int windowBits, int fileSize)
         {
-            _bitStream = new BitStream(new BufferedStream(stream, 8192));
+            _bitStream = new LzxBitStream(new BufferedStream(stream, 8192));
             _windowBits = windowBits;
             _fileSize = fileSize;
             _numPositionSlots = _windowBits * 2;

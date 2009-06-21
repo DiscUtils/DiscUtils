@@ -159,7 +159,7 @@ namespace DiscUtils.Wim
                 }
                 else
                 {
-                    throw new NotImplementedException("XPRESS compression");
+                    return new XpressStream(rawChunkStream, targetUncompressed);
                 }
             }
             else
