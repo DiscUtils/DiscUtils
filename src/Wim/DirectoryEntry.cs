@@ -119,7 +119,7 @@ namespace DiscUtils.Wim
             }
 
             AlternateStreamEntry streamEntry;
-            if (AlternateStreams.TryGetValue(streamName, out streamEntry))
+            if (AlternateStreams != null && AlternateStreams.TryGetValue(streamName, out streamEntry))
             {
                 return streamEntry.Hash;
             }
