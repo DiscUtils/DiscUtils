@@ -290,7 +290,7 @@ namespace DiscUtils.Wim
         {
             string filePart = path;
             string altStreamPart = "";
-            int streamSepPos = path.IndexOf(":");
+            int streamSepPos = path.IndexOf(":", StringComparison.Ordinal);
 
             if (streamSepPos >= 0)
             {
