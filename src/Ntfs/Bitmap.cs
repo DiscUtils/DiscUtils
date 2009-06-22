@@ -73,6 +73,32 @@ namespace DiscUtils.Ntfs
             _stream.Flush();
         }
 
+        public void MarkPresentRange(long index, long count)
+        {
+            for (long i = index; i < index + count; ++i)
+            {
+                long byteIdx = i / 8;
+                byte mask = (byte)(1 << (byte)(i % 8));
+
+                _bitmap[byteIdx] |= mask;
+            }
+
+            long firstByte = index / 8;
+            long lastByte = (index + count) / 8;
+
+            if (lastByte >= _stream.Length)
+            {
+                _stream.SetLength(Utilities.RoundUp(lastByte + 1, 8));
+            }
+
+            byte[] buffer = new byte[lastByte - firstByte + 1];
+            _bitmap.Read(firstByte, buffer, 0, buffer.Length);
+
+            _stream.Position = firstByte;
+            _stream.Write(buffer, 0, buffer.Length);
+            _stream.Flush();
+        }
+
         public void MarkAbsent(long index)
         {
             long byteIdx = index / 8;

@@ -180,7 +180,7 @@ namespace DiscUtils.Ntfs
                 if (value > _record.AllocatedLength)
                 {
                     long numToAllocate = Utilities.Ceil(value - _record.AllocatedLength, _bytesPerCluster);
-                    Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster);
+                    Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster, _file.IndexInMft == MasterFileTable.MftIndex, value / _bytesPerCluster);
                     foreach (var run in runs)
                     {
                         AddDataRun(run.First, run.Second);
@@ -214,7 +214,7 @@ namespace DiscUtils.Ntfs
                 _file.MarkMftRecordDirty();
 
                 long numToAllocate = Utilities.Ceil(_position + count - _record.AllocatedLength, _bytesPerCluster);
-                Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster);
+                Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster, _file.IndexInMft == MasterFileTable.MftIndex, (_position + count) / _bytesPerCluster);
                 foreach (var run in runs)
                 {
                     AddDataRun(run.First, run.Second);

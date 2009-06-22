@@ -140,12 +140,15 @@ namespace DiscUtils.Ntfs
                     saAttr.Save();
                 }
 
+
                 // Make attributes non-resident until the data in the record fits, start with DATA attributes
-                // by default, then kick other 'can-be' attributes out, finally move indexes.
+                // by default, then kick other 'can-be' attributes out, then try to defrag any non-resident attributes
+                // then finally move indexes.
                 bool fixedAttribute = true;
                 while (_baseRecord.Size > _mft.RecordSize && fixedAttribute)
                 {
                     fixedAttribute = false;
+
                     foreach (var attr in _baseRecord.Attributes)
                     {
                         if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
@@ -173,6 +176,19 @@ namespace DiscUtils.Ntfs
                     {
                         foreach (var attr in _baseRecord.Attributes)
                         {
+                            if (attr.IsNonResident && ((NonResidentAttributeRecord)attr).DataRuns.Count > 4)
+                            {
+                                DefragAttribute(attr.AttributeId);
+                                fixedAttribute = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!fixedAttribute)
+                    {
+                        foreach (var attr in _baseRecord.Attributes)
+                        {
                             if (attr.AttributeType == AttributeType.IndexRoot
                                 && ShrinkIndexRoot(attr.Name))
                             {
@@ -181,6 +197,7 @@ namespace DiscUtils.Ntfs
                             }
                         }
                     }
+
                 }
 
                 // Still too large?  Error.
@@ -480,6 +497,19 @@ namespace DiscUtils.Ntfs
             }
 
             attr.SetNonResident(false, maxData);
+            _baseRecord.SetAttribute(attr.Record);
+        }
+
+        internal void DefragAttribute(ushort attrId)
+        {
+            NtfsAttribute attr = GetAttribute(attrId);
+
+            if (!attr.IsNonResident)
+            {
+                throw new InvalidOperationException("Attribute is resident");
+            }
+
+            attr.Defrag();
             _baseRecord.SetAttribute(attr.Record);
         }
 

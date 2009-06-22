@@ -107,6 +107,30 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public void Defrag()
+        {
+            using (Stream oldStream = OpenRaw(FileAccess.ReadWrite))
+            {
+                AttributeRecord newRecord = new NonResidentAttributeRecord(_record);
+
+                using (Stream newStream = newRecord.OpenRaw(_file, FileAccess.Write))
+                {
+                    newStream.SetLength(oldStream.Length);
+
+                    byte[] buffer = new byte[_file.Context.BiosParameterBlock.BytesPerCluster * 2];
+                    int numRead = oldStream.Read(buffer, 0, buffer.Length);
+                    while (numRead > 0)
+                    {
+                        newStream.Write(buffer, 0, numRead);
+                        numRead = oldStream.Read(buffer, 0, buffer.Length);
+                    }
+                }
+
+                oldStream.SetLength(0);
+                _record = newRecord;
+            }
+        }
+
         public static NtfsAttribute FromRecord(File file, AttributeRecord record)
         {
             switch (record.AttributeType)

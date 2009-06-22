@@ -32,6 +32,8 @@ namespace DiscUtils.Ntfs
         private Bitmap _bitmap;
         private static Random s_rng = new Random();
 
+        private long _nextDataCluster;
+
         public ClusterBitmap(File file)
         {
             _file = file;
@@ -41,27 +43,48 @@ namespace DiscUtils.Ntfs
                 Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64, file.Context.BiosParameterBlock.SectorsPerCluster));
         }
 
-        public Tuple<long, long>[] AllocateClusters(long count, long proposedStart)
+        /// <summary>
+        /// Allocates clusters from the disk
+        /// </summary>
+        /// <param name="count">The number of clusters to allocate</param>
+        /// <param name="proposedStart">The proposed start cluster (or -1)</param>
+        /// <param name="isMft"><c>true</c> if this attribute is the $MFT\$DATA attribute</param>
+        /// <param name="total">The total number of clusters in the file, including this allocation</param>
+        /// <returns>The list of cluster allocations</returns>
+        public Tuple<long, long>[] AllocateClusters(long count, long proposedStart, bool isMft, long total)
         {
             List<Tuple<long, long>> result = new List<Tuple<long, long>>();
 
             long numFound = 0;
 
-            long numClusters = _file.Context.RawStream.Length / _file.Context.BiosParameterBlock.BytesPerCluster;
+            long totalClusters = _file.Context.RawStream.Length / _file.Context.BiosParameterBlock.BytesPerCluster;
 
-            numFound += FindClusters(count - numFound, result, numClusters / 8, numClusters, proposedStart);
+            if (isMft)
+            {
+                // The MFT grows sequentially across the disk
+                numFound += FindClusters(count - numFound, result, 0, totalClusters, proposedStart, isMft, false, 0);
+            }
+            else
+            {
+                // First try to find a contiguous range
+                numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, proposedStart, isMft, true, total / 4);
 
-            if (numFound < count)
-            {
-                numFound = FindClusters(count - numFound, result, numClusters / 16, numClusters / 8, proposedStart);
-            }
-            if (numFound < count)
-            {
-                numFound = FindClusters(count - numFound, result, numClusters / 32, numClusters / 16, proposedStart);
-            }
-            if (numFound < count)
-            {
-                numFound = FindClusters(count - numFound, result, 0, numClusters / 32, proposedStart);
+                if (numFound < count)
+                {
+                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, proposedStart, isMft, false, total / 4);
+                }
+                if (numFound < count)
+                {
+                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, proposedStart, isMft, false, total / 4);
+                }
+                if (numFound < count)
+                {
+                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, proposedStart, isMft, false, total / 4);
+                }
+                if (numFound < count)
+                {
+                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, proposedStart, isMft, false, total / 4);
+                }
             }
 
             if (numFound < count)
@@ -89,17 +112,29 @@ namespace DiscUtils.Ntfs
         /// <param name="start">The first cluster in the range to look at</param>
         /// <param name="end">The last cluster in the range to look at (exclusive)</param>
         /// <param name="proposedStart">The proposed first cluster</param>
+        /// <param name="isMft">Indicates if the clusters are for the MFT</param>
+        /// <param name="contiguous">Indicates if contiguous clusters are required</param>
+        /// <param name="headroom">Indicates how many clusters to skip before next allocation, to prevent fragmentation</param>
         /// <returns>The number of clusters found in the range</returns>
-        private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, long proposedStart)
+        private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, long proposedStart, bool isMft, bool contiguous, long headroom)
         {
             long numFound = 0;
 
             long focusCluster;
-            if (proposedStart < 0)
+            if (proposedStart < 0 || _bitmap.IsPresent(proposedStart))
             {
-                Random rng = GetRandom();
-
-                focusCluster = start + (long)(rng.NextDouble() * (end - start));
+                if (isMft)
+                {
+                    focusCluster = start;
+                }
+                else
+                {
+                    if (_nextDataCluster < start || _nextDataCluster >= end)
+                    {
+                        _nextDataCluster = start;
+                    }
+                    focusCluster = _nextDataCluster;
+                }
             }
             else
             {
@@ -113,18 +148,21 @@ namespace DiscUtils.Ntfs
                 {
                     // Start of a run...
                     long runStart = focusCluster;
-                    _bitmap.MarkPresent(focusCluster);
                     ++focusCluster;
 
                     while (!_bitmap.IsPresent(focusCluster) && focusCluster - runStart < (count - numFound))
                     {
-                        _bitmap.MarkPresent(focusCluster);
                         ++focusCluster;
                         ++numInspected;
                     }
 
-                    result.Add(new Tuple<long, long>(runStart, focusCluster - runStart));
-                    numFound += (focusCluster - runStart);
+                    if (!contiguous || (focusCluster - runStart) == (count - numFound))
+                    {
+                        _bitmap.MarkPresentRange(runStart, focusCluster - runStart);
+
+                        result.Add(new Tuple<long, long>(runStart, focusCluster - runStart));
+                        numFound += (focusCluster - runStart);
+                    }
                 }
 
                 ++focusCluster;
@@ -135,17 +173,12 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            return numFound;
-        }
-
-        private Random GetRandom()
-        {
-            Random rng = _file.Context.Options.RandomNumberGenerator;
-            if (rng == null)
+            if (!isMft)
             {
-                rng = s_rng;
+                _nextDataCluster = focusCluster + headroom;
             }
-            return rng;
+
+            return numFound;
         }
 
     }
