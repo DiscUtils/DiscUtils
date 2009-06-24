@@ -61,29 +61,47 @@ namespace DiscUtils.Ntfs
 
             if (isMft)
             {
+                // First, try to extend the existing cluster run (if available)
+                if (proposedStart >= 0)
+                {
+                    numFound += ExtendRun(count - numFound, result, proposedStart, totalClusters);
+                }
+
                 // The MFT grows sequentially across the disk
-                numFound += FindClusters(count - numFound, result, 0, totalClusters, proposedStart, isMft, false, 0);
+                if (numFound < count)
+                {
+                    numFound += FindClusters(count - numFound, result, 0, totalClusters, isMft, false, 0);
+                }
             }
             else
             {
-                // First try to find a contiguous range
-                numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, proposedStart, isMft, true, total / 4);
+                // First, try to extend the existing cluster run (if available)
+                if (proposedStart >= 0)
+                {
+                    numFound += ExtendRun(count - numFound, result, proposedStart, totalClusters);
+                }
+
+                // Try to find a contiguous range
+                if (numFound < count)
+                {
+                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, true, total / 4);
+                }
 
                 if (numFound < count)
                 {
-                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, proposedStart, isMft, false, total / 4);
+                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, false, total / 4);
                 }
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, proposedStart, isMft, false, total / 4);
+                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, isMft, false, total / 4);
                 }
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, proposedStart, isMft, false, total / 4);
+                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, isMft, false, total / 4);
                 }
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, proposedStart, isMft, false, total / 4);
+                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, isMft, false, total / 4);
                 }
             }
 
@@ -104,6 +122,25 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        private long ExtendRun(long count, List<Tuple<long, long>> result, long start, long end)
+        {
+            long focusCluster = start;
+            while (!_bitmap.IsPresent(focusCluster) && focusCluster < end && focusCluster - start < count)
+            {
+                ++focusCluster;
+            }
+
+            long numFound = focusCluster - start;
+
+            if (numFound > 0)
+            {
+                _bitmap.MarkPresentRange(start, numFound);
+                result.Add(new Tuple<long, long>(start, numFound));
+            }
+
+            return numFound;
+        }
+
         /// <summary>
         /// Finds one or more free clusters in a range.
         /// </summary>
@@ -111,34 +148,26 @@ namespace DiscUtils.Ntfs
         /// <param name="result">The list of clusters found (i.e. out param)</param>
         /// <param name="start">The first cluster in the range to look at</param>
         /// <param name="end">The last cluster in the range to look at (exclusive)</param>
-        /// <param name="proposedStart">The proposed first cluster</param>
         /// <param name="isMft">Indicates if the clusters are for the MFT</param>
         /// <param name="contiguous">Indicates if contiguous clusters are required</param>
         /// <param name="headroom">Indicates how many clusters to skip before next allocation, to prevent fragmentation</param>
         /// <returns>The number of clusters found in the range</returns>
-        private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, long proposedStart, bool isMft, bool contiguous, long headroom)
+        private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, bool isMft, bool contiguous, long headroom)
         {
             long numFound = 0;
 
             long focusCluster;
-            if (proposedStart < 0 || _bitmap.IsPresent(proposedStart))
+            if (isMft)
             {
-                if (isMft)
-                {
-                    focusCluster = start;
-                }
-                else
-                {
-                    if (_nextDataCluster < start || _nextDataCluster >= end)
-                    {
-                        _nextDataCluster = start;
-                    }
-                    focusCluster = _nextDataCluster;
-                }
+                focusCluster = start;
             }
             else
             {
-                focusCluster = proposedStart;
+                if (_nextDataCluster < start || _nextDataCluster >= end)
+                {
+                    _nextDataCluster = start;
+                }
+                focusCluster = _nextDataCluster;
             }
 
             long numInspected = 0;
