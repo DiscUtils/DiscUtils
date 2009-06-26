@@ -513,7 +513,7 @@ namespace DiscUtils
         public static string ResolveRelativePath(string basePath, string relativePath)
         {
             List<string> pathElements = new List<string>(basePath.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
-            if (!basePath.EndsWith("\\", StringComparison.Ordinal) && pathElements.Count > 0)
+            if (!basePath.EndsWith(@"\", StringComparison.Ordinal) && pathElements.Count > 0)
             {
                 pathElements.RemoveAt(pathElements.Count - 1);
             }
@@ -539,14 +539,18 @@ namespace DiscUtils
                 }
             }
 
-            string merged = string.Join("\\", pathElements.ToArray());
-            if (relativePath.EndsWith("\\", StringComparison.Ordinal))
+            string merged = string.Join(@"\", pathElements.ToArray());
+            if (relativePath.EndsWith(@"\", StringComparison.Ordinal))
             {
-                merged += "\\";
+                merged += @"\";
             }
-            if (basePath.StartsWith("\\", StringComparison.Ordinal))
+            if (basePath.StartsWith(@"\\", StringComparison.Ordinal))
             {
-                merged = "\\" + merged;
+                merged = @"\\" + merged;
+            }
+            else if (basePath.StartsWith(@"\", StringComparison.Ordinal))
+            {
+                merged = @"\" + merged;
             }
 
             return merged;
