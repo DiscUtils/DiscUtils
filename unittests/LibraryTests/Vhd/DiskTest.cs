@@ -114,5 +114,23 @@ namespace DiscUtils.Vhd
                 Assert.IsNotNull(disk.Content);
             }
         }
+
+        [Test]
+        public void ConstructorFromFiles()
+        {
+            MemoryStream baseStream = new MemoryStream();
+            DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, Ownership.Dispose, 16 * 1024L * 1024 * 1024);
+
+            MemoryStream childStream = new MemoryStream();
+            DiskImageFile childFile = DiskImageFile.InitializeDifferencing(childStream, Ownership.Dispose, baseFile, @"C:\temp\foo.vhd", @".\foo.vhd", DateTime.Now);
+
+            MemoryStream grandChildStream = new MemoryStream();
+            DiskImageFile grandChildFile = DiskImageFile.InitializeDifferencing(grandChildStream, Ownership.Dispose, childFile, @"C:\temp\child1.vhd", @".\child1.vhd", DateTime.Now);
+
+            using (Disk disk = new Disk(new DiskImageFile[]{grandChildFile, childFile, baseFile}, Ownership.Dispose))
+            {
+                Assert.IsNotNull(disk.Content);
+            }
+        }
     }
 }

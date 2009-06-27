@@ -72,6 +72,46 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Creates a new instance from a pre-existing set of image files.
+        /// </summary>
+        /// <param name="files">The set of image files</param>
+        /// <param name="ownsFiles">Indicates if the new instance controls the lifetime of the image files</param>
+        /// <remarks>The disks shound be ordered with the first file referencing the second, etc.  The final
+        /// file must not require any parent.</remarks>
+        public Disk(IList<DiskImageFile> files, Ownership ownsFiles)
+        {
+            if (files == null || files.Count == 0)
+            {
+                throw new ArgumentException("At least one file must be provided");
+            }
+            if (files[files.Count - 1].NeedsParent)
+            {
+                throw new ArgumentException("Final image file needs a parent");
+            }
+
+            List<Tuple<DiskImageFile, Ownership>> tempList = new List<Tuple<DiskImageFile, Ownership>>(files.Count);
+            for (int i = 0; i < files.Count - 1; ++i)
+            {
+                if (!files[i].NeedsParent)
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} does not have a parent disk", i));
+                }
+
+                // Note: Can't do timestamp check, not a property on DiskImageFile.
+                if (files[i].Information.DynamicParentUniqueId != files[i + 1].UniqueId)
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
+                }
+
+                tempList.Add(new Tuple<DiskImageFile, Ownership>(files[i], ownsFiles));
+            }
+
+            tempList.Add(new Tuple<DiskImageFile, Ownership>(files[files.Count - 1], ownsFiles));
+
+            _files = tempList;
+        }
+
+        /// <summary>
         /// Creates a new instance from an existing stream, differencing disks not supported.
         /// </summary>
         /// <param name="file">The file containing the disk</param>

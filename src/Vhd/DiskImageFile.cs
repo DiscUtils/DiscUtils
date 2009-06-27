@@ -317,6 +317,11 @@ namespace DiscUtils.Vhd
         /// <returns>Array of candidate file locations</returns>
         public string[] GetParentLocations(string basePath)
         {
+            if (!NeedsParent)
+            {
+                throw new InvalidOperationException("Only differencing disks contain parent locations");
+            }
+
             List<string> absPaths = new List<string>(8);
             List<string> relPaths = new List<string>(8);
             foreach (var pl in _dynamicHeader.ParentLocators)
