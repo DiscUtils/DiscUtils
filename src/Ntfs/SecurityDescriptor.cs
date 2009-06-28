@@ -38,6 +38,7 @@ namespace DiscUtils.Ntfs
         public FileSystemSecurity Descriptor
         {
             get { return _securityDescriptor; }
+            set { _securityDescriptor = value; }
         }
 
         public static uint CalcHash(FileSystemSecurity descriptor)

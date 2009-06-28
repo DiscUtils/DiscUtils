@@ -105,6 +105,8 @@ namespace DiscUtils.Ntfs
             {
                 attrStream.Write(buffer, 0, buffer.Length);
             }
+
+            _file.InvalidateAttributeStreams();
         }
 
         public void Defrag()
@@ -129,6 +131,8 @@ namespace DiscUtils.Ntfs
                 oldStream.SetLength(0);
                 _record = newRecord;
             }
+
+            _file.InvalidateAttributeStreams();
         }
 
         public static NtfsAttribute FromRecord(File file, AttributeRecord record)

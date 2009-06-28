@@ -37,7 +37,7 @@ namespace DiscUtils.Ntfs
         private FileAccess _access;
 
         private SparseStream _wrapped;
-        private ushort _lastKnownUsn;
+        private uint _lastKnownStreamChangeSeqNum;
 
         public FileAttributeStream(File file, ushort attrId, FileAccess access)
         {
@@ -45,7 +45,7 @@ namespace DiscUtils.Ntfs
             _attrId = attrId;
             _access = access;
 
-            _lastKnownUsn = _file.UpdateSequenceNumber;
+            _lastKnownStreamChangeSeqNum = _file.AttributeStreamChangeId;
             _wrapped = _file.GetAttribute(_attrId).OpenRaw(_access);
         }
 
@@ -59,7 +59,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                CheckUsn();
+                CheckStreamValid();
                 return _wrapped.Extents;
             }
         }
@@ -68,7 +68,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                CheckUsn();
+                CheckStreamValid();
                 return _wrapped.CanRead;
             }
         }
@@ -77,7 +77,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                CheckUsn();
+                CheckStreamValid();
                 return _wrapped.CanSeek;
             }
         }
@@ -86,14 +86,14 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                CheckUsn();
+                CheckStreamValid();
                 return _wrapped.CanWrite;
             }
         }
 
         public override void Flush()
         {
-            CheckUsn();
+            CheckStreamValid();
             _wrapped.Flush();
         }
 
@@ -101,7 +101,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                CheckUsn();
+                CheckStreamValid();
                 return _wrapped.Length;
             }
         }
@@ -110,38 +110,38 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                CheckUsn();
+                CheckStreamValid();
                 return _wrapped.Position;
             }
             set
             {
-                CheckUsn();
+                CheckStreamValid();
                 _wrapped.Position = value;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            CheckUsn();
+            CheckStreamValid();
             return _wrapped.Read(buffer, offset, count);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            CheckUsn();
+            CheckStreamValid();
             return _wrapped.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            CheckUsn();
+            CheckStreamValid();
             _wrapped.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
             ChangeAttributeResidencyByLength(_wrapped.Position + count);
-            CheckUsn();
+            CheckStreamValid();
             _wrapped.Write(buffer, offset, count);
         }
 
@@ -150,9 +150,9 @@ namespace DiscUtils.Ntfs
             return _file.ToString() + ".attr[" + _attrId + "]";
         }
 
-        private void CheckUsn()
+        private void CheckStreamValid()
         {
-            if (_lastKnownUsn != _file.UpdateSequenceNumber)
+            if (_lastKnownStreamChangeSeqNum != _file.AttributeStreamChangeId)
             {
                 ReopenWrapped();
             }
@@ -162,7 +162,7 @@ namespace DiscUtils.Ntfs
         {
             long pos = _wrapped.Position;
             _wrapped.Dispose();
-            _lastKnownUsn = _file.UpdateSequenceNumber;
+            _lastKnownStreamChangeSeqNum = _file.AttributeStreamChangeId;
             _wrapped = _file.GetAttribute(_attrId).OpenRaw(_access);
             _wrapped.Position = pos;
         }

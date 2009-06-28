@@ -30,7 +30,6 @@ namespace DiscUtils.Ntfs
     {
         private File _file;
         private Bitmap _bitmap;
-        private static Random s_rng = new Random();
 
         private long _nextDataCluster;
 

@@ -37,6 +37,8 @@ namespace DiscUtils.Ntfs
 
         private bool _baseRecordDirty;
 
+        private uint _attrStreamChangeId; // Indicates when AttributeStreams are invalid, and must be re-opened
+
         public File(INtfsContext context, FileRecord baseRecord)
         {
             _context = context;
@@ -59,11 +61,6 @@ namespace DiscUtils.Ntfs
         public FileReference MftReference
         {
             get { return new FileReference(_baseRecord.MasterFileTableIndex, _baseRecord.SequenceNumber); }
-        }
-
-        public ushort UpdateSequenceNumber
-        {
-            get { return _baseRecord.UpdateSequenceNumber; }
         }
 
         public int MftRecordFreeSpace
@@ -511,6 +508,16 @@ namespace DiscUtils.Ntfs
 
             attr.Defrag();
             _baseRecord.SetAttribute(attr.Record);
+        }
+
+        internal uint AttributeStreamChangeId
+        {
+            get { return _attrStreamChangeId; }
+        }
+
+        internal void InvalidateAttributeStreams()
+        {
+            _attrStreamChangeId++;
         }
 
         public FileNameRecord GetFileNameRecord(string name, bool freshened)

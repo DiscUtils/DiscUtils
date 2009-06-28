@@ -32,9 +32,9 @@ namespace DiscUtils.Ntfs
     /// <summary>
     /// Class for accessing NTFS file systems.
     /// </summary>
-    public sealed class NtfsFileSystem : ClusterBasedFileSystem, IDiagnosticTraceable
+    public sealed class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem, IWindowsFileSystem, IDiagnosticTraceable
     {
-        private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.NotContentIndexed | FileAttributes.Offline | FileAttributes.ReparsePoint | FileAttributes.Temporary;
+        private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.Offline | FileAttributes.ReparsePoint | FileAttributes.Temporary;
 
         private NtfsContext _context;
 
@@ -871,7 +871,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the size of each cluster (in bytes).
         /// </summary>
-        public override long ClusterSize
+        public long ClusterSize
         {
             get { return _context.BiosParameterBlock.BytesPerCluster; }
         }
@@ -879,9 +879,29 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the total number of clusters managed by the file system.
         /// </summary>
-        public override long TotalClusters
+        public long TotalClusters
         {
             get { return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64, _context.BiosParameterBlock.SectorsPerCluster); }
+        }
+
+        /// <summary>
+        /// Converts a cluster (index) into an absolute byte position in the underlying stream.
+        /// </summary>
+        /// <param name="cluster">The cluster to convert</param>
+        /// <returns>The corresponding absolute byte position.</returns>
+        public long ClusterToOffset(long cluster)
+        {
+            return cluster * ClusterSize;
+        }
+
+        /// <summary>
+        /// Converts an absolute byte position in the underlying stream to a cluster (index).
+        /// </summary>
+        /// <param name="offset">The byte position to convert</param>
+        /// <returns>The cluster containing the specified byte</returns>
+        public long OffsetToCluster(long offset)
+        {
+            return offset / ClusterSize;
         }
 
         /// <summary>
@@ -891,7 +911,7 @@ namespace DiscUtils.Ntfs
         /// <returns>The clusters as a list of cluster ranges</returns>
         /// <remarks>Note that in some file systems, small files may not have dedicated
         /// clusters.  Only dedicated clusters will be returned.</remarks>
-        public override Range<long, long>[] PathToClusters(string path)
+        public Range<long, long>[] PathToClusters(string path)
         {
             string plainPath;
             string attributeName;
@@ -925,7 +945,7 @@ namespace DiscUtils.Ntfs
         /// Master File Table, where corruption protection algorithms mean that some bytes do not contain
         /// the expected values.  This method merely indicates where file data is stored,
         /// not what's stored.  To access the contents of a file, use OpenFile.</remarks>
-        public override StreamExtent[] PathToExtents(string path)
+        public StreamExtent[] PathToExtents(string path)
         {
             string plainPath;
             string attributeName;
@@ -968,7 +988,7 @@ namespace DiscUtils.Ntfs
         /// Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
-        public override ClusterMap BuildClusterMap()
+        public ClusterMap BuildClusterMap()
         {
             return _context.Mft.GetClusterMap();
         }
@@ -1042,6 +1062,50 @@ namespace DiscUtils.Ntfs
 
                     StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
                     return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="securityDescriptor">The new security descriptor.</param>
+        public void SetAccessControl(string path, FileSystemSecurity securityDescriptor)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    File file = GetFile(dirEntry.Reference);
+
+                    NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
+                    if (legacyAttr != null)
+                    {
+                        StructuredNtfsAttribute<SecurityDescriptor> sdAttr = ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr);
+                        sdAttr.Content.Descriptor = securityDescriptor;
+                        sdAttr.Save();
+                    }
+                    else
+                    {
+                        uint id = _context.SecurityDescriptors.AddDescriptor(securityDescriptor);
+
+                        // Update the standard information attribute - so it reflects the actual file state
+                        StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)file.GetAttribute(AttributeType.StandardInformation);
+                        saAttr.Content.SecurityId = id;
+                        saAttr.Save();
+
+                        // Update the directory entry used to open the file, so it's accurate
+                        dirEntry.UpdateFrom(file);
+
+                        // Write attribute changes back to the Master File Table
+                        file.UpdateRecordInMft();
+                    }
                 }
             }
         }

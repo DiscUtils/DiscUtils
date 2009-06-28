@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualDiskConvert", "utils
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iSCSIBrowse", "utils\iSCSIBrowse\iSCSIBrowse.csproj", "{F8C736C2-6310-4F03-ABEB-4DAB473B181B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTFSExtract", "utils\NTFSExtract\NTFSExtract.csproj", "{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{F8C736C2-6310-4F03-ABEB-4DAB473B181B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8C736C2-6310-4F03-ABEB-4DAB473B181B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8C736C2-6310-4F03-ABEB-4DAB473B181B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

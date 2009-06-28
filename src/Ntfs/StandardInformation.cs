@@ -40,7 +40,7 @@ namespace DiscUtils.Ntfs
         public ulong QuotaCharged;
         public ulong UpdateSequenceNumber;
 
-        private bool _haveExtraFields;
+        private bool _haveExtraFields = true;
 
 
 
@@ -59,11 +59,14 @@ namespace DiscUtils.Ntfs
 
             if (buffer.Length > 0x30)
             {
-                _haveExtraFields = true;
                 OwnerId = Utilities.ToUInt32LittleEndian(buffer, 0x30);
                 SecurityId = Utilities.ToUInt32LittleEndian(buffer, 0x34);
                 QuotaCharged = Utilities.ToUInt64LittleEndian(buffer, 0x38);
                 UpdateSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, 0x40);
+            }
+            else
+            {
+                _haveExtraFields = false;
             }
         }
 

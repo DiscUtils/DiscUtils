@@ -398,12 +398,12 @@ namespace DiscUtils.Ntfs
                 if (indexName == "$SII")
                 {
                     keyValue = new SecurityDescriptors.IdIndexKey();
-                    dataValue = new SecurityDescriptors.IndexData();
+                    dataValue = new SecurityDescriptors.IdIndexData();
                 }
                 else if (indexName == "$SDH")
                 {
                     keyValue = new SecurityDescriptors.HashIndexKey();
-                    dataValue = new SecurityDescriptors.IndexData();
+                    dataValue = new SecurityDescriptors.IdIndexData();
                 }
             }
 

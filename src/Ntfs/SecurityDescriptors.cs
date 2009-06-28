@@ -31,48 +31,112 @@ namespace DiscUtils.Ntfs
     internal sealed class SecurityDescriptors : IDiagnosticTraceable
     {
         private File _file;
-        private IndexView<HashIndexKey, IndexData> _hashIndex;
-        private IndexView<IdIndexKey, IndexData> _idIndex;
+        private IndexView<HashIndexKey, HashIndexData> _hashIndex;
+        private IndexView<IdIndexKey, IdIndexData> _idIndex;
+        private uint _nextId;
+        private long _nextSpace;
 
         public SecurityDescriptors(File file)
         {
             _file = file;
-            _hashIndex = new IndexView<HashIndexKey, IndexData>(file.GetIndex("$SDH"));
-            _idIndex = new IndexView<IdIndexKey, IndexData>(file.GetIndex("$SII"));
+            _hashIndex = new IndexView<HashIndexKey, HashIndexData>(file.GetIndex("$SDH"));
+            _idIndex = new IndexView<IdIndexKey, IdIndexData>(file.GetIndex("$SII"));
+
+            foreach (var entry in _idIndex.Entries)
+            {
+                if (entry.Key.Id > _nextId)
+                {
+                    _nextId = entry.Key.Id;
+                }
+
+                long end = entry.Value.SdsOffset + entry.Value.SdsLength;
+                if (end > _nextSpace)
+                {
+                    _nextSpace = end;
+                }
+            }
+
+            _nextId++;
+            _nextSpace = Utilities.RoundUp(_nextSpace, 16);
         }
 
-        public FileSecurity GetDescriptorById(uint id)
+        public FileSystemSecurity GetDescriptorById(uint id)
         {
-            IndexData data = _idIndex[new IdIndexKey(id)];
-            using(Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
-            {
-                s.Position = data.SdsOffset;
-                byte[] buffer = Utilities.ReadFully(s, data.SdsLength);
-
-                SecurityDescriptorRecord record = new SecurityDescriptorRecord();
-                record.Read(buffer, 0);
-
-                FileSecurity fs = new FileSecurity();
-                fs.SetSecurityDescriptorBinaryForm(record.SecurityDescriptor, AccessControlSections.All);
-                return fs;
-            }
+            IdIndexData data = _idIndex[new IdIndexKey(id)];
+            return ReadDescriptor(data);
         }
 
-        public uint AddDescriptor(FileSecurity newDescriptor)
+        public uint AddDescriptor(FileSystemSecurity newDescriptor)
         {
-            HashIndexKey key = new HashIndexKey();
-            key.Hash = SecurityDescriptor.CalcHash(newDescriptor);
+            // Search to see if this is a known descriptor
+            uint newHash = SecurityDescriptor.CalcHash(newDescriptor);
+            foreach (var entry in _hashIndex.FindAll(new HashFinder(newHash)))
+            {
+                FileSystemSecurity stored = ReadDescriptor(entry.Value);
+                if (Utilities.AreEqual(newDescriptor.GetSecurityDescriptorBinaryForm(), stored.GetSecurityDescriptorBinaryForm()))
+                {
+                    return entry.Value.Id;
+                }
+            }
 
-            if (_hashIndex.ContainsKey(key))
+            long offset = _nextSpace;
+
+            byte[] sd = newDescriptor.GetSecurityDescriptorBinaryForm();
+
+            // Write the new descriptor to the end of the existing descriptors
+            SecurityDescriptorRecord record = new SecurityDescriptorRecord();
+            record.SecurityDescriptor = sd;
+            record.Hash = newHash;
+            record.Id = _nextId;
+            record.OffsetInFile = offset;
+
+            byte[] buffer = new byte[record.Size];
+            record.WriteTo(buffer, 0);
+
+            if (offset + buffer.Length > 0x40000)
             {
-                return _hashIndex[key].Id;
+                throw new NotImplementedException("Excessive number of security descriptors - running into redundant storage area");
             }
-            else
+
+            using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.ReadWrite))
             {
-                // TODO: Allocate space, add to both index's
-                _hashIndex[key] = new IndexData();
-                throw new NotImplementedException();
+                s.Position = _nextSpace;
+                s.Write(buffer, 0, buffer.Length);
+                s.Position = 0x40000 + _nextSpace;
+                s.Write(buffer, 0, buffer.Length);
             }
+
+            // Make the next descriptor land at the end of this one
+            _nextSpace = Utilities.RoundUp(_nextSpace + buffer.Length, 16);
+            _nextId++;
+
+            // Update the indexes
+            HashIndexData hashIndexData = new HashIndexData();
+            hashIndexData.Hash = record.Hash;
+            hashIndexData.Id = record.Id;
+            hashIndexData.SdsOffset = record.OffsetInFile;
+            hashIndexData.SdsLength = (int)record.EntrySize;
+
+            HashIndexKey hashIndexKey = new HashIndexKey();
+            hashIndexKey.Hash = record.Hash;
+            hashIndexKey.Id = record.Id;
+
+            _hashIndex[hashIndexKey] = hashIndexData;
+
+            IdIndexData idIndexData = new IdIndexData();
+            idIndexData.Hash = record.Hash;
+            idIndexData.Id = record.Id;
+            idIndexData.SdsOffset = record.OffsetInFile;
+            idIndexData.SdsLength = (int)record.EntrySize;
+
+            IdIndexKey idIndexKey = new IdIndexKey();
+            idIndexKey.Id = record.Id;
+
+            _idIndex[idIndexKey] = idIndexData;
+
+            _file.UpdateRecordInMft();
+
+            return record.Id;
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -111,6 +175,19 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        internal abstract class IndexData
+        {
+            public uint Hash;
+            public uint Id;
+            public long SdsOffset;
+            public int SdsLength;
+
+            public override string ToString()
+            {
+                return string.Format(CultureInfo.InvariantCulture, "[Data-Hash:{0},Id:{1},SdsOffset:{2},SdsLength:{3}]", Hash, Id, SdsOffset, SdsLength);
+            }
+        }
+
         internal sealed class HashIndexKey : IByteArraySerializable
         {
             public uint Hash;
@@ -136,6 +213,31 @@ namespace DiscUtils.Ntfs
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Hash:{0},Id:{1}]", Hash, Id);
+            }
+        }
+
+        internal sealed class HashIndexData : IndexData, IByteArraySerializable
+        {
+            public void ReadFrom(byte[] buffer, int offset)
+            {
+                Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+                Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
+                SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
+                SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
+            }
+
+            public void WriteTo(byte[] buffer, int offset)
+            {
+                Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+                Utilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
+                Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
+                //Array.Copy(new byte[] { (byte)'I', 0, (byte)'I', 0 }, 0, buffer, offset + 0x14, 4);
+            }
+
+            public int Size
+            {
+                get { return 0x14; }
             }
         }
 
@@ -173,20 +275,14 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal sealed class IndexData : IByteArraySerializable
+        internal sealed class IdIndexData : IndexData, IByteArraySerializable
         {
-            public uint Hash;
-            public uint Id;
-            public long SdsOffset;
-            public int SdsLength;
-
             public void ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
                 SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
                 SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
-                // Padding...
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -201,10 +297,50 @@ namespace DiscUtils.Ntfs
             {
                 get { return 0x14; }
             }
+        }
 
-            public override string ToString()
+        private FileSystemSecurity ReadDescriptor(IndexData data)
+        {
+            using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
             {
-                return string.Format(CultureInfo.InvariantCulture, "[Data-Hash:{0},Id:{1},SdsOffset:{2},SdsLength:{3}]", Hash, Id, SdsOffset, SdsLength);
+                s.Position = data.SdsOffset;
+                byte[] buffer = Utilities.ReadFully(s, data.SdsLength);
+
+                SecurityDescriptorRecord record = new SecurityDescriptorRecord();
+                record.Read(buffer, 0);
+
+                FileSecurity fs = new FileSecurity();
+                fs.SetSecurityDescriptorBinaryForm(record.SecurityDescriptor, AccessControlSections.All);
+                return fs;
+            }
+        }
+
+        private class HashFinder : IComparable<HashIndexKey>
+        {
+            private uint _toMatch;
+
+            public HashFinder(uint toMatch)
+            {
+                _toMatch = toMatch;
+            }
+
+            public int CompareTo(uint otherHash)
+            {
+                if (_toMatch < otherHash)
+                {
+                    return -1;
+                }
+                else if (_toMatch > otherHash)
+                {
+                    return 1;
+                }
+
+                return 0;
+            }
+
+            public int CompareTo(HashIndexKey other)
+            {
+                return CompareTo(other.Hash);
             }
         }
     }

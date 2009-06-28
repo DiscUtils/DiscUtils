@@ -32,10 +32,10 @@ namespace DiscUtils.Wim
     /// <summary>
     /// Provides access to the file system within a WIM file image.
     /// </summary>
-    public class WimFileSystem : ReadOnlyDiscFileSystem
+    public class WimFileSystem : ReadOnlyDiscFileSystem, IWindowsFileSystem
     {
         private WimFile _file;
-        private List<FileSecurity> _securityDescriptors;
+        private List<FileSystemSecurity> _securityDescriptors;
         private Dictionary<long, List<DirectoryEntry>> _directories;
 
         internal WimFileSystem(WimFile file, int index)
@@ -347,7 +347,7 @@ namespace DiscUtils.Wim
                 sdLengths[i] = reader.ReadUInt64();
             }
 
-            _securityDescriptors = new List<FileSecurity>((int)numEntries);
+            _securityDescriptors = new List<FileSystemSecurity>((int)numEntries);
             FileSecurity[] securityDescriptors = new FileSecurity[numEntries];
             for (uint i = 0; i < numEntries; ++i)
             {
@@ -437,5 +437,43 @@ namespace DiscUtils.Wim
                 }
             }
         }
+
+        #region IWindowsFileSystem Members
+
+        /// <summary>
+        /// Gets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The security descriptor.</returns>
+        public FileSystemSecurity GetAccessControl(string path)
+        {
+            uint id = GetEntry(path).SecurityId;
+
+            if (id == uint.MaxValue)
+            {
+                return null;
+            }
+            else if (id >= 0 && id < _securityDescriptors.Count)
+            {
+                return _securityDescriptors[(int)id];
+            }
+            else
+            {
+                // What if there is no descriptor?
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Sets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="securityDescriptor">The new security descriptor.</param>
+        public void SetAccessControl(string path, FileSystemSecurity securityDescriptor)
+        {
+            throw new NotSupportedException();
+        }
+
+        #endregion
     }
 }

@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Ntfs
 {
-    internal sealed class SecurityDescriptorRecord
+    internal sealed class SecurityDescriptorRecord : IByteArraySerializable
     {
         public uint Hash;
         public uint Id;
@@ -36,7 +36,7 @@ namespace DiscUtils.Ntfs
         {
             Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
             Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
-            OffsetInFile = Utilities.ToUInt32LittleEndian(buffer, offset + 0x08);
+            OffsetInFile = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
             EntrySize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
 
             if (EntrySize > 0)
@@ -50,5 +50,31 @@ namespace DiscUtils.Ntfs
                 return false;
             }
         }
+
+        #region IByteArraySerializable Members
+
+        public void ReadFrom(byte[] buffer, int offset)
+        {
+            Read(buffer, offset);
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            EntrySize = (uint)Size;
+
+            Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(OffsetInFile, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(EntrySize, buffer, offset + 0x10);
+
+            Array.Copy(SecurityDescriptor, 0, buffer, offset + 0x14, SecurityDescriptor.Length);
+        }
+
+        public int Size
+        {
+            get { return SecurityDescriptor.Length + 0x14; }
+        }
+
+        #endregion
     }
 }

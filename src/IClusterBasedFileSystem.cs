@@ -20,38 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace DiscUtils
 {
     /// <summary>
     /// Base class for all file systems based on a cluster model.
     /// </summary>
-    public abstract class ClusterBasedFileSystem : DiscFileSystem
+    public interface IClusterBasedFileSystem : IFileSystem
     {
-        /// <summary>
-        /// Creates a new instance.
-        /// </summary>
-        protected ClusterBasedFileSystem()
-        {
-        }
-
-        /// <summary>
-        /// Creates a new instance with default options.
-        /// </summary>
-        /// <param name="defaultOptions">The default options</param>
-        protected ClusterBasedFileSystem(DiscFileSystemOptions defaultOptions)
-            : base(defaultOptions)
-        {
-        }
-
         /// <summary>
         /// Gets the size (in bytes) of each cluster.
         /// </summary>
-        public abstract long ClusterSize
+        long ClusterSize
         {
             get;
         }
@@ -59,7 +39,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the total number of clusters managed by the file system.
         /// </summary>
-        public abstract long TotalClusters
+        long TotalClusters
         {
             get;
         }
@@ -69,20 +49,14 @@ namespace DiscUtils
         /// </summary>
         /// <param name="cluster">The cluster to convert</param>
         /// <returns>The corresponding absolute byte position.</returns>
-        public virtual long ClusterToOffset(long cluster)
-        {
-            return cluster * ClusterSize;
-        }
+        long ClusterToOffset(long cluster);
 
         /// <summary>
         /// Converts an absolute byte position in the underlying stream to a cluster (index).
         /// </summary>
         /// <param name="offset">The byte position to convert</param>
         /// <returns>The cluster containing the specified byte</returns>
-        public virtual long OffsetToCluster(long offset)
-        {
-            return offset / ClusterSize;
-        }
+        long OffsetToCluster(long offset);
 
         /// <summary>
         /// Converts a file name to the list of clusters occupied by the file's data.
@@ -91,7 +65,7 @@ namespace DiscUtils
         /// <returns>The clusters</returns>
         /// <remarks>Note that in some file systems, small files may not have dedicated
         /// clusters.  Only dedicated clusters will be returned.</remarks>
-        public abstract Range<long, long>[] PathToClusters(string path);
+        Range<long, long>[] PathToClusters(string path);
 
         /// <summary>
         /// Converts a file name to the extents containing its data.
@@ -101,12 +75,12 @@ namespace DiscUtils
         /// <remarks>Use this method with caution - not all file systems will store all bytes
         /// directly in extents.  Files may be compressed, sparse or encrypted.  This method
         /// merely indicates where file data is stored, not what's stored.</remarks>
-        public abstract StreamExtent[] PathToExtents(string path);
+        StreamExtent[] PathToExtents(string path);
 
         /// <summary>
         /// Gets an object that can convert between clusters and files.
         /// </summary>
         /// <returns>The cluster map</returns>
-        public abstract ClusterMap BuildClusterMap();
+        ClusterMap BuildClusterMap();
     }
 }

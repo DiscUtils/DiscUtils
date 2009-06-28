@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,65 +26,22 @@ using System.IO;
 namespace DiscUtils
 {
     /// <summary>
-    /// Provides the base class for all file systems.
+    /// Common interface for all file systems.
     /// </summary>
-    public abstract class DiscFileSystem : IFileSystem, IDisposable
+    public interface IFileSystem
     {
-        private DiscFileSystemOptions _options;
-
-        /// <summary>
-        /// Creates a new instance.
-        /// </summary>
-        protected DiscFileSystem()
-        {
-            _options = new DiscFileSystemOptions();
-        }
-
-        /// <summary>
-        /// Create a new instance with a default set of options.
-        /// </summary>
-        /// <param name="defaultOptions">The options instance to use for this file system instance.</param>
-        protected DiscFileSystem(DiscFileSystemOptions defaultOptions)
-        {
-            _options = defaultOptions;
-        }
-
-        /// <summary>
-        /// Destructor.
-        /// </summary>
-        ~DiscFileSystem()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// Gets the file system options, which can be modified.
-        /// </summary>
-        public DiscFileSystemOptions Options
-        {
-            get { return _options; }
-        }
-
-        /// <summary>
-        /// Provides a friendly description of the file system type.
-        /// </summary>
-        public abstract string FriendlyName
-        {
-            get;
-        }
-
         /// <summary>
         /// Indicates whether the file system is read-only or read-write.
         /// </summary>
         /// <returns>true if the file system is read-write.</returns>
-        public abstract bool CanWrite { get; }
+        bool CanWrite { get; }
 
         /// <summary>
         /// Gets the root directory of the file system.
         /// </summary>
-        public virtual DiscDirectoryInfo Root
+        DiscDirectoryInfo Root
         {
-            get { return new DiscDirectoryInfo(this, @""); }
+            get;
         }
 
         /// <summary>
@@ -92,10 +49,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="sourceFile">The source file</param>
         /// <param name="destinationFile">The destination file</param>
-        public virtual void CopyFile(string sourceFile, string destinationFile)
-        {
-            CopyFile(sourceFile, destinationFile, false);
-        }
+        void CopyFile(string sourceFile, string destinationFile);
 
         /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
@@ -103,82 +57,60 @@ namespace DiscUtils
         /// <param name="sourceFile">The source file</param>
         /// <param name="destinationFile">The destination file</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
-        public abstract void CopyFile(string sourceFile, string destinationFile, bool overwrite);
+        void CopyFile(string sourceFile, string destinationFile, bool overwrite);
 
         /// <summary>
         /// Creates a directory.
         /// </summary>
         /// <param name="path">The path of the new directory</param>
-        public abstract void CreateDirectory(string path);
+        void CreateDirectory(string path);
 
         /// <summary>
         /// Deletes a directory.
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
-        public abstract void DeleteDirectory(string path);
+        void DeleteDirectory(string path);
 
         /// <summary>
         /// Deletes a directory, optionally with all descendants.
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
         /// <param name="recursive">Determines if the all descendants should be deleted</param>
-        public void DeleteDirectory(string path, bool recursive)
-        {
-            if (recursive)
-            {
-                foreach (string dir in GetDirectories(path))
-                {
-                    DeleteDirectory(dir, true);
-                }
-
-                foreach (string file in GetFiles(path))
-                {
-                    DeleteFile(file);
-                }
-            }
-
-            DeleteDirectory(path);
-        }
+        void DeleteDirectory(string path, bool recursive);
 
         /// <summary>
         /// Deletes a file.
         /// </summary>
         /// <param name="path">The path of the file to delete.</param>
-        public abstract void DeleteFile(string path);
+        void DeleteFile(string path);
 
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
         /// <param name="path">The path to test</param>
         /// <returns>true if the directory exists</returns>
-        public abstract bool DirectoryExists(string path);
+        bool DirectoryExists(string path);
 
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
         /// <param name="path">The path to test</param>
         /// <returns>true if the file exists</returns>
-        public abstract bool FileExists(string path);
+        bool FileExists(string path);
 
         /// <summary>
         /// Indicates if a file or directory exists.
         /// </summary>
         /// <param name="path">The path to test</param>
         /// <returns>true if the file or directory exists</returns>
-        public virtual bool Exists(string path)
-        {
-            return FileExists(path) || DirectoryExists(path);
-        }
+        bool Exists(string path);
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory.
         /// </summary>
         /// <param name="path">The path to search.</param>
         /// <returns>Array of directories.</returns>
-        public virtual string[] GetDirectories(string path)
-        {
-            return GetDirectories(path, "*.*", SearchOption.TopDirectoryOnly);
-        }
+        string[] GetDirectories(string path);
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory matching a specified
@@ -187,10 +119,7 @@ namespace DiscUtils
         /// <param name="path">The path to search.</param>
         /// <param name="searchPattern">The search string to match against.</param>
         /// <returns>Array of directories matching the search pattern.</returns>
-        public virtual string[] GetDirectories(string path, string searchPattern)
-        {
-            return GetDirectories(path, searchPattern, SearchOption.TopDirectoryOnly);
-        }
+        string[] GetDirectories(string path, string searchPattern);
 
         /// <summary>
         /// Gets the names of subdirectories in a specified directory matching a specified
@@ -200,17 +129,14 @@ namespace DiscUtils
         /// <param name="searchPattern">The search string to match against.</param>
         /// <param name="searchOption">Indicates whether to search subdirectories.</param>
         /// <returns>Array of directories matching the search pattern.</returns>
-        public abstract string[] GetDirectories(string path, string searchPattern, SearchOption searchOption);
+        string[] GetDirectories(string path, string searchPattern, SearchOption searchOption);
 
         /// <summary>
         /// Gets the names of files in a specified directory.
         /// </summary>
         /// <param name="path">The path to search.</param>
         /// <returns>Array of files.</returns>
-        public virtual string[] GetFiles(string path)
-        {
-            return GetFiles(path, "*.*", SearchOption.TopDirectoryOnly);
-        }
+        string[] GetFiles(string path);
 
         /// <summary>
         /// Gets the names of files in a specified directory.
@@ -218,10 +144,7 @@ namespace DiscUtils
         /// <param name="path">The path to search.</param>
         /// <param name="searchPattern">The search string to match against.</param>
         /// <returns>Array of files matching the search pattern.</returns>
-        public virtual string[] GetFiles(string path, string searchPattern)
-        {
-            return GetFiles(path, searchPattern, SearchOption.TopDirectoryOnly);
-        }
+        string[] GetFiles(string path, string searchPattern);
 
         /// <summary>
         /// Gets the names of files in a specified directory matching a specified
@@ -231,14 +154,14 @@ namespace DiscUtils
         /// <param name="searchPattern">The search string to match against.</param>
         /// <param name="searchOption">Indicates whether to search subdirectories.</param>
         /// <returns>Array of files matching the search pattern.</returns>
-        public abstract string[] GetFiles(string path, string searchPattern, SearchOption searchOption);
+        string[] GetFiles(string path, string searchPattern, SearchOption searchOption);
 
         /// <summary>
         /// Gets the names of all files and subdirectories in a specified directory.
         /// </summary>
         /// <param name="path">The path to search.</param>
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
-        public abstract string[] GetFileSystemEntries(string path);
+        string[] GetFileSystemEntries(string path);
 
         /// <summary>
         /// Gets the names of files and subdirectories in a specified directory matching a specified
@@ -247,24 +170,21 @@ namespace DiscUtils
         /// <param name="path">The path to search.</param>
         /// <param name="searchPattern">The search string to match against.</param>
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
-        public abstract string[] GetFileSystemEntries(string path, string searchPattern);
+        string[] GetFileSystemEntries(string path, string searchPattern);
 
         /// <summary>
         /// Moves a directory.
         /// </summary>
         /// <param name="sourceDirectoryName">The directory to move.</param>
         /// <param name="destinationDirectoryName">The target directory name.</param>
-        public abstract void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName);
+        void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName);
 
         /// <summary>
         /// Moves a file.
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        public virtual void MoveFile(string sourceName, string destinationName)
-        {
-            MoveFile(sourceName, destinationName, false);
-        }
+        void MoveFile(string sourceName, string destinationName);
 
         /// <summary>
         /// Moves a file, allowing an existing file to be overwritten.
@@ -272,7 +192,7 @@ namespace DiscUtils
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
         /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
-        public abstract void MoveFile(string sourceName, string destinationName, bool overwrite);
+        void MoveFile(string sourceName, string destinationName, bool overwrite);
 
         /// <summary>
         /// Opens the specified file.
@@ -280,10 +200,7 @@ namespace DiscUtils
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public virtual Stream OpenFile(string path, FileMode mode)
-        {
-            return OpenFile(path, mode, FileAccess.ReadWrite);
-        }
+        Stream OpenFile(string path, FileMode mode);
 
         /// <summary>
         /// Opens the specified file.
@@ -292,130 +209,112 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public abstract Stream OpenFile(string path, FileMode mode, FileAccess access);
+        Stream OpenFile(string path, FileMode mode, FileAccess access);
 
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
         /// <param name="path">The file or directory to inspect</param>
         /// <returns>The attributes of the file or directory</returns>
-        public abstract FileAttributes GetAttributes(string path);
+        FileAttributes GetAttributes(string path);
 
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
         /// <param name="path">The file or directory to change</param>
         /// <param name="newValue">The new attributes of the file or directory</param>
-        public abstract void SetAttributes(string path, FileAttributes newValue);
+        void SetAttributes(string path, FileAttributes newValue);
 
         /// <summary>
         /// Gets the creation time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The creation time.</returns>
-        public virtual DateTime GetCreationTime(string path)
-        {
-            return GetCreationTimeUtc(path).ToLocalTime();
-        }
+        DateTime GetCreationTime(string path);
 
         /// <summary>
         /// Sets the creation time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public virtual void SetCreationTime(string path, DateTime newTime)
-        {
-            SetCreationTimeUtc(path, newTime.ToUniversalTime());
-        }
+        void SetCreationTime(string path, DateTime newTime);
 
         /// <summary>
         /// Gets the creation time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <returns>The creation time.</returns>
-        public abstract DateTime GetCreationTimeUtc(string path);
+        DateTime GetCreationTimeUtc(string path);
 
         /// <summary>
         /// Sets the creation time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public abstract void SetCreationTimeUtc(string path, DateTime newTime);
+        void SetCreationTimeUtc(string path, DateTime newTime);
 
         /// <summary>
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The last access time</returns>
-        public virtual DateTime GetLastAccessTime(string path)
-        {
-            return GetLastAccessTimeUtc(path).ToLocalTime();
-        }
+        DateTime GetLastAccessTime(string path);
 
         /// <summary>
         /// Sets the last access time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public virtual void SetLastAccessTime(string path, DateTime newTime)
-        {
-            SetLastAccessTimeUtc(path, newTime.ToUniversalTime());
-        }
+        void SetLastAccessTime(string path, DateTime newTime);
 
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The last access time</returns>
-        public abstract DateTime GetLastAccessTimeUtc(string path);
+        DateTime GetLastAccessTimeUtc(string path);
 
         /// <summary>
         /// Sets the last access time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public abstract void SetLastAccessTimeUtc(string path, DateTime newTime);
+        void SetLastAccessTimeUtc(string path, DateTime newTime);
 
         /// <summary>
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The last write time</returns>
-        public virtual DateTime GetLastWriteTime(string path)
-        {
-            return GetLastWriteTimeUtc(path).ToLocalTime();
-        }
+        DateTime GetLastWriteTime(string path);
 
         /// <summary>
         /// Sets the last modification time (in local time) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public virtual void SetLastWriteTime(string path, DateTime newTime)
-        {
-            SetLastWriteTimeUtc(path, newTime.ToUniversalTime());
-        }
+        void SetLastWriteTime(string path, DateTime newTime);
 
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
         /// <returns>The last write time</returns>
-        public abstract DateTime GetLastWriteTimeUtc(string path);
+        DateTime GetLastWriteTimeUtc(string path);
 
         /// <summary>
         /// Sets the last modification time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
         /// <param name="newTime">The new time to set.</param>
-        public abstract void SetLastWriteTimeUtc(string path, DateTime newTime);
+        void SetLastWriteTimeUtc(string path, DateTime newTime);
 
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
         /// <param name="path">The path to the file</param>
         /// <returns>The length in bytes</returns>
-        public abstract long GetFileLength(string path);
+        long GetFileLength(string path);
 
         /// <summary>
         /// Gets an object representing a possible file.
@@ -423,10 +322,7 @@ namespace DiscUtils
         /// <param name="path">The file path</param>
         /// <returns>The representing object</returns>
         /// <remarks>The file does not need to exist</remarks>
-        public virtual DiscFileInfo GetFileInfo(string path)
-        {
-            return new DiscFileInfo(this, path);
-        }
+        DiscFileInfo GetFileInfo(string path);
 
         /// <summary>
         /// Gets an object representing a possible directory.
@@ -434,10 +330,7 @@ namespace DiscUtils
         /// <param name="path">The directory path</param>
         /// <returns>The representing object</returns>
         /// <remarks>The directory does not need to exist</remarks>
-        public virtual DiscDirectoryInfo GetDirectoryInfo(string path)
-        {
-            return new DiscDirectoryInfo(this, path);
-        }
+        DiscDirectoryInfo GetDirectoryInfo(string path);
 
         /// <summary>
         /// Gets an object representing a possible file system object (file or directory).
@@ -445,30 +338,6 @@ namespace DiscUtils
         /// <param name="path">The file system path</param>
         /// <returns>The representing object</returns>
         /// <remarks>The file system object does not need to exist</remarks>
-        public virtual DiscFileSystemInfo GetFileSystemInfo(string path)
-        {
-            return new DiscFileSystemInfo(this, path);
-        }
-
-        #region IDisposable Members
-
-        /// <summary>
-        /// Disposes of this instance, releasing all resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes of this instance.
-        /// </summary>
-        /// <param name="disposing">true if Disposing</param>
-        protected virtual void Dispose(bool disposing)
-        {
-        }
-
-        #endregion
+        DiscFileSystemInfo GetFileSystemInfo(string path);
     }
 }

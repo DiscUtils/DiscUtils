@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Common
 {
@@ -68,6 +69,23 @@ namespace DiscUtils.Common
             {
                 Console.ForegroundColor = restoreColor;
             }
+        }
+
+        public static VirtualDisk OpenDisk(string path, FileAccess access)
+        {
+            if (path.EndsWith(".VHD", StringComparison.OrdinalIgnoreCase))
+            {
+                return new DiscUtils.Vhd.Disk(new FileStream(path, FileMode.Open, access), Ownership.Dispose);
+            }
+            else if (path.EndsWith(".VMDK", StringComparison.OrdinalIgnoreCase))
+            {
+                return new DiscUtils.Vmdk.Disk(path, access);
+            }
+            else if (path.EndsWith(".VDI", StringComparison.OrdinalIgnoreCase))
+            {
+                return new DiscUtils.Vdi.Disk(new FileStream(path, FileMode.Open, access), Ownership.Dispose);
+            }
+            throw new NotSupportedException("Unrecognised file extension");
         }
     }
 }
