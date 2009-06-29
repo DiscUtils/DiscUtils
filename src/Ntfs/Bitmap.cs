@@ -32,6 +32,7 @@ namespace DiscUtils.Ntfs
 
         private SparseMemoryBuffer _bitmap;
 
+        private long _nextAvailable;
 
         public Bitmap(Stream stream, long maxIndex)
         {
@@ -112,6 +113,11 @@ namespace DiscUtils.Ntfs
                 _stream.WriteByte(_bitmap[byteIdx]);
                 _stream.Flush();
             }
+
+            if (index < _nextAvailable)
+            {
+                _nextAvailable = index;
+            }
         }
 
         internal void MarkAbsentRange(long index, long count)
@@ -138,11 +144,16 @@ namespace DiscUtils.Ntfs
             _stream.Position = firstByte;
             _stream.Write(buffer, 0, buffer.Length);
             _stream.Flush();
+
+            if (index < _nextAvailable)
+            {
+                _nextAvailable = index;
+            }
         }
 
         internal long AllocateFirstAvailable(long minValue)
         {
-            long i = minValue;
+            long i = Math.Max(minValue, _nextAvailable);
             while (IsPresent(i) && i < _maxIndex)
             {
                 ++i;
@@ -151,6 +162,7 @@ namespace DiscUtils.Ntfs
             if (i < _maxIndex)
             {
                 MarkPresent(i);
+                _nextAvailable = i + 1;
                 return i;
             }
             else
