@@ -72,11 +72,6 @@ namespace DiscUtils.Wim
 
         public override uint Peek(int count)
         {
-            if (count > 16)
-            {
-                throw new ArgumentOutOfRangeException("count", count, "Maximum 16 bits can be read");
-            }
-
             if (_bufferAvailable < count)
             {
                 Need(count);

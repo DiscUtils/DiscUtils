@@ -33,7 +33,7 @@ namespace DiscUtils.Wim
     /// encoding. This makes for exceptionally fast symbol lookups O(1), but is inefficient
     /// overall.
     /// </remarks>
-    internal class HuffmanTree
+    internal sealed class HuffmanTree
     {
         private int _numBits; // Max bits per symbol
         private int _numSymbols; // Max symbols
