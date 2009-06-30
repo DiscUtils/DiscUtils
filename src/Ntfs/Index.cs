@@ -451,6 +451,24 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<byte[]> query)
+        {
+            foreach (var entry in _index.FindAll(query))
+            {
+                yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
+            }
+        }
+
+        public KeyValuePair<K, D> FindFirst(IComparable<byte[]> query)
+        {
+            foreach (var entry in FindAll(query))
+            {
+                return entry;
+            }
+
+            return default(KeyValuePair<K, D>);
+        }
+
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
         {
             foreach (var entry in _index.FindAll(new ComparableConverter(query)))

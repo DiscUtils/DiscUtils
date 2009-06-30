@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using DirectoryIndexEntry = System.Collections.Generic.KeyValuePair<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileReference>;
 
 namespace DiscUtils.Ntfs
@@ -225,20 +226,24 @@ namespace DiscUtils.Ntfs
             return entries;
         }
 
-        private sealed class FileNameQuery : IComparable<FileNameRecord>
+        private sealed class FileNameQuery : IComparable<byte[]>
         {
-            private string _query;
-            private IComparer<string> _nameComparer;
+            private byte[] _query;
+            private UpperCase _upperCase;
 
-            public FileNameQuery(string query, IComparer<string> nameComparer)
+            public FileNameQuery(string query, UpperCase upperCase)
             {
-                _query = query;
-                _nameComparer = nameComparer;
+                _query = Encoding.Unicode.GetBytes(query);
+                _upperCase = upperCase;
             }
 
-            public int CompareTo(FileNameRecord other)
+            public int CompareTo(byte[] buffer)
             {
-                return _nameComparer.Compare(_query, other.FileName);
+                // Note: this is internal knowledge of FileNameRecord structure - but for performance
+                // reasons, we don't want to decode the entire structure.  In fact can avoid the string
+                // conversion as well.
+                byte fnLen = buffer[0x40];
+                return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen * 2);
             }
         }
     }
