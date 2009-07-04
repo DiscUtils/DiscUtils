@@ -60,20 +60,27 @@ namespace DiscUtils.Ntfs
             _nextSpace = Utilities.RoundUp(_nextSpace, 16);
         }
 
-        public FileSystemSecurity GetDescriptorById(uint id)
+        public RawSecurityDescriptor GetDescriptorById(uint id)
         {
             IdIndexData data = _idIndex[new IdIndexKey(id)];
             return ReadDescriptor(data);
         }
 
-        public uint AddDescriptor(FileSystemSecurity newDescriptor)
+        public uint AddDescriptor(RawSecurityDescriptor newDescriptor)
         {
             // Search to see if this is a known descriptor
             uint newHash = SecurityDescriptor.CalcHash(newDescriptor);
+            byte[] newByteForm = new byte[newDescriptor.BinaryLength];
+            newDescriptor.GetBinaryForm(newByteForm, 0);
+
             foreach (var entry in _hashIndex.FindAll(new HashFinder(newHash)))
             {
-                FileSystemSecurity stored = ReadDescriptor(entry.Value);
-                if (Utilities.AreEqual(newDescriptor.GetSecurityDescriptorBinaryForm(), stored.GetSecurityDescriptorBinaryForm()))
+                RawSecurityDescriptor stored = ReadDescriptor(entry.Value);
+
+                byte[] storedByteForm = new byte[stored.BinaryLength];
+                stored.GetBinaryForm(storedByteForm, 0);
+
+                if (Utilities.AreEqual(newByteForm, storedByteForm))
                 {
                     return entry.Value.Id;
                 }
@@ -81,11 +88,9 @@ namespace DiscUtils.Ntfs
 
             long offset = _nextSpace;
 
-            byte[] sd = newDescriptor.GetSecurityDescriptorBinaryForm();
-
             // Write the new descriptor to the end of the existing descriptors
             SecurityDescriptorRecord record = new SecurityDescriptorRecord();
-            record.SecurityDescriptor = sd;
+            record.SecurityDescriptor = newByteForm;
             record.Hash = newHash;
             record.Id = _nextId;
             record.OffsetInFile = offset;
@@ -160,9 +165,8 @@ namespace DiscUtils.Ntfs
                     string secDescStr = "--unknown--";
                     if (rec.SecurityDescriptor[0] != 0)
                     {
-                        FileSecurity secDesc = new FileSecurity();
-                        secDesc.SetSecurityDescriptorBinaryForm(rec.SecurityDescriptor, AccessControlSections.All);
-                        secDescStr = secDesc.GetSecurityDescriptorSddlForm(AccessControlSections.All);
+                        RawSecurityDescriptor sd = new RawSecurityDescriptor(rec.SecurityDescriptor, 0);
+                        secDescStr = sd.GetSddlForm(AccessControlSections.All);
                     }
 
                     writer.WriteLine(indent + "  SECURITY DESCRIPTOR RECORD");
@@ -299,7 +303,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private FileSystemSecurity ReadDescriptor(IndexData data)
+        private RawSecurityDescriptor ReadDescriptor(IndexData data)
         {
             using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
             {
@@ -309,9 +313,7 @@ namespace DiscUtils.Ntfs
                 SecurityDescriptorRecord record = new SecurityDescriptorRecord();
                 record.Read(buffer, 0);
 
-                FileSecurity fs = new FileSecurity();
-                fs.SetSecurityDescriptorBinaryForm(record.SecurityDescriptor, AccessControlSections.All);
-                return fs;
+                return new RawSecurityDescriptor(record.SecurityDescriptor, 0);
             }
         }
 

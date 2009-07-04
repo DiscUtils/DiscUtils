@@ -28,22 +28,22 @@ namespace DiscUtils.Ntfs
 {
     internal sealed class SecurityDescriptor : IByteArraySerializable, IDiagnosticTraceable
     {
-        private FileSystemSecurity _securityDescriptor;
+        private RawSecurityDescriptor _securityDescriptor;
 
         public SecurityDescriptor()
         {
-            _securityDescriptor = new FileSecurity();
         }
 
-        public FileSystemSecurity Descriptor
+        public RawSecurityDescriptor Descriptor
         {
             get { return _securityDescriptor; }
             set { _securityDescriptor = value; }
         }
 
-        public static uint CalcHash(FileSystemSecurity descriptor)
+        public static uint CalcHash(RawSecurityDescriptor descriptor)
         {
-            byte[] buffer = descriptor.GetSecurityDescriptorBinaryForm();
+            byte[] buffer = new byte[descriptor.BinaryLength];
+            descriptor.GetBinaryForm(buffer, 0);
             uint hash = 0;
             for (int i = 0; i < buffer.Length / 4; ++i)
             {
@@ -56,31 +56,19 @@ namespace DiscUtils.Ntfs
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            byte[] temp;
-            if (offset == 0)
-            {
-                temp = buffer;
-            }
-            else
-            {
-                temp = new byte[buffer.Length - offset];
-                Array.Copy(buffer, offset, temp, 0, temp.Length);
-            }
-
-            _securityDescriptor.SetSecurityDescriptorBinaryForm(temp, AccessControlSections.All);
+            _securityDescriptor = new RawSecurityDescriptor(buffer, offset);
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            byte[] temp = _securityDescriptor.GetSecurityDescriptorBinaryForm();
-            Array.Copy(temp, 0, buffer, offset, temp.Length);
+            _securityDescriptor.GetBinaryForm(buffer, offset);
         }
 
         public int Size
         {
             get
             {
-                return _securityDescriptor.GetSecurityDescriptorBinaryForm().Length;
+                return _securityDescriptor.BinaryLength;
             }
         }
 
@@ -90,7 +78,7 @@ namespace DiscUtils.Ntfs
 
         public void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "Descriptor: " + _securityDescriptor.GetSecurityDescriptorSddlForm(AccessControlSections.All));
+            writer.WriteLine(indent + "Descriptor: " + _securityDescriptor.GetSddlForm(AccessControlSections.All));
         }
 
         #endregion

@@ -35,7 +35,7 @@ namespace DiscUtils.Wim
     public class WimFileSystem : ReadOnlyDiscFileSystem, IWindowsFileSystem
     {
         private WimFile _file;
-        private List<FileSystemSecurity> _securityDescriptors;
+        private List<RawSecurityDescriptor> _securityDescriptors;
         private Dictionary<long, List<DirectoryEntry>> _directories;
 
         internal WimFileSystem(WimFile file, int index)
@@ -347,13 +347,10 @@ namespace DiscUtils.Wim
                 sdLengths[i] = reader.ReadUInt64();
             }
 
-            _securityDescriptors = new List<FileSystemSecurity>((int)numEntries);
-            FileSecurity[] securityDescriptors = new FileSecurity[numEntries];
+            _securityDescriptors = new List<RawSecurityDescriptor>((int)numEntries);
             for (uint i = 0; i < numEntries; ++i)
             {
-                FileSecurity descriptor = new FileSecurity();
-                descriptor.SetSecurityDescriptorBinaryForm(reader.ReadBytes((int)sdLengths[i]), AccessControlSections.All);
-                _securityDescriptors.Add(descriptor);
+                _securityDescriptors.Add(new RawSecurityDescriptor(reader.ReadBytes((int)sdLengths[i]), 0));
             }
 
             if (reader.Position < startPos + totalLength)
@@ -445,7 +442,7 @@ namespace DiscUtils.Wim
         /// </summary>
         /// <param name="path">The file or directory to inspect.</param>
         /// <returns>The security descriptor.</returns>
-        public FileSystemSecurity GetAccessControl(string path)
+        public RawSecurityDescriptor GetSecurity(string path)
         {
             uint id = GetEntry(path).SecurityId;
 
@@ -469,7 +466,7 @@ namespace DiscUtils.Wim
         /// </summary>
         /// <param name="path">The file or directory to change.</param>
         /// <param name="securityDescriptor">The new security descriptor.</param>
-        public void SetAccessControl(string path, FileSystemSecurity securityDescriptor)
+        public void SetSecurity(string path, RawSecurityDescriptor securityDescriptor)
         {
             throw new NotSupportedException();
         }

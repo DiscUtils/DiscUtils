@@ -34,13 +34,13 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The file or directory to inspect.</param>
         /// <returns>The security descriptor.</returns>
-        FileSystemSecurity GetAccessControl(string path);
+        RawSecurityDescriptor GetSecurity(string path);
 
         /// <summary>
         /// Sets the security descriptor associated with the file or directory.
         /// </summary>
         /// <param name="path">The file or directory to change.</param>
         /// <param name="securityDescriptor">The new security descriptor.</param>
-        void SetAccessControl(string path, FileSystemSecurity securityDescriptor);
+        void SetSecurity(string path, RawSecurityDescriptor securityDescriptor);
     }
 }

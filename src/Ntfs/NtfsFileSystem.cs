@@ -1041,7 +1041,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="path">The file or directory to inspect.</param>
         /// <returns>The security descriptor.</returns>
-        public FileSystemSecurity GetAccessControl(string path)
+        public RawSecurityDescriptor GetSecurity(string path)
         {
             using (new NtfsTransaction())
             {
@@ -1071,7 +1071,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="path">The file or directory to change.</param>
         /// <param name="securityDescriptor">The new security descriptor.</param>
-        public void SetAccessControl(string path, FileSystemSecurity securityDescriptor)
+        public void SetSecurity(string path, RawSecurityDescriptor securityDescriptor)
         {
             using (new NtfsTransaction())
             {
