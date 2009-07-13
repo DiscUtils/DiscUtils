@@ -167,6 +167,47 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <param name="adapterType">The type of virtual disk adapter</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(string path, long capacity, DiskCreateType type, DiskAdapterType adapterType)
+        {
+            return Initialize(path, capacity, null, type, adapterType);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <param name="adapterType">The type of virtual disk adapter</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(string path, long capacity, Geometry geometry, DiskCreateType type, DiskAdapterType adapterType)
+        {
+            return new Disk(DiskImageFile.Initialize(path, capacity, geometry, type, adapterType), Ownership.Dispose);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified location on a file system.
+        /// </summary>
+        /// <param name="fileSystem">The file system to contain the disk</param>
+        /// <param name="path">The file system path to the disk</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="type">The type of virtual disk to create</param>
+        /// <param name="adapterType">The type of virtual disk adapter</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type, DiskAdapterType adapterType)
+        {
+            return new Disk(DiskImageFile.Initialize(fileSystem, path, capacity, type, adapterType), Ownership.Dispose);
+        }
+
+        /// <summary>
         /// Creates a new virtual disk as a thin clone of an existing disk.
         /// </summary>
         /// <param name="path">The path to the new disk.</param>

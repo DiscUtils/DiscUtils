@@ -202,7 +202,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
-            return Initialize(path, capacity, null, type);
+            return Initialize(path, capacity, null, type, DiskAdapterType.LsiLogicScsi);
         }
 
         /// <summary>
@@ -211,14 +211,28 @@ namespace DiscUtils.Vmdk
         /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <param name="type">The type of virtual disk to create</param>
+        /// <param name="createType">The type of virtual disk to create</param>
         /// <returns>The newly created disk image</returns>
-        public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType type)
+        public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType createType)
         {
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry ?? DefaultGeometry(capacity), type);
+            return Initialize(path, capacity, geometry, createType, DiskAdapterType.LsiLogicScsi);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
+        /// <param name="createType">The type of virtual disk to create</param>
+        /// <param name="adapterType">The type of disk adapter used with the disk</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
+        {
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry ?? DefaultGeometry(capacity), createType, adapterType);
 
             FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
-            return DoInitialize(locator, Path.GetFileName(path), capacity, type, baseDescriptor);
+            return DoInitialize(locator, Path.GetFileName(path), capacity, createType, baseDescriptor);
         }
 
         /// <summary>
@@ -227,14 +241,28 @@ namespace DiscUtils.Vmdk
         /// <param name="fileSystem">The file system to create the VMDK on</param>
         /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="type">The type of virtual disk to create</param>
+        /// <param name="createType">The type of virtual disk to create</param>
         /// <returns>The newly created disk image</returns>
-        public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type)
+        public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType createType)
         {
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(DefaultGeometry(capacity), type);
+            return Initialize(fileSystem, path, capacity, createType, DiskAdapterType.LsiLogicScsi);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the VMDK on</param>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <param name="createType">The type of virtual disk to create</param>
+        /// <param name="adapterType">The type of disk adapter used with the disk</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType createType, DiskAdapterType adapterType)
+        {
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(DefaultGeometry(capacity), createType, adapterType);
 
             FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            return DoInitialize(locator, Path.GetFileName(path), capacity, type, baseDescriptor);
+            return DoInitialize(locator, Path.GetFileName(path), capacity, createType, baseDescriptor);
         }
 
         /// <summary>
@@ -788,15 +816,15 @@ namespace DiscUtils.Vmdk
             return new Geometry(cylinders, heads, sectors);
         }
 
-        private static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, DiskCreateType type)
+        private static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
         {
             DescriptorFile baseDescriptor = new DescriptorFile();
             baseDescriptor.DiskGeometry = geometry;
             baseDescriptor.ContentId = (uint)_rng.Next();
-            baseDescriptor.CreateType = type;
+            baseDescriptor.CreateType = createType;
             baseDescriptor.UniqueId = Guid.NewGuid();
             baseDescriptor.HardwareVersion = "4";
-            baseDescriptor.AdapterType = DiskAdapterType.LsiLogicScsi;
+            baseDescriptor.AdapterType = adapterType;
             return baseDescriptor;
         }
 

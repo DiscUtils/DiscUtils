@@ -27,12 +27,34 @@ using System.Text;
 
 namespace DiscUtils.Vmdk
 {
-    internal enum DiskAdapterType
+    /// <summary>
+    /// Enumeration of known virtual disk controller (aka adapter) types.
+    /// </summary>
+    public enum DiskAdapterType
     {
+        /// <summary>
+        /// Unknown or unspecified.
+        /// </summary>
         None = 0,
+
+        /// <summary>
+        /// IDE controller.
+        /// </summary>
         Ide = 1,
+
+        /// <summary>
+        /// Bus Logic SCSI controller.
+        /// </summary>
         BusLogicScsi = 2,
+
+        /// <summary>
+        /// LSI Logic SCSI controller.
+        /// </summary>
         LsiLogicScsi = 3,
+
+        /// <summary>
+        /// Legacy ESX controller.
+        /// </summary>
         LegacyESX = 4
     }
 }

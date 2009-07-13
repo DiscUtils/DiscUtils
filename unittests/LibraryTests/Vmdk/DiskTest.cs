@@ -46,6 +46,22 @@ namespace DiscUtils.Vmdk
         }
 
         [Test]
+        public void InitializeFixedIDE()
+        {
+            using (Disk disk = Disk.Initialize(new InMemoryFileSystem(), "a.vmdk", 8 * 1024 * 1024, DiskCreateType.MonolithicFlat, DiskAdapterType.Ide))
+            {
+                Assert.IsNotNull(disk);
+                Assert.That(disk.Geometry.Capacity > 7.9 * 1024 * 1024 && disk.Geometry.Capacity < 8.1 * 1024 * 1024);
+                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+
+                List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
+                List<string> paths = new List<string>(links[0].ExtentPaths);
+                Assert.AreEqual(1, paths.Count);
+                Assert.AreEqual("a-flat.vmdk", paths[0]);
+            }
+        }
+
+        [Test]
         public void InitializeDynamic()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
