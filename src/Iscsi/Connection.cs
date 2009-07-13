@@ -247,7 +247,10 @@ namespace DiscUtils.Iscsi
             TextResponse resp = ParseResponse<TextResponse>(pdu);
 
             TextBuffer buffer = new TextBuffer();
-            buffer.ReadFrom(resp.TextData, 0, resp.TextData.Length);
+            if (resp.TextData != null)
+            {
+                buffer.ReadFrom(resp.TextData, 0, resp.TextData.Length);
+            }
 
             List<TargetInfo> targets = new List<TargetInfo>();
 
