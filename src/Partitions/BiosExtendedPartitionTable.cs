@@ -45,19 +45,30 @@ namespace DiscUtils.Partitions
             {
                 _disk.Position = (long)partPos * Utilities.SectorSize;
                 byte[] sector = Utilities.ReadFully(_disk, Utilities.SectorSize);
-
-                BiosPartitionRecord thisPart = new BiosPartitionRecord(sector, 0x01BE, partPos);
-                BiosPartitionRecord nextPart = new BiosPartitionRecord(sector, 0x01CE, partPos);
-
-                result.Add(thisPart);
-                if (nextPart.StartCylinder != 0 || nextPart.StartHead != 0 || nextPart.StartSector != 0)
+                if (sector[510] != 0x55 || sector[511] != 0xAA)
                 {
-                    partPos += nextPart.LBAStart;
+                    throw new IOException("Invalid extended partition sector");
                 }
-                else
+
+                uint nextPartPos = 0;
+                for (int offset = 0x1BE; offset <= 0x1EE; offset += 0x10)
                 {
-                    partPos = 0;
+                    BiosPartitionRecord thisPart = new BiosPartitionRecord(sector, offset, partPos);
+
+                    if (thisPart.StartCylinder != 0 || thisPart.StartHead != 0 || thisPart.StartSector != 0)
+                    {
+                        if (thisPart.PartitionType != 0x05 && thisPart.PartitionType != 0x0F)
+                        {
+                            result.Add(thisPart);
+                        }
+                        else
+                        {
+                            nextPartPos = _firstSector + thisPart.LBAStart;
+                        }
+                    }
                 }
+
+                partPos = nextPartPos;
             }
 
             return result.ToArray();

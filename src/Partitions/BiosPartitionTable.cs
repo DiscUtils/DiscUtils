@@ -325,8 +325,19 @@ namespace DiscUtils.Partitions
         private BiosPartitionRecord[] GetAllRecords()
         {
             List<BiosPartitionRecord> newList = new List<BiosPartitionRecord>();
-            newList.AddRange(GetPrimaryRecords());
-            newList.AddRange(GetExtendedRecords());
+
+            foreach (BiosPartitionRecord primaryRecord in GetPrimaryRecords())
+            {
+                if (IsExtendedPartition(primaryRecord))
+                {
+                    newList.AddRange(GetExtendedRecords(primaryRecord));
+                }
+                else
+                {
+                    newList.Add(primaryRecord);
+                }
+            }
+
             return newList.ToArray();
         }
 
@@ -340,39 +351,21 @@ namespace DiscUtils.Partitions
 
         private static BiosPartitionRecord[] ReadPrimaryRecords(byte[] bootSector)
         {
-            BiosPartitionRecord[] records = new BiosPartitionRecord[4];
+            List<BiosPartitionRecord> records = new List<BiosPartitionRecord>();
             for (int i = 0; i < 4; ++i)
             {
-                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0);
-            }
-            return records;
-        }
-
-        private BiosPartitionRecord[] GetExtendedRecords()
-        {
-            List<BiosPartitionRecord> result = new List<BiosPartitionRecord>();
-            foreach (var t in GetExtendedPartitionTables())
-            {
-                result.AddRange(t.GetPartitions());
-            }
-            return result.ToArray();
-        }
-
-        private BiosExtendedPartitionTable[] GetExtendedPartitionTables()
-        {
-            List<BiosExtendedPartitionTable> result = new List<BiosExtendedPartitionTable>();
-
-            foreach (BiosPartitionRecord r in GetPrimaryRecords())
-            {
-                if (r.IsValid
-                    && (r.PartitionType == BiosPartitionTypes.Extended
-                        || r.PartitionType == BiosPartitionTypes.ExtendedLba))
+                BiosPartitionRecord r = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0);
+                if (r.IsValid)
                 {
-                    result.Add(new BiosExtendedPartitionTable(_diskData, r.LBAStart));
+                    records.Add(r);
                 }
             }
+            return records.ToArray();
+        }
 
-            return result.ToArray();
+        private BiosPartitionRecord[] GetExtendedRecords(BiosPartitionRecord r)
+        {
+            return new BiosExtendedPartitionTable(_diskData, r.LBAStart).GetPartitions();
         }
 
         private void WriteRecord(int i, BiosPartitionRecord newRecord)
@@ -382,6 +375,11 @@ namespace DiscUtils.Partitions
             newRecord.WriteTo(bootSector, 0x01BE + (i * 16));
             _diskData.Position = 0;
             _diskData.Write(bootSector, 0, bootSector.Length);
+        }
+
+        private static bool IsExtendedPartition(BiosPartitionRecord r)
+        {
+            return r.PartitionType == BiosPartitionTypes.Extended || r.PartitionType == BiosPartitionTypes.ExtendedLba;
         }
 
         private static byte ConvertType(WellKnownPartitionType type, long size)
