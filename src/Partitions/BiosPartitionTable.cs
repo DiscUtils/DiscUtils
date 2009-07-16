@@ -328,13 +328,16 @@ namespace DiscUtils.Partitions
 
             foreach (BiosPartitionRecord primaryRecord in GetPrimaryRecords())
             {
-                if (IsExtendedPartition(primaryRecord))
+                if (primaryRecord.IsValid)
                 {
-                    newList.AddRange(GetExtendedRecords(primaryRecord));
-                }
-                else
-                {
-                    newList.Add(primaryRecord);
+                    if (IsExtendedPartition(primaryRecord))
+                    {
+                        newList.AddRange(GetExtendedRecords(primaryRecord));
+                    }
+                    else
+                    {
+                        newList.Add(primaryRecord);
+                    }
                 }
             }
 
@@ -351,16 +354,12 @@ namespace DiscUtils.Partitions
 
         private static BiosPartitionRecord[] ReadPrimaryRecords(byte[] bootSector)
         {
-            List<BiosPartitionRecord> records = new List<BiosPartitionRecord>();
+            BiosPartitionRecord[] records = new BiosPartitionRecord[4];
             for (int i = 0; i < 4; ++i)
             {
-                BiosPartitionRecord r = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0);
-                if (r.IsValid)
-                {
-                    records.Add(r);
-                }
+                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0);
             }
-            return records.ToArray();
+            return records;
         }
 
         private BiosPartitionRecord[] GetExtendedRecords(BiosPartitionRecord r)
