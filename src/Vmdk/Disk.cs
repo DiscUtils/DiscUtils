@@ -216,7 +216,8 @@ namespace DiscUtils.Vmdk
         /// <returns>The new disk.</returns>
         public static Disk InitializeDifferencing(string path, DiskCreateType type, string parentPath)
         {
-            return new Disk(DiskImageFile.InitializeDifferencing(path, type, parentPath), Ownership.Dispose);
+            FileLocator fileLoc = new LocalFileLocator(Path.GetDirectoryName(path));
+            return new Disk(DiskImageFile.InitializeDifferencing(path, type, parentPath), Ownership.Dispose, fileLoc);
         }
 
         /// <summary>
