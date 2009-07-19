@@ -150,6 +150,7 @@
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
     <Compile Include="Ntfs\AttributeRecord.cs" />
+    <Compile Include="Ntfs\AttributeReference.cs" />
     <Compile Include="Ntfs\AttributeType.cs" />
     <Compile Include="Ntfs\BiosParameterBlock.cs" />
     <Compile Include="Ntfs\Bitmap.cs" />
@@ -158,7 +159,6 @@
     <Compile Include="Ntfs\Directory.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
     <Compile Include="Ntfs\File.cs" />
-    <Compile Include="Ntfs\FileAttributeStream.cs" />
     <Compile Include="Ntfs\FileNameRecord.cs" />
     <Compile Include="Ntfs\FileRecord.cs" />
     <Compile Include="Ntfs\FileReference.cs" />
@@ -170,6 +170,7 @@
     <Compile Include="Ntfs\IndexHeader.cs" />
     <Compile Include="Ntfs\IndexNode.cs" />
     <Compile Include="Ntfs\IndexRoot.cs" />
+    <Compile Include="Ntfs\NonResidentAttributeExtentStream.cs" />
     <Compile Include="Ntfs\NtfsContext.cs" />
     <Compile Include="Ntfs\MasterFileTable.cs" />
     <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="Ntfs\NtfsFileSystem.cs" />
     <Compile Include="Ntfs\NtfsFileSystemChecker.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs" />
+    <Compile Include="Ntfs\NtfsStream.cs" />
     <Compile Include="Ntfs\NtfsTransaction.cs" />
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIdRecord.cs" />

@@ -354,6 +354,37 @@ namespace DiscUtils.Ntfs
             _dataRuns = new List<DataRun>();
         }
 
+        public NonResidentAttributeRecord(NonResidentAttributeRecord toCopy)
+            : base(toCopy)
+        {
+            base._nonResidentFlag = 1;
+            _startingVCN = toCopy._startingVCN;
+            _lastVCN = toCopy._lastVCN;
+            _dataRunsOffset = toCopy._dataRunsOffset;
+            _compressionUnitSize = toCopy._compressionUnitSize;
+            _dataAllocatedSize = toCopy._dataAllocatedSize;
+            _dataRealSize = toCopy._dataRealSize;
+            _initializedDataSize = toCopy._initializedDataSize;
+            _compressedSize = toCopy._compressedSize;
+
+            _dataRuns = new List<DataRun>(toCopy._dataRuns);
+        }
+
+        public void SetData(NonResidentAttributeRecord source)
+        {
+            _lastVCN = _startingVCN + (source._lastVCN - source._startingVCN);
+            _dataRuns = source._dataRuns;
+        }
+
+        /// <summary>
+        /// Detaches the data associated with this attribute
+        /// </summary>
+        public void DetachData()
+        {
+            _lastVCN = _startingVCN;
+            _dataRuns = new List<DataRun>();
+        }
+
         /// <summary>
         /// The amount of space occupied by the attribute (in bytes)
         /// </summary>
@@ -390,9 +421,15 @@ namespace DiscUtils.Ntfs
             set { _initializedDataSize = (ulong)value; }
         }
 
+        public long StartVcn
+        {
+            get { return (long)_startingVCN; }
+        }
+
         public long LastVcn
         {
             set { _lastVCN = (ulong)value; }
+            get { return (long)_lastVCN; }
         }
 
         /// <summary>
@@ -443,7 +480,7 @@ namespace DiscUtils.Ntfs
 
         public override SparseStream OpenRaw(File file, FileAccess access)
         {
-            return new NonResidentAttributeStream(file, access, this);
+            return new NonResidentAttributeExtentStream(file, access, this);
         }
 
         public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)

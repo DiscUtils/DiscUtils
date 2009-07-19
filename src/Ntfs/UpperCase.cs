@@ -32,7 +32,7 @@ namespace DiscUtils.Ntfs
 
         public UpperCase(File file)
         {
-            using (Stream s = file.OpenAttribute(AttributeType.Data, FileAccess.Read))
+            using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             {
                 _table = new char[s.Length / 2];
 

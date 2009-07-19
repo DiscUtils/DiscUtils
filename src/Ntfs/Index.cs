@@ -52,14 +52,14 @@ namespace DiscUtils.Ntfs
 
             _blockCache = new ObjectCache<long, IndexBlock>();
 
-            _file.CreateAttribute(AttributeType.IndexRoot, _name);
+            _file.CreateStream(AttributeType.IndexRoot, _name);
 
-            _root = new IndexRoot()
-            {
+            _root = new IndexRoot() {
                 AttributeType = (uint)attrType,
                 CollationRule = collationRule,
                 IndexAllocationSize = (uint)bpb.IndexBufferSize,
                 RawClustersPerIndexRecord = bpb.RawIndexBufferSize };
+
             _comparer = _root.GetCollator(upCase);
 
             _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, 32);
@@ -74,10 +74,10 @@ namespace DiscUtils.Ntfs
 
             _blockCache = new ObjectCache<long, IndexBlock>();
 
-            _root = _file.GetAttributeContent<IndexRoot>(AttributeType.IndexRoot, _name);
+            _root = _file.GetStream(AttributeType.IndexRoot, _name).GetContent<IndexRoot>();
             _comparer = _root.GetCollator(upCase);
 
-            using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Read))
+            using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
                 _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, buffer, IndexRoot.HeaderOffset);
@@ -87,15 +87,14 @@ namespace DiscUtils.Ntfs
                 _rootNode.TotalSpaceAvailable += _file.MftRecordFreeSpace - 100;
             }
 
-            if (_file.GetAttribute(AttributeType.IndexAllocation, _name) != null)
+            if (_file.StreamExists(AttributeType.IndexAllocation, _name))
             {
-                _indexStream = _file.OpenAttribute(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
+                _indexStream = _file.OpenStream(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
             }
 
-            NtfsAttribute bitmapAttr = _file.GetAttribute(AttributeType.Bitmap, _name);
-            if (bitmapAttr != null)
+            if (_file.StreamExists(AttributeType.Bitmap, _name))
             {
-                _indexBitmap = new Bitmap(_file.OpenAttribute(bitmapAttr.Id, FileAccess.ReadWrite), long.MaxValue);
+                _indexBitmap = new Bitmap(_file.OpenStream(AttributeType.Bitmap, _name, FileAccess.ReadWrite), long.MaxValue);
             }
         }
 
@@ -169,14 +168,14 @@ namespace DiscUtils.Ntfs
         {
             if (_indexStream == null)
             {
-                ushort iaId = _file.CreateAttribute(AttributeType.IndexAllocation, _name);
-                _indexStream = _file.OpenAttribute(iaId, FileAccess.ReadWrite);
+                _file.CreateStream(AttributeType.IndexAllocation, _name);
+                _indexStream = _file.OpenStream(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
             }
 
             if (_indexBitmap == null)
             {
-                ushort ibId = _file.CreateAttribute(AttributeType.Bitmap, _name);
-                _indexBitmap = new Bitmap(_file.OpenAttribute(ibId, FileAccess.ReadWrite), long.MaxValue);
+                _file.CreateStream(AttributeType.Bitmap, _name);
+                _indexBitmap = new Bitmap(_file.OpenStream(AttributeType.Bitmap, _name, FileAccess.ReadWrite), long.MaxValue);
             }
 
             long idx = _indexBitmap.AllocateFirstAvailable(0);
@@ -206,7 +205,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries + _root.Size];
             _root.WriteTo(buffer, 0);
             _rootNode.WriteTo(buffer, _root.Size);
-            using (Stream s = _file.OpenAttribute(AttributeType.IndexRoot, _name, FileAccess.Write))
+            using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Write))
             {
                 s.Position = 0;
                 s.Write(buffer, 0, buffer.Length);

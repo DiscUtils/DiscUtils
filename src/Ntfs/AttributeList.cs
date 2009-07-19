@@ -161,6 +161,12 @@ namespace DiscUtils.Ntfs
             {
                 Name = null;
             }
+
+            if (RecordLength < 0x18)
+            {
+                throw new InvalidDataException("Malformed AttributeList record");
+            }
+
             return RecordLength;
         }
 

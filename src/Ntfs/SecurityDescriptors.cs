@@ -103,7 +103,7 @@ namespace DiscUtils.Ntfs
                 throw new NotImplementedException("Excessive number of security descriptors - running into redundant storage area");
             }
 
-            using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.ReadWrite))
+            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.ReadWrite))
             {
                 s.Position = _nextSpace;
                 s.Write(buffer, 0, buffer.Length);
@@ -148,7 +148,7 @@ namespace DiscUtils.Ntfs
         {
             writer.WriteLine(indent + "SECURITY DESCRIPTORS");
 
-            using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
+            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
 
@@ -305,7 +305,7 @@ namespace DiscUtils.Ntfs
 
         private RawSecurityDescriptor ReadDescriptor(IndexData data)
         {
-            using (Stream s = _file.OpenAttribute(AttributeType.Data, "$SDS", FileAccess.Read))
+            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
                 s.Position = data.SdsOffset;
                 byte[] buffer = Utilities.ReadFully(s, data.SdsLength);

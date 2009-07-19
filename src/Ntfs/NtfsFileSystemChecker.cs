@@ -210,18 +210,24 @@ namespace DiscUtils.Ntfs
         {
             foreach (FileRecord fr in _context.Mft.Records)
             {
-                File f = new File(_context, fr);
-                foreach (var attr in f.GetAttributes(AttributeType.ObjectId))
+                if (fr.BaseFile.Value != 0)
                 {
-                    ObjectId objId = f.GetAttributeContent<ObjectId>(attr.Id);
-                    ObjectIdRecord objIdRec;
-                    if (!_context.ObjectIds.TryGetValue(objId.Id, out objIdRec))
+                    File f = new File(_context, fr);
+                    foreach (var stream in f.AllStreams)
                     {
-                        ReportError("ObjectId {0} for file {1} is not indexed", objId.Id, f.BestName);
-                    }
-                    else if(objIdRec.MftReference != f.MftReference)
-                    {
-                        ReportError("ObjectId {0} for file {1} points to {2}", objId.Id, f.BestName, objIdRec.MftReference);
+                        if (stream.AttributeType == AttributeType.ObjectId)
+                        {
+                            ObjectId objId = stream.GetContent<ObjectId>();
+                            ObjectIdRecord objIdRec;
+                            if (!_context.ObjectIds.TryGetValue(objId.Id, out objIdRec))
+                            {
+                                ReportError("ObjectId {0} for file {1} is not indexed", objId.Id, f.BestName);
+                            }
+                            else if (objIdRec.MftReference != f.MftReference)
+                            {
+                                ReportError("ObjectId {0} for file {1} points to {2}", objId.Id, f.BestName, objIdRec.MftReference);
+                            }
+                        }
                     }
                 }
             }
@@ -239,10 +245,15 @@ namespace DiscUtils.Ntfs
         {
             foreach (FileRecord fr in _context.Mft.Records)
             {
-                File f = new File(_context, fr);
-                foreach (var attr in f.AllAttributes)
+                if (fr.BaseFile.Value != 0)
                 {
-                    if (attr.Record.AttributeType == AttributeType.IndexRoot && attr.Record.Name == "$I30")
+                    continue;
+                }
+
+                File f = new File(_context, fr);
+                foreach (var stream in f.AllStreams)
+                {
+                    if (stream.AttributeType == AttributeType.IndexRoot && stream.Name == "$I30")
                     {
                         IndexView<FileNameRecord, FileReference> dir = new IndexView<FileNameRecord, FileReference>(f.GetIndex("$I30"));
                         foreach (var entry in dir.Entries)
@@ -256,7 +267,7 @@ namespace DiscUtils.Ntfs
                             }
 
                             File referencedFile = new File(_context, refFile);
-                            StandardInformation si = referencedFile.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                            StandardInformation si = referencedFile.GetStream(AttributeType.StandardInformation, null).GetContent<StandardInformation>();
                             if (si.CreationTime != entry.Key.CreationTime || si.MftChangedTime != entry.Key.MftChangedTime
                                 || si.ModificationTime != entry.Key.ModificationTime)
                             {
@@ -273,11 +284,11 @@ namespace DiscUtils.Ntfs
             foreach (FileRecord fr in _context.Mft.Records)
             {
                 File f = new File(_context, fr);
-                foreach (var attr in f.AllAttributes)
+                foreach (var stream in f.AllStreams)
                 {
-                    if (attr.Record.AttributeType == AttributeType.IndexRoot)
+                    if (stream.AttributeType == AttributeType.IndexRoot)
                     {
-                        SelfCheckIndex(f, attr.Name);
+                        SelfCheckIndex(f, stream.Name);
                     }
                 }
             }
@@ -287,18 +298,18 @@ namespace DiscUtils.Ntfs
         {
             ReportInfo("About to self-check index {0} in file {1} (MFT:{2})", name, file.BestName, file.IndexInMft);
 
-            IndexRoot root = file.GetAttributeContent<IndexRoot>(AttributeType.IndexRoot, name);
+            IndexRoot root = file.GetStream(AttributeType.IndexRoot, name).GetContent<IndexRoot>();
 
             byte[] rootBuffer;
-            using (Stream s = file.OpenAttribute(AttributeType.IndexRoot, name, FileAccess.Read))
+            using (Stream s = file.OpenStream(AttributeType.IndexRoot, name, FileAccess.Read))
             {
                 rootBuffer = Utilities.ReadFully(s, (int)s.Length);
             }
 
             Bitmap indexBitmap = null;
-            if (file.GetAttribute(AttributeType.Bitmap, name) != null)
+            if (file.GetStream(AttributeType.Bitmap, name) != null)
             {
-                indexBitmap = new Bitmap(file.OpenAttribute(AttributeType.Bitmap, name, FileAccess.Read), long.MaxValue);
+                indexBitmap = new Bitmap(file.OpenStream(AttributeType.Bitmap, name, FileAccess.Read), long.MaxValue);
             }
 
             if (!SelfCheckIndexNode(rootBuffer, IndexRoot.HeaderOffset, indexBitmap, root, file.BestName, name))
@@ -366,7 +377,7 @@ namespace DiscUtils.Ntfs
             int bytesPerSector = _context.BiosParameterBlock.BytesPerSector;
 
             // Check out the MFT's clusters
-            foreach (var range in file.GetAttribute(AttributeType.Data).GetClusters())
+            foreach (var range in file.GetAttribute(AttributeType.Data, null).GetClusters())
             {
                 if (!VerifyClusterRange(range))
                 {
@@ -374,7 +385,7 @@ namespace DiscUtils.Ntfs
                     Abort();
                 }
             }
-            foreach (var range in file.GetAttribute(AttributeType.Bitmap).GetClusters())
+            foreach (var range in file.GetAttribute(AttributeType.Bitmap, null).GetClusters())
             {
                 if (!VerifyClusterRange(range))
                 {
@@ -384,8 +395,8 @@ namespace DiscUtils.Ntfs
             }
 
 
-            using (Stream mftStream = file.OpenAttribute(AttributeType.Data, FileAccess.Read))
-            using (Stream bitmapStream = file.OpenAttribute(AttributeType.Bitmap, FileAccess.Read))
+            using (Stream mftStream = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
+            using (Stream bitmapStream = file.OpenStream(AttributeType.Bitmap, null, FileAccess.Read))
             {
 
                 Bitmap bitmap = new Bitmap(bitmapStream, long.MaxValue);
@@ -431,7 +442,7 @@ namespace DiscUtils.Ntfs
                 if ((fr.Flags & FileRecordFlags.InUse) != 0)
                 {
                     File f = new File(_context, fr);
-                    foreach (var attr in f.AllAttributes)
+                    foreach (NtfsAttribute attr in f.AllAttributes)
                     {
                         string attrKey = fr.MasterFileTableIndex + ":" + attr.Id;
 
@@ -451,12 +462,6 @@ namespace DiscUtils.Ntfs
                                 }
                             }
                         }
-                    }
-
-                    StandardInformation si = f.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
-                    if ((si.FileAttributes & FileAttributeFlags.Directory) != 0)
-                    {
-                        ReportError("Directory attribute set in StandardInformation");
                     }
                 }
             }
@@ -485,6 +490,24 @@ namespace DiscUtils.Ntfs
                     {
                         ReportError("Attribute size is different to calculated size.  AttrId={0}", ar.AttributeId);
                         ok = false;
+                    }
+
+                    if (ar.IsNonResident)
+                    {
+                        NonResidentAttributeRecord nrr = (NonResidentAttributeRecord)ar;
+                        if (nrr.DataRuns.Count > 0)
+                        {
+                            long totalVcn = 0;
+                            foreach (var run in nrr.DataRuns)
+                            {
+                                totalVcn += run.RunLength;
+                            }
+                            if (totalVcn != nrr.LastVcn - nrr.StartVcn + 1)
+                            {
+                                ReportError("Declared VCNs doesn't match data runs.  AttrId={0}", ar.AttributeId);
+                                ok = false;
+                            }
+                        }
                     }
                 }
                 catch

@@ -31,8 +31,14 @@ namespace DiscUtils.Ntfs
         private bool _initialized;
         private bool _hasContent;
 
-        public StructuredNtfsAttribute(File file, AttributeRecord record)
-            : base(file, record)
+        public StructuredNtfsAttribute(File file, FileReference containingFile, AttributeRecord record)
+            : base(file, containingFile, record)
+        {
+            _structure = new T();
+        }
+
+        public StructuredNtfsAttribute(NtfsAttribute toCopy)
+            : base(toCopy)
         {
             _structure = new T();
         }
@@ -64,7 +70,7 @@ namespace DiscUtils.Ntfs
         {
             byte[] buffer = new byte[_structure.Size];
             _structure.WriteTo(buffer, 0);
-            using (Stream s = OpenRaw(FileAccess.Write))
+            using (Stream s = Open(FileAccess.Write))
             {
                 s.Write(buffer, 0, buffer.Length);
                 s.SetLength(buffer.Length);
@@ -90,9 +96,9 @@ namespace DiscUtils.Ntfs
         {
             if (!_initialized)
             {
-                using (Stream s = OpenRaw(FileAccess.Read))
+                using (Stream s = Open(FileAccess.Read))
                 {
-                        byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                        byte[] buffer = Utilities.ReadFully(s, (int)Length);
                         _structure.ReadFrom(buffer, 0);
                         _hasContent = (s.Length != 0);
                 }

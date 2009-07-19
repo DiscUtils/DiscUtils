@@ -34,7 +34,7 @@ namespace DiscUtils.Ntfs
             _attrDefs = new Dictionary<AttributeType, AttributeDefinitionRecord>();
 
             byte[] buffer = new byte[AttributeDefinitionRecord.Size];
-            using (Stream s = file.OpenAttribute(AttributeType.Data, FileAccess.Read))
+            using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             {
                 while(Utilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
                 {

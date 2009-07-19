@@ -104,6 +104,11 @@ namespace DiscUtils.Ntfs
             get { return _recordRealSize; }
         }
 
+        public FileReference BaseFile
+        {
+            get { return _baseFile; }
+        }
+
         public FileRecordFlags Flags
         {
             get { return _flags; }
@@ -328,7 +333,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == AttributeType.FileName)
                 {
-                    StructuredNtfsAttribute<FileNameRecord> fnAttr = new StructuredNtfsAttribute<FileNameRecord>(null, attr);
+                    StructuredNtfsAttribute<FileNameRecord> fnAttr = new StructuredNtfsAttribute<FileNameRecord>(null, new FileReference(0), attr);
                     return fnAttr.Content.FileName;
                 }
             }

@@ -186,21 +186,20 @@ namespace DiscUtils.Ntfs
 
 
                 File newFile = File.CreateNew(_context);
-                foreach (var attr in origFile.AllAttributes)
+                foreach (var origStream in origFile.AllStreams)
                 {
-                    NtfsAttribute newAttr = newFile.GetAttribute(attr.Record.AttributeType, attr.Name);
+                    NtfsStream newStream = newFile.GetStream(origStream.AttributeType, origStream.Name);
 
-                    switch (attr.Record.AttributeType)
+                    switch (origStream.AttributeType)
                     {
                         case AttributeType.Data:
-                            if (attr == null)
+                            if (newStream == null)
                             {
-                                ushort newAttrId = newFile.CreateAttribute(attr.Record.AttributeType, attr.Name);
-                                newAttr = newFile.GetAttribute(newAttrId);
+                                newStream = newFile.CreateStream(origStream.AttributeType, origStream.Name);
                             }
 
-                            using (SparseStream s = origFile.OpenAttribute(attr.Id, FileAccess.Read))
-                            using (SparseStream d = newFile.OpenAttribute(newAttr.Id, FileAccess.Write))
+                            using (SparseStream s = origStream.Open(FileAccess.Read))
+                            using (SparseStream d = newStream.Open(FileAccess.Write))
                             {
                                 byte[] buffer = new byte[64 * Sizes.OneKiB];
                                 int numRead;
@@ -214,10 +213,8 @@ namespace DiscUtils.Ntfs
                             break;
 
                         case AttributeType.StandardInformation:
-                            StandardInformation newSi = ((StructuredNtfsAttribute<StandardInformation>)attr).Content;
-                            StructuredNtfsAttribute<StandardInformation> newSiAttr = (StructuredNtfsAttribute<StandardInformation>)newAttr;
-                            newSiAttr.Content = newSi;
-                            newSiAttr.Save();
+                            StandardInformation newSi = origStream.GetContent<StandardInformation>();
+                            newStream.SetContent<StandardInformation>(newSi);
                             break;
                     }
                 }
@@ -653,13 +650,13 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     File file = GetFile(entry.Reference);
-                    NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
+                    NtfsStream ntfsStream = file.GetStream(AttributeType.Data, attributeName);
 
-                    if (attr == null)
+                    if (ntfsStream == null)
                     {
                         if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
                         {
-                            file.CreateAttribute(AttributeType.Data, attributeName);
+                            ntfsStream = file.CreateStream(AttributeType.Data, attributeName);
                         }
                         else
                         {
@@ -680,14 +677,14 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Opens an existing attribute.
+        /// Opens an existing file stream.
         /// </summary>
-        /// <param name="file">The file containing the attribute</param>
-        /// <param name="type">The type of the attribute</param>
-        /// <param name="name">The name of the attribute</param>
-        /// <param name="access">The desired access to the attribute</param>
-        /// <returns>A stream with read access to the attribute</returns>
-        public Stream OpenRawAttribute(string file, AttributeType type, string name, FileAccess access)
+        /// <param name="file">The file containing the stream</param>
+        /// <param name="type">The type of the stream</param>
+        /// <param name="name">The name of the stream</param>
+        /// <param name="access">The desired access to the stream</param>
+        /// <returns>A stream that can be used to access the file stream</returns>
+        public Stream OpenRawStream(string file, AttributeType type, string name, FileAccess access)
         {
             using (new NtfsTransaction())
             {
@@ -698,7 +695,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 File fileObj = GetFile(entry.Reference);
-                return fileObj.OpenAttribute(type, name, access);
+                return fileObj.OpenStream(type, name, access);
             }
         }
 
@@ -926,13 +923,13 @@ namespace DiscUtils.Ntfs
 
             File file = GetFile(dirEntry.Reference);
 
-            NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
-            if (attr == null)
+            NtfsStream stream = file.GetStream(AttributeType.Data, attributeName);
+            if (stream == null)
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "File does not contain '{0}' data attribute", attributeName), path);
             }
 
-            return attr.GetClusters();
+            return stream.GetClusters();
         }
 
         /// <summary>
@@ -960,28 +957,13 @@ namespace DiscUtils.Ntfs
 
             File file = GetFile(dirEntry.Reference);
 
-            NtfsAttribute attr = file.GetAttribute(AttributeType.Data, attributeName);
-            if (attr == null)
+            NtfsStream stream = file.GetStream(AttributeType.Data, attributeName);
+            if (stream == null)
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "File does not contain '{0}' data attribute", attributeName), path);
             }
 
-            if (attr.IsNonResident)
-            {
-                Range<long, long>[] clusters = attr.GetClusters();
-                List<StreamExtent> result = new List<StreamExtent>(clusters.Length);
-                foreach (var clusterRange in clusters)
-                {
-                    result.Add(new StreamExtent(clusterRange.Offset * ClusterSize, clusterRange.Count * ClusterSize));
-                }
-                return result.ToArray();
-            }
-            else
-            {
-                StreamExtent[] result = new StreamExtent[1];
-                result[0] = new StreamExtent(attr.OffsetToAbsolutePos(0), attr.Length);
-                return result;
-            }
+            return stream.GetAbsoluteExtents();
         }
 
         /// <summary>
@@ -1054,13 +1036,14 @@ namespace DiscUtils.Ntfs
                 {
                     File file = GetFile(dirEntry.Reference);
 
-                    NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
-                    if (legacyAttr != null)
+                    NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
+                    if (legacyStream != null)
                     {
-                        return ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr).Content.Descriptor;
+                        return legacyStream.GetContent<SecurityDescriptor>().Descriptor;
                     }
 
-                    StandardInformation si = file.GetAttributeContent<StandardInformation>(AttributeType.StandardInformation);
+                    NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+                    StandardInformation si = stream.GetContent<StandardInformation>();
                     return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
                 }
             }
@@ -1084,21 +1067,22 @@ namespace DiscUtils.Ntfs
                 {
                     File file = GetFile(dirEntry.Reference);
 
-                    NtfsAttribute legacyAttr = file.GetAttribute(AttributeType.SecurityDescriptor);
-                    if (legacyAttr != null)
+                    NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
+                    if (legacyStream != null)
                     {
-                        StructuredNtfsAttribute<SecurityDescriptor> sdAttr = ((StructuredNtfsAttribute<SecurityDescriptor>)legacyAttr);
-                        sdAttr.Content.Descriptor = securityDescriptor;
-                        sdAttr.Save();
+                        SecurityDescriptor sd = new SecurityDescriptor();
+                        sd.Descriptor = securityDescriptor;
+                        legacyStream.SetContent(sd);
                     }
                     else
                     {
                         uint id = _context.SecurityDescriptors.AddDescriptor(securityDescriptor);
 
                         // Update the standard information attribute - so it reflects the actual file state
-                        StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)file.GetAttribute(AttributeType.StandardInformation);
-                        saAttr.Content.SecurityId = id;
-                        saAttr.Save();
+                        NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+                        StandardInformation si = stream.GetContent<StandardInformation>();
+                        si.SecurityId = id;
+                        stream.SetContent(si);
 
                         // Update the directory entry used to open the file, so it's accurate
                         dirEntry.UpdateFrom(file);
@@ -1133,7 +1117,7 @@ namespace DiscUtils.Ntfs
 
             File file = _fileCache[fileReference.MftIndex];
 
-            if (file != null && file.MftReference.SequenceNumber != record.SequenceNumber)
+            if (file != null && file.MftReference.SequenceNumber != fileReference.SequenceNumber)
             {
                 file = null;
             }
@@ -1242,12 +1226,12 @@ namespace DiscUtils.Ntfs
                 File f = new File(_context, record);
                 f.Dump(writer, linePrefix);
 
-                foreach (var attr in f.AllAttributes)
+                foreach (var stream in f.AllStreams)
                 {
-                    if (attr.Record.AttributeType == AttributeType.IndexRoot)
+                    if (stream.AttributeType == AttributeType.IndexRoot)
                     {
-                        writer.WriteLine(linePrefix + "  INDEX (" + attr.Name + ")");
-                        f.GetIndex(attr.Name).Dump(writer, linePrefix + "    ");
+                        writer.WriteLine(linePrefix + "  INDEX (" + stream.Name + ")");
+                        f.GetIndex(stream.Name).Dump(writer, linePrefix + "    ");
                     }
                 }
             }
@@ -1371,9 +1355,10 @@ namespace DiscUtils.Ntfs
                 File file = GetFile(dirEntry.Reference);
 
                 // Update the standard information attribute - so it reflects the actual file state
-                StructuredNtfsAttribute<StandardInformation> saAttr = (StructuredNtfsAttribute<StandardInformation>)file.GetAttribute(AttributeType.StandardInformation);
-                modifier(saAttr.Content);
-                saAttr.Save();
+                NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+                StandardInformation si = stream.GetContent<StandardInformation>();
+                modifier(si);
+                stream.SetContent(si); 
 
                 // Update the directory entry used to open the file, so it's accurate
                 dirEntry.UpdateFrom(file);

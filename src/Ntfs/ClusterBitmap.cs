@@ -36,9 +36,8 @@ namespace DiscUtils.Ntfs
         public ClusterBitmap(File file)
         {
             _file = file;
-            NtfsAttribute attr = _file.GetAttribute(AttributeType.Data);
             _bitmap = new Bitmap(
-                attr.OpenRaw(FileAccess.ReadWrite),
+                _file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite),
                 Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64, file.Context.BiosParameterBlock.SectorsPerCluster));
         }
 

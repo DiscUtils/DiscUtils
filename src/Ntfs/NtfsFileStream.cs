@@ -22,8 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace DiscUtils.Ntfs
@@ -33,8 +31,7 @@ namespace DiscUtils.Ntfs
         private DirectoryEntry _entry;
 
         private File _file;
-        private ushort _attrId;
-        private SparseStream _attrStream;
+        private SparseStream _baseStream;
 
         private bool _isDirty;
 
@@ -43,8 +40,7 @@ namespace DiscUtils.Ntfs
             _entry = entry;
 
             _file = fileSystem.GetFile(entry.Reference);
-            _attrId = _file.GetAttribute(attrType, attrName).Id;
-            _attrStream = _file.OpenAttribute(_attrId, access);
+            _baseStream = _file.OpenStream(attrType, attrName, access);
         }
 
         public override void Close()
@@ -52,7 +48,7 @@ namespace DiscUtils.Ntfs
             using (new NtfsTransaction())
             {
                 base.Close();
-                _attrStream.Close();
+                _baseStream.Close();
 
                 UpdateMetadata();
             }
@@ -60,24 +56,24 @@ namespace DiscUtils.Ntfs
 
         public override bool CanRead
         {
-            get { return _attrStream.CanRead; }
+            get { return _baseStream.CanRead; }
         }
 
         public override bool CanSeek
         {
-            get { return _attrStream.CanSeek; }
+            get { return _baseStream.CanSeek; }
         }
 
         public override bool CanWrite
         {
-            get { return _attrStream.CanWrite; }
+            get { return _baseStream.CanWrite; }
         }
 
         public override void Flush()
         {
             using (new NtfsTransaction())
             {
-                _attrStream.Flush();
+                _baseStream.Flush();
 
                 UpdateMetadata();
             }
@@ -85,20 +81,20 @@ namespace DiscUtils.Ntfs
 
         public override long Length
         {
-            get { return _attrStream.Length; }
+            get { return _baseStream.Length; }
         }
 
         public override long Position
         {
             get
             {
-                return _attrStream.Position;
+                return _baseStream.Position;
             }
             set
             {
                 using (new NtfsTransaction())
                 {
-                    _attrStream.Position = value;
+                    _baseStream.Position = value;
                 }
             }
         }
@@ -107,7 +103,7 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                return _attrStream.Read(buffer, offset, count);
+                return _baseStream.Read(buffer, offset, count);
             }
         }
 
@@ -115,7 +111,7 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                return _attrStream.Seek(offset, origin);
+                return _baseStream.Seek(offset, origin);
             }
         }
 
@@ -126,7 +122,7 @@ namespace DiscUtils.Ntfs
                 if (value != Length)
                 {
                     _isDirty = true;
-                    _attrStream.SetLength(value);
+                    _baseStream.SetLength(value);
                 }
             }
         }
@@ -136,13 +132,13 @@ namespace DiscUtils.Ntfs
             using (new NtfsTransaction())
             {
                 _isDirty = true;
-                _attrStream.Write(buffer, offset, count);
+                _baseStream.Write(buffer, offset, count);
             }
         }
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { return _attrStream.Extents; }
+            get { return _baseStream.Extents; }
         }
 
         private void UpdateMetadata()

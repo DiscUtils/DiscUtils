@@ -97,8 +97,8 @@ namespace DiscUtils.Ntfs
             newNameRecord.FileName = name;
             newNameRecord.ParentDirectory = MftReference;
 
-            ushort newNameAttrId = file.CreateAttribute(AttributeType.FileName);
-            file.SetAttributeContent(newNameAttrId, newNameRecord);
+            NtfsStream nameStream = file.CreateStream(AttributeType.FileName, null);
+            nameStream.SetContent(newNameRecord);
 
             file.HardLinkCount++;
             file.UpdateRecordInMft();
@@ -119,11 +119,12 @@ namespace DiscUtils.Ntfs
 
             Index.Remove(dirEntry.Details);
 
-            foreach (StructuredNtfsAttribute<FileNameRecord> fnrAttr in file.GetAttributes(AttributeType.FileName))
+            foreach(NtfsStream stream in file.GetStreams(AttributeType.FileName, null))
             {
-                if (nameRecord.Equals(fnrAttr.Content))
+                FileNameRecord streamName = stream.GetContent<FileNameRecord>();
+                if (nameRecord == streamName)
                 {
-                    file.RemoveAttribute(fnrAttr.Id);
+                    file.RemoveStream(stream);
                 }
             }
 
@@ -140,14 +141,14 @@ namespace DiscUtils.Ntfs
 
             Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
 
-            ushort attrId = dir.CreateAttribute(AttributeType.StandardInformation);
+            NtfsStream stream = dir.CreateStream(AttributeType.StandardInformation, null);
             StandardInformation si = new StandardInformation();
             si.CreationTime = now;
             si.ModificationTime = now;
             si.MftChangedTime = now;
             si.LastAccessTime = now;
             si.FileAttributes = FileAttributeFlags.Archive;
-            dir.SetAttributeContent(attrId, si);
+            stream.SetContent(si);
 
             // Create the index root attribute by instantiating a new index
             dir.CreateIndex("$I30", AttributeType.FileName, AttributeCollationRule.Filename);
@@ -182,7 +183,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                if (_index == null && GetAttribute(AttributeType.IndexRoot, "$I30") != null)
+                if (_index == null && StreamExists(AttributeType.IndexRoot, "$I30"))
                 {
                     _index = new IndexView<FileNameRecord, FileReference>(GetIndex("$I30"));
                 }

@@ -48,10 +48,10 @@ namespace DiscUtils.Ntfs
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            CreationTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, 0x00));
-            ModificationTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, 0x08));
-            MftChangedTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, 0x10));
-            LastAccessTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, 0x18));
+            CreationTime = ReadDateTime(buffer, 0x00);
+            ModificationTime = ReadDateTime(buffer, 0x08);
+            MftChangedTime = ReadDateTime(buffer, 0x10);
+            LastAccessTime = ReadDateTime(buffer, 0x18);
             FileAttributes = (FileAttributeFlags)Utilities.ToUInt32LittleEndian(buffer, 0x20);
             MaxVersions = Utilities.ToUInt32LittleEndian(buffer, 0x24);
             Version = Utilities.ToUInt32LittleEndian(buffer, 0x28);
@@ -67,6 +67,18 @@ namespace DiscUtils.Ntfs
             else
             {
                 _haveExtraFields = false;
+            }
+        }
+
+        private static DateTime ReadDateTime(byte[] buffer, int offset)
+        {
+            try
+            {
+                return DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset));
+            }
+            catch (ArgumentException)
+            {
+                return DateTime.MinValue;
             }
         }
 

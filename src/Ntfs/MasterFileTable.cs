@@ -36,7 +36,6 @@ namespace DiscUtils.Ntfs
     internal class MasterFileTable : IDiagnosticTraceable
     {
         private File _self;
-        private File _mirror;
         private Bitmap _bitmap;
         private Stream _records;
 
@@ -125,8 +124,11 @@ namespace DiscUtils.Ntfs
         {
             _self = file;
 
-            _bitmap = new Bitmap(_self.GetAttribute(AttributeType.Bitmap).OpenRaw(FileAccess.ReadWrite), long.MaxValue);
-            _records = _self.GetAttribute(AttributeType.Data).OpenRaw(FileAccess.ReadWrite);
+            NtfsStream bitmapStream = _self.GetStream(AttributeType.Bitmap, null);
+            _bitmap = new Bitmap(bitmapStream.Open(FileAccess.ReadWrite), long.MaxValue);
+
+            NtfsStream recordsStream = _self.GetStream(AttributeType.Data, null);
+            _records = recordsStream.Open(FileAccess.ReadWrite);
 
             _recordLength = _self.Context.BiosParameterBlock.MftRecordSize;
             _bytesPerSector = _self.Context.BiosParameterBlock.BytesPerSector;
@@ -137,23 +139,11 @@ namespace DiscUtils.Ntfs
             get { return _recordLength; }
         }
 
-        private File Mirror
-        {
-            get
-            {
-                if (_mirror == null)
-                {
-                    _mirror = _self.Context.GetFileByIndex(MftMirrorIndex);
-                }
-                return _mirror;
-            }
-        }
-
         public IEnumerable<FileRecord> Records
         {
             get
             {
-                using (Stream mftStream = _self.OpenAttribute(AttributeType.Data, FileAccess.Read))
+                using (Stream mftStream = _self.OpenStream(AttributeType.Data, null, FileAccess.Read))
                 {
                     while (mftStream.Position < mftStream.Length)
                     {
@@ -271,7 +261,7 @@ namespace DiscUtils.Ntfs
             // extend or otherwise modify any meta-data, just the content of the Data stream.
             if (record.MasterFileTableIndex < 4)
             {
-                using (Stream s = Mirror.GetAttribute(AttributeType.Data).OpenRaw(FileAccess.ReadWrite))
+                using (Stream s = _self.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
                 {
                     s.Position = record.MasterFileTableIndex * _recordLength;
                     s.Write(buffer, 0, _recordLength);
@@ -299,16 +289,21 @@ namespace DiscUtils.Ntfs
 
             foreach (FileRecord fr in Records)
             {
+                if (fr.BaseFile.Value != 0)
+                {
+                    continue;
+                }
+
                 File f = new File(_self.Context, fr);
 
-                foreach (var attr in f.AllAttributes)
+                foreach (var stream in f.AllStreams)
                 {
                     string fileId;
 
-                    if (attr.Record.AttributeType == AttributeType.Data && !string.IsNullOrEmpty(attr.Name))
+                    if (stream.AttributeType == AttributeType.Data && !string.IsNullOrEmpty(stream.Name))
                     {
-                        fileId = f.IndexInMft.ToString(CultureInfo.InvariantCulture) + ":" + attr.Name;
-                        fileToPaths[fileId] = Utilities.Map(f.Names, n => n + ":" + attr.Name);
+                        fileId = f.IndexInMft.ToString(CultureInfo.InvariantCulture) + ":" + stream.Name;
+                        fileToPaths[fileId] = Utilities.Map(f.Names, n => n + ":" + stream.Name);
                     }
                     else
                     {
@@ -331,12 +326,12 @@ namespace DiscUtils.Ntfs
                         roles |= ClusterRoles.DataFile;
                     }
 
-                    if (attr.Record.AttributeType != AttributeType.Data)
+                    if (stream.AttributeType != AttributeType.Data)
                     {
                         roles |= ClusterRoles.Metadata;
                     }
 
-                    foreach (var range in attr.GetClusters())
+                    foreach (var range in stream.GetClusters())
                     {
                         for (long cluster = range.Offset; cluster < range.Offset + range.Count; ++cluster)
                         {
