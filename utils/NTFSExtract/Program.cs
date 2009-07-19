@@ -93,7 +93,7 @@ namespace NTFSExtract
                 {
                     using (NtfsFileSystem fs = new NtfsFileSystem(partitionStream))
                     {
-                        using (Stream source = fs.OpenRawAttribute(_inFilePath.Value, type, _attributeName.Value, FileAccess.Read))
+                        using (Stream source = fs.OpenRawStream(_inFilePath.Value, type, _attributeName.Value, FileAccess.Read))
                         {
                             using (FileStream outFile = new FileStream(_outFilePath.Value, FileMode.Create, FileAccess.ReadWrite))
                             {
