@@ -144,7 +144,7 @@ namespace DiscUtils.Vmdk
                 case "lsilogic":
                     return DiskAdapterType.LsiLogicScsi;
                 case "legacyESX":
-                    return DiskAdapterType.LegacyESX;
+                    return DiskAdapterType.LegacyEsx;
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
             }
@@ -160,7 +160,7 @@ namespace DiscUtils.Vmdk
                     return "buslogic";
                 case DiskAdapterType.LsiLogicScsi:
                     return "lsilogic";
-                case DiskAdapterType.LegacyESX:
+                case DiskAdapterType.LegacyEsx:
                     return "legacyESX";
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");

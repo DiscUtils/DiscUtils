@@ -55,6 +55,6 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Legacy ESX controller.
         /// </summary>
-        LegacyESX = 4
+        LegacyEsx = 4
     }
 }
