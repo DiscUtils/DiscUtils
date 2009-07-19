@@ -106,7 +106,7 @@ namespace DiscUtils.Vmdk
             LoadDescriptor(stream);
 
             bool createTypeIsSparse =
-                _descriptor.CreateType != DiskCreateType.MonolithicSparse
+                _descriptor.CreateType == DiskCreateType.MonolithicSparse
                 || _descriptor.CreateType == DiskCreateType.StreamOptimized;
 
             if (!createTypeIsSparse || _descriptor.Extents.Count != 1
@@ -132,7 +132,14 @@ namespace DiscUtils.Vmdk
             LoadDescriptor(stream);
             _extentLocator = extentLocator;
 
-            if (ownsStream == Ownership.Dispose)
+            if ((_descriptor.CreateType == DiskCreateType.MonolithicSparse
+                || _descriptor.CreateType == DiskCreateType.StreamOptimized)
+                && _descriptor.Extents.Count == 1)
+            {
+                _monolithicStream = stream;
+                _ownsMonolithicStream = ownsStream;
+            }
+            else if (ownsStream == Ownership.Dispose)
             {
                 stream.Dispose();
             }
