@@ -392,6 +392,11 @@ namespace DiscUtils.Ntfs
                 keyValue = new ObjectIds.IndexKey();
                 dataValue = new ObjectIdRecord();
             }
+            else if (fileName == "$Reparse" && indexName == "$R")
+            {
+                keyValue = new ReparsePoints.Key();
+                dataValue = new ReparsePoints.Data();
+            }
             else if (fileName == "$Secure")
             {
                 if (indexName == "$SII")

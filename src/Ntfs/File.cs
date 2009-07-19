@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 
 namespace DiscUtils.Ntfs
 {
@@ -669,7 +670,9 @@ namespace DiscUtils.Ntfs
                     FileNameRecord fnr = stream.GetContent<FileNameRecord>();
                     if (fnr.Equals(fileName))
                     {
-                        stream.SetContent(fileName);
+                        fnr = new FileNameRecord(fileName);
+                        fnr.Flags &= ~FileAttributeFlags.ReparsePoint;
+                        stream.SetContent(fnr);
                     }
                 }
             }
@@ -1009,10 +1012,18 @@ namespace DiscUtils.Ntfs
                 if (_openByName)
                 {
                     newStream = _file.InnerOpenStream(_attrType, _attrName, _access);
+                    if (newStream == null)
+                    {
+                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "No such attribute {0}", (_attrName ?? "<unnamed>") + ":" + _attrType));
+                    }
                 }
                 else
                 {
                     newStream = _file.InnerOpenAttribute(_attrId, _access);
+                    if (newStream == null)
+                    {
+                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "No such attribute {0}", _attrId));
+                    }
                 }
 
                 _length = newStream.Length;

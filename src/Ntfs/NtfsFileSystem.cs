@@ -83,6 +83,7 @@ namespace DiscUtils.Ntfs
             _context.UpperCase = new UpperCase(GetFile(MasterFileTable.UpCaseIndex));
             _context.SecurityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
             _context.ObjectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
+            _context.ReparsePoints = new ReparsePoints(GetFile(GetDirectoryEntry(@"$Extend\$Reparse").Reference));
 
 #if false
             byte[] buffer = new byte[1024];
@@ -1094,6 +1095,159 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        /// <summary>
+        /// Sets the reparse point data on a file or directory.
+        /// </summary>
+        /// <param name="path">The file to set the reparse point on.</param>
+        /// <param name="reparsePoint">The new reparse point.</param>
+        public void SetReparsePoint(string path, ReparsePoint reparsePoint)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    File file = GetFile(dirEntry.Reference);
+
+                    NtfsStream stream = file.GetStream(AttributeType.ReparsePoint, null);
+                    if (stream != null)
+                    {
+                        // If there's an existing reparse point, unhook it.
+                        using (Stream contentStream = stream.Open(FileAccess.Read))
+                        {
+                            byte[] oldRpBuffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                            ReparsePointRecord rp = new ReparsePointRecord();
+                            rp.ReadFrom(oldRpBuffer, 0);
+                            _context.ReparsePoints.Remove(rp.Tag, dirEntry.Reference);
+                        }
+                    }
+                    else
+                    {
+                        stream = file.CreateStream(AttributeType.ReparsePoint, null);
+                    }
+
+                    // Set the new content
+                    ReparsePointRecord newRp = new ReparsePointRecord();
+                    newRp.Tag = (uint)reparsePoint.Tag;
+                    newRp.Content = reparsePoint.Content;
+
+                    byte[] contentBuffer = new byte[newRp.Size];
+                    newRp.WriteTo(contentBuffer, 0);
+                    using (Stream contentStream = stream.Open(FileAccess.ReadWrite))
+                    {
+                        contentStream.Write(contentBuffer, 0, contentBuffer.Length);
+                        contentStream.SetLength(contentBuffer.Length);
+                    }
+
+
+                    // Update the standard information attribute - so it reflects the actual file state
+                    NtfsStream stdInfoStream = file.GetStream(AttributeType.StandardInformation, null);
+                    StandardInformation si = stdInfoStream.GetContent<StandardInformation>();
+                    si.FileAttributes = si.FileAttributes | FileAttributeFlags.ReparsePoint;
+                    stdInfoStream.SetContent(si);
+
+                    // Update the directory entry used to open the file, so it's accurate
+                    dirEntry.Details.EASizeOrReparsePointTag = newRp.Tag;
+                    dirEntry.UpdateFrom(file);
+
+                    // Write attribute changes back to the Master File Table
+                    file.UpdateRecordInMft();
+
+                    // Add the reparse point to the index
+                    _context.ReparsePoints.Add(newRp.Tag, dirEntry.Reference);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the reparse point data associated with a file or directory.
+        /// </summary>
+        /// <param name="path">The file to query</param>
+        /// <returns>The reparse point information</returns>
+        public ReparsePoint GetReparsePoint(string path)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    File file = GetFile(dirEntry.Reference);
+
+                    NtfsStream stream = file.GetStream(AttributeType.ReparsePoint, null);
+                    if (stream != null)
+                    {
+                        ReparsePointRecord rp = new ReparsePointRecord();
+
+                        using (Stream contentStream = stream.Open(FileAccess.Read))
+                        {
+                            byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                            rp.ReadFrom(buffer, 0);
+                            return new ReparsePoint((int)rp.Tag, rp.Content);
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Removes a reparse point from a file or directory, without deleting the file or directory.
+        /// </summary>
+        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
+        public void RemoveReparsePoint(string path)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    File file = GetFile(dirEntry.Reference);
+
+                    NtfsStream stream = file.GetStream(AttributeType.ReparsePoint, null);
+                    if (stream != null)
+                    {
+                        ReparsePointRecord rp = new ReparsePointRecord();
+
+                        using (Stream contentStream = stream.Open(FileAccess.Read))
+                        {
+                            byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                            rp.ReadFrom(buffer, 0);
+                        }
+                        
+                        file.RemoveStream(stream);
+
+                        // Update the standard information attribute - so it reflects the actual file state
+                        NtfsStream stdInfoStream = file.GetStream(AttributeType.StandardInformation, null);
+                        StandardInformation si = stdInfoStream.GetContent<StandardInformation>();
+                        si.FileAttributes = si.FileAttributes & ~FileAttributeFlags.ReparsePoint;
+                        stdInfoStream.SetContent(si);
+
+                        // Update the directory entry used to open the file, so it's accurate
+                        dirEntry.UpdateFrom(file);
+
+                        // Write attribute changes back to the Master File Table
+                        file.UpdateRecordInMft();
+
+                        // Remove the reparse point from the index
+                        _context.ReparsePoints.Remove(rp.Tag, dirEntry.Reference);
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region Internal File access methods (exposed via NtfsContext)
@@ -1214,6 +1368,9 @@ namespace DiscUtils.Ntfs
 
             writer.WriteLine(linePrefix);
             _context.ObjectIds.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            _context.ReparsePoints.Dump(writer, linePrefix);
 
             writer.WriteLine(linePrefix);
             GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, linePrefix);

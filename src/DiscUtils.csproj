@@ -184,6 +184,9 @@
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIdRecord.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
+    <Compile Include="Ntfs\ReparsePoint.cs" />
+    <Compile Include="Ntfs\ReparsePointRecord.cs" />
+    <Compile Include="Ntfs\ReparsePoints.cs" />
     <Compile Include="Ntfs\ResidentAttributeStream.cs" />
     <Compile Include="Ntfs\SecurityDescriptor.cs" />
     <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />

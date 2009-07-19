@@ -2499,19 +2499,23 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="SecurityDescriptor">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-04-18 23:06:11Z">
-            <Issue>
-             <Item>'SecurityDescriptor'</Item>
-            </Issue>
-            <Notes>
-             <User Name="Kenneth">
-              <Note Id="47" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
+         <Type Name="ReparsePoint">
+          <Members>
+           <Member Name="#Content">
+            <Messages>
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Status="Excluded" Created="2009-07-19 20:21:52Z">
+              <Issue>
+               <Item>'ReparsePoint.Content'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="76" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
          </Type>
          <Type Name="VolumeInformation">
           <Messages>
@@ -3295,6 +3299,25 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="DiskAdapterType">
+          <Members>
+           <Member Name="#LegacyEsx">
+            <Messages>
+             <Message Id="Esx" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-07-19 20:10:29Z">
+              <Issue Name="Member">
+               <Item>Esx</Item>
+               <Item>'DiskAdapterType.LegacyEsx'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="47" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="DiskCreateType">
           <Members>
            <Member Name="#TwoGbMaxExtentFlat">
@@ -3570,7 +3593,7 @@
     <Note Id="44" Modified="2009-03-22 22:17:35Z">Deliberately not signing assemblies.</Note>
     <Note Id="45" Modified="2009-03-22 22:17:50Z">DiscUtils is established project name</Note>
     <Note Id="46" Modified="2009-04-16 21:57:27Z">Deliberately using wide catch - this is diagnostic code that should not cause an exception should it fail.</Note>
-    <Note Id="47" Modified="2009-04-18 23:12:33Z">SecurityDescriptor is instantiated via template arguments</Note>
+    <Note Id="47" Modified="2009-07-19 20:12:44Z">ESX is well-known name.</Note>
     <Note Id="48" Modified="2009-04-18 23:12:53Z">VolumeInformation is instantiated via template arguments</Note>
     <Note Id="49" Modified="2009-05-09 08:55:57Z">Iscsi matches normal naming convention for namespaces</Note>
     <Note Id="50" Modified="2009-05-23 13:44:01Z">Names follow normal conventions</Note>
@@ -3599,6 +3622,7 @@
     <Note Id="73" Modified="2009-06-20 10:33:49Z">Utils is part of project name</Note>
     <Note Id="74" Modified="2009-06-20 10:34:03Z">Following convention of separating file formats by namespace</Note>
     <Note Id="75" Modified="2009-06-20 10:34:23Z">Currently unused fields</Note>
+    <Note Id="76" Modified="2009-07-19 20:23:00Z">Simple byte array accessors.</Note>
    </User>
   </Notes>
   <Rules>
@@ -3645,6 +3669,9 @@
    </Rule>
    <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
     <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
+   </Rule>
+   <Rule TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819">
+    <Resolution Name="Default">Change {0} to return a collection or make it a method.</Resolution>
    </Rule>
    <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
     <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>

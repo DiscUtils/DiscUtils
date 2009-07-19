@@ -73,6 +73,11 @@ namespace DiscUtils.Ntfs
             get;
         }
 
+        ReparsePoints ReparsePoints
+        {
+            get;
+        }
+
         NtfsOptions Options
         {
             get;
@@ -124,6 +129,7 @@ namespace DiscUtils.Ntfs
         private ClusterBitmap _bitmap;
         private SecurityDescriptors _securityDescriptors;
         private ObjectIds _objectIds;
+        private ReparsePoints _reparsePoints;
         private NtfsOptions _options;
         private GetFileByIndexFn _getFileByIndexFn;
         private GetFileByRefFn _getFileByRefFn;
@@ -179,6 +185,12 @@ namespace DiscUtils.Ntfs
         {
             get { return _objectIds; }
             set { _objectIds = value; }
+        }
+
+        public ReparsePoints ReparsePoints
+        {
+            get { return _reparsePoints; }
+            set { _reparsePoints = value; }
         }
 
         public NtfsOptions Options

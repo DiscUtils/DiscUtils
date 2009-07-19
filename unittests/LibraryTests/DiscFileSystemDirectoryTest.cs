@@ -336,7 +336,7 @@ namespace DiscUtils
 
                 // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
                 yield return new TestCaseData(
-                    new DelayLoadFileSystem(QuickNtfsFileSystem)).SetName("NTFS");
+                    new DelayLoadFileSystem(NtfsFileSystem)).SetName("NTFS");
             }
         }
 
@@ -348,7 +348,7 @@ namespace DiscUtils
             return Fat.FatFileSystem.FormatFloppy(ms, Fat.FloppyDiskType.Extended, null);
         }
 
-        private DiscFileSystem DiagnosticNtfsFileSystem()
+        public DiscFileSystem DiagnosticNtfsFileSystem()
         {
             DiskImageFile parent = new DiskImageFile(
                 ntfsBaseStream,
@@ -368,7 +368,7 @@ namespace DiscUtils
             return discFs;
         }
 
-        private DiscFileSystem QuickNtfsFileSystem()
+        public Ntfs.NtfsFileSystem NtfsFileSystem()
         {
             DiskImageFile parent = new DiskImageFile(
                 ntfsBaseStream,

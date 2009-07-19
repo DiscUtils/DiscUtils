@@ -192,6 +192,8 @@ namespace DiscUtils.Ntfs
                     return new NtfsAttribute(file, recordFile, record);
                 case AttributeType.ObjectId:
                     return new StructuredNtfsAttribute<ObjectId>(file, recordFile, record);
+                case AttributeType.ReparsePoint:
+                    return new StructuredNtfsAttribute<ReparsePointRecord>(file, recordFile, record);
                 case AttributeType.AttributeList:
                     return new StructuredNtfsAttribute<AttributeList>(file, recordFile, record);
                 default:
@@ -270,6 +272,8 @@ namespace DiscUtils.Ntfs
                         return "INDEX ALLOCATION";
                     case AttributeType.ObjectId:
                         return "OBJECT ID";
+                    case AttributeType.ReparsePoint:
+                        return "REPARSE POINT";
                     case AttributeType.AttributeList:
                         return "ATTRIBUTE LIST";
                     default:
