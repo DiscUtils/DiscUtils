@@ -42,5 +42,25 @@ namespace DiscUtils
         /// <param name="path">The file or directory to change.</param>
         /// <param name="securityDescriptor">The new security descriptor.</param>
         void SetSecurity(string path, RawSecurityDescriptor securityDescriptor);
+
+        /// <summary>
+        /// Gets the reparse point data associated with a file or directory.
+        /// </summary>
+        /// <param name="path">The file to query</param>
+        /// <returns>The reparse point information</returns>
+        ReparsePoint GetReparsePoint(string path);
+
+        /// <summary>
+        /// Sets the reparse point data on a file or directory.
+        /// </summary>
+        /// <param name="path">The file to set the reparse point on.</param>
+        /// <param name="reparsePoint">The new reparse point.</param>
+        void SetReparsePoint(string path, ReparsePoint reparsePoint);
+
+        /// <summary>
+        /// Removes a reparse point from a file or directory, without deleting the file or directory.
+        /// </summary>
+        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
+        void RemoveReparsePoint(string path);
     }
 }

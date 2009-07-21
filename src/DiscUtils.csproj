@@ -184,7 +184,6 @@
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIdRecord.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
-    <Compile Include="Ntfs\ReparsePoint.cs" />
     <Compile Include="Ntfs\ReparsePointRecord.cs" />
     <Compile Include="Ntfs\ReparsePoints.cs" />
     <Compile Include="Ntfs\ResidentAttributeStream.cs" />
@@ -223,6 +222,7 @@
     <Compile Include="Registry\RegistryHive.cs" />
     <Compile Include="Registry\RegistryKey.cs" />
     <Compile Include="Registry\RegistryValue.cs" />
+    <Compile Include="ReparsePoint.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

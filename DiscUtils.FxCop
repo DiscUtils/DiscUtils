@@ -575,6 +575,24 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="ReparsePoint">
+          <Members>
+           <Member Name="#Content">
+            <Messages>
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Status="Excluded" Created="2009-07-21 06:24:11Z">
+              <Issue>
+               <Item>'ReparsePoint.Content'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="77" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="StreamExtent">
           <Members>
            <Member Name="#op_Equality(DiscUtils.StreamExtent,DiscUtils.StreamExtent)">
@@ -2499,24 +2517,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="ReparsePoint">
-          <Members>
-           <Member Name="#Content">
-            <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Status="Excluded" Created="2009-07-19 20:21:52Z">
-              <Issue>
-               <Item>'ReparsePoint.Content'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="76" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="VolumeInformation">
           <Messages>
            <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-04-18 23:06:11Z">
@@ -3622,7 +3622,7 @@
     <Note Id="73" Modified="2009-06-20 10:33:49Z">Utils is part of project name</Note>
     <Note Id="74" Modified="2009-06-20 10:34:03Z">Following convention of separating file formats by namespace</Note>
     <Note Id="75" Modified="2009-06-20 10:34:23Z">Currently unused fields</Note>
-    <Note Id="76" Modified="2009-07-19 20:23:00Z">Simple byte array accessors.</Note>
+    <Note Id="77" Modified="2009-07-21 06:24:41Z">Returning low-cost byte array.</Note>
    </User>
   </Notes>
   <Rules>

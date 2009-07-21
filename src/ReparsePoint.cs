@@ -21,7 +21,7 @@
 //
 
 
-namespace DiscUtils.Ntfs
+namespace DiscUtils
 {
     /// <summary>
     /// Represents a Reparse Point, which can be associated with a file or directory.

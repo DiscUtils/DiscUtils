@@ -471,6 +471,48 @@ namespace DiscUtils.Wim
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Gets the reparse point data associated with a file or directory.
+        /// </summary>
+        /// <param name="path">The file to query</param>
+        /// <returns>The reparse point information</returns>
+        public ReparsePoint GetReparsePoint(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+
+            ShortResourceHeader hdr = _file.LocateResource(dirEntry.Hash);
+            if (hdr == null)
+            {
+                throw new IOException("No reparse point");
+            }
+
+            using (Stream s = _file.OpenResourceStream(hdr))
+            {
+                byte[] buffer = new byte[s.Length];
+                s.Read(buffer, 0, buffer.Length);
+                return new ReparsePoint((int)dirEntry.ReparseTag, buffer);
+            }
+        }
+
+        /// <summary>
+        /// Sets the reparse point data on a file or directory.
+        /// </summary>
+        /// <param name="path">The file to set the reparse point on.</param>
+        /// <param name="reparsePoint">The new reparse point.</param>
+        public void SetReparsePoint(string path, ReparsePoint reparsePoint)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Removes a reparse point from a file or directory, without deleting the file or directory.
+        /// </summary>
+        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
+        public void RemoveReparsePoint(string path)
+        {
+            throw new NotSupportedException();
+        }
+
         #endregion
     }
 }
