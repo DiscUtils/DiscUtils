@@ -205,7 +205,7 @@ namespace DiscUtils.Vmdk
             do
             {
                 int grainTable = (int)(_position / _gtCoverage);
-                int grainTableOffset = (int)(_position - (grainTable * _gtCoverage));
+                int grainTableOffset = (int)(_position - (((long)grainTable) * _gtCoverage));
                 numRead = 0;
 
                 if (!LoadGrainTable(grainTable))
@@ -408,7 +408,7 @@ namespace DiscUtils.Vmdk
                 newGrainTable = new uint[_header.NumGTEsPerGT];
             }
 
-            _fileStream.Position = _globalDirectory[index] * Sizes.Sector;
+            _fileStream.Position = ((long)_globalDirectory[index]) * Sizes.Sector;
             byte[] buffer = Utilities.ReadFully(_fileStream, (int)(_header.NumGTEsPerGT * 4));
 
             for (int i = 0; i < _header.NumGTEsPerGT; ++i)
