@@ -430,7 +430,7 @@ namespace DiscUtils.Registry
             get { throw new NotImplementedException(); }
         }
 
-        internal int Find(string name, int start)
+        internal IEnumerable<int> Find(string name, int start)
         {
             if (_hashType == "lh")
             {
@@ -438,12 +438,11 @@ namespace DiscUtils.Registry
             }
             else
             {
-                //return FindByPrefix(name, start);
-                throw new NotImplementedException("FindByPrefix");
+                return FindByPrefix(name, start);
             }
         }
 
-        private int FindByHash(string name, int start)
+        private IEnumerable<int> FindByHash(string name, int start)
         {
             uint hash = 0;
             for (int i = 0; i < name.Length; ++i)
@@ -456,11 +455,36 @@ namespace DiscUtils.Registry
             {
                 if (_nameHashes[i] == hash)
                 {
-                    return _subKeyIndexes[i];
+                    yield return _subKeyIndexes[i];
                 }
             }
+        }
 
-            return -1;
+        private IEnumerable<int> FindByPrefix(string name, int start)
+        {
+            int compChars = Math.Min(name.Length, 4);
+            string compStr = name.Substring(0, compChars).ToUpperInvariant() + "\0\0\0\0";
+
+            for (int i = start; i < _nameHashes.Length; ++i)
+            {
+                bool match = true;
+                uint hash = _nameHashes[i];
+
+                for (int j = 0; j < 4; ++j)
+                {
+                    char ch = (char)((hash >> (j * 8)) & 0xFF);
+                    if (char.ToUpperInvariant(ch) != compStr[j])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    yield return _subKeyIndexes[i];
+                }
+            }
         }
     }
 

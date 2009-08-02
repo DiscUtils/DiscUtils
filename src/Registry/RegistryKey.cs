@@ -348,32 +348,26 @@ namespace DiscUtils.Registry
                     foreach (int listIndex in indirectList.Lists)
                     {
                         SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                        int keyIndex = hashList.Find(name, 0);
-                        while (keyIndex >= 0)
+                        foreach(int keyIndex in hashList.Find(name, 0))
                         {
                             KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(keyIndex);
                             if (cell.Name.ToUpperInvariant() == name.ToUpperInvariant())
                             {
                                 return cell;
                             }
-
-                            keyIndex = hashList.Find(name, keyIndex);
                         }
                     }
                 }
                 else
                 {
                     SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                    int keyIndex = hashList.Find(name, 0);
-                    while (keyIndex >= 0)
+                    foreach (int keyIndex in hashList.Find(name, 0))
                     {
                         KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(keyIndex);
                         if (cell.Name.ToUpperInvariant() == name.ToUpperInvariant())
                         {
                             return cell;
                         }
-
-                        keyIndex = hashList.Find(name, keyIndex);
                     }
                 }
             }
