@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -70,20 +71,17 @@ namespace DiscUtils.Registry
         /// </summary>
         public RegistryKey Root
         {
-            get { return new RegistryKey(this, GetCell<KeyNodeCell>(_header.RootCell)); }
+            get { return new RegistryKey(this, _header.RootCell, GetCell<KeyNodeCell>(_header.RootCell)); }
         }
 
         internal K GetCell<K>(int index)
             where K : Cell
         {
-            BinHeader binHeader = FindBin(index);
+            Bin bin = GetBin(index);
 
-            if (binHeader != null)
+            if (bin != null)
             {
-                _fileStream.Position = BinStart + binHeader.FileOffset;
-                Bin bin = new Bin(_fileStream);
-
-                return (K)bin[index - binHeader.FileOffset];
+                return (K)bin[index - bin.Header.FileOffset];
             }
             else
             {
@@ -91,20 +89,62 @@ namespace DiscUtils.Registry
             }
         }
 
+        internal void FreeCell(int index)
+        {
+            Bin bin = GetBin(index);
+
+            if (bin != null)
+            {
+                bin.FreeCell(index - bin.Header.FileOffset);
+            }
+        }
+
+        internal int UpdateCell(int index, Cell cell)
+        {
+            Bin bin = GetBin(index);
+
+            if (bin != null)
+            {
+                if (bin.UpdateCell(index - bin.Header.FileOffset, cell))
+                {
+                    return index;
+                }
+                else
+                {
+                    throw new NotImplementedException("Migrating cell to new location");
+                }
+            }
+            else
+            {
+                throw new IndexOutOfRangeException("No bin found containing index");
+            }
+        }
+
         internal byte[] RawCellData(int index, int maxBytes)
         {
-            BinHeader binHeader = FindBin(index);
+            Bin bin = GetBin(index);
 
-            if (binHeader != null)
+            if (bin != null)
             {
-                _fileStream.Position = BinStart + binHeader.FileOffset;
-                Bin bin = new Bin(_fileStream);
-
-                return bin.RawCellData(index - binHeader.FileOffset, maxBytes);
+                return bin.RawCellData(index - bin.Header.FileOffset, maxBytes);
             }
             else
             {
                 return null;
+            }
+        }
+
+        internal void WriteRawCellData(int index, byte[] data, int offset, int count)
+        {
+            Bin bin = GetBin(index);
+
+            if (bin != null)
+            {
+                bin.WriteRawCellData(index - bin.Header.FileOffset, data, offset, count);
+            }
+            else
+            {
+                throw new IndexOutOfRangeException("No bin found containing index");
             }
         }
 
@@ -114,6 +154,19 @@ namespace DiscUtils.Registry
             if (binsIdx >= 0)
             {
                 return _bins[binsIdx];
+            }
+
+            return null;
+        }
+
+        private Bin GetBin(int cellIndex)
+        {
+            BinHeader binHeader = FindBin(cellIndex);
+
+            if (binHeader != null)
+            {
+                _fileStream.Position = BinStart + binHeader.FileOffset;
+                return new Bin(_fileStream);
             }
 
             return null;

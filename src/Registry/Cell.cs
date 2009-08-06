@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Security.AccessControl;
 
 namespace DiscUtils.Registry
@@ -270,6 +271,23 @@ namespace DiscUtils.Registry
         private int _valueListIndex;
         private int _securityIndex;
         private int _classNameIndex;
+
+        /// <summary>
+        /// Number of bytes to represent largest subkey name in Unicode - no null terminator
+        /// </summary>
+        private int _maxSubKeyNameBytes;
+
+        /// <summary>
+        /// Number of bytes to represent largest value name in Unicode - no null terminator
+        /// </summary>
+        private int _maxValNameBytes;
+
+        /// <summary>
+        /// Number of bytes to represent largest value content (strings in Unicode, with null terminator - if stored)
+        /// </summary>
+        private int _maxValDataBytes;
+
+        private int _indexInParent;
         private int _classNameLength;
         private string _name;
 
@@ -301,6 +319,7 @@ namespace DiscUtils.Registry
         public int NumValues
         {
             get { return _numValues; }
+            set { _numValues = value; }
         }
 
         public int ValueListIndex
@@ -316,6 +335,11 @@ namespace DiscUtils.Registry
         public int ClassNameIndex
         {
             get { return _classNameIndex; }
+        }
+
+        public int IndexInParent
+        {
+            get { return _indexInParent; }
         }
 
         public int ClassNameLength
@@ -339,19 +363,49 @@ namespace DiscUtils.Registry
             _valueListIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x28);
             _securityIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x2C);
             _classNameIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x30);
+            _maxSubKeyNameBytes = Utilities.ToInt32LittleEndian(buffer, offset + 0x34);
+            _maxValNameBytes = Utilities.ToInt32LittleEndian(buffer, offset + 0x3C);
+            _maxValDataBytes = Utilities.ToInt32LittleEndian(buffer, offset + 0x40);
+            _indexInParent = Utilities.ToInt32LittleEndian(buffer, offset + 0x44);
             int nameLength = Utilities.ToInt16LittleEndian(buffer, offset + 0x48);
             _classNameLength = Utilities.ToInt16LittleEndian(buffer, offset + 0x4A);
             _name = Utilities.BytesToString(buffer, offset + 0x4C, nameLength);
+
+            //uint unknown0 = Utilities.ToUInt32LittleEndian(buffer, offset + 0x0C);
+
+            //// 
+            //uint unknown1 = Utilities.ToUInt32LittleEndian(buffer, offset + 0x18);
+
+            //uint unknown2 = Utilities.ToUInt32LittleEndian(buffer, offset + 0x20);
+            //uint unknown4 = Utilities.ToUInt32LittleEndian(buffer, offset + 0x38);
+
+            //if (unknown0 != 0 || unknown1 != 0 || unknown4 != 0 || unknown2 != 0xffffffff)
+            //{
+            //    throw new InvalidDataException("Interesting value");
+            //}
         }
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.StringToBytes("nk", buffer, offset, 2);
+            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x02);
+            Utilities.WriteBytesLittleEndian(_timestamp.ToFileTimeUtc(), buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(_parentIndex, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian(_numSubKeys, buffer, offset + 0x14);
+            Utilities.WriteBytesLittleEndian(_subKeysIndex, buffer, offset + 0x1C);
+            Utilities.WriteBytesLittleEndian(_numValues, buffer, offset + 0x24);
+            Utilities.WriteBytesLittleEndian(_valueListIndex, buffer, offset + 0x28);
+            Utilities.WriteBytesLittleEndian(_securityIndex, buffer, offset + 0x2C);
+            Utilities.WriteBytesLittleEndian(_classNameIndex, buffer, offset + 0x30);
+            Utilities.WriteBytesLittleEndian(_indexInParent, buffer, offset + 0x44);
+            Utilities.WriteBytesLittleEndian((ushort)_name.Length, buffer, offset + 0x48);
+            Utilities.WriteBytesLittleEndian(_classNameLength, buffer, offset + 0x4A);
+            Utilities.StringToBytes(_name, buffer, offset + 0x4C, _name.Length);
         }
 
         public override int Size
         {
-            get { throw new NotImplementedException(); }
+            get { return 0x4C + _name.Length; }
         }
 
         public override string ToString()

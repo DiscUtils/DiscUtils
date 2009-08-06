@@ -32,7 +32,9 @@ namespace DiscUtils
     /// </summary>
     /// <typeparam name="TOffset">The type of the offset element</typeparam>
     /// <typeparam name="TCount">The type of the size element</typeparam>
-    public class Range<TOffset, TCount>
+    public class Range<TOffset, TCount> : IEquatable<Range<TOffset, TCount>>
+        where TOffset : IEquatable<TOffset>
+        where TCount : IEquatable<TCount>
     {
         private TOffset _offset;
         private TCount _count;
@@ -72,5 +74,24 @@ namespace DiscUtils
         {
             return "[" + _offset + ":+" + _count + "]";
         }
+
+        #region IEquatable<Range<TOffset,TCount>> Members
+
+        /// <summary>
+        /// Compares this range to another.
+        /// </summary>
+        /// <param name="other">The range to compare</param>
+        /// <returns><c>true</c> if the ranges are equivalent, else <c>false</c>.</returns>
+        public bool Equals(Range<TOffset, TCount> other)
+        {
+            if(other == null)
+            {
+                return false;
+            }
+
+            return _offset.Equals(other.Offset) && _count.Equals(other._count);
+        }
+
+        #endregion
     }
 }

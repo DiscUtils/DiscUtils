@@ -32,6 +32,7 @@ namespace DiscUtils.Registry
 
         public int FileOffset;
         public int BinSize;
+        public DateTime Timestamp;
 
         #region IByteArraySerializable Members
 
@@ -45,6 +46,7 @@ namespace DiscUtils.Registry
 
             FileOffset = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
             BinSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x0014));
         }
 
         public void WriteTo(byte[] buffer, int offset)

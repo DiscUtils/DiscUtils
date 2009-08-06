@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -34,11 +33,13 @@ namespace DiscUtils.Registry
     public sealed class RegistryKey
     {
         private RegistryHive _hive;
+        private int _cellIndex;
         private KeyNodeCell _cell;
 
-        internal RegistryKey(RegistryHive hive, KeyNodeCell cell)
+        internal RegistryKey(RegistryHive hive, int cellIndex, KeyNodeCell cell)
         {
             _hive = hive;
+            _cellIndex = cellIndex;
             _cell = cell;
         }
 
@@ -117,6 +118,69 @@ namespace DiscUtils.Registry
         public object GetValue(string name, object defaultValue)
         {
             return GetValue(name) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Deletes a named value stored within this key.
+        /// </summary>
+        /// <param name="name">The name of the value to delete.</param>
+        public void DeleteValue(string name)
+        {
+            DeleteValue(name, true);
+        }
+
+        /// <summary>
+        /// Deletes a named value stored within this key.
+        /// </summary>
+        /// <param name="name">The name of the value to delete.</param>
+        /// <param name="throwOnMissingValue">Throws ArgumentException if <c>name</c> doesn't exist</param>
+        public void DeleteValue(string name, bool throwOnMissingValue)
+        {
+            bool foundValue = false;
+
+            if (_cell.NumValues != 0)
+            {
+                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+
+                int i = 0;
+                while (i < _cell.NumValues)
+                {
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    ValueCell valueCell = _hive.GetCell<ValueCell>(valueIndex);
+                    if (string.Compare(valueCell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        foundValue = true;
+                        _hive.FreeCell(valueIndex);
+                        _cell.NumValues--;
+                        _cellIndex = _hive.UpdateCell(_cellIndex, _cell);
+                        break;
+                    }
+
+                    ++i;
+                }
+
+                // Move following value's to fill gap
+                if (i < _cell.NumValues)
+                {
+                    while (i < _cell.NumValues)
+                    {
+                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, (i + 1) * 4);
+                        Utilities.WriteBytesLittleEndian(valueIndex, valueList, i * 4);
+
+                        ++i;
+                    }
+
+                    _hive.WriteRawCellData(_cell.ValueListIndex, valueList, 0, _cell.NumValues * 4);
+                }
+
+                // TODO: Update maxbytes for value name and value content if this was the largest value for either.
+                // Windows seems to repair this info, if not accurate, though.
+            }
+
+            if (throwOnMissingValue && !foundValue)
+            {
+                throw new ArgumentException("No such value: " + name, "name");
+            }
         }
 
         /// <summary>
@@ -200,7 +264,7 @@ namespace DiscUtils.Registry
             {
                 if ((_cell.Flags & RegistryKeyFlags.Root) == 0)
                 {
-                    return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
+                    return new RegistryKey(_hive, _cell.ParentIndex, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
                 }
                 else
                 {
@@ -246,18 +310,20 @@ namespace DiscUtils.Registry
             }
 
             string[] split = path.Split(new char[] { '\\' }, 2);
-            KeyNodeCell cell = SearchSubKeys(split[0]);
+            int cellIndex;
+            KeyNodeCell cell = SearchSubKeys(split[0], out cellIndex);
+
             if (cell == null)
             {
                 return null;
             }
             else if (split.Length == 1)
             {
-                return new RegistryKey(_hive, cell);
+                return new RegistryKey(_hive, cellIndex, cell);
             }
             else
             {
-                return new RegistryKey(_hive, cell).OpenSubKey(split[1]);
+                return new RegistryKey(_hive, cellIndex, cell).OpenSubKey(split[1]);
             }
         }
 
@@ -280,7 +346,7 @@ namespace DiscUtils.Registry
                             SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
                             foreach (int index in hashList.SubKeys)
                             {
-                                yield return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(index));
+                                yield return new RegistryKey(_hive, index, _hive.GetCell<KeyNodeCell>(index));
                             }
                         }
                     }
@@ -289,7 +355,7 @@ namespace DiscUtils.Registry
                         SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
                         foreach (int index in hashList.SubKeys)
                         {
-                            yield return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(index));
+                            yield return new RegistryKey(_hive, index, _hive.GetCell<KeyNodeCell>(index));
                         }
                     }
                 }
@@ -336,7 +402,7 @@ namespace DiscUtils.Registry
             return null;
         }
 
-        private KeyNodeCell SearchSubKeys(string name)
+        private KeyNodeCell SearchSubKeys(string name, out int index)
         {
             if (_cell.NumSubKeys != 0)
             {
@@ -353,6 +419,7 @@ namespace DiscUtils.Registry
                             KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(keyIndex);
                             if (cell.Name.ToUpperInvariant() == name.ToUpperInvariant())
                             {
+                                index = keyIndex;
                                 return cell;
                             }
                         }
@@ -366,11 +433,14 @@ namespace DiscUtils.Registry
                         KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(keyIndex);
                         if (cell.Name.ToUpperInvariant() == name.ToUpperInvariant())
                         {
+                            index = keyIndex;
                             return cell;
                         }
                     }
                 }
             }
+
+            index = 0;
             return null;
         }
     }
