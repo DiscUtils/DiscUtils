@@ -29,7 +29,7 @@ namespace DiscUtils.Registry
     /// <summary>
     /// A registry value.
     /// </summary>
-    public sealed class RegistryValue
+    internal sealed class RegistryValue
     {
         private RegistryHive _hive;
         private ValueCell _cell;
@@ -148,15 +148,6 @@ namespace DiscUtils.Registry
             {
                 return ConvertToObject(GetData(), DataType);
             }
-        }
-
-        /// <summary>
-        /// Sets the value stored.
-        /// </summary>
-        /// <param name="value">The value to store.</param>
-        public void SetValue(object value)
-        {
-            SetValue(value, RegistryValueType.None);
         }
 
         /// <summary>

@@ -174,7 +174,7 @@ namespace DiscUtils.Registry
             }
             else
             {
-                string hashStr = name.Substring(0, 4) + "\0\0\0\0";
+                string hashStr = name + "\0\0\0\0";
                 for (int i = 0; i < 4; ++i)
                 {
                     hash |= (uint)((hashStr[i] & 0xFF) << (i * 8));

@@ -73,6 +73,11 @@ namespace DiscUtils.Registry
         /// <returns>The new hive</returns>
         public static RegistryHive Create(Stream stream)
         {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream", "Attempt to create registry hive in null stream");
+            }
+
             // Construct a file with minimal structure - hive header, plus one (empty) bin
             BinHeader binHeader = new BinHeader();
             binHeader.FileOffset = 0;
@@ -188,7 +193,17 @@ namespace DiscUtils.Registry
                 }
                 else if (canRelocate)
                 {
-                    throw new NotImplementedException("Migrating cell to new location");
+                    int oldCell = cell.Index;
+                    cell.Index = AllocateRawCell(cell.Size);
+                    bin = GetBin(cell.Index);
+                    if (!bin.UpdateCell(cell))
+                    {
+                        cell.Index = oldCell;
+                        throw new RegistryCorruptException("Failed to migrate cell to new location");
+                    }
+
+                    FreeCell(oldCell);
+                    return cell.Index;
                 }
                 else
                 {

@@ -63,6 +63,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Fat\FatFileSystemTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Registry\RegistryHiveTest.cs" />
+    <Compile Include="Registry\RegistryKeyTest.cs" />
     <Compile Include="StreamExtentTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />
     <Compile Include="Vdi\StreamTest.cs" />

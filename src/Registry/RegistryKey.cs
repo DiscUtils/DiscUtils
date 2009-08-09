@@ -99,12 +99,7 @@ namespace DiscUtils.Registry
         /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
         public object GetValue(string name)
         {
-            RegistryValue regVal = GetRegistryValue(name);
-            if (regVal != null)
-            {
-                return regVal.Value;
-            }
-            return null;
+            return GetValue(name, null, Microsoft.Win32.RegistryValueOptions.None);
         }
 
         /// <summary>
@@ -115,7 +110,31 @@ namespace DiscUtils.Registry
         /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
         public object GetValue(string name, object defaultValue)
         {
-            return GetValue(name) ?? defaultValue;
+            return GetValue(name, defaultValue, Microsoft.Win32.RegistryValueOptions.None);
+        }
+
+        /// <summary>
+        /// Gets a named value stored within this key.
+        /// </summary>
+        /// <param name="name">The name of the value to retrieve.</param>
+        /// <param name="defaultValue">The default value to return, if no existing value is stored.</param>
+        /// <param name="options">Flags controlling how the value is processed before it's returned.</param>
+        /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
+        public object GetValue(string name, object defaultValue, Microsoft.Win32.RegistryValueOptions options)
+        {
+            RegistryValue regVal = GetRegistryValue(name);
+            if (regVal != null)
+            {
+                if (regVal.DataType == RegistryValueType.ExpandString && (options & Microsoft.Win32.RegistryValueOptions.DoNotExpandEnvironmentNames) == 0)
+                {
+                    return Environment.ExpandEnvironmentVariables((string)regVal.Value);
+                }
+                else
+                {
+                    return regVal.Value;
+                }
+            }
+            return defaultValue;
         }
 
         /// <summary>
@@ -539,7 +558,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets an enumerator over all values in this key.
         /// </summary>
-        public IEnumerable<RegistryValue> Values
+        private IEnumerable<RegistryValue> Values
         {
             get
             {
@@ -558,6 +577,11 @@ namespace DiscUtils.Registry
 
         private RegistryValue GetRegistryValue(string name)
         {
+            if (name != null && name.Length == 0)
+            {
+                name = null;
+            }
+
             if (_cell.NumValues != 0)
             {
                 byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
@@ -579,6 +603,10 @@ namespace DiscUtils.Registry
         private RegistryValue AddRegistryValue(string name)
         {
             byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+            if (valueList == null)
+            {
+                valueList = new byte[0];
+            }
 
             int insertIdx = 0;
             while(insertIdx < _cell.NumValues)
@@ -602,11 +630,16 @@ namespace DiscUtils.Registry
             Array.Copy(valueList, 0, newValueList, 0, insertIdx * 4);
             Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
             Array.Copy(valueList, insertIdx * 4, newValueList, insertIdx * 4 + 4, (_cell.NumValues - insertIdx) * 4);
-            if (!_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
+            if (_cell.ValueListIndex == -1 || !_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
             {
                 int newListCellIndex = _hive.AllocateRawCell(Utilities.RoundUp(newValueList.Length, 8));
                 _hive.WriteRawCellData(newListCellIndex, newValueList, 0, newValueList.Length);
-                _hive.FreeCell(_cell.ValueListIndex);
+
+                if (_cell.ValueListIndex != -1)
+                {
+                    _hive.FreeCell(_cell.ValueListIndex);
+                }
+
                 _cell.ValueListIndex = newListCellIndex;
             }
 
@@ -649,6 +682,9 @@ namespace DiscUtils.Registry
             {
                 SubKeyHashedListCell newListCell = new SubKeyHashedListCell(_hive, "lf");
                 newListCell.Add(name, cellIndex);
+                _hive.UpdateCell(newListCell, true);
+                _cell.NumSubKeys = 1;
+                _cell.SubKeysIndex = newListCell.Index;
                 return;
             }
 
