@@ -29,7 +29,7 @@ namespace DiscUtils.Registry
     /// <summary>
     /// A registry value.
     /// </summary>
-    public class RegistryValue
+    public sealed class RegistryValue
     {
         private RegistryHive _hive;
         private ValueCell _cell;
@@ -73,6 +73,34 @@ namespace DiscUtils.Registry
                 return result;
             }
             return _hive.RawCellData(_cell.DataIndex, _cell.DataLength);
+        }
+
+        /// <summary>
+        /// Sets the value as raw bytes, with no validation that enough data is specified for the given value type.
+        /// </summary>
+        /// <param name="data">The data to store</param>
+        /// <param name="offset">The offset within <c>data</c> of the first byte to store</param>
+        /// <param name="count">The number of bytes to store</param>
+        /// <param name="valueType">The type of the data</param>
+        public void SetData(byte[] data, int offset, int count, RegistryValueType valueType)
+        {
+            if (_cell.DataIndex == -1)
+            {
+                _cell.DataIndex = _hive.AllocateRawCell(count);
+            }
+
+            if (!_hive.WriteRawCellData(_cell.DataIndex, data, offset, count))
+            {
+                int newDataIndex = _hive.AllocateRawCell(count);
+                _hive.WriteRawCellData(newDataIndex, data, offset, count);
+                _hive.FreeCell(_cell.DataIndex);
+                _cell.DataIndex = newDataIndex;
+            }
+
+            _cell.DataLength = count;
+            _cell.DataType = valueType;
+
+            _hive.UpdateCell(_cell, false);
         }
 
         /// <summary>
@@ -123,6 +151,46 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Sets the value stored.
+        /// </summary>
+        /// <param name="value">The value to store.</param>
+        public void SetValue(object value)
+        {
+            SetValue(value, RegistryValueType.None);
+        }
+
+        /// <summary>
+        /// Sets the value stored.
+        /// </summary>
+        /// <param name="value">The value to store.</param>
+        /// <param name="valueType">The registry type of the data</param>
+        public void SetValue(object value, RegistryValueType valueType)
+        {
+            if (valueType == RegistryValueType.None)
+            {
+                if (value is int)
+                {
+                    valueType = RegistryValueType.Dword;
+                }
+                else if (value is byte[])
+                {
+                    valueType = RegistryValueType.Binary;
+                }
+                else if (value is string[])
+                {
+                    valueType = RegistryValueType.MultiString;
+                }
+                else
+                {
+                    valueType = RegistryValueType.String;
+                }
+            }
+
+            byte[] data = ConvertToData(value, valueType);
+            SetData(data, 0, data.Length, valueType);
+        }
+
+        /// <summary>
         /// Gets a string representation of the registry value.
         /// </summary>
         /// <returns>The registry value as a string.</returns>
@@ -167,10 +235,10 @@ namespace DiscUtils.Registry
                     return Encoding.Unicode.GetString(data).Trim('\0');
 
                 case RegistryValueType.Dword:
-                    return Utilities.ToUInt32LittleEndian(data, 0);
+                    return Utilities.ToInt32LittleEndian(data, 0);
 
                 case RegistryValueType.DwordBigEndian:
-                    return Utilities.ToUInt32BigEndian(data, 0);
+                    return Utilities.ToInt32BigEndian(data, 0);
 
                 case RegistryValueType.MultiString:
                     string multiString = Encoding.Unicode.GetString(data).Trim('\0');
@@ -183,5 +251,46 @@ namespace DiscUtils.Registry
                     return data;
             }
         }
+
+        private static byte[] ConvertToData(object value, RegistryValueType valueType)
+        {
+            if (valueType == RegistryValueType.None)
+            {
+                throw new ArgumentException("Specific registry value type must be specified", "valueType");
+            }
+
+            byte[] data;
+            switch (valueType)
+            {
+                case RegistryValueType.String:
+                case RegistryValueType.ExpandString:
+                    string strValue = value.ToString();
+                    data = new byte[strValue.Length * 2 + 2];
+                    Encoding.Unicode.GetBytes(strValue, 0, strValue.Length, data, 0);
+                    break;
+
+                case RegistryValueType.Dword:
+                    data = new byte[4];
+                    Utilities.WriteBytesLittleEndian((int)value, data, 0);
+                    break;
+
+                case RegistryValueType.DwordBigEndian:
+                    data = new byte[4];
+                    Utilities.WriteBytesBigEndian((int)value, data, 0);
+                    break;
+
+                case RegistryValueType.MultiString:
+                    string multiStrValue = string.Join("\0", (string[])value) + "\0";
+                    data = new byte[multiStrValue.Length * 2 + 2];
+                    Encoding.Unicode.GetBytes(multiStrValue, 0, multiStrValue.Length, data, 0);
+                    break;
+
+                default:
+                    data = (byte[])value;
+                    break;
+            }
+            return data;
+        }
+
     }
 }

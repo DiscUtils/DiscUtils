@@ -30,10 +30,9 @@ namespace DiscUtils.Registry
     /// An internal structure within registry files, bins are the major unit of allocation in a registry hive.
     /// </summary>
     /// <remarks>Bins are divided into multiple cells, that contain actual registry data.</remarks>
-    internal class Bin
+    internal sealed class Bin
     {
-        internal const int Size = 4096;
-
+        private RegistryHive _hive;
         private Stream _fileStream;
         private long _streamPos;
 
@@ -42,8 +41,9 @@ namespace DiscUtils.Registry
 
         private List<Range<int, int>> _freeCells;
 
-        public Bin(Stream stream)
+        public Bin(RegistryHive hive, Stream stream)
         {
+            _hive = hive;
             _fileStream = stream;
             _streamPos = stream.Position;
 
@@ -69,27 +69,22 @@ namespace DiscUtils.Registry
             }
         }
 
-        public BinHeader Header
-        {
-            get { return _header; }
-        }
-
         public Cell this[int index]
         {
             get
             {
-                int size = Utilities.ToInt32LittleEndian(_buffer, index);
+                int size = Utilities.ToInt32LittleEndian(_buffer, index - _header.FileOffset);
                 if (size >= 0)
                 {
                     throw new ArgumentException("index is not allocated", "index");
                 }
-                return Cell.Parse(_buffer, index + 4);
+                return Cell.Parse(_hive, index, _buffer, index + 4 - _header.FileOffset);
             }
         }
 
         public void FreeCell(int index)
         {
-            int freeIndex = index;
+            int freeIndex = index - _header.FileOffset;
 
             int len = Utilities.ToInt32LittleEndian(_buffer, freeIndex);
             if (len >= 0)
@@ -130,12 +125,13 @@ namespace DiscUtils.Registry
             _fileStream.Write(_buffer, freeIndex, 4);
         }
 
-        public bool UpdateCell(int index, Cell cell)
+        public bool UpdateCell(Cell cell)
         {
+            int index = cell.Index - _header.FileOffset;
             int allocSize = Math.Abs(Utilities.ToInt32LittleEndian(_buffer, index));
 
             int newSize = cell.Size + 4;
-            if (newSize> allocSize)
+            if (newSize > allocSize)
             {
                 return false;
             }
@@ -148,8 +144,9 @@ namespace DiscUtils.Registry
             return true;
         }
 
-        public byte[] RawCellData(int index, int maxBytes)
+        public byte[] ReadRawCellData(int cellIndex, int maxBytes)
         {
+            int index = cellIndex - _header.FileOffset;
             int len = Math.Abs(Utilities.ToInt32LittleEndian(_buffer, index));
             byte[] result = new byte[Math.Min(len - 4, maxBytes)];
             Array.Copy(_buffer, index + 4, result, 0, result.Length);
@@ -157,8 +154,9 @@ namespace DiscUtils.Registry
         }
 
 
-        internal object WriteRawCellData(int index, byte[] data, int offset, int count)
+        internal bool WriteRawCellData(int cellIndex, byte[] data, int offset, int count)
         {
+            int index = cellIndex - _header.FileOffset;
             int allocSize = Math.Abs(Utilities.ToInt32LittleEndian(_buffer, index));
 
             int newSize = count + 4;
@@ -173,6 +171,48 @@ namespace DiscUtils.Registry
             _fileStream.Write(_buffer, index, newSize);
 
             return true;
+        }
+
+        internal int AllocateCell(int size)
+        {
+            if (size < 8 || size % 8 != 0)
+            {
+                throw new ArgumentException("Invalid cell size");
+            }
+
+            // Very inefficient algorithm - will lead to fragmentation
+
+            for (int i = 0; i < _freeCells.Count; ++i)
+            {
+                int result = _freeCells[i].Offset + _header.FileOffset;
+                if (_freeCells[i].Count > size)
+                {
+                    // Record the newly allocated cell
+                    Utilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);
+                    _fileStream.Position = _streamPos + _freeCells[i].Offset;
+                    _fileStream.Write(_buffer, _freeCells[i].Offset, 4);
+
+                    // Keep the remainder of the free buffer as unallocated
+                    _freeCells[i] = new Range<int, int>(_freeCells[i].Offset + size, _freeCells[i].Count - size);
+                    Utilities.WriteBytesLittleEndian(_freeCells[i].Count, _buffer, _freeCells[i].Offset);
+                    _fileStream.Position = _streamPos + _freeCells[i].Offset;
+                    _fileStream.Write(_buffer, _freeCells[i].Offset, 4);
+
+                    return result;
+                }
+                else if (_freeCells[i].Count == size)
+                {
+                    // Record the whole of the free buffer as a newly allocated cell
+                    Utilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);
+                    _fileStream.Position = _streamPos + _freeCells[i].Offset;
+                    _fileStream.Write(_buffer, _freeCells[i].Offset, 4);
+
+                    _freeCells.RemoveAt(i);
+                    return result;
+                }
+            }
+
+            return -1;
         }
     }
 }

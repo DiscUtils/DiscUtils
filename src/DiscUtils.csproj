@@ -12,6 +12,8 @@
     <AssemblyName>DiscUtils</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -219,9 +221,18 @@
     <Compile Include="Registry\BinHeader.cs" />
     <Compile Include="Registry\Cell.cs" />
     <Compile Include="Registry\HiveHeader.cs" />
+    <Compile Include="Registry\KeyNodeCell.cs" />
+    <Compile Include="Registry\RegistryCorruptException.cs" />
     <Compile Include="Registry\RegistryHive.cs" />
     <Compile Include="Registry\RegistryKey.cs" />
+    <Compile Include="Registry\RegistryKeyFlags.cs" />
     <Compile Include="Registry\RegistryValue.cs" />
+    <Compile Include="Registry\RegistryValueType.cs" />
+    <Compile Include="Registry\SecurityCell.cs" />
+    <Compile Include="Registry\SubKeyHashedListCell.cs" />
+    <Compile Include="Registry\SubKeyIndirectListCell.cs" />
+    <Compile Include="Registry\ValueCell.cs" />
+    <Compile Include="Registry\ValueFlags.cs" />
     <Compile Include="ReparsePoint.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>

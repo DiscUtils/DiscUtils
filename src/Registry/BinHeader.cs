@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Registry
 {
-    internal class BinHeader : IByteArraySerializable
+    internal sealed class BinHeader : IByteArraySerializable
     {
         public const int HeaderSize = 0x20;
         private const uint Signature = 0x6E696268;
@@ -33,6 +33,11 @@ namespace DiscUtils.Registry
         public int FileOffset;
         public int BinSize;
         public DateTime Timestamp;
+
+        public BinHeader()
+        {
+            Timestamp = DateTime.UtcNow;
+        }
 
         #region IByteArraySerializable Members
 
@@ -46,12 +51,17 @@ namespace DiscUtils.Registry
 
             FileOffset = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
             BinSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            long unknown = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x0014));
+            int unknown2 = Utilities.ToInt32LittleEndian(buffer, offset + 0x1C);
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(Signature, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(BinSize, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(Timestamp.ToFileTimeUtc(), buffer, offset + 0x14);
         }
 
         public int Size

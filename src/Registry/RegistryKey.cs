@@ -33,13 +33,11 @@ namespace DiscUtils.Registry
     public sealed class RegistryKey
     {
         private RegistryHive _hive;
-        private int _cellIndex;
         private KeyNodeCell _cell;
 
-        internal RegistryKey(RegistryHive hive, int cellIndex, KeyNodeCell cell)
+        internal RegistryKey(RegistryHive hive, KeyNodeCell cell)
         {
             _hive = hive;
-            _cellIndex = cellIndex;
             _cell = cell;
         }
 
@@ -72,7 +70,7 @@ namespace DiscUtils.Registry
                 SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
                 if (indirectList != null)
                 {
-                    foreach (int listIndex in indirectList.Lists)
+                    foreach (int listIndex in indirectList.CellIndexes)
                     {
                         SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
                         foreach (int index in hashList.SubKeys)
@@ -121,6 +119,33 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Sets a named value stored within this key.
+        /// </summary>
+        /// <param name="name">The name of the value to store.</param>
+        /// <param name="value">The value to store.</param>
+        public void SetValue(string name, object value)
+        {
+            SetValue(name, value, RegistryValueType.None);
+        }
+
+        /// <summary>
+        /// Sets a named value stored within this key.
+        /// </summary>
+        /// <param name="name">The name of the value to store.</param>
+        /// <param name="value">The value to store.</param>
+        /// <param name="valueType">The registry type of the data</param>
+        public void SetValue(string name, object value, RegistryValueType valueType)
+        {
+            RegistryValue valObj = GetRegistryValue(name);
+            if (valObj == null)
+            {
+                valObj = AddRegistryValue(name);
+            }
+
+            valObj.SetValue(value, valueType);
+        }
+
+        /// <summary>
         /// Deletes a named value stored within this key.
         /// </summary>
         /// <param name="name">The name of the value to delete.</param>
@@ -152,7 +177,7 @@ namespace DiscUtils.Registry
                         foundValue = true;
                         _hive.FreeCell(valueIndex);
                         _cell.NumValues--;
-                        _cellIndex = _hive.UpdateCell(_cellIndex, _cell);
+                        _hive.UpdateCell(_cell, false);
                         break;
                     }
 
@@ -264,7 +289,7 @@ namespace DiscUtils.Registry
             {
                 if ((_cell.Flags & RegistryKeyFlags.Root) == 0)
                 {
-                    return new RegistryKey(_hive, _cell.ParentIndex, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
+                    return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
                 }
                 else
                 {
@@ -298,6 +323,54 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Creates or opens a subkey.
+        /// </summary>
+        /// <param name="subkey">The relative path the the subkey</param>
+        /// <returns>The subkey</returns>
+        public RegistryKey CreateSubKey(string subkey)
+        {
+            if (string.IsNullOrEmpty(subkey))
+            {
+                return this;
+            }
+
+            string[] split = subkey.Split(new char[] { '\\' }, 2);
+            int cellIndex = FindSubKeyCell(split[0]);
+
+            if (cellIndex < 0)
+            {
+                KeyNodeCell newKeyCell = new KeyNodeCell(split[0], _cell.Index);
+                newKeyCell.SecurityIndex = _cell.SecurityIndex;
+                ReferenceSecurityCell(newKeyCell.SecurityIndex);
+                _hive.UpdateCell(newKeyCell, true);
+
+                LinkSubKey(split[0], newKeyCell.Index);
+                _hive.UpdateCell(_cell, false);
+
+                if (split.Length == 1)
+                {
+                    return new RegistryKey(_hive, newKeyCell);
+                }
+                else
+                {
+                    return new RegistryKey(_hive, newKeyCell).CreateSubKey(split[1]);
+                }
+            }
+            else
+            {
+                KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(cellIndex);
+                if (split.Length == 1)
+                {
+                    return new RegistryKey(_hive, cell);
+                }
+                else
+                {
+                    return new RegistryKey(_hive, cell).CreateSubKey(split[1]);
+                }
+            }
+        }
+
+        /// <summary>
         /// Opens a sub key.
         /// </summary>
         /// <param name="path">The relative path to the sub key.</param>
@@ -310,20 +383,121 @@ namespace DiscUtils.Registry
             }
 
             string[] split = path.Split(new char[] { '\\' }, 2);
-            int cellIndex;
-            KeyNodeCell cell = SearchSubKeys(split[0], out cellIndex);
+            int cellIndex = FindSubKeyCell(split[0]);
 
-            if (cell == null)
+            if (cellIndex < 0)
             {
                 return null;
             }
-            else if (split.Length == 1)
+            else
             {
-                return new RegistryKey(_hive, cellIndex, cell);
+                KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(cellIndex);
+                if (split.Length == 1)
+                {
+                    return new RegistryKey(_hive, cell);
+                }
+                else
+                {
+                    return new RegistryKey(_hive, cell).OpenSubKey(split[1]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deletes a subkey and any child subkeys recursively. The string subkey is not case-sensitive.
+        /// </summary>
+        /// <param name="subkey">The subkey to delete</param>
+        public void DeleteSubKeyTree(string subkey)
+        {
+            RegistryKey subKeyObj = OpenSubKey(subkey);
+
+            if ((subKeyObj.Flags & RegistryKeyFlags.Root) != 0)
+            {
+                throw new ArgumentException("Attempt to delete root key");
+            }
+
+            foreach (var child in subKeyObj.GetSubKeyNames())
+            {
+                subKeyObj.DeleteSubKeyTree(child);
+            }
+            DeleteSubKey(subkey);
+        }
+
+        /// <summary>
+        /// Deletes the specified subkey. The string subkey is not case-sensitive.
+        /// </summary>
+        /// <param name="subkey">The subkey to delete</param>
+        public void DeleteSubKey(string subkey)
+        {
+            DeleteSubKey(subkey, true);
+        }
+
+        /// <summary>
+        /// Deletes the specified subkey. The string subkey is not case-sensitive.
+        /// </summary>
+        /// <param name="subkey">The subkey to delete</param>
+        /// <param name="throwOnMissingSubKey"><c>true</c> to throw an argument exception if <c>subkey</c> doesn't exist</param>
+        public void DeleteSubKey(string subkey, bool throwOnMissingSubKey)
+        {
+            if (string.IsNullOrEmpty(subkey))
+            {
+                throw new ArgumentException("Invalid SubKey", "subkey");
+            }
+
+            string[] split = subkey.Split(new char[] { '\\' }, 2);
+
+            int subkeyCellIndex = FindSubKeyCell(split[0]);
+            if (subkeyCellIndex < 0)
+            {
+                if (throwOnMissingSubKey)
+                {
+                    throw new ArgumentException("No such SubKey", "subkey");
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            KeyNodeCell subkeyCell = _hive.GetCell<KeyNodeCell>(subkeyCellIndex);
+
+            if (split.Length == 1)
+            {
+                if (subkeyCell.NumSubKeys != 0)
+                {
+                    throw new InvalidOperationException("The registry key has subkeys");
+                }
+
+                if (subkeyCell.ClassNameIndex != -1)
+                {
+                    _hive.FreeCell(subkeyCell.ClassNameIndex);
+                    subkeyCell.ClassNameIndex = -1;
+                    subkeyCell.ClassNameLength = 0;
+                }
+
+                if (subkeyCell.SecurityIndex != -1)
+                {
+                    DereferenceSecurityCell(subkeyCell.SecurityIndex);
+                    subkeyCell.SecurityIndex = -1;
+                }
+
+                if (subkeyCell.SubKeysIndex != -1)
+                {
+                    FreeSubKeys(subkeyCell);
+                }
+
+                if (subkeyCell.ValueListIndex != -1)
+                {
+                    FreeValues(subkeyCell);
+                }
+
+                UnlinkSubKey(subkey);
+                _hive.FreeCell(subkeyCellIndex);
+                _hive.UpdateCell(_cell, false);
             }
             else
             {
-                return new RegistryKey(_hive, cellIndex, cell).OpenSubKey(split[1]);
+                new RegistryKey(_hive, subkeyCell).DeleteSubKey(split[1], throwOnMissingSubKey);
             }
         }
 
@@ -341,12 +515,12 @@ namespace DiscUtils.Registry
                     SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
                     if (indirectList != null)
                     {
-                        foreach (int listIndex in indirectList.Lists)
+                        foreach (int listIndex in indirectList.CellIndexes)
                         {
                             SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
                             foreach (int index in hashList.SubKeys)
                             {
-                                yield return new RegistryKey(_hive, index, _hive.GetCell<KeyNodeCell>(index));
+                                yield return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(index));
                             }
                         }
                     }
@@ -355,7 +529,7 @@ namespace DiscUtils.Registry
                         SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
                         foreach (int index in hashList.SubKeys)
                         {
-                            yield return new RegistryKey(_hive, index, _hive.GetCell<KeyNodeCell>(index));
+                            yield return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(index));
                         }
                     }
                 }
@@ -402,7 +576,49 @@ namespace DiscUtils.Registry
             return null;
         }
 
-        private KeyNodeCell SearchSubKeys(string name, out int index)
+        private RegistryValue AddRegistryValue(string name)
+        {
+            byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+
+            int insertIdx = 0;
+            while(insertIdx < _cell.NumValues)
+            {
+                int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx * 4);
+                ValueCell cell = _hive.GetCell<ValueCell>(valueCellIndex);
+                if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    break;
+                }
+
+                ++insertIdx;
+            }
+
+            // Allocate a new value cell (note _hive.UpdateCell does actual allocation).
+            ValueCell valueCell = new ValueCell(name);
+            _hive.UpdateCell(valueCell, true);
+
+            // Update the value list, re-allocating if necessary
+            byte[] newValueList = new byte[_cell.NumValues * 4 + 4];
+            Array.Copy(valueList, 0, newValueList, 0, insertIdx * 4);
+            Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
+            Array.Copy(valueList, insertIdx * 4, newValueList, insertIdx * 4 + 4, (_cell.NumValues - insertIdx) * 4);
+            if (!_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
+            {
+                int newListCellIndex = _hive.AllocateRawCell(Utilities.RoundUp(newValueList.Length, 8));
+                _hive.WriteRawCellData(newListCellIndex, newValueList, 0, newValueList.Length);
+                _hive.FreeCell(_cell.ValueListIndex);
+                _cell.ValueListIndex = newListCellIndex;
+            }
+
+            // Record the new value and save this cell
+            _cell.NumValues++;
+            _hive.UpdateCell(_cell, false);
+
+            // Finally, set the data in the value cell
+            return new RegistryValue(_hive, valueCell);
+        }
+
+        private int FindSubKeyCell(string name)
         {
             if (_cell.NumSubKeys != 0)
             {
@@ -411,37 +627,195 @@ namespace DiscUtils.Registry
                 SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
                 if (indirectList != null)
                 {
-                    foreach (int listIndex in indirectList.Lists)
+                    foreach (int listIndex in indirectList.CellIndexes)
                     {
                         SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                        foreach(int keyIndex in hashList.Find(name, 0))
-                        {
-                            KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(keyIndex);
-                            if (cell.Name.ToUpperInvariant() == name.ToUpperInvariant())
-                            {
-                                index = keyIndex;
-                                return cell;
-                            }
-                        }
+                        return hashList.FindCell(name);
                     }
                 }
                 else
                 {
                     SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                    foreach (int keyIndex in hashList.Find(name, 0))
+                    return hashList.FindCell(name);
+                }
+            }
+
+            return -1;
+        }
+
+        private void LinkSubKey(string name, int cellIndex)
+        {
+            if (_cell.SubKeysIndex == -1)
+            {
+                SubKeyHashedListCell newListCell = new SubKeyHashedListCell(_hive, "lf");
+                newListCell.Add(name, cellIndex);
+                return;
+            }
+
+            Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
+
+            SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
+            if (indirectList != null)
+            {
+                if (indirectList.CellIndexes.Count == 0)
+                {
+                    throw new NotImplementedException("Empty indirect list");
+                }
+
+                // Look for the first sublist that has a subkey name greater than ours
+                int insertionListIdx = 0;
+                while (insertionListIdx < indirectList.CellIndexes.Count - 1)
+                {
+                    int testListIndex = indirectList.CellIndexes[insertionListIdx];
+
+                    SubKeyHashedListCell candidateList = _hive.GetCell<SubKeyHashedListCell>(testListIndex);
+                    if (candidateList.Count > 0)
                     {
-                        KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(keyIndex);
-                        if (cell.Name.ToUpperInvariant() == name.ToUpperInvariant())
+                        KeyNodeCell first = _hive.GetCell<KeyNodeCell>(candidateList.IndexToCellIndex(0));
+                        if (string.CompareOrdinal(first.Name, name) > 0)
                         {
-                            index = keyIndex;
-                            return cell;
+                            break;
+                        }
+                    }
+                    insertionListIdx++;
+                }
+
+                int listIndex = indirectList.CellIndexes[insertionListIdx];
+                SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
+                hashList.Add(name, cellIndex);
+                int newListIndex = _hive.UpdateCell(hashList, true);
+                if (newListIndex != listIndex)
+                {
+                    indirectList.CellIndexes[insertionListIdx] = newListIndex;
+                    _cell.SubKeysIndex = _hive.UpdateCell(indirectList, true);
+                }
+            }
+            else
+            {
+                SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
+                hashList.Add(name, cellIndex);
+                _cell.SubKeysIndex = _hive.UpdateCell(hashList, true);
+            }
+
+            _cell.NumSubKeys++;
+        }
+
+        private void UnlinkSubKey(string name)
+        {
+            if (_cell.SubKeysIndex == -1 || _cell.NumSubKeys == 0)
+            {
+                throw new InvalidOperationException("No subkey list");
+            }
+
+            Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
+
+            SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
+            if (indirectList != null)
+            {
+                //foreach (int listIndex in indirectList.CellIndexes)
+                for (int i = 0; i < indirectList.CellIndexes.Count; ++i)
+                {
+                    int listIndex = indirectList.CellIndexes[i];
+
+                    SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
+                    int index = hashList.IndexOf(name);
+                    if (index >= 0)
+                    {
+                        hashList.RemoveAt(index);
+                        int newListIndex = _hive.UpdateCell(hashList, true);
+                        if (newListIndex != listIndex)
+                        {
+                            indirectList.CellIndexes[i] = newListIndex;
+                            _cell.SubKeysIndex = _hive.UpdateCell(indirectList, true);
                         }
                     }
                 }
             }
+            else
+            {
+                SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
+                int index = hashList.IndexOf(name);
+                if (index >= 0)
+                {
+                    hashList.RemoveAt(index);
+                    _cell.SubKeysIndex = _hive.UpdateCell(hashList, true);
+                }
+            }
 
-            index = 0;
-            return null;
+            _cell.NumSubKeys--;
         }
+
+        private void ReferenceSecurityCell(int cellIndex)
+        {
+            SecurityCell sc = _hive.GetCell<SecurityCell>(cellIndex);
+            sc.UsageCount++;
+            _hive.UpdateCell(sc, false);
+        }
+
+        private void DereferenceSecurityCell(int cellIndex)
+        {
+            SecurityCell sc = _hive.GetCell<SecurityCell>(cellIndex);
+            sc.UsageCount--;
+            if (sc.UsageCount == 0)
+            {
+                SecurityCell prev = _hive.GetCell<SecurityCell>(sc.PreviousIndex);
+                prev.NextIndex = sc.NextIndex;
+                _hive.UpdateCell(prev, false);
+
+                SecurityCell next = _hive.GetCell<SecurityCell>(sc.NextIndex);
+                next.PreviousIndex = sc.PreviousIndex;
+                _hive.UpdateCell(next, false);
+
+                _hive.FreeCell(cellIndex);
+            }
+            else
+            {
+                _hive.UpdateCell(sc, false);
+            }
+        }
+
+        private void FreeValues(KeyNodeCell cell)
+        {
+            if (cell.NumValues != 0 && cell.ValueListIndex != -1)
+            {
+                byte[] valueList = _hive.RawCellData(cell.ValueListIndex, cell.NumValues * 4);
+
+                for (int i = 0; i < cell.NumValues; ++i)
+                {
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    _hive.FreeCell(valueIndex);
+                }
+
+                _hive.FreeCell(cell.ValueListIndex);
+                cell.ValueListIndex = -1;
+                cell.NumValues = 0;
+                cell.MaxValDataBytes = 0;
+                cell.MaxValNameBytes = 0;
+            }
+        }
+
+        private void FreeSubKeys(KeyNodeCell subkeyCell)
+        {
+            if (subkeyCell.SubKeysIndex == -1)
+            {
+                throw new InvalidOperationException("No subkey list");
+            }
+
+            Cell list = _hive.GetCell<Cell>(subkeyCell.SubKeysIndex);
+
+            SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
+            if (indirectList != null)
+            {
+                //foreach (int listIndex in indirectList.CellIndexes)
+                for (int i = 0; i < indirectList.CellIndexes.Count; ++i)
+                {
+                    int listIndex = indirectList.CellIndexes[i];
+                    _hive.FreeCell(listIndex);
+                }
+            }
+
+            _hive.FreeCell(list.Index);
+        }
+
     }
 }

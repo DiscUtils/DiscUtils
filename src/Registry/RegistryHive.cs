@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.AccessControl;
 
 namespace DiscUtils.Registry
 {
@@ -34,9 +35,7 @@ namespace DiscUtils.Registry
         private const long BinStart = 4 * Sizes.OneKiB;
 
         private Stream _fileStream;
-
         private HiveHeader _header;
-
         private List<BinHeader> _bins;
 
         /// <summary>
@@ -46,6 +45,7 @@ namespace DiscUtils.Registry
         public RegistryHive(Stream hive)
         {
             _fileStream = hive;
+            _fileStream.Position = 0;
 
             byte[] buffer = Utilities.ReadFully(_fileStream, HiveHeader.HeaderSize);
 
@@ -67,11 +67,83 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Creates a new (empty) registry hive.
+        /// </summary>
+        /// <param name="stream">The stream to contain the new hive</param>
+        /// <returns>The new hive</returns>
+        public static RegistryHive Create(Stream stream)
+        {
+            // Construct a file with minimal structure - hive header, plus one (empty) bin
+            BinHeader binHeader = new BinHeader();
+            binHeader.FileOffset = 0;
+            binHeader.BinSize = (int)(4 * Sizes.OneKiB);
+
+            HiveHeader hiveHeader = new HiveHeader();
+            hiveHeader.Length = binHeader.BinSize;
+
+            stream.Position = 0;
+
+            byte[] buffer = new byte[hiveHeader.Size];
+            hiveHeader.WriteTo(buffer, 0);
+            stream.Write(buffer, 0, buffer.Length);
+
+            buffer = new byte[binHeader.Size];
+            binHeader.WriteTo(buffer, 0);
+            stream.Position = BinStart;
+            stream.Write(buffer, 0, buffer.Length);
+
+            buffer = new byte[4];
+            Utilities.WriteBytesLittleEndian(binHeader.BinSize - binHeader.Size, buffer, 0);
+            stream.Write(buffer, 0, buffer.Length);
+
+            // Make sure the file is initialized out to the end of the firs bin
+            stream.Position = BinStart + binHeader.BinSize - 1;
+            stream.WriteByte(0);
+
+            // Temporary hive to perform construction of higher-level structures
+            RegistryHive newHive = new RegistryHive(stream);
+            KeyNodeCell rootCell = new KeyNodeCell("root", -1);
+            rootCell.Flags = RegistryKeyFlags.Normal | RegistryKeyFlags.Root;
+            newHive.UpdateCell(rootCell, true);
+
+            RegistrySecurity sd = new RegistrySecurity();
+            sd.SetSecurityDescriptorSddlForm("O:BAG:BAD:PAI(A;;KA;;;SY)(A;CI;KA;;;BA)", AccessControlSections.All);
+            SecurityCell secCell = new SecurityCell(sd);
+            newHive.UpdateCell(secCell, true);
+            secCell.NextIndex = secCell.Index;
+            secCell.PreviousIndex = secCell.Index;
+            newHive.UpdateCell(secCell, false);
+
+            rootCell.SecurityIndex = secCell.Index;
+            newHive.UpdateCell(rootCell, false);
+
+            // Ref the root cell from the hive header
+            hiveHeader.RootCell = rootCell.Index;
+            buffer = new byte[hiveHeader.Size];
+            hiveHeader.WriteTo(buffer, 0);
+            stream.Position = 0;
+            stream.Write(buffer, 0, buffer.Length);
+
+            // Finally, return the new hive
+            return new RegistryHive(stream);
+        }
+
+        /// <summary>
+        /// Creates a new (empty) registry hive.
+        /// </summary>
+        /// <param name="path">The file to create the new hive in</param>
+        /// <returns>The new hive</returns>
+        public static RegistryHive Create(string path)
+        {
+            return Create(new FileStream(path, FileMode.Create, FileAccess.ReadWrite));
+        }
+
+        /// <summary>
         /// Gets the root key in the registry hive.
         /// </summary>
         public RegistryKey Root
         {
-            get { return new RegistryKey(this, _header.RootCell, GetCell<KeyNodeCell>(_header.RootCell)); }
+            get { return new RegistryKey(this, GetCell<KeyNodeCell>(_header.RootCell)); }
         }
 
         internal K GetCell<K>(int index)
@@ -81,7 +153,7 @@ namespace DiscUtils.Registry
 
             if (bin != null)
             {
-                return (K)bin[index - bin.Header.FileOffset];
+                return (K)bin[index];
             }
             else
             {
@@ -95,28 +167,37 @@ namespace DiscUtils.Registry
 
             if (bin != null)
             {
-                bin.FreeCell(index - bin.Header.FileOffset);
+                bin.FreeCell(index);
             }
         }
 
-        internal int UpdateCell(int index, Cell cell)
+        internal int UpdateCell(Cell cell, bool canRelocate)
         {
-            Bin bin = GetBin(index);
+            if (cell.Index == -1 && canRelocate)
+            {
+                cell.Index = AllocateRawCell(cell.Size);
+            }
+
+            Bin bin = GetBin(cell.Index);
 
             if (bin != null)
             {
-                if (bin.UpdateCell(index - bin.Header.FileOffset, cell))
+                if (bin.UpdateCell(cell))
                 {
-                    return index;
+                    return cell.Index;
+                }
+                else if (canRelocate)
+                {
+                    throw new NotImplementedException("Migrating cell to new location");
                 }
                 else
                 {
-                    throw new NotImplementedException("Migrating cell to new location");
+                    throw new ArgumentException("Can't update cell, needs relocation but relocation disabled", "canRelocate");
                 }
             }
             else
             {
-                throw new IndexOutOfRangeException("No bin found containing index");
+                throw new RegistryCorruptException("No bin found containing index: " + cell.Index);
             }
         }
 
@@ -126,7 +207,7 @@ namespace DiscUtils.Registry
 
             if (bin != null)
             {
-                return bin.RawCellData(index - bin.Header.FileOffset, maxBytes);
+                return bin.ReadRawCellData(index, maxBytes);
             }
             else
             {
@@ -134,18 +215,39 @@ namespace DiscUtils.Registry
             }
         }
 
-        internal void WriteRawCellData(int index, byte[] data, int offset, int count)
+        internal bool WriteRawCellData(int index, byte[] data, int offset, int count)
         {
             Bin bin = GetBin(index);
 
             if (bin != null)
             {
-                bin.WriteRawCellData(index - bin.Header.FileOffset, data, offset, count);
+                return bin.WriteRawCellData(index, data, offset, count);
             }
             else
             {
-                throw new IndexOutOfRangeException("No bin found containing index");
+                throw new RegistryCorruptException("No bin found containing index: " + index);
             }
+        }
+
+        internal int AllocateRawCell(int capacity)
+        {
+            int minSize = Utilities.RoundUp(capacity + 4, 8); // Allow for size header and ensure multiple of 8
+
+            // Incredibly inefficient algorithm...
+            foreach (var binHeader in _bins)
+            {
+                Bin bin = LoadBin(binHeader);
+                int cellIndex = bin.AllocateCell(minSize);
+
+                if(cellIndex >= 0)
+                {
+                    return cellIndex;
+                }
+            }
+
+            BinHeader newBinHeader = AllocateBin(minSize);
+            Bin newBin = LoadBin(newBinHeader);
+            return newBin.AllocateCell(minSize);
         }
 
         private BinHeader FindBin(int index)
@@ -165,11 +267,53 @@ namespace DiscUtils.Registry
 
             if (binHeader != null)
             {
-                _fileStream.Position = BinStart + binHeader.FileOffset;
-                return new Bin(_fileStream);
+                return LoadBin(binHeader);
             }
 
             return null;
+        }
+
+        private Bin LoadBin(BinHeader binHeader)
+        {
+            _fileStream.Position = BinStart + binHeader.FileOffset;
+            return new Bin(this, _fileStream);
+        }
+
+        private BinHeader AllocateBin(int minSize)
+        {
+            BinHeader lastBin = _bins[_bins.Count - 1];
+
+            BinHeader newBinHeader = new BinHeader();
+            newBinHeader.FileOffset = lastBin.FileOffset + lastBin.BinSize;
+            newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4 * (int)Sizes.OneKiB);
+            newBinHeader.Timestamp = DateTime.UtcNow;
+
+            byte[] buffer = new byte[newBinHeader.Size];
+            newBinHeader.WriteTo(buffer, 0);
+            _fileStream.Position = BinStart + newBinHeader.FileOffset;
+            _fileStream.Write(buffer, 0, buffer.Length);
+
+            byte[] cellHeader = new byte[4];
+            Utilities.WriteBytesLittleEndian(newBinHeader.BinSize - newBinHeader.Size, cellHeader, 0);
+            _fileStream.Write(cellHeader, 0, 4);
+
+            // Update hive with new length
+            _header.Length = newBinHeader.FileOffset + newBinHeader.BinSize;
+            _header.Timestamp = DateTime.UtcNow;
+            _header.Sequence1++;
+            _header.Sequence2++;
+            _fileStream.Position = 0;
+            byte[] hiveHeader = Utilities.ReadFully(_fileStream, _header.Size);
+            _header.WriteTo(hiveHeader, 0);
+            _fileStream.Position = 0;
+            _fileStream.Write(hiveHeader, 0, hiveHeader.Length);
+
+            // Make sure the file is initialized to desired position
+            _fileStream.Position = BinStart + _header.Length - 1;
+            _fileStream.WriteByte(0);
+
+            _bins.Add(newBinHeader);
+            return newBinHeader;
         }
 
         private class BinFinder : IComparer<BinHeader>

@@ -2718,87 +2718,45 @@
        </Namespace>
        <Namespace Name="DiscUtils.Registry">
         <Types>
-         <Type Name="HiveHeader">
+         <Type Name="KeyNodeCell">
           <Members>
-           <Member Name="#Guid1">
+           <Member Name="#MaxSubKeyNameBytes">
             <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-08-09 13:49:03Z">
               <Issue>
-               <Item>'HiveHeader.Guid1'</Item>
+               <Item>'KeyNodeCell.MaxSubKeyNameBytes'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
-                <Note Id="64" />
+                <Note Id="79" />
                </User>
               </Notes>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#Guid2">
+           <Member Name="#MaxValDataBytes">
             <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-08-09 13:49:03Z">
               <Issue>
-               <Item>'HiveHeader.Guid2'</Item>
+               <Item>'KeyNodeCell.MaxValDataBytes'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
-                <Note Id="64" />
+                <Note Id="79" />
                </User>
               </Notes>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#MajorVersion">
+           <Member Name="#MaxValNameBytes">
             <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-08-09 13:49:03Z">
               <Issue>
-               <Item>'HiveHeader.MajorVersion'</Item>
+               <Item>'KeyNodeCell.MaxValNameBytes'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
-                <Note Id="64" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#MinorVersion">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
-              <Issue>
-               <Item>'HiveHeader.MinorVersion'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="64" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Path">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
-              <Issue>
-               <Item>'HiveHeader.Path'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="64" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Timestamp">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-23 13:41:59Z">
-              <Issue>
-               <Item>'HiveHeader.Timestamp'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="64" />
+                <Note Id="79" />
                </User>
               </Notes>
              </Message>
@@ -2808,6 +2766,76 @@
          </Type>
          <Type Name="RegistryKey">
           <Members>
+           <Member Name="#CreateSubKey(System.String)">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-08-09 12:57:12Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.CreateSubKey(string)'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="76" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeleteSubKey(System.String)">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-08-09 12:57:12Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.DeleteSubKey(string)'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="76" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeleteSubKey(System.String,System.Boolean)">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-08-09 12:57:12Z">
+              <Issue Name="MemberParameterShouldBeDiscreteTerm">
+               <Item>'RegistryKey.DeleteSubKey(string, bool)'</Item>
+               <Item>SubKey</Item>
+               <Item>'throwOnMissingSubKey'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.DeleteSubKey(string, bool)'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="76" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeleteSubKeyTree(System.String)">
+            <Messages>
+             <Message Id="SubKey" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-08-09 12:57:12Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>SubKey</Item>
+               <Item>'RegistryKey.DeleteSubKeyTree(string)'</Item>
+               <Item>Subkey</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="76" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#Flags">
             <Messages>
              <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-05-23 13:41:59Z">
@@ -2964,64 +2992,6 @@
               </Notes>
              </Message>
             </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="SecurityCell">
-          <Members>
-           <Member Name="#NextIndex">
-            <Accessors>
-             <Accessor Name="#get_NextIndex()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
-                <Issue>
-                 <Item>'SecurityCell.NextIndex.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="64" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#PreviousIndex">
-            <Accessors>
-             <Accessor Name="#get_PreviousIndex()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
-                <Issue>
-                 <Item>'SecurityCell.PreviousIndex.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="64" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#UsageCount">
-            <Accessors>
-             <Accessor Name="#get_UsageCount()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
-                <Issue>
-                 <Item>'SecurityCell.UsageCount.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="64" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
            </Member>
           </Members>
          </Type>
@@ -3610,7 +3580,6 @@
     <Note Id="61" Modified="2009-05-23 13:53:26Z">Using SubKey per framework class RegistryKey</Note>
     <Note Id="62" Modified="2009-05-23 13:53:40Z">Flags is appropriate term</Note>
     <Note Id="63" Modified="2009-05-23 14:02:57Z">Get is appropriate because it involves file access to retrieve ACL.</Note>
-    <Note Id="64" Modified="2009-05-23 14:08:05Z">Members reflect structure of registry data.</Note>
     <Note Id="65" Modified="2009-05-23 14:08:29Z">Invoked by reflection</Note>
     <Note Id="66" Modified="2009-05-23 14:11:32Z">Fields reflect data structure.</Note>
     <Note Id="67" Modified="2009-05-23 14:12:40Z">Methods reflect structure of descriptor files.</Note>
@@ -3622,7 +3591,9 @@
     <Note Id="73" Modified="2009-06-20 10:33:49Z">Utils is part of project name</Note>
     <Note Id="74" Modified="2009-06-20 10:34:03Z">Following convention of separating file formats by namespace</Note>
     <Note Id="75" Modified="2009-06-20 10:34:23Z">Currently unused fields</Note>
+    <Note Id="76" Modified="2009-08-09 13:24:58Z">Following naming convention on .Net RegistryKey class.</Note>
     <Note Id="77" Modified="2009-07-21 06:24:41Z">Returning low-cost byte array.</Note>
+    <Note Id="79" Modified="2009-08-09 13:49:20Z">Not used yet</Note>
    </User>
   </Notes>
   <Rules>
@@ -3642,6 +3613,7 @@
     <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
    </Rule>
    <Rule TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702">
+    <Resolution Name="MemberParameterShouldBeDiscreteTerm">In member {0}, the compound word '{1}' in parameter name {2} exists as a discrete term. If your usage is intended to be single word, case it as '{3}' or strip the first token entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="MemberShouldBeDiscreteTerm">The compound word '{0}' in member name {1} exists as a discrete term. If your usage is intended to be single word, case it as '{2}' or strip the first token entirely if it represents any sort of Hungarian notation.</Resolution>
    </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
