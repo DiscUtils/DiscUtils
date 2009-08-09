@@ -126,10 +126,10 @@ namespace DiscUtils.Ntfs
         public void ReadFrom(byte[] buffer, int offset)
         {
             ParentDirectory = new FileReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x00));
-            CreationTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x08));
-            ModificationTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x10));
-            MftChangedTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x18));
-            LastAccessTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x20));
+            CreationTime = ReadDateTime(buffer, offset + 0x08);
+            ModificationTime = ReadDateTime(buffer, offset + 0x10);
+            MftChangedTime = ReadDateTime(buffer, offset + 0x18);
+            LastAccessTime = ReadDateTime(buffer, offset + 0x20);
             AllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
             RealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
             Flags = (FileAttributeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 0x38);
@@ -164,6 +164,17 @@ namespace DiscUtils.Ntfs
         }
 
         #endregion
+        private static DateTime ReadDateTime(byte[] buffer, int offset)
+        {
+            try
+            {
+                return DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset));
+            }
+            catch (ArgumentException)
+            {
+                return DateTime.MinValue;
+            }
+        }
 
         internal static FileAttributes ConvertFlags(FileAttributeFlags flags)
         {
