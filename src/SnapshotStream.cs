@@ -206,7 +206,7 @@ namespace DiscUtils
         /// return <c>true</c></remarks>
         public override bool CanWrite
         {
-            get { return _baseStream.CanWrite; }
+            get { return (_diffStream != null) ? true : _baseStream.CanWrite; }
         }
 
         /// <summary>
