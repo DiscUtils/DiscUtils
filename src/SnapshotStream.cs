@@ -31,7 +31,7 @@ namespace DiscUtils
     /// </summary>
     /// <remarks>Once a snapshot is taken, you can discard subsequent changes or merge them back
     /// into the wrapped stream.</remarks>
-    public sealed class SnapshotStream : Stream
+    public sealed class SnapshotStream : SparseStream
     {
         private Stream _baseStream;
 
@@ -388,6 +388,25 @@ namespace DiscUtils
                 _baseStream.Position = _position;
                 _baseStream.Write(buffer, offset, count);
                 _position += count;
+            }
+        }
+
+        /// <summary>
+        /// Returns an enumeration over the parts of the stream that contain real data.
+        /// </summary>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                SparseStream sparseBase = _baseStream as SparseStream;
+                if (sparseBase == null)
+                {
+                    return new StreamExtent[] { new StreamExtent(0, Length) };
+                }
+                else
+                {
+                    return StreamExtent.Union(sparseBase.Extents, _diffExtents);
+                }
             }
         }
 
