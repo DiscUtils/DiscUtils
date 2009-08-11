@@ -199,6 +199,8 @@ namespace DiscUtils.Vmdk
                 }
             }
 
+
+            int maxToRead = (int)Math.Min(count, Length - _position);
             int totalRead = 0;
             int numRead;
 
@@ -212,7 +214,7 @@ namespace DiscUtils.Vmdk
                 {
                     // Read from parent stream, to at most the end of grain table's coverage
                     _parentDiskStream.Position = _position + _diskOffset;
-                    numRead = _parentDiskStream.Read(buffer, offset + totalRead, (int)Math.Min(count - totalRead, _gtCoverage - grainTableOffset));
+                    numRead = _parentDiskStream.Read(buffer, offset + totalRead, (int)Math.Min(maxToRead - totalRead, _gtCoverage - grainTableOffset));
                 }
                 else
                 {
@@ -220,7 +222,7 @@ namespace DiscUtils.Vmdk
                     int grain = grainTableOffset / grainSize;
                     int grainOffset = grainTableOffset - (grain * grainSize);
 
-                    int numToRead = Math.Min(count - totalRead, grainSize - grainOffset);
+                    int numToRead = Math.Min(maxToRead - totalRead, grainSize - grainOffset);
 
                     if (_grainTable[grain] == 0)
                     {
@@ -237,7 +239,7 @@ namespace DiscUtils.Vmdk
 
                 _position += numRead;
                 totalRead += numRead;
-            } while (numRead != 0 && totalRead < count);
+            } while (numRead != 0 && totalRead < maxToRead);
 
             return totalRead;
         }
