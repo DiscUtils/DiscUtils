@@ -85,9 +85,14 @@ namespace DiscUtils.Ntfs
                     {
                         string name = attr.Content.FileName;
 
-                        foreach (string dirName in _context.GetDirectoryByRef(attr.Content.ParentDirectory).Names)
+                        Directory parentDir = _context.GetDirectoryByRef(attr.Content.ParentDirectory);
+                        if (parentDir != null)
                         {
-                            result.Add(Path.Combine(dirName, name));
+
+                            foreach (string dirName in parentDir.Names)
+                            {
+                                result.Add(Path.Combine(dirName, name));
+                            }
                         }
                     }
                 }
