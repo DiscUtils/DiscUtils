@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PassthroughStreamBuilder.cs" />
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
     <Compile Include="BuilderExtentSource.cs" />
@@ -279,9 +280,11 @@
     <Compile Include="Vmdk\DescriptorFileEntry.cs" />
     <Compile Include="Vmdk\Disk.cs" />
     <Compile Include="Vmdk\DiskAdapterType.cs" />
+    <Compile Include="Vmdk\DiskBuilder.cs" />
     <Compile Include="Vmdk\DiskCreateType.cs" />
     <Compile Include="Vmdk\DiskImageFile.cs" />
     <Compile Include="Vmdk\ExtentDescriptor.cs" />
+    <Compile Include="Vmdk\FileSpecification.cs" />
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
