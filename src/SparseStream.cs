@@ -116,6 +116,22 @@ namespace DiscUtils
                     extentOffset += numRead;
                 }
             }
+
+            // Ensure the output stream is at least as long as the input stream.  This uses
+            // read/write, rather than SetLength, to avoid failing on streams that can't be
+            // explicitly resized.  Side-effect of this, is that if outStream is an NTFS
+            // file stream, then actual clusters will be allocated out to at least the
+            // length of the input stream.
+            if (outStream.Length < inStream.Length)
+            {
+                inStream.Position = inStream.Length - 1;
+                int b = inStream.ReadByte();
+                if (b >= 0)
+                {
+                    outStream.Position = inStream.Length - 1;
+                    outStream.WriteByte((byte)b);
+                }
+            }
         }
 
         private static bool IsAllZeros(byte[] buffer, int offset, int count)
