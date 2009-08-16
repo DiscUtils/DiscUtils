@@ -329,36 +329,102 @@ namespace DiscUtils.Vhd
         {
             get
             {
-                // Note: For now we only go down to block granularity (2MB chunks), we don't inspect the
-                // blocks to indicate which sectors are present.
-                List<StreamExtent> extents = new List<StreamExtent>();
+                return StreamExtent.Union(LayerExtents(), _parentStream.Extents);
+            }
+        }
 
-                long blockSize = _dynamicHeader.BlockSize;
-                int i = 0;
-                while (i < _blockAllocationTable.Length)
+        private IEnumerable<StreamExtent> LayerExtents()
+        {
+            long length = Length;
+            long start = FindNextPresentSector(0);
+            while (start < length)
+            {
+                long end = FindNextAbsentSector(start);
+                yield return new StreamExtent(start, end - start);
+
+                start = FindNextPresentSector(end);
+            }
+        }
+
+        private long FindNextPresentSector(long pos)
+        {
+            long length = Length;
+
+            bool foundStart = false;
+            while (pos < length && !foundStart)
+            {
+                long block = pos / _dynamicHeader.BlockSize;
+
+                if (!PopulateBlockBitmap(block))
                 {
-                    // Find next stored block
-                    while (i < _blockAllocationTable.Length && _blockAllocationTable[i] == uint.MaxValue)
-                    {
-                        ++i;
-                    }
-                    int start = i;
+                    pos += _dynamicHeader.BlockSize;
+                }
+                else
+                {
+                    uint offsetInBlock = (uint)(pos % _dynamicHeader.BlockSize);
+                    int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
 
-                    // Find next absent block
-                    while (i < _blockAllocationTable.Length && _blockAllocationTable[i] != uint.MaxValue)
+                    if (_blockBitmaps[block][sectorInBlock / 8] == 0)
                     {
-                        ++i;
+                        pos += (8 - (sectorInBlock % 8)) * Utilities.SectorSize;
                     }
-
-                    if (start != i)
+                    else
                     {
-                        long end = Math.Min(i * blockSize, _length);
-                        extents.Add(new StreamExtent(start * blockSize, end - (start * blockSize)));
+                        byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
+                        {
+                            foundStart = true;
+                        }
+                        else
+                        {
+                            pos += Utilities.SectorSize;
+                        }
                     }
                 }
-
-                return StreamExtent.Union(extents, _parentStream.Extents);
             }
+
+            return pos;
+        }
+
+        private long FindNextAbsentSector(long pos)
+        {
+            long length = Length;
+
+
+            bool foundEnd = false;
+            while (pos < length && !foundEnd)
+            {
+                long block = pos / _dynamicHeader.BlockSize;
+
+                if (!PopulateBlockBitmap(block))
+                {
+                    foundEnd = true;
+                }
+                else
+                {
+                    uint offsetInBlock = (uint)(pos % _dynamicHeader.BlockSize);
+                    int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
+
+                    if (_blockBitmaps[block][sectorInBlock / 8] == 0xFF)
+                    {
+                        pos += (8 - (sectorInBlock % 8)) * Utilities.SectorSize;
+                    }
+                    else
+                    {
+                        byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        if ((_blockBitmaps[block][sectorInBlock / 8] & mask) == 0)
+                        {
+                            foundEnd = true;
+                        }
+                        else
+                        {
+                            pos += Utilities.SectorSize;
+                        }
+                    }
+                }
+            }
+
+            return pos;
         }
 
         private void ReadBlockAllocationTable()
