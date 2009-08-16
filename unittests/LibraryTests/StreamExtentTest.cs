@@ -161,6 +161,73 @@ namespace DiscUtils
             Compare(r, StreamExtent.Union());
         }
 
+        [Test]
+        public void TestBlockCount()
+        {
+            StreamExtent[] s = new StreamExtent[] {
+                new StreamExtent(0,8),
+                new StreamExtent(11, 4)
+            };
+
+            Assert.AreEqual(2, StreamExtent.BlockCount(s, 10));
+
+            s = new StreamExtent[] {
+                new StreamExtent(0,8),
+                new StreamExtent(9, 8)
+            };
+
+            Assert.AreEqual(2, StreamExtent.BlockCount(s, 10));
+
+            s = new StreamExtent[] {
+                new StreamExtent(3, 4),
+                new StreamExtent(19, 4),
+                new StreamExtent(44, 4)
+            };
+
+            Assert.AreEqual(4, StreamExtent.BlockCount(s, 10));
+        }
+
+        [Test]
+        public void TestBlocks()
+        {
+            StreamExtent[] s = new StreamExtent[] {
+                new StreamExtent(0,8),
+                new StreamExtent(11, 4)
+            };
+
+            List<Range<long,long>> ranges = new List<Range<long,long>>(StreamExtent.Blocks(s, 10));
+
+            Assert.AreEqual(1, ranges.Count);
+            Assert.AreEqual(0, ranges[0].Offset);
+            Assert.AreEqual(2, ranges[0].Count);
+
+            s = new StreamExtent[] {
+                new StreamExtent(0,8),
+                new StreamExtent(9, 8)
+            };
+
+            ranges = new List<Range<long, long>>(StreamExtent.Blocks(s, 10));
+
+            Assert.AreEqual(1, ranges.Count);
+            Assert.AreEqual(0, ranges[0].Offset);
+            Assert.AreEqual(2, ranges[0].Count);
+
+            s = new StreamExtent[] {
+                new StreamExtent(3, 4),
+                new StreamExtent(19, 4),
+                new StreamExtent(44, 4)
+            };
+
+            ranges = new List<Range<long, long>>(StreamExtent.Blocks(s, 10));
+
+            Assert.AreEqual(2, ranges.Count);
+            Assert.AreEqual(0, ranges[0].Offset);
+            Assert.AreEqual(3, ranges[0].Count);
+            Assert.AreEqual(4, ranges[1].Offset);
+            Assert.AreEqual(1, ranges[1].Count);
+        }
+
+
         public void Compare(IEnumerable<StreamExtent> expected, IEnumerable<StreamExtent> actual)
         {
             List<StreamExtent> eList = new List<StreamExtent>(expected);
