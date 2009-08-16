@@ -21,8 +21,8 @@
 //
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Vmdk
 {
@@ -32,10 +32,8 @@ namespace DiscUtils.Vmdk
     /// <remarks>Using this method for creating virtual disks avoids consuming
     /// large amounts of memory, or going via the local file system when the aim
     /// is simply to present a VMDK version of an existing disk.</remarks>
-    public class DiskBuilder
+    public sealed class DiskBuilder : DiskImageBuilder
     {
-        private SparseStream _content;
-        private Geometry _diskGeometry;
         private DiskCreateType _diskType;
         private DiskAdapterType _adapterType;
 
@@ -46,24 +44,6 @@ namespace DiscUtils.Vmdk
         {
             _diskType = DiskCreateType.Vmfs;
             _adapterType = DiskAdapterType.LsiLogicScsi;
-        }
-
-        /// <summary>
-        /// Sets the content for this disk, implying the size of the disk.
-        /// </summary>
-        public SparseStream Content
-        {
-            get { return _content; }
-            set { _content = value; }
-        }
-
-        /// <summary>
-        /// Sets the geometry of this disk, will be implied from the content stream if not set.
-        /// </summary>
-        public Geometry DiskGeometry
-        {
-            get { return _diskGeometry; }
-            set { _diskGeometry = value; }
         }
 
         /// <summary>
@@ -89,51 +69,51 @@ namespace DiscUtils.Vmdk
         /// </summary>
         /// <param name="baseName">The base name for the VMDK, for example 'foo' to create 'foo.vmdk'.</param>
         /// <returns>An array of objects describing the logical files that comprise the VMDK.</returns>
-        public FileSpecification[] Build(string baseName)
+        public override DiskImageFileSpecification[] Build(string baseName)
         {
             if (string.IsNullOrEmpty(baseName))
             {
                 throw new ArgumentException("Invalid base file name", "baseName");
             }
 
-            if (_content == null)
+            if (Content == null)
             {
                 throw new InvalidOperationException("No content stream specified");
             }
 
             if (_diskType != DiskCreateType.Vmfs && _diskType != DiskCreateType.VmfsSparse)
             {
-                throw new NotImplementedException("Only flat VMFS disks implemented");
+                throw new NotImplementedException("Only Vmfs and VmfsSparse disks implemented");
             }
 
-            List<FileSpecification> fileSpecs = new List<FileSpecification>();
+            List<DiskImageFileSpecification> fileSpecs = new List<DiskImageFileSpecification>();
 
-            Geometry geometry = _diskGeometry ?? DiskImageFile.DefaultGeometry(_content.Length);
+            Geometry geometry = Geometry ?? DiskImageFile.DefaultGeometry(Content.Length);
 
 
             DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, _diskType, _adapterType);
 
             if (_diskType == DiskCreateType.Vmfs)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, _content.Length / 512, ExtentType.Vmfs, baseName + "-flat.vmdk", 0);
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512, ExtentType.Vmfs, baseName + "-flat.vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
 
                 MemoryStream ms = new MemoryStream();
                 baseDescriptor.Write(ms);
 
-                fileSpecs.Add(new FileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
-                fileSpecs.Add(new FileSpecification(baseName + "-flat.vmdk", new PassthroughStreamBuilder(_content)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + "-flat.vmdk", new PassthroughStreamBuilder(Content)));
             }
             else if (_diskType == DiskCreateType.VmfsSparse)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, _content.Length / 512, ExtentType.VmfsSparse, baseName + "-sparse.vmdk", 0);
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512, ExtentType.VmfsSparse, baseName + "-sparse.vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
 
                 MemoryStream ms = new MemoryStream();
                 baseDescriptor.Write(ms);
 
-                fileSpecs.Add(new FileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
-                fileSpecs.Add(new FileSpecification(baseName + "-sparse.vmdk", new VmfsSparseExtentBuilder(_content)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + "-sparse.vmdk", new VmfsSparseExtentBuilder(Content)));
             }
 
             return fileSpecs.ToArray();

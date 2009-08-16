@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiskImageBuilder.cs" />
+    <Compile Include="DiskImageFileSpecification.cs" />
     <Compile Include="PassthroughStreamBuilder.cs" />
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
@@ -264,6 +266,7 @@
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
     <Compile Include="Vhd\Disk.cs" />
+    <Compile Include="Vhd\DiskBuilder.cs" />
     <Compile Include="Vhd\DiskImageFile.cs" />
     <Compile Include="Vhd\DiskImageFileInfo.cs" />
     <Compile Include="Vhd\DynamicHeader.cs" />
@@ -284,7 +287,6 @@
     <Compile Include="Vmdk\DiskCreateType.cs" />
     <Compile Include="Vmdk\DiskImageFile.cs" />
     <Compile Include="Vmdk\ExtentDescriptor.cs" />
-    <Compile Include="Vmdk\FileSpecification.cs" />
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
