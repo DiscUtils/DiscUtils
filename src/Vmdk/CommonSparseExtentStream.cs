@@ -284,23 +284,22 @@ namespace DiscUtils.Vmdk
             {
                 CheckDisposed();
 
-                // Note: For now we only go down to grain table granularity (large chunks), we don't inspect the
-                // grain tables themselves to indicate which sectors are present.
-                List<StreamExtent> extents = new List<StreamExtent>();
-
-                long length = Length;
-                long start = FindNextPresentGrain(0);
-                while (start < length)
-                {
-                    long end = FindNextAbsentGrain(start);
-                    extents.Add(new StreamExtent(start, end - start));
-
-                    start = FindNextPresentGrain(end);
-                }
-
                 var parentExtents = StreamExtent.Intersect(_parentDiskStream.Extents, new StreamExtent[] { new StreamExtent(_diskOffset, Length) });
                 parentExtents = StreamExtent.Offset(parentExtents, -_diskOffset);
-                return StreamExtent.Union(extents, parentExtents);
+                return StreamExtent.Union(LayerExtents(), parentExtents);
+            }
+        }
+
+        private IEnumerable<StreamExtent> LayerExtents()
+        {
+            long length = Length;
+            long start = FindNextPresentGrain(0);
+            while (start < length)
+            {
+                long end = FindNextAbsentGrain(start);
+                yield return new StreamExtent(start, end - start);
+
+                start = FindNextPresentGrain(end);
             }
         }
 
