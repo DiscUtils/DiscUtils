@@ -251,6 +251,84 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Returns the number of blocks containing stream data.
+        /// </summary>
+        /// <param name="stream">The stream extents</param>
+        /// <param name="blockSize">The size of each block</param>
+        /// <returns>The number of blocks containing stream data</returns>
+        /// <remarks>This method logically divides the stream into blocks of a specified
+        /// size, then indicates how many of those blocks contain actual stream data.</remarks>
+        public static long BlockCount(IEnumerable<StreamExtent> stream, long blockSize)
+        {
+            long totalBlocks = 0;
+            long lastBlock = -1;
+
+            foreach (var extent in stream)
+            {
+                if (extent.Length > 0)
+                {
+                    long extentStartBlock = extent.Start / blockSize;
+                    long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
+
+                    long extentNumBlocks = extentNextBlock - extentStartBlock;
+                    if (extentStartBlock == lastBlock)
+                    {
+                        extentNumBlocks--;
+                    }
+                    lastBlock = extentNextBlock - 1;
+
+                    totalBlocks += extentNumBlocks;
+                }
+            }
+
+            return totalBlocks;
+        }
+
+        /// <summary>
+        /// Returns all of the blocks containing stream data.
+        /// </summary>
+        /// <param name="stream">The stream extents</param>
+        /// <param name="blockSize">The size of each block</param>
+        /// <returns>Ranges of blocks, as block indexes</returns>
+        /// <remarks>This method logically divides the stream into blocks of a specified
+        /// size, then indicates ranges of blocks that contain stream data.</remarks>
+        public static IEnumerable<Range<long, long>> Blocks(IEnumerable<StreamExtent> stream, long blockSize)
+        {
+            long? rangeStart = null;
+            long rangeLength = 0;
+
+            foreach (var extent in stream)
+            {
+                if (extent.Length > 0)
+                {
+                    long extentStartBlock = extent.Start / blockSize;
+                    long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
+
+                    if (rangeStart != null && extentStartBlock > rangeStart + 1)
+                    {
+                        // This extent is non-contiguous (in terms of blocks), so write out the last range and start new
+                        yield return new Range<long, long>((long)rangeStart, rangeLength);
+                        rangeStart = extentStartBlock;
+                    }
+                    else if (rangeStart == null)
+                    {
+                        // First extent, so start first range
+                        rangeStart = extentStartBlock;
+                    }
+
+                    // Set the length of the current range, based on the end of this extent
+                    rangeLength = extentNextBlock - (long)rangeStart;
+                }
+            }
+
+            // Final range (if any ranges at all) hasn't been returned yet, so do that now
+            if (rangeStart != null)
+            {
+                yield return new Range<long, long>((long)rangeStart, rangeLength);
+            }
+        }
+
+        /// <summary>
         /// Indicates if this StreamExtent is equal to another.
         /// </summary>
         /// <param name="other">The extent to compare</param>
