@@ -291,6 +291,7 @@
     <Compile Include="Vmdk\CompressedGrainHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
+    <Compile Include="Vmdk\VmfsSparseExtentBuilder.cs" />
     <Compile Include="Wim\AlternateStreamEntry.cs" />
     <Compile Include="Wim\BitStream.cs" />
     <Compile Include="Wim\LzxBitStream.cs" />

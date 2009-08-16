@@ -596,20 +596,12 @@ namespace DiscUtils.Vmdk
             }
             else if(type == ExtentType.VmfsSparse)
             {
-                uint numSectors = (uint)Utilities.Ceil(size, Sizes.Sector);
-                uint numGDEntries = (uint)Utilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
-
-                ServerSparseExtentHeader header = new ServerSparseExtentHeader();
-                header.Capacity = numSectors;
-                header.GrainSize = 1;
-                header.GdOffset = 4;
-                header.NumGdEntries = numGDEntries;
-                header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
+                ServerSparseExtentHeader header = CreateServerSparseExtentHeader(size);
 
                 extentStream.Position = 0;
                 extentStream.Write(header.GetBytes(), 0, 4 * Sizes.Sector);
 
-                byte[] blankGlobalDirectory = new byte[numGDEntries * 4];
+                byte[] blankGlobalDirectory = new byte[header.NumGdEntries * 4];
                 extentStream.Write(blankGlobalDirectory, 0, blankGlobalDirectory.Length);
 
                 descriptorStart = 0;
@@ -619,6 +611,20 @@ namespace DiscUtils.Vmdk
             {
                 throw new NotImplementedException("Extent type not implemented");
             }
+        }
+
+        internal static ServerSparseExtentHeader CreateServerSparseExtentHeader(long size)
+        {
+            uint numSectors = (uint)Utilities.Ceil(size, Sizes.Sector);
+            uint numGDEntries = (uint)Utilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
+
+            ServerSparseExtentHeader header = new ServerSparseExtentHeader();
+            header.Capacity = numSectors;
+            header.GrainSize = 1;
+            header.GdOffset = 4;
+            header.NumGdEntries = numGDEntries;
+            header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
+            return header;
         }
 
         private static void CreateSparseExtent(Stream extentStream, long size, long descriptorLength, out long descriptorStart)
@@ -797,7 +803,7 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        private static Geometry DefaultGeometry(long diskSize)
+        internal static Geometry DefaultGeometry(long diskSize)
         {
             int heads;
             int sectors;
@@ -823,7 +829,7 @@ namespace DiscUtils.Vmdk
             return new Geometry(cylinders, heads, sectors);
         }
 
-        private static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
+        internal static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
         {
             DescriptorFile baseDescriptor = new DescriptorFile();
             baseDescriptor.DiskGeometry = geometry;
