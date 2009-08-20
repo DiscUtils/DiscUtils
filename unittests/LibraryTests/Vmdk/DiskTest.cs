@@ -124,5 +124,17 @@ namespace DiscUtils.Vmdk
             }
             Assert.Greater(2 * 1024 * 1024, fs.GetFileLength(@"\dir\diff.vmdk"));
         }
+
+        [Test]
+        public void ReadOnlyHosted()
+        {
+            DiscFileSystem fs = new InMemoryFileSystem();
+            using (Disk disk = Disk.Initialize(fs, "a.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.MonolithicSparse))
+            {
+            }
+
+            Disk d2 = new Disk(fs, "a.vmdk", FileAccess.Read);
+            Assert.IsFalse(d2.Content.CanWrite);
+        }
     }
 }

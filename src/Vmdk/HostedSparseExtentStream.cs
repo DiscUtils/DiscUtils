@@ -75,7 +75,7 @@ namespace DiscUtils.Vmdk
             get
             {
                 // No write support for streamOptimized disks
-                return (_hostedHeader.Flags & (HostedSparseExtentFlags.CompressedGrains | HostedSparseExtentFlags.MarkersInUse)) == 0;
+                return _fileStream.CanWrite && (_hostedHeader.Flags & (HostedSparseExtentFlags.CompressedGrains | HostedSparseExtentFlags.MarkersInUse)) == 0;
             }
         }
 
