@@ -208,7 +208,7 @@ namespace DiscUtils.Iso9660
             }
             else
             {
-                BuildFileInfo fi = new BuildFileInfo(name, dir, source);
+                BuildFileInfo fi = new BuildFileInfo(nameElements[nameElements.Length - 1], dir, source);
                 _files.Add(fi);
                 dir.Add(fi);
                 return fi;

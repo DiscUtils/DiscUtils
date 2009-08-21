@@ -54,6 +54,7 @@
     <Compile Include="DiscFileSystemFileTest.cs" />
     <Compile Include="GeometryTest.cs" />
     <Compile Include="InMemoryFileSystem.cs" />
+    <Compile Include="Iso9660\BuilderTest.cs" />
     <Compile Include="Iso9660\IsoDirectoryInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileSystemTest.cs" />
