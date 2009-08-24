@@ -26,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Vmdk
 {
-    internal class VmfsSparseExtentBuilder : StreamBuilder
+    internal sealed class VmfsSparseExtentBuilder : StreamBuilder
     {
         private SparseStream _content;
 

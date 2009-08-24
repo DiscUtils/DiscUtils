@@ -26,7 +26,7 @@ namespace DiscUtils
     /// <summary>
     /// Represents a Reparse Point, which can be associated with a file or directory.
     /// </summary>
-    public class ReparsePoint
+    public sealed class ReparsePoint
     {
         private int _tag;
         private byte[] _content;
