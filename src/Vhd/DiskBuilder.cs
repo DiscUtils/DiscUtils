@@ -62,11 +62,6 @@ namespace DiscUtils.Vhd
                 throw new InvalidOperationException("No content stream specified");
             }
 
-            if (_diskType != FileType.Fixed)
-            {
-                throw new NotImplementedException("Only Fixed disks implemented");
-            }
-
             List<DiskImageFileSpecification> fileSpecs = new List<DiskImageFileSpecification>();
 
             Geometry geometry = Geometry ?? Geometry.FromCapacity(Content.Length);
@@ -84,9 +79,13 @@ namespace DiscUtils.Vhd
                 Stream imageStream = new ConcatStream(Ownership.None, Content, footerStream);
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd", new PassthroughStreamBuilder(imageStream)));
             }
+            else if (_diskType == FileType.Dynamic)
+            {
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd",  new DynamicDiskBuilder(Content, footer, (uint)Sizes.OneMiB * 2)));
+            }
             else
             {
-                throw new NotImplementedException();
+                throw new InvalidOperationException("Only Fixed and Dynamic disk types supported");
             }
 
             return fileSpecs.ToArray();

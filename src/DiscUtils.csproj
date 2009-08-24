@@ -58,7 +58,6 @@
     <Compile Include="BuilderStreamExtent.cs" />
     <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
-    <Compile Include="IClusterBasedFileSystem.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="ConcatStream.cs" />
     <Compile Include="DataReader.cs" />
@@ -83,6 +82,7 @@
     <Compile Include="FileLocator.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="IByteArraySerializable.cs" />
+    <Compile Include="IClusterBasedFileSystem.cs" />
     <Compile Include="IDiagnosticTraceable.cs" />
     <Compile Include="IFileSystem.cs" />
     <Compile Include="InvalidFileSystemException.cs" />
@@ -269,6 +269,7 @@
     <Compile Include="Vhd\DiskBuilder.cs" />
     <Compile Include="Vhd\DiskImageFile.cs" />
     <Compile Include="Vhd\DiskImageFileInfo.cs" />
+    <Compile Include="Vhd\DynamicDiskBuilder.cs" />
     <Compile Include="Vhd\DynamicHeader.cs" />
     <Compile Include="Vhd\DynamicStream.cs" />
     <Compile Include="Vhd\FileType.cs" />
