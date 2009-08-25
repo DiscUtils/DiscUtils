@@ -51,7 +51,8 @@ namespace DiscUtils.Vmdk
                 for (int i = 0; i < grainTableRange.Count; ++i)
                 {
                     long grainTable = grainTableRange.Offset + i;
-                    GrainTableExtent gtExtent = new GrainTableExtent(grainTableStart, new SubStream(_content, grainTable * grainTableCoverage, grainTableCoverage), header);
+                    long dataStart = grainTable * grainTableCoverage;
+                    GrainTableExtent gtExtent = new GrainTableExtent(grainTableStart, new SubStream(_content, dataStart, Math.Min(grainTableCoverage, _content.Length - dataStart)), header);
                     extents.Add(gtExtent);
                     gdExtent.SetEntry((int)grainTable, (uint)(grainTableStart / Sizes.Sector));
 

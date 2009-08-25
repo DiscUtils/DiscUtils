@@ -52,6 +52,7 @@
     <Compile Include="Combined\CombinedTest.cs" />
     <Compile Include="DiscFileSystemDirectoryTest.cs" />
     <Compile Include="DiscFileSystemFileTest.cs" />
+    <Compile Include="DiskBuilderFileSystem.cs" />
     <Compile Include="GeometryTest.cs" />
     <Compile Include="InMemoryFileSystem.cs" />
     <Compile Include="Iso9660\BuilderTest.cs" />
@@ -69,9 +70,11 @@
     <Compile Include="StreamExtentTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />
     <Compile Include="Vdi\StreamTest.cs" />
+    <Compile Include="Vhd\DiskBuilderTest.cs" />
     <Compile Include="Vhd\DiskImageFileTest.cs" />
     <Compile Include="Vhd\DiskTest.cs" />
     <Compile Include="Vhd\DynamicStreamTest.cs" />
+    <Compile Include="Vmdk\DiskBuilderTest.cs" />
     <Compile Include="Vmdk\DiskTest.cs" />
     <Compile Include="Vmdk\DynamicStreamTest.cs" />
     <Compile Include="Xva\VirtualMachineBuilderTest.cs" />

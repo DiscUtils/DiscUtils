@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -58,7 +59,8 @@ namespace DiscUtils.Vhd
                 for (int i = 0; i < blockRange.Count; ++i)
                 {
                     long block = blockRange.Offset + i;
-                    DataBlockExtent dataExtent = new DataBlockExtent(streamPos, new SubStream(_content, block * _blockSize, _blockSize));
+                    long blockStart = block * _blockSize;
+                    DataBlockExtent dataExtent = new DataBlockExtent(streamPos, new SubStream(_content, blockStart, Math.Min(_blockSize, _content.Length - blockStart)));
                     extents.Add(dataExtent);
 
                     batExtent.SetEntry((int)block, (uint)(streamPos / Sizes.Sector));
