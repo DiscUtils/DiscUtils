@@ -81,24 +81,33 @@ namespace DiscUtils.Iso9660
             IsoUtilities.ToBothFromUInt16(buffer, offset + 28, VolumeSequenceNumber);
             byte lengthOfFileIdentifier;
 
-            lengthOfFileIdentifier = (byte)IsoUtilities.WriteString(buffer, offset + 33, (int)(length - 33), false, FileIdentifier, enc);
-#if false
-            if ((Flags & FileFlags.Directory) != 0)
+
+            if (FileIdentifier.Length == 1 && FileIdentifier[0] <= 1)
             {
-                lengthOfFileIdentifier = Utilities.WriteDirectoryName(buffer, offset + 33, 255, FileIdentifier, enc);
+                buffer[offset + 33] = (byte)FileIdentifier[0];
+                lengthOfFileIdentifier = 1;
             }
             else
             {
-                lengthOfFileIdentifier = Utilities.WriteFileName(buffer, offset + 33, 255, FileIdentifier, enc);
+                lengthOfFileIdentifier = (byte)IsoUtilities.WriteString(buffer, offset + 33, (int)(length - 33), false, FileIdentifier, enc);
             }
-#endif
+
             buffer[offset + 32] = lengthOfFileIdentifier;
             return (int)length;
         }
 
         public static uint CalcLength(string name, Encoding enc)
         {
-            int nameBytes = enc.GetByteCount(name);
+            int nameBytes;
+            if (name.Length == 1 && name[0] <= 1)
+            {
+                nameBytes = 1;
+            }
+            else
+            {
+                nameBytes = enc.GetByteCount(name);
+            }
+
             return (uint)(33 + nameBytes + (((nameBytes & 0x1) == 0) ? 1 : 0));
         }
     }
