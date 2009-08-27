@@ -325,33 +325,45 @@ namespace DiscUtils.Vhd
             _atEof = false;
         }
 
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            CheckDisposed();
+
+            long maxCount = Math.Min(Length, start + count) - start;
+            if (maxCount < 0)
+            {
+                return new StreamExtent[0];
+            }
+
+            var parentExtents = _parentStream.GetExtentsInRange(start, maxCount);
+
+            var result = StreamExtent.Union(LayerExtents(start, maxCount), parentExtents);
+            result = StreamExtent.Intersect(result, new StreamExtent[] { new StreamExtent(start, maxCount) });
+            return result;
+        }
+
         public override IEnumerable<StreamExtent> Extents
         {
-            get
+            get { return GetExtentsInRange(0, Length); }
+        }
+
+        private IEnumerable<StreamExtent> LayerExtents(long start, long count)
+        {
+            long maxPos = start + count;
+            long pos = FindNextPresentSector(Utilities.RoundDown(start, Utilities.SectorSize), maxPos);
+            while (pos < maxPos)
             {
-                return StreamExtent.Union(LayerExtents(), _parentStream.Extents);
+                long end = FindNextAbsentSector(pos, maxPos);
+                yield return new StreamExtent(pos, end - pos);
+
+                pos = FindNextPresentSector(end, maxPos);
             }
         }
 
-        private IEnumerable<StreamExtent> LayerExtents()
+        private long FindNextPresentSector(long pos, long maxPos)
         {
-            long length = Length;
-            long start = FindNextPresentSector(0);
-            while (start < length)
-            {
-                long end = FindNextAbsentSector(start);
-                yield return new StreamExtent(start, end - start);
-
-                start = FindNextPresentSector(end);
-            }
-        }
-
-        private long FindNextPresentSector(long pos)
-        {
-            long length = Length;
-
             bool foundStart = false;
-            while (pos < length && !foundStart)
+            while (pos < maxPos && !foundStart)
             {
                 long block = pos / _dynamicHeader.BlockSize;
 
@@ -383,16 +395,13 @@ namespace DiscUtils.Vhd
                 }
             }
 
-            return pos;
+            return Math.Min(pos, maxPos);
         }
 
-        private long FindNextAbsentSector(long pos)
+        private long FindNextAbsentSector(long pos, long maxPos)
         {
-            long length = Length;
-
-
             bool foundEnd = false;
-            while (pos < length && !foundEnd)
+            while (pos < maxPos && !foundEnd)
             {
                 long block = pos / _dynamicHeader.BlockSize;
 
@@ -424,7 +433,7 @@ namespace DiscUtils.Vhd
                 }
             }
 
-            return pos;
+            return Math.Min(pos, maxPos);
         }
 
         private void ReadBlockAllocationTable()

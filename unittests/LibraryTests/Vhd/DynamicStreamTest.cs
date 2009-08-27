@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 
@@ -159,6 +160,39 @@ namespace DiscUtils.Vhd
                         Assert.Fail();
                     }
                 }
+            }
+        }
+
+        [Test]
+        public void Extents()
+        {
+            MemoryStream stream = new MemoryStream();
+            using (Disk disk = Disk.InitializeDynamic(stream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
+            {
+                disk.Content.Position = 20 * 512;
+                disk.Content.Write(new byte[4 * 512], 0, 4 * 512);
+
+                // Starts before first extent, ends before end of extent
+                List<StreamExtent> extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(0, 21 * 512));
+                Assert.AreEqual(1, extents.Count);
+                Assert.AreEqual(20 * 512, extents[0].Start);
+                Assert.AreEqual(1 * 512, extents[0].Length);
+
+                // Limit to disk content length
+                extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * 512, 20 * 512));
+                Assert.AreEqual(1, extents.Count);
+                Assert.AreEqual(21 * 512, extents[0].Start);
+                Assert.AreEqual(3 * 512, extents[0].Length);
+
+                // Out of range
+                extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(25 * 512, 4 * 512));
+                Assert.AreEqual(0, extents.Count);
+
+                // Non-sector multiples
+                extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * 512 + 10, 20 * 512));
+                Assert.AreEqual(1, extents.Count);
+                Assert.AreEqual(21 * 512 + 10, extents[0].Start);
+                Assert.AreEqual(3 * 512 - 10, extents[0].Length);
             }
         }
     }
