@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 
@@ -317,6 +318,43 @@ namespace DiscUtils.Vmdk
                         Assert.Fail();
                     }
                 }
+            }
+        }
+
+        [Test]
+        public void Extents()
+        {
+            // Fragile - this is the grain size in bytes of the VMDK file, so dependant on algorithm that
+            // determines grain size for new VMDKs...
+            const int unit = 31 * 512;
+
+            DiscFileSystem fs = new InMemoryFileSystem();
+            using (Disk disk = Disk.Initialize(fs, "a.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.TwoGbMaxExtentSparse))
+            {
+                disk.Content.Position = 20 * unit;
+                disk.Content.Write(new byte[4 * unit], 0, 4 * unit);
+
+                // Starts before first extent, ends before end of extent
+                List<StreamExtent> extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(0, 21 * unit));
+                Assert.AreEqual(1, extents.Count);
+                Assert.AreEqual(20 * unit, extents[0].Start);
+                Assert.AreEqual(1 * unit, extents[0].Length);
+
+                // Limit to disk content length
+                extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * unit, 20 * unit));
+                Assert.AreEqual(1, extents.Count);
+                Assert.AreEqual(21 * unit, extents[0].Start);
+                Assert.AreEqual(3 * unit, extents[0].Length);
+
+                // Out of range
+                extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(25 * unit, 4 * unit));
+                Assert.AreEqual(0, extents.Count);
+
+                // Non-unit multiples
+                extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * unit + 10, 20 * unit));
+                Assert.AreEqual(1, extents.Count);
+                Assert.AreEqual(21 * unit + 10, extents[0].Start);
+                Assert.AreEqual(3 * unit - 10, extents[0].Length);
             }
         }
     }

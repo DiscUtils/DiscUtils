@@ -292,7 +292,7 @@ namespace DiscUtils.Vmdk
             parentExtents = StreamExtent.Offset(parentExtents, -_diskOffset);
 
             var result = StreamExtent.Union(LayerExtents(start, maxCount), parentExtents);
-            result = StreamExtent.Intersect(result, new StreamExtent[] { new StreamExtent(0, Length) });
+            result = StreamExtent.Intersect(result, new StreamExtent[] { new StreamExtent(start, maxCount) });
             return result;
         }
 
