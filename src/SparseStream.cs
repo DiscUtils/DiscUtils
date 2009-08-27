@@ -34,6 +34,17 @@ namespace DiscUtils
     public abstract class SparseStream : Stream
     {
         /// <summary>
+        /// Gets the parts of a stream that are stored, within a specified range.
+        /// </summary>
+        /// <param name="start">The offset of the first byte of interest</param>
+        /// <param name="count">The number of bytes of interest</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        public virtual IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            return StreamExtent.Intersect(Extents, new StreamExtent[] { new StreamExtent(start, count) });
+        }
+
+        /// <summary>
         /// Gets the parts of the stream that are stored.
         /// </summary>
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>

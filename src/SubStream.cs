@@ -184,7 +184,7 @@ namespace DiscUtils
                 SparseStream parentAsSparse = _parent as SparseStream;
                 if (parentAsSparse != null)
                 {
-                    return StreamExtent.Intersect(OffsetExtents(parentAsSparse.Extents), new StreamExtent[] { new StreamExtent(0, _length) });
+                    return OffsetExtents(parentAsSparse.GetExtentsInRange(_first, _length));
                 }
                 else
                 {

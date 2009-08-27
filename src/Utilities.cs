@@ -60,6 +60,17 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Round down a value to a multiple of a unit size.
+        /// </summary>
+        /// <param name="value">The value to round down</param>
+        /// <param name="unit">The unit (the returned value will be a multiple of this number)</param>
+        /// <returns>The rounded-down value</returns>
+        public static long RoundDown(long value, long unit)
+        {
+            return ((value / unit) * unit);
+        }
+
+        /// <summary>
         /// Calculates the CEIL function.
         /// </summary>
         /// <param name="numerator">The value to divide</param>

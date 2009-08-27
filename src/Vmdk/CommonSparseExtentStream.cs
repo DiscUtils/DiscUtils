@@ -278,38 +278,48 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            CheckDisposed();
+
+            long maxCount = Math.Min(Length, start + count) - start;
+            if (maxCount < 0)
+            {
+                return new StreamExtent[0];
+            }
+
+            var parentExtents = _parentDiskStream.GetExtentsInRange(_diskOffset + start, maxCount);
+            parentExtents = StreamExtent.Offset(parentExtents, -_diskOffset);
+
+            var result = StreamExtent.Union(LayerExtents(start, maxCount), parentExtents);
+            result = StreamExtent.Intersect(result, new StreamExtent[] { new StreamExtent(0, Length) });
+            return result;
+        }
+
         public override IEnumerable<StreamExtent> Extents
         {
-            get
-            {
-                CheckDisposed();
+            get { return GetExtentsInRange(0, Length); }
+        }
 
-                var parentExtents = StreamExtent.Intersect(_parentDiskStream.Extents, new StreamExtent[] { new StreamExtent(_diskOffset, Length) });
-                parentExtents = StreamExtent.Offset(parentExtents, -_diskOffset);
-                return StreamExtent.Union(LayerExtents(), parentExtents);
+        private IEnumerable<StreamExtent> LayerExtents(long start, long count)
+        {
+            long maxPos = start + count;
+            long pos = FindNextPresentGrain(Utilities.RoundDown(start, _header.GrainSize * Sizes.Sector), maxPos);
+            while (pos < maxPos)
+            {
+                long end = FindNextAbsentGrain(pos, maxPos);
+                yield return new StreamExtent(pos, end - pos);
+
+                pos = FindNextPresentGrain(end, maxPos);
             }
         }
 
-        private IEnumerable<StreamExtent> LayerExtents()
+        private long FindNextPresentGrain(long pos, long maxPos)
         {
-            long length = Length;
-            long start = FindNextPresentGrain(0);
-            while (start < length)
-            {
-                long end = FindNextAbsentGrain(start);
-                yield return new StreamExtent(start, end - start);
-
-                start = FindNextPresentGrain(end);
-            }
-        }
-
-        private long FindNextPresentGrain(long pos)
-        {
-            long length = Length;
             int grainSize = (int)(_header.GrainSize * Sizes.Sector);
 
             bool foundStart = false;
-            while (pos < length && !foundStart)
+            while (pos < maxPos && !foundStart)
             {
                 int grainTable = (int)(pos / _gtCoverage);
 
@@ -333,17 +343,15 @@ namespace DiscUtils.Vmdk
                     }
                 }
             }
-            long start = pos;
-            return start;
+            return Math.Min(pos, maxPos);
         }
 
-        private long FindNextAbsentGrain(long pos)
+        private long FindNextAbsentGrain(long pos, long maxPos)
         {
-            long length = Length;
             int grainSize = (int)(_header.GrainSize * Sizes.Sector);
 
             bool foundEnd = false;
-            while (pos < length && !foundEnd)
+            while (pos < maxPos && !foundEnd)
             {
                 int grainTable = (int)(pos / _gtCoverage);
 
@@ -367,7 +375,7 @@ namespace DiscUtils.Vmdk
                     }
                 }
             }
-            return pos;
+            return Math.Min(pos, maxPos);
         }
 
         protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
