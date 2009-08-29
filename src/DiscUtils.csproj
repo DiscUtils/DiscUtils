@@ -49,9 +49,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DiskImageBuilder.cs" />
-    <Compile Include="DiskImageFileSpecification.cs" />
-    <Compile Include="PassthroughStreamBuilder.cs" />
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
     <Compile Include="BuilderExtentSource.cs" />
@@ -67,6 +64,8 @@
     <Compile Include="DiscFileSystemChecker.cs" />
     <Compile Include="DiscFileSystemInfo.cs" />
     <Compile Include="DiscFileSystemOptions.cs" />
+    <Compile Include="DiskImageBuilder.cs" />
+    <Compile Include="DiskImageFileSpecification.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
     <Compile Include="Fat\ClusterStream.cs" />
     <Compile Include="Fat\Directory.cs" />
@@ -78,8 +77,8 @@
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
-    <Compile Include="FloppyDiskType.cs" />
     <Compile Include="FileLocator.cs" />
+    <Compile Include="FloppyDiskType.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="IByteArraySerializable.cs" />
     <Compile Include="IClusterBasedFileSystem.cs" />
@@ -151,6 +150,7 @@
     <Compile Include="Iso9660\SupplementaryVolumeDescriptor.cs" />
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminator.cs" />
+    <Compile Include="IWindowsFileSystem.cs" />
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
@@ -217,9 +217,11 @@
     <Compile Include="Partitions\PartitionInfo.cs" />
     <Compile Include="Partitions\PartitionTable.cs" />
     <Compile Include="Partitions\WellKnownPartitionType.cs" />
+    <Compile Include="PassthroughStreamBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range.cs" />
     <Compile Include="Raw\Disk.cs" />
+    <Compile Include="Raw\DiskFactory.cs" />
     <Compile Include="Raw\DiskImageFile.cs" />
     <Compile Include="ReadOnlyDiscFileSystem.cs" />
     <Compile Include="Registry\Bin.cs" />
@@ -259,6 +261,7 @@
     <Compile Include="Tuple.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Vdi\Disk.cs" />
+    <Compile Include="Vdi\DiskFactory.cs" />
     <Compile Include="Vdi\DiskImageFile.cs" />
     <Compile Include="Vdi\DiskStream.cs" />
     <Compile Include="Vdi\FileVersion.cs" />
@@ -269,6 +272,7 @@
     <Compile Include="Vdi\PreHeaderRecord.cs" />
     <Compile Include="Vhd\Disk.cs" />
     <Compile Include="Vhd\DiskBuilder.cs" />
+    <Compile Include="Vhd\DiskFactory.cs" />
     <Compile Include="Vhd\DiskImageFile.cs" />
     <Compile Include="Vhd\DiskImageFileInfo.cs" />
     <Compile Include="Vhd\DynamicDiskBuilder.cs" />
@@ -279,21 +283,24 @@
     <Compile Include="Vhd\Header.cs" />
     <Compile Include="Vhd\ParentLocator.cs" />
     <Compile Include="VirtualDisk.cs" />
+    <Compile Include="VirtualDiskFactory.cs" />
+    <Compile Include="VirtualDiskFactoryAttribute.cs" />
     <Compile Include="VirtualDiskLayer.cs" />
     <Compile Include="Vmdk\CommonSparseExtentHeader.cs" />
     <Compile Include="Vmdk\CommonSparseExtentStream.cs" />
+    <Compile Include="Vmdk\CompressedGrainHeader.cs" />
     <Compile Include="Vmdk\DescriptorFile.cs" />
     <Compile Include="Vmdk\DescriptorFileEntry.cs" />
     <Compile Include="Vmdk\Disk.cs" />
     <Compile Include="Vmdk\DiskAdapterType.cs" />
     <Compile Include="Vmdk\DiskBuilder.cs" />
     <Compile Include="Vmdk\DiskCreateType.cs" />
+    <Compile Include="Vmdk\DiskFactory.cs" />
     <Compile Include="Vmdk\DiskImageFile.cs" />
     <Compile Include="Vmdk\ExtentDescriptor.cs" />
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
-    <Compile Include="Vmdk\CompressedGrainHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Vmdk\VmfsSparseExtentBuilder.cs" />
@@ -311,7 +318,6 @@
     <Compile Include="Wim\ShortResourceHeader.cs" />
     <Compile Include="Wim\XpressBitStream.cs" />
     <Compile Include="Wim\XpressStream.cs" />
-    <Compile Include="IWindowsFileSystem.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

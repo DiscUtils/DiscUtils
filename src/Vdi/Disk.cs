@@ -35,6 +35,16 @@ namespace DiscUtils.Vdi
         private DiskStream _content;
 
         /// <summary>
+        /// Creates a new instance from a file on disk.
+        /// </summary>
+        /// <param name="path">The path to the disk</param>
+        /// <param name="access">The access requested to the disk</param>
+        public Disk(string path, FileAccess access)
+            : this(new FileStream(path, FileMode.Open, access), Ownership.Dispose)
+        {
+        }
+
+        /// <summary>
         /// Creates a new instance from an existing disk file.
         /// </summary>
         /// <param name="file">The file containing the disk image.</param>

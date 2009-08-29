@@ -187,6 +187,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Raw">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2009-08-29 16:05:41Z">
+      <Issue>
+       <Item>DiscUtils.Raw</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="82" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-08-29 16:05:41Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Raw</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="81" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Registry">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
@@ -3676,6 +3701,8 @@
     <Note Id="78" Modified="2009-08-16 15:49:48Z">BuilderExtent subclasses implement an equivalent dispose pattern, but one that semantically supports re-use.</Note>
     <Note Id="79" Modified="2009-08-09 13:49:20Z">Not used yet</Note>
     <Note Id="80" Modified="2009-08-27 11:54:59Z">Using alternative dispose pattern that permits re-use.</Note>
+    <Note Id="81" Modified="2009-08-29 16:06:15Z">Utils is part of the project namespace.</Note>
+    <Note Id="82" Modified="2009-08-29 16:06:39Z">Raw follows pattern of placing each disk type in its own namespace.</Note>
    </User>
   </Notes>
   <Rules>

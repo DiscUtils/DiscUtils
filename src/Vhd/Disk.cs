@@ -72,6 +72,20 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Creates a new instance from an existing file, differencing disks are supported.
+        /// </summary>
+        /// <param name="path">The path to the disk image</param>
+        /// <param name="access">The access requested to the disk</param>
+        public Disk(string path, FileAccess access)
+        {
+            FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
+            DiskImageFile file = new DiskImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose);
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            ResolveFileChain(path);
+        }
+
+        /// <summary>
         /// Creates a new instance from a pre-existing set of image files.
         /// </summary>
         /// <param name="files">The set of image files</param>

@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Partitions;
 
 namespace DiscUtils
@@ -31,6 +32,8 @@ namespace DiscUtils
     /// </summary>
     public abstract class VirtualDisk : IDisposable
     {
+        private static Dictionary<string, VirtualDiskFactory> s_diskFactories;
+
         /// <summary>
         /// Destroys this instance.
         /// </summary>
@@ -117,6 +120,60 @@ namespace DiscUtils
                 {
                     return table;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets the set of disk formats supported as an array of file extensions.
+        /// </summary>
+        public static ICollection<string> SupportedDiskFormats
+        {
+            get { return DiskFactories.Keys; }
+        }
+
+        /// <summary>
+        /// Opens an existing virtual disk.
+        /// </summary>
+        /// <param name="path">The path of the virtual disk to open</param>
+        /// <param name="access">The desired access to the disk</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        public static VirtualDisk OpenDisk(string path, FileAccess access)
+        {
+            string extension = Path.GetExtension(path).ToUpperInvariant();
+            if (extension.StartsWith(".", StringComparison.Ordinal))
+            {
+                extension = extension.Substring(1);
+            }
+
+            VirtualDiskFactory factory;
+            if (DiskFactories.TryGetValue(extension, out factory))
+            {
+                return factory.OpenDisk(path, access);
+            }
+
+            return null;
+        }
+
+        private static Dictionary<string, VirtualDiskFactory> DiskFactories
+        {
+            get
+            {
+                if (s_diskFactories == null)
+                {
+                    Dictionary<string, VirtualDiskFactory> factories = new Dictionary<string, VirtualDiskFactory>();
+
+                    foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+                    {
+                        foreach (VirtualDiskFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskFactoryAttribute), false))
+                        {
+                            factories.Add(attr.FileExtension.ToUpperInvariant(), (VirtualDiskFactory)Activator.CreateInstance(type));
+                        }
+                    }
+
+                    s_diskFactories = factories;
+                }
+
+                return s_diskFactories;
             }
         }
     }
