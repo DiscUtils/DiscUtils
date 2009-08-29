@@ -47,6 +47,8 @@ namespace DiscUtils.Vmdk
         private const string DiskDbHardwareVersion = "ddb.virtualHWVersion";
         private const string DiskDbUuid = "ddb.uuid";
 
+        private const long MaxSize = 20 * Sizes.OneKiB;
+
         public DescriptorFile()
         {
             _header = new List<DescriptorFileEntry>();
@@ -312,6 +314,11 @@ namespace DiscUtils.Vmdk
 
         private void Load(Stream source)
         {
+            if (source.Length - source.Position > MaxSize)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Invalid VMDK descriptor file, more than {0} bytes in length", MaxSize));
+            }
+
             StreamReader reader = new StreamReader(source);
             string line = reader.ReadLine();
             while (line != null)
