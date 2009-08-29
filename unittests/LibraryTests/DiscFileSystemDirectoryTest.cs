@@ -345,7 +345,7 @@ namespace DiscUtils
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();
             Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            return Fat.FatFileSystem.FormatFloppy(ms, Fat.FloppyDiskType.Extended, null);
+            return Fat.FatFileSystem.FormatFloppy(ms, FloppyDiskType.Extended, null);
         }
 
         public DiscFileSystem DiagnosticNtfsFileSystem()

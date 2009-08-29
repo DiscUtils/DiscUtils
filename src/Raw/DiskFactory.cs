@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2009, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,27 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 
-namespace DiscUtils.Fat
+namespace DiscUtils.Raw
 {
-    /// <summary>
-    /// The supported Floppy Disk logical formats.
-    /// </summary>
-    public enum FloppyDiskType
+    [VirtualDiskFactory("img")]
+    [VirtualDiskFactory("ima")]
+    [VirtualDiskFactory("vfd")]
+    [VirtualDiskFactory("flp")]
+    internal sealed class DiskFactory : VirtualDiskFactory
     {
-        /// <summary>
-        /// 720KiB capacity disk.
-        /// </summary>
-        DoubleDensity = 0,
-
-        /// <summary>
-        /// 1440KiB capacity disk.
-        /// </summary>
-        HighDensity = 1,
-
-        /// <summary>
-        /// 2880KiB capacity disk.
-        /// </summary>
-        Extended = 2
+        public override VirtualDisk OpenDisk(string path, FileAccess access)
+        {
+            return new Disk(path, access);
+        }
     }
 }

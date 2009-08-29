@@ -78,7 +78,7 @@
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
-    <Compile Include="Fat\FloppyDiskType.cs" />
+    <Compile Include="FloppyDiskType.cs" />
     <Compile Include="FileLocator.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="IByteArraySerializable.cs" />
@@ -219,6 +219,8 @@
     <Compile Include="Partitions\WellKnownPartitionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range.cs" />
+    <Compile Include="Raw\Disk.cs" />
+    <Compile Include="Raw\DiskImageFile.cs" />
     <Compile Include="ReadOnlyDiscFileSystem.cs" />
     <Compile Include="Registry\Bin.cs" />
     <Compile Include="Registry\BinHeader.cs" />
