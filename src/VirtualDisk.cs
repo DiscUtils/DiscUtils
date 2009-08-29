@@ -105,6 +105,17 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets a best guess as to whether the disk has a valid partition table.
+        /// </summary>
+        /// <remarks>There is no reliable way to determine whether a disk has a valid partition
+        /// table.  The 'guess' consists of checking for basic indicators and looking for obviously
+        /// invalid data, such as overlapping partitions.</remarks>
+        public virtual bool IsPartitioned
+        {
+            get { return BiosPartitionTable.IsValid(Content); }
+        }
+
+        /// <summary>
         /// Gets the object that interprets the partition structure.
         /// </summary>
         public virtual PartitionTable Partitions

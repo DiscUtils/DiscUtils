@@ -322,6 +322,52 @@ namespace DiscUtils.Partitions
             return Geometry.FromCapacity(disk.Length);
         }
 
+        /// <summary>
+        /// Indicates if a stream contains a valid partition table.
+        /// </summary>
+        /// <param name="disk">The stream to inspect</param>
+        /// <returns><c>true</c> if the partition table is valid, else <c>false</c>.</returns>
+        public static bool IsValid(Stream disk)
+        {
+            disk.Position = 0;
+            byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+
+            // Check for the 'bootable sector' marker
+            if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
+            {
+                return false;
+            }
+
+            bool foundPartition = false;
+
+            List<StreamExtent> knownPartitions = new List<StreamExtent>();
+            foreach (var record in ReadPrimaryRecords(bootSector))
+            {
+                // If the partition extends beyond the end of the disk, this is probably an invalid partition table
+                if ((record.LBAStart + record.LBALength) * Sizes.Sector > disk.Length)
+                {
+                    return false;
+                }
+
+                if (record.LBALength > 0)
+                {
+                    foundPartition = true;
+                }
+
+                StreamExtent[] thisPartitionExtents = new StreamExtent[] { new StreamExtent(record.LBAStart, record.LBALength) };
+
+                // If the partition intersects another partition, this is probably an invalid partition table
+                foreach (var overlap in StreamExtent.Intersect(knownPartitions, thisPartitionExtents))
+                {
+                    return false;
+                }
+
+                knownPartitions = new List<StreamExtent>(StreamExtent.Union(knownPartitions, thisPartitionExtents));
+            }
+
+            return foundPartition;
+        }
+
         private BiosPartitionRecord[] GetAllRecords()
         {
             List<BiosPartitionRecord> newList = new List<BiosPartitionRecord>();
