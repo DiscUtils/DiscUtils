@@ -275,7 +275,7 @@ namespace DiscUtils.Partitions
         }
 
 
-        internal Stream Open(GptEntry entry)
+        internal SparseStream Open(GptEntry entry)
         {
             return new SubStream(_diskData, entry.FirstUsedLogicalBlock * _diskGeometry.BytesPerSector, entry.LastUsedLogicalBlock * _diskGeometry.BytesPerSector);
         }

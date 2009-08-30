@@ -38,7 +38,7 @@ namespace DiscUtils.Partitions
         /// Opens a stream that accesses the partition's contents.
         /// </summary>
         /// <returns>The new stream.</returns>
-        public abstract Stream Open();
+        public abstract SparseStream Open();
 
         /// <summary>
         /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.

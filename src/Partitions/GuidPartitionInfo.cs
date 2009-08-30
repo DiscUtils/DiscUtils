@@ -43,7 +43,7 @@ namespace DiscUtils.Partitions
         /// Opens a stream to access the content of the partition.
         /// </summary>
         /// <returns>The new stream</returns>
-        public override Stream Open()
+        public override SparseStream Open()
         {
             return _table.Open(_entry);
         }
