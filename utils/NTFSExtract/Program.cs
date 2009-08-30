@@ -25,7 +25,6 @@ using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
-using DiscUtils.Vhd;
 
 namespace NTFSExtract
 {
@@ -42,7 +41,7 @@ namespace NTFSExtract
 
         static void Main(string[] args)
         {
-            _diskFile = new CommandLineParameter("disk", "The name of the VHD, VMDK or VDI file to access.", false);
+            _diskFile = new CommandLineParameter("disk", "The name of the disk image file to access.", false);
             _inFilePath = new CommandLineParameter("file_path", "The path of the file to extract.", false);
             _outFilePath = new CommandLineParameter("out_file", "The output file to be written.", false);
             _attributeName = new CommandLineSwitch("a", "attribute", "name", "The name of the attribute to extract (the default is 'unnamed').");
@@ -65,7 +64,7 @@ namespace NTFSExtract
 
             if (!_quietSwitch.IsPresent)
             {
-                ShowHeader();
+                Utilities.ShowHeader(typeof(Program));
             }
 
             if (_helpSwitch.IsPresent || !parseResult)
@@ -89,7 +88,7 @@ namespace NTFSExtract
 
             using (VirtualDisk disk = Utilities.OpenDisk(_diskFile.Value, FileAccess.Read))
             {
-                using (Stream partitionStream = disk.Partitions[partition].Open())
+                using (Stream partitionStream = Utilities.OpenVolume(disk, partition))
                 {
                     using (NtfsFileSystem fs = new NtfsFileSystem(partitionStream))
                     {
@@ -111,19 +110,5 @@ namespace NTFSExtract
             }
         }
 
-
-
-        private static void ShowHeader()
-        {
-            Console.WriteLine("NTFSExtract v{0}, available from http://codeplex.com/DiscUtils", GetVersion());
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
-            Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
-            Console.WriteLine();
-        }
-
-        private static string GetVersion()
-        {
-            return typeof(Program).Assembly.GetName().Version.ToString(3);
-        }
     }
 }

@@ -64,7 +64,7 @@ namespace VirtualDiskConvert
 
             if (!_quietSwitch.IsPresent)
             {
-                ShowHeader();
+                Utilities.ShowHeader(typeof(Program));
             }
 
             if (_helpSwitch.IsPresent || !parseResult || !_outFormat.IsPresent)
@@ -139,21 +139,9 @@ namespace VirtualDiskConvert
             {
                 return OpenIScsiDisk(_inFile.Value);
             }
-            else if (_inFile.Value.EndsWith(".vhd", StringComparison.OrdinalIgnoreCase))
-            {
-                return new DiscUtils.Vhd.Disk(_inFile.Value);
-            }
-            else if (_inFile.Value.EndsWith(".vmdk", StringComparison.OrdinalIgnoreCase))
-            {
-                return new DiscUtils.Vmdk.Disk(_inFile.Value, FileAccess.Read);
-            }
-            else if (_inFile.Value.EndsWith(".vdi", StringComparison.OrdinalIgnoreCase))
-            {
-                return new DiscUtils.Vdi.Disk(new FileStream(_inFile.Value, FileMode.Open, FileAccess.Read), Ownership.Dispose);
-            }
             else
             {
-                throw new NotSupportedException(_inFile.Value + " is not a recognised disk image type");
+                return Utilities.OpenDisk(_inFile.Value, FileAccess.Read);
             }
         }
 
@@ -227,20 +215,7 @@ namespace VirtualDiskConvert
                 }
             }
 
-            throw new FileNotFoundException("The iSCSI lun could not be found", path);
-        }
-
-        private static void ShowHeader()
-        {
-            Console.WriteLine("VirtualDiskConvert v{0}, available from http://codeplex.com/DiscUtils", GetVersion());
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
-            Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
-            Console.WriteLine();
-        }
-
-        private static string GetVersion()
-        {
-            return typeof(Program).Assembly.GetName().Version.ToString(3);
+            throw new FileNotFoundException("The iSCSI LUN could not be found", path);
         }
     }
 }

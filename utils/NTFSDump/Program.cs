@@ -25,7 +25,6 @@ using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
-using DiscUtils.Vhd;
 
 namespace NTFSDump
 {
@@ -41,7 +40,7 @@ namespace NTFSDump
 
         static void Main(string[] args)
         {
-            _diskFile = new CommandLineParameter("disk_file", "The name of the VHD or VMDK file to inspect.", false);
+            _diskFile = new CommandLineParameter("disk_file", "The name of the disk image file to inspect.", false);
             _partition = new CommandLineSwitch("p", "partition", "num", "The number of the partition to inspect, in the range 0-n.  If not specified, 0 (the first partition) is the default.");
             _showHidden = new CommandLineSwitch("H", "hidden", null, "Don't hide files & directories with the hidden attribute set in the directory listing.");
             _showSystem = new CommandLineSwitch("S", "system", null, "Don't hide files & directories with the system attribute set in the directory listing.");
@@ -62,7 +61,7 @@ namespace NTFSDump
 
             if (!_quietSwitch.IsPresent)
             {
-                ShowHeader();
+                Utilities.ShowHeader(typeof(Program));
             }
 
             if (_helpSwitch.IsPresent || !parseResult)
@@ -80,7 +79,7 @@ namespace NTFSDump
 
             using (VirtualDisk disk = Utilities.OpenDisk(_diskFile.Value, FileAccess.Read))
             {
-                using (Stream partitionStream = disk.Partitions[partition].Open())
+                using (Stream partitionStream = Utilities.OpenVolume(disk, partition))
                 {
                     NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
                     fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
@@ -90,19 +89,6 @@ namespace NTFSDump
                     fs.Dump(Console.Out, "");
                 }
             }
-        }
-
-        private static void ShowHeader()
-        {
-            Console.WriteLine("NTFSDump v{0}, available from http://codeplex.com/DiscUtils", GetVersion());
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
-            Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
-            Console.WriteLine();
-        }
-
-        private static string GetVersion()
-        {
-            return typeof(Program).Assembly.GetName().Version.ToString(3);
         }
     }
 }

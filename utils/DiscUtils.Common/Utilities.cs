@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 
 namespace DiscUtils.Common
 {
@@ -73,19 +74,48 @@ namespace DiscUtils.Common
 
         public static VirtualDisk OpenDisk(string path, FileAccess access)
         {
-            if (path.EndsWith(".VHD", StringComparison.OrdinalIgnoreCase))
+            VirtualDisk result = VirtualDisk.OpenDisk(path, access);
+            if (result == null)
             {
-                return new DiscUtils.Vhd.Disk(new FileStream(path, FileMode.Open, access), Ownership.Dispose);
+                throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "{0} is not a recognised virtual disk type", path));
             }
-            else if (path.EndsWith(".VMDK", StringComparison.OrdinalIgnoreCase))
+
+            return result;
+        }
+
+        public static SparseStream OpenVolume(VirtualDisk disk, int partition)
+        {
+            if (disk.IsPartitioned)
             {
-                return new DiscUtils.Vmdk.Disk(path, access);
+                return disk.Partitions[partition].Open();
             }
-            else if (path.EndsWith(".VDI", StringComparison.OrdinalIgnoreCase))
+            else
             {
-                return new DiscUtils.Vdi.Disk(new FileStream(path, FileMode.Open, access), Ownership.Dispose);
+                if (partition != 0)
+                {
+                    throw new ArgumentException("Attempt to open partition on unpartitioned disk");
+                }
+
+                return new SnapshotStream(disk.Content, Ownership.None);
             }
-            throw new NotSupportedException("Unrecognised file extension");
+        }
+
+        public static void ShowHeader(Type program)
+        {
+            Console.WriteLine("{0} v{1}, available from http://discutils.codeplex.com", GetExeName(program), GetVersion(program));
+            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
+            Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
+            Console.WriteLine();
+        }
+
+        public static string GetExeName(Type program)
+        {
+            return program.Assembly.GetName().Name;
+        }
+
+        public static string GetVersion(Type program)
+        {
+            return program.Assembly.GetName().Version.ToString(3);
         }
     }
 }

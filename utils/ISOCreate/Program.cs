@@ -54,7 +54,7 @@ namespace ISOCreate
 
             if (!_quietSwitch.IsPresent)
             {
-                ShowHeader();
+                Utilities.ShowHeader(typeof(Program));
             }
 
             if (_helpSwitch.IsPresent || !parseResult)
@@ -82,19 +82,6 @@ namespace ISOCreate
             PopulateFromFolder(builder, di, di.FullName);
 
             builder.Build(_isoFileParam.Value);
-        }
-
-        private static void ShowHeader()
-        {
-            Console.WriteLine("ISOCreate v{0}, available from http://codeplex.com/DiscUtils", GetVersion());
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
-            Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
-            Console.WriteLine();
-        }
-
-        private static string GetVersion()
-        {
-            return typeof(Program).Assembly.GetName().Version.ToString(3);
         }
 
         private static void PopulateFromFolder(CDBuilder builder, DirectoryInfo di, string basePath)
