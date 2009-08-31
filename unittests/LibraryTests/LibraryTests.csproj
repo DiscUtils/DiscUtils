@@ -74,6 +74,7 @@
     <Compile Include="Vhd\DiskImageFileTest.cs" />
     <Compile Include="Vhd\DiskTest.cs" />
     <Compile Include="Vhd\DynamicStreamTest.cs" />
+    <Compile Include="VirtualDiskTest.cs" />
     <Compile Include="Vmdk\DiskBuilderTest.cs" />
     <Compile Include="Vmdk\DiskTest.cs" />
     <Compile Include="Vmdk\DynamicStreamTest.cs" />

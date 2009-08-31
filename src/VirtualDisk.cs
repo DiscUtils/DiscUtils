@@ -105,6 +105,59 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Reads the first sector of the disk, known as the Master Boot Record.
+        /// </summary>
+        public virtual byte[] GetMasterBootRecord()
+        {
+            byte[] sector = new byte[Sizes.Sector];
+
+            long oldPos = Content.Position;
+            Content.Position = 0;
+            Utilities.ReadFully(Content, sector, 0, Sizes.Sector);
+            Content.Position = oldPos;
+
+            return sector;
+        }
+
+        /// <summary>
+        /// Overwrites the first sector of the disk, known as the Master Boot Record.
+        /// </summary>
+        public virtual void SetMasterBootRecord(byte[] data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+            else if (data.Length != Sizes.Sector)
+            {
+                throw new ArgumentException("The Master Boot Record must be exactly 512 bytes in length", "data");
+            }
+
+            long oldPos = Content.Position;
+            Content.Position = 0;
+            Content.Write(data, 0, Sizes.Sector);
+            Content.Position = oldPos;
+        }
+
+        /// <summary>
+        /// Gets the Windows disk signature of the disk, which uniquely identifies the disk.
+        /// </summary>
+        public virtual int Signature
+        {
+            get
+            {
+                return Utilities.ToInt32LittleEndian(GetMasterBootRecord(), 0x01B8);
+            }
+
+            set
+            {
+                byte[] mbr = GetMasterBootRecord();
+                Utilities.WriteBytesLittleEndian(value, mbr, 0x01B8);
+                SetMasterBootRecord(mbr);
+            }
+        }
+
+        /// <summary>
         /// Gets a best guess as to whether the disk has a valid partition table.
         /// </summary>
         /// <remarks>There is no reliable way to determine whether a disk has a valid partition
