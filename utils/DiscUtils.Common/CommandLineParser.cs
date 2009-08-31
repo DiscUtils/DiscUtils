@@ -30,6 +30,7 @@ namespace DiscUtils.Common
         private string _utilityName;
         private List<CommandLineSwitch> _switches;
         private List<CommandLineParameter> _params;
+        private CommandLineMultiParameter _multiParam;
 
         private bool _parseFailed;
 
@@ -39,6 +40,15 @@ namespace DiscUtils.Common
             _switches = new List<CommandLineSwitch>();
             _params = new List<CommandLineParameter>();
             _parseFailed = false;
+        }
+
+        public void AddMultiParameter(CommandLineMultiParameter multiParameter)
+        {
+            if (_multiParam != null)
+            {
+                throw new InvalidOperationException("Multi parameter already set");
+            }
+            _multiParam = multiParameter;
         }
 
         public void AddParameter(CommandLineParameter parameter)
@@ -62,6 +72,10 @@ namespace DiscUtils.Common
             {
                 Console.Write(" " + el.CommandLineText);
             }
+            if (_multiParam != null)
+            {
+                Console.WriteLine(" " + _multiParam.CommandLineText);
+            }
             Console.WriteLine();
             Console.WriteLine();
 
@@ -73,10 +87,19 @@ namespace DiscUtils.Common
             {
                 maxNameLen = Math.Max(maxNameLen, p.NameDisplayLength);
             }
+            if (_multiParam != null)
+            {
+                maxNameLen = Math.Max(maxNameLen, _multiParam.NameDisplayLength);
+            }
 
             foreach (CommandLineParameter p in _params)
             {
                 p.WriteDescription(Console.Out, "  {0,-" + maxNameLen + "}  {1}", 70 - maxNameLen);
+                Console.WriteLine();
+            }
+            if (_multiParam != null)
+            {
+                _multiParam.WriteDescription(Console.Out, "  {0,-" + maxNameLen + "}  {1}", 70 - maxNameLen);
                 Console.WriteLine();
             }
 
@@ -140,17 +163,18 @@ namespace DiscUtils.Common
                     }
 
                 }
+                else if (paramIdx < _params.Count && (!_params[paramIdx].IsOptional || _params[paramIdx].Matches(args[i])))
+                {
+                    i = _params[paramIdx].Process(args, i);
+                    ++paramIdx;
+                }
+                else if (paramIdx >= _params.Count && _multiParam != null && _multiParam.Matches(args[i]))
+                {
+                    i = _multiParam.Process(args, i);
+                }
                 else
                 {
-                    if (paramIdx < _params.Count && (!_params[paramIdx].IsOptional || _params[paramIdx].Matches(args[i])))
-                    {
-                        i = _params[paramIdx].Process(args, i);
-                        ++paramIdx;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -163,6 +187,17 @@ namespace DiscUtils.Common
                 }
 
                 if (!_params[j].IsOptional && !_params[j].IsPresent)
+                {
+                    return false;
+                }
+            }
+            if (_multiParam != null)
+            {
+                if (!_multiParam.IsValid)
+                {
+                    return false;
+                }
+                if (!_multiParam.IsOptional && !_multiParam.IsPresent)
                 {
                     return false;
                 }

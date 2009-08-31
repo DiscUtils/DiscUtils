@@ -22,8 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Globalization;
+using System.IO;
+using DiscUtils.Iscsi;
 
 namespace DiscUtils.Common
 {
@@ -55,6 +56,91 @@ namespace DiscUtils.Common
             return lines.ToArray();
         }
 
+        public static VirtualDisk OpenDisk(string path, FileAccess access, string username, string password)
+        {
+            if (path.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
+            {
+                return OpenIScsiDisk(path, username, password);
+            }
+            else
+            {
+                VirtualDisk result = VirtualDisk.OpenDisk(path, access);
+                if (result == null)
+                {
+                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "{0} is not a recognised virtual disk type", path));
+                }
+
+                return result;
+            }
+        }
+
+        public static VirtualDisk OpenIScsiDisk(string path, string username, string password)
+        {
+            string targetAddress;
+            string targetName;
+            string lun = null;
+
+            if (!path.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("The iSCSI address is invalid");
+            }
+
+            int targetAddressEnd = path.IndexOf('/', 8);
+            if (targetAddressEnd < 8)
+            {
+                throw new ArgumentException("The iSCSI address is invalid");
+            }
+            targetAddress = path.Substring(8, targetAddressEnd - 8);
+
+
+            int targetNameEnd = path.IndexOf('?', targetAddressEnd + 1);
+            if (targetNameEnd < targetAddressEnd)
+            {
+                targetName = path.Substring(targetAddressEnd + 1);
+            }
+            else
+            {
+                targetName = path.Substring(targetAddressEnd + 1, targetNameEnd - (targetAddressEnd + 1));
+
+                string[] parms = path.Substring(targetNameEnd + 1).Split('&');
+
+                foreach (string param in parms)
+                {
+                    if (param.StartsWith("LUN=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        lun = param.Substring(4);
+                    }
+                }
+            }
+
+            if (lun == null)
+            {
+                throw new ArgumentException("No LUN specified in address", "path");
+            }
+
+            Initiator initiator = new Initiator();
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                if (string.IsNullOrEmpty(password))
+                {
+                    password = Utilities.PromptForPassword();
+                }
+                initiator.SetCredentials(username, password);
+            }
+
+            Session session = initiator.ConnectTo(targetName, targetAddress);
+            foreach (var lunInfo in session.GetLuns())
+            {
+                if (lunInfo.ToString() == lun)
+                {
+                    return session.OpenDisk(lunInfo.Lun);
+                }
+            }
+
+            throw new FileNotFoundException("The iSCSI LUN could not be found", path);
+        }
+
         public static string PromptForPassword()
         {
             Console.WriteLine();
@@ -72,31 +158,33 @@ namespace DiscUtils.Common
             }
         }
 
-        public static VirtualDisk OpenDisk(string path, FileAccess access)
+        public static SparseStream OpenVolume(string volumeId, int partition, string user, string password, FileAccess access, params string[] disks)
         {
-            VirtualDisk result = VirtualDisk.OpenDisk(path, access);
-            if (result == null)
+            VolumeManager volMgr = new VolumeManager();
+            foreach (string disk in disks)
             {
-                throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "{0} is not a recognised virtual disk type", path));
+                volMgr.AddDisk(OpenDisk(disk, access, user, password));
             }
 
-            return result;
-        }
-
-        public static SparseStream OpenVolume(VirtualDisk disk, int partition)
-        {
-            if (disk.IsPartitioned)
+            if (string.IsNullOrEmpty(volumeId))
             {
-                return disk.Partitions[partition].Open();
+                PhysicalVolumeInfo[] physicalVolumes = volMgr.GetPhysicalVolumes();
+
+                if (partition > physicalVolumes.Length)
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Partition {0} not found", partition), "partition");
+                }
+
+                return physicalVolumes[partition].Open();
             }
             else
             {
-                if (partition != 0)
+                VolumeInfo volInfo = volMgr.GetVolume(volumeId);
+                if (volInfo == null)
                 {
-                    throw new ArgumentException("Attempt to open partition on unpartitioned disk");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Volume {0} not found", volumeId), "volumeId");
                 }
-
-                return new SnapshotStream(disk.Content, Ownership.None);
+                return volInfo.Open();
             }
         }
 

@@ -40,7 +40,7 @@ namespace iSCSIBrowse
         {
             _portalAddress = new CommandLineParameter("portal", "Address of the iSCSI server (aka Portal) in the form <host>[:<port>], for example 192.168.1.2:3260 or 192.168.1.2", false);
             _userName = new CommandLineSwitch("u", "user", "user_name", "The user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password");
-            _password = new CommandLineSwitch("p", "password", "secret", "The password to authenticate with.");
+            _password = new CommandLineSwitch("pw", "password", "secret", "The password to authenticate with.");
             _verbose = new CommandLineSwitch("v", "verbose", null, "Show detailed information about targets and LUNs.");
             _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
             _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");

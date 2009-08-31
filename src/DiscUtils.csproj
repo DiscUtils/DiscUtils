@@ -151,6 +151,7 @@
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminator.cs" />
     <Compile Include="IWindowsFileSystem.cs" />
+    <Compile Include="LogicalVolumeInfo.cs" />
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
@@ -218,6 +219,7 @@
     <Compile Include="Partitions\PartitionTable.cs" />
     <Compile Include="Partitions\WellKnownPartitionType.cs" />
     <Compile Include="PassthroughStreamBuilder.cs" />
+    <Compile Include="PhysicalVolumeInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range.cs" />
     <Compile Include="Raw\Disk.cs" />
@@ -304,6 +306,8 @@
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Vmdk\VmfsSparseExtentBuilder.cs" />
+    <Compile Include="VolumeInfo.cs" />
+    <Compile Include="VolumeManager.cs" />
     <Compile Include="Wim\AlternateStreamEntry.cs" />
     <Compile Include="Wim\BitStream.cs" />
     <Compile Include="Wim\LzxBitStream.cs" />

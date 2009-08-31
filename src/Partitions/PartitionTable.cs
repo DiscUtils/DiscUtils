@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.ObjectModel;
 
 namespace DiscUtils.Partitions
@@ -32,6 +33,11 @@ namespace DiscUtils.Partitions
     /// the partitions to discover the next index-to-partition mapping.</remarks>
     public abstract class PartitionTable
     {
+        /// <summary>
+        /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
+        /// </summary>
+        public abstract Guid DiskGuid { get; }
+
         /// <summary>
         /// Creates a new partition that encompasses the entire disk.
         /// </summary>

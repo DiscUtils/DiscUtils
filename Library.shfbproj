@@ -53,7 +53,8 @@
 <NamespaceSummaryItem name="DiscUtils.Vhd" isDocumented="True">Classes to create, read and modify virtual hard-disks in the Microsoft VHD format.  Fixed, Dynamic and Differencing disks are supported.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Vmdk" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VMWare VMDK format.  Most disk forms (dynamic, static, etc) are supported.  Stream optimized disks can be read from a seekable stream, but can not be read as a sequential stream, nor written to.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Wim" isDocumented="True">Classes to read Windows Image File Format (WIM) files.  Only LZX (i.e. maximum) compression is supported, and files are read-only.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Xva" isDocumented="True">Classes to create and read virtual hard-disks held within a XenServer Virtual Appliance (XVA).  Disks cannot be directly modified within an XVA itself.</NamespaceSummaryItem></NamespaceSummaries>
+<NamespaceSummaryItem name="DiscUtils.Xva" isDocumented="True">Classes to create and read virtual hard-disks held within a XenServer Virtual Appliance (XVA).  Disks cannot be directly modified within an XVA itself.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Raw" isDocumented="True">Classes to access the contents of raw disk images (IMG, IMA, FLP, VFD file extensions).</NamespaceSummaryItem></NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
   </PropertyGroup>
   <!-- There are no properties for these two groups but they need to appear in

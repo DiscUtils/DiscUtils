@@ -76,6 +76,14 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Gets the unique GPT identifier for this disk.
+        /// </summary>
+        public override Guid DiskGuid
+        {
+            get { return _primaryHeader.DiskGuid; }
+        }
+
+        /// <summary>
         /// Creates a new partition table on a disk.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>

@@ -113,6 +113,14 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
+        /// </summary>
+        public override Guid DiskGuid
+        {
+            get { return Guid.Empty; }
+        }
+
+        /// <summary>
         /// Creates a new partition that encompasses the entire disk.
         /// </summary>
         /// <param name="type">The partition type</param>

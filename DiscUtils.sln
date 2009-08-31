@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iSCSIBrowse", "utils\iSCSIB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTFSExtract", "utils\NTFSExtract\NTFSExtract.csproj", "{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolInfo", "utils\VolInfo\VolInfo.csproj", "{484C9CBA-8F33-4964-82CE-D8B340C8FF83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

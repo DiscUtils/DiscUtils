@@ -685,7 +685,7 @@ namespace DiscUtils.Ntfs
         /// <param name="name">The name of the stream</param>
         /// <param name="access">The desired access to the stream</param>
         /// <returns>A stream that can be used to access the file stream</returns>
-        public Stream OpenRawStream(string file, AttributeType type, string name, FileAccess access)
+        public SparseStream OpenRawStream(string file, AttributeType type, string name, FileAccess access)
         {
             using (new NtfsTransaction())
             {

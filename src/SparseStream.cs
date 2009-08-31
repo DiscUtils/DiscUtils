@@ -26,6 +26,8 @@ using System.IO;
 
 namespace DiscUtils
 {
+    internal delegate SparseStream SparseStreamOpenDelegate();
+
     /// <summary>
     /// Represents a sparse stream.
     /// </summary>

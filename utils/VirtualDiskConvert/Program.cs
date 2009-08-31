@@ -24,7 +24,6 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
-using DiscUtils.Iscsi;
 
 namespace VirtualDiskConvert
 {
@@ -45,7 +44,7 @@ namespace VirtualDiskConvert
             _outFormat = new CommandLineSwitch("of", "outputFormat", "format", "The type of disk to output, one of VMDK-fixed, VMDK-dynamic, VMDK-vmfsFixed, VMDK-vmfsDynamic, VHD-fixed, VHD-dynamic, VDI-dynamic, VDI-fixed or iSCSI.");
             _outFile = new CommandLineParameter("out_file", "Path to the output file.  This can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
             _userName = new CommandLineSwitch("u", "user", "user_name", "If using an iSCSI source or target, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("p", "password", "secret", "If using an iSCSI source or target, optionally use this parameter to specify the password to authenticate with.");
+            _password = new CommandLineSwitch("pw", "password", "secret", "If using an iSCSI source or target, optionally use this parameter to specify the password to authenticate with.");
             _wipe = new CommandLineSwitch("w", "wipe", null, "Write zero's to all unused parts of the disk.  This option only makes sense when converting to an iSCSI LUN which may be dirty.");
             _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
             _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
@@ -74,9 +73,11 @@ namespace VirtualDiskConvert
                 return;
             }
 
+            string user = _userName.IsPresent ? _userName.Value : null;
+            string password = _password.IsPresent ? _password.Value : null;
 
-            using (VirtualDisk inDisk = OpenInputDisk())
-            using (VirtualDisk outDisk = OpenOutputDisk(inDisk))
+            using (VirtualDisk inDisk = Utilities.OpenDisk(_inFile.Value, FileAccess.Read, user, password))
+            using (VirtualDisk outDisk = OpenOutputDisk(inDisk, user, password))
             {
                 if (outDisk.Capacity < inDisk.Capacity)
                 {
@@ -106,7 +107,7 @@ namespace VirtualDiskConvert
             }
         }
 
-        private static VirtualDisk OpenOutputDisk(VirtualDisk source)
+        private static VirtualDisk OpenOutputDisk(VirtualDisk source, string user, string password)
         {
             switch (_outFormat.Value.ToUpperInvariant())
             {
@@ -127,95 +128,11 @@ namespace VirtualDiskConvert
                 case "VDI-DYNAMIC":
                     return DiscUtils.Vdi.Disk.InitializeDynamic(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
                 case "ISCSI":
-                    return OpenIScsiDisk(_outFile.Value);
+                    return Utilities.OpenIScsiDisk(_outFile.Value, user, password);
                 default:
                     throw new NotSupportedException(_outFormat.Value + " is not a recognized disk type");
             }
         }
 
-        private static VirtualDisk OpenInputDisk()
-        {
-            if (_inFile.Value.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
-            {
-                return OpenIScsiDisk(_inFile.Value);
-            }
-            else
-            {
-                return Utilities.OpenDisk(_inFile.Value, FileAccess.Read);
-            }
-        }
-
-        private static VirtualDisk OpenIScsiDisk(string path)
-        {
-            string targetAddress;
-            string targetName;
-            string lun = null;
-
-            if (!path.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("The iSCSI address is invalid");
-            }
-
-            int targetAddressEnd = path.IndexOf('/', 8);
-            if (targetAddressEnd < 8)
-            {
-                throw new ArgumentException("The iSCSI address is invalid");
-            }
-            targetAddress = path.Substring(8, targetAddressEnd - 8);
-
-
-            int targetNameEnd = path.IndexOf('?', targetAddressEnd + 1);
-            if (targetNameEnd < targetAddressEnd)
-            {
-                targetName = path.Substring(targetAddressEnd + 1);
-            }
-            else
-            {
-                targetName = path.Substring(targetAddressEnd + 1, targetNameEnd - (targetAddressEnd + 1));
-
-                string[] parms = path.Substring(targetNameEnd + 1).Split('&');
-
-                foreach (string param in parms)
-                {
-                    if (param.StartsWith("LUN=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        lun = param.Substring(4);
-                    }
-                }
-            }
-
-            if (lun == null)
-            {
-                throw new ArgumentException("No LUN specified in address", "path");
-            }
-
-            Initiator initiator = new Initiator();
-
-            if (_userName.IsPresent)
-            {
-                string password;
-                if (_password.IsPresent)
-                {
-                    password = _password.Value;
-                }
-                else
-                {
-                    password = Utilities.PromptForPassword();
-                }
-
-                initiator.SetCredentials(_userName.Value, password);
-            }
-
-            Session session = initiator.ConnectTo(targetName, targetAddress);
-            foreach (var lunInfo in session.GetLuns())
-            {
-                if (lunInfo.ToString() == lun)
-                {
-                    return session.OpenDisk(lunInfo.Lun);
-                }
-            }
-
-            throw new FileNotFoundException("The iSCSI LUN could not be found", path);
-        }
     }
 }
