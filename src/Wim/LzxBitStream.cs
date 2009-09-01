@@ -95,11 +95,9 @@ namespace DiscUtils.Wim
 
         public void Align(int bits)
         {
+            // Note: Consumes 1-16 bits, to force alignment (never 0)
             int offset = (int)(_position % bits);
-            if (offset != 0)
-            {
-                Consume(bits - offset);
-            }
+            Consume(bits - offset);
         }
 
         public long Position
