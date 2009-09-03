@@ -111,5 +111,13 @@ namespace DiscUtils.Partitions
         {
             get { return new ChsAddress(_record.EndCylinder, _record.EndHead, _record.EndSector); }
         }
+
+        /// <summary>
+        /// Gets the index of the partition in the primary partition table, or <c>-1</c> if not a primary partition.
+        /// </summary>
+        public int PrimaryIndex
+        {
+            get { return _record.Index; }
+        }
     }
 }

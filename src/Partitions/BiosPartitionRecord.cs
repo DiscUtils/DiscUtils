@@ -38,12 +38,13 @@ namespace DiscUtils.Partitions
         private byte _endSector;
         private uint _lbaStart;
         private uint _lbaLength;
+        private int _index;
 
         public BiosPartitionRecord()
         {
         }
 
-        public BiosPartitionRecord(byte[] data, int offset, uint lbaOffset)
+        public BiosPartitionRecord(byte[] data, int offset, uint lbaOffset, int index)
         {
             _lbaOffset = lbaOffset;
 
@@ -57,6 +58,7 @@ namespace DiscUtils.Partitions
             _endCylinder = (ushort)(data[offset + 7] | ((data[offset + 6] & 0xC0) << 2));
             _lbaStart = Utilities.ToUInt32LittleEndian(data, offset + 8);
             _lbaLength = Utilities.ToUInt32LittleEndian(data, offset + 12);
+            _index = index;
         }
 
         public bool IsValid
@@ -180,6 +182,11 @@ namespace DiscUtils.Partitions
         public uint LBAStartAbsolute
         {
             get { return _lbaStart + _lbaOffset; }
+        }
+
+        public int Index
+        {
+            get { return _index; }
         }
 
         internal void WriteTo(byte[] buffer, int offset)

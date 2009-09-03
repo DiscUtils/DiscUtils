@@ -302,6 +302,22 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Sets the active partition.
+        /// </summary>
+        /// <param name="index">The index of the primary partition to mark bootable, or <c>-1</c> for none</param>
+        /// <remarks>The supplied index is the index within the primary partition, see <c>PrimaryIndex</c> on <c>BiosPartitionInfo</c>.</remarks>
+        public void SetActivePartition(int index)
+        {
+            List<BiosPartitionRecord> records = new List<BiosPartitionRecord>(GetPrimaryRecords());
+
+            for (int i = 0; i < records.Count; ++i)
+            {
+                records[i].Status = (i == index) ? (byte)0x80 : (byte)0x00;
+                WriteRecord(i, records[i]);
+            }
+        }
+
+        /// <summary>
         /// Makes a best guess at the geometry of a disk.
         /// </summary>
         /// <param name="disk">String containing the disk image to detect the geometry from</param>
@@ -411,7 +427,7 @@ namespace DiscUtils.Partitions
             BiosPartitionRecord[] records = new BiosPartitionRecord[4];
             for (int i = 0; i < 4; ++i)
             {
-                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0);
+                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0, i);
             }
             return records;
         }

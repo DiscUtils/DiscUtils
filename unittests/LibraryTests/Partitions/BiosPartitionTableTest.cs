@@ -62,6 +62,9 @@ namespace DiscUtils.Partitions
 
             // Make sure the 'active' flag made it through...
             Assert.IsTrue(((BiosPartitionInfo)table[idx]).IsActive);
+
+            // Make sure the partition index is Zero
+            Assert.AreEqual(0, ((BiosPartitionInfo)table[idx]).PrimaryIndex);
         }
 
         [Test]
@@ -128,5 +131,21 @@ namespace DiscUtils.Partitions
             Assert.AreEqual(sectorCount[2], table[1].SectorCount);
         }
 
+        [Test]
+        public void SetActive()
+        {
+            MemoryStream ms = new MemoryStream();
+            Geometry geom = Geometry.FromCapacity(10 * 1024 * 1024);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            table.Create(1 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+            table.Create(2 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+            table.Create(3 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+
+            table.SetActivePartition(1);
+            table.SetActivePartition(2);
+            Assert.IsFalse(((BiosPartitionInfo)table.Partitions[1]).IsActive);
+            Assert.IsTrue(((BiosPartitionInfo)table.Partitions[2]).IsActive);
+        }
     }
 }

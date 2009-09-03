@@ -53,7 +53,7 @@ namespace DiscUtils.Partitions
                 uint nextPartPos = 0;
                 for (int offset = 0x1BE; offset <= 0x1EE; offset += 0x10)
                 {
-                    BiosPartitionRecord thisPart = new BiosPartitionRecord(sector, offset, partPos);
+                    BiosPartitionRecord thisPart = new BiosPartitionRecord(sector, offset, partPos, -1);
 
                     if (thisPart.StartCylinder != 0 || thisPart.StartHead != 0 || thisPart.StartSector != 0)
                     {
