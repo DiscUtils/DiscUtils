@@ -36,24 +36,30 @@ namespace DiscUtils.Diagnostics
         /// <param name="output">The destination for the hex dump.</param>
         public static void Generate(Stream stream, TextWriter output)
         {
+            Generate(SparseStream.FromStream(stream, Ownership.None), output);
+        }
+
+        /// <summary>
+        /// Creates a hex dump from a stream.
+        /// </summary>
+        /// <param name="stream">The stream to generate the hex dump from.</param>
+        /// <param name="output">The destination for the hex dump.</param>
+        public static void Generate(SparseStream stream, TextWriter output)
+        {
             stream.Position = 0;
             byte[] buffer = new byte[1024 * 1024];
 
-            bool done = false;
-            long totalNumLoaded = 0;
-
-            while (!done)
+            foreach(var block in StreamExtent.Blocks(stream.Extents, buffer.Length))
             {
+                long startPos = block.Offset * (long)buffer.Length;
+                stream.Position = startPos;
+
                 int numLoaded = 0;
                 while (numLoaded < buffer.Length)
                 {
                     int bytesRead = stream.Read(buffer, numLoaded, buffer.Length - numLoaded);
                     if (bytesRead == 0)
                     {
-                        if (numLoaded != buffer.Length)
-                        {
-                            done = true;
-                        }
                         break;
                     }
                     numLoaded += bytesRead;
@@ -80,7 +86,7 @@ namespace DiscUtils.Diagnostics
 
                     if (foundVal)
                     {
-                        output.Write("{0:x8}", i + totalNumLoaded);
+                        output.Write("{0:x8}", i + startPos);
 
                         for (int j = 0; j < 16; j++)
                         {
@@ -105,8 +111,6 @@ namespace DiscUtils.Diagnostics
                         output.WriteLine();
                     }
                 }
-
-                totalNumLoaded += numLoaded;
             }
         }
     }
