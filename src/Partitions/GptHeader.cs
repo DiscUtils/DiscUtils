@@ -94,6 +94,12 @@ namespace DiscUtils.Partitions
             Buffer = new byte[HeaderSize];
             Array.Copy(buffer, offset, Buffer, 0, HeaderSize);
 
+            // Reject obviously invalid data
+            if (Signature != GptSignature || HeaderSize == 0)
+            {
+                return false;
+            }
+
             return (Crc == CalcCrc(buffer, offset, HeaderSize));
         }
 
