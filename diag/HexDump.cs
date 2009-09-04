@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Diagnostics
@@ -52,63 +53,68 @@ namespace DiscUtils.Diagnostics
             foreach(var block in StreamExtent.Blocks(stream.Extents, buffer.Length))
             {
                 long startPos = block.Offset * (long)buffer.Length;
+                long endPos = Math.Min((block.Offset + block.Count) * (long)buffer.Length, stream.Length);
                 stream.Position = startPos;
 
-                int numLoaded = 0;
-                while (numLoaded < buffer.Length)
+                while (stream.Position < endPos)
                 {
-                    int bytesRead = stream.Read(buffer, numLoaded, buffer.Length - numLoaded);
-                    if (bytesRead == 0)
+                    int numLoaded = 0;
+                    long readStart = stream.Position;
+                    while (numLoaded < buffer.Length)
                     {
-                        break;
-                    }
-                    numLoaded += bytesRead;
-                }
-
-                for (int i = 0; i < numLoaded; i += 16)
-                {
-                    bool foundVal = false;
-                    if (i > 0)
-                    {
-                        for (int j = 0; j < 16; j++)
+                        int bytesRead = stream.Read(buffer, numLoaded, buffer.Length - numLoaded);
+                        if (bytesRead == 0)
                         {
-                            if (buffer[i + j] != buffer[i + j - 16])
-                            {
-                                foundVal = true;
-                                break;
-                            }
+                            break;
                         }
-                    }
-                    else
-                    {
-                        foundVal = true;
+                        numLoaded += bytesRead;
                     }
 
-                    if (foundVal)
+                    for (int i = 0; i < numLoaded; i += 16)
                     {
-                        output.Write("{0:x8}", i + startPos);
-
-                        for (int j = 0; j < 16; j++)
+                        bool foundVal = false;
+                        if (i > 0)
                         {
-                            if (j % 8 == 0)
+                            for (int j = 0; j < 16; j++)
                             {
-                                output.Write(" ");
+                                if (buffer[i + j] != buffer[i + j - 16])
+                                {
+                                    foundVal = true;
+                                    break;
+                                }
                             }
-                            output.Write(" {0:x2}", buffer[i + j]);
+                        }
+                        else
+                        {
+                            foundVal = true;
                         }
 
-                        output.Write("  |");
-                        for (int j = 0; j < 16; j++)
+                        if (foundVal)
                         {
-                            if (j % 8 == 0 && j != 0)
-                            {
-                                output.Write(" ");
-                            }
-                            output.Write("{0}", (buffer[i + j] >= 32 && buffer[i + j] < 127) ? (char)buffer[i + j] : '.');
-                        }
-                        output.Write("|");
+                            output.Write("{0:x8}", i + readStart);
 
-                        output.WriteLine();
+                            for (int j = 0; j < 16; j++)
+                            {
+                                if (j % 8 == 0)
+                                {
+                                    output.Write(" ");
+                                }
+                                output.Write(" {0:x2}", buffer[i + j]);
+                            }
+
+                            output.Write("  |");
+                            for (int j = 0; j < 16; j++)
+                            {
+                                if (j % 8 == 0 && j != 0)
+                                {
+                                    output.Write(" ");
+                                }
+                                output.Write("{0}", (buffer[i + j] >= 32 && buffer[i + j] < 127) ? (char)buffer[i + j] : '.');
+                            }
+                            output.Write("|");
+
+                            output.WriteLine();
+                        }
                     }
                 }
             }
