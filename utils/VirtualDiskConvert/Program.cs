@@ -41,7 +41,7 @@ namespace VirtualDiskConvert
         static void Main(string[] args)
         {
             _inFile = new CommandLineParameter("in_file", "Path to the disk to convert.  This can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
-            _outFormat = new CommandLineSwitch("of", "outputFormat", "format", "The type of disk to output, one of VMDK-fixed, VMDK-dynamic, VMDK-vmfsFixed, VMDK-vmfsDynamic, VHD-fixed, VHD-dynamic, VDI-dynamic, VDI-fixed or iSCSI.");
+            _outFormat = new CommandLineSwitch("of", "outputFormat", "format", "The type of disk to output, one of RAW, VMDK-fixed, VMDK-dynamic, VMDK-vmfsFixed, VMDK-vmfsDynamic, VHD-fixed, VHD-dynamic, VDI-dynamic, VDI-fixed or iSCSI.");
             _outFile = new CommandLineParameter("out_file", "Path to the output file.  This can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
             _userName = new CommandLineSwitch("u", "user", "user_name", "If using an iSCSI source or target, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
             _password = new CommandLineSwitch("pw", "password", "secret", "If using an iSCSI source or target, optionally use this parameter to specify the password to authenticate with.");
@@ -127,6 +127,8 @@ namespace VirtualDiskConvert
                     return DiscUtils.Vdi.Disk.InitializeFixed(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
                 case "VDI-DYNAMIC":
                     return DiscUtils.Vdi.Disk.InitializeDynamic(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
+                case "RAW":
+                    return DiscUtils.Raw.Disk.Initialize(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
                 case "ISCSI":
                     return Utilities.OpenIScsiDisk(_outFile.Value, user, password);
                 default:
