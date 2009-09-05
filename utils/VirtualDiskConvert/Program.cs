@@ -130,7 +130,7 @@ namespace VirtualDiskConvert
                 case "RAW":
                     return DiscUtils.Raw.Disk.Initialize(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
                 case "ISCSI":
-                    return Utilities.OpenIScsiDisk(_outFile.Value, user, password);
+                    return Utilities.OpenIScsiDisk(_outFile.Value, FileAccess.ReadWrite, user, password);
                 default:
                     throw new NotSupportedException(_outFormat.Value + " is not a recognized disk type");
             }
