@@ -60,7 +60,7 @@ namespace DiscUtils.Common
         {
             if (path.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
             {
-                return OpenIScsiDisk(path, username, password);
+                return OpenIScsiDisk(path, access, username, password);
             }
             else
             {
@@ -74,7 +74,7 @@ namespace DiscUtils.Common
             }
         }
 
-        public static VirtualDisk OpenIScsiDisk(string path, string username, string password)
+        public static VirtualDisk OpenIScsiDisk(string path, FileAccess access, string username, string password)
         {
             string targetAddress;
             string targetName;
@@ -134,7 +134,7 @@ namespace DiscUtils.Common
             {
                 if (lunInfo.ToString() == lun)
                 {
-                    return session.OpenDisk(lunInfo.Lun);
+                    return session.OpenDisk(lunInfo.Lun, access);
                 }
             }
 
