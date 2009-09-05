@@ -40,6 +40,7 @@ namespace DiscUtils
     /// </remarks>
     public sealed class VolumeManager
     {
+        private static List<LogicalVolumeFactory> s_logicalVolumeFactories;
         private List<VirtualDisk> _disks;
         private bool _needScan;
 
@@ -187,7 +188,7 @@ namespace DiscUtils
         private void Scan()
         {
             Dictionary<string,PhysicalVolumeInfo> newPhysicalVolumes = ScanForPhysicalVolumes();
-            Dictionary<string, LogicalVolumeInfo> newLogicalVolumes = ScanForLogicalVolumes(newPhysicalVolumes);
+            Dictionary<string, LogicalVolumeInfo> newLogicalVolumes = ScanForLogicalVolumes(newPhysicalVolumes.Values);
 
             _physicalVolumes = newPhysicalVolumes;
             _logicalVolumes = newLogicalVolumes;
@@ -195,22 +196,53 @@ namespace DiscUtils
             _needScan = false;
         }
 
-        private static Dictionary<string, LogicalVolumeInfo> ScanForLogicalVolumes(Dictionary<string, PhysicalVolumeInfo> physicalVolumes)
+        private Dictionary<string, LogicalVolumeInfo> ScanForLogicalVolumes(IEnumerable<PhysicalVolumeInfo> physicalVols)
         {
+            List<PhysicalVolumeInfo> unhandledPhysical = new List<PhysicalVolumeInfo>();
             Dictionary<string, LogicalVolumeInfo> result = new Dictionary<string, LogicalVolumeInfo>();
 
-            foreach (var physicalVol in physicalVolumes.Values)
+            foreach (PhysicalVolumeInfo pvi in physicalVols)
+            {
+                bool handled = false;
+                foreach (var volFactory in LogicalVolumeFactories)
+                {
+                    if (volFactory.HandlesPhysicalVolume(pvi))
+                    {
+                        handled = true;
+                        break;
+                    }
+                }
+
+                if (!handled)
+                {
+                    unhandledPhysical.Add(pvi);
+                }
+            }
+
+            MapPhysicalVolumes(unhandledPhysical, result);
+
+            foreach (var volFactory in LogicalVolumeFactories)
+            {
+                volFactory.MapDisks(_disks, result);
+            }
+
+            return result;
+        }
+
+        private static void MapPhysicalVolumes(IEnumerable<PhysicalVolumeInfo> physicalVols, Dictionary<string, LogicalVolumeInfo> result)
+        {
+            foreach (var physicalVol in physicalVols)
             {
                 LogicalVolumeInfo lvi = new LogicalVolumeInfo(
                     physicalVol.PartitionIdentity,
                     physicalVol.Identity,
                     delegate() { return physicalVol.Open(); },
-                    physicalVol.Length);
+                    physicalVol.Length,
+                    physicalVol.BiosType,
+                    LogicalVolumeStatus.Healthy);
 
                 result.Add(lvi.Identity, lvi);
             }
-
-            return result;
         }
 
         private Dictionary<string, PhysicalVolumeInfo> ScanForPhysicalVolumes()
@@ -225,44 +257,15 @@ namespace DiscUtils
 
                 if (disk.IsPartitioned)
                 {
-                    PartitionTable pt = disk.Partitions;
-                    int diskSig = disk.Signature;
-                    Guid diskGuid = pt.DiskGuid;
-                    PhysicalVolumeType type = (pt is GuidPartitionTable) ? PhysicalVolumeType.GptPartition : PhysicalVolumeType.BiosPartition;
-
-                    for (int j = 0; j < pt.Count; ++j)
+                    foreach (var part in disk.Partitions.Partitions)
                     {
-                        PartitionInfo pi = pt[j];
-                        GuidPartitionInfo gpi = pi as GuidPartitionInfo;
-
-                        PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(
-                            pi.Open,
-                            diskId,
-                            diskSig,
-                            diskGuid,
-                            gpi == null ? PhysicalVolumeType.BiosPartition : PhysicalVolumeType.GptPartition,
-                            gpi == null ? Guid.Empty : gpi.Identity,
-                            pi.FirstSector * Sizes.Sector,
-                            pi.SectorCount * Sizes.Sector);
-
+                        PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(diskId, disk, part);
                         result.Add(pvi.Identity, pvi);
                     }
-
                 }
                 else
                 {
-                    // Can't just return disk.Content because it may be opened and closed multiple times.
-                    SparseStreamOpenDelegate openDelegate = delegate() { return new SubStream(disk.Content, Ownership.None, 0, disk.Capacity); };
-
-                    PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(
-                        openDelegate,
-                        diskId,
-                        0,
-                        Guid.Empty,
-                        PhysicalVolumeType.EntireDisk,
-                        Guid.Empty,
-                        0,
-                        disk.Capacity);
+                    PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(diskId, disk);
                     result.Add(pvi.Identity, pvi);
                 }
             }
@@ -291,5 +294,27 @@ namespace DiscUtils
             return "DO" + ordinal;
         }
 
+        private static List<LogicalVolumeFactory> LogicalVolumeFactories
+        {
+            get
+            {
+                if (s_logicalVolumeFactories == null)
+                {
+                    List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
+
+                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    {
+                        foreach (LogicalVolumeFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
+                        {
+                            factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
+                        }
+                    }
+
+                    s_logicalVolumeFactories = factories;
+                }
+
+                return s_logicalVolumeFactories;
+            }
+        }
     }
 }

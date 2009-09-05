@@ -147,6 +147,17 @@ namespace DiscUtils
             }
         }
 
+        /// <summary>
+        /// Wraps a sparse stream in a read-only wrapper, preventing modification.
+        /// </summary>
+        /// <param name="toWrap">The stream to make read-only</param>
+        /// <param name="ownership">Whether to transfer responsibility for calling Dispose on <c>toWrap</c></param>
+        /// <returns>The read-only stream.</returns>
+        public static SparseStream ReadOnly(SparseStream toWrap, Ownership ownership)
+        {
+            return new SparseReadOnlyWrapperStream(toWrap, ownership);
+        }
+
         private static bool IsAllZeros(byte[] buffer, int offset, int count)
         {
             for (int j = 0; j < count; j++)
@@ -158,6 +169,95 @@ namespace DiscUtils
             }
 
             return true;
+        }
+
+        private class SparseReadOnlyWrapperStream : SparseStream
+        {
+            private SparseStream _wrapped;
+            private Ownership _ownsWrapped;
+
+            public SparseReadOnlyWrapperStream(SparseStream wrapped, Ownership ownsWrapped)
+            {
+                _wrapped = wrapped;
+                _ownsWrapped = ownsWrapped;
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                try
+                {
+                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
+                    {
+                        _wrapped.Dispose();
+                        _wrapped = null;
+                    }
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
+            }
+
+            public override bool CanRead
+            {
+                get { return _wrapped.CanRead; }
+            }
+
+            public override bool CanSeek
+            {
+                get { return _wrapped.CanSeek; }
+            }
+
+            public override bool CanWrite
+            {
+                get { return false; }
+            }
+
+            public override void Flush()
+            {
+            }
+
+            public override long Length
+            {
+                get { return _wrapped.Length; }
+            }
+
+            public override long Position
+            {
+                get
+                {
+                    return _wrapped.Position;
+                }
+                set
+                {
+                    _wrapped.Position = value;
+                }
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                return _wrapped.Read(buffer, offset, count);
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                return _wrapped.Seek(offset, origin);
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new InvalidOperationException("Attempt to change length of read-only stream");
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                throw new InvalidOperationException("Attempt to write to read-only stream");
+            }
+
+            public override IEnumerable<StreamExtent> Extents
+            {
+                get { return _wrapped.Extents; }
+            }
         }
 
         private class SparseWrapperStream : SparseStream

@@ -22,6 +22,7 @@
 
 using System;
 using System.Globalization;
+using DiscUtils.Partitions;
 
 namespace DiscUtils
 {
@@ -56,33 +57,45 @@ namespace DiscUtils
     /// </summary>
     public sealed class PhysicalVolumeInfo : VolumeInfo
     {
-        private SparseStreamOpenDelegate _streamOpener;
         private string _diskId;
-        private int _diskSignature;
-        private Guid _diskGuid;
+        private VirtualDisk _disk;
+        private SparseStreamOpenDelegate _streamOpener;
         private PhysicalVolumeType _type;
-        private Guid _partitionGuid;
-        private long _diskOffset;
-        private long _length;
+        private PartitionInfo _partitionInfo;
 
+        /// <summary>
+        /// Creates an instance representing a (BIOS or GPT) partition.
+        /// </summary>
+        /// <param name="diskId">The containing disk's identity</param>
+        /// <param name="disk">The disk containing the partition</param>
+        /// <param name="partitionInfo">Information about the partition</param>
         internal PhysicalVolumeInfo(
-            SparseStreamOpenDelegate opener,
             string diskId,
-            int diskSignature,
-            Guid diskGuid,
-            PhysicalVolumeType type,
-            Guid partitionGuid,
-            long diskOffset,
-            long length)
+            VirtualDisk disk,
+            PartitionInfo partitionInfo
+            )
         {
-            _streamOpener = opener;
             _diskId = diskId;
-            _diskSignature = diskSignature;
-            _diskGuid = diskGuid;
-            _type = type;
-            _partitionGuid = partitionGuid;
-            _diskOffset = diskOffset;
-            _length = length;
+            _disk = disk;
+            _streamOpener = partitionInfo.Open;
+            _type = (partitionInfo is GuidPartitionInfo) ? PhysicalVolumeType.GptPartition : PhysicalVolumeType.BiosPartition;
+            _partitionInfo = partitionInfo;
+        }
+
+        /// <summary>
+        /// Creates an instance representing an entire disk as a single volume.
+        /// </summary>
+        /// <param name="diskId">The identity of the disk</param>
+        /// <param name="disk">The disk itself</param>
+        internal PhysicalVolumeInfo(
+            string diskId,
+            VirtualDisk disk
+            )
+        {
+            _diskId = diskId;
+            _disk = disk;
+            _streamOpener = delegate() { return new SubStream(disk.Content, Ownership.None, 0, disk.Capacity); };
+            _type = PhysicalVolumeType.EntireDisk;
         }
 
         /// <summary>
@@ -98,7 +111,7 @@ namespace DiscUtils
         /// </summary>
         public int DiskSignature
         {
-            get { return _diskSignature; }
+            get { return (_type != PhysicalVolumeType.EntireDisk) ? _disk.Signature : 0; }
         }
 
         /// <summary>
@@ -106,7 +119,7 @@ namespace DiscUtils
         /// </summary>
         public Guid DiskIdentity
         {
-            get { return _diskGuid; }
+            get { return (_type != PhysicalVolumeType.EntireDisk) ? _disk.Partitions.DiskGuid : Guid.Empty; }
         }
 
         /// <summary>
@@ -119,11 +132,19 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the one-byte BIOS type for this volume, which indicates the content.
+        /// </summary>
+        public override byte BiosType
+        {
+            get { return (_partitionInfo == null) ? (byte)0 : _partitionInfo.BiosType; }
+        }
+
+        /// <summary>
         /// The size of the volume, in bytes.
         /// </summary>
         public override long Length
         {
-            get { return _length; }
+            get { return (_partitionInfo == null) ? _disk.Capacity : _partitionInfo.SectorCount * Sizes.Sector; }
         }
 
         /// <summary>
@@ -139,7 +160,7 @@ namespace DiscUtils
             {
                 if (_type == PhysicalVolumeType.GptPartition)
                 {
-                    return "VPG" + _partitionGuid.ToString("B");
+                    return "VPG" + PartitionIdentity.ToString("B");
                 }
                 else
                 {
@@ -150,7 +171,7 @@ namespace DiscUtils
                             partId = "PD";
                             break;
                         case PhysicalVolumeType.BiosPartition:
-                            partId = "PO" + _diskOffset.ToString("X", CultureInfo.InvariantCulture);
+                            partId = "PO" + (_partitionInfo.FirstSector * Sizes.Sector).ToString("X", CultureInfo.InvariantCulture);
                             break;
                         default:
                             partId = "P*";
@@ -167,7 +188,23 @@ namespace DiscUtils
         /// </summary>
         public Guid PartitionIdentity
         {
-            get { return _partitionGuid; }
+            get
+            {
+                GuidPartitionInfo gpi = _partitionInfo as GuidPartitionInfo;
+                if (gpi != null)
+                {
+                    return gpi.Identity;
+                }
+                return Guid.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets the underlying partition (if any).
+        /// </summary>
+        internal PartitionInfo Partition
+        {
+            get { return _partitionInfo; }
         }
     }
 }

@@ -25,6 +25,27 @@ using System;
 namespace DiscUtils
 {
     /// <summary>
+    /// Enumeration of the health status of a logical volume.
+    /// </summary>
+    public enum LogicalVolumeStatus
+    {
+        /// <summary>
+        /// The volume is healthy and fully functional.
+        /// </summary>
+        Healthy = 0,
+
+        /// <summary>
+        /// The volume is completely accessible, but at degraded redundancy.
+        /// </summary>
+        FailedRedundancy = 1,
+
+        /// <summary>
+        /// The volume is wholely, or partly, inaccessible.
+        /// </summary>
+        Failed = 2
+    }
+
+    /// <summary>
     /// Information about a logical disk volume, which may be backed by one or more physical volumes.
     /// </summary>
     public sealed class LogicalVolumeInfo : VolumeInfo
@@ -33,13 +54,17 @@ namespace DiscUtils
         private string _physicalVolId;
         private SparseStreamOpenDelegate _opener;
         private long _length;
+        private LogicalVolumeStatus _status;
+        private byte _biosType;
 
-        internal LogicalVolumeInfo(Guid guid, string physicalVolumeId, SparseStreamOpenDelegate opener, long length)
+        internal LogicalVolumeInfo(Guid guid, string physicalVolumeId, SparseStreamOpenDelegate opener, long length, byte biosType, LogicalVolumeStatus status)
         {
             _guid = guid;
             _physicalVolId = physicalVolumeId;
             _opener = opener;
             _length = length;
+            _biosType = biosType;
+            _status = status;
         }
 
         /// <summary>
@@ -49,6 +74,22 @@ namespace DiscUtils
         public override SparseStream Open()
         {
             return _opener();
+        }
+
+        /// <summary>
+        /// Gets the one-byte BIOS type for this volume, which indicates the content.
+        /// </summary>
+        public override byte BiosType
+        {
+            get { return _biosType; }
+        }
+
+        /// <summary>
+        /// Gets the status of the logical volume, indicating volume health.
+        /// </summary>
+        public LogicalVolumeStatus Status
+        {
+            get { return _status; }
         }
 
         /// <summary>

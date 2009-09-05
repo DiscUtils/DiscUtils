@@ -40,6 +40,11 @@ namespace DiscUtils
         public abstract SparseStream Open();
 
         /// <summary>
+        /// Gets the one-byte BIOS type for this volume, which indicates the content.
+        /// </summary>
+        public abstract byte BiosType { get; }
+
+        /// <summary>
         /// Gets the size of the volume, in bytes.
         /// </summary>
         public abstract long Length { get; }
