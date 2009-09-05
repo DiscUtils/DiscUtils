@@ -60,6 +60,16 @@ namespace DiscUtils.Partitions
         public static readonly Guid LinuxSwap = new Guid("0657FD6D-A4AB-43C4-84E5-0933C84B4F4F");
 
         /// <summary>
+        /// Windows Logical Disk Manager metadata.
+        /// </summary>
+        public static readonly Guid WindowsLdmMetadata = new Guid("5808C8AA-7E8F-42E0-85D2-E1E90434CFB3");
+
+        /// <summary>
+        /// Windows Logical Disk Manager data.
+        /// </summary>
+        public static readonly Guid WindowsLdmData = new Guid("AF9B60A0-1431-4F62-BC68-3311714A69AD");
+
+        /// <summary>
         /// Converts a well known partition type to a Guid.
         /// </summary>
         /// <param name="wellKnown">The value to convert</param>

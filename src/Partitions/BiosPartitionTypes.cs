@@ -76,6 +76,11 @@ namespace DiscUtils.Partitions
         public const byte ExtendedLba = 0x0F;
 
         /// <summary>
+        /// Windows Logical Disk Manager dynamic volume.
+        /// </summary>
+        public const byte WindowsDynamicVolume = 0x42;
+
+        /// <summary>
         /// Linux Swap.
         /// </summary>
         public const byte LinuxSwap = 0x82;
@@ -99,5 +104,57 @@ namespace DiscUtils.Partitions
         /// EFI System partition on an MBR disk.
         /// </summary>
         public const byte EfiSystem = 0xEF;
+
+        /// <summary>
+        /// Provides a string representation of some known BIOS partition types.
+        /// </summary>
+        /// <param name="type">The partition type to represent as a string.</param>
+        /// <returns>The string representation</returns>
+        public static string ToString(byte type)
+        {
+            switch (type)
+            {
+                case 0x00: return "Unused";
+                case 0x01: return "FAT12";
+                case 0x02: return "XENIX root";
+                case 0x03: return "XENIX /usr";
+                case 0x04: return "FAT16 (<32M)";
+                case 0x05: return "Extended (non-LBA)";
+                case 0x06: return "FAT16 (>32M)";
+                case 0x07: return "IFS (NTFS or HPFS)";
+                case 0x0B: return "FAT32 (non-LBA)";
+                case 0x0C: return "FAT32 (LBA)";
+                case 0x0E: return "FAT16 (LBA)";
+                case 0x0F: return "Extended (LBA)";
+                case 0x11: return "Hidden FAT12";
+                case 0x12: return "Vendor Config/Recovery/Diagnostics";
+                case 0x14: return "Hidden FAT16 (<32M)";
+                case 0x16: return "Hidden FAT16 (>32M)";
+                case 0x17: return "Hidden IFS (NTFS or HPFS)";
+                case 0x1B: return "Hidden FAT32 (non-LBA)";
+                case 0x1C: return "Hidden FAT32 (LBA)";
+                case 0x1E: return "Hidden FAT16 (LBA)";
+                case 0x27: return "Windows Recovery Environment";
+                case 0x42: return "Windows Dynamic Volume";
+                case 0x80: return "Minix v1.1 - v1.4a";
+                case 0x81: return "Minix / Early Linux";
+                case 0x82: return "Linux Swap";
+                case 0x83: return "Linux Native";
+                case 0x84: return "Hibernation";
+                case 0x8E: return "Linux LVM";
+                case 0xA0: return "Laptop Hibernation";
+                case 0xA8: return "Mac OS-X";
+                case 0xAB: return "Mac OS-X Boot";
+                case 0xAF: return "Mac OS-X HFS";
+                case 0xC0: return "NTFT";
+                case 0xDE: return "Dell OEM";
+                case 0xEE: return "GPT Protective";
+                case 0xEF: return "EFI";
+                case 0xFB: return "VMWare File System";
+                case 0xFC: return "VMWare Swap";
+                case 0xFE: return "IBM OEM";
+                default: return "Unknown";
+            }
+        }
     }
 }
