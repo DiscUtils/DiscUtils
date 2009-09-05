@@ -33,7 +33,6 @@ namespace DiscUtils.Iscsi
 
     internal class LoginRequest
     {
-        private const uint Isid = 0x802c8eae;
         private const ushort IsidQualifier = 0x0000;
 
         private Connection _connection;
@@ -79,7 +78,7 @@ namespace DiscUtils.Iscsi
             buffer[1] = PackState();
             buffer[2] = 0; // Max Version
             buffer[3] = 0; // Min Version
-            Utilities.WriteBytesBigEndian(Isid, buffer, 8);
+            Utilities.WriteBytesBigEndian(_connection.Session.InitiatorSessionId, buffer, 8);
             Utilities.WriteBytesBigEndian(IsidQualifier, buffer, 12);
             Utilities.WriteBytesBigEndian(_connection.Session.TargetSessionId, buffer, 14);
             Utilities.WriteBytesBigEndian(_connectionId, buffer, 20);

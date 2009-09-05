@@ -23,8 +23,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace DiscUtils.Iscsi
 {
@@ -42,6 +44,8 @@ namespace DiscUtils.Iscsi
     /// </summary>
     public sealed class Session : IDisposable
     {
+        private static int s_nextInitiatorSessionId = new Random().Next();
+
         private IList<TargetAddress> _addresses;
         private string _userName;
         private string _password;
@@ -52,6 +56,7 @@ namespace DiscUtils.Iscsi
         private uint _commandSequenceNumber;
         private uint _nextInitiaterTaskTag;
         private ushort _nextConnectionId;
+        private uint _initiatorSessionId;
 
         /// <summary>
         /// The set of all 'parameters' we've negotiated.
@@ -65,6 +70,7 @@ namespace DiscUtils.Iscsi
 
         internal Session(SessionType type, string targetName, string userName, string password, IList<TargetAddress> addresses)
         {
+            _initiatorSessionId = (uint)Interlocked.Increment(ref s_nextInitiatorSessionId);
             _addresses = addresses;
             _userName = userName;
             _password = password;
@@ -264,13 +270,24 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Provides access to a LUN as a VirtualDisk.
+        /// Provides read-write access to a LUN as a VirtualDisk.
         /// </summary>
         /// <param name="lun">The LUN to access</param>
         /// <returns>The new VirtualDisk instance</returns>
         public Disk OpenDisk(long lun)
         {
-            return new Disk(this, lun);
+            return OpenDisk(lun, FileAccess.ReadWrite);
+        }
+
+        /// <summary>
+        /// Provides access to a LUN as a VirtualDisk.
+        /// </summary>
+        /// <param name="lun">The LUN to access</param>
+        /// <param name="access">The type of access desired</param>
+        /// <returns>The new VirtualDisk instance</returns>
+        public Disk OpenDisk(long lun, FileAccess access)
+        {
+            return new Disk(this, lun, access);
         }
 
         /// <summary>
@@ -306,6 +323,11 @@ namespace DiscUtils.Iscsi
         internal Connection ActiveConnection
         {
             get { return _currentConnection; }
+        }
+
+        internal uint InitiatorSessionId
+        {
+            get { return _initiatorSessionId; }
         }
 
         internal ushort TargetSessionId

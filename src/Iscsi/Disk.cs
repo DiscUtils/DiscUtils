@@ -32,14 +32,16 @@ namespace DiscUtils.Iscsi
     {
         private Session _session;
         private long _lun;
+        private FileAccess _access;
         private LunCapacity _capacity;
 
         private DiskStream _stream;
 
-        internal Disk(Session session, long lun)
+        internal Disk(Session session, long lun, FileAccess access)
         {
             _session = session;
             _lun = lun;
+            _access = access;
         }
 
         /// <summary>
@@ -102,7 +104,7 @@ namespace DiscUtils.Iscsi
             {
                 if (_stream == null)
                 {
-                    _stream = new DiskStream(_session, _lun);
+                    _stream = new DiskStream(_session, _lun, _access);
                 }
                 return _stream;
             }

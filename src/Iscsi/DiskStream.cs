@@ -35,9 +35,10 @@ namespace DiscUtils.Iscsi
         private long _position;
 
         private int _blockSize;
-        private bool _canWrite = true; // TODO - use real value...
+        private bool _canWrite;
+        private bool _canRead;
 
-        public DiskStream(Session session, long lun)
+        public DiskStream(Session session, long lun, FileAccess access)
         {
             _session = session;
             _lun = lun;
@@ -45,11 +46,13 @@ namespace DiscUtils.Iscsi
             LunCapacity capacity = session.GetCapacity(lun);
             _blockSize = capacity.BlockSize;
             _length = capacity.LogicalBlockCount * capacity.BlockSize;
+            _canWrite = (access != FileAccess.Read);
+            _canRead = (access != FileAccess.Write);
         }
         
         public override bool CanRead
         {
-            get { throw new NotImplementedException(); }
+            get { return _canRead; }
         }
 
         public override bool CanSeek
@@ -85,17 +88,25 @@ namespace DiscUtils.Iscsi
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (!CanRead)
+            {
+                throw new InvalidOperationException("Attempt to read from read-only stream");
+            }
+
+            int maxToRead = (int)Math.Min(_length - _position, count);
+
             long firstBlock = _position / _blockSize;
-            long lastBlock = Utilities.Ceil(_position + count, _blockSize);
+            long lastBlock = Utilities.Ceil(_position + maxToRead, _blockSize);
 
             byte[] tempBuffer = new byte[(lastBlock - firstBlock) * _blockSize];
             int numRead = _session.Read(_lun, firstBlock, (short)(lastBlock - firstBlock), tempBuffer, 0);
 
-            Array.Copy(tempBuffer, _position - (firstBlock * _blockSize), buffer, offset, Math.Min(count, numRead));
+            int numCopied = Math.Min(maxToRead, numRead);
+            Array.Copy(tempBuffer, _position - (firstBlock * _blockSize), buffer, offset, numCopied);
 
-            _position += numRead;
+            _position += numCopied;
 
-            return numRead;
+            return numCopied;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -131,6 +142,11 @@ namespace DiscUtils.Iscsi
             if (!CanWrite)
             {
                 throw new IOException("Attempt to write to read-only stream");
+            }
+
+            if (_position + count > _length)
+            {
+                throw new IOException("Attempt to write beyond end of stream");
             }
 
             int numWritten = 0;
