@@ -168,14 +168,21 @@ namespace DiscUtils.Common
 
             if (string.IsNullOrEmpty(volumeId))
             {
-                PhysicalVolumeInfo[] physicalVolumes = volMgr.GetPhysicalVolumes();
-
-                if (partition > physicalVolumes.Length)
+                if (partition >= 0)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Partition {0} not found", partition), "partition");
-                }
+                    PhysicalVolumeInfo[] physicalVolumes = volMgr.GetPhysicalVolumes();
 
-                return physicalVolumes[partition].Open();
+                    if (partition > physicalVolumes.Length)
+                    {
+                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Partition {0} not found", partition), "partition");
+                    }
+
+                    return physicalVolumes[partition].Open();
+                }
+                else
+                {
+                    return volMgr.GetLogicalVolumes()[0].Open();
+                }
             }
             else
             {

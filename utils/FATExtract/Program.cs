@@ -75,7 +75,7 @@ namespace FATExtract
                 return;
             }
 
-            int partition = 0;
+            int partition = -1;
             if (_partition.IsPresent && !int.TryParse(_partition.Value, out partition))
             {
                 parser.DisplayHelp();
