@@ -35,9 +35,9 @@ namespace DiscUtils.LogicalDiskManager
         public ulong DiskId;
         public ulong InterleaveOrder;
 
-        protected override void DoReadFrom(byte[] buffer, int offset, int count)
+        protected override void DoReadFrom(byte[] buffer, int offset)
         {
-            base.DoReadFrom(buffer, offset, count);
+            base.DoReadFrom(buffer, offset);
 
             int pos = offset + 0x18;
 

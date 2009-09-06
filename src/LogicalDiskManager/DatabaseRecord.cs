@@ -41,7 +41,7 @@ namespace DiscUtils.LogicalDiskManager
         {
         }
 
-        public static DatabaseRecord ReadFrom(byte[] buffer, int offset, int count)
+        public static DatabaseRecord ReadFrom(byte[] buffer, int offset)
         {
             DatabaseRecord result = null;
 
@@ -73,13 +73,13 @@ namespace DiscUtils.LogicalDiskManager
                         throw new NotImplementedException("Unrecognized record type: " + buffer[offset + 0x13]);
                 }
 
-                result.DoReadFrom(buffer, offset, count);
+                result.DoReadFrom(buffer, offset);
             }
 
             return result;
         }
 
-        protected virtual void DoReadFrom(byte[] buffer, int offset, int count)
+        protected virtual void DoReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.BytesToString(buffer, offset + 0x00, 4);
             Label = Utilities.ToUInt32BigEndian(buffer, offset + 0x04);

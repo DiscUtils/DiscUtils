@@ -42,12 +42,12 @@ namespace DiscUtils.LogicalDiskManager
 
             stream.Position = dbStart + _vmdb.HeaderSize;
 
+            buffer = Utilities.ReadFully(stream, (int)(_vmdb.BlockSize * _vmdb.NumVBlks));
+
             _records = new Dictionary<ulong, DatabaseRecord>();
-            byte[] recordBuffer = new byte[_vmdb.BlockSize];
             for (int i = 0; i < _vmdb.NumVBlks; ++i)
             {
-                stream.Read(recordBuffer, 0, recordBuffer.Length);
-                DatabaseRecord rec = DatabaseRecord.ReadFrom(recordBuffer, 0, recordBuffer.Length);
+                DatabaseRecord rec = DatabaseRecord.ReadFrom(buffer, (int)(i * _vmdb.BlockSize));
                 if (rec != null)
                 {
                     _records.Add(rec.Id, rec);
