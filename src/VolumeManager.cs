@@ -35,8 +35,6 @@ namespace DiscUtils
     /// <para>Although file systems commonly are placed directly within partitions on a disk, in some
     /// cases a logical volume manager / logical disk manager may be used, to combine disk regions in multiple
     /// ways for data redundancy or other purposes.</para>
-    /// <para>Initially, VolumeManager only supports so-called 'physical volumes' (aka 'hard partitions'), which
-    /// directly correspond to the partitions on a disk.</para>
     /// </remarks>
     public sealed class VolumeManager
     {
