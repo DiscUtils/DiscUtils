@@ -164,7 +164,16 @@ namespace DiscUtils.LogicalDiskManager
             }
             else if (component.MergeType == ExtentMergeType.Interleaved)
             {
-                throw new NotImplementedException("Striped volumes");
+                List<ExtentRecord> extents = new List<ExtentRecord>(_database.GetComponentExtents(component.Id));
+                extents.Sort(CompareExtentInterleaveOrder);
+
+                List<SparseStream> streams = new List<SparseStream>();
+                foreach (var extent in extents)
+                {
+                    streams.Add(OpenExtent(extent));
+                }
+
+                return new StripedStream(component.StripeSizeSectors * Sizes.Sector, Ownership.Dispose, streams.ToArray());
             }
             else
             {
@@ -174,17 +183,24 @@ namespace DiscUtils.LogicalDiskManager
 
         private SparseStream OpenVolume(VolumeRecord volume)
         {
-            if (volume.ComponentCount != 1)
-            {
-                throw new NotImplementedException("Mirrored volumes");
-            }
-
+            List<SparseStream> cmpntStreams = new List<SparseStream>();
             foreach (var component in _database.GetVolumeComponents(volume.Id))
             {
-                return OpenComponent(component);
+                cmpntStreams.Add(OpenComponent(component));
             }
 
-            throw new IOException("Volume with no associated components");
+            if (cmpntStreams.Count < 1)
+            {
+                throw new IOException("Volume with no associated components");
+            }
+            else if (cmpntStreams.Count == 1)
+            {
+                return cmpntStreams[0];
+            }
+            else
+            {
+                return new MirrorStream(Ownership.Dispose, cmpntStreams.ToArray());
+            }
         }
 
         private static int CompareExtentOffsets(ExtentRecord x, ExtentRecord y)
@@ -194,6 +210,19 @@ namespace DiscUtils.LogicalDiskManager
                 return 1;
             }
             else if(x.OffsetInVolumeLba < y.OffsetInVolumeLba)
+            {
+                return -1;
+            }
+            return 0;
+        }
+
+        private static int CompareExtentInterleaveOrder(ExtentRecord x, ExtentRecord y)
+        {
+            if (x.InterleaveOrder > y.InterleaveOrder)
+            {
+                return 1;
+            }
+            else if (x.InterleaveOrder < y.InterleaveOrder)
             {
                 return -1;
             }

@@ -169,6 +169,7 @@
     <Compile Include="LogicalDiskManager\TocBlock.cs" />
     <Compile Include="LogicalDiskManager\VolumeRecord.cs" />
     <Compile Include="LogicalVolumeInfo.cs" />
+    <Compile Include="MirrorStream.cs" />
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
@@ -276,6 +277,7 @@
     <Compile Include="SparseStream.cs" />
     <Compile Include="StreamBuilder.cs" />
     <Compile Include="StreamExtent.cs" />
+    <Compile Include="StripedStream.cs" />
     <Compile Include="SubStream.cs" />
     <Compile Include="Tuple.cs" />
     <Compile Include="Utilities.cs" />

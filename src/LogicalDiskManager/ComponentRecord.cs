@@ -34,8 +34,8 @@ namespace DiscUtils.LogicalDiskManager
         public ulong Unknown3; // 00 .. 00
         public ulong VolumeId;
         public ulong Unknown4; // ??
-        public ulong StripeSizeSectors;
-        public ulong StripeStride; // aka num partitions
+        public long StripeSizeSectors;
+        public long StripeStride; // aka num partitions
 
         protected override void DoReadFrom(byte[] buffer, int offset, int count)
         {
@@ -57,8 +57,8 @@ namespace DiscUtils.LogicalDiskManager
 
             if ((Flags & 0x1000) != 0)
             {
-                StripeSizeSectors = ReadVarULong(buffer, ref pos);
-                StripeStride = ReadVarULong(buffer, ref pos);
+                StripeSizeSectors = ReadVarLong(buffer, ref pos);
+                StripeStride = ReadVarLong(buffer, ref pos);
             }
         }
     }

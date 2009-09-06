@@ -147,6 +147,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.LogicalDiskManager">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2009-09-05 23:30:46Z">
+      <Issue>
+       <Item>DiscUtils.LogicalDiskManager</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="85" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-09-05 23:30:46Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.LogicalDiskManager</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="86" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Ntfs">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-12-09 22:48:10Z">
@@ -1867,6 +1892,22 @@
              </Message>
             </Messages>
            </Member>
+           <Member Name="#OpenDisk(System.Int64,System.IO.FileAccess)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.OpenDisk(long, FileAccess)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="6" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#Read(System.Int64,System.Int64,System.Int16,System.Byte[],System.Int32)">
             <Messages>
              <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-05-09 08:55:03Z">
@@ -2090,6 +2131,896 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="20" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.LogicalDiskManager">
+        <Types>
+         <Type Name="ComponentRecord">
+          <Members>
+           <Member Name="#Unknown1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'ComponentRecord.Unknown1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'ComponentRecord.Unknown2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown3">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'ComponentRecord.Unknown3'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown4">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'ComponentRecord.Unknown4'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DatabaseHeader">
+          <Members>
+           <Member Name="#CommittedSequence">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.CommittedSequence'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DiskGroupId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.DiskGroupId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GroupName">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.GroupName'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PendingSequence">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.PendingSequence'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Signature">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Signature'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Timestamp">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Timestamp'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown3">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown3'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown4">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown4'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown5">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown5'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown6">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown6'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown7">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown7'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown8">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown8'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown9">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.Unknown9'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownA">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.UnknownA'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownB">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.UnknownB'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownC">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.UnknownC'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VersionDenom">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.VersionDenom'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VersionNum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseHeader.VersionNum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DatabaseRecord">
+          <Members>
+           <Member Name="#Counter">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseRecord.Counter'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DataLength">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseRecord.DataLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Label">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseRecord.Label'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Signature">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseRecord.Signature'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Valid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DatabaseRecord.Valid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DiskGroupRecord">
+          <Members>
+           <Member Name="#Unknown1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'DiskGroupRecord.Unknown1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ExtentRecord">
+          <Members>
+           <Member Name="#Unknown1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'ExtentRecord.Unknown1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'ExtentRecord.Unknown2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PrivateHeader">
+          <Members>
+           <Member Name="#Checksum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.Checksum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ConfigSizeLba">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.ConfigSizeLba'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Signature">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.Signature'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.Unknown2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown3">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.Unknown3'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown4">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.Unknown4'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown5">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'PrivateHeader.Unknown5'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="TocBlock">
+          <Members>
+           <Member Name="#Checksum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Checksum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Item1Size">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Item1Size'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Item1Str">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Item1Str'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Item2Size">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Item2Size'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Item2Start">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Item2Start'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Item2Str">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Item2Str'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.SequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Unknown1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Unknown2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown3">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Unknown3'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown4">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Unknown4'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown5">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Unknown5'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown6">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'TocBlock.Unknown6'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="VolumeRecord">
+          <Members>
+           <Member Name="#DupCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.DupCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GenString">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.GenString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#NumberString">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.NumberString'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown1">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.Unknown1'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Unknown2">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.Unknown2'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownA">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.UnknownA'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownB">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.UnknownB'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownC">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.UnknownC'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UnknownD">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue>
+               <Item>'VolumeRecord.UnknownD'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="3" />
                </User>
               </Notes>
              </Message>
@@ -2727,6 +3658,36 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="28" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsLdmData">
+            <Messages>
+             <Message Id="Ldm" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue Name="Member">
+               <Item>Ldm</Item>
+               <Item>'GuidPartitionTypes.WindowsLdmData'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="84" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsLdmMetadata">
+            <Messages>
+             <Message Id="Ldm" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-09-05 23:30:46Z">
+              <Issue Name="Member">
+               <Item>Ldm</Item>
+               <Item>'GuidPartitionTypes.WindowsLdmMetadata'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="84" />
                </User>
               </Notes>
              </Message>
@@ -3622,8 +4583,10 @@
     <Note Id="0" Modified="2008-11-16 19:06:07Z">Added for completeness - setter is used.</Note>
     <Note Id="1" Modified="2008-11-22 16:47:22Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="2" Modified="2008-11-22 16:47:50Z">VHD is well-used acronym.</Note>
+    <Note Id="3" Modified="2009-09-05 23:32:26Z">Fields represent current understanding of on-disk structure, even if not used yet.</Note>
     <Note Id="4" Modified="2008-11-10 13:18:19Z">Deliberately not strong named - people using the library should add their own signature.</Note>
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
+    <Note Id="6" Modified="2009-09-05 23:33:03Z">Follows standard naming scheme.</Note>
     <Note Id="7" Modified="2008-11-22 17:12:07Z">DiscUtils is fixed name of the project</Note>
     <Note Id="8" Modified="2008-11-10 13:24:01Z">Reflects name of member in CLR's DirectoryInfo class.</Note>
     <Note Id="9" Modified="2008-11-10 13:22:31Z">Reflects the GetFileSystemInfos member of CLR's DirectoryInfo class.</Note>
@@ -3701,6 +4664,9 @@
     <Note Id="81" Modified="2009-08-29 16:06:15Z">Utils is part of the project namespace.</Note>
     <Note Id="82" Modified="2009-08-29 16:06:39Z">Raw follows pattern of placing each disk type in its own namespace.</Note>
     <Note Id="83" Modified="2009-08-31 15:03:32Z">Gpt is camel case for recognized acronym</Note>
+    <Note Id="84" Modified="2009-09-05 23:33:48Z">Ldm is camel-case naming for LDM (Logical Disk Manager)</Note>
+    <Note Id="85" Modified="2009-09-05 23:34:06Z">Using namespace to separate distinct concept</Note>
+    <Note Id="86" Modified="2009-09-05 23:34:35Z">Utils is part of project name.</Note>
    </User>
   </Notes>
   <Rules>
