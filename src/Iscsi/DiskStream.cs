@@ -161,6 +161,8 @@ namespace DiscUtils.Iscsi
                 // Need to read - we're not handling a full block
                 if (offsetInBlock != 0 || toWrite < _blockSize)
                 {
+                    toWrite = (int)Math.Min(toWrite, _blockSize - offsetInBlock);
+
                     byte[] blockBuffer = new byte[_blockSize];
                     int numRead = _session.Read(_lun, block, 1, blockBuffer, 0);
 
