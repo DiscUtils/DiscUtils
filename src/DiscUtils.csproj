@@ -248,6 +248,7 @@
     <Compile Include="Registry\BinHeader.cs" />
     <Compile Include="Registry\Cell.cs" />
     <Compile Include="Registry\HiveHeader.cs" />
+    <Compile Include="Registry\ListCell.cs" />
     <Compile Include="Registry\KeyNodeCell.cs" />
     <Compile Include="Registry\RegistryCorruptException.cs" />
     <Compile Include="Registry\RegistryHive.cs" />

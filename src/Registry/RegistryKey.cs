@@ -65,28 +65,7 @@ namespace DiscUtils.Registry
 
             if (_cell.NumSubKeys != 0)
             {
-                Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
-
-                SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
-                if (indirectList != null)
-                {
-                    foreach (int listIndex in indirectList.CellIndexes)
-                    {
-                        SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                        foreach (int index in hashList.SubKeys)
-                        {
-                            names.Add(_hive.GetCell<KeyNodeCell>(index).Name);
-                        }
-                    }
-                }
-                else
-                {
-                    SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                    foreach (int index in hashList.SubKeys)
-                    {
-                        names.Add(_hive.GetCell<KeyNodeCell>(index).Name);
-                    }
-                }
+                _hive.GetCell<ListCell>(_cell.SubKeysIndex).EnumerateKeys(names);
             }
 
             return names.ToArray();
@@ -655,21 +634,12 @@ namespace DiscUtils.Registry
         {
             if (_cell.NumSubKeys != 0)
             {
-                Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
+                ListCell listCell = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
 
-                SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
-                if (indirectList != null)
+                int cellIndex;
+                if (listCell.FindKey(name, out cellIndex) == 0)
                 {
-                    foreach (int listIndex in indirectList.CellIndexes)
-                    {
-                        SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                        return hashList.FindCell(name);
-                    }
-                }
-                else
-                {
-                    SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                    return hashList.FindCell(name);
+                    return cellIndex;
                 }
             }
 

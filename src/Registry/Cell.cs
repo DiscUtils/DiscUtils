@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 
 namespace DiscUtils.Registry
 {
@@ -67,8 +66,9 @@ namespace DiscUtils.Registry
                     result = new SubKeyHashedListCell(hive, index);
                     break;
 
+                case "li":
                 case "ri":
-                    result = new SubKeyIndirectListCell(index);
+                    result = new SubKeyIndirectListCell(hive, index);
                     break;
 
                 default:

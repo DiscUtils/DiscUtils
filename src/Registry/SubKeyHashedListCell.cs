@@ -26,7 +26,7 @@ using System.Globalization;
 
 namespace DiscUtils.Registry
 {
-    internal sealed class SubKeyHashedListCell : Cell
+    internal sealed class SubKeyHashedListCell : ListCell
     {
         private string _hashType;
         private short _numElements;
@@ -47,6 +47,11 @@ namespace DiscUtils.Registry
             : base(index)
         {
             _hive = hive;
+        }
+
+        public string HashType
+        {
+            get { return _hashType; }
         }
 
         public IEnumerable<int> SubKeys
@@ -115,19 +120,32 @@ namespace DiscUtils.Registry
             return _numElements++;
         }
 
-        /// <summary>
-        /// Tries to match a subkey cell, returning it's absolute offset.
-        /// </summary>
-        /// <param name="name">The name of the subkey</param>
-        /// <returns></returns>
-        internal int FindCell(string name)
+        internal override int FindKey(string name, out int cellIndex)
         {
-            int index = IndexOf(name);
-            if (index >= 0)
+            // Check first and last, to early abort if the name is outside the range of this list
+            int result = FindKeyAt(name, 0, out cellIndex);
+            if (result <= 0)
             {
-                return _subKeyIndexes[index];
+                return result;
             }
-            return -1;
+            result = FindKeyAt(name, _subKeyIndexes.Count - 1, out cellIndex);
+            if (result >= 0)
+            {
+                return result;
+            }
+
+            KeyFinder finder = new KeyFinder(_hive, name);
+            int idx = _subKeyIndexes.BinarySearch(-1, finder);
+            cellIndex = finder.CellIndex;
+            return (idx < 0) ? -1 : 0;
+        }
+
+        internal override void EnumerateKeys(List<string> names)
+        {
+            for (int i = 0; i < _subKeyIndexes.Count; ++i)
+            {
+                names.Add(_hive.GetCell<KeyNodeCell>(_subKeyIndexes[i]).Name);
+            }
         }
 
         /// <summary>
@@ -183,6 +201,19 @@ namespace DiscUtils.Registry
             return hash;
         }
 
+        private int FindKeyAt(string name, int listIndex, out int cellIndex)
+        {
+            Cell cell = _hive.GetCell<Cell>(_subKeyIndexes[listIndex]);
+            ListCell listCell = cell as ListCell;
+            if (listCell != null)
+            {
+                return listCell.FindKey(name, out cellIndex);
+            }
+
+            cellIndex = _subKeyIndexes[listIndex];
+            return string.Compare(name, ((KeyNodeCell)cell).Name, StringComparison.OrdinalIgnoreCase);
+        }
+
         private IEnumerable<int> Find(string name, int start)
         {
             if (_hashType == "lh")
@@ -233,6 +264,37 @@ namespace DiscUtils.Registry
                     yield return i;
                 }
             }
+        }
+
+        private class KeyFinder : IComparer<int>
+        {
+            private RegistryHive _hive;
+            private string _searchName;
+
+            public KeyFinder(RegistryHive hive, string searchName)
+            {
+                _hive = hive;
+                _searchName = searchName;
+            }
+
+            public int CellIndex { get; set; }
+
+            #region IComparer<int> Members
+
+            public int Compare(int x, int y)
+            {
+                // TODO: Be more efficient at ruling out no-hopes by using the hash values
+
+                KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(x);
+                int result = string.Compare(((KeyNodeCell)cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
+                if (result == 0)
+                {
+                    CellIndex = x;
+                }
+                return result;
+            }
+
+            #endregion
         }
     }
 
