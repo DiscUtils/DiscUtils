@@ -61,12 +61,17 @@ namespace DiscUtils.Registry
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.StringToBytes(_listType, buffer, offset, 2);
+            Utilities.WriteBytesLittleEndian((ushort)_listIndexes.Count, buffer, offset + 2);
+            for (int i = 0; i < _listIndexes.Count; ++i)
+            {
+                Utilities.WriteBytesLittleEndian(_listIndexes[i], buffer, offset + 4 + (i * 4));
+            }
         }
 
         public override int Size
         {
-            get { throw new NotImplementedException(); }
+            get { return 4 + (_listIndexes.Count * 4); }
         }
 
         internal override int FindKey(string name, out int cellIndex)
@@ -103,6 +108,48 @@ namespace DiscUtils.Registry
                 {
                     names.Add(((KeyNodeCell)cell).Name);
                 }
+            }
+        }
+
+        internal override int LinkSubKey(string name, int cellIndex)
+        {
+            // Look for the first sublist that has a subkey name greater than name
+            if (ListType == "ri")
+            {
+                if (_listIndexes.Count == 0)
+                {
+                    throw new NotImplementedException("Empty indirect list");
+                }
+
+                for (int i = 0; i < _listIndexes.Count - 1; ++i)
+                {
+                    int tempIndex;
+                    ListCell cell = _hive.GetCell<ListCell>(_listIndexes[i]);
+                    if (cell.FindKey(name, out tempIndex) <= 0)
+                    {
+                        _listIndexes[i] = cell.LinkSubKey(name, cellIndex);
+                        return _hive.UpdateCell(this, false);
+                    }
+                }
+
+                ListCell lastCell = _hive.GetCell<ListCell>(_listIndexes[_listIndexes.Count - 1]);
+                _listIndexes[_listIndexes.Count - 1] = lastCell.LinkSubKey(name, cellIndex);
+                return _hive.UpdateCell(this, false);
+            }
+            else
+            {
+                for (int i = 0; i < _listIndexes.Count; ++i)
+                {
+                    KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(_listIndexes[i]);
+                    if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
+                    {
+                        _listIndexes.Insert(i, cellIndex);
+                        return _hive.UpdateCell(this, true);
+                    }
+                }
+
+                _listIndexes.Add(cellIndex);
+                return _hive.UpdateCell(this, true);
             }
         }
 

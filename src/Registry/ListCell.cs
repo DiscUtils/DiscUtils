@@ -45,5 +45,13 @@ namespace DiscUtils.Registry
         /// </summary>
         /// <param name="names">The list to populate</param>
         internal abstract void EnumerateKeys(List<string> names);
+
+        /// <summary>
+        /// Adds a subkey to this list.
+        /// </summary>
+        /// <param name="name">The name of the subkey</param>
+        /// <param name="cellIndex">The cell index of the subkey</param>
+        /// <returns>The new cell index of the list, which may have changed</returns>
+        internal abstract int LinkSubKey(string name, int cellIndex);
     }
 }

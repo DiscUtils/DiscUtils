@@ -49,11 +49,6 @@ namespace DiscUtils.Registry
             _hive = hive;
         }
 
-        public string HashType
-        {
-            get { return _hashType; }
-        }
-
         public IEnumerable<int> SubKeys
         {
             get { return _subKeyIndexes; }
@@ -90,11 +85,6 @@ namespace DiscUtils.Registry
             get { return 0x4 + _numElements * 0x8; }
         }
 
-        public int Count
-        {
-            get { return _numElements; }
-        }
-
         /// <summary>
         /// Adds a new entry.
         /// </summary>
@@ -106,7 +96,7 @@ namespace DiscUtils.Registry
             for (int i = 0; i < _numElements; ++i)
             {
                 KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(_subKeyIndexes[i]);
-                if (string.CompareOrdinal(cell.Name, name) > 0)
+                if (string.Compare(cell.Name, name, StringComparison.OrdinalIgnoreCase) > 0)
                 {
                     _subKeyIndexes.Insert(i, cellIndex);
                     _nameHashes.Insert(i, CalcHash(name));
@@ -148,6 +138,12 @@ namespace DiscUtils.Registry
             }
         }
 
+        internal override int LinkSubKey(string name, int cellIndex)
+        {
+            Add(name, cellIndex);
+            return _hive.UpdateCell(this, true);
+        }
+
         /// <summary>
         /// Finds a subkey cell, returning it's index in this list.
         /// </summary>
@@ -174,12 +170,7 @@ namespace DiscUtils.Registry
             _numElements--;
         }
 
-        internal int IndexToCellIndex(int index)
-        {
-            return _subKeyIndexes[index];
-        }
-
-        internal uint CalcHash(string name)
+        private uint CalcHash(string name)
         {
             uint hash = 0;
             if (_hashType == "lh")

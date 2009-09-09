@@ -343,7 +343,6 @@ namespace DiscUtils.Registry
                 _hive.UpdateCell(newKeyCell, true);
 
                 LinkSubKey(split[0], newKeyCell.Index);
-                _hive.UpdateCell(_cell, false);
 
                 if (split.Length == 1)
                 {
@@ -655,55 +654,14 @@ namespace DiscUtils.Registry
                 _hive.UpdateCell(newListCell, true);
                 _cell.NumSubKeys = 1;
                 _cell.SubKeysIndex = newListCell.Index;
-                return;
-            }
-
-            Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
-
-            SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
-            if (indirectList != null)
-            {
-                if (indirectList.CellIndexes.Count == 0)
-                {
-                    throw new NotImplementedException("Empty indirect list");
-                }
-
-                // Look for the first sublist that has a subkey name greater than ours
-                int insertionListIdx = 0;
-                while (insertionListIdx < indirectList.CellIndexes.Count - 1)
-                {
-                    int testListIndex = indirectList.CellIndexes[insertionListIdx];
-
-                    SubKeyHashedListCell candidateList = _hive.GetCell<SubKeyHashedListCell>(testListIndex);
-                    if (candidateList.Count > 0)
-                    {
-                        KeyNodeCell first = _hive.GetCell<KeyNodeCell>(candidateList.IndexToCellIndex(0));
-                        if (string.CompareOrdinal(first.Name, name) > 0)
-                        {
-                            break;
-                        }
-                    }
-                    insertionListIdx++;
-                }
-
-                int listIndex = indirectList.CellIndexes[insertionListIdx];
-                SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                hashList.Add(name, cellIndex);
-                int newListIndex = _hive.UpdateCell(hashList, true);
-                if (newListIndex != listIndex)
-                {
-                    indirectList.CellIndexes[insertionListIdx] = newListIndex;
-                    _cell.SubKeysIndex = _hive.UpdateCell(indirectList, true);
-                }
             }
             else
             {
-                SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                hashList.Add(name, cellIndex);
-                _cell.SubKeysIndex = _hive.UpdateCell(hashList, true);
+                ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
+                _cell.SubKeysIndex = list.LinkSubKey(name, cellIndex);
+                _cell.NumSubKeys++;
             }
-
-            _cell.NumSubKeys++;
+            _hive.UpdateCell(_cell, false);
         }
 
         private void UnlinkSubKey(string name)
