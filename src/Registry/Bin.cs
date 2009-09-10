@@ -69,17 +69,14 @@ namespace DiscUtils.Registry
             }
         }
 
-        public Cell this[int index]
+        public Cell TryGetCell(int index)
         {
-            get
+            int size = Utilities.ToInt32LittleEndian(_buffer, index - _header.FileOffset);
+            if (size >= 0)
             {
-                int size = Utilities.ToInt32LittleEndian(_buffer, index - _header.FileOffset);
-                if (size >= 0)
-                {
-                    throw new ArgumentException("index is not allocated", "index");
-                }
-                return Cell.Parse(_hive, index, _buffer, index + 4 - _header.FileOffset);
+                return null;
             }
+            return Cell.Parse(_hive, index, _buffer, index + 4 - _header.FileOffset);
         }
 
         public void FreeCell(int index)
@@ -104,7 +101,10 @@ namespace DiscUtils.Registry
                     len += _freeCells[i].Count;
                     _freeCells.RemoveAt(i);
                 }
-                ++i;
+                else
+                {
+                    ++i;
+                }
             }
 
             // If there's a free cell after this one, combine

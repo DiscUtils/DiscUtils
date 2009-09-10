@@ -74,8 +74,36 @@ namespace DiscUtils.Registry
             get { return 4 + (_listIndexes.Count * 4); }
         }
 
+        internal override int Count
+        {
+            get
+            {
+                int total = 0;
+                foreach (var cellIndex in _listIndexes)
+                {
+                    Cell cell = _hive.GetCell<Cell>(cellIndex);
+                    ListCell listCell = cell as ListCell;
+                    if (listCell != null)
+                    {
+                        total += listCell.Count;
+                    }
+                    else
+                    {
+                        total++;
+                    }
+                }
+                return total;
+            }
+        }
+
         internal override int FindKey(string name, out int cellIndex)
         {
+            if (_listIndexes.Count <= 0)
+            {
+                cellIndex = 0;
+                return -1;
+            }
+
             // Check first and last, to early abort if the name is outside the range of this list
             int result = DoFindKey(name, 0, out cellIndex);
             if (result <= 0)
@@ -107,6 +135,26 @@ namespace DiscUtils.Registry
                 else
                 {
                     names.Add(((KeyNodeCell)cell).Name);
+                }
+            }
+        }
+
+        internal override IEnumerable<KeyNodeCell> EnumerateKeys()
+        {
+            for (int i = 0; i < _listIndexes.Count; ++i)
+            {
+                Cell cell = _hive.GetCell<Cell>(_listIndexes[i]);
+                ListCell listCell = cell as ListCell;
+                if (listCell != null)
+                {
+                    foreach (var keyNodeCell in listCell.EnumerateKeys())
+                    {
+                        yield return keyNodeCell;
+                    }
+                }
+                else
+                {
+                    yield return (KeyNodeCell)cell;
                 }
             }
         }
@@ -151,6 +199,47 @@ namespace DiscUtils.Registry
                 _listIndexes.Add(cellIndex);
                 return _hive.UpdateCell(this, true);
             }
+        }
+
+        internal override int UnlinkSubKey(string name)
+        {
+            if (ListType == "ri")
+            {
+                if (_listIndexes.Count == 0)
+                {
+                    throw new NotImplementedException("Empty indirect list");
+                }
+
+                for (int i = 0; i < _listIndexes.Count; ++i)
+                {
+                    int tempIndex;
+                    ListCell cell = _hive.GetCell<ListCell>(_listIndexes[i]);
+                    if (cell.FindKey(name, out tempIndex) <= 0)
+                    {
+                        _listIndexes[i] = cell.UnlinkSubKey(name);
+                        if (cell.Count == 0)
+                        {
+                            _hive.FreeCell(_listIndexes[i]);
+                            _listIndexes.RemoveAt(i);
+                        }
+                        return _hive.UpdateCell(this, false);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < _listIndexes.Count; ++i)
+                {
+                    KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(_listIndexes[i]);
+                    if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        _listIndexes.RemoveAt(i);
+                        return _hive.UpdateCell(this, true);
+                    }
+                }
+            }
+
+            return Index;
         }
 
         private int DoFindKey(string name, int listIndex, out int cellIndex)

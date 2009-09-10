@@ -158,7 +158,7 @@ namespace DiscUtils.Registry
 
             if (bin != null)
             {
-                return (K)bin[index];
+                return (K)bin.TryGetCell(index);
             }
             else
             {

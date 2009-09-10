@@ -49,11 +49,6 @@ namespace DiscUtils.Registry
             _hive = hive;
         }
 
-        public IEnumerable<int> SubKeys
-        {
-            get { return _subKeyIndexes; }
-        }
-
         public override void ReadFrom(byte[] buffer, int offset)
         {
             _hashType = Utilities.BytesToString(buffer, offset, 2);
@@ -110,6 +105,11 @@ namespace DiscUtils.Registry
             return _numElements++;
         }
 
+        internal override int Count
+        {
+            get { return _subKeyIndexes.Count; }
+        }
+
         internal override int FindKey(string name, out int cellIndex)
         {
             // Check first and last, to early abort if the name is outside the range of this list
@@ -138,10 +138,30 @@ namespace DiscUtils.Registry
             }
         }
 
+        internal override IEnumerable<KeyNodeCell> EnumerateKeys()
+        {
+            for (int i = 0; i < _subKeyIndexes.Count; ++i)
+            {
+                yield return _hive.GetCell<KeyNodeCell>(_subKeyIndexes[i]);
+            }
+        }
+
         internal override int LinkSubKey(string name, int cellIndex)
         {
             Add(name, cellIndex);
             return _hive.UpdateCell(this, true);
+        }
+
+        internal override int UnlinkSubKey(string name)
+        {
+            int index = IndexOf(name);
+            if (index >= 0)
+            {
+                RemoveAt(index);
+                return _hive.UpdateCell(this, true);
+            }
+
+            return Index;
         }
 
         /// <summary>
@@ -195,6 +215,12 @@ namespace DiscUtils.Registry
         private int FindKeyAt(string name, int listIndex, out int cellIndex)
         {
             Cell cell = _hive.GetCell<Cell>(_subKeyIndexes[listIndex]);
+            if (cell == null)
+            {
+                cellIndex = 0;
+                return -1;
+            }
+
             ListCell listCell = cell as ListCell;
             if (listCell != null)
             {

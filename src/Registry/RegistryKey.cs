@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -407,6 +408,10 @@ namespace DiscUtils.Registry
         public void DeleteSubKeyTree(string subkey)
         {
             RegistryKey subKeyObj = OpenSubKey(subkey);
+            if (subKeyObj == null)
+            {
+                return;
+            }
 
             if ((subKeyObj.Flags & RegistryKeyFlags.Root) != 0)
             {
@@ -507,28 +512,13 @@ namespace DiscUtils.Registry
             {
                 if (_cell.NumSubKeys != 0)
                 {
-                    Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
-
-                    SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
-                    if (indirectList != null)
-                    {
-                        foreach (int listIndex in indirectList.CellIndexes)
-                        {
-                            SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                            foreach (int index in hashList.SubKeys)
-                            {
-                                yield return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(index));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                        foreach (int index in hashList.SubKeys)
-                        {
-                            yield return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(index));
-                        }
-                    }
+                    ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
+                    return from key in list.EnumerateKeys()
+                           select new RegistryKey(_hive, key);
+                }
+                else
+                {
+                    return new RegistryKey[] { };
                 }
             }
         }
@@ -671,41 +661,8 @@ namespace DiscUtils.Registry
                 throw new InvalidOperationException("No subkey list");
             }
 
-            Cell list = _hive.GetCell<Cell>(_cell.SubKeysIndex);
-
-            SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
-            if (indirectList != null)
-            {
-                //foreach (int listIndex in indirectList.CellIndexes)
-                for (int i = 0; i < indirectList.CellIndexes.Count; ++i)
-                {
-                    int listIndex = indirectList.CellIndexes[i];
-
-                    SubKeyHashedListCell hashList = _hive.GetCell<SubKeyHashedListCell>(listIndex);
-                    int index = hashList.IndexOf(name);
-                    if (index >= 0)
-                    {
-                        hashList.RemoveAt(index);
-                        int newListIndex = _hive.UpdateCell(hashList, true);
-                        if (newListIndex != listIndex)
-                        {
-                            indirectList.CellIndexes[i] = newListIndex;
-                            _cell.SubKeysIndex = _hive.UpdateCell(indirectList, true);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                SubKeyHashedListCell hashList = (SubKeyHashedListCell)list;
-                int index = hashList.IndexOf(name);
-                if (index >= 0)
-                {
-                    hashList.RemoveAt(index);
-                    _cell.SubKeysIndex = _hive.UpdateCell(hashList, true);
-                }
-            }
-
+            ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
+            _cell.SubKeysIndex = list.UnlinkSubKey(name);
             _cell.NumSubKeys--;
         }
 

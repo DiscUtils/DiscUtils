@@ -33,6 +33,11 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Gets the number of subkeys in this list
+        /// </summary>
+        internal abstract int Count { get; }
+
+        /// <summary>
         /// Searches for a key with a given name.
         /// </summary>
         /// <param name="name">The name to search for</param>
@@ -47,11 +52,24 @@ namespace DiscUtils.Registry
         internal abstract void EnumerateKeys(List<string> names);
 
         /// <summary>
+        /// Enumerates all of the keys in the list.
+        /// </summary>
+        /// <returns>Enumeration of key cells</returns>
+        internal abstract IEnumerable<KeyNodeCell> EnumerateKeys();
+
+        /// <summary>
         /// Adds a subkey to this list.
         /// </summary>
         /// <param name="name">The name of the subkey</param>
         /// <param name="cellIndex">The cell index of the subkey</param>
         /// <returns>The new cell index of the list, which may have changed</returns>
         internal abstract int LinkSubKey(string name, int cellIndex);
+
+        /// <summary>
+        /// Removes a subkey from this list.
+        /// </summary>
+        /// <param name="name">The name of the subkey</param>
+        /// <returns>The new cell index of the list, which may have changed</returns>
+        internal abstract int UnlinkSubKey(string name);
     }
 }
