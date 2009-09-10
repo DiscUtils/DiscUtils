@@ -40,6 +40,7 @@ Copy-Item "${basedir}\utils\VHDDump\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\iSCSIBrowse\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VirtualDiskConvert\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VolInfo\bin\Release\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\DiskDump\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\bin\LICENSE.TXT"
 pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"

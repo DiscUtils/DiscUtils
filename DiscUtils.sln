@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTFSExtract", "utils\NTFSEx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolInfo", "utils\VolInfo\VolInfo.csproj", "{484C9CBA-8F33-4964-82CE-D8B340C8FF83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiskDump", "utils\DiskDump\DiskDump.csproj", "{C4FD3AC2-A5DE-4CE8-B5B3-D3E96DAB7975}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4FD3AC2-A5DE-4CE8-B5B3-D3E96DAB7975}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4FD3AC2-A5DE-4CE8-B5B3-D3E96DAB7975}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4FD3AC2-A5DE-4CE8-B5B3-D3E96DAB7975}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4FD3AC2-A5DE-4CE8-B5B3-D3E96DAB7975}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
