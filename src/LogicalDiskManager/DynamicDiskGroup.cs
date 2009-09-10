@@ -258,7 +258,7 @@ namespace DiscUtils.LogicalDiskManager
                 DynamicDisk dynDisk;
                 if (_disks.TryGetValue(new Guid(disk.DiskGuidString), out dynDisk))
                 {
-                    Console.WriteLine(linePrefix + "      PRIVATE HEADER");
+                    writer.WriteLine(linePrefix + "      PRIVATE HEADER");
                     dynDisk.Dump(writer, linePrefix + "        ");
                 }
             }
