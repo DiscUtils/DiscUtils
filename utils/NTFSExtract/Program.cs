@@ -37,6 +37,7 @@ namespace NTFSExtract
         private static CommandLineSwitch _attributeType;
         private static CommandLineSwitch _partition;
         private static CommandLineSwitch _volumeId;
+        private static CommandLineSwitch _hexDump;
         private static CommandLineSwitch _userName;
         private static CommandLineSwitch _password;
         private static CommandLineSwitch _helpSwitch;
@@ -51,6 +52,7 @@ namespace NTFSExtract
             _attributeType = new CommandLineSwitch("t", "type", "type", "The type of the attribute to extract (the default is Data).  One of: StandardInformation, AttributeList, FileName, ObjectId, SecurityDescriptor, VolumeName, VolumeInformation, Data, IndexRoot, IndexAllocation, Bitmap, ReparsePoint, ExtendedAttributesInformation, ExtendedAttributes, PropertySet, LoggedUtilityStream.");
             _partition = new CommandLineSwitch("p", "partition", "num", "The number of the partition to access, in the range 0-n.  If not specified, 0 (the first partition) is the default.");
             _volumeId = new CommandLineSwitch("v", "volume", "id", "The volume id of the volume to access, use the VolInfo tool to discover this id.  If specified, the partition parameter is ignored.");
+            _hexDump = new CommandLineSwitch("hd", "hexdump", null, "Output a HexDump of the NTFS stream to the console, in addition to writing it to the output file.");
             _userName = new CommandLineSwitch("u", "user", "user_name", "If using iSCSI, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
             _password = new CommandLineSwitch("pw", "password", "secret", "If using iSCSI, optionally use this parameter to specify the password to authenticate with.");
             _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
@@ -64,6 +66,7 @@ namespace NTFSExtract
             parser.AddSwitch(_attributeType);
             parser.AddSwitch(_partition);
             parser.AddSwitch(_volumeId);
+            parser.AddSwitch(_hexDump);
             parser.AddSwitch(_userName);
             parser.AddSwitch(_password);
             parser.AddSwitch(_helpSwitch);
@@ -108,6 +111,12 @@ namespace NTFSExtract
                         {
                             outFile.SetLength(source.Length);
                             SparseStream.Pump(source, outFile);
+                        }
+
+                        if (_hexDump.IsPresent)
+                        {
+                            source.Position = 0;
+                            HexDump.Generate(source, Console.Out);
                         }
                     }
                 }

@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 
-namespace DiscUtils.Diagnostics
+namespace DiscUtils.Common
 {
     /// <summary>
     /// Provides utility methods to produce hex dumps of binary data.

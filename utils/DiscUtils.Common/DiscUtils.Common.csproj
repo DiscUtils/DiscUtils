@@ -49,6 +49,7 @@
     <Compile Include="CommandLineParameter.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandLineSwitch.cs" />
+    <Compile Include="HexDump.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
