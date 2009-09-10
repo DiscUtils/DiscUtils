@@ -185,9 +185,12 @@ namespace DiscUtils
         {
             get
             {
+                StreamExtent[] bounds = new StreamExtent[] {new StreamExtent(0, Length)};
                 int chunkSize = _buffer.ChunkSize;
-                return from chunk in _buffer.AllocatedChunks
-                       select new StreamExtent(chunk * chunkSize, chunkSize);
+                return StreamExtent.Intersect(
+                    bounds,
+                    from chunk in _buffer.AllocatedChunks
+                       select new StreamExtent(chunk * chunkSize, chunkSize));
             }
         }
     }
