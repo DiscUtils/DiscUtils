@@ -206,9 +206,10 @@ namespace DiscUtils.Vhd
             {
                 geometry = Geometry.FromCapacity(capacity);
 
-                // This is to maintain legacy behaviour - if no geometry specified, we make the actual capacity exactly
-                // fit the disk geometry, rather than allowing it to be different.
-                capacity = geometry.Capacity;
+                // Backwards compatibility - if the geometry isn't specified, make the actual capacity a
+                // multiple of the disk geometry's cylinder capacity.
+                long cylinderSize = geometry.BytesPerSector * (long)geometry.SectorsPerTrack * geometry.HeadsPerCylinder;
+                capacity = (capacity / cylinderSize) * cylinderSize;
             }
 
             Footer footer = new Footer(geometry, capacity, FileType.Dynamic);

@@ -208,7 +208,7 @@ namespace DiscUtils.Partitions
                 throw new ArgumentException("The first sector in a partition must be before the last");
             }
 
-            if (last > _diskGeometry.TotalSectors)
+            if ((last + 1) > _diskGeometry.TotalSectors)
             {
                 throw new ArgumentOutOfRangeException("last", last, "The last sector extends beyond the end of the disk");
             }
