@@ -115,20 +115,15 @@ namespace DiscUtils.Ntfs
 
         private static int WriteVarLong(byte[] buffer, int offset, long val)
         {
-            bool isPositive = val > 0;
+            bool isPositive = val >= 0;
 
             int pos = 0;
-            while (val != 0)
+            do
             {
                 buffer[offset + pos] = (byte)(val & 0xFF);
                 val >>= 8;
                 pos++;
-
-                if (val == -1L)
-                {
-                    break;
-                }
-            }
+            } while (val != 0 && val != -1);
 
             // Avoid appearing to have a negative number that is actually positive,
             // record an extra empty byte if needed.
@@ -148,21 +143,17 @@ namespace DiscUtils.Ntfs
 
         private static int VarLongSize(long val)
         {
-            bool isPositive = val > 0;
+            bool isPositive = val >= 0;
             bool lastByteHighBitSet = false;
 
             int len = 0;
-            while (val != 0)
+            do
             {
                 lastByteHighBitSet = ((val & 0x80) != 0);
                 val >>= 8;
                 len++;
+            } while (val != 0 && val != -1) ;
 
-                if (val == -1L)
-                {
-                    break;
-                }
-            }
 
             if ((isPositive && lastByteHighBitSet) || (!isPositive && !lastByteHighBitSet))
             {
