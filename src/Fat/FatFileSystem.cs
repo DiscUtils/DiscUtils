@@ -1106,7 +1106,7 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Creates a formatted hard disk partition in a stream.
         /// </summary>
-        /// <param name="stream">The stream to write the blank image to</param>
+        /// <param name="stream">The stream to write the new file system to</param>
         /// <param name="label">The volume label for the partition (or null)</param>
         /// <param name="diskGeometry">The geometry of the disk containing the partition</param>
         /// <param name="firstSector">The starting sector number of this partition (hide's sectors in other partitions)</param>
