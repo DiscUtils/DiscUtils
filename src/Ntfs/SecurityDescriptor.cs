@@ -34,6 +34,11 @@ namespace DiscUtils.Ntfs
         {
         }
 
+        public SecurityDescriptor(RawSecurityDescriptor secDesc)
+        {
+            _securityDescriptor = secDesc;
+        }
+
         public RawSecurityDescriptor Descriptor
         {
             get { return _securityDescriptor; }
@@ -42,8 +47,13 @@ namespace DiscUtils.Ntfs
 
         public static uint CalcHash(RawSecurityDescriptor descriptor)
         {
-            byte[] buffer = new byte[descriptor.BinaryLength];
-            descriptor.GetBinaryForm(buffer, 0);
+            return new SecurityDescriptor(descriptor).CalcHash();
+        }
+
+        public uint CalcHash()
+        {
+            byte[] buffer = new byte[Size];
+            WriteTo(buffer, 0);
             uint hash = 0;
             for (int i = 0; i < buffer.Length / 4; ++i)
             {
@@ -61,7 +71,57 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            _securityDescriptor.GetBinaryForm(buffer, offset);
+            // Write out the security descriptor manually because on NFTS the DACL is written
+            // before the Owner & Group.  Writing the components in the same order means the
+            // hashes will match for identical Security Descriptors.
+
+            ControlFlags controlFlags = _securityDescriptor.ControlFlags;
+            buffer[offset + 0x00] = 1;
+            buffer[offset + 0x01] = _securityDescriptor.ResourceManagerControl;
+            Utilities.WriteBytesLittleEndian((ushort)controlFlags, buffer, offset + 0x02);
+
+            // Blank out offsets, will fill later
+            for(int i = 0x04; i < 0x14; ++i)
+            {
+                buffer[offset + i] = 0;
+            }
+
+            int pos = 0x14;
+
+            if ((controlFlags & ControlFlags.DiscretionaryAclPresent) != 0)
+            {
+                Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x10);
+                _securityDescriptor.DiscretionaryAcl.GetBinaryForm(buffer, offset + pos);
+                pos += _securityDescriptor.DiscretionaryAcl.BinaryLength;
+            }
+            else
+            {
+                Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 0x10);
+            }
+
+            if ((controlFlags & ControlFlags.SystemAclPresent) != 0)
+            {
+                Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x0C);
+                _securityDescriptor.SystemAcl.GetBinaryForm(buffer, offset + pos);
+                pos += _securityDescriptor.SystemAcl.BinaryLength;
+            }
+            else
+            {
+                Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 0x0C);
+            }
+
+            Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x04);
+            _securityDescriptor.Owner.GetBinaryForm(buffer, offset + pos);
+            pos += _securityDescriptor.Owner.BinaryLength;
+
+            Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x08);
+            _securityDescriptor.Group.GetBinaryForm(buffer, offset + pos);
+            pos += _securityDescriptor.Group.BinaryLength;
+
+            if (pos != _securityDescriptor.BinaryLength)
+            {
+                throw new IOException("Failed to write Security Descriptor correctly");
+            }
         }
 
         public int Size

@@ -56,29 +56,38 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            _nextId++;
+            if (_nextId == 0)
+            {
+                _nextId = 256;
+            }
+            else
+            {
+                _nextId++;
+            }
+
             _nextSpace = Utilities.RoundUp(_nextSpace, 16);
         }
 
         public RawSecurityDescriptor GetDescriptorById(uint id)
         {
             IdIndexData data = _idIndex[new IdIndexKey(id)];
-            return ReadDescriptor(data);
+            return ReadDescriptor(data).Descriptor;
         }
 
         public uint AddDescriptor(RawSecurityDescriptor newDescriptor)
         {
             // Search to see if this is a known descriptor
-            uint newHash = SecurityDescriptor.CalcHash(newDescriptor);
-            byte[] newByteForm = new byte[newDescriptor.BinaryLength];
-            newDescriptor.GetBinaryForm(newByteForm, 0);
+            SecurityDescriptor newDescObj = new SecurityDescriptor(newDescriptor);
+            uint newHash = newDescObj.CalcHash();
+            byte[] newByteForm = new byte[newDescObj.Size];
+            newDescObj.WriteTo(newByteForm, 0);
 
             foreach (var entry in _hashIndex.FindAll(new HashFinder(newHash)))
             {
-                RawSecurityDescriptor stored = ReadDescriptor(entry.Value);
+                SecurityDescriptor stored = ReadDescriptor(entry.Value);
 
-                byte[] storedByteForm = new byte[stored.BinaryLength];
-                stored.GetBinaryForm(storedByteForm, 0);
+                byte[] storedByteForm = new byte[stored.Size];
+                stored.WriteTo(storedByteForm, 0);
 
                 if (Utilities.AreEqual(newByteForm, storedByteForm))
                 {
@@ -142,6 +151,15 @@ namespace DiscUtils.Ntfs
             _file.UpdateRecordInMft();
 
             return record.Id;
+        }
+
+        public static SecurityDescriptors Initialize(File file)
+        {
+            file.CreateIndex("$SDH", (AttributeType)0, AttributeCollationRule.SecurityHash);
+            file.CreateIndex("$SII", (AttributeType)0, AttributeCollationRule.UnsignedLong);
+            file.CreateStream(AttributeType.Data, "$SDS");
+
+            return new SecurityDescriptors(file);
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -303,7 +321,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private RawSecurityDescriptor ReadDescriptor(IndexData data)
+        private SecurityDescriptor ReadDescriptor(IndexData data)
         {
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
@@ -313,7 +331,7 @@ namespace DiscUtils.Ntfs
                 SecurityDescriptorRecord record = new SecurityDescriptorRecord();
                 record.Read(buffer, 0);
 
-                return new RawSecurityDescriptor(record.SecurityDescriptor, 0);
+                return new SecurityDescriptor(new RawSecurityDescriptor(record.SecurityDescriptor, 0));
             }
         }
 
@@ -345,5 +363,6 @@ namespace DiscUtils.Ntfs
                 return CompareTo(other.Hash);
             }
         }
+
     }
 }
