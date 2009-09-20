@@ -30,6 +30,15 @@ namespace DiscUtils.Ntfs
     {
         private string _name;
 
+        public VolumeName()
+        {
+        }
+
+        public VolumeName(string name)
+        {
+            _name = name;
+        }
+
         #region IByteArraySerializable Members
 
         public void ReadFrom(byte[] buffer, int offset)
@@ -39,12 +48,12 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Encoding.Unicode.GetBytes(_name, 0, _name.Length, buffer, offset);
         }
 
         public int Size
         {
-            get { throw new NotImplementedException(); }
+            get { return Encoding.Unicode.GetByteCount(_name); }
         }
 
         #endregion

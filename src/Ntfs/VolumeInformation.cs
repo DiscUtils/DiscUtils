@@ -31,23 +31,37 @@ namespace DiscUtils.Ntfs
         private byte _minorVersion;
         private VolumeInformationFlags _flags;
 
+        public VolumeInformation()
+        {
+        }
+
+        public VolumeInformation(byte major, byte minor, VolumeInformationFlags flags)
+        {
+            _majorVersion = major;
+            _minorVersion = minor;
+            _flags = flags;
+        }
+
         #region IByteArraySerializable Members
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            _majorVersion = buffer[0x08];
-            _minorVersion = buffer[0x09];
-            _flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, 0x0A);
+            _majorVersion = buffer[offset + 0x08];
+            _minorVersion = buffer[offset + 0x09];
+            _flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian((ulong)0, buffer, offset + 0x00);
+            buffer[offset + 0x08] = _majorVersion;
+            buffer[offset + 0x09] = _minorVersion;
+            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0A);
         }
 
         public int Size
         {
-            get { throw new NotImplementedException(); }
+            get { return 0x0C; }
         }
 
         #endregion
