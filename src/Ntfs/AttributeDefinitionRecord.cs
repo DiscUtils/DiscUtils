@@ -39,6 +39,7 @@ namespace DiscUtils.Ntfs
     [Flags]
     internal enum AttributeTypeFlags : int
     {
+        None             = 0x00,
         Indexed          = 0x02,
         Multiple         = 0x04,
         NotZero          = 0x08,
@@ -69,6 +70,17 @@ namespace DiscUtils.Ntfs
             Flags = (AttributeTypeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 0x8C);
             MinSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x90);
             MaxSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x98);
+        }
+
+        internal void Write(byte[] buffer, int offset)
+        {
+            Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset + 0x80);
+            Utilities.WriteBytesLittleEndian(DisplayRule, buffer, offset + 0x84);
+            Utilities.WriteBytesLittleEndian((uint)CollationRule, buffer, offset + 0x88);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 0x8C);
+            Utilities.WriteBytesLittleEndian(MinSize, buffer, offset + 0x90);
+            Utilities.WriteBytesLittleEndian(MaxSize, buffer, offset + 0x98);
         }
     }
 }
