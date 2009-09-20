@@ -134,6 +134,43 @@ namespace DiscUtils.Ntfs
             _bytesPerSector = _self.Context.BiosParameterBlock.BytesPerSector;
         }
 
+        public File InitializeNew(INtfsContext context, long firstBitmapCluster, ulong numBitmapClusters, long firstRecordsCluster, ulong numRecordsClusters)
+        {
+            BiosParameterBlock bpb = context.BiosParameterBlock;
+
+            FileRecord fileRec = new FileRecord(bpb.BytesPerSector, bpb.MftRecordSize, (uint)MftIndex);
+            fileRec.Flags = FileRecordFlags.InUse;
+            fileRec.SequenceNumber = 1;
+
+            _self = new File(context, fileRec);
+
+            StandardInformation.InitializeNewFile(_self, FileAttributeFlags.Hidden | FileAttributeFlags.System);
+
+            NtfsStream recordsStream = _self.CreateStream(AttributeType.Data, null, firstRecordsCluster, numRecordsClusters, (uint)bpb.BytesPerCluster);
+            _records = recordsStream.Open(FileAccess.ReadWrite);
+
+            NtfsStream bitmapStream = _self.CreateStream(AttributeType.Bitmap, null, firstBitmapCluster, numBitmapClusters, (uint)bpb.BytesPerCluster);
+            using (Stream s = bitmapStream.Open(FileAccess.ReadWrite))
+            {
+                s.SetLength(32);
+                _bitmap = new Bitmap(s, long.MaxValue);
+            }
+
+            _recordLength = context.BiosParameterBlock.MftRecordSize;
+            _bytesPerSector = context.BiosParameterBlock.BytesPerSector;
+
+            _bitmap.MarkPresentRange(0, 1);
+
+            // Write the MFT's own record to itself
+            byte[] buffer = new byte[_recordLength];
+            fileRec.ToBytes(buffer, 0);
+            _records.Position = 0;
+            _records.Write(buffer, 0, _recordLength);
+            _records.Flush();
+
+            return _self;
+        }
+
         public int RecordSize
         {
             get { return _recordLength; }
@@ -164,19 +201,31 @@ namespace DiscUtils.Ntfs
 
         public FileRecord AllocateRecord(FileRecordFlags flags)
         {
-            uint index = (uint)_bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
+            long index = _bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
 
             FileRecord newRecord;
             if ((index + 1) * _recordLength <= _records.Length)
             {
                 newRecord = GetRecord(index, true);
-                newRecord.ReInitialize(_bytesPerSector, _recordLength, index);
+                newRecord.ReInitialize(_bytesPerSector, _recordLength, (uint)index);
             }
             else
             {
-                newRecord = new FileRecord(_bytesPerSector, _recordLength, index);
+                newRecord = new FileRecord(_bytesPerSector, _recordLength, (uint)index);
             }
 
+            newRecord.Flags = FileRecordFlags.InUse | flags;
+
+            WriteRecord(newRecord);
+            _self.UpdateRecordInMft();
+            return newRecord;
+        }
+
+        public FileRecord AllocateRecord(long index, FileRecordFlags flags)
+        {
+            _bitmap.MarkPresent(index);
+
+            FileRecord newRecord = new FileRecord(_bytesPerSector, _recordLength, (uint)index);
             newRecord.Flags = FileRecordFlags.InUse | flags;
 
             WriteRecord(newRecord);
@@ -253,18 +302,25 @@ namespace DiscUtils.Ntfs
             if(_self.MftRecordIsDirty)
             {
                 DirectoryEntry dirEntry = _self.DirectoryEntry;
-                dirEntry.UpdateFrom(_self);
+                if (dirEntry != null)
+                {
+                    dirEntry.UpdateFrom(_self);
+                }
                 _self.UpdateRecordInMft();
             }
 
             // Need to update Mirror.  OpenRaw is OK because this is short duration, and we don't
             // extend or otherwise modify any meta-data, just the content of the Data stream.
-            if (record.MasterFileTableIndex < 4)
+            if (record.MasterFileTableIndex < 4 && _self.Context.GetFileByIndex != null)
             {
-                using (Stream s = _self.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
+                File mftMirror = _self.Context.GetFileByIndex(MftMirrorIndex);
+                if (mftMirror != null)
                 {
-                    s.Position = record.MasterFileTableIndex * _recordLength;
-                    s.Write(buffer, 0, _recordLength);
+                    using (Stream s = mftMirror.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
+                    {
+                        s.Position = record.MasterFileTableIndex * _recordLength;
+                        s.Write(buffer, 0, _recordLength);
+                    }
                 }
             }
         }

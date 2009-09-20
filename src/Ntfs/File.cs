@@ -303,6 +303,22 @@ namespace DiscUtils.Ntfs
             return new AttributeReference(MftReference, id);
         }
 
+        /// <summary>
+        /// Creates a new attribute at a fixed cluster.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        /// <param name="firstCluster">The first cluster to assign to the attribute</param>
+        /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
+        /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
+        private AttributeReference CreateAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        {
+            bool indexed = _context.AttributeDefinitions.IsIndexed(type);
+            ushort id = _baseRecord.CreateAttribute(type, name, firstCluster, numClusters, bytesPerCluster);
+            MarkMftRecordDirty();
+            return new AttributeReference(MftReference, id);
+        }
+
         private void RemoveAttribute(AttributeReference id)
         {
             if (id.File.MftIndex != _baseRecord.MasterFileTableIndex)
@@ -565,6 +581,12 @@ namespace DiscUtils.Ntfs
             return new NtfsStream(this, attrType, name, attrRef);
         }
 
+        public NtfsStream CreateStream(AttributeType attrType, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        {
+            AttributeReference attrRef = CreateAttribute(attrType, name, firstCluster, numClusters, bytesPerCluster);
+            return new NtfsStream(this, attrType, name, attrRef);
+        }
+
         public SparseStream OpenStream(AttributeType attrType, string name, FileAccess access)
         {
             return new FileStream(this, attrType, name, access);
@@ -687,7 +709,18 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                FileNameRecord record = GetStream(AttributeType.FileName, null).GetContent<FileNameRecord>();
+                if (_context.GetDirectoryByRef == null)
+                {
+                    return null;
+                }
+
+                NtfsStream stream = GetStream(AttributeType.FileName, null);
+                if (stream == null)
+                {
+                    return null;
+                }
+
+                FileNameRecord record = stream.GetContent<FileNameRecord>();
 
                 // Root dir is stored without root directory flag set in FileNameRecord, simulate it.
                 if (_baseRecord.MasterFileTableIndex == MasterFileTable.RootDirIndex)
@@ -782,25 +815,26 @@ namespace DiscUtils.Ntfs
 
         internal static File CreateNew(INtfsContext context)
         {
+            return CreateNew(context, FileRecordFlags.None);
+        }
+
+        internal static File CreateNew(INtfsContext context, FileRecordFlags flags)
+        {
             DateTime now = DateTime.UtcNow;
 
-            File newFile = context.AllocateFile(FileRecordFlags.None);
+            File newFile = context.AllocateFile(flags);
 
-            NtfsStream stream = newFile.CreateStream(AttributeType.StandardInformation, null);
-            StandardInformation si = new StandardInformation();
-            si.CreationTime = now;
-            si.ModificationTime = now;
-            si.MftChangedTime = now;
-            si.LastAccessTime = now;
-            si.FileAttributes = FileAttributeFlags.Archive;
-            stream.SetContent(si);
+            StandardInformation.InitializeNewFile(newFile, FileAttributeFlags.Archive | FileRecord.ConvertFlags(flags));
 
-            Guid newId = CreateNewGuid(context);
-            stream = newFile.CreateStream(AttributeType.ObjectId, null);
-            ObjectId objId = new ObjectId();
-            objId.Id = newId;
-            stream.SetContent(objId);
-            context.ObjectIds.Add(newId, newFile.MftReference, newId, Guid.Empty, Guid.Empty);
+            if (context.ObjectIds != null)
+            {
+                Guid newId = CreateNewGuid(context);
+                NtfsStream stream = newFile.CreateStream(AttributeType.ObjectId, null);
+                ObjectId objId = new ObjectId();
+                objId.Id = newId;
+                stream.SetContent(objId);
+                context.ObjectIds.Add(newId, newFile.MftReference, newId, Guid.Empty, Guid.Empty);
+            }
 
             newFile.CreateAttribute(AttributeType.Data);
 
@@ -1045,6 +1079,12 @@ namespace DiscUtils.Ntfs
             /// state, not the current state alone</remarks>
             private void ChangeAttributeResidencyByLength(long value)
             {
+                // This is a bit of a hack - but it's really important the bitmap file remains non-resident
+                if (_file._baseRecord.MasterFileTableIndex == MasterFileTable.BitmapIndex)
+                {
+                    return;
+                }
+
                 NtfsAttribute attr = _openByName ? _file.GetAttribute(_attrType, _attrName) : _file.GetAttribute(_attrId);
                 if (!attr.IsNonResident && value >= _file.MaxMftRecordSize)
                 {

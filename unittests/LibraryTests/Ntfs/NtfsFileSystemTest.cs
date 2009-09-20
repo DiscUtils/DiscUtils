@@ -57,5 +57,29 @@ namespace DiscUtils.Ntfs
             Assert.IsNotNull(rp.Content);
             Assert.AreEqual(3, rp.Content.Length);
         }
+
+        [Test]
+        public void Format_SmallDisk()
+        {
+            long size = 8 * 1024 * 1024;
+            SparseMemoryStream partStream = new SparseMemoryStream();
+            //VirtualDisk disk = Vhd.Disk.InitializeDynamic(partStream, Ownership.Dispose, size);
+            NtfsFileSystem.Format(partStream, "New Partition", Geometry.FromCapacity(size), 0, size / 512);
+
+            NtfsFileSystem ntfs = new NtfsFileSystem(partStream);
+            ntfs.Dump(TextWriter.Null, "");
+        }
+
+        [Test]
+        public void Format_LargeDisk()
+        {
+            long size = 320 * 1024 * 1024L * 1024;
+            SparseMemoryStream partStream = new SparseMemoryStream();
+            //VirtualDisk disk = Vhd.Disk.InitializeDynamic(partStream, Ownership.Dispose, size);
+            NtfsFileSystem.Format(partStream, "New Partition", Geometry.FromCapacity(size), 0, size / 512);
+
+            NtfsFileSystem ntfs = new NtfsFileSystem(partStream);
+            ntfs.Dump(TextWriter.Null, "");
+        }
     }
 }

@@ -45,6 +45,22 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        internal static UpperCase Initialize(File file)
+        {
+            byte[] buffer = new byte[(char.MaxValue + 1) * 2];
+            for (int i = Char.MinValue; i <= char.MaxValue; ++i)
+            {
+                Utilities.WriteBytesLittleEndian((ushort)char.ToUpperInvariant((char)i), buffer, i * 2);
+            }
+
+            using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
+            {
+                s.Write(buffer, 0, buffer.Length);
+            }
+
+            return new UpperCase(file);
+        }
+
         public int Compare(string x, string y)
         {
             int compLen = Math.Min(x.Length, y.Length);
@@ -81,5 +97,6 @@ namespace DiscUtils.Ntfs
             // determining factor.
             return xLength - yLength;
         }
+
     }
 }

@@ -103,6 +103,30 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Initializes a new NTFS file system.
+        /// </summary>
+        /// <param name="stream">The stream to write the new file system to</param>
+        /// <param name="label">The label for the new file system</param>
+        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system</param>
+        /// <param name="firstSector">The first sector of the new file system on the disk</param>
+        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk</param>
+        /// <returns>The newly-initialized file system</returns>
+        public static NtfsFileSystem Format(
+            Stream stream,
+            string label,
+            Geometry diskGeometry,
+            long firstSector,
+            long sectorCount)
+        {
+            NtfsFormatter formatter = new NtfsFormatter();
+            formatter.Label = label;
+            formatter.DiskGeometry = diskGeometry;
+            formatter.FirstSector = firstSector;
+            formatter.SectorCount = sectorCount;
+            return formatter.Format(stream);
+        }
+
+        /// <summary>
         /// Gets the options that control how the file system is interpreted.
         /// </summary>
         public NtfsOptions NtfsOptions
@@ -1328,11 +1352,11 @@ namespace DiscUtils.Ntfs
             File result = null;
             if ((flags & FileRecordFlags.IsDirectory) != 0)
             {
-                result = new Directory(_context, _context.Mft.AllocateRecord(FileRecordFlags.IsDirectory));
+                result = new Directory(_context, _context.Mft.AllocateRecord(flags));
             }
             else
             {
-                result = new File(_context, _context.Mft.AllocateRecord(FileRecordFlags.None));
+                result = new File(_context, _context.Mft.AllocateRecord(flags));
             }
             _fileCache[result.MftReference.MftIndex] = result;
             return result;

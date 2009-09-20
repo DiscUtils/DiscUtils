@@ -45,11 +45,6 @@ namespace DiscUtils.Ntfs
             set { _securityDescriptor = value; }
         }
 
-        public static uint CalcHash(RawSecurityDescriptor descriptor)
-        {
-            return new SecurityDescriptor(descriptor).CalcHash();
-        }
-
         public uint CalcHash()
         {
             byte[] buffer = new byte[Size];

@@ -112,11 +112,25 @@ namespace DiscUtils.Ntfs
             return result.ToArray();
         }
 
+        internal void MarkAllocated(long first, long count)
+        {
+            _bitmap.MarkPresentRange(first, count);
+        }
+
         internal void FreeClusters(params Tuple<long, long>[] runs)
         {
             foreach (var run in runs)
             {
                 _bitmap.MarkAbsentRange(run.First, run.Second);
+            }
+        }
+
+        internal void SetTotalClusters(long numClusters)
+        {
+            long actualClusters = _bitmap.SetTotalEntries(numClusters);
+            if (actualClusters != numClusters)
+            {
+                MarkAllocated(numClusters, actualClusters - numClusters);
             }
         }
 
@@ -207,6 +221,5 @@ namespace DiscUtils.Ntfs
 
             return numFound;
         }
-
     }
 }

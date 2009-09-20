@@ -202,6 +202,7 @@
     <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsFileSystem.cs" />
     <Compile Include="Ntfs\NtfsFileSystemChecker.cs" />
+    <Compile Include="Ntfs\NtfsFormatter.cs" />
     <Compile Include="Ntfs\NtfsOptions.cs" />
     <Compile Include="Ntfs\NtfsStream.cs" />
     <Compile Include="Ntfs\NtfsTransaction.cs" />

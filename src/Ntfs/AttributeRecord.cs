@@ -354,6 +354,18 @@ namespace DiscUtils.Ntfs
             _dataRuns = new List<DataRun>();
         }
 
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, long firstCluster, ulong numClusters, uint bytesPerCluster)
+            : base(type, name, id)
+        {
+            base._nonResidentFlag = 1;
+            _dataRuns = new List<DataRun>();
+            _dataRuns.Add(new DataRun(firstCluster, (long)numClusters));
+            _lastVCN = numClusters - 1;
+            _dataAllocatedSize = bytesPerCluster * numClusters;
+            _dataRealSize = bytesPerCluster * numClusters;
+            _initializedDataSize = bytesPerCluster * numClusters;
+        }
+
         public NonResidentAttributeRecord(NonResidentAttributeRecord toCopy)
             : base(toCopy)
         {
@@ -548,10 +560,9 @@ namespace DiscUtils.Ntfs
             }
 
             byte nameLength = 0;
-            ushort nameOffset = 0;
+            ushort nameOffset = headerLength;
             if (Name != null)
             {
-                nameOffset = headerLength;
                 nameLength = (byte)Name.Length;
             }
 

@@ -86,6 +86,7 @@ namespace DiscUtils.Ntfs
         public ushort SequenceNumber
         {
             get { return _sequenceNumber; }
+            set { _sequenceNumber = value; }
         }
 
         public ushort HardLinkCount
@@ -135,6 +136,30 @@ namespace DiscUtils.Ntfs
                     name,
                     id,
                     indexed)
+                );
+            _attributes.Sort();
+            return id;
+        }
+
+        /// <summary>
+        /// Creates a new attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        /// <param name="firstCluster">The first cluster to assign to the attribute</param>
+        /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
+        /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
+        internal ushort CreateAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        {
+            ushort id = _nextAttributeId++;
+            _attributes.Add(
+                new NonResidentAttributeRecord(
+                    type,
+                    name,
+                    id,
+                    firstCluster,
+                    numClusters,
+                    bytesPerCluster)
                 );
             _attributes.Sort();
             return id;
@@ -339,6 +364,17 @@ namespace DiscUtils.Ntfs
             }
 
             return "No Name";
+        }
+
+        internal static FileAttributeFlags ConvertFlags(FileRecordFlags source)
+        {
+            FileAttributeFlags result = FileAttributeFlags.None;
+
+            if ((source & FileRecordFlags.IsDirectory) != 0) result |= FileAttributeFlags.Directory;
+            if ((source & FileRecordFlags.HasViewIndex) != 0) result |= FileAttributeFlags.IndexView;
+            if ((source & FileRecordFlags.IsMetaFile) != 0) result |= FileAttributeFlags.Hidden | FileAttributeFlags.System;
+
+            return result;
         }
 
         internal void Dump(TextWriter writer, string indent)

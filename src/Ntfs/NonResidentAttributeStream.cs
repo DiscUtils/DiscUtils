@@ -176,10 +176,13 @@ namespace DiscUtils.Ntfs
 
             _file.MarkMftRecordDirty();
 
-            long clusterLength = Utilities.RoundUp(value, _bytesPerCluster);
-            _extents[0].SetLength(clusterLength);
+            if (_file.Context.ClusterBitmap != null)
+            {
+                long clusterLength = Utilities.RoundUp(value, _bytesPerCluster);
+                _extents[0].SetLength(clusterLength);
+                _record.AllocatedLength = clusterLength;
+            }
 
-            _record.AllocatedLength = clusterLength;
             _record.RealLength = value;
             _record.InitializedDataLength = Math.Min(_record.InitializedDataLength, value);
         }
@@ -266,7 +269,7 @@ namespace DiscUtils.Ntfs
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { throw new NotImplementedException(); }
+            get { return new StreamExtent[] { new StreamExtent(0, Length) }; }
         }
 
         private int GetActiveExtent(out long startPos)

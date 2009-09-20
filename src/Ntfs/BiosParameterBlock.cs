@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 
 namespace DiscUtils.Ntfs
 {
@@ -48,6 +49,34 @@ namespace DiscUtils.Ntfs
         public byte RawMftRecordSize;
         public byte RawIndexBufferSize;
         public ulong VolumeSerialNumber;
+
+        internal static BiosParameterBlock Initialized(Geometry diskGeometry, int clusterSize, uint partitionStartLba, long partitionSizeLba, int mftRecordSize, int indexBufferSize)
+        {
+            BiosParameterBlock bpb = new BiosParameterBlock();
+            bpb.OemId = "NTFS    ";
+            bpb.BytesPerSector = Sizes.Sector;
+            bpb.SectorsPerCluster = (byte)(clusterSize / bpb.BytesPerSector);
+            bpb.ReservedSectors = 0;
+            bpb.NumFats = 0;
+            bpb.FatRootEntriesCount = 0;
+            bpb.TotalSectors16 = 0;
+            bpb.Media = 0xF8;
+            bpb.FatSize16 = 0;
+            bpb.SectorsPerTrack = (ushort)diskGeometry.SectorsPerTrack;
+            bpb.NumHeads = (ushort)diskGeometry.HeadsPerCylinder;
+            bpb.HiddenSectors = partitionStartLba;
+            bpb.TotalSectors32 = 0;
+            bpb.BiosDriveNumber = 0x80;
+            bpb.ChkDskFlags = 0;
+            bpb.SignatureByte = 0x80;
+            bpb.PaddingByte = 0;
+            bpb.TotalSectors64 = partitionSizeLba - 1;
+            bpb.RawMftRecordSize = bpb.CodeRecordSize(mftRecordSize);
+            bpb.RawIndexBufferSize = bpb.CodeRecordSize(indexBufferSize);
+            bpb.VolumeSerialNumber = GenSerialNumber();
+
+            return bpb;
+        }
 
         internal static BiosParameterBlock FromBytes(byte[] bytes, int offset)
         {
@@ -79,6 +108,33 @@ namespace DiscUtils.Ntfs
             return bpb;
         }
 
+        internal void ToBytes(byte[] buffer, int offset)
+        {
+            Utilities.StringToBytes(OemId, buffer, offset + 0x03, 8);
+            Utilities.WriteBytesLittleEndian(BytesPerSector, buffer, offset + 0x0B);
+            buffer[offset + 0x0D] = SectorsPerCluster;
+            Utilities.WriteBytesLittleEndian(ReservedSectors, buffer, offset + 0x0E);
+            buffer[offset + 0x10] = NumFats;
+            Utilities.WriteBytesLittleEndian(FatRootEntriesCount, buffer, offset + 0x11);
+            Utilities.WriteBytesLittleEndian(TotalSectors16, buffer, offset + 0x13);
+            buffer[offset + 0x15] = Media;
+            Utilities.WriteBytesLittleEndian(FatSize16, buffer, offset + 0x16);
+            Utilities.WriteBytesLittleEndian(SectorsPerTrack, buffer, offset + 0x18);
+            Utilities.WriteBytesLittleEndian(NumHeads, buffer, offset + 0x1A);
+            Utilities.WriteBytesLittleEndian(HiddenSectors, buffer, offset + 0x1C);
+            Utilities.WriteBytesLittleEndian(TotalSectors32, buffer, offset + 0x20);
+            buffer[offset + 0x24] = BiosDriveNumber;
+            buffer[offset + 0x25] = ChkDskFlags;
+            buffer[offset + 0x26] = SignatureByte;
+            buffer[offset + 0x27] = PaddingByte;
+            Utilities.WriteBytesLittleEndian(TotalSectors64, buffer, offset + 0x28);
+            Utilities.WriteBytesLittleEndian(MftCluster, buffer, offset + 0x30);
+            Utilities.WriteBytesLittleEndian(MftMirrorCluster, buffer, offset + 0x38);
+            buffer[offset + 0x40] = RawMftRecordSize;
+            buffer[offset + 0x44] = RawIndexBufferSize;
+            Utilities.WriteBytesLittleEndian(VolumeSerialNumber, buffer, offset + 0x48);
+        }
+
         public int MftRecordSize
         {
             get { return CalcRecordSize(RawMftRecordSize); }
@@ -104,6 +160,32 @@ namespace DiscUtils.Ntfs
             {
                 return rawSize * SectorsPerCluster * BytesPerSector;
             }
+        }
+
+        private byte CodeRecordSize(int size)
+        {
+            if (size >= BytesPerCluster)
+            {
+                return (byte)(size / BytesPerCluster);
+            }
+            else
+            {
+                sbyte val = 0;
+                while (size != 1)
+                {
+                    size = (size >> 1) & 0x7FFFFFFF;
+                    val++;
+                }
+                return (byte)-val;
+            }
+        }
+
+        private static ulong GenSerialNumber()
+        {
+            byte[] buffer = new byte[8];
+            Random rng = new Random();
+            rng.NextBytes(buffer);
+            return Utilities.ToUInt64LittleEndian(buffer, 0);
         }
     }
 }

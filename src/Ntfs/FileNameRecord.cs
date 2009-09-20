@@ -189,15 +189,7 @@ namespace DiscUtils.Ntfs
         internal static FileAttributeFlags SetAttributes(FileAttributes attrs, FileAttributeFlags flags)
         {
             FileAttributes attrMask = ((FileAttributes)0xFFFF) & ~FileAttributes.Directory;
-
-            FileAttributeFlags result = (FileAttributeFlags)(((uint)flags & 0xFFFF0000) | (uint)(attrs & attrMask));
-
-            if ((attrs & FileAttributes.Directory) != 0)
-            {
-                result |= FileAttributeFlags.Directory;
-            }
-
-            return result;
+            return (FileAttributeFlags)(((uint)flags & 0xFFFF0000) | (uint)(attrs & attrMask));
         }
 
         #region IEquatable<FileNameRecord> Members

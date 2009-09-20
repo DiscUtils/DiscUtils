@@ -40,7 +40,7 @@ namespace DiscUtils.Ntfs
             _maxIndex = maxIndex;
             _bitmap = new SparseMemoryBuffer(128);
 
-            if (stream.Length > 8 * Sizes.OneMiB)
+            if (stream.Length > 10 * Sizes.OneMiB)
             {
                 throw new NotImplementedException("Large Bitmap");
             }
@@ -76,16 +76,20 @@ namespace DiscUtils.Ntfs
 
         public void MarkPresentRange(long index, long count)
         {
+            if (count <= 0)
+            {
+                return;
+            }
+
             for (long i = index; i < index + count; ++i)
             {
                 long byteIdx = i / 8;
                 byte mask = (byte)(1 << (byte)(i % 8));
-
                 _bitmap[byteIdx] |= mask;
             }
 
             long firstByte = index / 8;
-            long lastByte = (index + count) / 8;
+            long lastByte = (index + count - 1) / 8;
 
             if (lastByte >= _stream.Length)
             {
@@ -169,6 +173,13 @@ namespace DiscUtils.Ntfs
             {
                 return -1;
             }
+        }
+
+        internal long SetTotalEntries(long numEntries)
+        {
+            long length = Utilities.RoundUp(numEntries / 8, 8);
+            _stream.SetLength(length);
+            return length * 8;
         }
     }
 }
