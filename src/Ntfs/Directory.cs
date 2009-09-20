@@ -93,7 +93,7 @@ namespace DiscUtils.Ntfs
             }
 
             FileNameRecord newNameRecord = file.GetFileNameRecord(null, true);
-            newNameRecord.FileNameNamespace = FileNameNamespace.Posix;
+            newNameRecord.FileNameNamespace = Utilities.Is8Dot3(name.ToUpperInvariant()) ? FileNameNamespace.Win32AndDos : FileNameNamespace.Posix;
             newNameRecord.FileName = name;
             newNameRecord.ParentDirectory = MftReference;
 
@@ -137,18 +137,9 @@ namespace DiscUtils.Ntfs
 
         internal new static Directory CreateNew(INtfsContext context)
         {
-            DateTime now = DateTime.UtcNow;
-
             Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
 
-            NtfsStream stream = dir.CreateStream(AttributeType.StandardInformation, null);
-            StandardInformation si = new StandardInformation();
-            si.CreationTime = now;
-            si.ModificationTime = now;
-            si.MftChangedTime = now;
-            si.LastAccessTime = now;
-            si.FileAttributes = FileAttributeFlags.Archive;
-            stream.SetContent(si);
+            StandardInformation.InitializeNewFile(dir, FileAttributeFlags.Archive);
 
             // Create the index root attribute by instantiating a new index
             dir.CreateIndex("$I30", AttributeType.FileName, AttributeCollationRule.Filename);

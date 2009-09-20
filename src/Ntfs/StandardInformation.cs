@@ -42,7 +42,21 @@ namespace DiscUtils.Ntfs
 
         private bool _haveExtraFields = true;
 
+        public static StandardInformation InitializeNewFile(File file, FileAttributeFlags flags)
+        {
+            DateTime now = DateTime.UtcNow;
 
+            NtfsStream siStream = file.CreateStream(AttributeType.StandardInformation, null);
+            StandardInformation si = new StandardInformation();
+            si.CreationTime = now;
+            si.ModificationTime = now;
+            si.MftChangedTime = now;
+            si.LastAccessTime = now;
+            si.FileAttributes = flags;
+            siStream.SetContent(si);
+
+            return si;
+        }
 
         #region IByteArraySerializable Members
 
