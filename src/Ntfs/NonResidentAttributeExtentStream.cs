@@ -596,7 +596,7 @@ namespace DiscUtils.Ntfs
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { throw new NotImplementedException(); }
+            get { return new StreamExtent[] { new StreamExtent(0, Length) }; }
         }
     }
 }
