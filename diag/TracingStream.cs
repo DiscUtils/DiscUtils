@@ -153,7 +153,7 @@ namespace DiscUtils.Diagnostics
 
             if (!string.IsNullOrEmpty(path))
             {
-                _fileOut = new StreamWriter(path, false);
+                _fileOut = new StreamWriter(new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 
@@ -314,6 +314,7 @@ namespace DiscUtils.Diagnostics
             {
                 _fileOut.Write(record);
                 _fileOut.Write(trace.ToString());
+                _fileOut.Flush();
             }
             return record;
         }
