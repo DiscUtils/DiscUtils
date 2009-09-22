@@ -85,7 +85,7 @@ namespace DiscUtils.Iso9660
             } while (bvd.VolumeDescriptorType != VolumeDescriptorType.SetTerminator);
 
 
-            if (joliet)
+            if (joliet && svdPos != 0)
             {
                 data.Position = svdPos;
                 data.Read(buffer, 0, IsoUtilities.SectorSize);
