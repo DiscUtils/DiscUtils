@@ -202,6 +202,13 @@ namespace DiscUtils
             Assert.AreEqual(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
         }
 
+        [ExpectedException(typeof(DirectoryNotFoundException))]
+        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        public void GetDirectories_BadPath(DiscFileSystem fs)
+        {
+            fs.GetDirectories(@"\baddir");
+        }
+
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         public void GetFiles(DiscFileSystem fs)
         {

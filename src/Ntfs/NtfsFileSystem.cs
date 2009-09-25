@@ -555,7 +555,7 @@ namespace DiscUtils.Ntfs
             using (new NtfsTransaction())
             {
                 DirectoryEntry sourceParentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(sourceName));
-                if(sourceParentDirEntry == null || !sourceParentDirEntry.IsDirectory)
+                if (sourceParentDirEntry == null || !sourceParentDirEntry.IsDirectory)
                 {
                     throw new FileNotFoundException("No such file", sourceName);
                 }
@@ -1250,7 +1250,7 @@ namespace DiscUtils.Ntfs
                             byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
                             rp.ReadFrom(buffer, 0);
                         }
-                        
+
                         file.RemoveStream(stream);
 
                         // Update the standard information attribute - so it reflects the actual file state
@@ -1437,7 +1437,16 @@ namespace DiscUtils.Ntfs
         private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
         {
             DirectoryEntry parentDirEntry = GetDirectoryEntry(path);
+            if (parentDirEntry == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
+            }
+
             Directory parentDir = GetDirectory(parentDirEntry.Reference);
+            if (parentDir == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
+            }
 
             foreach (DirectoryEntry de in parentDir.GetAllEntries())
             {
@@ -1539,7 +1548,7 @@ namespace DiscUtils.Ntfs
                 NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
                 StandardInformation si = stream.GetContent<StandardInformation>();
                 modifier(si);
-                stream.SetContent(si); 
+                stream.SetContent(si);
 
                 // Update the directory entry used to open the file, so it's accurate
                 dirEntry.UpdateFrom(file);

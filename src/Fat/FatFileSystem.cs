@@ -1657,6 +1657,11 @@ namespace DiscUtils.Fat
         private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
         {
             Directory dir = GetDirectory(path);
+            if (dir == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
+            }
+
             DirectoryEntry[] entries = dir.Entries;
 
             foreach (DirectoryEntry de in entries)
