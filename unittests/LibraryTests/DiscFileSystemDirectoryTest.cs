@@ -313,11 +313,8 @@ namespace DiscUtils
 
     public class FileSystemSource
     {
-        private Stream ntfsBaseStream;
-
         public FileSystemSource()
         {
-            ntfsBaseStream = new FileStream(@"c:\temp\ntfsblank.vhd", FileMode.Open, FileAccess.Read);
         }
 
         public IEnumerable<TestCaseData> ReadWriteFileSystems
@@ -341,7 +338,6 @@ namespace DiscUtils
                 yield return new TestCaseData(
                     new DelayLoadFileSystem(FatFileSystem)).SetName("FAT");
 
-                // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
                 yield return new TestCaseData(
                     new DelayLoadFileSystem(NtfsFileSystem)).SetName("NTFS");
             }
@@ -357,19 +353,11 @@ namespace DiscUtils
 
         public DiscFileSystem DiagnosticNtfsFileSystem()
         {
-            DiskImageFile parent = new DiskImageFile(
-                ntfsBaseStream,
-                Ownership.None);
-            Stream diffStream = new SparseMemoryStream();
-            Disk disk = Disk.InitializeDifferencing(
-                diffStream,
-                Ownership.Dispose,
-                parent,
-                Ownership.Dispose,
-                @"C:\temp\ntfsblank.vhd",
-                @".\ntfsblank.vhd",
-                File.GetLastWriteTimeUtc(@"C:\temp\ntfsblank.vhd"));
-            var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<Ntfs.NtfsFileSystem, Ntfs.NtfsFileSystemChecker>(disk.Partitions[0].Open());
+            SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
+            SparseMemoryStream ms = new SparseMemoryStream();
+            Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
+            Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
+            var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<Ntfs.NtfsFileSystem, Ntfs.NtfsFileSystemChecker>(ms);
             discFs.CheckpointInterval = 1;
             discFs.GlobalIOTraceCapturesStackTraces = false;
             return discFs;
@@ -377,19 +365,10 @@ namespace DiscUtils
 
         public Ntfs.NtfsFileSystem NtfsFileSystem()
         {
-            DiskImageFile parent = new DiskImageFile(
-                ntfsBaseStream,
-                Ownership.None);
-            Stream diffStream = new SparseMemoryStream();
-            Disk disk = Disk.InitializeDifferencing(
-                diffStream,
-                Ownership.Dispose,
-                parent,
-                Ownership.Dispose,
-                @"C:\temp\ntfsblank.vhd",
-                @".\ntfsblank.vhd",
-                File.GetLastWriteTimeUtc(@"C:\temp\ntfsblank.vhd"));
-            return new Ntfs.NtfsFileSystem(disk.Partitions[0].Open());
+            SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
+            SparseMemoryStream ms = new SparseMemoryStream();
+            Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
+            return Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
         }
 
         private delegate DiscFileSystem FileSystemLoaderDelegate();
