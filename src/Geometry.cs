@@ -246,6 +246,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets a null geometry, which has 512-byte sectors but zero sectors, tracks or cylinders.
+        /// </summary>
+        public static Geometry Null
+        {
+            get { return new Geometry(0, 0, 0, 512); }
+        }
+
+        /// <summary>
         /// Determines if this object is equivalent to another.
         /// </summary>
         /// <param name="obj">The object to test against.</param>

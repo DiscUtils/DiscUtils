@@ -184,6 +184,22 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the disk geometry of the underlying storage medium, if any (may be null).
+        /// </summary>
+        public override Geometry PhysicalGeometry
+        {
+            get { return _disk.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
+        /// </summary>
+        public override long PhysicalStartSector
+        {
+            get { return _type == PhysicalVolumeType.EntireDisk ? 0 : _partitionInfo.FirstSector; }
+        }
+
+        /// <summary>
         /// The unique identity of the physical partition, if known.
         /// </summary>
         public Guid PartitionIdentity

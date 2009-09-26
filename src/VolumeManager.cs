@@ -233,8 +233,8 @@ namespace DiscUtils
             {
                 LogicalVolumeInfo lvi = new LogicalVolumeInfo(
                     physicalVol.PartitionIdentity,
-                    physicalVol.Identity,
-                    delegate() { return physicalVol.Open(); },
+                    physicalVol,
+                    physicalVol.Open,
                     physicalVol.Length,
                     physicalVol.BiosType,
                     LogicalVolumeStatus.Healthy);

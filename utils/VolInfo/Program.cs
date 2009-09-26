@@ -76,20 +76,24 @@ namespace VolInfo
             Console.WriteLine("PHYSICAL VOLUMES");
             foreach (var physVol in volMgr.GetPhysicalVolumes())
             {
-                Console.WriteLine("  Identity: " + physVol.Identity);
-                Console.WriteLine("      Type: " + physVol.VolumeType);
-                Console.WriteLine("   Disk Id: " + physVol.DiskIdentity);
-                Console.WriteLine("  Disk Sig: " + physVol.DiskSignature.ToString("X8"));
-                Console.WriteLine("   Part Id: " + physVol.PartitionIdentity);
-                Console.WriteLine("    Length: " + physVol.Length + " bytes");
+                Console.WriteLine("      Identity: " + physVol.Identity);
+                Console.WriteLine("          Type: " + physVol.VolumeType);
+                Console.WriteLine("       Disk Id: " + physVol.DiskIdentity);
+                Console.WriteLine("      Disk Sig: " + physVol.DiskSignature.ToString("X8"));
+                Console.WriteLine("       Part Id: " + physVol.PartitionIdentity);
+                Console.WriteLine("        Length: " + physVol.Length + " bytes");
+                Console.WriteLine(" Disk Geometry: " + physVol.PhysicalGeometry);
+                Console.WriteLine("  First Sector: " + physVol.PhysicalStartSector);
                 Console.WriteLine();
             }
 
             Console.WriteLine("LOGICAL VOLUMES");
             foreach (var logVol in volMgr.GetLogicalVolumes())
             {
-                Console.WriteLine("  Identity: " + logVol.Identity);
-                Console.WriteLine("    Length: " + logVol.Length + " bytes");
+                Console.WriteLine("      Identity: " + logVol.Identity);
+                Console.WriteLine("        Length: " + logVol.Length + " bytes");
+                Console.WriteLine(" Disk Geometry: " + logVol.PhysicalGeometry);
+                Console.WriteLine("  First Sector: " + logVol.PhysicalStartSector);
                 Console.WriteLine();
             }
         }

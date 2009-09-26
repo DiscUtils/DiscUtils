@@ -127,6 +127,24 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Initializes a new NTFS file system.
+        /// </summary>
+        /// <param name="volume">The volume to format</param>
+        /// <param name="label">The label for the new file system</param>
+        /// <returns>The newly-initialized file system</returns>
+        public static NtfsFileSystem Format(
+            VolumeInfo volume,
+            string label)
+        {
+            NtfsFormatter formatter = new NtfsFormatter();
+            formatter.Label = label;
+            formatter.DiskGeometry = volume.PhysicalGeometry ?? Geometry.Null;
+            formatter.FirstSector = volume.PhysicalStartSector;
+            formatter.SectorCount = volume.Length / Sizes.Sector;
+            return formatter.Format(volume.Open());
+        }
+
+        /// <summary>
         /// Gets the options that control how the file system is interpreted.
         /// </summary>
         public NtfsOptions NtfsOptions

@@ -51,16 +51,16 @@ namespace DiscUtils
     public sealed class LogicalVolumeInfo : VolumeInfo
     {
         private Guid _guid;
-        private string _physicalVolId;
+        private PhysicalVolumeInfo _physicalVol;
         private SparseStreamOpenDelegate _opener;
         private long _length;
         private LogicalVolumeStatus _status;
         private byte _biosType;
 
-        internal LogicalVolumeInfo(Guid guid, string physicalVolumeId, SparseStreamOpenDelegate opener, long length, byte biosType, LogicalVolumeStatus status)
+        internal LogicalVolumeInfo(Guid guid, PhysicalVolumeInfo physicalVolume, SparseStreamOpenDelegate opener, long length, byte biosType, LogicalVolumeStatus status)
         {
             _guid = guid;
-            _physicalVolId = physicalVolumeId;
+            _physicalVol = physicalVolume;
             _opener = opener;
             _length = length;
             _biosType = biosType;
@@ -117,9 +117,26 @@ namespace DiscUtils
                 }
                 else
                 {
-                    return "VLP:" + _physicalVolId;
+                    return "VLP:" + _physicalVol.Identity;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the disk geometry of the underlying storage medium, if any (may be Geometry.Null).
+        /// </summary>
+        public override Geometry PhysicalGeometry
+        {
+            get { return (_physicalVol == null) ? Geometry.Null : _physicalVol.PhysicalGeometry; }
+        }
+
+
+        /// <summary>
+        /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
+        /// </summary>
+        public override long PhysicalStartSector
+        {
+            get { return (_physicalVol == null) ? 0 : _physicalVol.PhysicalStartSector; }
         }
     }
 }

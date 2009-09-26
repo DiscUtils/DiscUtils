@@ -57,5 +57,15 @@ namespace DiscUtils
         /// is available.  Best practice is to add disks to the Volume Manager in a stable 
         /// order, if the stability of this identity is paramount.</remarks>
         public abstract string Identity { get; }
+
+        /// <summary>
+        /// Gets the disk geometry of the underlying storage medium, if any (may be null).
+        /// </summary>
+        public abstract Geometry PhysicalGeometry { get; }
+
+        /// <summary>
+        /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
+        /// </summary>
+        public abstract long PhysicalStartSector { get; }
     }
 }

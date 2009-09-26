@@ -143,6 +143,8 @@ namespace DiskDump
                     Console.WriteLine("    Disk Id: " + vol.DiskIdentity);
                     Console.WriteLine("    Disk Sig: " + vol.DiskSignature.ToString("X8"));
                     Console.WriteLine("    Partition: " + vol.PartitionIdentity);
+                    Console.WriteLine("    Disk Geometry: " + vol.PhysicalGeometry);
+                    Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
                     Console.WriteLine();
                 }
             }
@@ -162,6 +164,8 @@ namespace DiskDump
                     Console.WriteLine("    BIOS Type: " + vol.BiosType.ToString("X2") + " [" + BiosPartitionTypes.ToString(vol.BiosType) + "]");
                     Console.WriteLine("    Status: " + vol.Status);
                     Console.WriteLine("    Size: " + vol.Length);
+                    Console.WriteLine("    Disk Geometry: " + vol.PhysicalGeometry);
+                    Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
                     Console.WriteLine();
 
                     if (_showVolContent.IsPresent)
