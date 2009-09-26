@@ -32,6 +32,7 @@ namespace DiscUtils.Ntfs
         public Geometry DiskGeometry { get; set;}
         public long FirstSector { get; set; }
         public long SectorCount { get; set; }
+        public byte[] BootCode { get; set; }
 
         private int _clusterSize;
         private int _mftRecordSize;
@@ -57,7 +58,7 @@ namespace DiscUtils.Ntfs
 
                 long totalClusters = ((SectorCount - 1) * Sizes.Sector) / _clusterSize;
 
-                uint numBootClusters = 1;
+                int numBootClusters = Utilities.Ceil(BootCode == null ? 1 : BootCode.Length, _clusterSize);
 
                 _mftMirrorCluster = (int)numBootClusters + 1;
                 uint numMftMirrorClusters = 1;
@@ -114,7 +115,7 @@ namespace DiscUtils.Ntfs
                 attrDefFile.UpdateRecordInMft();
 
 
-                File bootFile = CreateFixedSystemFile(MasterFileTable.BootIndex, 0, numBootClusters, false);
+                File bootFile = CreateFixedSystemFile(MasterFileTable.BootIndex, 0, (uint)numBootClusters, false);
 
 
                 File badClusFile = CreateSystemFile(MasterFileTable.BadClusIndex);
@@ -283,7 +284,18 @@ namespace DiscUtils.Ntfs
 
         private void CreateBiosParameterBlock(Stream stream)
         {
-            byte[] bootSectors = new byte[Sizes.Sector];
+            byte[] bootSectors;
+
+            if (BootCode != null)
+            {
+                bootSectors = new byte[Utilities.RoundUp(BootCode.Length, _clusterSize)];
+                Array.Copy(BootCode, 0, bootSectors, 0, BootCode.Length);
+            }
+            else
+            {
+                bootSectors = new byte[_clusterSize];
+            }
+
             BiosParameterBlock bpb = BiosParameterBlock.Initialized(DiskGeometry, _clusterSize, (uint)FirstSector, SectorCount, _mftRecordSize, _indexBufferSize);
             bpb.MftCluster = _mftCluster;
             bpb.MftMirrorCluster = _mftMirrorCluster;
@@ -295,7 +307,7 @@ namespace DiscUtils.Ntfs
 
             // Backup goes at the end of the data in the partition
             stream.Position = (SectorCount - 1) * Sizes.Sector;
-            stream.Write(bootSectors, 0, bootSectors.Length);
+            stream.Write(bootSectors, 0, Sizes.Sector);
 
 
             _context.BiosParameterBlock = bpb;

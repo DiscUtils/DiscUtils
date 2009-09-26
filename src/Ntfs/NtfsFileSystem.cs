@@ -129,6 +129,33 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
+        /// <param name="stream">The stream to write the new file system to</param>
+        /// <param name="label">The label for the new file system</param>
+        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system</param>
+        /// <param name="firstSector">The first sector of the new file system on the disk</param>
+        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk</param>
+        /// <param name="bootCode">The Operating System's boot code</param>
+        /// <returns>The newly-initialized file system</returns>
+        public static NtfsFileSystem Format(
+            Stream stream,
+            string label,
+            Geometry diskGeometry,
+            long firstSector,
+            long sectorCount,
+            byte[] bootCode)
+        {
+            NtfsFormatter formatter = new NtfsFormatter();
+            formatter.Label = label;
+            formatter.DiskGeometry = diskGeometry;
+            formatter.FirstSector = firstSector;
+            formatter.SectorCount = sectorCount;
+            formatter.BootCode = bootCode;
+            return formatter.Format(stream);
+        }
+
+        /// <summary>
+        /// Initializes a new NTFS file system.
+        /// </summary>
         /// <param name="volume">The volume to format</param>
         /// <param name="label">The label for the new file system</param>
         /// <returns>The newly-initialized file system</returns>
@@ -141,6 +168,27 @@ namespace DiscUtils.Ntfs
             formatter.DiskGeometry = volume.PhysicalGeometry ?? Geometry.Null;
             formatter.FirstSector = volume.PhysicalStartSector;
             formatter.SectorCount = volume.Length / Sizes.Sector;
+            return formatter.Format(volume.Open());
+        }
+
+        /// <summary>
+        /// Initializes a new NTFS file system.
+        /// </summary>
+        /// <param name="volume">The volume to format</param>
+        /// <param name="label">The label for the new file system</param>
+        /// <param name="bootCode">The Operating System's boot code</param>
+        /// <returns>The newly-initialized file system</returns>
+        public static NtfsFileSystem Format(
+            VolumeInfo volume,
+            string label,
+            byte[] bootCode)
+        {
+            NtfsFormatter formatter = new NtfsFormatter();
+            formatter.Label = label;
+            formatter.DiskGeometry = volume.PhysicalGeometry ?? Geometry.Null;
+            formatter.FirstSector = volume.PhysicalStartSector;
+            formatter.SectorCount = volume.Length / Sizes.Sector;
+            formatter.BootCode = bootCode;
             return formatter.Format(volume.Open());
         }
 
