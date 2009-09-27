@@ -366,13 +366,13 @@ namespace DiscUtils.Ntfs
                 if ((header & SubBlockIsCompressedFlag) == 0)
                 {
                     // not compressed
-                    if ((header & SubBlockSizeMask) != SubBlockSize)
+                    if ((header & SubBlockSizeMask) + 1 != SubBlockSize)
                     {
                         throw new IOException("Found short non-compressed sub-block");
                     }
-                    Array.Copy(compBuffer, sourceIdx, resultBuffer, destIdx, (header & SubBlockSizeMask));
-                    sourceIdx += (header & SubBlockSizeMask);
-                    destIdx += (header & SubBlockSizeMask);
+                    Array.Copy(compBuffer, sourceIdx, resultBuffer, destIdx, SubBlockSize);
+                    sourceIdx += SubBlockSize;
+                    destIdx += SubBlockSize;
                 }
                 else
                 {
