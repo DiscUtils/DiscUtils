@@ -83,10 +83,11 @@ namespace DiscUtils.Ntfs
 
             int pos = 0x14;
 
-            if ((controlFlags & ControlFlags.DiscretionaryAclPresent) != 0)
+            RawAcl discAcl = _securityDescriptor.DiscretionaryAcl;
+            if ((controlFlags & ControlFlags.DiscretionaryAclPresent) != 0 && discAcl != null)
             {
                 Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x10);
-                _securityDescriptor.DiscretionaryAcl.GetBinaryForm(buffer, offset + pos);
+                discAcl.GetBinaryForm(buffer, offset + pos);
                 pos += _securityDescriptor.DiscretionaryAcl.BinaryLength;
             }
             else
@@ -94,10 +95,11 @@ namespace DiscUtils.Ntfs
                 Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 0x10);
             }
 
-            if ((controlFlags & ControlFlags.SystemAclPresent) != 0)
+            RawAcl sysAcl = _securityDescriptor.SystemAcl;
+            if ((controlFlags & ControlFlags.SystemAclPresent) != 0 && sysAcl != null)
             {
                 Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x0C);
-                _securityDescriptor.SystemAcl.GetBinaryForm(buffer, offset + pos);
+                sysAcl.GetBinaryForm(buffer, offset + pos);
                 pos += _securityDescriptor.SystemAcl.BinaryLength;
             }
             else

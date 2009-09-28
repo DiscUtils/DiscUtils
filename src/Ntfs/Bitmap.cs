@@ -66,7 +66,8 @@ namespace DiscUtils.Ntfs
 
             if (byteIdx >= _stream.Length)
             {
-                _stream.SetLength(Utilities.RoundUp(byteIdx + 1, 8));
+                _stream.Position = Utilities.RoundUp(byteIdx + 1, 8) - 1;
+                _stream.WriteByte(0);
             }
 
             _stream.Position = byteIdx;
@@ -93,7 +94,8 @@ namespace DiscUtils.Ntfs
 
             if (lastByte >= _stream.Length)
             {
-                _stream.SetLength(Utilities.RoundUp(lastByte + 1, 8));
+                _stream.Position = Utilities.RoundUp(lastByte + 1, 8) - 1;
+                _stream.WriteByte(0);
             }
 
             byte[] buffer = new byte[lastByte - firstByte + 1];
@@ -139,7 +141,8 @@ namespace DiscUtils.Ntfs
 
             if (lastByte >= _stream.Length)
             {
-                _stream.SetLength(Utilities.RoundUp(lastByte + 1, 8));
+                _stream.Position = Utilities.RoundUp(lastByte + 1, 8) - 1;
+                _stream.WriteByte(0);
             }
 
             byte[] buffer = new byte[lastByte - firstByte + 1];

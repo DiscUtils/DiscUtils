@@ -152,7 +152,7 @@ namespace DiscUtils.Ntfs
             NtfsStream bitmapStream = _self.CreateStream(AttributeType.Bitmap, null, firstBitmapCluster, numBitmapClusters, (uint)bpb.BytesPerCluster);
             using (Stream s = bitmapStream.Open(FileAccess.ReadWrite))
             {
-                s.SetLength(32);
+                s.SetLength(8);
                 _bitmap = new Bitmap(s, long.MaxValue);
             }
 

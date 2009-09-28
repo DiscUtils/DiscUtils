@@ -183,7 +183,7 @@ namespace DiscUtils.Ntfs
             }
 
             long numInspected = 0;
-            while (numFound < count && focusCluster >= start && numInspected != end - start)
+            while (numFound < count && focusCluster >= start && numInspected < end - start)
             {
                 if (!_bitmap.IsPresent(focusCluster))
                 {

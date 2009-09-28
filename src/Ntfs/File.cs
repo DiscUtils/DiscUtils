@@ -1006,6 +1006,7 @@ namespace DiscUtils.Ntfs
 
             public override void SetLength(long value)
             {
+                ChangeAttributeResidencyByLength(value);
                 CheckStreamValid();
                 _wrapped.SetLength(value);
                 _length = value;
