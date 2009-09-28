@@ -81,7 +81,7 @@ namespace VHDCreate
             if ((_typeSwitch.IsPresent && _typeSwitch.Value == "dynamic") || !_typeSwitch.IsPresent)
             {
                 long size;
-                if(!_sizeSwitch.IsPresent || !TryParseDiskSize(_sizeSwitch.Value, out size))
+                if(!_sizeSwitch.IsPresent || !Utilities.TryParseDiskSize(_sizeSwitch.Value, out size))
                 {
                     parser.DisplayHelp();
                     Environment.ExitCode = 1;
@@ -91,7 +91,7 @@ namespace VHDCreate
                 long blockSize = 2 * 1024 * 1024;
                 if (_blockSizeSwitch.IsPresent)
                 {
-                    if (!TryParseDiskSize(_blockSizeSwitch.Value, out blockSize))
+                    if (!Utilities.TryParseDiskSize(_blockSizeSwitch.Value, out blockSize))
                     {
                         parser.DisplayHelp();
                         Environment.ExitCode = 1;
@@ -127,7 +127,7 @@ namespace VHDCreate
             {
                 // Create Fixed disk
                 long size;
-                if (!_sizeSwitch.IsPresent || !TryParseDiskSize(_sizeSwitch.Value, out size))
+                if (!_sizeSwitch.IsPresent || !Utilities.TryParseDiskSize(_sizeSwitch.Value, out size))
                 {
                     parser.DisplayHelp();
                     Environment.ExitCode = 1;
@@ -144,54 +144,6 @@ namespace VHDCreate
                 parser.DisplayHelp();
                 Environment.ExitCode = 1;
                 return;
-            }
-        }
-
-        private static bool TryParseDiskSize(string size, out long value)
-        {
-            char lastChar = size[size.Length - 1];
-            if (Char.IsDigit(lastChar))
-            {
-                return long.TryParse(size, out value);
-            }
-            else if (lastChar == 'B' && size.Length >= 2)
-            {
-                char unitChar = size[size.Length - 2];
-
-                // suffix is 'B', indicating bytes
-                if(Char.IsDigit(unitChar))
-                {
-                    return long.TryParse(size.Substring(0, size.Length - 1), out value);
-                }
-
-                // suffix is KB, MB or GB
-                long quantity;
-                if(!long.TryParse(size.Substring(0, size.Length - 2), out quantity))
-                {
-                    value = 0;
-                    return false;
-                }
-
-                switch(unitChar)
-                {
-                    case 'K':
-                        value = quantity * 1024;
-                        return true;
-                    case 'M':
-                        value = quantity * 1024 * 1024;
-                        return true;
-                    case 'G':
-                        value = quantity * 1024 * 1024 * 1024;
-                        return true;
-                    default:
-                        value = 0;
-                        return false;
-                }
-            }
-            else
-            {
-                value = 0;
-                return false;
             }
         }
 

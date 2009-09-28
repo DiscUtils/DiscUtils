@@ -77,7 +77,7 @@ namespace VirtualDiskConvert
             string password = _password.IsPresent ? _password.Value : null;
 
             using (VirtualDisk inDisk = Utilities.OpenDisk(_inFile.Value, FileAccess.Read, user, password))
-            using (VirtualDisk outDisk = OpenOutputDisk(inDisk, user, password))
+            using (VirtualDisk outDisk = Utilities.OpenOutputDisk(_outFormat.Value, _outFile.Value, inDisk.Capacity, inDisk.Geometry, user, password))
             {
                 if (outDisk.Capacity < inDisk.Capacity)
                 {
@@ -104,35 +104,6 @@ namespace VirtualDiskConvert
             {
                 dest.Write(buffer, 0, numRead);
                 numRead = source.Read(buffer, 0, buffer.Length);
-            }
-        }
-
-        private static VirtualDisk OpenOutputDisk(VirtualDisk source, string user, string password)
-        {
-            switch (_outFormat.Value.ToUpperInvariant())
-            {
-                case "VMDK-FIXED":
-                    return DiscUtils.Vmdk.Disk.Initialize(_outFile.Value, source.Capacity, source.Geometry, DiscUtils.Vmdk.DiskCreateType.MonolithicFlat);
-                case "VMDK-DYNAMIC":
-                    return DiscUtils.Vmdk.Disk.Initialize(_outFile.Value, source.Capacity, source.Geometry, DiscUtils.Vmdk.DiskCreateType.MonolithicSparse);
-                case "VMDK-VMFSFIXED":
-                    return DiscUtils.Vmdk.Disk.Initialize(_outFile.Value, source.Capacity, source.Geometry, DiscUtils.Vmdk.DiskCreateType.Vmfs);
-                case "VMDK-VMFSDYNAMIC":
-                    return DiscUtils.Vmdk.Disk.Initialize(_outFile.Value, source.Capacity, source.Geometry, DiscUtils.Vmdk.DiskCreateType.VmfsSparse);
-                case "VHD-FIXED":
-                    return DiscUtils.Vhd.Disk.InitializeFixed(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity, source.Geometry);
-                case "VHD-DYNAMIC":
-                    return DiscUtils.Vhd.Disk.InitializeDynamic(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity, source.Geometry);
-                case "VDI-FIXED":
-                    return DiscUtils.Vdi.Disk.InitializeFixed(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
-                case "VDI-DYNAMIC":
-                    return DiscUtils.Vdi.Disk.InitializeDynamic(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
-                case "RAW":
-                    return DiscUtils.Raw.Disk.Initialize(new FileStream(_outFile.Value, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, source.Capacity);
-                case "ISCSI":
-                    return Utilities.OpenIScsiDisk(_outFile.Value, FileAccess.ReadWrite, user, password);
-                default:
-                    throw new NotSupportedException(_outFormat.Value + " is not a recognized disk type");
             }
         }
 

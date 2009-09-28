@@ -195,6 +195,83 @@ namespace DiscUtils.Common
             }
         }
 
+        public static VirtualDisk OpenOutputDisk(string format, string outFile, long capacity, Geometry geometry, string user, string password)
+        {
+            switch (format.ToUpperInvariant())
+            {
+                case "VMDK-FIXED":
+                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.MonolithicFlat);
+                case "VMDK-DYNAMIC":
+                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.MonolithicSparse);
+                case "VMDK-VMFSFIXED":
+                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.Vmfs);
+                case "VMDK-VMFSDYNAMIC":
+                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.VmfsSparse);
+                case "VHD-FIXED":
+                    return DiscUtils.Vhd.Disk.InitializeFixed(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity, geometry);
+                case "VHD-DYNAMIC":
+                    return DiscUtils.Vhd.Disk.InitializeDynamic(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity, geometry);
+                case "VDI-FIXED":
+                    return DiscUtils.Vdi.Disk.InitializeFixed(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity);
+                case "VDI-DYNAMIC":
+                    return DiscUtils.Vdi.Disk.InitializeDynamic(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity);
+                case "RAW":
+                    return DiscUtils.Raw.Disk.Initialize(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity);
+                case "ISCSI":
+                    return Utilities.OpenIScsiDisk(outFile, FileAccess.ReadWrite, user, password);
+                default:
+                    throw new NotSupportedException(format + " is not a recognized disk type");
+            }
+        }
+
+        public static bool TryParseDiskSize(string size, out long value)
+        {
+            char lastChar = size[size.Length - 1];
+            if (Char.IsDigit(lastChar))
+            {
+                return long.TryParse(size, out value);
+            }
+            else if (lastChar == 'B' && size.Length >= 2)
+            {
+                char unitChar = size[size.Length - 2];
+
+                // suffix is 'B', indicating bytes
+                if (Char.IsDigit(unitChar))
+                {
+                    return long.TryParse(size.Substring(0, size.Length - 1), out value);
+                }
+
+                // suffix is KB, MB or GB
+                long quantity;
+                if (!long.TryParse(size.Substring(0, size.Length - 2), out quantity))
+                {
+                    value = 0;
+                    return false;
+                }
+
+                switch (unitChar)
+                {
+                    case 'K':
+                        value = quantity * 1024;
+                        return true;
+                    case 'M':
+                        value = quantity * 1024 * 1024;
+                        return true;
+                    case 'G':
+                        value = quantity * 1024 * 1024 * 1024;
+                        return true;
+                    default:
+                        value = 0;
+                        return false;
+                }
+            }
+            else
+            {
+                value = 0;
+                return false;
+            }
+        }
+
         public static void ShowHeader(Type program)
         {
             Console.WriteLine("{0} v{1}, available from http://discutils.codeplex.com", GetExeName(program), GetVersion(program));
