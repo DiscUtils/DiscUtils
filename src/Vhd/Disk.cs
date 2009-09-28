@@ -414,7 +414,14 @@ namespace DiscUtils.Vhd
                     if (File.Exists(testPath))
                     {
                         filePath = Path.GetFullPath(testPath);
-                        file = new DiskImageFile(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), Ownership.Dispose);
+                        DiskImageFile newFile = new DiskImageFile(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), Ownership.Dispose);
+
+                        if (newFile.UniqueId != file.ParentUniqueId)
+                        {
+                            throw new IOException(string.Format(CultureInfo.InstalledUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, filePath, newFile.UniqueId));
+                        }
+
+                        file = newFile;
                         _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
                         found = true;
                     }

@@ -360,6 +360,14 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Gets the unique id of the parent disk.
+        /// </summary>
+        public Guid ParentUniqueId
+        {
+            get { return _dynamicHeader == null ? Guid.Empty : _dynamicHeader.ParentUniqueId; }
+        }
+
+        /// <summary>
         /// Gets the geometry of the virtual disk.
         /// </summary>
         public Geometry Geometry
