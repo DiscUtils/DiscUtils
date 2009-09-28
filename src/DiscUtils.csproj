@@ -49,6 +49,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bcd\ApplicationImageType.cs" />
+    <Compile Include="Bcd\ApplicationType.cs" />
+    <Compile Include="Bcd\BaseStorage.cs" />
+    <Compile Include="Bcd\BcdObject.cs" />
+    <Compile Include="Bcd\DiscUtilsRegistryStorage.cs" />
+    <Compile Include="Bcd\Element.cs" />
+    <Compile Include="Bcd\ElementClass.cs" />
+    <Compile Include="Bcd\ElementFormat.cs" />
+    <Compile Include="Bcd\ElementValue.cs" />
+    <Compile Include="Bcd\ObjectType.cs" />
+    <Compile Include="Bcd\Store.cs" />
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
     <Compile Include="BuilderExtentSource.cs" />
@@ -209,6 +220,7 @@
     <Compile Include="Ntfs\ObjectId.cs" />
     <Compile Include="Ntfs\ObjectIdRecord.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
+    <Compile Include="Ntfs\Quotas.cs" />
     <Compile Include="Ntfs\ReparsePointRecord.cs" />
     <Compile Include="Ntfs\ReparsePoints.cs" />
     <Compile Include="Ntfs\ResidentAttributeStream.cs" />
