@@ -397,6 +397,19 @@ namespace DiscUtils.Ntfs
                 keyValue = new ReparsePoints.Key();
                 dataValue = new ReparsePoints.Data();
             }
+            else if (fileName == "$Quota")
+            {
+                if (indexName == "$O")
+                {
+                    keyValue = new Quotas.OwnerKey();
+                    dataValue = new Quotas.OwnerRecord();
+                }
+                else if (indexName == "$Q")
+                {
+                    keyValue = new Quotas.OwnerRecord();
+                    dataValue = new Quotas.QuotaRecord();
+                }
+            }
             else if (fileName == "$Secure")
             {
                 if (indexName == "$SII")
@@ -422,6 +435,7 @@ namespace DiscUtils.Ntfs
             }
             catch
             {
+                return "{Parsing-Error}";
             }
 
             return "{Unknown-Index-Type}";
