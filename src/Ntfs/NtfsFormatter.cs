@@ -95,7 +95,7 @@ namespace DiscUtils.Ntfs
                 File logFile = CreateSystemFile(MasterFileTable.LogFileIndex);
                 using (Stream s = logFile.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
                 {
-                    s.SetLength(Math.Max(2 * Sizes.OneMiB, (totalClusters / 500) * (long)_clusterSize));
+                    s.SetLength(Math.Min(Math.Max(2 * Sizes.OneMiB, (totalClusters / 500) * (long)_clusterSize), 64 * Sizes.OneMiB));
                     byte[] buffer = new byte[1024 * 1024];
                     for (int i = 0; i < buffer.Length; ++i)
                     {
