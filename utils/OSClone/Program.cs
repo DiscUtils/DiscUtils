@@ -141,7 +141,7 @@ namespace OSClone
 
                 using (NtfsFileSystem destNtfs = NtfsFileSystem.Format(volMgr.GetLogicalVolumes()[0], label, bootCode))
                 {
-                    //sourceNtfs.SetSecurity(@"\", destNtfs.GetSecurity(@"\"));
+                    destNtfs.SetSecurity(@"\", sourceNtfs.GetSecurity(@"\"));
 
                     sourceNtfs.NtfsOptions.HideHiddenFiles = false;
                     sourceNtfs.NtfsOptions.HideSystemFiles = false;
