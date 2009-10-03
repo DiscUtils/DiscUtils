@@ -23,11 +23,11 @@
 using System;
 using System.IO;
 using DiscUtils;
+using DiscUtils.Bcd;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
 using DiscUtils.Registry;
-using DiscUtils.Bcd;
 
 namespace OSClone
 {
@@ -112,7 +112,7 @@ namespace OSClone
 
             string user = _userName.IsPresent ? _userName.Value : null;
             string password = _password.IsPresent ? _password.Value : null;
-            string label = _labelSwitch.IsPresent ? _labelSwitch.Value : null;
+            string label = _labelSwitch.IsPresent ? _labelSwitch.Value : "New Volume";
 
             using (VirtualDisk sourceDisk = Utilities.OpenDisk(_sourceFile.Value, FileAccess.Read, user, password))
             using (VirtualDisk destDisk = Utilities.OpenOutputDisk(_outFormat.Value, _destFile.Value, diskSize, null, user, password))
@@ -147,20 +147,23 @@ namespace OSClone
                     sourceNtfs.NtfsOptions.HideSystemFiles = false;
                     CopyFiles(sourceNtfs, destNtfs, @"\", true);
 
-                    // Force all boot entries in the BCD to point to the newly created NTFS partition - does _not_ cope with
-                    // complex multi-volume / multi-boot scenarios at all.
-                    using (Stream bcdStream = destNtfs.OpenFile(@"\boot\BCD", FileMode.Open, FileAccess.ReadWrite))
+                    if (destNtfs.FileExists(@"\boot\BCD"))
                     {
-                        RegistryHive hive = new RegistryHive(bcdStream);
-                        Store store = new Store(hive.Root);
-                        foreach (var obj in store.Objects)
+                        // Force all boot entries in the BCD to point to the newly created NTFS partition - does _not_ cope with
+                        // complex multi-volume / multi-boot scenarios at all.
+                        using (Stream bcdStream = destNtfs.OpenFile(@"\boot\BCD", FileMode.Open, FileAccess.ReadWrite))
                         {
-                            foreach (var elem in obj.Elements)
+                            RegistryHive hive = new RegistryHive(bcdStream);
+                            Store store = new Store(hive.Root);
+                            foreach (var obj in store.Objects)
                             {
-                                if (elem.Format == DiscUtils.Bcd.ElementFormat.Device)
+                                foreach (var elem in obj.Elements)
                                 {
-                                    Console.WriteLine(obj.FriendlyName + ":" + elem.Value);
-                                    elem.Value = DiscUtils.Bcd.ElementValue.FromVolume(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
+                                    if (elem.Format == DiscUtils.Bcd.ElementFormat.Device)
+                                    {
+                                        Console.WriteLine(obj.FriendlyName + ":" + elem.Value);
+                                        elem.Value = DiscUtils.Bcd.ElementValue.FromVolume(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
+                                    }
                                 }
                             }
                         }
