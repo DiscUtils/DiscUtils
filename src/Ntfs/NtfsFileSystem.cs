@@ -84,6 +84,7 @@ namespace DiscUtils.Ntfs
             _context.SecurityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
             _context.ObjectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
             _context.ReparsePoints = new ReparsePoints(GetFile(GetDirectoryEntry(@"$Extend\$Reparse").Reference));
+            _context.Quotas = new Quotas(GetFile(GetDirectoryEntry(@"$Extend\$Quota").Reference));
 
 #if false
             byte[] buffer = new byte[1024];
@@ -1461,6 +1462,9 @@ namespace DiscUtils.Ntfs
 
             writer.WriteLine(linePrefix);
             _context.ReparsePoints.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            _context.Quotas.Dump(writer, linePrefix);
 
             writer.WriteLine(linePrefix);
             GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, linePrefix);

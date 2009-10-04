@@ -21,11 +21,9 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security.Principal;
 using System.Globalization;
+using System.IO;
+using System.Security.Principal;
 
 namespace DiscUtils.Ntfs
 {
@@ -33,11 +31,9 @@ namespace DiscUtils.Ntfs
     {
         private IndexView<OwnerKey, OwnerRecord> _ownerIndex;
         private IndexView<OwnerRecord, QuotaRecord> _quotaIndex;
-        private File _file;
 
         public Quotas(File file)
         {
-            _file = file;
             _ownerIndex = new IndexView<OwnerKey, OwnerRecord>(file.GetIndex("$O"));
             _quotaIndex = new IndexView<OwnerRecord, QuotaRecord>(file.GetIndex("$Q"));
         }
@@ -59,6 +55,34 @@ namespace DiscUtils.Ntfs
             quotaIndexView[adminOwnerId] = new QuotaRecord(adminSid.Sid);
 
             return new Quotas(file);
+        }
+
+        public void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "QUOTAS");
+
+            writer.WriteLine(indent + "  OWNER INDEX");
+            foreach (var entry in _ownerIndex.Entries)
+            {
+                writer.WriteLine(indent + "    OWNER INDEX ENTRY");
+                writer.WriteLine(indent + "            SID: " + entry.Key.Sid);
+                writer.WriteLine(indent + "       Owner Id: " + entry.Value.OwnerId);
+            }
+
+            writer.WriteLine(indent + "  QUOTA INDEX");
+            foreach (var entry in _quotaIndex.Entries)
+            {
+                writer.WriteLine(indent + "    QUOTA INDEX ENTRY");
+                writer.WriteLine(indent + "           Owner Id: " + entry.Key.OwnerId);
+                writer.WriteLine(indent + "           User SID: " + entry.Value.Sid);
+                writer.WriteLine(indent + "            Changed: " + entry.Value.ChangeTime);
+                writer.WriteLine(indent + "           Exceeded: " + entry.Value.ExceededTime);
+                writer.WriteLine(indent + "         Bytes Used: " + entry.Value.BytesUsed);
+                writer.WriteLine(indent + "              Flags: " + entry.Value.Flags);
+                writer.WriteLine(indent + "         Hard Limit: " + entry.Value.HardLimit);
+                writer.WriteLine(indent + "      Warning Limit: " + entry.Value.WarningLimit);
+                writer.WriteLine(indent + "            Version: " + entry.Value.Version);
+            }
         }
 
         internal sealed class OwnerKey : IByteArraySerializable
@@ -151,7 +175,6 @@ namespace DiscUtils.Ntfs
                 ChangeTime = DateTime.UtcNow;
                 WarningLimit = -1;
                 HardLimit = -1;
-                ExceededTime = 0;
                 Sid = sid;
             }
 

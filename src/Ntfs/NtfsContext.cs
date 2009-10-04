@@ -78,6 +78,11 @@ namespace DiscUtils.Ntfs
             get;
         }
 
+        Quotas Quotas
+        {
+            get;
+        }
+
         NtfsOptions Options
         {
             get;
@@ -130,6 +135,7 @@ namespace DiscUtils.Ntfs
         private SecurityDescriptors _securityDescriptors;
         private ObjectIds _objectIds;
         private ReparsePoints _reparsePoints;
+        private Quotas _quotas;
         private NtfsOptions _options;
         private GetFileByIndexFn _getFileByIndexFn;
         private GetFileByRefFn _getFileByRefFn;
@@ -191,6 +197,12 @@ namespace DiscUtils.Ntfs
         {
             get { return _reparsePoints; }
             set { _reparsePoints = value; }
+        }
+
+        public Quotas Quotas
+        {
+            get { return _quotas; }
+            set { _quotas = value; }
         }
 
         public NtfsOptions Options
