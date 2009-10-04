@@ -49,17 +49,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bcd\ApplicationImageType.cs" />
-    <Compile Include="Bcd\ApplicationType.cs" />
-    <Compile Include="Bcd\BaseStorage.cs" />
-    <Compile Include="Bcd\BcdObject.cs" />
-    <Compile Include="Bcd\DiscUtilsRegistryStorage.cs" />
-    <Compile Include="Bcd\Element.cs" />
-    <Compile Include="Bcd\ElementClass.cs" />
-    <Compile Include="Bcd\ElementFormat.cs" />
-    <Compile Include="Bcd\ElementValue.cs" />
-    <Compile Include="Bcd\ObjectType.cs" />
-    <Compile Include="Bcd\Store.cs" />
+    <Compile Include="BootConfig\ApplicationImageType.cs" />
+    <Compile Include="BootConfig\ApplicationType.cs" />
+    <Compile Include="BootConfig\BaseStorage.cs" />
+    <Compile Include="BootConfig\BcdObject.cs" />
+    <Compile Include="BootConfig\DiscUtilsRegistryStorage.cs" />
+    <Compile Include="BootConfig\Element.cs" />
+    <Compile Include="BootConfig\ElementClass.cs" />
+    <Compile Include="BootConfig\ElementFormat.cs" />
+    <Compile Include="BootConfig\ElementValue.cs" />
+    <Compile Include="BootConfig\InheritType.cs" />
+    <Compile Include="BootConfig\ObjectType.cs" />
+    <Compile Include="BootConfig\Store.cs" />
+    <Compile Include="BootConfig\WellKnownElement.cs" />
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
     <Compile Include="BuilderExtentSource.cs" />

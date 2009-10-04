@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils;
-using DiscUtils.Bcd;
+using DiscUtils.BootConfig;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
@@ -159,10 +159,10 @@ namespace OSClone
                             {
                                 foreach (var elem in obj.Elements)
                                 {
-                                    if (elem.Format == DiscUtils.Bcd.ElementFormat.Device)
+                                    if (elem.Format == DiscUtils.BootConfig.ElementFormat.Device)
                                     {
                                         Console.WriteLine(obj.FriendlyName + ":" + elem.Value);
-                                        elem.Value = DiscUtils.Bcd.ElementValue.FromVolume(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
+                                        elem.Value = DiscUtils.BootConfig.ElementValue.ForDevice(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
                                     }
                                 }
                             }

@@ -48,6 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BootConfig\BcdObjectTest.cs" />
+    <Compile Include="BootConfig\ElementTest.cs" />
+    <Compile Include="BootConfig\ElementValueTest.cs" />
+    <Compile Include="BootConfig\StoreTest.cs" />
     <Compile Include="ChsAddressTest.cs" />
     <Compile Include="Combined\CombinedTest.cs" />
     <Compile Include="DiscFileSystemDirectoryTest.cs" />

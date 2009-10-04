@@ -66,6 +66,21 @@
  </Rules>
  <FxCopReport Version="1.36">
   <Namespaces>
+   <Namespace Name="DiscUtils.BootConfig">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.BootConfig</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="48" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Diagnostics">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-03-22 22:16:33Z">
@@ -794,6 +809,1255 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="25" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.BootConfig">
+        <Types>
+         <Type Name="ApplicationType">
+          <Members>
+           <Member Name="#NtLoader">
+            <Messages>
+             <Message Id="Nt" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Nt</Item>
+               <Item>'ApplicationType.NtLoader'</Item>
+               <Item>NT</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="87" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoader">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'ApplicationType.OsLoader'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="87" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="BcdObject">
+          <Members>
+           <Member Name="#.cctor()">
+            <Messages>
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue>
+               <Item>'BcdObject'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="90" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsLegacyNtldrId">
+            <Messages>
+             <Message Id="Ntldr" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Ntldr</Item>
+               <Item>'BcdObject.WindowsLegacyNtldrId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsOsTargetTemplateEfiId">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'BcdObject.WindowsOsTargetTemplateEfiId'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Efi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Efi</Item>
+               <Item>'BcdObject.WindowsOsTargetTemplateEfiId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsOsTargetTemplatePcatId">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'BcdObject.WindowsOsTargetTemplatePcatId'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Pcat" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pcat</Item>
+               <Item>'BcdObject.WindowsOsTargetTemplatePcatId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsSetupEfiId">
+            <Messages>
+             <Message Id="Efi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Efi</Item>
+               <Item>'BcdObject.WindowsSetupEfiId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsSetupPcatId">
+            <Messages>
+             <Message Id="Pcat" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pcat</Item>
+               <Item>'BcdObject.WindowsSetupPcatId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WindowsSetupRamdiskOptionsId">
+            <Messages>
+             <Message Id="Ramdisk" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Ramdisk</Item>
+               <Item>'BcdObject.WindowsSetupRamdiskOptionsId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="88" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="WellKnownElement">
+          <Members>
+           <Member Name="#DeviceRamDiskExportAsCd">
+            <Messages>
+             <Message Id="Cd" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Cd</Item>
+               <Item>'WellKnownElement.DeviceRamDiskExportAsCd'</Item>
+               <Item>CD</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceRamDiskTftpBlockSize">
+            <Messages>
+             <Message Id="Tftp" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Tftp</Item>
+               <Item>'WellKnownElement.DeviceRamDiskTftpBlockSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceRamDiskTftpClientPort">
+            <Messages>
+             <Message Id="Tftp" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Tftp</Item>
+               <Item>'WellKnownElement.DeviceRamDiskTftpClientPort'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LibraryFirstMegaBytePolicy">
+            <Messages>
+             <Message Id="MegaByte" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>MegaByte</Item>
+               <Item>'WellKnownElement.LibraryFirstMegaBytePolicy'</Item>
+               <Item>Megabyte</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LibraryFveKeyRingAddress">
+            <Messages>
+             <Message Id="Fve" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Fve</Item>
+               <Item>'WellKnownElement.LibraryFveKeyRingAddress'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MemDiagFailureCount">
+            <Messages>
+             <Message Id="Diag" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Diag</Item>
+               <Item>'WellKnownElement.MemDiagFailureCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Mem" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Mem</Item>
+               <Item>'WellKnownElement.MemDiagFailureCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MemDiagPassCount">
+            <Messages>
+             <Message Id="Diag" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Diag</Item>
+               <Item>'WellKnownElement.MemDiagPassCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Mem" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Mem</Item>
+               <Item>'WellKnownElement.MemDiagPassCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MemDiagTestMix">
+            <Messages>
+             <Message Id="Diag" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Diag</Item>
+               <Item>'WellKnownElement.MemDiagTestMix'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Mem" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Mem</Item>
+               <Item>'WellKnownElement.MemDiagTestMix'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MemDiagTestToFail">
+            <Messages>
+             <Message Id="Diag" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Diag</Item>
+               <Item>'WellKnownElement.MemDiagTestToFail'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Mem" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Mem</Item>
+               <Item>'WellKnownElement.MemDiagTestToFail'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderAllowPrereleaseSignatures">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:19:06Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderAllowPrereleaseSignatures'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="89" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderAssociatedResumeObject">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderAssociatedResumeObject'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderBootLogInitialization">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderBootLogInitialization'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderBootStatusPolicy">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderBootStatusPolicy'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderClusterModeAddressing">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderClusterModeAddressing'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDebuggerHalBreakpoint">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDebuggerHalBreakpoint'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDebugTransportPath">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDebugTransportPath'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDetectKernelAndHal">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDetectKernelAndHal'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDisableBootDisplay">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDisableBootDisplay'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDisableCrashAutoReboot">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDisableCrashAutoReboot'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDisableIntegrityChecks">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDisableIntegrityChecks'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDisableVesaBios">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDisableVesaBios'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Vesa" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Vesa</Item>
+               <Item>'WellKnownElement.OsLoaderDisableVesaBios'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderDriverLoadFailurePolicy">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderDriverLoadFailurePolicy'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderEmsEnabled">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderEmsEnabled'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderForceFailure">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderForceFailure'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderForceMaxProcessors">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderForceMaxProcessors'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderHalPath">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderHalPath'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderIncreaseUserVa">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderIncreaseUserVa'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Va" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Va</Item>
+               <Item>'WellKnownElement.OsLoaderIncreaseUserVa'</Item>
+               <Item>VA</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderKernelDebuggerEnabled">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderKernelDebuggerEnabled'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderKernelPath">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderKernelPath'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderMsiPolicy">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderMsiPolicy'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Msi" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Msi</Item>
+               <Item>'WellKnownElement.OsLoaderMsiPolicy'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderNoLowMemory">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderNoLowMemory'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderNumberOfProcessors">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderNumberOfProcessors'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderNxPolicy">
+            <Messages>
+             <Message Id="Nx" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Nx</Item>
+               <Item>'WellKnownElement.OsLoaderNxPolicy'</Item>
+               <Item>NX</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderNxPolicy'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Nx" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Nx</Item>
+               <Item>'WellKnownElement.OsLoaderNxPolicy'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderOsDevice">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderOsDevice'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderOsDevice'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderPaePolicy">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderPaePolicy'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Pae" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pae</Item>
+               <Item>'WellKnownElement.OsLoaderPaePolicy'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderPciExpressPolicy">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderPciExpressPolicy'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Pci" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pci</Item>
+               <Item>'WellKnownElement.OsLoaderPciExpressPolicy'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderPerformanceDataMemory">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderPerformanceDataMemory'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderProcessorConfigurationFlags">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderProcessorConfigurationFlags'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="MemberNoAlternate">
+               <Item>Flags</Item>
+               <Item>'WellKnownElement.OsLoaderProcessorConfigurationFlags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderRemoveMemory">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderRemoveMemory'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderRestrictApicCluster">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderRestrictApicCluster'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Apic" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Apic</Item>
+               <Item>'WellKnownElement.OsLoaderRestrictApicCluster'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderSafeBoot">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderSafeBoot'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderSafeBootAlternateShell">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderSafeBootAlternateShell'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderSystemRoot">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderSystemRoot'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderUseBootProcessorOnly">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderUseBootProcessorOnly'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderUseFirmwarePciSettings">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderUseFirmwarePciSettings'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Pci" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pci</Item>
+               <Item>'WellKnownElement.OsLoaderUseFirmwarePciSettings'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderUseLastGoodSettings">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderUseLastGoodSettings'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderUsePhysicalDestination">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderUsePhysicalDestination'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderUseVgaDriver">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderUseVgaDriver'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderVerboseObjectLoadMode">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderVerboseObjectLoadMode'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#OsLoaderWinPeMode">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.OsLoaderWinPeMode'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="Pe" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pe</Item>
+               <Item>'WellKnownElement.OsLoaderWinPeMode'</Item>
+               <Item>PE</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ResumeHiberFileDevice">
+            <Messages>
+             <Message Id="Hiber" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Hiber</Item>
+               <Item>'WellKnownElement.ResumeHiberFileDevice'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ResumeHiberFilePath">
+            <Messages>
+             <Message Id="Hiber" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Hiber</Item>
+               <Item>'WellKnownElement.ResumeHiberFilePath'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ResumePaeMode">
+            <Messages>
+             <Message Id="Pae" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pae</Item>
+               <Item>'WellKnownElement.ResumePaeMode'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SetupOmitOsLoaderElements">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.SetupOmitOsLoaderElements'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SetupRecoveryOs">
+            <Messages>
+             <Message Id="Os" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Os</Item>
+               <Item>'WellKnownElement.SetupRecoveryOs'</Item>
+               <Item>OS</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#StartupPxeApplicationName">
+            <Messages>
+             <Message Id="Pxe" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pxe</Item>
+               <Item>'WellKnownElement.StartupPxeApplicationName'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#StartupPxeSoftReboot">
+            <Messages>
+             <Message Id="Pxe" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
+              <Issue Name="Member">
+               <Item>Pxe</Item>
+               <Item>'WellKnownElement.StartupPxeSoftReboot'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="57" />
                </User>
               </Notes>
              </Message>
@@ -4284,6 +5548,7 @@
     <Note Id="45" Modified="2009-03-22 22:17:50Z">DiscUtils is established project name</Note>
     <Note Id="46" Modified="2009-04-16 21:57:27Z">Deliberately using wide catch - this is diagnostic code that should not cause an exception should it fail.</Note>
     <Note Id="47" Modified="2009-07-19 20:12:44Z">ESX is well-known name.</Note>
+    <Note Id="48" Modified="2009-10-04 18:14:05Z">Utils is part of the project name.</Note>
     <Note Id="49" Modified="2009-05-09 08:55:57Z">Iscsi matches normal naming convention for namespaces</Note>
     <Note Id="50" Modified="2009-05-23 13:44:01Z">Names follow normal conventions</Note>
     <Note Id="51" Modified="2009-05-16 10:41:11Z">Lun is correct form of LUN, which is a common concept in iSCSI.</Note>
@@ -4292,6 +5557,7 @@
     <Note Id="54" Modified="2009-05-16 11:07:19Z">This is not a flags enumeration</Note>
     <Note Id="55" Modified="2009-05-16 11:19:41Z">Instantiated via generic parameter.</Note>
     <Note Id="56" Modified="2009-05-16 11:32:30Z">Uncalled private code corresponding to fields of the iSCSI protocol not implemented yet.</Note>
+    <Note Id="57" Modified="2009-10-04 18:18:05Z">Using names derived from underlying BCD terms</Note>
     <Note Id="58" Modified="2009-05-16 11:33:58Z">DiscUtils is the project name.</Note>
     <Note Id="59" Modified="2009-05-23 13:47:43Z">Flags is appropriate name</Note>
     <Note Id="60" Modified="2009-05-23 13:50:02Z">Following convention set by framework class RegistryKey</Note>
@@ -4321,6 +5587,10 @@
     <Note Id="84" Modified="2009-09-05 23:33:48Z">Ldm is camel-case naming for LDM (Logical Disk Manager)</Note>
     <Note Id="85" Modified="2009-09-05 23:34:06Z">Using namespace to separate distinct concept</Note>
     <Note Id="86" Modified="2009-09-05 23:34:35Z">Utils is part of project name.</Note>
+    <Note Id="87" Modified="2009-10-04 18:18:27Z">Using standard Camel-case</Note>
+    <Note Id="88" Modified="2009-10-04 18:19:33Z">Identifiers names based on BCD concepts</Note>
+    <Note Id="89" Modified="2009-10-04 18:19:45Z">Standard camel-case</Note>
+    <Note Id="90" Modified="2009-10-04 18:21:02Z">Non-trivial initialization</Note>
    </User>
   </Notes>
   <Rules>
