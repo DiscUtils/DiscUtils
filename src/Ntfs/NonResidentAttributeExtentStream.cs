@@ -336,7 +336,7 @@ namespace DiscUtils.Ntfs
 
                 // Read to the end of the compression cluster
                 int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
-                RawRead(dataRunIdx, _position - _runs[dataRunIdx].StartVcn, buffer, offset, numBytes, true);
+                RawRead(dataRunIdx, _position - (_runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, numBytes, true);
                 return numBytes;
             }
         }

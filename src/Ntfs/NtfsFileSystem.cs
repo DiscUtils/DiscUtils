@@ -34,7 +34,7 @@ namespace DiscUtils.Ntfs
     /// </summary>
     public sealed class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem, IWindowsFileSystem, IDiagnosticTraceable
     {
-        private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.Offline | FileAttributes.ReparsePoint | FileAttributes.Temporary;
+        private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.Offline | FileAttributes.ReparsePoint;
 
         private NtfsContext _context;
 
