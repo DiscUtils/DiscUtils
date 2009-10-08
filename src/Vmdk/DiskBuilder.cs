@@ -36,6 +36,7 @@ namespace DiscUtils.Vmdk
     {
         private DiskCreateType _diskType;
         private DiskAdapterType _adapterType;
+        private Geometry _biosGeometry;
 
         /// <summary>
         /// Creates a new instance.
@@ -65,6 +66,15 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Sets the disk geometry the BIOS should indicate for this disk.
+        /// </summary>
+        public Geometry BiosGeometry
+        {
+            get { return _biosGeometry; }
+            set { _biosGeometry = value; }
+        }
+
+        /// <summary>
         /// Initiates the build process.
         /// </summary>
         /// <param name="baseName">The base name for the VMDK, for example 'foo' to create 'foo.vmdk'.</param>
@@ -89,9 +99,9 @@ namespace DiscUtils.Vmdk
             List<DiskImageFileSpecification> fileSpecs = new List<DiskImageFileSpecification>();
 
             Geometry geometry = Geometry ?? DiskImageFile.DefaultGeometry(Content.Length);
+            Geometry biosGeometry = BiosGeometry ?? Geometry.LbaAssistedBiosGeometry(Content.Length);
 
-
-            DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, _diskType, _adapterType);
+            DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, biosGeometry, _diskType, _adapterType);
 
             if (_diskType == DiskCreateType.Vmfs)
             {

@@ -334,6 +334,7 @@
     <Compile Include="Vmdk\DiskCreateType.cs" />
     <Compile Include="Vmdk\DiskFactory.cs" />
     <Compile Include="Vmdk\DiskImageFile.cs" />
+    <Compile Include="Vmdk\DiskParameters.cs" />
     <Compile Include="Vmdk\ExtentDescriptor.cs" />
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />

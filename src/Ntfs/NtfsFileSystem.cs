@@ -166,7 +166,7 @@ namespace DiscUtils.Ntfs
         {
             NtfsFormatter formatter = new NtfsFormatter();
             formatter.Label = label;
-            formatter.DiskGeometry = volume.PhysicalGeometry ?? Geometry.Null;
+            formatter.DiskGeometry = volume.BiosGeometry ?? Geometry.Null;
             formatter.FirstSector = volume.PhysicalStartSector;
             formatter.SectorCount = volume.Length / Sizes.Sector;
             return formatter.Format(volume.Open());
@@ -186,7 +186,7 @@ namespace DiscUtils.Ntfs
         {
             NtfsFormatter formatter = new NtfsFormatter();
             formatter.Label = label;
-            formatter.DiskGeometry = volume.PhysicalGeometry ?? Geometry.Null;
+            formatter.DiskGeometry = volume.BiosGeometry ?? Geometry.Null;
             formatter.FirstSector = volume.PhysicalStartSector;
             formatter.SectorCount = volume.Length / Sizes.Sector;
             formatter.BootCode = bootCode;

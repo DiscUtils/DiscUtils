@@ -44,6 +44,9 @@ namespace DiscUtils.Vmdk
         private const string DiskDbSectors = "ddb.geometry.sectors";
         private const string DiskDbHeads = "ddb.geometry.heads";
         private const string DiskDbCylinders = "ddb.geometry.cylinders";
+        private const string DiskDbBiosSectors = "ddb.geometry.biosSectors";
+        private const string DiskDbBiosHeads = "ddb.geometry.biosHeads";
+        private const string DiskDbBiosCylinders = "ddb.geometry.biosCylinders";
         private const string DiskDbHardwareVersion = "ddb.virtualHWVersion";
         private const string DiskDbUuid = "ddb.uuid";
 
@@ -103,16 +106,47 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                return new Geometry(
-                    int.Parse(GetDiskDatabase(DiskDbCylinders), CultureInfo.InvariantCulture),
-                    int.Parse(GetDiskDatabase(DiskDbHeads), CultureInfo.InvariantCulture),
-                    int.Parse(GetDiskDatabase(DiskDbSectors), CultureInfo.InvariantCulture));
+                string cylStr = GetDiskDatabase(DiskDbCylinders);
+                string headsStr = GetDiskDatabase(DiskDbHeads);
+                string sectorsStr = GetDiskDatabase(DiskDbSectors);
+                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) && !string.IsNullOrEmpty(sectorsStr))
+                {
+                    return new Geometry(
+                        int.Parse(cylStr, CultureInfo.InvariantCulture),
+                        int.Parse(headsStr, CultureInfo.InvariantCulture),
+                        int.Parse(sectorsStr, CultureInfo.InvariantCulture));
+                }
+                return null;
             }
             set
             {
                 SetDiskDatabase(DiskDbCylinders, value.Cylinders.ToString(CultureInfo.InvariantCulture));
                 SetDiskDatabase(DiskDbHeads, value.HeadsPerCylinder.ToString(CultureInfo.InvariantCulture));
                 SetDiskDatabase(DiskDbSectors, value.SectorsPerTrack.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        public Geometry BiosGeometry
+        {
+            get
+            {
+                string cylStr = GetDiskDatabase(DiskDbBiosCylinders);
+                string headsStr = GetDiskDatabase(DiskDbBiosHeads);
+                string sectorsStr = GetDiskDatabase(DiskDbBiosSectors);
+                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) && !string.IsNullOrEmpty(sectorsStr))
+                {
+                    return new Geometry(
+                        int.Parse(cylStr, CultureInfo.InvariantCulture),
+                        int.Parse(headsStr, CultureInfo.InvariantCulture),
+                        int.Parse(sectorsStr, CultureInfo.InvariantCulture));
+                }
+                return null;
+            }
+            set
+            {
+                SetDiskDatabase(DiskDbBiosCylinders, value.Cylinders.ToString(CultureInfo.InvariantCulture));
+                SetDiskDatabase(DiskDbBiosHeads, value.HeadsPerCylinder.ToString(CultureInfo.InvariantCulture));
+                SetDiskDatabase(DiskDbBiosSectors, value.SectorsPerTrack.ToString(CultureInfo.InvariantCulture));
             }
         }
 

@@ -132,6 +132,17 @@ namespace DiscUtils.Vmdk
         /// Creates a new virtual disk at the specified path.
         /// </summary>
         /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="parameters">The desired parameters for the new disk.</param>
+        /// <returns>The newly created disk image</returns>
+        public static Disk Initialize(string path, DiskParameters parameters)
+        {
+            return new Disk(DiskImageFile.Initialize(path, parameters), Ownership.Dispose);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <param name="type">The type of virtual disk to create</param>
         /// <returns>The newly created disk image</returns>
@@ -240,6 +251,19 @@ namespace DiscUtils.Vmdk
         public override Geometry Geometry
         {
             get { return _files[_files.Count - 1].First.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk as it is anticipated a hypervisor BIOS will represent it.
+        /// </summary>
+        public override Geometry BiosGeometry
+        {
+            get
+            {
+                DiskImageFile file = _files[_files.Count - 1].First;
+                Geometry result = file.BiosGeometry;
+                return file.BiosGeometry ?? Geometry.MakeBiosSafe(file.Geometry, Capacity);
+            }
         }
 
         /// <summary>

@@ -204,12 +204,87 @@ namespace DiscUtils.Vmdk
         /// Creates a new virtual disk at the specified path.
         /// </summary>
         /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="parameters">The desired parameters for the new disk.</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(string path, DiskParameters parameters)
+        {
+            if (parameters.Capacity <= 0)
+            {
+                throw new ArgumentException("Capacity must be greater than zero", "parameters");
+            }
+
+            Geometry geometry = parameters.Geometry ?? DefaultGeometry(parameters.Capacity);
+
+            Geometry biosGeometry;
+            if (parameters.BiosGeometry != null)
+            {
+                biosGeometry = parameters.BiosGeometry;
+            }
+            else
+            {
+                biosGeometry = Geometry.MakeBiosSafe(geometry, parameters.Capacity);
+            }
+
+
+            DiskAdapterType adapterType = (parameters.AdapterType == DiskAdapterType.None) ? DiskAdapterType.LsiLogicScsi : parameters.AdapterType;
+            DiskCreateType createType = (parameters.CreateType == DiskCreateType.None) ? DiskCreateType.MonolithicSparse : parameters.CreateType;
+
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry, biosGeometry, createType, adapterType);
+
+            FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
+            return DoInitialize(locator, Path.GetFileName(path), parameters.Capacity, createType, baseDescriptor);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="parameters">The desired parameters for the new disk.</param>
+        /// <returns>The newly created disk image</returns>
+        public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, DiskParameters parameters)
+        {
+            if (parameters.Capacity <= 0)
+            {
+                throw new ArgumentException("Capacity must be greater than zero", "parameters");
+            }
+
+            Geometry geometry = parameters.Geometry ?? DefaultGeometry(parameters.Capacity);
+
+            Geometry biosGeometry;
+            if (parameters.BiosGeometry != null)
+            {
+                biosGeometry = parameters.BiosGeometry;
+            }
+            else
+            {
+                biosGeometry = Geometry.MakeBiosSafe(geometry, parameters.Capacity);
+            }
+
+
+            DiskAdapterType adapterType = (parameters.AdapterType == DiskAdapterType.None) ? DiskAdapterType.LsiLogicScsi : parameters.AdapterType;
+            DiskCreateType createType = (parameters.CreateType == DiskCreateType.None) ? DiskCreateType.MonolithicSparse : parameters.CreateType;
+
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry, biosGeometry, createType, adapterType);
+
+            FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            return DoInitialize(locator, Path.GetFileName(path), parameters.Capacity, createType, baseDescriptor);
+        }
+
+        /// <summary>
+        /// Creates a new virtual disk at the specified path.
+        /// </summary>
+        /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="capacity">The desired capacity of the new disk</param>
         /// <param name="type">The type of virtual disk to create</param>
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
-            return Initialize(path, capacity, null, type, DiskAdapterType.LsiLogicScsi);
+            DiskParameters diskParams = new DiskParameters();
+            diskParams.Capacity = capacity;
+            diskParams.CreateType = type;
+
+            return Initialize(path, diskParams);
         }
 
         /// <summary>
@@ -222,7 +297,12 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType createType)
         {
-            return Initialize(path, capacity, geometry, createType, DiskAdapterType.LsiLogicScsi);
+            DiskParameters diskParams = new DiskParameters();
+            diskParams.Capacity = capacity;
+            diskParams.Geometry = geometry;
+            diskParams.CreateType = createType;
+
+            return Initialize(path, diskParams);
         }
 
         /// <summary>
@@ -236,10 +316,13 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
         {
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry ?? DefaultGeometry(capacity), createType, adapterType);
+            DiskParameters diskParams = new DiskParameters();
+            diskParams.Capacity = capacity;
+            diskParams.Geometry = geometry;
+            diskParams.CreateType = createType;
+            diskParams.AdapterType = adapterType;
 
-            FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
-            return DoInitialize(locator, Path.GetFileName(path), capacity, createType, baseDescriptor);
+            return Initialize(path, diskParams);
         }
 
         /// <summary>
@@ -252,7 +335,11 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType createType)
         {
-            return Initialize(fileSystem, path, capacity, createType, DiskAdapterType.LsiLogicScsi);
+            DiskParameters diskParams = new DiskParameters();
+            diskParams.Capacity = capacity;
+            diskParams.CreateType = createType;
+
+            return Initialize(fileSystem, path, diskParams);
         }
 
         /// <summary>
@@ -266,10 +353,12 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType createType, DiskAdapterType adapterType)
         {
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(DefaultGeometry(capacity), createType, adapterType);
+            DiskParameters diskParams = new DiskParameters();
+            diskParams.Capacity = capacity;
+            diskParams.CreateType = createType;
+            diskParams.AdapterType = adapterType;
 
-            FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            return DoInitialize(locator, Path.GetFileName(path), capacity, createType, baseDescriptor);
+            return Initialize(fileSystem, path, diskParams);
         }
 
         /// <summary>
@@ -392,6 +481,14 @@ namespace DiscUtils.Vmdk
         internal Geometry Geometry
         {
             get { return _descriptor.DiskGeometry; }
+        }
+
+        /// <summary>
+        /// Gets the BIOS geometry of this disk.
+        /// </summary>
+        internal Geometry BiosGeometry
+        {
+            get { return _descriptor.BiosGeometry; }
         }
 
         /// <summary>
@@ -829,10 +926,11 @@ namespace DiscUtils.Vmdk
             return new Geometry(cylinders, heads, sectors);
         }
 
-        internal static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
+        internal static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, Geometry biosGeometery, DiskCreateType createType, DiskAdapterType adapterType)
         {
             DescriptorFile baseDescriptor = new DescriptorFile();
             baseDescriptor.DiskGeometry = geometry;
+            baseDescriptor.BiosGeometry = biosGeometery;
             baseDescriptor.ContentId = (uint)_rng.Next();
             baseDescriptor.CreateType = createType;
             baseDescriptor.UniqueId = Guid.NewGuid();

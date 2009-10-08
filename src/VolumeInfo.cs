@@ -64,6 +64,11 @@ namespace DiscUtils
         public abstract Geometry PhysicalGeometry { get; }
 
         /// <summary>
+        /// Gets the disk geometry of the underlying storage medium (as used in BIOS calls), may be null.
+        /// </summary>
+        public abstract Geometry BiosGeometry { get; }
+
+        /// <summary>
         /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
         /// </summary>
         public abstract long PhysicalStartSector { get; }

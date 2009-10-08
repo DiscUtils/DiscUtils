@@ -84,12 +84,13 @@ namespace DiskDump
                 Console.WriteLine();
                 Console.WriteLine("DISK: " + path);
                 Console.WriteLine();
-                Console.WriteLine("   Capacity: {0:X16}", disk.Capacity);
-                Console.WriteLine("   Geometry: {0}", disk.Geometry);
-                Console.WriteLine("  Signature: {0:X8}", disk.Signature);
+                Console.WriteLine("       Capacity: {0:X16}", disk.Capacity);
+                Console.WriteLine("       Geometry: {0}", disk.Geometry);
+                Console.WriteLine("  BIOS Geometry: {0}", disk.BiosGeometry);
+                Console.WriteLine("      Signature: {0:X8}", disk.Signature);
                 if (disk.IsPartitioned)
                 {
-                    Console.WriteLine("       GUID: {0}", disk.Partitions.DiskGuid);
+                    Console.WriteLine("           GUID: {0}", disk.Partitions.DiskGuid);
                 }
                 Console.WriteLine();
 
@@ -115,6 +116,16 @@ namespace DiskDump
                         Console.WriteLine("  {0:X2}  {1:X16}  {2:X16}  {3}", partition.BiosType, partition.FirstSector * 512, partition.LastSector * 512 + 512, partition.TypeAsString);
                     }
                     Console.WriteLine();
+
+                    PartitionTable bpt = disk.Partitions as BiosPartitionTable;
+                    if (bpt != null)
+                    {
+                        foreach (BiosPartitionInfo pi in bpt.Partitions)
+                        {
+                            Console.WriteLine("  {0} {1}", pi.Start.ToString(), pi.End.ToString());
+                        }
+                        Console.WriteLine();
+                    }
                 }
             }
 
@@ -144,6 +155,7 @@ namespace DiskDump
                     Console.WriteLine("    Disk Sig: " + vol.DiskSignature.ToString("X8"));
                     Console.WriteLine("    Partition: " + vol.PartitionIdentity);
                     Console.WriteLine("    Disk Geometry: " + vol.PhysicalGeometry);
+                    Console.WriteLine("    BIOS Geometry: " + vol.BiosGeometry);
                     Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
                     Console.WriteLine();
                 }
@@ -165,6 +177,7 @@ namespace DiskDump
                     Console.WriteLine("    Status: " + vol.Status);
                     Console.WriteLine("    Size: " + vol.Length);
                     Console.WriteLine("    Disk Geometry: " + vol.PhysicalGeometry);
+                    Console.WriteLine("    BIOS Geometry: " + vol.BiosGeometry);
                     Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
                     Console.WriteLine();
 

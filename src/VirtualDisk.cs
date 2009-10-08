@@ -70,6 +70,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the geometry of the disk as it is anticipated a hypervisor BIOS will represent it.
+        /// </summary>
+        public virtual Geometry BiosGeometry
+        {
+            get { return Geometry.MakeBiosSafe(Geometry, Capacity); }
+        }
+
+        /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
         public abstract long Capacity

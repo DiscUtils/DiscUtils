@@ -184,6 +184,87 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets an indication if the Geometry is consistent with the values a BIOS can support.
+        /// </summary>
+        public bool IsBiosSafe
+        {
+            get { return _cylinders <= 1024 && _headsPerCylinder <= 255 && _sectorsPerTrack <= 63; }
+        }
+
+        /// <summary>
+        /// Gets an indication if the Geometry is consistent with the values IDE can represent.
+        /// </summary>
+        public bool IsIdeSafe
+        {
+            get { return _cylinders <= 65536 && _headsPerCylinder <= 16 && _sectorsPerTrack <= 255; }
+        }
+
+        /// <summary>
+        /// Gets an indication if the Geometry is representable both by the BIOS and by IDE.
+        /// </summary>
+        public bool IsBiosAndIdeSafe
+        {
+            get { return _cylinders <= 1024 && _headsPerCylinder <= 16 && _sectorsPerTrack <= 63; }
+        }
+
+        /// <summary>
+        /// Gets the 'LBA Assisted' BIOS geometry for a disk, given it's capacity.
+        /// </summary>
+        /// <param name="capacity">The capacity of the disk</param>
+        /// <returns>The geometry a BIOS using the 'LBA Assisted' method for calculating disk geometry will indicate for the disk</returns>
+        public static Geometry LbaAssistedBiosGeometry(long capacity)
+        {
+            int heads;
+            if (capacity <= 504 * Sizes.OneMiB)
+            {
+                heads = 16;
+            }
+            else if (capacity <= 1008 * Sizes.OneMiB)
+            {
+                heads = 32;
+            }
+            else if (capacity <= 2016 * Sizes.OneMiB)
+            {
+                heads = 64;
+            }
+            else if (capacity <= 4032 * Sizes.OneMiB)
+            {
+                heads = 128;
+            }
+            else
+            {
+                heads = 255;
+            }
+
+            int sectors = 63;
+            int cylinders = (int)Math.Min(1024, capacity/(sectors * heads * Sizes.Sector));
+            return new Geometry(cylinders, heads, sectors, Sizes.Sector);
+        }
+
+        /// <summary>
+        /// Converts a geometry into one that is BIOS-safe, if not already.
+        /// </summary>
+        /// <param name="geometry">The geometry to make BIOS-safe.</param>
+        /// <param name="capacity">The capacity of the disk.</param>
+        /// <returns>The new geometry</returns>
+        /// <remarks>This method returns the LBA-Assisted geometry if the given geometry isn't BIOS-safe.</remarks>
+        public static Geometry MakeBiosSafe(Geometry geometry, long capacity)
+        {
+            if(geometry == null)
+            {
+                return LbaAssistedBiosGeometry(capacity);
+            }
+            else if (geometry.IsBiosSafe)
+            {
+                return geometry;
+            }
+            else
+            {
+                return LbaAssistedBiosGeometry(capacity);
+            }
+        }
+
+        /// <summary>
         /// Calculates a sensible disk geometry for a disk capacity using the VHD algorithm (errs under).
         /// </summary>
         /// <param name="capacity">The desired capacity of the disk</param>

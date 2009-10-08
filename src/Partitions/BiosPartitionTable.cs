@@ -42,7 +42,7 @@ namespace DiscUtils.Partitions
         /// <param name="disk">The disk containing the partition table</param>
         public BiosPartitionTable(VirtualDisk disk)
         {
-            Init(disk.Content, disk.Geometry);
+            Init(disk.Content, disk.BiosGeometry);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace DiscUtils.Partitions
         /// <returns>An object to access the newly created partition table</returns>
         public static BiosPartitionTable Initialize(VirtualDisk disk)
         {
-            return Initialize(disk.Content, disk.Geometry);
+            return Initialize(disk.Content, disk.BiosGeometry);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace DiscUtils.Partitions
         /// <returns>An object to access the newly created partition table</returns>
         public static BiosPartitionTable Initialize(VirtualDisk disk, WellKnownPartitionType type)
         {
-            BiosPartitionTable table = Initialize(disk.Content, disk.Geometry);
+            BiosPartitionTable table = Initialize(disk.Content, disk.BiosGeometry);
             table.Create(type, true);
             return table;
         }

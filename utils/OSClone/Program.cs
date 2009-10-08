@@ -161,7 +161,6 @@ namespace OSClone
                                 {
                                     if (elem.Format == DiscUtils.BootConfig.ElementFormat.Device)
                                     {
-                                        Console.WriteLine(obj.FriendlyName + ":" + elem.Value);
                                         elem.Value = DiscUtils.BootConfig.ElementValue.ForDevice(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
                                     }
                                 }

@@ -132,6 +132,14 @@ namespace DiscUtils
 
 
         /// <summary>
+        /// Gets the disk geometry of the underlying storage medium (as used in BIOS calls), may be null.
+        /// </summary>
+        public override Geometry BiosGeometry
+        {
+            get { return (_physicalVol == null) ? Geometry.Null : _physicalVol.BiosGeometry; }
+        }
+
+        /// <summary>
         /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
         /// </summary>
         public override long PhysicalStartSector
