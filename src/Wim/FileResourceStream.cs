@@ -116,12 +116,14 @@ namespace DiscUtils.Wim
                 return 0;
             }
 
+            int maxToRead = (int)Math.Min(Length - _position, count);
+
             int totalRead = 0;
-            while (totalRead < count)
+            while (totalRead < maxToRead)
             {
                 int chunk = (int)(_position / ChunkSize);
                 int chunkOffset = (int)(_position % ChunkSize);
-                int numToRead = Math.Min(count - totalRead, ChunkSize - chunkOffset);
+                int numToRead = Math.Min(maxToRead - totalRead, ChunkSize - chunkOffset);
 
                 if (_currentChunk != chunk)
                 {
