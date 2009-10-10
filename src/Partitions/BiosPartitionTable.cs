@@ -130,13 +130,15 @@ namespace DiscUtils.Partitions
         /// otherwise IOException is thrown.</remarks>
         public override int Create(WellKnownPartitionType type, bool active)
         {
+            Geometry allocationGeometry = new Geometry(_diskData.Length, _diskGeometry.HeadsPerCylinder, _diskGeometry.SectorsPerTrack, _diskGeometry.BytesPerSector);
+
             ChsAddress start = new ChsAddress(0, 1, 1);
-            ChsAddress last = _diskGeometry.LastSector;
+            ChsAddress last = allocationGeometry.LastSector;
 
-            long startLba = _diskGeometry.ToLogicalBlockAddress(start);
-            long lastLba = _diskGeometry.ToLogicalBlockAddress(last);
+            long startLba = allocationGeometry.ToLogicalBlockAddress(start);
+            long lastLba = allocationGeometry.ToLogicalBlockAddress(last);
 
-            return CreatePrimaryByCylinder(0, _diskGeometry.Cylinders - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
+            return CreatePrimaryByCylinder(0, allocationGeometry.Cylinders - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
         }
 
         /// <summary>
@@ -208,7 +210,7 @@ namespace DiscUtils.Partitions
                 throw new ArgumentException("The first sector in a partition must be before the last");
             }
 
-            if ((last + 1) > _diskGeometry.TotalSectors)
+            if ((last + 1) * _diskGeometry.BytesPerSector > _diskData.Length)
             {
                 throw new ArgumentOutOfRangeException("last", last, "The last sector extends beyond the end of the disk");
             }

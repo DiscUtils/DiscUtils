@@ -65,6 +65,21 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Creates a new instance, based on a known track layout.
+        /// </summary>
+        /// <param name="capacity">The total capacity of the disk</param>
+        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk</param>
+        /// <param name="bytesPerSector">The number of bytes per sector of the disk</param>
+        public Geometry(long capacity, int headsPerCylinder, int sectorsPerTrack, int bytesPerSector)
+        {
+            _cylinders = (int)(capacity / (headsPerCylinder * sectorsPerTrack * bytesPerSector));
+            _headsPerCylinder = headsPerCylinder;
+            _sectorsPerTrack = sectorsPerTrack;
+            _bytesPerSector = bytesPerSector;
+        }
+
+        /// <summary>
         /// Gets the number of cylinders.
         /// </summary>
         public int Cylinders
