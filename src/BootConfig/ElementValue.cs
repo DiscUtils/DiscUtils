@@ -415,6 +415,10 @@ namespace DiscUtils.BootConfig
             {
                 // Pseudo 'boot' device
             }
+            else if (_deviceType == 8)
+            {
+                // location=custom:nnnnnnnnn
+            }
             else
             {
                 throw new NotImplementedException("Unknown device type: " + _deviceType);
