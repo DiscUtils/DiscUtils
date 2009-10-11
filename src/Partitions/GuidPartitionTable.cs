@@ -148,6 +148,19 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Creates a new partition table on a disk containing a single partition.
+        /// </summary>
+        /// <param name="disk">The disk to initialize.</param>
+        /// <param name="type">The partition type for the single partition</param>
+        /// <returns>An object to access the newly created partition table</returns>
+        public static GuidPartitionTable Initialize(VirtualDisk disk, WellKnownPartitionType type)
+        {
+            GuidPartitionTable pt = Initialize(disk);
+            pt.Create(type, true);
+            return pt;
+        }
+
+        /// <summary>
         /// Creates a new partition that encompasses the entire disk.
         /// </summary>
         /// <param name="type">The partition type</param>
@@ -550,7 +563,6 @@ namespace DiscUtils.Partitions
 
             throw new IOException("No free partition entries available");
         }
-
 
     }
 }
