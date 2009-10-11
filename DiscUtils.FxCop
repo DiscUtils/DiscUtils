@@ -620,6 +620,25 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="Geometry">
+          <Members>
+           <Member Name="#LbaAssistedBiosGeometry(System.Int64)">
+            <Messages>
+             <Message Id="Lba" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-11 13:46:10Z">
+              <Issue Name="Member">
+               <Item>Lba</Item>
+               <Item>'Geometry.LbaAssistedBiosGeometry(long)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="91" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="PhysicalVolumeType">
           <Members>
            <Member Name="#GptPartition">
@@ -5591,6 +5610,7 @@
     <Note Id="88" Modified="2009-10-04 18:19:33Z">Identifiers names based on BCD concepts</Note>
     <Note Id="89" Modified="2009-10-04 18:19:45Z">Standard camel-case</Note>
     <Note Id="90" Modified="2009-10-04 18:21:02Z">Non-trivial initialization</Note>
+    <Note Id="91" Modified="2009-10-11 13:46:39Z">LBA is standard term</Note>
    </User>
   </Notes>
   <Rules>
