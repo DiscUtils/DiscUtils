@@ -42,6 +42,7 @@ Copy-Item "${basedir}\utils\VirtualDiskConvert\bin\Release\*.exe" "${basedir}\la
 Copy-Item "${basedir}\utils\VolInfo\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\DiskDump\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\OSClone\bin\Release\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\BCDDump\bin\Release\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\bin\LICENSE.TXT"
 pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"
