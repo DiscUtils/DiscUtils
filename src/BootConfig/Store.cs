@@ -74,6 +74,18 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
+        /// Creates a specific object.
+        /// </summary>
+        /// <param name="id">The identity of the object to create</param>
+        /// <param name="type">The object's type</param>
+        /// <returns>The object representing the new application</returns>
+        public BcdObject CreateObject(Guid id, int type)
+        {
+            _store.CreateObject(id, type);
+            return new BcdObject(_store, id);
+        }
+
+        /// <summary>
         /// Creates an application object.
         /// </summary>
         /// <param name="imageType">The image type of the application</param>
@@ -81,7 +93,20 @@ namespace DiscUtils.BootConfig
         /// <returns>The object representing the new application</returns>
         public BcdObject CreateApplication(ApplicationImageType imageType, ApplicationType appType)
         {
-            Guid obj = _store.CreateObject(BcdObject.MakeApplicationType(imageType, appType));
+            Guid obj = _store.CreateObject(Guid.NewGuid(), BcdObject.MakeApplicationType(imageType, appType));
+            return new BcdObject(_store, obj);
+        }
+
+        /// <summary>
+        /// Creates an application object.
+        /// </summary>
+        /// <param name="id">The identity of the object to create</param>
+        /// <param name="imageType">The image type of the application</param>
+        /// <param name="appType">The application's type</param>
+        /// <returns>The object representing the new application</returns>
+        public BcdObject CreateApplication(Guid id, ApplicationImageType imageType, ApplicationType appType)
+        {
+            Guid obj = _store.CreateObject(id, BcdObject.MakeApplicationType(imageType, appType));
             return new BcdObject(_store, obj);
         }
 
@@ -92,7 +117,19 @@ namespace DiscUtils.BootConfig
         /// <returns>The object representing the new settings</returns>
         public BcdObject CreateInherit(InheritType inheritType)
         {
-            Guid obj = _store.CreateObject(BcdObject.MakeInheritType(inheritType));
+            Guid obj = _store.CreateObject(Guid.NewGuid(), BcdObject.MakeInheritType(inheritType));
+            return new BcdObject(_store, obj);
+        }
+
+        /// <summary>
+        /// Creates an 'inherit' object that contains common settings.
+        /// </summary>
+        /// <param name="id">The identity of the object to create</param>
+        /// <param name="inheritType">The type of object the settings apply to</param>
+        /// <returns>The object representing the new settings</returns>
+        public BcdObject CreateInherit(Guid id, InheritType inheritType)
+        {
+            Guid obj = _store.CreateObject(id, BcdObject.MakeInheritType(inheritType));
             return new BcdObject(_store, obj);
         }
 
@@ -102,7 +139,7 @@ namespace DiscUtils.BootConfig
         /// <returns>The object representing the new device.</returns>
         public BcdObject CreateDevice()
         {
-            Guid obj = _store.CreateObject(0x30000000);
+            Guid obj = _store.CreateObject(Guid.NewGuid(), 0x30000000);
             return new BcdObject(_store, obj);
         }
 

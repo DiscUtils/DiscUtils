@@ -38,7 +38,7 @@ namespace DiscUtils.BootConfig
         public abstract IEnumerable<int> EnumerateElements(Guid obj);
         public abstract int GetObjectType(Guid obj);
         public abstract bool ObjectExists(Guid obj);
-        public abstract Guid CreateObject(int type);
+        public abstract Guid CreateObject(Guid obj, int type);
         public abstract void CreateElement(Guid obj, int element);
         public abstract void DeleteObject(Guid obj);
         public abstract void DeleteElement(Guid obj, int element);

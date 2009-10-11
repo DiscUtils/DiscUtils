@@ -113,15 +113,15 @@ namespace DiscUtils.BootConfig
             return _rootKey.OpenSubKey(path) != null;
         }
 
-        public override Guid CreateObject(int type)
+        public override Guid CreateObject(Guid obj, int type)
         {
-            Guid obj = Guid.NewGuid();
-            string path = string.Format(CultureInfo.InvariantCulture, ObjectTypePathTemplate, obj.ToString("B"));
+            Guid realObj = (obj == Guid.Empty) ? Guid.NewGuid() : obj;
+            string path = string.Format(CultureInfo.InvariantCulture, ObjectTypePathTemplate, realObj.ToString("B"));
 
             RegistryKey key = _rootKey.CreateSubKey(path);
             key.SetValue("Type", type, RegistryValueType.Dword);
 
-            return obj;
+            return realObj;
         }
 
         public override void CreateElement(Guid obj, int element)
