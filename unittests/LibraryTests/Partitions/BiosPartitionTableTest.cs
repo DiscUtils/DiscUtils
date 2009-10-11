@@ -31,8 +31,10 @@ namespace DiscUtils.Partitions
         [Test]
         public void Initialize()
         {
-            MemoryStream ms = new MemoryStream();
-            Geometry geom = Geometry.FromCapacity(3 * 1024 * 1024);
+            long capacity = 3 * 1024 * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.FromCapacity(capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.Count);
@@ -41,8 +43,10 @@ namespace DiscUtils.Partitions
         [Test]
         public void CreateWholeDisk()
         {
-            MemoryStream ms = new MemoryStream();
-            Geometry geom = Geometry.FromCapacity(3 * 1024 * 1024);
+            long capacity = 3 * 1024 * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.FromCapacity(capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             int idx = table.Create(WellKnownPartitionType.WindowsFat, true);
@@ -70,8 +74,10 @@ namespace DiscUtils.Partitions
         [Test]
         public void CreateBySize()
         {
-            MemoryStream ms = new MemoryStream();
-            Geometry geom = Geometry.FromCapacity(3 * 1024 * 1024);
+            long capacity = 3 * 1024 * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.FromCapacity(capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             int idx = table.Create(2 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
@@ -87,8 +93,9 @@ namespace DiscUtils.Partitions
         [Test]
         public void CreateBySizeInGap()
         {
-            MemoryStream ms = new MemoryStream();
+            SparseMemoryStream ms = new SparseMemoryStream();
             Geometry geom = new Geometry(15, 30, 63);
+            ms.SetLength(geom.Capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
@@ -99,8 +106,9 @@ namespace DiscUtils.Partitions
         [Test]
         public void CreateByCylinder()
         {
-            MemoryStream ms = new MemoryStream();
+            SparseMemoryStream ms = new SparseMemoryStream();
             Geometry geom = new Geometry(15, 30, 63);
+            ms.SetLength(geom.Capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
@@ -115,8 +123,10 @@ namespace DiscUtils.Partitions
         [Test]
         public void Delete()
         {
-            MemoryStream ms = new MemoryStream();
-            Geometry geom = Geometry.FromCapacity(10 * 1024 * 1024);
+            long capacity = 10 * 1024 * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.FromCapacity(capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             Assert.AreEqual(0, table.Create(1 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false));
@@ -134,8 +144,10 @@ namespace DiscUtils.Partitions
         [Test]
         public void SetActive()
         {
-            MemoryStream ms = new MemoryStream();
-            Geometry geom = Geometry.FromCapacity(10 * 1024 * 1024);
+            long capacity = 10 * 1024 * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.FromCapacity(capacity);
             BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
 
             table.Create(1 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
