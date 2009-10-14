@@ -728,9 +728,8 @@ namespace DiscUtils.Vmdk
         {
             // Figure out grain size and number of grain tables, and adjust actual extent size to be a multiple
             // of grain size
-            int targetGrainTables = 256;
             const int gtesPerGt = 512;
-            long grainSize = Math.Max(size / (targetGrainTables * gtesPerGt * Sizes.Sector), 8);
+            long grainSize = 128;
             int numGrainTables = (int)Utilities.Ceil(size, grainSize * gtesPerGt * Sizes.Sector);
 
             descriptorLength = Utilities.RoundUp(descriptorLength, Sizes.Sector);

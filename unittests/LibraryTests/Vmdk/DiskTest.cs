@@ -72,7 +72,8 @@ namespace DiscUtils.Vmdk
                 Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
             }
 
-            Assert.Greater(2 * 1024 * 1024, fs.GetFileLength("a.vmdk"));
+            Assert.Greater(fs.GetFileLength("a.vmdk"), 2 * 1024 * 1024);
+            Assert.Less(fs.GetFileLength("a.vmdk"), 4 * 1024 * 1024);
 
             using (Disk disk = new Disk(fs, "a.vmdk", FileAccess.Read))
             {
@@ -106,7 +107,8 @@ namespace DiscUtils.Vmdk
                 Assert.AreEqual(1, paths.Count);
                 Assert.AreEqual("diff.vmdk", paths[0]);
             }
-            Assert.Greater(2 * 1024 * 1024, fs.GetFileLength(@"\diff\diff.vmdk"));
+            Assert.Greater(fs.GetFileLength(@"\diff\diff.vmdk"), 2 * 1024 * 1024);
+            Assert.Less(fs.GetFileLength(@"\diff\diff.vmdk"), 4 * 1024 * 1024);
         }
 
         [Test]
@@ -122,7 +124,8 @@ namespace DiscUtils.Vmdk
                 Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
                 Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
             }
-            Assert.Greater(2 * 1024 * 1024, fs.GetFileLength(@"\dir\diff.vmdk"));
+            Assert.Greater(fs.GetFileLength(@"\dir\diff.vmdk"), 2 * 1024 * 1024);
+            Assert.Less(fs.GetFileLength(@"\dir\diff.vmdk"), 4 * 1024 * 1024);
         }
 
         [Test]

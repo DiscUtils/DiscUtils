@@ -326,7 +326,7 @@ namespace DiscUtils.Vmdk
         {
             // Fragile - this is the grain size in bytes of the VMDK file, so dependant on algorithm that
             // determines grain size for new VMDKs...
-            const int unit = 31 * 512;
+            const int unit = 128 * 512;
 
             DiscFileSystem fs = new InMemoryFileSystem();
             using (Disk disk = Disk.Initialize(fs, "a.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.TwoGbMaxExtentSparse))
