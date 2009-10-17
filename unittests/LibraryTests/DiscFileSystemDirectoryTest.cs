@@ -550,6 +550,15 @@ namespace DiscUtils
                 Load();
                 return _wrapped.GetFileLength(path);
             }
+
+            public override string VolumeLabel
+            {
+                get
+                {
+                    Load();
+                    return _wrapped.VolumeLabel;
+                }
+            }
         }
     }
 }

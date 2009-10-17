@@ -454,5 +454,11 @@ namespace DiscUtils
             Assert.AreEqual(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Directory);
         }
 
+        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        public void VolumeLabel(DiscFileSystem fs)
+        {
+            string volLabel = fs.VolumeLabel;
+            Assert.NotNull(volLabel);
+        }
     }
 }

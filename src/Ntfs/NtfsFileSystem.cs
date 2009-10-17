@@ -1339,6 +1339,19 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public override string VolumeLabel
+        {
+            get
+            {
+                File volumeFile = GetFile(MasterFileTable.VolumeIndex);
+                NtfsStream volNameStream = volumeFile.GetStream(AttributeType.VolumeName, null);
+                return volNameStream.GetContent<VolumeName>().Name;
+            }
+        }
+
         #endregion
 
         #region Internal File access methods (exposed via NtfsContext)

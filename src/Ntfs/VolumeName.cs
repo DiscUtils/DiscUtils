@@ -39,6 +39,11 @@ namespace DiscUtils.Ntfs
             _name = name;
         }
 
+        public string Name
+        {
+            get { return _name; }
+        }
+
         #region IByteArraySerializable Members
 
         public void ReadFrom(byte[] buffer, int offset)

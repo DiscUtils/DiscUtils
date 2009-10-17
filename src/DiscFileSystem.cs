@@ -450,6 +450,14 @@ namespace DiscUtils
             return new DiscFileSystemInfo(this, path);
         }
 
+        /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public virtual string VolumeLabel
+        {
+            get { return ""; }
+        }
+
         #region IDisposable Members
 
         /// <summary>

@@ -277,7 +277,7 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the volume label.
         /// </summary>
-        public string VolumeLabel
+        public override string VolumeLabel
         {
             get { return _bsVolLab; }
         }

@@ -418,6 +418,14 @@ namespace DiscUtils.Iso9660
             return new DiscFileSystemInfo(this, path);
         }
 
+        /// <summary>
+        /// Gets the Volume Identifier.
+        /// </summary>
+        public override string VolumeLabel
+        {
+            get { return _volDesc.VolumeIdentifier; }
+        }
+
         internal DirectoryRecord GetDirectoryRecord(string path)
         {
             DirectoryRecord result = new DirectoryRecord();

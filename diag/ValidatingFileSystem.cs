@@ -1324,6 +1324,22 @@ namespace DiscUtils.Diagnostics
 
             return (DiscFileSystemInfo)PerformActivity(fn);
         }
+
+        /// <summary>
+        /// Gets the Volume Label.
+        /// </summary>
+        public override string VolumeLabel
+        {
+            get
+            {
+                Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+                {
+                    return fs.VolumeLabel;
+                };
+
+                return (string)PerformActivity(fn);
+            }
+        }
         #endregion
     }
 }
