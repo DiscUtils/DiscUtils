@@ -456,7 +456,7 @@ namespace DiscUtils.Fat
 
         private void HandleAccessed(bool forWrite)
         {
-            if (_parent != null && _parentId >= 0)
+            if (_fileSystem.CanWrite && _parent != null)
             {
                 DateTime now = DateTime.Now;
                 DirectoryEntry entry = SelfEntry;
@@ -465,7 +465,7 @@ namespace DiscUtils.Fat
                 DateTime oldWriteTime = entry.LastWriteTime;
 
                 entry.LastAccessTime = now;
-                if( forWrite)
+                if (forWrite)
                 {
                     entry.LastWriteTime = now;
                 }
