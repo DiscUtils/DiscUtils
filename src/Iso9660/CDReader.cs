@@ -170,7 +170,8 @@ namespace DiscUtils.Iso9660
         public override bool FileExists(string path)
         {
             DirectoryRecord record;
-            return TryGetFileDirectoryRecord(path, out record);
+            bool recordExists = TryGetFileDirectoryRecord(path, out record);
+            return recordExists && (record.Flags & FileFlags.Directory) == 0;
         }
 
         /// <summary>
@@ -430,10 +431,14 @@ namespace DiscUtils.Iso9660
         {
             DirectoryRecord result = new DirectoryRecord();
             PathTableRecord ptr;
-            if (TrySearchPathTable(Utilities.GetDirectoryFromPath(path), out ptr))
+
+            string dirPath = string.IsNullOrEmpty(path) ? "\x0" : Utilities.GetDirectoryFromPath(path);
+            string filePart = string.IsNullOrEmpty(path) ? "\x0" : Utilities.GetFileFromPath(path);
+
+            if (TrySearchPathTable(dirPath, out ptr))
             {
                 ReaderDirectory dir = new ReaderDirectory(this, ptr, _volDesc.CharacterEncoding, null);
-                if (!dir.TryGetFile(Utilities.GetFileFromPath(path), out result))
+                if (!dir.TryGetFile(filePart, out result))
                 {
                     throw new FileNotFoundException("No such file", path);
                 }

@@ -120,19 +120,16 @@ namespace DiscUtils.Iso9660
 
             foreach (DirectoryRecord r in _records)
             {
-                if ((r.Flags & FileFlags.Directory) == 0)
+                string toComp = IsoUtilities.NormalizeFileName(r.FileIdentifier).ToUpper(CultureInfo.InvariantCulture);
+                if (!anyVerMatch && toComp == normName)
                 {
-                    string toComp = IsoUtilities.NormalizeFileName(r.FileIdentifier).ToUpper(CultureInfo.InvariantCulture);
-                    if (!anyVerMatch && toComp == normName)
-                    {
-                        result = r;
-                        return true;
-                    }
-                    else if (anyVerMatch && toComp.StartsWith(normName, StringComparison.Ordinal))
-                    {
-                        result = r;
-                        return true;
-                    }
+                    result = r;
+                    return true;
+                }
+                else if (anyVerMatch && toComp.StartsWith(normName, StringComparison.Ordinal))
+                {
+                    result = r;
+                    return true;
                 }
             }
 

@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 using NUnit.Framework;
 
@@ -162,5 +163,47 @@ namespace DiscUtils.Iso9660
             Assert.IsNull(fs.Root.Parent);
         }
 
+        [Test]
+        public void RootBehaviour()
+        {
+            // Start time rounded down to whole seconds
+            DateTime start = DateTime.UtcNow;
+            start = new DateTime(start.Year, start.Month, start.Day, start.Hour, start.Minute, start.Second);
+
+            CDBuilder builder = new CDBuilder();
+            CDReader fs = new CDReader(builder.Build(), false);
+            DateTime end = DateTime.UtcNow;
+
+            Assert.AreEqual(FileAttributes.Directory | FileAttributes.ReadOnly, fs.Root.Attributes);
+            Assert.GreaterOrEqual(fs.Root.CreationTimeUtc, start);
+            Assert.LessOrEqual(fs.Root.CreationTimeUtc, end);
+            Assert.GreaterOrEqual(fs.Root.LastAccessTimeUtc, start);
+            Assert.LessOrEqual(fs.Root.LastAccessTimeUtc, end);
+            Assert.GreaterOrEqual(fs.Root.LastWriteTimeUtc, start);
+            Assert.LessOrEqual(fs.Root.LastWriteTimeUtc, end);
+        }
+
+        [Test]
+        public void Attributes()
+        {
+            // Start time rounded down to whole seconds
+            DateTime start = DateTime.UtcNow;
+            start = new DateTime(start.Year, start.Month, start.Day, start.Hour, start.Minute, start.Second);
+
+            CDBuilder builder = new CDBuilder();
+            builder.AddDirectory("Foo");
+            CDReader fs = new CDReader(builder.Build(), false);
+            DateTime end = DateTime.UtcNow;
+
+            DiscDirectoryInfo di = fs.GetDirectoryInfo("Foo");
+
+            Assert.AreEqual(FileAttributes.Directory | FileAttributes.ReadOnly, di.Attributes);
+            Assert.GreaterOrEqual(di.CreationTimeUtc, start);
+            Assert.LessOrEqual(di.CreationTimeUtc, end);
+            Assert.GreaterOrEqual(di.LastAccessTimeUtc, start);
+            Assert.LessOrEqual(di.LastAccessTimeUtc, end);
+            Assert.GreaterOrEqual(di.LastWriteTimeUtc, start);
+            Assert.LessOrEqual(di.LastWriteTimeUtc, end);
+        }
     }
 }
