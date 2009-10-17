@@ -166,7 +166,7 @@ namespace DiscUtils
 
             if (offset < 0)
             {
-                throw new IOException("Attempt to move before beginning of disk");
+                throw new IOException("Attempt to move before beginning of stream");
             }
             else
             {
