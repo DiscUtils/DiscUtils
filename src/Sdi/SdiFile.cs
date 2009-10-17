@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -29,19 +30,32 @@ namespace DiscUtils.Sdi
     /// Class for accessing the contents of Simple Deployment Image (.sdi) files.
     /// </summary>
     /// <remarks>SDI files are primitive disk images, containing multiple blobs.</remarks>
-    public class SdiFile
+    public sealed class SdiFile : IDisposable
     {
         private Stream _stream;
+        private Ownership _ownership;
         private FileHeader _header;
         private List<SectionRecord> _sections;
+
+        /// <summary>
+        /// Creates a new instance from a stream, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="stream">The stream formatted as an SDI file.</param>
+        public SdiFile(Stream stream)
+            : this(stream, Ownership.None)
+        {
+        }
+
 
         /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
         /// <param name="stream">The stream formatted as an SDI file.</param>
-        public SdiFile(Stream stream)
+        /// <param name="ownership">Whether to pass ownership of <c>stream</c> to the new instance</param>
+        public SdiFile(Stream stream, Ownership ownership)
         {
             _stream = stream;
+            _ownership = ownership;
 
             byte[] page = Utilities.ReadFully(_stream, 512);
 
@@ -64,6 +78,19 @@ namespace DiscUtils.Sdi
                 pos += SectionRecord.RecordSize;
             }
         }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_ownership == Ownership.Dispose && _stream != null)
+            {
+                _stream.Dispose();
+                _stream = null;
+            }
+        }
+
 
         /// <summary>
         /// Gets all of the sections within the file.
