@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.XPath;
@@ -33,7 +34,7 @@ namespace DiscUtils.Xva
     /// <remarks>XVA is a VM archive, not just a disk archive.  It can contain multiple
     /// disk images.  This class provides access to all of the disk images within the
     /// XVA file.</remarks>
-    public sealed class VirtualMachine
+    public sealed class VirtualMachine : IDisposable
     {
         private static readonly XPathExpression FindVDIsExpression = XPathExpression.Compile("/value/struct/member[child::name='objects']/value/array/data/value/struct[child::member/value='VDI']");
         private static readonly XPathExpression GetDiskId = XPathExpression.Compile("member[child::name='id']/value");
@@ -42,17 +43,41 @@ namespace DiscUtils.Xva
         private static readonly XPathExpression GetDiskCapacity = XPathExpression.Compile("member[child::name='snapshot']/value/struct/member[child::name='virtual_size']/value");
 
         private Stream _fileStream;
+        private Ownership _ownership;
         private TarFile _archive;
+
+        /// <summary>
+        /// Creates a new instance from a stream, without taking ownership of the stream.
+        /// </summary>
+        /// <param name="fileStream">The stream containing the .XVA file</param>
+        public VirtualMachine(Stream fileStream)
+            : this(fileStream, Ownership.None)
+        {
+        }
 
         /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
         /// <param name="fileStream">The stream containing the .XVA file</param>
-        public VirtualMachine(Stream fileStream)
+        /// <param name="ownership">Whether to transfer ownership of <c>fileStream</c> to the new instance.</param>
+        public VirtualMachine(Stream fileStream, Ownership ownership)
         {
             _fileStream = fileStream;
+            _ownership = ownership;
             _fileStream.Position = 0;
             _archive = new TarFile(fileStream);
+        }
+
+        /// <summary>
+        /// Disposes of this object, freeing any owned resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_ownership == Ownership.Dispose && _fileStream != null)
+            {
+                _fileStream.Dispose();
+                _fileStream = null;
+            }
         }
 
         internal TarFile Archive
