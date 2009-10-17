@@ -398,6 +398,12 @@ namespace DiscUtils.Fat
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
+            // Simulate a root directory entry - doesn't really exist though
+            if (IsRootPath(path))
+            {
+                return FileAttributes.Directory;
+            }
+
             DirectoryEntry dirEntry = GetDirectoryEntry(path);
             if (dirEntry == null)
             {
@@ -414,6 +420,15 @@ namespace DiscUtils.Fat
         /// <param name="newValue">The new attributes of the file or directory</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
+            if (IsRootPath(path))
+            {
+                if(newValue != FileAttributes.Directory)
+                {
+                    throw new NotSupportedException("The attributes of the root directory cannot be modified");
+                }
+                return;
+            }
+
             Directory parent;
             long id = GetDirectoryEntry(path, out parent);
             DirectoryEntry dirEntry = parent.GetEntry(id);
@@ -445,6 +460,11 @@ namespace DiscUtils.Fat
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
+            if (IsRootPath(path))
+            {
+                return Epoch;
+            }
+
             return GetDirectoryEntry(path).CreationTime;
         }
 
@@ -455,6 +475,15 @@ namespace DiscUtils.Fat
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTime(string path, DateTime newTime)
         {
+            if (IsRootPath(path))
+            {
+                if (newTime != Epoch)
+                {
+                    throw new NotSupportedException("The creation time of the root directory cannot be modified");
+                }
+                return;
+            }
+
             UpdateDirEntry(path, (e) => { e.CreationTime = newTime; });
         }
 
@@ -465,6 +494,11 @@ namespace DiscUtils.Fat
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
+            if (IsRootPath(path))
+            {
+                return ConvertToUtc(Epoch);
+            }
+
             return ConvertToUtc(GetDirectoryEntry(path).CreationTime);
         }
 
@@ -475,6 +509,15 @@ namespace DiscUtils.Fat
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTimeUtc(string path, DateTime newTime)
         {
+            if (IsRootPath(path))
+            {
+                if (ConvertFromUtc(newTime) != Epoch)
+                {
+                    throw new NotSupportedException("The last write time of the root directory cannot be modified");
+                }
+                return;
+            }
+
             UpdateDirEntry(path, (e) => { e.CreationTime = ConvertFromUtc(newTime); });
         }
 
@@ -485,6 +528,11 @@ namespace DiscUtils.Fat
         /// <returns>The time the file or directory was last accessed</returns>
         public override DateTime GetLastAccessTime(string path)
         {
+            if (IsRootPath(path))
+            {
+                return Epoch;
+            }
+
             return GetDirectoryEntry(path).LastAccessTime;
         }
 
@@ -495,6 +543,15 @@ namespace DiscUtils.Fat
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTime(string path, DateTime newTime)
         {
+            if (IsRootPath(path))
+            {
+                if (newTime != Epoch)
+                {
+                    throw new NotSupportedException("The last access time of the root directory cannot be modified");
+                }
+                return;
+            }
+
             UpdateDirEntry(path, (e) => { e.LastAccessTime = newTime; });
         }
 
@@ -505,6 +562,11 @@ namespace DiscUtils.Fat
         /// <returns>The time the file or directory was last accessed</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
+            if (IsRootPath(path))
+            {
+                return ConvertToUtc(Epoch);
+            }
+
             return ConvertToUtc(GetDirectoryEntry(path).LastAccessTime);
         }
 
@@ -515,6 +577,15 @@ namespace DiscUtils.Fat
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
+            if (IsRootPath(path))
+            {
+                if (ConvertFromUtc(newTime) != Epoch)
+                {
+                    throw new NotSupportedException("The last write time of the root directory cannot be modified");
+                }
+                return;
+            }
+
             UpdateDirEntry(path, (e) => { e.LastAccessTime = ConvertFromUtc(newTime); });
         }
 
@@ -525,6 +596,11 @@ namespace DiscUtils.Fat
         /// <returns>The time the file or directory was last modified</returns>
         public override DateTime GetLastWriteTime(string path)
         {
+            if (IsRootPath(path))
+            {
+                return Epoch;
+            }
+
             return GetDirectoryEntry(path).LastWriteTime;
         }
 
@@ -535,6 +611,15 @@ namespace DiscUtils.Fat
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTime(string path, DateTime newTime)
         {
+            if (IsRootPath(path))
+            {
+                if (newTime != Epoch)
+                {
+                    throw new NotSupportedException("The last write time of the root directory cannot be modified");
+                }
+                return;
+            }
+
             UpdateDirEntry(path, (e) => { e.LastWriteTime = newTime; });
         }
 
@@ -545,6 +630,11 @@ namespace DiscUtils.Fat
         /// <returns>The time the file or directory was last modified</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
+            if (IsRootPath(path))
+            {
+                return ConvertToUtc(Epoch);
+            }
+
             return ConvertToUtc(GetDirectoryEntry(path).LastWriteTime);
         }
 
@@ -555,6 +645,15 @@ namespace DiscUtils.Fat
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
+            if (IsRootPath(path))
+            {
+                if (ConvertFromUtc(newTime) != Epoch)
+                {
+                    throw new NotSupportedException("The last write time of the root directory cannot be modified");
+                }
+                return;
+            }
+
             UpdateDirEntry(path, (e) => { e.LastWriteTime = ConvertFromUtc(newTime); });
         }
 
@@ -1523,6 +1622,11 @@ namespace DiscUtils.Fat
             {
                 return FatType.Fat32;
             }
+        }
+
+        private static bool IsRootPath(string path)
+        {
+            return string.IsNullOrEmpty(path) || path == @"\";
         }
 
         internal DateTime ConvertToUtc(DateTime dateTime)

@@ -309,6 +309,16 @@ namespace DiscUtils
         {
             Assert.AreEqual(fs.GetDirectoryInfo("foo"), fs.GetDirectoryInfo("foo"));
         }
+
+        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        public void RootBehaviour(DiscFileSystem fs)
+        {
+            // Not all file systems can modify the root directory, so we just make sure 'get' and 'no-op' change work.
+            fs.Root.Attributes = fs.Root.Attributes;
+            fs.Root.CreationTimeUtc = fs.Root.CreationTimeUtc;
+            fs.Root.LastAccessTimeUtc = fs.Root.LastAccessTimeUtc;
+            fs.Root.LastWriteTimeUtc = fs.Root.LastWriteTimeUtc;
+        }
     }
 
     public class FileSystemSource
