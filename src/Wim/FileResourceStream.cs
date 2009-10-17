@@ -31,12 +31,12 @@ namespace DiscUtils.Wim
     /// <remarks>Stream access must be strictly sequential.</remarks>
     internal class FileResourceStream : Stream
     {
-        private const int ChunkSize = 32768;
         private const int E8DecodeFileSize = 12000000;
 
         private Stream _baseStream;
         private ShortResourceHeader _header;
         private bool _lzxCompression;
+        private int _chunkSize;
 
         private long[] _chunkOffsets;
         private long[] _chunkLength;
@@ -47,18 +47,19 @@ namespace DiscUtils.Wim
 
         private long _position;
 
-        public FileResourceStream(Stream baseStream, ShortResourceHeader header, bool lzxCompression)
+        public FileResourceStream(Stream baseStream, ShortResourceHeader header, bool lzxCompression, int chunkSize)
         {
             _baseStream = baseStream;
             _header = header;
             _lzxCompression = lzxCompression;
+            _chunkSize = chunkSize;
 
             if (baseStream.Length > uint.MaxValue)
             {
                 throw new NotImplementedException("Large files >4GB");
             }
 
-            int numChunks = (int)Utilities.Ceil(header.OriginalSize, ChunkSize);
+            int numChunks = (int)Utilities.Ceil(header.OriginalSize, _chunkSize);
 
             _chunkOffsets = new long[numChunks];
             _chunkLength = new long[numChunks];
@@ -121,9 +122,9 @@ namespace DiscUtils.Wim
             int totalRead = 0;
             while (totalRead < maxToRead)
             {
-                int chunk = (int)(_position / ChunkSize);
-                int chunkOffset = (int)(_position % ChunkSize);
-                int numToRead = Math.Min(maxToRead - totalRead, ChunkSize - chunkOffset);
+                int chunk = (int)(_position / _chunkSize);
+                int chunkOffset = (int)(_position % _chunkSize);
+                int numToRead = Math.Min(maxToRead - totalRead, _chunkSize - chunkOffset);
 
                 if (_currentChunk != chunk)
                 {
@@ -146,7 +147,7 @@ namespace DiscUtils.Wim
 
         private Stream OpenChunkStream(int chunk)
         {
-            int targetUncompressed = 32768;
+            int targetUncompressed = _chunkSize;
             if (chunk == _chunkLength.Length - 1)
             {
                 targetUncompressed = (int)(Length - _position);

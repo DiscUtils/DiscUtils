@@ -44,7 +44,7 @@ namespace DiscUtils.Wim
         public uint HeaderSize;
         public uint Version;
         public FileFlags Flags;
-        public uint CompressionSize;
+        public int CompressionSize;
         public Guid WimGuid;
         public ushort PartNumber;
         public ushort TotalParts;
@@ -61,7 +61,7 @@ namespace DiscUtils.Wim
             HeaderSize = Utilities.ToUInt32LittleEndian(buffer, 8);
             Version = Utilities.ToUInt32LittleEndian(buffer, 12);
             Flags = (FileFlags)Utilities.ToUInt32LittleEndian(buffer, 16);
-            CompressionSize = Utilities.ToUInt32LittleEndian(buffer, 20);
+            CompressionSize = Utilities.ToInt32LittleEndian(buffer, 20);
             WimGuid = Utilities.ToGuidLittleEndian(buffer, 24);
             PartNumber = Utilities.ToUInt16LittleEndian(buffer, 40);
             TotalParts = Utilities.ToUInt16LittleEndian(buffer, 42);

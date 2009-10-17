@@ -48,11 +48,6 @@ namespace DiscUtils.Wim
             _fileHeader = new FileHeader();
             _fileHeader.Read(buffer, 0);
 
-            if (_fileHeader.CompressionSize != 0x8000)
-            {
-                throw new NotSupportedException("Compression size: " + _fileHeader.CompressionSize);
-            }
-
             if (_fileHeader.TotalParts != 1)
             {
                 throw new NotSupportedException("Multi-part WIM file");
@@ -180,7 +175,7 @@ namespace DiscUtils.Wim
                 return fileSectionStream;
             }
 
-            return new FileResourceStream(fileSectionStream, hdr, (_fileHeader.Flags & FileFlags.LzxCompression) != 0);
+            return new FileResourceStream(fileSectionStream, hdr, (_fileHeader.Flags & FileFlags.LzxCompression) != 0, _fileHeader.CompressionSize);
         }
 
         private void ReadResourceTable()
