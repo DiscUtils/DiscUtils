@@ -107,10 +107,28 @@ namespace DiscUtils.Iso9660
             _pathTableFirstInParent = new Dictionary<int,int>();
             uint pos = 0;
             int lastParent = 0;
+            bool byteSwapPtr = false;
             while (pos < _volDesc.PathTableSize)
             {
                 PathTableRecord ptr;
-                int length = PathTableRecord.ReadFrom(pathTableBuffer, (int)pos, false, _volDesc.CharacterEncoding, out ptr);
+                int length = PathTableRecord.ReadFrom(pathTableBuffer, (int)pos, byteSwapPtr, _volDesc.CharacterEncoding, out ptr);
+
+                // Abort early if 'null' record found - some ISO authoring software indicates a larger path table
+                // than actually occupied.
+                if (string.IsNullOrEmpty(ptr.DirectoryIdentifier) || ptr.LocationOfExtent == 0)
+                {
+                    break;
+                }
+
+                // Some ISO authoring software writes some fields out byte-swapped.  ECMA-119 spec says these fields
+                // should be written least significant byte first (8.4.14) - i.e. normal Intel ordering, but some
+                // get it wrong...
+                if (ptr.ParentDirectoryNumber == 0x0100 && ptr.DirectoryIdentifier == "\x0")
+                {
+                    byteSwapPtr = true;
+                    ptr.ParentDirectoryNumber = Utilities.BitSwap(ptr.ParentDirectoryNumber);
+                    ptr.LocationOfExtent = Utilities.BitSwap(ptr.LocationOfExtent);
+                }
 
                 if (lastParent != ptr.ParentDirectoryNumber)
                 {
