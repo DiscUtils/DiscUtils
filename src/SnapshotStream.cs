@@ -333,7 +333,7 @@ namespace DiscUtils
                 effectiveOffset += Length;
             }
 
-            if (offset < 0)
+            if (effectiveOffset < 0)
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
