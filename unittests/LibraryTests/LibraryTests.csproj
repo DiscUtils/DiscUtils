@@ -72,6 +72,7 @@
     <Compile Include="Registry\RegistryHiveTest.cs" />
     <Compile Include="Registry\RegistryKeyTest.cs" />
     <Compile Include="StreamExtentTest.cs" />
+    <Compile Include="ThreadSafeStreamTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />
     <Compile Include="Vdi\StreamTest.cs" />
     <Compile Include="Vhd\DiskBuilderTest.cs" />
