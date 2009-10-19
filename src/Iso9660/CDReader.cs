@@ -265,7 +265,7 @@ namespace DiscUtils.Iso9660
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            ReaderDirectory dir = GetDirectory(Utilities.GetDirectoryFromPath(path));
+            ReaderDirectory dir = GetDirectory(path);
             List<string> results = new List<string>();
             foreach (DirectoryRecord r in dir.GetRecords())
             {
