@@ -149,7 +149,7 @@ namespace DiscUtils.Vhd
         {
             return (Cookie == FileCookie)
                 && IsChecksumValid()
-                && ((Features & FeatureReservedMustBeSet) != 0)
+                //&& ((Features & FeatureReservedMustBeSet) != 0)
                 && FileFormatVersion == Version1;
         }
 
