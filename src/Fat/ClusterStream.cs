@@ -60,6 +60,11 @@ namespace DiscUtils.Fat
                 _knownClusters.Add(FatBuffer.EndOfChain);
             }
 
+            if (_length == uint.MaxValue)
+            {
+                _length = DetectLength();
+            }
+
             _currentCluster = uint.MaxValue;
             _clusterBuffer = new byte[_reader.ClusterSize];
         }
@@ -193,16 +198,8 @@ namespace DiscUtils.Fat
 
         public override void SetLength(long value)
         {
-            // In case the length is unbounded, detect the length
-            // from the cluster chain
-            long actualLength = _length;
-            if (actualLength == uint.MaxValue)
-            {
-                actualLength = DetectLength();
-            }
-
             long desiredNumClusters = (value + _reader.ClusterSize - 1) / _reader.ClusterSize;
-            long actualNumClusters = (actualLength + _reader.ClusterSize - 1) / _reader.ClusterSize;
+            long actualNumClusters = (_length + _reader.ClusterSize - 1) / _reader.ClusterSize;
 
             if (desiredNumClusters < actualNumClusters)
             {
@@ -459,7 +456,7 @@ namespace DiscUtils.Fat
             return _knownClusters.Count > index;
         }
 
-        private long DetectLength()
+        private uint DetectLength()
         {
             while (!_fat.IsEndOfChain(_knownClusters[_knownClusters.Count - 1]))
             {
@@ -469,7 +466,7 @@ namespace DiscUtils.Fat
                 }
             }
 
-            return (long)(_knownClusters.Count - 1) * (long)(_reader.ClusterSize);
+            return (uint)((long)(_knownClusters.Count - 1) * (long)(_reader.ClusterSize));
         }
 
     }
