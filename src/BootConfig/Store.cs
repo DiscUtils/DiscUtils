@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DiscUtils.Registry;
 
 namespace DiscUtils.BootConfig
@@ -50,9 +49,10 @@ namespace DiscUtils.BootConfig
         {
             get
             {
-                return
-                    from obj in _store.EnumerateObjects()
-                    select new BcdObject(_store, obj);
+                foreach (var obj in _store.EnumerateObjects())
+                {
+                    yield return new BcdObject(_store, obj);
+                }
             }
         }
 

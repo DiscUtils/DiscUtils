@@ -30,11 +30,19 @@ using System.Text.RegularExpressions;
 namespace DiscUtils.Fat
 {
     /// <summary>
+    /// Converts a time to/from UTC.
+    /// </summary>
+    /// <param name="time">The time to convert</param>
+    /// <param name="toUtc"><c>true</c> to convert FAT time to UTC, <c>false</c> to convert UTC to FAT time</param>
+    /// <returns>The converted time.</returns>
+    public delegate DateTime TimeConverter(DateTime time, bool toUtc);
+
+    /// <summary>
     /// Class for accessing FAT file systems.
     /// </summary>
     public sealed class FatFileSystem : DiscFileSystem
     {
-        private TimeZoneInfo _timeZone;
+        private TimeConverter _timeConverter;
         private Stream _data;
         private Ownership _ownsData;
         private byte[] _bootSector;
@@ -84,7 +92,7 @@ namespace DiscUtils.Fat
         public FatFileSystem(Stream data)
         {
             _dirCache = new Dictionary<uint, Directory>();
-            _timeZone = TimeZoneInfo.Local;
+            _timeConverter = DefaultTimeConverter;
             Initialize(data);
         }
 
@@ -97,7 +105,7 @@ namespace DiscUtils.Fat
         public FatFileSystem(Stream data, Ownership ownsData)
         {
             _dirCache = new Dictionary<uint, Directory>();
-            _timeZone = TimeZoneInfo.Local;
+            _timeConverter = DefaultTimeConverter;
             Initialize(data);
             _ownsData = ownsData;
         }
@@ -106,11 +114,11 @@ namespace DiscUtils.Fat
         /// Creates a new instance, with a specific timezone
         /// </summary>
         /// <param name="data">The stream containing the file system.</param>
-        /// <param name="timeZone">The timezone of the new instance.</param>
-        public FatFileSystem(Stream data, TimeZoneInfo timeZone)
+        /// <param name="timeConverter">A delegate to convert to/from the file system's timezone.</param>
+        public FatFileSystem(Stream data, TimeConverter timeConverter)
         {
             _dirCache = new Dictionary<uint, Directory>();
-            _timeZone = timeZone;
+            _timeConverter = timeConverter;
             Initialize(data);
         }
 
@@ -120,11 +128,11 @@ namespace DiscUtils.Fat
         /// <param name="data">The stream containing the file system.</param>
         /// <param name="ownsData">Indicates if the new instance should take ownership
         /// of <paramref name="data"/>.</param>
-        /// <param name="timeZone">The timezone of the new instance.</param>
-        public FatFileSystem(Stream data, Ownership ownsData, TimeZoneInfo timeZone)
+        /// <param name="timeConverter">A delegate to convert to/from the file system's timezone.</param>
+        public FatFileSystem(Stream data, Ownership ownsData, TimeConverter timeConverter)
         {
             _dirCache = new Dictionary<uint, Directory>();
-            _timeZone = timeZone;
+            _timeConverter = timeConverter;
             Initialize(data);
             _ownsData = ownsData;
         }
@@ -1629,14 +1637,19 @@ namespace DiscUtils.Fat
             return string.IsNullOrEmpty(path) || path == @"\";
         }
 
+        private static DateTime DefaultTimeConverter(DateTime time, bool toUtc)
+        {
+            return toUtc ? time.ToUniversalTime() : time.ToLocalTime();
+        }
+
         internal DateTime ConvertToUtc(DateTime dateTime)
         {
-            return TimeZoneInfo.ConvertTimeToUtc(dateTime, _timeZone);
+            return _timeConverter(dateTime, true);
         }
 
         internal DateTime ConvertFromUtc(DateTime dateTime)
         {
-            return TimeZoneInfo.ConvertTimeFromUtc(dateTime, _timeZone);
+            return _timeConverter(dateTime, false);
         }
 
         internal Directory GetDirectory(string path)

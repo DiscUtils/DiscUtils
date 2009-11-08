@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace DiscUtils.Ntfs
 {
@@ -62,7 +61,12 @@ namespace DiscUtils.Ntfs
 
         public AttributeReference[] GetAttributes()
         {
-            return _attrs.ToArray();
+            AttributeReference[] results = new AttributeReference[_attrs.Count];
+            for (int i = 0; i < _attrs.Count; ++i)
+            {
+                results[i] = _attrs[i];
+            }
+            return results;
         }
 
         /// <summary>

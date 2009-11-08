@@ -23,7 +23,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace DiscUtils.Iso9660
@@ -260,11 +259,11 @@ namespace DiscUtils.Iso9660
         {
             string[] parts = new string[] { name, "", "1" };
 
-            if (name.Contains('.'))
+            if (name.Contains("."))
             {
                 int endOfFilePart = name.IndexOf('.');
                 parts[0] = name.Substring(0, endOfFilePart);
-                if (name.Contains(';'))
+                if (name.Contains(";"))
                 {
                     int verSep = name.IndexOf(';', endOfFilePart + 1);
                     parts[1] = name.Substring(endOfFilePart + 1, verSep - (endOfFilePart + 1));
@@ -277,7 +276,7 @@ namespace DiscUtils.Iso9660
             }
             else
             {
-                if (name.Contains(';'))
+                if (name.Contains(";"))
                 {
                     int verSep = name.IndexOf(';');
                     parts[0] = name.Substring(0, verSep);

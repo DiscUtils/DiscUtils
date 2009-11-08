@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 
@@ -513,12 +512,10 @@ namespace DiscUtils.Registry
                 if (_cell.NumSubKeys != 0)
                 {
                     ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
-                    return from key in list.EnumerateKeys()
-                           select new RegistryKey(_hive, key);
-                }
-                else
-                {
-                    return new RegistryKey[] { };
+                    foreach (var key in list.EnumerateKeys())
+                    {
+                        yield return new RegistryKey(_hive, key);
+                    }
                 }
             }
         }

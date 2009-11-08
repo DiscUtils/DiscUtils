@@ -24,12 +24,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DiscUtils
 {
+    internal delegate TResult Func<T, TResult>(T arg);
+    
     internal static class Utilities
     {
         /// <summary>
@@ -759,7 +760,7 @@ namespace DiscUtils
         /// </remarks>
         internal static Regex ConvertWildcardsToRegEx(string pattern)
         {
-            if (!pattern.Contains('.'))
+            if (!pattern.Contains("."))
             {
                 pattern += ".";
             }

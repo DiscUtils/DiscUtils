@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 
 namespace DiscUtils.Partitions
 {
@@ -174,8 +173,8 @@ namespace DiscUtils.Partitions
 
             // If no MicrosoftReserved partition, and no Microsoft Data partitions, and the disk
             // has a 'reasonable' size free, create a Microsoft Reserved partition.
-            if (allEntries.Count(e => e.PartitionType == GuidPartitionTypes.MicrosoftReserved) == 0
-                && allEntries.Count(e => e.PartitionType == GuidPartitionTypes.WindowsBasicData) == 0
+            if (CountEntries(allEntries, e => e.PartitionType == GuidPartitionTypes.MicrosoftReserved) == 0
+                && CountEntries(allEntries, e => e.PartitionType == GuidPartitionTypes.WindowsBasicData) == 0
                 && _diskGeometry.Capacity > 512 * 1024 * 1024)
             {
                 long reservedStart = FirstAvailableSector(allEntries);
@@ -562,6 +561,21 @@ namespace DiscUtils.Partitions
             }
 
             throw new IOException("No free partition entries available");
+        }
+
+        private static int CountEntries<T>(ICollection<T> values, Func<T, bool> pred)
+        {
+            int count = 0;
+
+            foreach (var val in values)
+            {
+                if (pred(val))
+                {
+                    ++count;
+                }
+            }
+
+            return count;
         }
 
     }

@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 
 namespace DiscUtils.Iso9660
@@ -169,7 +168,7 @@ namespace DiscUtils.Iso9660
         {
             if (_sortedMembers == null)
             {
-                List<BuildDirectoryMember> sorted = _members.Values.ToList();
+                List<BuildDirectoryMember> sorted = new List<BuildDirectoryMember>(_members.Values);
                 sorted.Sort(BuildDirectoryMember.SortedComparison);
                 _sortedMembers = sorted;
             }

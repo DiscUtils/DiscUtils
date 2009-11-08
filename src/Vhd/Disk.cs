@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 
 namespace DiscUtils.Vhd
 {
@@ -396,8 +395,10 @@ namespace DiscUtils.Vhd
         {
             get
             {
-                return from file in _files
-                       select (file.First as VirtualDiskLayer);
+                foreach (var file in _files)
+                {
+                    yield return (file.First as VirtualDiskLayer);
+                }
             }
         }
 

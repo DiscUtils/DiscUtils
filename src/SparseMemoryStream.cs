@@ -22,7 +22,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace DiscUtils
 {
@@ -189,8 +188,15 @@ namespace DiscUtils
                 int chunkSize = _buffer.ChunkSize;
                 return StreamExtent.Intersect(
                     bounds,
-                    from chunk in _buffer.AllocatedChunks
-                       select new StreamExtent(chunk * chunkSize, chunkSize));
+                    ChunksToExtents(_buffer.AllocatedChunks, chunkSize));
+            }
+        }
+
+        private IEnumerable<StreamExtent> ChunksToExtents(IEnumerable<int> chunks, int chunkSize)
+        {
+            foreach (var chunk in chunks)
+            {
+                yield return new StreamExtent(chunk * chunkSize, chunkSize);
             }
         }
     }

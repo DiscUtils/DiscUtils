@@ -28,7 +28,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiscUtils.BootConfig
 {
@@ -236,9 +235,10 @@ namespace DiscUtils.BootConfig
         {
             get
             {
-                return
-                    from el in _storage.EnumerateElements(_id)
-                    select new Element(_storage, _id, ApplicationType, el);
+                foreach (var el in _storage.EnumerateElements(_id))
+                {
+                    yield return new Element(_storage, _id, ApplicationType, el);
+                }
             }
         }
 

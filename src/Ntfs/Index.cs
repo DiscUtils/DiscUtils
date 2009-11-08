@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace DiscUtils.Ntfs
 {
@@ -112,15 +111,19 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return from entry in Enumerate(_rootNode)
-                       select new KeyValuePair<byte[],byte[]>(entry.KeyBuffer, entry.DataBuffer);
+                foreach(var entry in Enumerate(_rootNode))
+                {
+                    yield return new KeyValuePair<byte[],byte[]>(entry.KeyBuffer, entry.DataBuffer);
+                }
             }
         }
 
         public IEnumerable<KeyValuePair<byte[],byte[]>> FindAll(IComparable<byte[]> query)
         {
-            return from entry in FindAllIn(query, _rootNode)
-                   select new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
+            foreach (var entry in FindAllIn(query, _rootNode))
+            {
+                yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
+            }
         }
 
         public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)

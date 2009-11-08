@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -228,10 +227,15 @@ namespace DiscUtils.Iscsi
         /// <returns>The block-device LUNs</returns>
         public long[] GetBlockDeviceLuns()
         {
-            IEnumerable<long> luns =
-                from info in GetLuns()
-                where info.DeviceType == LunClass.BlockStorage
-                select (long)info.Lun;
+            List<long> luns = new List<long>();
+
+            foreach (var info in GetLuns())
+            {
+                if (info.DeviceType == LunClass.BlockStorage)
+                {
+                    luns.Add(info.Lun);
+                }
+            }
 
             return luns.ToArray();
         }

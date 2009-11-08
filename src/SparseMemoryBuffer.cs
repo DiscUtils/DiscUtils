@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiscUtils
 {
@@ -182,9 +181,9 @@ namespace DiscUtils
         {
             get
             {
-                return from entry in _buffers
-                       orderby entry.Key
-                       select entry.Key;
+                List<int> keys = new List<int>(_buffers.Keys);
+                keys.Sort();
+                return keys;
             }
         }
     }

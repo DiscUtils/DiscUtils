@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace DiscUtils.Vmdk
 {
@@ -304,8 +303,10 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                return from file in _files
-                       select (file.First as VirtualDiskLayer);
+                foreach (var file in _files)
+                {
+                    yield return (file.First as VirtualDiskLayer);
+                }
             }
         }
 
@@ -316,8 +317,10 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                return from file in _files
-                       select file.First;
+                foreach (var file in _files)
+                {
+                    yield return file.First;
+                }
             }
         }
 
