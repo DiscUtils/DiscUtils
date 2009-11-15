@@ -1,4 +1,4 @@
-$version = "0.7.0.0"
+$version = "0.8.0.0"
 
 foreach ($file in Get-ChildItem .\* -include AssemblyInfo.cs -recurse)
 {
