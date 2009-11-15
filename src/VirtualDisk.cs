@@ -115,6 +115,7 @@ namespace DiscUtils
         /// <summary>
         /// Reads the first sector of the disk, known as the Master Boot Record.
         /// </summary>
+        /// <remarks>The MBR as a byte array</remarks>
         public virtual byte[] GetMasterBootRecord()
         {
             byte[] sector = new byte[Sizes.Sector];
@@ -130,6 +131,7 @@ namespace DiscUtils
         /// <summary>
         /// Overwrites the first sector of the disk, known as the Master Boot Record.
         /// </summary>
+        /// <param name="data">The master boot record, must be 512 bytes in length.</param>
         public virtual void SetMasterBootRecord(byte[] data)
         {
             if (data == null)

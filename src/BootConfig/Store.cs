@@ -36,7 +36,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Initializes the store from a registry key.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">The registry key that is the root of the configuration database</param>
         public Store(RegistryKey key)
         {
             _store = new DiscUtilsRegistryStorage(key);
@@ -60,7 +60,7 @@ namespace DiscUtils.BootConfig
         /// Gets an object from the store.
         /// </summary>
         /// <param name="id">The identity of the object</param>
-        /// <returns></returns>
+        /// <returns>The requested object, or <c>null</c></returns>
         public BcdObject GetObject(Guid id)
         {
             if (_store.ObjectExists(id))
