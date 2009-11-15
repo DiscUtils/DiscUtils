@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -64,6 +64,7 @@
     <Compile Include="ClusterMap.cs" />
     <Compile Include="ConcatStream.cs" />
     <Compile Include="DataReader.cs" />
+    <Compile Include="DataWriter.cs" />
     <Compile Include="DiscDirectoryInfo.cs" />
     <Compile Include="DiscFileInfo.cs" />
     <Compile Include="DiscFileSystem.cs" />
@@ -176,6 +177,51 @@
     <Compile Include="LogicalDiskManager\VolumeRecord.cs" />
     <Compile Include="LogicalVolumeInfo.cs" />
     <Compile Include="MirrorStream.cs" />
+    <Compile Include="Nfs\Nfs3AccessPermissions.cs" />
+    <Compile Include="Nfs\Nfs3AccessResult.cs" />
+    <Compile Include="Nfs\Nfs3Client.cs" />
+    <Compile Include="Nfs\Nfs3CreateResult.cs" />
+    <Compile Include="Nfs\Nfs3DirectoryEntry.cs" />
+    <Compile Include="Nfs\Nfs3Exception.cs" />
+    <Compile Include="Nfs\Nfs3FileStream.cs" />
+    <Compile Include="Nfs\Nfs3FileSystemInfo.cs" />
+    <Compile Include="Nfs\Nfs3FileSystemProperties.cs" />
+    <Compile Include="Nfs\Nfs3.cs" />
+    <Compile Include="Nfs\Nfs3FileAttributes.cs" />
+    <Compile Include="Nfs\Nfs3FileTime.cs" />
+    <Compile Include="Nfs\Nfs3FileType.cs" />
+    <Compile Include="Nfs\Nfs3LookupResult.cs" />
+    <Compile Include="Nfs\Nfs3Mount.cs" />
+    <Compile Include="Nfs\Nfs3FileHandle.cs" />
+    <Compile Include="Nfs\Nfs3Export.cs" />
+    <Compile Include="Nfs\Nfs3MountResult.cs" />
+    <Compile Include="Nfs\Nfs3ReadDirPlusResult.cs" />
+    <Compile Include="Nfs\Nfs3ReadResult.cs" />
+    <Compile Include="Nfs\Nfs3SetAttributes.cs" />
+    <Compile Include="Nfs\Nfs3SetAttributesResult.cs" />
+    <Compile Include="Nfs\Nfs3WeakCacheConsistency.cs" />
+    <Compile Include="Nfs\Nfs3WriteResult.cs" />
+    <Compile Include="Nfs\NfsFileSystem.cs" />
+    <Compile Include="Nfs\NfsFileSystemOptions.cs" />
+    <Compile Include="Nfs\PortMapper.cs" />
+    <Compile Include="Nfs\RpcAcceptedReplyHeader.cs" />
+    <Compile Include="Nfs\RpcAuthentication.cs" />
+    <Compile Include="Nfs\RpcCall.cs" />
+    <Compile Include="Nfs\RpcCallHeader.cs" />
+    <Compile Include="Nfs\RpcClient.cs" />
+    <Compile Include="Nfs\RpcCredentials.cs" />
+    <Compile Include="Nfs\RpcException.cs" />
+    <Compile Include="Nfs\RpcMessageHeader.cs" />
+    <Compile Include="Nfs\RpcMismatchInfo.cs" />
+    <Compile Include="Nfs\RpcNullCall.cs" />
+    <Compile Include="Nfs\RpcProgram.cs" />
+    <Compile Include="Nfs\RpcRejectedReplyHeader.cs" />
+    <Compile Include="Nfs\RpcReply.cs" />
+    <Compile Include="Nfs\RpcReplyHeader.cs" />
+    <Compile Include="Nfs\RpcTcpTransport.cs" />
+    <Compile Include="Nfs\RpcUnixCredential.cs" />
+    <Compile Include="Nfs\XdrDataReader.cs" />
+    <Compile Include="Nfs\XdrDataWriter.cs" />
     <Compile Include="Ntfs\AttributeDefinitionRecord.cs" />
     <Compile Include="Ntfs\AttributeDefinitions.cs" />
     <Compile Include="Ntfs\AttributeList.cs" />
@@ -290,6 +336,7 @@
     <Compile Include="SubStream.cs" />
     <Compile Include="ThreadSafeStream.cs" />
     <Compile Include="Tuple.cs" />
+    <Compile Include="UnixFilePermissions.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskFactory.cs" />

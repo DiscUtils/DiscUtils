@@ -52,6 +52,7 @@ namespace DiscUtils
         }
 
         public abstract ushort ReadUInt16();
+        public abstract int ReadInt32();
         public abstract uint ReadUInt32();
         public abstract long ReadInt64();
         public abstract ulong ReadUInt64();
@@ -72,6 +73,11 @@ namespace DiscUtils
             return Utilities.ToUInt16LittleEndian(Utilities.ReadFully(_stream, 2), 0);
         }
 
+        public override int ReadInt32()
+        {
+            return Utilities.ToInt32LittleEndian(Utilities.ReadFully(_stream, 4), 0);
+        }
+
         public override uint ReadUInt32()
         {
             return Utilities.ToUInt32LittleEndian(Utilities.ReadFully(_stream, 4), 0);
@@ -85,6 +91,43 @@ namespace DiscUtils
         public override ulong ReadUInt64()
         {
             return Utilities.ToUInt64LittleEndian(Utilities.ReadFully(_stream, 8), 0);
+        }
+
+        public override byte[] ReadBytes(int count)
+        {
+            return Utilities.ReadFully(_stream, count);
+        }
+    }
+
+    internal class BigEndianDataReader : DataReader
+    {
+        public BigEndianDataReader(Stream stream)
+            : base(stream)
+        { }
+
+        public override ushort ReadUInt16()
+        {
+            return Utilities.ToUInt16BigEndian(Utilities.ReadFully(_stream, 2), 0);
+        }
+
+        public override int ReadInt32()
+        {
+            return Utilities.ToInt32BigEndian(Utilities.ReadFully(_stream, 4), 0);
+        }
+
+        public override uint ReadUInt32()
+        {
+            return Utilities.ToUInt32BigEndian(Utilities.ReadFully(_stream, 4), 0);
+        }
+
+        public override long ReadInt64()
+        {
+            return Utilities.ToInt64BigEndian(Utilities.ReadFully(_stream, 8), 0);
+        }
+
+        public override ulong ReadUInt64()
+        {
+            return Utilities.ToUInt64BigEndian(Utilities.ReadFully(_stream, 8), 0);
         }
 
         public override byte[] ReadBytes(int count)
