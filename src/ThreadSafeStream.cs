@@ -35,12 +35,14 @@ namespace DiscUtils
     /// only a single operation is executing on the wrapped stream at any time.</para>
     /// <para>This example shows the pattern of use:</para>
     /// <example>
+    /// <code>
     /// SparseStream baseStream = ...;
     /// ThreadSafeStream tss = new ThreadSafeStream(baseStream);
     /// for(int i = 0; i &lt; 10; ++i)
     /// {
     ///   SparseStream streamForThread = tss.OpenView();
     /// }
+    /// </code>
     /// </example>
     /// <para>This results in 11 streams that can be used in different streams - <c>tss</c> and ten 'views' created from <c>tss</c>.</para>
     /// <para>Note, the stream length cannot be changed.</para>
