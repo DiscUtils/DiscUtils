@@ -12,7 +12,7 @@ New-Item -path "${basedir}" -name "layout" -type directory | out-null
 
 
 # Create the source zip
-& $svn export -r HEAD "${basedir}" "${basedir}\layout\src"
+& $svn export -r BASE "${basedir}" "${basedir}\layout\src"
 pushd layout\src
 & $zip a -r -tzip  "${basedir}\layout\DiscUtilsSrc-${ver}.zip" "*.*"
 popd

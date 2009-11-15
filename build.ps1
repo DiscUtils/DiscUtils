@@ -4,6 +4,13 @@ $basedir = "$pwd"
 $utilsdir = "C:\utils"
 $msbuild = "c:\windows\Microsoft.NET\Framework\v3.5\msbuild.exe"
 $vcsexpress = "C:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\VCSExpress.exe"
+$signingkey = "${pwd}\DiscUtilsSigningKey.snk"
+
+if(-not (Test-Path $signingkey))
+{
+  Write-Host "Signing key missing"
+  Exit
+}
 
 # Clean up
 del ${basedir}\help -recurse -force | out-null
