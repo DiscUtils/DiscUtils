@@ -176,6 +176,8 @@ namespace DiscUtils.Nfs
                 Nfs3SetAttributes setAttrs = new Nfs3SetAttributes();
                 setAttrs.Mode = NfsOptions.NewFilePermissions;
                 setAttrs.SetMode = true;
+                setAttrs.Size = 0;
+                setAttrs.SetSize = true;
                 Nfs3FileHandle handle = _client.Create(parent, Utilities.GetFileFromPath(path), mode != FileMode.Create, setAttrs);
 
                 return new Nfs3FileStream(_client, handle, access);
