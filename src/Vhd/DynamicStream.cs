@@ -174,24 +174,66 @@ namespace DiscUtils.Vhd
                 {
                     int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
                     int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
-                    int toRead = Math.Min(maxToRead - numRead, 512 - offsetInSector);
+                    int toRead = (int)Math.Min(maxToRead - numRead, _dynamicHeader.BlockSize - offsetInBlock);//512 - offsetInSector);
 
-                    byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
-                    if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
+                    if (offsetInSector != 0 || toRead < Utilities.SectorSize)
                     {
-                        _fileStream.Position = (((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize + offsetInSector;
-                        if (Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
+                        byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
                         {
-                            throw new IOException("Failed to read entire sector");
+                            _fileStream.Position = (((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize + offsetInSector;
+                            if (Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
+                            {
+                                throw new IOException("Failed to read entire sector");
+                            }
                         }
+                        else
+                        {
+                            _parentStream.Position = _position;
+                            Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
+                        }
+                        numRead += toRead;
+                        _position += toRead;
                     }
                     else
                     {
-                        _parentStream.Position = _position;
-                        Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
+                        // Processing at least one whole sector, read as many as possible
+                        int toReadSectors = toRead / Utilities.SectorSize;
+
+                        byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        bool readFromParent = ((_blockBitmaps[block][sectorInBlock / 8] & mask) == 0);
+
+                        int numSectors = 1;
+                        while (numSectors < toReadSectors)
+                        {
+                            mask = (byte)(1 << (7 - ((sectorInBlock + numSectors) % 8)));
+                            if (((_blockBitmaps[block][(sectorInBlock + numSectors) / 8] & mask) == 0) != readFromParent)
+                            {
+                                break;
+                            }
+
+                            ++numSectors;
+                        }
+
+                        toRead = numSectors * Utilities.SectorSize;
+
+                        if (readFromParent)
+                        {
+                            _parentStream.Position = _position;
+                            Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
+                        }
+                        else
+                        {
+                            _fileStream.Position = (((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize + _blockBitmapSize;
+                            if (Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
+                            {
+                                throw new IOException("Failed to read entire chunk");
+                            }
+                        }
+
+                        numRead += toRead;
+                        _position += toRead;
                     }
-                    numRead += toRead;
-                    _position += toRead;
                 }
                 else
                 {
