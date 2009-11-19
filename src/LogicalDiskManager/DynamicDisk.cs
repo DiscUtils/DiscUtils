@@ -107,19 +107,16 @@ namespace DiscUtils.LogicalDiskManager
 
         private TocBlock GetTableOfContents()
         {
-            byte[] buffer = new byte[1024];
-            for (int i = 0; i < _header.NumberOfToc; ++i)
+            byte[] buffer = new byte[_header.TocSizeLba * 512];
+            _disk.Content.Position = (_header.ConfigurationStartLba * 512) + (1 * _header.TocSizeLba * 512);
+
+            _disk.Content.Read(buffer, 0, buffer.Length);
+            TocBlock tocBlock = new TocBlock();
+            tocBlock.ReadFrom(buffer, 0);
+
+            if (tocBlock.Signature == "TOCBLOCK")
             {
-                _disk.Content.Position = (_header.ConfigurationStartLba * 512) + (i * 1024);
-
-                _disk.Content.Read(buffer, 0, buffer.Length);
-                TocBlock tocBlock = new TocBlock();
-                tocBlock.ReadFrom(buffer, 0);
-
-                if (tocBlock.Signature == "TOCBLOCK")
-                {
-                    return tocBlock;
-                }
+                return tocBlock;
             }
 
             return null;
@@ -140,8 +137,8 @@ namespace DiscUtils.LogicalDiskManager
             writer.WriteLine(linePrefix + "             Data Size: " + _header.DataSizeLba + " (Sectors)");
             writer.WriteLine(linePrefix + "   Configuration Start: " + _header.ConfigurationStartLba + " (Sectors)");
             writer.WriteLine(linePrefix + "    Configuration Size: " + _header.ConfigurationSizeLba + " (Sectors)");
-            writer.WriteLine(linePrefix + "        Number of TOCs: " + _header.NumberOfToc);
             writer.WriteLine(linePrefix + "              TOC Size: " + _header.TocSizeLba + " (Sectors)");
+            writer.WriteLine(linePrefix + "              Next TOC: " + _header.NextTocLba + " (Sectors)");
             writer.WriteLine(linePrefix + "     Number of Configs: " + _header.NumberOfConfigs);
             writer.WriteLine(linePrefix + "           Config Size: " + _header.ConfigurationSizeLba + " (Sectors)");
             writer.WriteLine(linePrefix + "        Number of Logs: " + _header.NumberOfLogs);

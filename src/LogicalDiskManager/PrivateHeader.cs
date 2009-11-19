@@ -42,8 +42,8 @@ namespace DiscUtils.LogicalDiskManager
         public long DataSizeLba; // 03 FF F7 C1
         public long ConfigurationStartLba; // 03 FF F8 00
         public long ConfigurationSizeLba; // 08 00
-        public long NumberOfToc;
         public long TocSizeLba;
+        public long NextTocLba;
         public long NumberOfConfigs;
         public long ConfigSizeLba;
         public long NumberOfLogs;
@@ -67,8 +67,8 @@ namespace DiscUtils.LogicalDiskManager
             DataSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x123);
             ConfigurationStartLba = Utilities.ToInt64BigEndian(buffer, offset + 0x12B);
             ConfigurationSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x133);
-            NumberOfToc = Utilities.ToInt64BigEndian(buffer, offset + 0x13B);
-            TocSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x143);
+            TocSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x13B);
+            NextTocLba = Utilities.ToInt64BigEndian(buffer, offset + 0x143);
 
             // These two may be reversed
             NumberOfConfigs = Utilities.ToInt32BigEndian(buffer, offset + 0x14B);
