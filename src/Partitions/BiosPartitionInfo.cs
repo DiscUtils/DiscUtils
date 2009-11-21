@@ -119,5 +119,13 @@ namespace DiscUtils.Partitions
         {
             get { return _record.Index; }
         }
+
+        /// <summary>
+        /// Gets value indicating the partition is a primary (rather than extended) partition.
+        /// </summary>
+        public bool IsPrimary
+        {
+            get { return PrimaryIndex >= 0; }
+        }
     }
 }
