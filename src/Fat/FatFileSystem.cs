@@ -287,7 +287,18 @@ namespace DiscUtils.Fat
         /// </summary>
         public override string VolumeLabel
         {
-            get { return _bsVolLab; }
+            get
+            {
+                long volId = _rootDir.FindVolumeId();
+                if (volId < 0)
+                {
+                    return _bsVolLab;
+                }
+                else
+                {
+                    return _rootDir.GetEntry(volId).NormalizedName;
+                }
+            }
         }
 
         /// <summary>

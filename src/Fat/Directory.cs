@@ -320,6 +320,20 @@ namespace DiscUtils.Fat
             }
         }
 
+        internal long FindVolumeId()
+        {
+            foreach (long id in _entries.Keys)
+            {
+                DirectoryEntry focus = _entries[id];
+                if ((focus.Attributes & FatAttributes.VolumeId) != 0)
+                {
+                    return id;
+                }
+            }
+
+            return -1;
+        }
+
         internal long FindEntryByNormalizedName(string name)
         {
             foreach(long id in _entries.Keys)
