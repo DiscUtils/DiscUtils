@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using NUnit.Framework;
 
 namespace DiscUtils.Iso9660
@@ -87,6 +88,25 @@ namespace DiscUtils.Iso9660
             CDReader reader = new CDReader(builder.Build(), true);
 
             Assert.AreEqual(3000, reader.Root.GetFiles().Length);
+        }
+
+        [Test]
+        public void HideVersions()
+        {
+            CDBuilder builder = new CDBuilder();
+            builder.UseJoliet = true;
+            builder.AddFile("FILE.TXT;1", new byte[] { });
+
+            MemoryStream ms = new MemoryStream();
+            SparseStream.Pump(builder.Build(), ms);
+
+            CDReader reader = new CDReader(ms, true, false);
+            Assert.AreEqual("\\FILE.TXT;1", reader.GetFiles("")[0]);
+            Assert.AreEqual("\\FILE.TXT;1", reader.GetFileSystemEntries("")[0]);
+
+            reader = new CDReader(ms, true, true);
+            Assert.AreEqual("\\FILE.TXT", reader.GetFiles("")[0]);
+            Assert.AreEqual("\\FILE.TXT", reader.GetFileSystemEntries("")[0]);
         }
     }
 }

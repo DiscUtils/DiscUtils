@@ -33,6 +33,7 @@ namespace DiscUtils.Iso9660
     public sealed class CDReader : ReadOnlyDiscFileSystem
     {
         private Stream _data;
+        private bool _hideVersions;
         private CommonVolumeDescriptor _volDesc;
         private List<PathTableRecord> _pathTable;
         private Dictionary<int,int> _pathTableFirstInParent;
@@ -43,8 +44,20 @@ namespace DiscUtils.Iso9660
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>
         public CDReader(Stream data, bool joliet)
+            : this(data, joliet, false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="data">The stream to read the ISO image from.</param>
+        /// <param name="joliet">Whether to read Joliet extensions.</param>
+        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files</param>
+        public CDReader(Stream data, bool joliet, bool hideVersions)
         {
             _data = data;
+            _hideVersions = hideVersions;
 
             long vdpos = 0x8000; // Skip lead-in
 
@@ -238,7 +251,7 @@ namespace DiscUtils.Iso9660
             {
                 if ((r.Flags & FileFlags.Directory) == 0)
                 {
-                    files.Add(Utilities.CombinePaths(path, r.FileIdentifier));
+                    files.Add(Utilities.CombinePaths(path, FormatFileName(r.FileIdentifier)));
                 }
             }
             return files.ToArray();
@@ -271,7 +284,14 @@ namespace DiscUtils.Iso9660
             {
                 if (!IsoUtilities.IsSpecialDirectory(r))
                 {
-                    results.Add(Utilities.CombinePaths(path, r.FileIdentifier));
+                    if ((r.Flags & FileFlags.Directory) == 0)
+                    {
+                        results.Add(Utilities.CombinePaths(path, FormatFileName(r.FileIdentifier)));
+                    }
+                    else
+                    {
+                        results.Add(Utilities.CombinePaths(path, r.FileIdentifier) + "\\");
+                    }
                 }
             }
             return results.ToArray();
@@ -476,6 +496,20 @@ namespace DiscUtils.Iso9660
             {
                 throw new DirectoryNotFoundException("No such directory: " + path);
             }
+        }
+
+        private string FormatFileName(string name)
+        {
+            if (_hideVersions)
+            {
+                int pos = name.LastIndexOf(';');
+                if (pos > 0)
+                {
+                    return name.Substring(0, pos);
+                }
+            }
+
+            return name;
         }
 
         private bool TryGetFileDirectoryRecord(string path, out DirectoryRecord result)
