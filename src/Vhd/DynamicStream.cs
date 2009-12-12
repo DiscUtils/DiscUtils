@@ -39,6 +39,8 @@ namespace DiscUtils.Vhd
         private uint[] _blockAllocationTable;
         private byte[][] _blockBitmaps;
         private int _blockBitmapSize;
+        private long _nextBlockStart;
+        private bool _newBlocksAllocated;
 
         public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, Ownership ownsParentStream)
         {
@@ -77,6 +79,15 @@ namespace DiscUtils.Vhd
             {
                 if (disposing)
                 {
+                    if (_newBlocksAllocated)
+                    {
+                        // Update the footer at the end of the file (if we allocated new blocks).
+                        _fileStream.Position = 0;
+                        byte[] footerData = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+                        _fileStream.Position = _nextBlockStart;
+                        _fileStream.Write(footerData, 0, footerData.Length);
+                    }
+
                     if (_ownsParentStream == Ownership.Dispose && _parentStream != null)
                     {
                         _parentStream.Dispose();
@@ -483,10 +494,29 @@ namespace DiscUtils.Vhd
             _fileStream.Position = _dynamicHeader.TableOffset;
             byte[] data = Utilities.ReadFully(_fileStream, _dynamicHeader.MaxTableEntries * 4);
 
+            uint lastBlockStartSector = 0;
+
             uint[] bat = new uint[_dynamicHeader.MaxTableEntries];
             for (int i = 0; i < _dynamicHeader.MaxTableEntries; ++i)
             {
-                bat[i] = Utilities.ToUInt32BigEndian(data, i * 4);
+                uint val = Utilities.ToUInt32BigEndian(data, i * 4);
+                if (val != uint.MaxValue && val >= lastBlockStartSector)
+                {
+                    lastBlockStartSector = val;
+                }
+
+                bat[i] = val;
+            }
+
+            if (lastBlockStartSector == 0)
+            {
+                // No blocks allocated yet, so infer it's at the end of the BAT
+                _nextBlockStart = Utilities.RoundUp(_fileStream.Position, Utilities.SectorSize);
+            }
+            else
+            {
+                // Currently at start of last block in file, move to just beyond that block
+                _nextBlockStart = (lastBlockStartSector * (long)Utilities.SectorSize) + _blockBitmapSize + _dynamicHeader.BlockSize;
             }
 
             _blockAllocationTable = bat;
@@ -519,18 +549,8 @@ namespace DiscUtils.Vhd
                 throw new ArgumentException("Attempt to allocate existing block");
             }
 
-            long newBlockStart = _fileStream.Length - 512;
-
-            _fileStream.Position = newBlockStart;
-            byte[] footer = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
-            if (Utilities.BytesToString(footer, 0, 8) != Footer.FileCookie)
-            {
-                // If the footer is invalid, assume it's just missing, so next block goes on
-                // end of file, and we need the copy from the front of the file to put on the
-                // end (after the new block)
-                newBlockStart = _fileStream.Length;
-                Utilities.ReadFully(_fileStream, footer, 0, Utilities.SectorSize);
-            }
+            _newBlocksAllocated = true;
+            long newBlockStart = _nextBlockStart;
 
             // Create and write new sector bitmap
             byte[] bitmap = new byte[_blockBitmapSize];
@@ -538,9 +558,11 @@ namespace DiscUtils.Vhd
             _fileStream.Write(bitmap, 0, _blockBitmapSize);
             _blockBitmaps[block] = bitmap;
 
-            // Write the new footer
-            _fileStream.Position = newBlockStart + _blockBitmapSize + _dynamicHeader.BlockSize;
-            _fileStream.Write(footer, 0, footer.Length);
+            _nextBlockStart += _blockBitmapSize + _dynamicHeader.BlockSize;
+            if (_fileStream.Length < _nextBlockStart)
+            {
+                _fileStream.SetLength(_nextBlockStart);
+            }
 
             // Update the BAT entry for the new block
             byte[] entryBuffer = new byte[4];
@@ -552,7 +574,6 @@ namespace DiscUtils.Vhd
 
         private void WriteBlockBitmap(long block)
         {
-            // Read in bitmap
             _fileStream.Position = ((long)_blockAllocationTable[block]) * Utilities.SectorSize;
             _fileStream.Write(_blockBitmaps[block], 0, _blockBitmapSize);
         }
