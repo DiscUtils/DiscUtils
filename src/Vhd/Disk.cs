@@ -425,6 +425,7 @@ namespace DiscUtils.Vhd
                         file = newFile;
                         _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
                         found = true;
+                        break;
                     }
                 }
 
