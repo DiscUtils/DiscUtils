@@ -238,8 +238,7 @@ namespace DiscUtils.Diagnostics
                 int result = _wrapped.Read(buffer, offset, count);
                 if (_active && _traceReads)
                 {
-                    StreamTraceRecord record = CreateAndAddRecord("READ", position, count);
-                    record.Result = result;
+                    CreateAndAddRecord("READ", position, count, result);
                 }
                 return result;
             }
@@ -247,9 +246,7 @@ namespace DiscUtils.Diagnostics
             {
                 if (_active && _traceReads)
                 {
-                    StreamTraceRecord record = CreateAndAddRecord("READ", position, count);
-                    record.Result = -1;
-                    record.ExceptionThrown = e;
+                    CreateAndAddRecord("READ", position, count, e);
                 }
                 throw;
             }
@@ -296,8 +293,7 @@ namespace DiscUtils.Diagnostics
             {
                 if (_active && _traceWrites)
                 {
-                    StreamTraceRecord record = CreateAndAddRecord("WRITE", position, count);
-                    record.ExceptionThrown = e;
+                    CreateAndAddRecord("WRITE", position, count, e);
                 }
                 throw;
             }
@@ -305,15 +301,39 @@ namespace DiscUtils.Diagnostics
 
         private StreamTraceRecord CreateAndAddRecord(string activity, long position, long count)
         {
+            return CreateAndAddRecord(activity, position, count, 0, null);
+        }
+
+        private StreamTraceRecord CreateAndAddRecord(string activity, long position, long count, int result)
+        {
+            return CreateAndAddRecord(activity, position, count, result, null);
+        }
+
+        private StreamTraceRecord CreateAndAddRecord(string activity, long position, long count, Exception e)
+        {
+            return CreateAndAddRecord(activity, position, count, -1, e);
+        }
+
+        private StreamTraceRecord CreateAndAddRecord(string activity, long position, long count, int result, Exception ex)
+        {
             StackTrace trace = (_captureStack ? new StackTrace(2, _captureStackFileDetails) : null);
             StreamTraceRecord record = new StreamTraceRecord(_records.Count, activity, position, trace);
             record.CountArg = count;
+            record.Result = result;
+            record.ExceptionThrown = ex;
             _records.Add(record);
 
             if (_fileOut != null)
             {
-                _fileOut.Write(record);
-                _fileOut.Write(trace.ToString());
+                _fileOut.WriteLine(record);
+                if (trace != null)
+                {
+                    _fileOut.Write(trace.ToString());
+                }
+                if (ex != null)
+                {
+                    _fileOut.WriteLine(ex);
+                }
                 _fileOut.Flush();
             }
             return record;
