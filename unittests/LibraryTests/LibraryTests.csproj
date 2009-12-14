@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockCacheTest.cs" />
     <Compile Include="BootConfig\BcdObjectTest.cs" />
     <Compile Include="BootConfig\ElementTest.cs" />
     <Compile Include="BootConfig\ElementValueTest.cs" />
