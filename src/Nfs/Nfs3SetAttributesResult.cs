@@ -23,9 +23,8 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3SetAttributesResult
+    internal class Nfs3SetAttributesResult : Nfs3CallResult
     {
-        public Nfs3Status Status { get; set; }
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
 
         public Nfs3SetAttributesResult(XdrDataReader reader)

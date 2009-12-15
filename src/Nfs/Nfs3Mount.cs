@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Nfs
 {
@@ -52,11 +53,18 @@ namespace DiscUtils.Nfs
 
         public List<Nfs3Export> Exports()
         {
-            RpcReply reply = DoSend(new ExportCall(_client.NextTransactionId()));
+            MemoryStream ms = new MemoryStream();
+            XdrDataWriter writer = StartCallMessage(ms, null, 5);
+
+            RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                ExportReply gpReply = new ExportReply(reply);
-                return gpReply.Exports;
+                List<Nfs3Export> exports = new List<Nfs3Export>();
+                while (reply.BodyReader.ReadBool())
+                {
+                    exports.Add(new Nfs3Export(reply.BodyReader));
+                }
+                return exports;
             }
             else
             {
@@ -66,15 +74,19 @@ namespace DiscUtils.Nfs
 
         public Nfs3MountResult Mount(string dirPath)
         {
-            RpcReply reply = DoSend(new MountCall(_client.NextTransactionId(), _client.Credentials, dirPath));
+            MemoryStream ms = new MemoryStream();
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 1);
+            writer.Write(dirPath);
+
+            RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                MountReply gpReply = new MountReply(reply);
-                if (gpReply.Status == Nfs3Status.Ok)
+                Nfs3Status status = (Nfs3Status)reply.BodyReader.ReadInt32();
+                if (status == Nfs3Status.Ok)
                 {
-                    return gpReply.MountResult;
+                    return new Nfs3MountResult(reply.BodyReader);
                 }
-                throw new Nfs3Exception(gpReply.Status);
+                throw new Nfs3Exception(status);
             }
             else
             {
@@ -82,73 +94,5 @@ namespace DiscUtils.Nfs
             }
         }
 
-
-
-        private class MountCall : RpcCall
-        {
-            private string _dirPath;
-
-            public MountCall(uint transaction, RpcCredentials credentials, string dirPath)
-                : base(transaction, credentials, ProgramIdentifier, ProgramVersion, 1)
-            {
-                _dirPath = dirPath;
-            }
-
-            public override void Write(XdrDataWriter writer)
-            {
-                base.Write(writer);
-                writer.Write(_dirPath);
-            }
-        }
-
-        private class MountReply
-        {
-            private RpcReplyHeader _header;
-
-            public Nfs3Status Status { get; set; }
-            public Nfs3MountResult MountResult { get; set; }
-
-            public MountReply(RpcReply reply)
-            {
-                _header = reply.Header.ReplyHeader;
-
-                Status = (Nfs3Status)reply.BodyReader.ReadInt32();
-                if (Status == Nfs3Status.Ok)
-                {
-                    MountResult = new Nfs3MountResult(reply.BodyReader);
-                }
-            }
-        }
-
-        private class ExportCall : RpcCall
-        {
-            public ExportCall(uint transaction)
-                : base(transaction, null, ProgramIdentifier, ProgramVersion, 5)
-            {
-            }
-
-            public override void Write(XdrDataWriter writer)
-            {
-                base.Write(writer);
-            }
-        }
-
-        private class ExportReply
-        {
-            private RpcReplyHeader _header;
-            public List<Nfs3Export> Exports { get; set; }
-
-            public ExportReply(RpcReply reply)
-            {
-                _header = reply.Header.ReplyHeader;
-
-                List<Nfs3Export> exports = new List<Nfs3Export>();
-                while (reply.BodyReader.ReadBool())
-                {
-                    exports.Add(new Nfs3Export(reply.BodyReader));
-                }
-                Exports = exports;
-            }
-        }
     }
 }

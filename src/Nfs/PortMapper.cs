@@ -21,6 +21,8 @@
 //
 
 
+using System.IO;
+
 namespace DiscUtils.Nfs
 {
     internal enum PortMapperProtocol
@@ -51,53 +53,21 @@ namespace DiscUtils.Nfs
 
         public int GetPort(int program, int version, PortMapperProtocol protocol)
         {
-            RpcReply reply = DoSend(new GetPortCall(_client.NextTransactionId(), ProgramVersion, (uint)program, (uint)version, protocol));
+            MemoryStream ms = new MemoryStream();
+            XdrDataWriter writer = StartCallMessage(ms, null, 3);
+            writer.Write(program);
+            writer.Write(version);
+            writer.Write((uint)protocol);
+            writer.Write((uint)0);
+
+            RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                GetPortReply gpReply = new GetPortReply(reply);
-                return (int)gpReply.Port;
+                return (int)reply.BodyReader.ReadUInt32();
             }
             else
             {
                 throw new RpcException(reply.Header.ReplyHeader);
-            }
-        }
-
-
-
-        private class GetPortCall : RpcCall
-        {
-            private uint _program;
-            private uint _version;
-            private PortMapperProtocol _protocol;
-
-            public GetPortCall(uint transaction, int portMapVersion, uint program, uint version, PortMapperProtocol protocol)
-                : base(transaction, null, ProgramIdentifier, portMapVersion, 3)
-            {
-                _program = program;
-                _version = version;
-                _protocol = protocol;
-            }
-
-            public override void Write(XdrDataWriter writer)
-            {
-                base.Write(writer);
-                writer.Write(_program);
-                writer.Write(_version);
-                writer.Write((uint)_protocol);
-                writer.Write((uint)0);
-            }
-        }
-
-        private class GetPortReply
-        {
-            private RpcReplyHeader _header;
-            public uint Port { get; set; }
-
-            public GetPortReply(RpcReply reply)
-            {
-                _header = reply.Header.ReplyHeader;
-                Port = reply.BodyReader.ReadUInt32();
             }
         }
     }

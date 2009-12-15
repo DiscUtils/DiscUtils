@@ -23,16 +23,11 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcNullCall : RpcCall
+    /// <summary>
+    /// Base class for all NFS result structures.
+    /// </summary>
+    internal abstract class Nfs3CallResult
     {
-        public RpcNullCall(uint transaction, int program, int version, uint procedure)
-            : base(transaction, null, program, version, procedure)
-        {
-        }
-
-        public override void Write(XdrDataWriter writer)
-        {
-            base.Write(writer);
-        }
+        public Nfs3Status Status { get; set; }
     }
 }

@@ -23,9 +23,8 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3CreateResult
+    internal class Nfs3CreateResult : Nfs3CallResult
     {
-        public Nfs3Status Status { get; set; }
         public Nfs3FileHandle FileHandle { get; set; }
         public Nfs3FileAttributes FileAttributes { get; set; }
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }

@@ -23,6 +23,9 @@
 
 namespace DiscUtils.Nfs
 {
+    /// <summary>
+    /// Base class for all RPC credentials.
+    /// </summary>
     public abstract class RpcCredentials
     {
         internal RpcCredentials()
@@ -33,6 +36,9 @@ namespace DiscUtils.Nfs
         internal abstract void Write(XdrDataWriter writer);
     }
 
+    /// <summary>
+    /// Null RPC credentials, for use with anonymous services / procedures.
+    /// </summary>
     public sealed class RpcNullCredentials : RpcCredentials
     {
 

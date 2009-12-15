@@ -30,10 +30,8 @@ namespace DiscUtils.Nfs
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
     [Serializable]
-    public class RpcException : IOException
+    public sealed class RpcException : IOException
     {
-        private RpcReplyHeader _reply;
-
         /// <summary>
         /// Creates a new instance.
         /// </summary>
@@ -48,7 +46,6 @@ namespace DiscUtils.Nfs
         internal RpcException(RpcReplyHeader reply)
             : base(GenerateMessage(reply))
         {
-            _reply = reply;
         }
 
         /// <summary>
@@ -75,7 +72,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">The streaming context</param>
-        protected RpcException(SerializationInfo info, StreamingContext context)
+        private RpcException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

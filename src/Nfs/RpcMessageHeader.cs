@@ -37,10 +37,6 @@ namespace DiscUtils.Nfs
         public RpcCallHeader CallHeader { get; set; }
         public RpcReplyHeader ReplyHeader { get; set; }
 
-        public RpcMessageHeader()
-        {
-        }
-
         public RpcMessageHeader(XdrDataReader reader)
         {
             TransactionId = reader.ReadUInt32();
@@ -51,13 +47,6 @@ namespace DiscUtils.Nfs
             }
 
             ReplyHeader = new RpcReplyHeader(reader);
-        }
-
-        public void Write(XdrDataWriter writer)
-        {
-            writer.Write(TransactionId);
-            writer.Write((int)RpcMessageType.Call);
-            CallHeader.Write(writer);
         }
 
         public bool IsSuccess

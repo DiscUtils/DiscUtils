@@ -23,9 +23,8 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3AccessResult
+    internal class Nfs3AccessResult : Nfs3CallResult
     {
-        public Nfs3Status Status { get; set; }
         public Nfs3FileAttributes ObjectAttributes { get; set; }
         public Nfs3AccessPermissions Access { get; set; }
 

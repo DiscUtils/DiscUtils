@@ -28,6 +28,7 @@ namespace DiscUtils.Nfs
     {
         protected RpcClient _client;
 
+        public const uint RpcVersion = 2;
         public abstract int Identifier { get; }
         public abstract int Version { get; }
 
@@ -38,7 +39,9 @@ namespace DiscUtils.Nfs
 
         public void NullProc()
         {
-            RpcReply reply = DoSend(new RpcNullCall(_client.NextTransactionId(), Identifier, Version, 0));
+            MemoryStream ms = new MemoryStream();
+            XdrDataWriter writer = StartCallMessage(ms, null, 0);
+            RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
                 return;
@@ -49,22 +52,35 @@ namespace DiscUtils.Nfs
             }
         }
 
-        internal RpcReply DoSend(RpcCall call)
+        protected RpcReply DoSend(MemoryStream ms)
         {
             RpcTcpTransport transport = _client.GetTransport(Identifier, Version);
 
-            MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = new XdrDataWriter(ms);
-
-            call.Write(writer);
             byte[] buffer = ms.ToArray();
-            transport.Send(buffer);
-
-            buffer = transport.Receive();
+            buffer = transport.Send(buffer);
 
             XdrDataReader reader = new XdrDataReader(new MemoryStream(buffer));
             RpcMessageHeader header = new RpcMessageHeader(reader);
             return new RpcReply() { Header = header, BodyReader = reader };
+        }
+
+        protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, uint procedure)
+        {
+            XdrDataWriter writer = new XdrDataWriter(ms);
+
+            writer.Write(_client.NextTransactionId());
+            writer.Write((int)RpcMessageType.Call);
+
+            RpcCallHeader hdr = new RpcCallHeader();
+            hdr.RpcVersion = RpcVersion;
+            hdr.Program = (uint)Identifier;
+            hdr.Version = (uint)Version;
+            hdr.Proc = procedure;
+            hdr.Credentials = new RpcAuthentication(credentials ?? new RpcNullCredentials());
+            hdr.Verifier = RpcAuthentication.Null();
+            hdr.Write(writer); 
+
+            return writer;
         }
     }
 }

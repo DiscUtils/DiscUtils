@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -27,13 +29,15 @@ using System.Threading;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcTcpTransport
+    internal sealed class RpcTcpTransport : IDisposable
     {
         private string _address;
         private int _port;
         private int _localPort;
         private Socket _socket;
-        private Stream _tcpStream;
+        private NetworkStream _tcpStream;
+
+        private const int RetryLimit = 20;
 
         public RpcTcpTransport(string address, int port)
             :this(address, port, 0)
@@ -47,51 +51,96 @@ namespace DiscUtils.Nfs
             _localPort = localPort;
         }
 
-        public void Send(byte[] message)
+        public void Dispose()
         {
-            bool sent = false;
-            while (!sent)
+            if (_tcpStream != null)
             {
-                while (_socket == null || !_socket.Connected)
+                _tcpStream.Dispose();
+                _tcpStream = null;
+            }
+            if (_socket != null)
+            {
+                _socket.Close();
+                _socket = null;
+            }
+        }
+
+        public byte[] Send(byte[] message)
+        {
+            int retries = 0;
+            Exception lastException = null;
+
+            byte[] response = null;
+            while (response == null && retries < RetryLimit)
+            {
+                while (retries < RetryLimit && (_socket == null || !_socket.Connected))
                 {
                     try
                     {
+                        if (_tcpStream != null)
+                        {
+                            _tcpStream.Close();
+                            _tcpStream = null;
+                        }
                         if (_socket != null)
                         {
                             _socket.Close();
+                            _socket = null;
                         }
 
                         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                        _socket.NoDelay = true;
                         if (_localPort != 0)
                         {
                             _socket.Bind(new IPEndPoint(0, _localPort));
                         }
                         _socket.Connect(_address, _port);
-                        _tcpStream = new NetworkStream(_socket, true);
+                        _tcpStream = new NetworkStream(_socket, false);
                     }
-                    catch
+                    catch(IOException connectException)
                     {
+                        retries++;
+                        lastException = connectException;
                         Thread.Sleep(1000);
                     }
                 }
 
-                try
+                if (_tcpStream != null)
                 {
-                    byte[] header = new byte[4];
-                    Utilities.WriteBytesBigEndian((uint)(0x80000000 | (uint)message.Length), header, 0);
-                    _tcpStream.Write(header, 0, 4);
-                    _tcpStream.Write(message, 0, message.Length);
-                    _tcpStream.Flush();
-                    sent = true;
-                }
-                catch
-                {
+                    try
+                    {
+                        byte[] header = new byte[4];
+                        Utilities.WriteBytesBigEndian((uint)(0x80000000 | (uint)message.Length), header, 0);
+                        _tcpStream.Write(header, 0, 4);
+                        _tcpStream.Write(message, 0, message.Length);
+                        _tcpStream.Flush();
+
+                        response = Receive();
+                    }
+                    catch (IOException sendReceiveException)
+                    {
+                        lastException = sendReceiveException;
+
+                        _tcpStream.Close();
+                        _tcpStream = null;
+                        _socket.Close();
+                        _socket = null;
+                    }
+
+                    retries++;
                 }
             }
+
+            if (response == null)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to send RPC message to {0}:{1}", _address, _port), lastException);
+            }
+
+            return response;
         }
 
-        public byte[] Receive()
+        private byte[] Receive()
         {
             MemoryStream ms = null;
             bool lastFragFound = false;

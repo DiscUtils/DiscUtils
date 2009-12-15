@@ -24,20 +24,30 @@ using System;
 
 namespace DiscUtils.Nfs
 {
+    /// <summary>
+    /// RPC credentials used for accessing an access-controlled server.
+    /// </summary>
+    /// <remarks>Note there is no server-side authentication with these credentials,
+    /// instead the client is assumed to be trusted.</remarks>
     public sealed class RpcUnixCredential : RpcCredentials
     {
-        private int _stamp;
         private string _machineName;
         private int _uid;
         private int _gid;
         private int[] _gids;
 
-        public RpcUnixCredential(int uid, int gid, int[] gids)
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="user">The user's unique id (UID)</param>
+        /// <param name="primaryGroup">The user's primary group id (GID)</param>
+        /// <param name="groups">The user's supplementary group ids</param>
+        public RpcUnixCredential(int user, int primaryGroup, int[] groups)
         {
             _machineName = Environment.MachineName;
-            _uid = uid;
-            _gid = gid;
-            _gids = gids;
+            _uid = user;
+            _gid = primaryGroup;
+            _gids = groups;
         }
 
         internal override RpcAuthFlavour AuthFlavour
@@ -47,7 +57,7 @@ namespace DiscUtils.Nfs
 
         internal override void Write(XdrDataWriter writer)
         {
-            writer.Write(_stamp);
+            writer.Write((int)0);
             writer.Write(_machineName);
             writer.Write(_uid);
             writer.Write(_gid);

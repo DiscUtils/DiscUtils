@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class RpcClient
+    internal sealed class RpcClient : IDisposable
     {
         private string _serverAddress;
         private RpcCredentials _credential;
@@ -38,6 +38,18 @@ namespace DiscUtils.Nfs
             _credential = credential;
             _nextTransaction = (uint)new Random().Next();
             _transports[PortMapper.ProgramIdentifier] = new RpcTcpTransport(address, 111);
+        }
+
+        public void Dispose()
+        {
+            if (_transports != null)
+            {
+                foreach (var transport in _transports.Values)
+                {
+                    transport.Dispose();
+                }
+                _transports = null;
+            }
         }
 
         internal uint NextTransactionId()

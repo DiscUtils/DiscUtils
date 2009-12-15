@@ -30,7 +30,7 @@ namespace DiscUtils.Nfs
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
     [Serializable]
-    public class Nfs3Exception : IOException
+    public sealed class Nfs3Exception : IOException
     {
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">The streaming context</param>
-        protected Nfs3Exception(SerializationInfo info, StreamingContext context)
+        private Nfs3Exception(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
@@ -90,55 +90,55 @@ namespace DiscUtils.Nfs
                     return "No such file or directory";
                 case Nfs3Status.IoError:
                     return "Hardware I/O error";
-                case Nfs3Status.NFS3ERR_NXIO:
+                case Nfs3Status.NoSuchDeviceOrAddress:
                     return "I/O error - no such device or address";
                 case Nfs3Status.AccessDenied:
                     return "Permission denied";
-                case Nfs3Status.NFS3ERR_EXIST:
+                case Nfs3Status.FileExists:
                     return "File exists";
-                case Nfs3Status.NFS3ERR_XDEV:
+                case Nfs3Status.AttemptedCrossDeviceHardLink:
                     return "Attempted cross-device hard link";
-                case Nfs3Status.NFS3ERR_NODEV:
+                case Nfs3Status.NoSuchDevice:
                     return "No such device";
                 case Nfs3Status.NotDirectory:
                     return "Not a directory";
-                case Nfs3Status.NFS3ERR_ISDIR:
+                case Nfs3Status.IsADirectory:
                     return "Is a directory";
                 case Nfs3Status.InvalidArgument:
                     return "Invalid or unsupported argument";
-                case Nfs3Status.NFS3ERR_FBIG:
+                case Nfs3Status.FileTooLarge:
                     return "File too large";
-                case Nfs3Status.NFS3ERR_NOSPC:
+                case Nfs3Status.NoSpaceAvailable:
                     return "No space left on device";
-                case Nfs3Status.NFS3ERR_ROFS:
+                case Nfs3Status.ReadOnlyFilesystem:
                     return "Read-only file system";
-                case Nfs3Status.NFS3ERR_MLINK:
+                case Nfs3Status.TooManyHardLinks:
                     return "Too many hard links";
                 case Nfs3Status.NameTooLong:
                     return "Name too long";
-                case Nfs3Status.NFS3ERR_NOTEMPTY:
+                case Nfs3Status.DirectoryNotEmpty:
                     return "Directory not empty";
-                case Nfs3Status.NFS3ERR_DQUOT:
+                case Nfs3Status.QuotaHardLimitExceeded:
                     return "Quota hard limit exceeded";
-                case Nfs3Status.NFS3ERR_STALE:
+                case Nfs3Status.StaleFileHandle:
                     return "Invalid (stale) file handle";
-                case Nfs3Status.NFS3ERR_REMOTE:
+                case Nfs3Status.TooManyRemoteAccessLevels:
                     return "Too many levels of remote access";
-                case Nfs3Status.NFS3ERR_BADHANDLE:
+                case Nfs3Status.BadFileHandle:
                     return "Illegal NFS file handle";
-                case Nfs3Status.NFS3ERR_NOT_SYNC:
+                case Nfs3Status.UpdateSynchronizationError:
                     return "Update synchronization error";
-                case Nfs3Status.NFS3ERR_BAD_COOKIE:
+                case Nfs3Status.StaleCookie:
                     return "Read directory cookie stale";
                 case Nfs3Status.NotSupported:
                     return "Operation is not supported";
-                case Nfs3Status.NFS3ERR_TOOSMALL:
+                case Nfs3Status.TooSmall:
                     return "Buffer or request is too small";
                 case Nfs3Status.ServerFault:
                     return "Server fault";
-                case Nfs3Status.NFS3ERR_BADTYPE:
+                case Nfs3Status.BadType:
                     return "Server doesn't support object type";
-                case Nfs3Status.NFS3ERR_JUKEBOX:
+                case Nfs3Status.SlowJukeBox:
                     return "Unable to complete in timely fashion";
                 default:
                     return "Unknown error: " + status;

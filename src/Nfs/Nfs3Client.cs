@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3Client
+    internal sealed class Nfs3Client : IDisposable
     {
         private RpcClient _rpcClient;
         private Nfs3Mount _mountClient;
@@ -42,8 +42,20 @@ namespace DiscUtils.Nfs
             _rootHandle = _mountClient.Mount(mountPoint).FileHandle;
 
             _nfsClient = new Nfs3(_rpcClient);
-            _fsInfo = _nfsClient.FileSystemInfo(_rootHandle);
+
+            Nfs3FileSystemInfoResult fsiResult = _nfsClient.FileSystemInfo(_rootHandle);
+            _fsInfo = fsiResult.FileSystemInfo;
             _cachedAttributes = new Dictionary<Nfs3FileHandle, Nfs3FileAttributes>();
+            _cachedAttributes[_rootHandle] = fsiResult.PostOpAttributes;
+        }
+
+        public void Dispose()
+        {
+            if (_rpcClient != null)
+            {
+                _rpcClient.Dispose();
+                _rpcClient = null;
+            }
         }
 
         public Nfs3FileHandle RootHandle

@@ -23,9 +23,8 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3WriteResult
+    internal class Nfs3WriteResult : Nfs3CallResult
     {
-        public Nfs3Status Status { get; set; }
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
         public int Count { get; set; }
         public int HowCommitted { get; set; }

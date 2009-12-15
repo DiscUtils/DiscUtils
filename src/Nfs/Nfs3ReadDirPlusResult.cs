@@ -24,9 +24,8 @@ using System.Collections.Generic;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3ReadDirPlusResult
+    internal class Nfs3ReadDirPlusResult : Nfs3CallResult
     {
-        public Nfs3Status Status { get; set; }
         public Nfs3FileAttributes DirAttributes { get; set; }
         public byte[] CookieVerifier { get; set; }
         public List<Nfs3DirectoryEntry> DirEntries { get; set; }

@@ -23,28 +23,22 @@
 
 namespace DiscUtils.Nfs
 {
-    internal abstract class RpcCall
+    internal class Nfs3FileSystemInfoResult : Nfs3CallResult
     {
-        public const uint RpcVersion = 2;
+        public Nfs3FileAttributes PostOpAttributes { get; set; }
+        public Nfs3FileSystemInfo FileSystemInfo { get; set; }
 
-        public RpcMessageHeader MessageHeader { get; set; }
-
-        public RpcCall(uint transaction, RpcCredentials credentials, int program, int version, uint procedure)
+        public Nfs3FileSystemInfoResult(XdrDataReader reader)
         {
-            RpcCallHeader hdr = new RpcCallHeader();
-            hdr.RpcVersion = RpcVersion;
-            hdr.Program = (uint)program;
-            hdr.Version = (uint)version;
-            hdr.Proc = procedure;
-            hdr.Credentials = new RpcAuthentication(credentials ?? new RpcNullCredentials());
-            hdr.Verifier = RpcAuthentication.Null();
-
-            MessageHeader = new RpcMessageHeader() { TransactionId = transaction, CallHeader = hdr };
-        }
-
-        public virtual void Write(XdrDataWriter writer)
-        {
-            MessageHeader.Write(writer);
+            Status = (Nfs3Status)reader.ReadInt32();
+            if (reader.ReadBool())
+            {
+                PostOpAttributes = new Nfs3FileAttributes(reader);
+            }
+            if (Status == Nfs3Status.Ok)
+            {
+                FileSystemInfo = new Nfs3FileSystemInfo(reader);
+            }
         }
     }
 }
