@@ -33,21 +33,6 @@ namespace DiscUtils
             _stream = stream;
         }
 
-        public long Position
-        {
-            get { return _stream.Position; }
-        }
-
-        public long Length
-        {
-            get { return _stream.Length; }
-        }
-
-        public void Skip(int bytes)
-        {
-            WriteBytes(new byte[bytes]);
-        }
-
         public abstract void Write(ushort value);
         public abstract void Write(int value);
         public abstract void Write(uint value);
