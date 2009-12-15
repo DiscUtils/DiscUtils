@@ -30,7 +30,7 @@
     <BuildLogFile>
     </BuildLogFile>
     <HelpFileFormat>HtmlHelp1x</HelpFileFormat>
-    <FrameworkVersion>3.5</FrameworkVersion>
+    <FrameworkVersion>2.0.50727</FrameworkVersion>
     <HelpTitle>DiscUtils Class Library</HelpTitle>
     <CopyrightText>Copyright %28c%29 Kenneth Bell, 2008-2009</CopyrightText>
     <FooterText>Free software released under the MIT license, see http://discutils.codeplex.com</FooterText>
@@ -41,22 +41,23 @@
     </DocumentationSources>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />
-<NamespaceSummaryItem name="DiscUtils" isDocumented="True">Shared classes common to multiple file systems.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Fat" isDocumented="True">Classes to access and modify disks formatted with a FAT file system.  FAT12, FAT16 and FAT32 are supported.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Iscsi" isDocumented="True">Provides read/write access to disk images available over iSCSI, supporting CHAP authentication.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Iso9660" isDocumented="True">Classes to create and read ISO 9660 (aka CDROM) disc images.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Ntfs" isDocumented="True">Classes providing read-only access to NTFS file systems.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Partitions" isDocumented="True">Classes to initialize, access and modify hard disk partition tables.  Currently, only legacy BIOS-style partition tables are fully supported (GUID Partition Tables are read-only).</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Registry" isDocumented="True">Provides read/write access to NT-style registry hives.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Sdi" isDocumented="True">Classes to access the contents of Simple Deployment Image (SDI) files.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Vdi" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VirtualBox .vdi format.  Fixed and Dynamic disks are currently supported.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Vhd" isDocumented="True">Classes to create, read and modify virtual hard-disks in the Microsoft VHD format.  Fixed, Dynamic and Differencing disks are supported.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Vmdk" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VMWare VMDK format.  Most disk forms (dynamic, static, etc) are supported.  Stream optimized disks can be read from a seekable stream, but can not be read as a sequential stream, nor written to.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Wim" isDocumented="True">Classes to read Windows Image File Format (WIM) files.  Only LZX (i.e. maximum) compression is supported, and files are read-only.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Xva" isDocumented="True">Classes to create and read virtual hard-disks held within a XenServer Virtual Appliance (XVA).  Disks cannot be directly modified within an XVA itself.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Raw" isDocumented="True">Classes to access the contents of raw disk images (IMG, IMA, FLP, VFD file extensions).</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.LogicalDiskManager" isDocumented="True">Classes to access Windows logical volumes inside a disk, created using Logical Disk Manager - these are also known as 'dynamic disks'.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.BootConfig" isDocumented="True">Classes to access and modify a Windows Boot Configuration Database (BCD), that controls the Windows boot process.</NamespaceSummaryItem></NamespaceSummaries>
+      <NamespaceSummaryItem name="DiscUtils" isDocumented="True">Shared classes common to multiple file systems.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Fat" isDocumented="True">Classes to access and modify disks formatted with a FAT file system.  FAT12, FAT16 and FAT32 are supported.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Iscsi" isDocumented="True">Provides read/write access to disk images available over iSCSI, supporting CHAP authentication.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Iso9660" isDocumented="True">Classes to create and read ISO 9660 (aka CDROM) disc images.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Ntfs" isDocumented="True">Classes providing read-only access to NTFS file systems.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Partitions" isDocumented="True">Classes to initialize, access and modify hard disk partition tables.  Currently, only legacy BIOS-style partition tables are fully supported (GUID Partition Tables are read-only).</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Registry" isDocumented="True">Provides read/write access to NT-style registry hives.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Sdi" isDocumented="True">Classes to access the contents of Simple Deployment Image (SDI) files.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Vdi" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VirtualBox .vdi format.  Fixed and Dynamic disks are currently supported.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Vhd" isDocumented="True">Classes to create, read and modify virtual hard-disks in the Microsoft VHD format.  Fixed, Dynamic and Differencing disks are supported.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Vmdk" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VMWare VMDK format.  Most disk forms (dynamic, static, etc) are supported.  Stream optimized disks can be read from a seekable stream, but can not be read as a sequential stream, nor written to.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Wim" isDocumented="True">Classes to read Windows Image File Format (WIM) files.  Only LZX (i.e. maximum) compression is supported, and files are read-only.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Xva" isDocumented="True">Classes to create and read virtual hard-disks held within a XenServer Virtual Appliance (XVA).  Disks cannot be directly modified within an XVA itself.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Raw" isDocumented="True">Classes to access the contents of raw disk images (IMG, IMA, FLP, VFD file extensions).</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.LogicalDiskManager" isDocumented="True">Classes to access Windows logical volumes inside a disk, created using Logical Disk Manager - these are also known as 'dynamic disks'.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.BootConfig" isDocumented="True">Classes to access and modify a Windows Boot Configuration Database (BCD), that controls the Windows boot process.</NamespaceSummaryItem>
+    </NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
   </PropertyGroup>
   <!-- There are no properties for these two groups but they need to appear in
