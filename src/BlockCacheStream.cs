@@ -114,6 +114,18 @@ namespace DiscUtils
         public long ReadCacheMisses { get; internal set; }
 
         /// <summary>
+        /// The number of requested unaligned writes.
+        /// </summary>
+        /// <remarks>Unaligned writes are writes where the write doesn't start on a multiple of
+        /// the block size.</remarks>
+        public long UnalignedWritesIn { get; internal set; }
+
+        /// <summary>
+        /// The total number of requested writes.
+        /// </summary>
+        public long TotalWritesIn { get; internal set; }
+
+        /// <summary>
         /// The number of free blocks in the read cache.
         /// </summary>
         public int FreeReadBlocks { get; internal set; }
@@ -187,6 +199,10 @@ namespace DiscUtils
             CreateBlocks();
         }
 
+        /// <summary>
+        /// Disposes of this instance, freeing up associated resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if invoked from <c>Dispose</c>, else <c>false</c>.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -481,6 +497,8 @@ namespace DiscUtils
         {
             CheckDisposed();
 
+            _stats.TotalWritesIn++;
+
             long startPos = _position;
 
             if (_position + count > Length)
@@ -505,8 +523,15 @@ namespace DiscUtils
             }
 
 
-            // For each block touched, if it's cached, update it
             int offsetInNextBlock = (int)(_position % blockSize);
+
+            if (offsetInNextBlock != 0)
+            {
+                _stats.UnalignedWritesIn++;
+            }
+
+
+            // For each block touched, if it's cached, update it
             int bytesProcessed = 0;
             for (int i = 0; i < numBlocks; ++i)
             {
