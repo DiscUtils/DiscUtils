@@ -31,24 +31,7 @@ namespace LibraryTests
         [STAThread]
         static void Main(string[] args)
         {
-            AppDomainSetup domSetup = new AppDomainSetup();
-            domSetup.ApplicationBase = @"C:\Program Files\NUnit 2.5\";
-            domSetup.PrivateBinPath = @"C:\Program Files\NUnit 2.5\bin\net-2.0";
-
-            AppDomain dom = AppDomain.CreateDomain("Test Run", null, domSetup);
-
-            object invoker = dom.CreateInstanceFromAndUnwrap(typeof(Program).Assembly.Location, "LibraryTests.Invoker");
-            invoker.GetType().GetMethod("DoUnitTests").Invoke(invoker, new object[] { Assembly.GetExecutingAssembly().Location });
-
-        }
-    }
-
-    public class Invoker : MarshalByRefObject
-    {
-        public void DoUnitTests(string assembly)
-        {
-            ObjectHandle objHandle = Activator.CreateInstanceFrom(@"C:\Program Files\NUnit 2.5\bin\net-2.0\nunit-gui-runner.dll", "NUnit.Gui.AppEntry");
-            objHandle.Unwrap().GetType().GetMethod("Main").Invoke(objHandle.Unwrap(), new object[] { new string[] { assembly } });
+            NUnit.Gui.AppEntry.Main(new string[] { typeof(Program).Assembly.Location });
         }
     }
 }

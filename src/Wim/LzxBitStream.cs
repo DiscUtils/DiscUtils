@@ -34,7 +34,7 @@ namespace DiscUtils.Wim
     /// <para>It is strongly recommended to use some kind of in memory buffering (such as a
     /// BufferedStream) for the wrapped stream.  This class makes a large number of small
     /// reads.</para></remarks>
-    internal class LzxBitStream : BitStream
+    internal sealed class LzxBitStream : BitStream
     {
         private Stream _byteStream;
 
