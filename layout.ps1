@@ -1,4 +1,4 @@
-$ver = "0.7"
+$ver = "0.8"
 
 $basedir = "$pwd"
 $utilsdir = "C:\utils"
