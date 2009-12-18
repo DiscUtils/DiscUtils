@@ -34,7 +34,6 @@ namespace DiscUtils.Nfs
     internal class RpcMessageHeader
     {
         public uint TransactionId { get; set; }
-        public RpcCallHeader CallHeader { get; set; }
         public RpcReplyHeader ReplyHeader { get; set; }
 
         public RpcMessageHeader(XdrDataReader reader)
@@ -43,7 +42,7 @@ namespace DiscUtils.Nfs
             RpcMessageType type = (RpcMessageType)reader.ReadInt32();
             if (type != RpcMessageType.Reply)
             {
-                throw new NotImplementedException("Parsing call messages");
+                throw new NotSupportedException("Parsing RPC call messages");
             }
 
             ReplyHeader = new RpcReplyHeader(reader);

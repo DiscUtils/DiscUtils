@@ -46,22 +46,22 @@ namespace DiscUtils.Nfs
             _nseconds = (uint)((ticks % TicksPerSec) * TicksPerNanoSec);
         }
 
-        public Nfs3FileTime(TimeSpan timeSpan)
-        {
-            long ticks = timeSpan.Ticks;
-            _seconds = (uint)(ticks / TicksPerSec);
-            _nseconds = (uint)((ticks % TicksPerSec) * TicksPerNanoSec);
-        }
+        //public Nfs3FileTime(TimeSpan timeSpan)
+        //{
+        //    long ticks = timeSpan.Ticks;
+        //    _seconds = (uint)(ticks / TicksPerSec);
+        //    _nseconds = (uint)((ticks % TicksPerSec) * TicksPerNanoSec);
+        //}
 
         public DateTime ToDateTime()
         {
             return new DateTime((_seconds * TicksPerSec + (_nseconds / TicksPerNanoSec)) + NfsEpoch.Ticks);
         }
 
-        public TimeSpan ToTimeSpan()
-        {
-            return new TimeSpan(_seconds * TicksPerSec + (_nseconds / TicksPerNanoSec));
-        }
+        //public TimeSpan ToTimeSpan()
+        //{
+        //    return new TimeSpan(_seconds * TicksPerSec + (_nseconds / TicksPerNanoSec));
+        //}
 
         public void Write(XdrDataWriter writer)
         {

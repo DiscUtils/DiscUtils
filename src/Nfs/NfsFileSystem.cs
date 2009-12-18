@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -65,6 +66,23 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
+        /// Gets the folders exported by a server.
+        /// </summary>
+        /// <param name="address">The address of the server</param>
+        /// <returns>An enumeration of exported folders</returns>
+        public static IEnumerable<string> GetExports(string address)
+        {
+            using (RpcClient rpcClient = new RpcClient(address, null))
+            {
+                Nfs3Mount mountClient = new Nfs3Mount(rpcClient);
+                foreach (var export in mountClient.Exports())
+                {
+                    yield return export.DirPath;
+                }
+            }
+        }
+
+        /// <summary>
         /// The options controlling this instance.
         /// </summary>
         public NfsFileSystemOptions NfsOptions
@@ -96,7 +114,75 @@ namespace DiscUtils.Nfs
         /// <param name="overwrite">Whether to overwrite any existing file (true), or fail if such a file exists</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Nfs3FileHandle sourceParent = GetParentDirectory(sourceFile);
+                Nfs3FileHandle destParent = GetParentDirectory(destinationFile);
+
+                string sourceFileName = Utilities.GetFileFromPath(sourceFile);
+                string destFileName = Utilities.GetFileFromPath(destinationFile);
+
+                Nfs3FileHandle sourceFileHandle = _client.Lookup(sourceParent, sourceFileName);
+                if (sourceFileHandle == null)
+                {
+                    throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "The file '{0}' does not exist", sourceFile), sourceFile);
+                }
+
+                Nfs3FileAttributes sourceAttrs = _client.GetAttributes(sourceFileHandle);
+                if ((sourceAttrs.Type & Nfs3FileType.Directory) != 0)
+                {
+                    throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "The path '{0}' is not a file", sourceFile), sourceFile);
+                }
+
+                Nfs3FileHandle destFileHandle = _client.Lookup(destParent, destFileName);
+                if (destFileHandle != null)
+                {
+                    if (overwrite == false)
+                    {
+                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "The destination file '{0}' already exists", destinationFile));
+                    }
+                }
+
+                // Create the file, with temporary permissions
+                Nfs3SetAttributes setAttrs = new Nfs3SetAttributes();
+                setAttrs.Mode = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite;
+                setAttrs.SetMode = true;
+                setAttrs.Size = sourceAttrs.Size;
+                setAttrs.SetSize = true;
+                destFileHandle = _client.Create(destParent, destFileName, !overwrite, setAttrs);
+
+
+                // Copy the file contents
+                using(Nfs3FileStream sourceFs = new Nfs3FileStream(_client, sourceFileHandle, FileAccess.Read))
+                using (Nfs3FileStream destFs = new Nfs3FileStream(_client, destFileHandle, FileAccess.Write))
+                {
+                    int bufferSize = (int)Math.Max(1 * Sizes.OneMiB, Math.Min(_client.FileSystemInfo.WritePreferredBytes, _client.FileSystemInfo.ReadPreferredBytes));
+                    byte[] buffer = new byte[bufferSize];
+
+                    int numRead = sourceFs.Read(buffer, 0, bufferSize);
+                    while (numRead > 0)
+                    {
+                        destFs.Write(buffer, 0, numRead);
+                        numRead = sourceFs.Read(buffer, 0, bufferSize);
+                    }
+                }
+
+                // Set the new file's attributes based on the source file
+                setAttrs = new Nfs3SetAttributes();
+                setAttrs.Mode = sourceAttrs.Mode;
+                setAttrs.SetMode = true;
+                setAttrs.AccessTime = sourceAttrs.AccessTime;
+                setAttrs.SetAccessTime = Nfs3SetTimeMethod.ClientTime;
+                setAttrs.ModifyTime = sourceAttrs.ModifyTime;
+                setAttrs.SetModifyTime = Nfs3SetTimeMethod.ClientTime;
+                setAttrs.Gid = sourceAttrs.Gid;
+                setAttrs.SetGid = true;
+                _client.SetAttributes(destFileHandle, setAttrs);
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -105,7 +191,20 @@ namespace DiscUtils.Nfs
         /// <param name="path">The path of the directory to create</param>
         public override void CreateDirectory(string path)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Nfs3FileHandle parent = GetParentDirectory(path);
+
+                Nfs3SetAttributes setAttrs = new Nfs3SetAttributes();
+                setAttrs.Mode = NfsOptions.NewDirectoryPermissions;
+                setAttrs.SetMode = true;
+
+                _client.MakeDirectory(parent, Utilities.GetFileFromPath(path), setAttrs);
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -114,18 +213,23 @@ namespace DiscUtils.Nfs
         /// <param name="path">The directory to delete.</param>
         public override void DeleteDirectory(string path)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            if (handle != null && _client.GetAttributes(handle).Type != Nfs3FileType.Directory)
+            try
             {
-                throw new DirectoryNotFoundException("No such directory: " + path);
+                Nfs3FileHandle handle = GetFile(path);
+                if (handle != null && _client.GetAttributes(handle).Type != Nfs3FileType.Directory)
+                {
+                    throw new DirectoryNotFoundException("No such directory: " + path);
+                }
+
+                Nfs3FileHandle parent = GetParentDirectory(path);
+                if (handle != null)
+                {
+                    _client.RemoveDirectory(parent, Utilities.GetFileFromPath(path));
+                }
             }
-
-            string[] dirs = Utilities.GetDirectoryFromPath(path).Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
-
-            if (handle != null)
+            catch (Nfs3Exception ne)
             {
-                _client.Remove(parent, Utilities.GetFileFromPath(path));
+                throw ConvertNfsException(ne);
             }
         }
 
@@ -135,18 +239,23 @@ namespace DiscUtils.Nfs
         /// <param name="path">The path of the file to delete.</param>
         public override void DeleteFile(string path)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            if (handle != null && _client.GetAttributes(handle).Type == Nfs3FileType.Directory)
+            try
             {
-                throw new FileNotFoundException("No such file", path);
+                Nfs3FileHandle handle = GetFile(path);
+                if (handle != null && _client.GetAttributes(handle).Type == Nfs3FileType.Directory)
+                {
+                    throw new FileNotFoundException("No such file", path);
+                }
+
+                Nfs3FileHandle parent = GetParentDirectory(path);
+                if (handle != null)
+                {
+                    _client.Remove(parent, Utilities.GetFileFromPath(path));
+                }
             }
-
-            string[] dirs = Utilities.GetDirectoryFromPath(path).Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
-
-            if (handle != null)
+            catch (Nfs3Exception ne)
             {
-                _client.Remove(parent, Utilities.GetFileFromPath(path));
+                throw ConvertNfsException(ne);
             }
         }
 
@@ -180,11 +289,18 @@ namespace DiscUtils.Nfs
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+            try
+            {
+                Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
-            List<string> dirs = new List<string>();
-            DoSearch(dirs, _client.RootHandle, path, re, searchOption == SearchOption.AllDirectories, true, false);
-            return dirs.ToArray();
+                List<string> dirs = new List<string>();
+                DoSearch(dirs, _client.RootHandle, path, re, searchOption == SearchOption.AllDirectories, true, false);
+                return dirs.ToArray();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -197,11 +313,18 @@ namespace DiscUtils.Nfs
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+            try
+            {
+                Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
-            List<string> results = new List<string>();
-            DoSearch(results, _client.RootHandle, path, re, searchOption == SearchOption.AllDirectories, false, true);
-            return results.ToArray();
+                List<string> results = new List<string>();
+                DoSearch(results, _client.RootHandle, path, re, searchOption == SearchOption.AllDirectories, false, true);
+                return results.ToArray();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -211,11 +334,18 @@ namespace DiscUtils.Nfs
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx("*.*");
+            try
+            {
+                Regex re = Utilities.ConvertWildcardsToRegEx("*.*");
 
-            List<string> results = new List<string>();
-            DoSearch(results, _client.RootHandle, path, re, false, true, true);
-            return results.ToArray();
+                List<string> results = new List<string>();
+                DoSearch(results, _client.RootHandle, path, re, false, true, true);
+                return results.ToArray();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -227,11 +357,18 @@ namespace DiscUtils.Nfs
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
+            try
+            {
+                Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
-            List<string> results = new List<string>();
-            DoSearch(results, _client.RootHandle, path, re, false, true, true);
-            return results.ToArray();
+                List<string> results = new List<string>();
+                DoSearch(results, _client.RootHandle, path, re, false, true, true);
+                return results.ToArray();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -241,7 +378,32 @@ namespace DiscUtils.Nfs
         /// <param name="destinationDirectoryName">The target directory name.</param>
         public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Nfs3FileHandle sourceParent = GetParentDirectory(sourceDirectoryName);
+                Nfs3FileHandle destParent = GetParentDirectory(destinationDirectoryName);
+
+                string sourceName = Utilities.GetFileFromPath(sourceDirectoryName);
+                string destName = Utilities.GetFileFromPath(destinationDirectoryName);
+
+                Nfs3FileHandle fileHandle = _client.Lookup(sourceParent, sourceName);
+                if (fileHandle == null)
+                {
+                    throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", sourceDirectoryName));
+                }
+
+                Nfs3FileAttributes sourceAttrs = _client.GetAttributes(fileHandle);
+                if ((sourceAttrs.Type & Nfs3FileType.Directory) == 0)
+                {
+                    throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The path '{0}' is not a directory", sourceDirectoryName));
+                }
+
+                _client.Rename(sourceParent, sourceName, destParent, destName);
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -252,7 +414,38 @@ namespace DiscUtils.Nfs
         /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Nfs3FileHandle sourceParent = GetParentDirectory(sourceName);
+                Nfs3FileHandle destParent = GetParentDirectory(destinationName);
+
+                string sourceFileName = Utilities.GetFileFromPath(sourceName);
+                string destFileName = Utilities.GetFileFromPath(destinationName);
+
+                Nfs3FileHandle sourceFileHandle = _client.Lookup(sourceParent, sourceFileName);
+                if (sourceFileHandle == null)
+                {
+                    throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "The file '{0}' does not exist", sourceName), sourceName);
+                }
+
+                Nfs3FileAttributes sourceAttrs = _client.GetAttributes(sourceFileHandle);
+                if ((sourceAttrs.Type & Nfs3FileType.Directory) != 0)
+                {
+                    throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "The path '{0}' is not a file", sourceName), sourceName);
+                }
+
+                Nfs3FileHandle destFileHandle = _client.Lookup(destParent, destFileName);
+                if (destFileHandle != null && overwrite == false)
+                {
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "The destination file '{0}' already exists", destinationName));
+                }
+
+                _client.Rename(sourceParent, sourceFileName, destParent, destFileName);
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -264,54 +457,60 @@ namespace DiscUtils.Nfs
         /// <returns>The new stream.</returns>
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
-            Nfs3AccessPermissions requested;
-            if (access == FileAccess.Read)
+            try
             {
-                requested = Nfs3AccessPermissions.Read;
-            }
-            else if (access == FileAccess.ReadWrite)
-            {
-                requested = Nfs3AccessPermissions.Read | Nfs3AccessPermissions.Modify;
-            }
-            else
-            {
-                requested = Nfs3AccessPermissions.Modify;
-            }
-
-            if (mode == FileMode.Create || mode == FileMode.CreateNew || (mode == FileMode.OpenOrCreate && !FileExists(path)))
-            {
-                string[] dirs = Utilities.GetDirectoryFromPath(path).Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
-
-                Nfs3SetAttributes setAttrs = new Nfs3SetAttributes();
-                setAttrs.Mode = NfsOptions.NewFilePermissions;
-                setAttrs.SetMode = true;
-                setAttrs.Size = 0;
-                setAttrs.SetSize = true;
-                Nfs3FileHandle handle = _client.Create(parent, Utilities.GetFileFromPath(path), mode != FileMode.Create, setAttrs);
-
-                return new Nfs3FileStream(_client, handle, access);
-            }
-            else
-            {
-                Nfs3FileHandle handle = GetFile(path);
-                Nfs3AccessPermissions actualPerms = _client.Access(handle, requested);
-
-                if (actualPerms != requested)
+                Nfs3AccessPermissions requested;
+                if (access == FileAccess.Read)
                 {
-                    throw new UnauthorizedAccessException();
+                    requested = Nfs3AccessPermissions.Read;
+                }
+                else if (access == FileAccess.ReadWrite)
+                {
+                    requested = Nfs3AccessPermissions.Read | Nfs3AccessPermissions.Modify;
+                }
+                else
+                {
+                    requested = Nfs3AccessPermissions.Modify;
                 }
 
-                Nfs3FileStream result = new Nfs3FileStream(_client, handle, access);
-                if (mode == FileMode.Append)
+                if (mode == FileMode.Create || mode == FileMode.CreateNew || (mode == FileMode.OpenOrCreate && !FileExists(path)))
                 {
-                    result.Seek(0, SeekOrigin.End);
+                    Nfs3FileHandle parent = GetParentDirectory(path);
+
+                    Nfs3SetAttributes setAttrs = new Nfs3SetAttributes();
+                    setAttrs.Mode = NfsOptions.NewFilePermissions;
+                    setAttrs.SetMode = true;
+                    setAttrs.Size = 0;
+                    setAttrs.SetSize = true;
+                    Nfs3FileHandle handle = _client.Create(parent, Utilities.GetFileFromPath(path), mode != FileMode.Create, setAttrs);
+
+                    return new Nfs3FileStream(_client, handle, access);
                 }
-                else if (mode == FileMode.Truncate)
+                else
                 {
-                    result.SetLength(0);
+                    Nfs3FileHandle handle = GetFile(path);
+                    Nfs3AccessPermissions actualPerms = _client.Access(handle, requested);
+
+                    if (actualPerms != requested)
+                    {
+                        throw new UnauthorizedAccessException();
+                    }
+
+                    Nfs3FileStream result = new Nfs3FileStream(_client, handle, access);
+                    if (mode == FileMode.Append)
+                    {
+                        result.Seek(0, SeekOrigin.End);
+                    }
+                    else if (mode == FileMode.Truncate)
+                    {
+                        result.SetLength(0);
+                    }
+                    return result;
                 }
-                return result;
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
             }
         }
 
@@ -322,29 +521,38 @@ namespace DiscUtils.Nfs
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            Nfs3FileAttributes nfsAttrs = _client.GetAttributes(handle);
+            try
+            {
+                Nfs3FileHandle handle = GetFile(path);
+                Nfs3FileAttributes nfsAttrs = null;
 
-            FileAttributes result = (FileAttributes)0;
-            if (nfsAttrs.Type == Nfs3FileType.Directory)
-            {
-                result |= FileAttributes.Directory;
-            }
-            else if (nfsAttrs.Type == Nfs3FileType.BlockDevice || nfsAttrs.Type == Nfs3FileType.CharacterDevice)
-            {
-                result |= FileAttributes.Device;
-            }
-            else
-            {
-                result |= FileAttributes.Normal;
-            }
+                _client.GetAttributes(handle);
 
-            if (Utilities.GetFileFromPath(path).StartsWith(".", StringComparison.Ordinal))
-            {
-                result |= FileAttributes.Hidden;
-            }
+                FileAttributes result = (FileAttributes)0;
+                if (nfsAttrs.Type == Nfs3FileType.Directory)
+                {
+                    result |= FileAttributes.Directory;
+                }
+                else if (nfsAttrs.Type == Nfs3FileType.BlockDevice || nfsAttrs.Type == Nfs3FileType.CharacterDevice)
+                {
+                    result |= FileAttributes.Device;
+                }
+                else
+                {
+                    result |= FileAttributes.Normal;
+                }
 
-            return result;
+                if (Utilities.GetFileFromPath(path).StartsWith(".", StringComparison.Ordinal))
+                {
+                    result |= FileAttributes.Hidden;
+                }
+
+                return result;
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -367,10 +575,17 @@ namespace DiscUtils.Nfs
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            // Note creation time is not available, so simulating from last modification time
-            Nfs3FileHandle handle = GetFile(path);
-            Nfs3FileAttributes attrs = _client.GetAttributes(handle);
-            return attrs.ModifyTime.ToDateTime();
+            try
+            {
+                // Note creation time is not available, so simulating from last modification time
+                Nfs3FileHandle handle = GetFile(path);
+                Nfs3FileAttributes attrs = _client.GetAttributes(handle);
+                return attrs.ModifyTime.ToDateTime();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -390,9 +605,16 @@ namespace DiscUtils.Nfs
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            Nfs3FileAttributes attrs = _client.GetAttributes(handle);
-            return attrs.AccessTime.ToDateTime();
+            try
+            {
+                Nfs3FileHandle handle = GetFile(path);
+                Nfs3FileAttributes attrs = _client.GetAttributes(handle);
+                return attrs.AccessTime.ToDateTime();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -402,8 +624,15 @@ namespace DiscUtils.Nfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            _client.SetAttributes(handle, new Nfs3SetAttributes() { SetAccessTime = Nfs3SetTimeMethod.ClientTime, AccessTime = new Nfs3FileTime(newTime) });
+            try
+            {
+                Nfs3FileHandle handle = GetFile(path);
+                _client.SetAttributes(handle, new Nfs3SetAttributes() { SetAccessTime = Nfs3SetTimeMethod.ClientTime, AccessTime = new Nfs3FileTime(newTime) });
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -413,9 +642,16 @@ namespace DiscUtils.Nfs
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            Nfs3FileAttributes attrs = _client.GetAttributes(handle);
-            return attrs.ModifyTime.ToDateTime();
+            try
+            {
+                Nfs3FileHandle handle = GetFile(path);
+                Nfs3FileAttributes attrs = _client.GetAttributes(handle);
+                return attrs.ModifyTime.ToDateTime();
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -425,8 +661,15 @@ namespace DiscUtils.Nfs
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            _client.SetAttributes(handle, new Nfs3SetAttributes() { SetModifyTime = Nfs3SetTimeMethod.ClientTime, ModifyTime = new Nfs3FileTime(newTime) });
+            try
+            {
+                Nfs3FileHandle handle = GetFile(path);
+                _client.SetAttributes(handle, new Nfs3SetAttributes() { SetModifyTime = Nfs3SetTimeMethod.ClientTime, ModifyTime = new Nfs3FileTime(newTime) });
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         /// <summary>
@@ -436,9 +679,16 @@ namespace DiscUtils.Nfs
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            Nfs3FileHandle handle = GetFile(path);
-            Nfs3FileAttributes attrs = _client.GetAttributes(handle);
-            return attrs.Size;
+            try
+            {
+                Nfs3FileHandle handle = GetFile(path);
+                Nfs3FileAttributes attrs = _client.GetAttributes(handle);
+                return attrs.Size;
+            }
+            catch (Nfs3Exception ne)
+            {
+                throw ConvertNfsException(ne);
+            }
         }
 
         private void DoSearch(List<string> results, Nfs3FileHandle dir, string path, Regex regex, bool subFolders, bool dirs, bool files)
@@ -471,10 +721,8 @@ namespace DiscUtils.Nfs
 
         private Nfs3FileHandle GetFile(string path)
         {
-            string[] dirs = Utilities.GetDirectoryFromPath(path).Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             string file = Utilities.GetFileFromPath(path);
-
-            Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
+            Nfs3FileHandle parent = GetParentDirectory(path);
 
             Nfs3FileHandle handle = _client.Lookup(parent, file);
             if (handle == null)
@@ -482,6 +730,13 @@ namespace DiscUtils.Nfs
                 throw new FileNotFoundException("No such file or directory", path);
             }
             return handle;
+        }
+
+        private Nfs3FileHandle GetParentDirectory(string path)
+        {
+            string[] dirs = Utilities.GetDirectoryFromPath(path).Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
+            return parent;
         }
 
         private Nfs3FileHandle GetDirectory(Nfs3FileHandle parent, string[] dirs)
@@ -494,7 +749,7 @@ namespace DiscUtils.Nfs
             Nfs3FileHandle handle = parent;
             for (int i = 0; i < dirs.Length; ++i)
             {
-                handle = _client.Lookup(parent, dirs[i]);
+                handle = _client.Lookup(handle, dirs[i]);
 
                 if (handle == null || _client.GetAttributes(handle).Type != Nfs3FileType.Directory)
                 {
@@ -504,5 +759,11 @@ namespace DiscUtils.Nfs
 
             return handle;
         }
+
+        private static Exception ConvertNfsException(Nfs3Exception ne)
+        {
+            throw new IOException("NFS Status: " + ne.Message, ne);
+        }
+
     }
 }

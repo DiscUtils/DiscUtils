@@ -23,30 +23,14 @@
 
 namespace DiscUtils.Nfs
 {
-    /// <summary>
-    /// Options controlling the behaviour of NFS file system.
-    /// </summary>
-    public sealed class NfsFileSystemOptions : DiscFileSystemOptions
+    internal class Nfs3GetAttributesResult : Nfs3CallResult
     {
-        /// <summary>
-        /// The permission mask to apply to newly created files.
-        /// </summary>
-        public UnixFilePermissions NewFilePermissions { get; set; }
+        public Nfs3FileAttributes Attributes { get; set; }
 
-        /// <summary>
-        /// The permission mask to apply to newly created directories.
-        /// </summary>
-        public UnixFilePermissions NewDirectoryPermissions { get; set; }
-
-        /// <summary>
-        /// Creates a new instance with default settings.
-        /// </summary>
-        public NfsFileSystemOptions()
+        public Nfs3GetAttributesResult(XdrDataReader reader)
         {
-            NewFilePermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite
-                | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite;
-            NewDirectoryPermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite | UnixFilePermissions.OwnerExecute
-                | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite | UnixFilePermissions.GroupExecute;
+            Status = (Nfs3Status)reader.ReadInt32();
+            Attributes = new Nfs3FileAttributes(reader);
         }
     }
 }

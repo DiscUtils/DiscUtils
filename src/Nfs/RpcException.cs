@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -126,7 +127,14 @@ namespace DiscUtils.Nfs
                 }
                 else
                 {
-                    return "RPC protocol version mismatch";
+                    if (reply.RejectedReply.MismatchInfo != null)
+                    {
+                        return string.Format(CultureInfo.InvariantCulture, "RPC protocol version mismatch, server supports versions {0} through {1}", reply.RejectedReply.MismatchInfo.Low, reply.RejectedReply.MismatchInfo.High);
+                    }
+                    else
+                    {
+                        return "RPC protocol version mismatch, server didn't indicate supported versions";
+                    }
                 }
             }
         }

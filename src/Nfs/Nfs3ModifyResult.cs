@@ -23,11 +23,11 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3SetAttributesResult : Nfs3CallResult
+    internal sealed class Nfs3ModifyResult : Nfs3CallResult
     {
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
 
-        public Nfs3SetAttributesResult(XdrDataReader reader)
+        public Nfs3ModifyResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             CacheConsistency = new Nfs3WeakCacheConsistency(reader);

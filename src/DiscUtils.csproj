@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -193,15 +193,17 @@
     <Compile Include="Nfs\Nfs3FileAttributes.cs" />
     <Compile Include="Nfs\Nfs3FileTime.cs" />
     <Compile Include="Nfs\Nfs3FileType.cs" />
+    <Compile Include="Nfs\Nfs3GetAttributesResult.cs" />
     <Compile Include="Nfs\Nfs3LookupResult.cs" />
+    <Compile Include="Nfs\Nfs3ModifyResult.cs" />
     <Compile Include="Nfs\Nfs3Mount.cs" />
     <Compile Include="Nfs\Nfs3FileHandle.cs" />
     <Compile Include="Nfs\Nfs3Export.cs" />
     <Compile Include="Nfs\Nfs3MountResult.cs" />
     <Compile Include="Nfs\Nfs3ReadDirPlusResult.cs" />
     <Compile Include="Nfs\Nfs3ReadResult.cs" />
+    <Compile Include="Nfs\Nfs3RenameResult.cs" />
     <Compile Include="Nfs\Nfs3SetAttributes.cs" />
-    <Compile Include="Nfs\Nfs3SetAttributesResult.cs" />
     <Compile Include="Nfs\Nfs3WeakCacheConsistency.cs" />
     <Compile Include="Nfs\Nfs3WriteResult.cs" />
     <Compile Include="Nfs\NfsFileSystem.cs" />

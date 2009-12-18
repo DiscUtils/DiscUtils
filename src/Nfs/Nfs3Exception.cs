@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace DiscUtils.Nfs
 {
@@ -32,6 +33,7 @@ namespace DiscUtils.Nfs
     [Serializable]
     public sealed class Nfs3Exception : IOException
     {
+        private Nfs3Status _status = Nfs3Status.Unknown;
 
         /// <summary>
         /// Creates a new instance.
@@ -47,6 +49,7 @@ namespace DiscUtils.Nfs
         internal Nfs3Exception(Nfs3Status status)
             : base(GenerateMessage(status))
         {
+            _status = status;
         }
 
         /// <summary>
@@ -56,6 +59,17 @@ namespace DiscUtils.Nfs
         public Nfs3Exception(string message)
             : base(message)
         {
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="message">The exception message.</param>
+        /// <param name="status">The status result of an NFS procedure.</param>
+        public Nfs3Exception(string message, Nfs3Status status)
+            : base(message)
+        {
+            _status = status;
         }
 
         /// <summary>
@@ -76,6 +90,27 @@ namespace DiscUtils.Nfs
         private Nfs3Exception(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            _status = (Nfs3Status)info.GetInt32("Status");
+        }
+
+        /// <summary>
+        /// Gets the NFS status code that lead to the exception.
+        /// </summary>
+        public Nfs3Status NfsStatus
+        {
+            get { return _status; }
+        }
+
+        /// <summary>
+        /// Serializes this exception.
+        /// </summary>
+        /// <param name="info">The object to populate with serialized data.</param>
+        /// <param name="context">The context for this serialization</param>
+        [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Status", (int)_status);
+            base.GetObjectData(info, context);
         }
 
         private static string GenerateMessage(Nfs3Status status)
@@ -88,7 +123,7 @@ namespace DiscUtils.Nfs
                     return "Not owner";
                 case Nfs3Status.NoSuchEntity:
                     return "No such file or directory";
-                case Nfs3Status.IoError:
+                case Nfs3Status.IOError:
                     return "Hardware I/O error";
                 case Nfs3Status.NoSuchDeviceOrAddress:
                     return "I/O error - no such device or address";
@@ -110,7 +145,7 @@ namespace DiscUtils.Nfs
                     return "File too large";
                 case Nfs3Status.NoSpaceAvailable:
                     return "No space left on device";
-                case Nfs3Status.ReadOnlyFilesystem:
+                case Nfs3Status.ReadOnlyFileSystem:
                     return "Read-only file system";
                 case Nfs3Status.TooManyHardLinks:
                     return "Too many hard links";
@@ -138,7 +173,7 @@ namespace DiscUtils.Nfs
                     return "Server fault";
                 case Nfs3Status.BadType:
                     return "Server doesn't support object type";
-                case Nfs3Status.SlowJukeBox:
+                case Nfs3Status.SlowJukebox:
                     return "Unable to complete in timely fashion";
                 default:
                     return "Unknown error: " + status;

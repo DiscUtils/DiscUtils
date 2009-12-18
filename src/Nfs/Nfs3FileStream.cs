@@ -41,7 +41,6 @@ namespace DiscUtils.Nfs
             _access = access;
 
             _length = _client.GetAttributes(_handle).Size;
-            _position = 0;
         }
 
         public override bool CanRead

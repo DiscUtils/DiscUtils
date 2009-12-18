@@ -4341,6 +4341,50 @@
        </Namespace>
        <Namespace Name="DiscUtils.Nfs">
         <Types>
+         <Type Name="Nfs3CreateResult">
+          <Members>
+           <Member Name="#CacheConsistency">
+            <Accessors>
+             <Accessor Name="#get_CacheConsistency()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3CreateResult.CacheConsistency.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3DirectoryEntry">
+          <Members>
+           <Member Name="#FileId">
+            <Accessors>
+             <Accessor Name="#get_FileId()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3DirectoryEntry.FileId.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="Nfs3Exception">
           <Messages>
            <Message Id="Nfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-12-15 19:24:01Z">
@@ -4355,6 +4399,452 @@
             </Notes>
            </Message>
           </Messages>
+          <Members>
+           <Member Name="#NfsStatus">
+            <Messages>
+             <Message Id="Nfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue Name="Member">
+               <Item>Nfs</Item>
+               <Item>'Nfs3Exception.NfsStatus'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="93" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3Export">
+          <Members>
+           <Member Name="#Groups">
+            <Accessors>
+             <Accessor Name="#get_Groups()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3Export.Groups.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3FileAttributes">
+          <Members>
+           <Member Name="#BytesUsed">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.BytesUsed'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ChangeTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.ChangeTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.FileId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileSystemId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.FileSystemId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LinkCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.LinkCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RdevMajor">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.RdevMajor'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RdevMinor">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.RdevMinor'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Uid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'Nfs3FileAttributes.Uid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="95" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3FileSystemInfo">
+          <Members>
+           <Member Name="#FileSystemProperties">
+            <Accessors>
+             <Accessor Name="#get_FileSystemProperties()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3FileSystemInfo.FileSystemProperties.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#MaxFileSize">
+            <Accessors>
+             <Accessor Name="#get_MaxFileSize()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3FileSystemInfo.MaxFileSize.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#ReadMultipleSize">
+            <Accessors>
+             <Accessor Name="#get_ReadMultipleSize()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3FileSystemInfo.ReadMultipleSize.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#TimePrecision">
+            <Accessors>
+             <Accessor Name="#get_TimePrecision()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3FileSystemInfo.TimePrecision.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#WriteMultipleSize">
+            <Accessors>
+             <Accessor Name="#get_WriteMultipleSize()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3FileSystemInfo.WriteMultipleSize.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3ReadDirPlusResult">
+          <Members>
+           <Member Name="#DirAttributes">
+            <Accessors>
+             <Accessor Name="#get_DirAttributes()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3ReadDirPlusResult.DirAttributes.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3SetAttributes">
+          <Members>
+           <Member Name="#SetUid">
+            <Accessors>
+             <Accessor Name="#set_SetUid(System.Boolean)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3SetAttributes.SetUid.set(bool)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#Uid">
+            <Accessors>
+             <Accessor Name="#set_Uid(System.UInt32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3SetAttributes.Uid.set(uint)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3Status">
+          <Messages>
+           <Message Id="Nfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-12-18 14:01:56Z">
+            <Issue Name="Type">
+             <Item>Nfs</Item>
+             <Item>'Nfs3Status'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="94" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="Nfs3WeakCacheConsistency">
+          <Members>
+           <Member Name="#Before">
+            <Accessors>
+             <Accessor Name="#get_Before()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3WeakCacheConsistency.Before.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3WeakCacheConsistencyAttr">
+          <Members>
+           <Member Name="#ChangeTime">
+            <Accessors>
+             <Accessor Name="#get_ChangeTime()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3WeakCacheConsistencyAttr.ChangeTime.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#ModifyTime">
+            <Accessors>
+             <Accessor Name="#get_ModifyTime()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3WeakCacheConsistencyAttr.ModifyTime.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#Size">
+            <Accessors>
+             <Accessor Name="#get_Size()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3WeakCacheConsistencyAttr.Size.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Nfs3WriteResult">
+          <Members>
+           <Member Name="#HowCommitted">
+            <Accessors>
+             <Accessor Name="#get_HowCommitted()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3WriteResult.HowCommitted.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#WriteVerifier">
+            <Accessors>
+             <Accessor Name="#get_WriteVerifier()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'Nfs3WriteResult.WriteVerifier.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
          </Type>
          <Type Name="NfsFileSystem">
           <Messages>
@@ -4402,6 +4892,64 @@
             </Notes>
            </Message>
           </Messages>
+         </Type>
+         <Type Name="RpcAcceptedReplyHeader">
+          <Members>
+           <Member Name="#Verifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'RpcAcceptedReplyHeader.Verifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="96" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="RpcMessageHeader">
+          <Members>
+           <Member Name="#TransactionId">
+            <Accessors>
+             <Accessor Name="#get_TransactionId()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+                <Issue>
+                 <Item>'RpcMessageHeader.TransactionId.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="96" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="RpcProgram">
+          <Members>
+           <Member Name="#NullProc()">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-12-18 14:01:56Z">
+              <Issue>
+               <Item>'RpcProgram.NullProc()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="96" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
          </Type>
         </Types>
        </Namespace>
@@ -5704,6 +6252,10 @@
     <Note Id="90" Modified="2009-10-04 18:21:02Z">Non-trivial initialization</Note>
     <Note Id="91" Modified="2009-10-11 13:46:39Z">LBA is standard term</Note>
     <Note Id="92" Modified="2009-12-15 19:57:30Z">Nfs is standard abbreviation.</Note>
+    <Note Id="93" Modified="2009-12-18 14:04:02Z">NFS is standard acronym</Note>
+    <Note Id="94" Modified="2009-12-18 14:04:13Z">Nfs is standard acronym</Note>
+    <Note Id="95" Modified="2009-12-18 14:06:58Z">Standard NFS-defined attributes.</Note>
+    <Note Id="96" Modified="2009-12-18 14:26:08Z">Standard parts of NFS</Note>
    </User>
   </Notes>
   <Rules>

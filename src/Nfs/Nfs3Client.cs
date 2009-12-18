@@ -76,12 +76,22 @@ namespace DiscUtils.Nfs
                 return result;
             }
 
-            throw new NotImplementedException("GETATTR");
+            Nfs3GetAttributesResult getResult = _nfsClient.GetAttributes(handle);
+
+            if (getResult.Status == Nfs3Status.Ok)
+            {
+                _cachedAttributes[handle] = getResult.Attributes;
+                return getResult.Attributes;
+            }
+            else
+            {
+                throw new Nfs3Exception(getResult.Status);
+            }
         }
 
         public void SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
         {
-            Nfs3SetAttributesResult result = _nfsClient.SetAttributes(handle, newAttributes);
+            Nfs3ModifyResult result = _nfsClient.SetAttributes(handle, newAttributes);
 
             _cachedAttributes[handle] = result.CacheConsistency.After;
 
@@ -187,11 +197,49 @@ namespace DiscUtils.Nfs
             }
         }
 
+        public Nfs3FileHandle MakeDirectory(Nfs3FileHandle dirHandle, string name, Nfs3SetAttributes attributes)
+        {
+            Nfs3CreateResult result = _nfsClient.MakeDirectory(dirHandle, name, attributes);
+
+            if (result.Status == Nfs3Status.Ok)
+            {
+                _cachedAttributes[result.FileHandle] = result.FileAttributes;
+                return result.FileHandle;
+            }
+            else
+            {
+                throw new Nfs3Exception(result.Status);
+            }
+        }
+
         public void Remove(Nfs3FileHandle dirHandle, string name)
         {
-            Nfs3SetAttributesResult result = _nfsClient.Remove(dirHandle, name);
+            Nfs3ModifyResult result = _nfsClient.Remove(dirHandle, name);
 
             _cachedAttributes[dirHandle] = result.CacheConsistency.After;
+            if (result.Status != Nfs3Status.Ok)
+            {
+                throw new Nfs3Exception(result.Status);
+            }
+        }
+
+        public void RemoveDirectory(Nfs3FileHandle dirHandle, string name)
+        {
+            Nfs3ModifyResult result = _nfsClient.RemoveDirectory(dirHandle, name);
+
+            _cachedAttributes[dirHandle] = result.CacheConsistency.After;
+            if (result.Status != Nfs3Status.Ok)
+            {
+                throw new Nfs3Exception(result.Status);
+            }
+        }
+
+        public void Rename(Nfs3FileHandle fromDirHandle, string fromName, Nfs3FileHandle toDirHandle, string toName)
+        {
+            Nfs3RenameResult result = _nfsClient.Rename(fromDirHandle, fromName, toDirHandle, toName);
+
+            _cachedAttributes[fromDirHandle] = result.FromDirCacheConsistency.After;
+            _cachedAttributes[toDirHandle] = result.ToDirCacheConsistency.After;
             if (result.Status != Nfs3Status.Ok)
             {
                 throw new Nfs3Exception(result.Status);
