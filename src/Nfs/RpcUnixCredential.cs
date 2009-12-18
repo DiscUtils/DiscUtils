@@ -31,6 +31,15 @@ namespace DiscUtils.Nfs
     /// instead the client is assumed to be trusted.</remarks>
     public sealed class RpcUnixCredential : RpcCredentials
     {
+        /// <summary>
+        /// Default credentials (nobody).
+        /// </summary>
+        /// <remarks>
+        /// There is no standard UID/GID for nobody.  This default credential
+        /// assumes 65534 for both the user and group.
+        /// </remarks>
+        public static readonly RpcUnixCredential Default = new RpcUnixCredential(65534, 65534);
+
         private string _machineName;
         private int _uid;
         private int _gid;
@@ -38,6 +47,16 @@ namespace DiscUtils.Nfs
 
         /// <summary>
         /// Creates a new instance.
+        /// </summary>
+        /// <param name="user">The user's unique id (UID)</param>
+        /// <param name="primaryGroup">The user's primary group id (GID)</param>
+        public RpcUnixCredential(int user, int primaryGroup)
+            : this(user, primaryGroup, new int[]{})
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance, allowing a supplementary group specification.
         /// </summary>
         /// <param name="user">The user's unique id (UID)</param>
         /// <param name="primaryGroup">The user's primary group id (GID)</param>

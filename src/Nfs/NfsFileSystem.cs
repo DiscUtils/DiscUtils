@@ -37,6 +37,17 @@ namespace DiscUtils.Nfs
         private Nfs3Client _client;
 
         /// <summary>
+        /// Creates a new instance using default credentials.
+        /// </summary>
+        /// <param name="address">The address of the NFS server (IP or DNS address)</param>
+        /// <param name="mountPoint">The mount point on the server to root the file system</param>
+        public NfsFileSystem(string address, string mountPoint)
+            : base(new NfsFileSystemOptions())
+        {
+            _client = new Nfs3Client(address, RpcUnixCredential.Default, mountPoint);
+        }
+
+        /// <summary>
         /// Creates a new instance.
         /// </summary>
         /// <param name="address">The address of the NFS server (IP or DNS address)</param>
