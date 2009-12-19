@@ -100,11 +100,6 @@ namespace DiscUtils.Wim
             Consume(bits - offset);
         }
 
-        public long Position
-        {
-            get { return _position; }
-        }
-
         public int ReadBytes(byte[] buffer, int offset, int count)
         {
             if (_position % 8 != 0)

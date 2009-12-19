@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace DiscUtils.Wim
 {
@@ -125,6 +126,22 @@ namespace DiscUtils.Wim
             }
 
             return new byte[20];
+        }
+
+        internal long GetLength(string streamName)
+        {
+            if (string.IsNullOrEmpty(streamName))
+            {
+                return Length;
+            }
+
+            AlternateStreamEntry streamEntry;
+            if (AlternateStreams != null && AlternateStreams.TryGetValue(streamName, out streamEntry))
+            {
+                return streamEntry.Length;
+            }
+
+            throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such alternate stream '{1}' in file '{2}'", streamName, FileName), FileName + ":" + streamName);
         }
 
         public string SearchName

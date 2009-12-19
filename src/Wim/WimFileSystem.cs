@@ -267,13 +267,17 @@ namespace DiscUtils.Wim
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            byte[] hash = GetFileHash(path);
-            if (Utilities.IsAllZeros(hash, 0, hash.Length))
+            string filePart;
+            string altStreamPart;
+            SplitFileName(path, out filePart, out altStreamPart);
+
+            DirectoryEntry dirEntry = GetEntry(filePart);
+            if (dirEntry == null)
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
 
-            return _file.LocateResource(hash).OriginalSize;
+            return dirEntry.GetLength(altStreamPart);
         }
         #endregion
 
@@ -288,15 +292,9 @@ namespace DiscUtils.Wim
         /// the integrity of the file contents.</remarks>
         public byte[] GetFileHash(string path)
         {
-            string filePart = path;
-            string altStreamPart = "";
-            int streamSepPos = path.IndexOf(":", StringComparison.Ordinal);
-
-            if (streamSepPos >= 0)
-            {
-                filePart = path.Substring(0, streamSepPos);
-                altStreamPart = path.Substring(streamSepPos + 1);
-            }
+            string filePart;
+            string altStreamPart;
+            SplitFileName(path, out filePart, out altStreamPart);
 
             DirectoryEntry dirEntry = GetEntry(filePart);
             if (dirEntry == null)
@@ -305,6 +303,22 @@ namespace DiscUtils.Wim
             }
 
             return dirEntry.GetStreamHash(altStreamPart);
+        }
+
+        private static void SplitFileName(string path, out string filePart, out string altStreamPart)
+        {
+            int streamSepPos = path.IndexOf(":", StringComparison.Ordinal);
+
+            if (streamSepPos >= 0)
+            {
+                filePart = path.Substring(0, streamSepPos);
+                altStreamPart = path.Substring(streamSepPos + 1);
+            }
+            else
+            {
+                filePart = path;
+                altStreamPart = "";
+            }
         }
 
         private void ReadMetaData(Stream stream)

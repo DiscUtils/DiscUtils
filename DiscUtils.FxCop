@@ -6107,6 +6107,24 @@
        </Namespace>
        <Namespace Name="DiscUtils.Wim">
         <Types>
+         <Type Name="DirectoryEntry">
+          <Members>
+           <Member Name="#HardLink">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-19 10:35:39Z">
+              <Issue>
+               <Item>'DirectoryEntry.HardLink'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="99" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="FileHeader">
           <Members>
            <Member Name="#PartNumber">
@@ -6154,6 +6172,20 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="54" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RefCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-19 10:35:39Z">
+              <Issue>
+               <Item>'ResourceInfo.RefCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="99" />
                </User>
               </Notes>
              </Message>
@@ -6322,6 +6354,7 @@
     <Note Id="96" Modified="2009-12-18 14:26:08Z">Standard parts of NFS</Note>
     <Note Id="97" Modified="2009-12-19 02:26:50Z">Type is immutable</Note>
     <Note Id="98" Modified="2009-12-19 02:34:33Z">Aesthetically prefer lower case in this instance.</Note>
+    <Note Id="99" Modified="2009-12-19 10:58:59Z">Don't use hard link information, or reference counts as yet.</Note>
    </User>
   </Notes>
   <Rules>

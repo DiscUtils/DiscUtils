@@ -81,5 +81,10 @@ namespace DiscUtils.Wim
             IntegrityHeader = new ShortResourceHeader();
             IntegrityHeader.Read(buffer, 124);
         }
+
+        public bool IsValid()
+        {
+            return Tag == "MSWIM\0\0\0" && HeaderSize >= 148;
+        }
     }
 }

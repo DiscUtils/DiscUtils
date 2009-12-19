@@ -48,6 +48,11 @@ namespace DiscUtils.Wim
             _fileHeader = new FileHeader();
             _fileHeader.Read(buffer, 0);
 
+            if (!_fileHeader.IsValid())
+            {
+                throw new IOException("Not a valid WIM file");
+            }
+
             if (_fileHeader.TotalParts != 1)
             {
                 throw new NotSupportedException("Multi-part WIM file");

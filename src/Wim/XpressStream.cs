@@ -33,8 +33,6 @@ namespace DiscUtils.Wim
     internal class XpressStream : Stream
     {
         private Stream _compressedStream;
-        private DataReader _compressedStreamReader;
-
         private byte[] _buffer;
         private long _position;
 
@@ -46,8 +44,6 @@ namespace DiscUtils.Wim
         public XpressStream(Stream compressed, int count)
         {
             _compressedStream = new BufferedStream(compressed);
-            _compressedStreamReader = new LittleEndianDataReader(_compressedStream);
-
             _buffer = Buffer(count);
         }
 
