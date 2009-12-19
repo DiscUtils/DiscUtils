@@ -21,6 +21,8 @@
 //
 
 
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace DiscUtils.Iscsi
@@ -124,6 +126,11 @@ namespace DiscUtils.Iscsi
         /// Device is a well-known device, as defined by SCSI specifications.
         /// </summary>
         WellKnown = 0x1E,
+
+        /// <summary>
+        /// Unknown LUN class.
+        /// </summary>
+        Unknown = 0xFF
     }
 
     /// <summary>
@@ -131,6 +138,7 @@ namespace DiscUtils.Iscsi
     /// </summary>
     public class LunInfo
     {
+        private TargetInfo _targetInfo;
         private long _lun;
         private LunClass _deviceType;
         private bool _removable;
@@ -138,14 +146,23 @@ namespace DiscUtils.Iscsi
         private string _productId;
         private string _productRevision;
 
-        internal LunInfo(long lun, LunClass type, bool removable, string vendor, string product, string revision)
+        internal LunInfo(TargetInfo targetInfo, long lun, LunClass type, bool removable, string vendor, string product, string revision)
         {
+            _targetInfo = targetInfo;
             _lun = lun;
             _deviceType = type;
             _removable = removable;
             _vendorId = vendor;
             _productId = product;
             _productRevision = revision;
+        }
+
+        /// <summary>
+        /// Gets info about the target hosting this LUN.
+        /// </summary>
+        public TargetInfo Target
+        {
+            get { return _targetInfo; }
         }
 
         /// <summary>
@@ -213,6 +230,100 @@ namespace DiscUtils.Iscsi
             {
                 return _lun.ToString(CultureInfo.InvariantCulture);
             }
+        }
+
+        /// <summary>
+        /// Gets the URIs corresponding to this LUN.
+        /// </summary>
+        /// <remarks>Multiple URIs are returned because multiple targets may serve the same LUN.</remarks>
+        public string[] GetUris()
+        {
+            List<string> results = new List<string>();
+            foreach (var targetAddress in _targetInfo.Addresses)
+            {
+                results.Add(targetAddress.ToUri().ToString() + "/" + _targetInfo.Name + "?LUN=" + ToString());
+            }
+            return results.ToArray();
+        }
+
+        /// <summary>
+        /// Parses a URI referring to a LUN.
+        /// </summary>
+        /// <param name="uri">The URI to parse</param>
+        /// <returns>The LUN info</returns>
+        /// <remarks>
+        /// Note the LUN info is incomplete, only as much of the information as is encoded
+        /// into the URL is available.
+        /// </remarks>
+        public static LunInfo ParseUri(string uri)
+        {
+            return ParseUri(new Uri(uri));
+        }
+
+        /// <summary>
+        /// Parses a URI referring to a LUN.
+        /// </summary>
+        /// <param name="uri">The URI to parse</param>
+        /// <returns>The LUN info</returns>
+        /// <remarks>
+        /// Note the LUN info is incomplete, only as much of the information as is encoded
+        /// into the URL is available.
+        /// </remarks>
+        public static LunInfo ParseUri(Uri uri)
+        {
+            string address;
+            int port;
+            string targetGroupTag = "";
+            string targetName = "";
+            ulong lun = 0;
+
+            if (uri.Scheme != "iscsi")
+            {
+                ThrowInvalidURI(uri.OriginalString);
+            }
+
+            address = uri.Host;
+            port = uri.Port;
+            if (uri.Port == -1)
+            {
+                port = TargetAddress.DefaultPort;
+            }
+
+            string[] uriSegments = uri.Segments;
+            if (uriSegments.Length == 2)
+            {
+                targetName = uriSegments[1].Replace("/", "");
+            }
+            else if (uriSegments.Length == 3)
+            {
+                targetGroupTag = uriSegments[1].Replace("/", "");
+                targetName = uriSegments[2].Replace("/", "");
+            }
+            else
+            {
+                ThrowInvalidURI(uri.OriginalString);
+            }
+
+            TargetInfo targetInfo = new TargetInfo(targetName, new TargetAddress[] { new TargetAddress(address, port, targetGroupTag) });
+
+            foreach (var queryElem in uri.Query.Substring(1).Split('&'))
+            {
+                if (queryElem.StartsWith("LUN=", StringComparison.OrdinalIgnoreCase))
+                {
+                    lun = ulong.Parse(queryElem.Substring(4), CultureInfo.InvariantCulture);
+                    if (lun < 256)
+                    {
+                        lun = lun << (6 * 8);
+                    }
+                }
+            }
+
+            return new LunInfo(targetInfo, (long)lun, LunClass.Unknown, false, "", "", "");
+        }
+
+        private static void ThrowInvalidURI(string uri)
+        {
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Not a valid iSCSI URI: {0}", uri), "uri");
         }
     }
 }

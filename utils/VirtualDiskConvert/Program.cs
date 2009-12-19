@@ -27,57 +27,35 @@ using DiscUtils.Common;
 
 namespace VirtualDiskConvert
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _inFile;
-        private static CommandLineSwitch _outFormat;
-        private static CommandLineParameter _outFile;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _wipe;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _inFile;
+        private CommandLineParameter _outFile;
+        private CommandLineSwitch _wipe;
 
         static void Main(string[] args)
         {
-            _inFile = new CommandLineParameter("in_file", "Path to the disk to convert.  This can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
-            _outFormat = new CommandLineSwitch("of", "outputFormat", "format", "The type of disk to output, one of RAW, VMDK-fixed, VMDK-dynamic, VMDK-vmfsFixed, VMDK-vmfsDynamic, VHD-fixed, VHD-dynamic, VDI-dynamic, VDI-fixed or iSCSI.");
-            _outFile = new CommandLineParameter("out_file", "Path to the output file.  This can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
-            _userName = new CommandLineSwitch("u", "user", "user_name", "If using an iSCSI source or target, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("pw", "password", "secret", "If using an iSCSI source or target, optionally use this parameter to specify the password to authenticate with.");
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
+            _inFile = FileOrUriParameter("in_file", "Path to the source disk.", false);
+            _outFile = FileOrUriParameter("out_file", "Path to the output disk.", false);
             _wipe = new CommandLineSwitch("w", "wipe", null, "Write zero's to all unused parts of the disk.  This option only makes sense when converting to an iSCSI LUN which may be dirty.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("VirtualDiskConvert");
             parser.AddParameter(_inFile);
-            parser.AddSwitch(_outFormat);
             parser.AddParameter(_outFile);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
             parser.AddSwitch(_wipe);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.OutputFormat | StandardSwitches.UserAndPassword;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult || !_outFormat.IsPresent)
-            {
-                string remark = "This utility flattens disk hierarchies (VMDK linked-clones, VHD differencing disks) into a single disk image, but does preserve sparseness where the output disk format supports it.";
-                parser.DisplayHelp(remark);
-                return;
-            }
-
-            string user = _userName.IsPresent ? _userName.Value : null;
-            string password = _password.IsPresent ? _password.Value : null;
-
-            using (VirtualDisk inDisk = Utilities.OpenDisk(_inFile.Value, FileAccess.Read, user, password))
-            using (VirtualDisk outDisk = Utilities.OpenOutputDisk(_outFormat.Value, _outFile.Value, inDisk.Capacity, inDisk.Geometry, user, password))
+        protected override void DoRun()
+        {
+            using (VirtualDisk inDisk = VirtualDisk.OpenDisk(_inFile.Value, FileAccess.Read, UserName, Password))
+            using (VirtualDisk outDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _outFile.Value, inDisk.Capacity, inDisk.Geometry, UserName, Password, null))
             {
                 if (outDisk.Capacity < inDisk.Capacity)
                 {
@@ -92,6 +70,18 @@ namespace VirtualDiskConvert
                 {
                     SparseStream.Pump(inDisk.Content, outDisk.Content);
                 }
+            }
+        }
+
+        protected override string[] HelpRemarks
+        {
+            get
+            {
+                return new string[] {
+                    "This utility flattens disk hierarchies (VMDK linked-clones, VHD differencing disks) " +
+                    "into a single disk image, but does preserve sparseness where the output disk format " +
+                    "supports it."
+                };
             }
         }
 

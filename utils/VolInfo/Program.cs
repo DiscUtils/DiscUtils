@@ -28,49 +28,31 @@ using DiscUtils.Iscsi;
 
 namespace VolInfo
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineMultiParameter _inFiles;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineMultiParameter _inFiles;
 
         static void Main(string[] args)
         {
-            _inFiles = new CommandLineMultiParameter("disk", "Paths to the disks to inspect.  Values can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
-            _userName = new CommandLineSwitch("u", "user", "user_name", "If using iSCSI, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("pw", "password", "secret", "If using iSCSI, optionally use this parameter to specify the password to authenticate with.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
+            Program program = new Program();
+            program.Run(args);
+        }
 
-            CommandLineParser parser = new CommandLineParser("VolInfo");
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
+            _inFiles = FileOrUriMultiParameter("disk", "Paths to the disks to inspect.", false);
+
             parser.AddMultiParameter(_inFiles);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.UserAndPassword;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
-            string user = _userName.IsPresent ? _userName.Value : null;
-            string password = _password.IsPresent ? _password.Value : null;
-
+        protected override void DoRun()
+        {
             VolumeManager volMgr = new VolumeManager();
             foreach (var path in _inFiles.Values)
             {
-                volMgr.AddDisk(Utilities.OpenDisk(path, FileAccess.Read, user, password));
+                volMgr.AddDisk(VirtualDisk.OpenDisk(path, FileAccess.Read, UserName, Password));
             }
 
             Console.WriteLine("PHYSICAL VOLUMES");

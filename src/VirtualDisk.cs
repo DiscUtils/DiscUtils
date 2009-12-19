@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using DiscUtils.Partitions;
 
@@ -32,7 +33,11 @@ namespace DiscUtils
     /// </summary>
     public abstract class VirtualDisk : IDisposable
     {
-        private static Dictionary<string, VirtualDiskFactory> s_diskFactories;
+        private static Dictionary<string, VirtualDiskFactory> s_extensionMap;
+        private static Dictionary<string, VirtualDiskFactory> s_typeMap;
+        private static Dictionary<string, VirtualDiskTransport> s_diskTransports;
+
+        private VirtualDiskTransport _transport;
 
         /// <summary>
         /// Destroys this instance.
@@ -59,6 +64,14 @@ namespace DiscUtils
         /// if running inside destructor.</param>
         protected virtual void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                if (_transport != null)
+                {
+                    _transport.Dispose();
+                }
+                _transport = null;
+            }
         }
 
         /// <summary>
@@ -202,16 +215,177 @@ namespace DiscUtils
         /// </summary>
         public static ICollection<string> SupportedDiskFormats
         {
-            get { return DiskFactories.Keys; }
+            get { return ExtensionMap.Keys; }
+        }
+
+        /// <summary>
+        /// Gets the set of disk types supported, as an array of identifiers.
+        /// </summary>
+        public static ICollection<string> SupportedDiskTypes
+        {
+            get { return TypeMap.Keys; }
+        }
+
+        /// <summary>
+        /// Gets the set of supported variants of a type of virtual disk.
+        /// </summary>
+        /// <param name="type">A type, as returned by <see cref="SupportedDiskTypes"/></param>
+        /// <returns>A collection of identifiers, or empty if there is no variant concept for this type of disk.</returns>
+        public static ICollection<string> GetSupportedDiskVariants(string type)
+        {
+            return TypeMap[type].Variants;
+        }
+
+        /// <summary>
+        /// Create a new virtual disk.
+        /// </summary>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <param name="capacity">The capacity of the new disk</param>
+        /// <param name="geometry">The geometry of the new disk (or null).</param>
+        /// <param name="parameters">Untyped parameters controlling the creation process (TBD)</param>
+        /// <returns>The newly created disk</returns>
+        public static VirtualDisk CreateDisk(string type, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        {
+            return CreateDisk(type, variant, path, capacity, geometry, null, null, parameters);
+        }
+
+        /// <summary>
+        /// Create a new virtual disk.
+        /// </summary>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <param name="capacity">The capacity of the new disk</param>
+        /// <param name="geometry">The geometry of the new disk (or null).</param>
+        /// <param name="user">The user identity to use when accessing the <c>path</c> (or null)</param>
+        /// <param name="password">The password to use when accessing the <c>path</c> (or null)</param>
+        /// <param name="parameters">Untyped parameters controlling the creation process (TBD)</param>
+        /// <returns>The newly created disk</returns>
+        public static VirtualDisk CreateDisk(string type, string variant, string path, long capacity, Geometry geometry, string user, string password, Dictionary<string, string> parameters)
+        {
+            Uri uri = PathToUri(path);
+            VirtualDisk result = null;
+
+            VirtualDiskTransport transport;
+            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transport))
+            {
+                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "Unable to parse path '{0}'", path), path);
+            }
+
+            try
+            {
+                transport.Connect(uri, user, password);
+
+                if (transport.IsRawDisk)
+                {
+                    result = transport.OpenDisk(FileAccess.ReadWrite);
+                }
+                else
+                {
+                    VirtualDiskFactory factory = TypeMap[type];
+
+                    result = factory.CreateDisk(transport.GetFileLocator(), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), capacity, geometry, parameters ?? new Dictionary<string, string>());
+                }
+
+                if (result != null)
+                {
+                    result._transport = transport;
+                    transport = null;
+                }
+
+                return result;
+            }
+            finally
+            {
+                if (transport != null)
+                {
+                    transport.Dispose();
+                }
+            }
         }
 
         /// <summary>
         /// Opens an existing virtual disk.
         /// </summary>
-        /// <param name="path">The path of the virtual disk to open</param>
+        /// <param name="path">The path of the virtual disk to open, can be a URI</param>
         /// <param name="access">The desired access to the disk</param>
         /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
         public static VirtualDisk OpenDisk(string path, FileAccess access)
+        {
+            return OpenDisk(path, access, null, null);
+        }
+
+        /// <summary>
+        /// Opens an existing virtual disk.
+        /// </summary>
+        /// <param name="path">The path of the virtual disk to open, can be a URI</param>
+        /// <param name="access">The desired access to the disk</param>
+        /// <param name="user">The user name to use for authentication (if necessary)</param>
+        /// <param name="password">The password to use for authentication (if necessary)</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        public static VirtualDisk OpenDisk(string path, FileAccess access, string user, string password)
+        {
+            Uri uri = PathToUri(path);
+            VirtualDisk result = null;
+
+            VirtualDiskTransport transport;
+            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transport))
+            {
+                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "Unable to parse path '{0}'", path), path);
+            }
+
+            try
+            {
+                transport.Connect(uri, user, password);
+
+                if (transport.IsRawDisk)
+                {
+                    result = transport.OpenDisk(access);
+                }
+                else
+                {
+                    string extension = Path.GetExtension(uri.AbsolutePath).ToUpperInvariant();
+                    if (extension.StartsWith(".", StringComparison.Ordinal))
+                    {
+                        extension = extension.Substring(1);
+                    }
+
+                    VirtualDiskFactory factory;
+                    if (ExtensionMap.TryGetValue(extension, out factory))
+                    {
+                        string[] segments = uri.Segments;
+                        result = factory.OpenDisk(transport.GetFileLocator(), segments[segments.Length - 1], access);
+                    }
+                }
+
+                if (result != null)
+                {
+                    result._transport = transport;
+                    transport = null;
+                }
+
+                return result;
+            }
+            finally
+            {
+                if (transport != null)
+                {
+                    transport.Dispose();
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Opens an existing virtual disk, possibly from within an existing disk.
+        /// </summary>
+        /// <param name="fs">The file system to open the disk on</param>
+        /// <param name="path">The path of the virtual disk to open</param>
+        /// <param name="access">The desired access to the disk</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        public static VirtualDisk OpenDisk(DiscFileSystem fs, string path, FileAccess access)
         {
             string extension = Path.GetExtension(path).ToUpperInvariant();
             if (extension.StartsWith(".", StringComparison.Ordinal))
@@ -220,34 +394,98 @@ namespace DiscUtils
             }
 
             VirtualDiskFactory factory;
-            if (DiskFactories.TryGetValue(extension, out factory))
+            if (ExtensionMap.TryGetValue(extension, out factory))
             {
-                return factory.OpenDisk(path, access);
+                return factory.OpenDisk(fs, path, access);
             }
 
             return null;
         }
 
-        private static Dictionary<string, VirtualDiskFactory> DiskFactories
+        private static Uri PathToUri(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException("Path must not be null or empty", "path");
+            }
+
+            if (path.IndexOf(':') < 0 && path[0] != '\\')
+            {
+                path = Path.GetFullPath(path);
+            }
+
+            return new Uri(path);
+        }
+
+        private static Dictionary<string, VirtualDiskFactory> ExtensionMap
         {
             get
             {
-                if (s_diskFactories == null)
+                if (s_extensionMap == null)
                 {
-                    Dictionary<string, VirtualDiskFactory> factories = new Dictionary<string, VirtualDiskFactory>();
+                    InitializeMaps();
+                }
+
+                return s_extensionMap;
+            }
+        }
+
+        private static Dictionary<string, VirtualDiskFactory> TypeMap
+        {
+            get
+            {
+                if (s_typeMap == null)
+                {
+                    InitializeMaps();
+                }
+
+                return s_typeMap;
+            }
+        }
+
+        private static void InitializeMaps()
+        {
+            Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
+            Dictionary<string, VirtualDiskFactory> extensionMap = new Dictionary<string, VirtualDiskFactory>();
+
+            foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+            {
+                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)Attribute.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
+                if (attr != null)
+                {
+                    VirtualDiskFactory factory = (VirtualDiskFactory)Activator.CreateInstance(type);
+                    typeMap.Add(attr.Type, factory);
+                    foreach (var extension in attr.FileExtensions)
+                    {
+                        extensionMap.Add(extension.ToUpperInvariant(), factory);
+                    }
+                }
+            }
+
+            s_typeMap = typeMap;
+            s_extensionMap = extensionMap;
+        }
+
+        private static Dictionary<string, VirtualDiskTransport> DiskTransports
+        {
+            get
+            {
+                if (s_diskTransports == null)
+                {
+                    Dictionary<string, VirtualDiskTransport> transports = new Dictionary<string, VirtualDiskTransport>();
 
                     foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
                     {
-                        foreach (VirtualDiskFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskFactoryAttribute), false))
+                        foreach (VirtualDiskTransportAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
                         {
-                            factories.Add(attr.FileExtension.ToUpperInvariant(), (VirtualDiskFactory)Activator.CreateInstance(type));
+                            transports.Add(attr.Scheme.ToUpperInvariant(), (VirtualDiskTransport)Activator.CreateInstance(type));
                         }
                     }
 
-                    s_diskFactories = factories;
+                    s_diskTransports = transports;
                 }
 
-                return s_diskFactories;
+                return s_diskTransports;
             }
         }
     }

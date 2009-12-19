@@ -20,19 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Raw
 {
-    [VirtualDiskFactory("img")]
-    [VirtualDiskFactory("ima")]
-    [VirtualDiskFactory("vfd")]
-    [VirtualDiskFactory("flp")]
+    [VirtualDiskFactory("RAW", ".img,.ima,.vfd,.flp")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
+        public override string[] Variants
+        {
+            get { return new string[] {}; }
+        }
+
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        {
+            return Disk.Initialize(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity, geometry);
+        }
+
         public override VirtualDisk OpenDisk(string path, FileAccess access)
         {
             return new Disk(path, access);
+        }
+
+        public override VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access)
+        {
+            FileShare share = (access == FileAccess.Read ? FileShare.Read : FileShare.None);
+            return new Disk(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
         }
     }
 }

@@ -45,11 +45,8 @@ namespace DiscUtils.Vmdk
         /// <param name="path">The path to the disk</param>
         /// <param name="access">The access requested to the disk</param>
         public Disk(string path, FileAccess access)
+            : this(new LocalFileLocator(Path.GetDirectoryName(path)), path, access)
         {
-            _layerLocator = new LocalFileLocator(Path.GetDirectoryName(path));
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(path, access), Ownership.Dispose));
-            ResolveFileChain();
         }
 
         /// <summary>
@@ -93,6 +90,14 @@ namespace DiscUtils.Vmdk
             _layerLocator = layerLocator;
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsStream));
+            ResolveFileChain();
+        }
+
+        internal Disk(FileLocator layerLocator, string path, FileAccess access)
+        {
+            _layerLocator = layerLocator;
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(path, access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -215,6 +220,11 @@ namespace DiscUtils.Vmdk
         public static Disk Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type, DiskAdapterType adapterType)
         {
             return new Disk(DiskImageFile.Initialize(fileSystem, path, capacity, type, adapterType), Ownership.Dispose);
+        }
+
+        internal static Disk Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
+        {
+            return new Disk(DiskImageFile.Initialize(fileLocator, path, parameters), Ownership.Dispose);
         }
 
         /// <summary>

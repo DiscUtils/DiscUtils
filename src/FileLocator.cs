@@ -29,6 +29,8 @@ namespace DiscUtils
 {
     internal abstract class FileLocator
     {
+        public abstract bool Exists(string fileName);
+
         public abstract Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share);
 
         public abstract FileLocator GetRelativeLocator(string path);
@@ -41,6 +43,11 @@ namespace DiscUtils
         public LocalFileLocator(string dir)
         {
             _dir = dir;
+        }
+
+        public override bool Exists(string fileName)
+        {
+            return File.Exists(Path.Combine(_dir, fileName));
         }
 
         public override Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
@@ -65,6 +72,11 @@ namespace DiscUtils
             _basePath = basePath;
         }
 
+        public override bool Exists(string fileName)
+        {
+            return _fileSystem.FileExists(Path.Combine(_basePath, fileName));
+        }
+
         public override Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
         {
             return _fileSystem.OpenFile(Path.Combine(_basePath, fileName), mode, access);
@@ -75,5 +87,4 @@ namespace DiscUtils
             return new DiscFileLocator(_fileSystem, Path.Combine(_basePath, path));
         }
     }
-
 }

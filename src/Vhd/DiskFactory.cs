@@ -20,17 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace DiscUtils.Vhd
 {
-    [VirtualDiskFactory("vhd")]
-    [VirtualDiskFactory("avhd")]
+    [VirtualDiskFactory("VHD", ".vhd,.avhd")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
+        public override string[] Variants
+        {
+            get { return new string[] { "fixed", "dynamic" }; }
+        }
+
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        {
+            switch (variant)
+            {
+                case "fixed":
+                    return Disk.InitializeFixed(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity, geometry);
+                case "dynamic":
+                    return Disk.InitializeDynamic(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity, geometry);
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VDI disk variant '{0}'", variant), "variant");
+            }
+        }
+
         public override VirtualDisk OpenDisk(string path, FileAccess access)
         {
             return new Disk(path, access);
+        }
+
+        public override VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access)
+        {
+            return new Disk(locator, path, access);
         }
     }
 }

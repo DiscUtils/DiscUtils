@@ -27,60 +27,31 @@ using DiscUtils.Iscsi;
 
 namespace iSCSIBrowse
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _portalAddress;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _verbose;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _portalAddress;
 
         static void Main(string[] args)
         {
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+{
             _portalAddress = new CommandLineParameter("portal", "Address of the iSCSI server (aka Portal) in the form <host>[:<port>], for example 192.168.1.2:3260 or 192.168.1.2", false);
-            _userName = new CommandLineSwitch("u", "user", "user_name", "The user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password");
-            _password = new CommandLineSwitch("pw", "password", "secret", "The password to authenticate with.");
-            _verbose = new CommandLineSwitch("v", "verbose", null, "Show detailed information about targets and LUNs.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
-
-            CommandLineParser parser = new CommandLineParser("iSCSIBrowse");
             parser.AddParameter(_portalAddress);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
-            parser.AddSwitch(_verbose);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.UserAndPassword | StandardSwitches.Verbose;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
+        protected override void DoRun()
+        {
             Initiator initiator = new Initiator();
 
-            if (_userName.IsPresent)
+            if (!string.IsNullOrEmpty(UserName))
             {
-                string password;
-                if (_password.IsPresent)
-                {
-                    password = _password.Value;
-                }
-                else
-                {
-                    password = Utilities.PromptForPassword();
-                }
-
-                initiator.SetCredentials(_userName.Value, password);
+                initiator.SetCredentials(UserName, Password);
             }
 
             bool foundTargets = false;
@@ -91,23 +62,35 @@ namespace iSCSIBrowse
                     foundTargets = true;
                     Console.WriteLine("Target: " + target);
 
-                    if (_verbose.IsPresent)
+                    if (Verbose)
                     {
                         Console.WriteLine("  Name: " + target.Name);
                         foreach (var addr in target.Addresses)
                         {
-                            Console.WriteLine("  Address: " + addr);
+                            Console.WriteLine("  Address: " + addr + "  <" + addr.ToUri() + ">");
                         }
                         Console.WriteLine();
                     }
 
-                    using(Session s = initiator.ConnectTo(target))
+                    using (Session s = initiator.ConnectTo(target))
                     {
                         foreach (var lun in s.GetLuns())
                         {
-                            Console.WriteLine(lun.DeviceType + ": " + target + "?LUN=" + lun);
+                            Console.WriteLine(lun.DeviceType + ": ");
+                            string[] uris = lun.GetUris();
+                            if (uris.Length > 1)
+                            {
+                                for (int i = 0; i < uris.Length; ++i)
+                                {
+                                    Console.WriteLine("  URI[" + i + "]: " + uris[i]);
+                                }
+                            }
+                            else if (uris.Length > 0)
+                            {
+                                Console.WriteLine("  URI: " + uris[0]);
+                            }
 
-                            if (_verbose.IsPresent)
+                            if (Verbose)
                             {
                                 Console.WriteLine("  LUN: " + lun.Lun.ToString("x16", CultureInfo.InvariantCulture));
                                 Console.WriteLine("  Device Type: " + lun.DeviceType);

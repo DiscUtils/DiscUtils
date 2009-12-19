@@ -20,16 +20,52 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.IO;
 
 namespace DiscUtils.Vmdk
 {
-    [VirtualDiskFactory("vmdk")]
+    [VirtualDiskFactory("VMDK", ".vmdk")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
+        public override string[] Variants
+        {
+            get { return new string[] { "fixed", "dynamic", "vmfsfixed", "vmfsdynamic" }; }
+        }
+
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        {
+            DiskParameters vmdkParams = new DiskParameters();
+            vmdkParams.Capacity = capacity;
+            vmdkParams.Geometry = geometry;
+
+            switch (variant)
+            {
+                case "fixed":
+                    vmdkParams.CreateType = DiskCreateType.MonolithicFlat;
+                    break;
+                case "dynamic":
+                    vmdkParams.CreateType = DiskCreateType.MonolithicSparse;
+                    break;
+                case "vmfsfixed":
+                    vmdkParams.CreateType = DiskCreateType.Vmfs;
+                    break;
+                case "vmfsdynamic":
+                    vmdkParams.CreateType = DiskCreateType.VmfsSparse;
+                    break;
+            }
+
+            return Disk.Initialize(locator, path, vmdkParams);
+        }
+
         public override VirtualDisk OpenDisk(string path, FileAccess access)
         {
             return new Disk(path, access);
+        }
+
+        public override VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access)
+        {
+            return new Disk(locator, path, access);
         }
     }
 }

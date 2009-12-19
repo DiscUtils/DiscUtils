@@ -22,81 +22,71 @@
 
 using System;
 using System.IO;
+using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
 
 namespace NTFSDump
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineMultiParameter _diskFiles;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _partition;
-        private static CommandLineSwitch _volumeId;
-        private static CommandLineSwitch _showHidden;
-        private static CommandLineSwitch _showSystem;
-        private static CommandLineSwitch _showMeta;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineMultiParameter _diskFiles;
+        private CommandLineSwitch _showHidden;
+        private CommandLineSwitch _showSystem;
+        private CommandLineSwitch _showMeta;
 
         static void Main(string[] args)
         {
-            _diskFiles = new CommandLineMultiParameter("disk", "Paths to the disks to inspect.  Values can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
-            _userName = new CommandLineSwitch("u", "user", "user_name", "If using iSCSI, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("pw", "password", "secret", "If using iSCSI, optionally use this parameter to specify the password to authenticate with.");
-            _partition = new CommandLineSwitch("p", "partition", "num", "The number of the partition to inspect, in the range 0-n.  If not specified, 0 (the first partition) is the default.");
-            _volumeId = new CommandLineSwitch("v", "volume", "id", "The volume id of the volume to access, use the VolInfo tool to discover this id.  If specified, the partition parameter is ignored.");
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
+            _diskFiles = FileOrUriMultiParameter("disk", "Paths to the disks to inspect.", false);
             _showHidden = new CommandLineSwitch("H", "hidden", null, "Don't hide files and directories with the hidden attribute set in the directory listing.");
             _showSystem = new CommandLineSwitch("S", "system", null, "Don't hide files and directories with the system attribute set in the directory listing.");
             _showMeta = new CommandLineSwitch("M", "meta", null, "Don't hide files and directories that are part of the file system itself in the directory listing.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("NTFSDump");
             parser.AddMultiParameter(_diskFiles);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
-            parser.AddSwitch(_partition);
-            parser.AddSwitch(_volumeId);
             parser.AddSwitch(_showHidden);
             parser.AddSwitch(_showSystem);
             parser.AddSwitch(_showMeta);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.UserAndPassword;
+        }
 
-            if (!_quietSwitch.IsPresent)
+        protected override void DoRun()
+        {
+            VolumeManager volMgr = new VolumeManager();
+            foreach (string disk in _diskFiles.Values)
             {
-                Utilities.ShowHeader(typeof(Program));
+                volMgr.AddDisk(VirtualDisk.OpenDisk(disk, FileAccess.Read, UserName, Password));
             }
 
-            if (_helpSwitch.IsPresent || !parseResult)
+
+            Stream partitionStream = null;
+            if (!string.IsNullOrEmpty(VolumeId))
             {
-                parser.DisplayHelp();
-                return;
+                partitionStream = volMgr.GetVolume(VolumeId).Open();
+            }
+            else if (Partition >= 0)
+            {
+                partitionStream = volMgr.GetPhysicalVolumes()[Partition].Open();
+            }
+            else
+            {
+                partitionStream = volMgr.GetLogicalVolumes()[0].Open();
             }
 
-            int partition = -1;
-            if (_partition.IsPresent && !int.TryParse(_partition.Value, out partition))
-            {
-                parser.DisplayHelp();
-                return;
-            }
 
-            string user = _userName.IsPresent ? _userName.Value : null;
-            string password = _password.IsPresent ? _password.Value : null;
+            NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
+            fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
+            fs.NtfsOptions.HideSystemFiles = !_showSystem.IsPresent;
+            fs.NtfsOptions.HideMetafiles = !_showMeta.IsPresent;
 
-            using (Stream partitionStream = Utilities.OpenVolume(_volumeId.Value, partition, user, password, FileAccess.Read, _diskFiles.Values))
-            {
-                NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
-                fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
-                fs.NtfsOptions.HideSystemFiles = !_showSystem.IsPresent;
-                fs.NtfsOptions.HideMetafiles = !_showMeta.IsPresent;
 
-                fs.Dump(Console.Out, "");
-            }
+            fs.Dump(Console.Out, "");
         }
     }
 }

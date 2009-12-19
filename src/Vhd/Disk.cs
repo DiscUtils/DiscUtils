@@ -85,6 +85,20 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Creates a new instance from an existing file, differencing disks are supported.
+        /// </summary>
+        /// <param name="locator">The locator to access relative files</param>
+        /// <param name="path">The path to the disk image</param>
+        /// <param name="access">The access requested to the disk</param>
+        internal Disk(FileLocator locator, string path, FileAccess access)
+        {
+            DiskImageFile file = new DiskImageFile(locator.Open(path, FileMode.Open, access, FileShare.None), Ownership.Dispose);
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            ResolveFileChain(locator, path);
+        }
+
+        /// <summary>
         /// Creates a new instance from a pre-existing set of image files.
         /// </summary>
         /// <param name="files">The set of image files</param>
@@ -404,6 +418,12 @@ namespace DiscUtils.Vhd
 
         private void ResolveFileChain(string lastPath)
         {
+            LocalFileLocator locator = new LocalFileLocator(Utilities.GetDirectoryFromPath(lastPath));
+            ResolveFileChain(locator, Utilities.GetFileFromPath(lastPath));
+        }
+
+        private void ResolveFileChain(FileLocator fileLocator, string lastPath)
+        {
             DiskImageFile file = _files[_files.Count - 1].First;
             string filePath = lastPath;
 
@@ -412,10 +432,9 @@ namespace DiscUtils.Vhd
                 bool found = false;
                 foreach (string testPath in file.GetParentLocations(filePath))
                 {
-                    if (File.Exists(testPath))
+                    if (fileLocator.Exists(testPath))
                     {
-                        filePath = Path.GetFullPath(testPath);
-                        DiskImageFile newFile = new DiskImageFile(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), Ownership.Dispose);
+                        DiskImageFile newFile = new DiskImageFile(fileLocator.Open(testPath, FileMode.Open, FileAccess.Read, FileShare.Read), Ownership.Dispose);
 
                         if (newFile.UniqueId != file.ParentUniqueId)
                         {

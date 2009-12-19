@@ -21,6 +21,7 @@
 //
 
 
+using System;
 using System.Globalization;
 
 namespace DiscUtils.Iscsi
@@ -33,7 +34,7 @@ namespace DiscUtils.Iscsi
     /// </remarks>
     public class TargetAddress
     {
-        private const int DefaultPort = 3260;
+        internal const int DefaultPort = 3260;
 
         private string _networkAddress;
         private int _networkPort;
@@ -135,6 +136,20 @@ namespace DiscUtils.Iscsi
                 result += "," + _targetGroupTag;
             }
             return result;
+        }
+
+        /// <summary>
+        /// Gets the target address as a URI.
+        /// </summary>
+        /// <returns>The target address in the form: iscsi://host[:port][/grouptag]</returns>
+        public Uri ToUri()
+        {
+            UriBuilder builder = new UriBuilder();
+            builder.Scheme = "iscsi";
+            builder.Host = NetworkAddress;
+            builder.Port = (_networkPort != DefaultPort) ? _networkPort : -1;
+            builder.Path = string.IsNullOrEmpty(_targetGroupTag) ? "" : _targetGroupTag;
+            return builder.Uri;
         }
     }
 }

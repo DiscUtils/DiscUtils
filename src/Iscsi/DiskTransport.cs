@@ -21,22 +21,52 @@
 //
 
 using System;
+using System.IO;
 
-namespace DiscUtils
+namespace DiscUtils.Iscsi
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    internal sealed class VirtualDiskFactoryAttribute : Attribute
+    [VirtualDiskTransport("iscsi")]
+    internal sealed class DiskTransport : VirtualDiskTransport
     {
-        private string _fileExtension;
+        private LunInfo _lunInfo;
+        private Session _session;
 
-        public VirtualDiskFactoryAttribute(string fileExtension)
+        public override void Connect(Uri uri, string username, string password)
         {
-            _fileExtension = fileExtension;
+            _lunInfo = LunInfo.ParseUri(uri.OriginalString);
+
+            Initiator initiator = new Initiator();
+            initiator.SetCredentials(username, password);
+            _session = initiator.ConnectTo(_lunInfo.Target);
         }
 
-        public string FileExtension
+        public override void Dispose(bool disposing)
         {
-            get { return _fileExtension; }
+            if (disposing)
+            {
+                if (_session != null)
+                {
+                    _session.Dispose();
+                }
+                _session = null;
+            }
+
+            base.Dispose(disposing);
+        }
+
+        public override bool IsRawDisk
+        {
+            get { return true; }
+        }
+
+        public override VirtualDisk OpenDisk(FileAccess access)
+        {
+            return _session.OpenDisk(_lunInfo.Lun, access);
+        }
+
+        public override FileLocator GetFileLocator()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -28,72 +28,57 @@ using DiscUtils.Vhd;
 
 namespace VHDCreate
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _sourceFile;
-        private static CommandLineParameter _destFile;
-        private static CommandLineSwitch _typeSwitch;
-        private static CommandLineSwitch _sizeSwitch;
-        private static CommandLineSwitch _blockSizeSwitch;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _sourceFile;
+        private CommandLineParameter _destFile;
+        private CommandLineSwitch _typeSwitch;
+        private CommandLineSwitch _blockSizeSwitch;
+        private CommandLineSwitch _helpSwitch;
+        private CommandLineSwitch _quietSwitch;
 
         static void Main(string[] args)
+        {
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
         {
             _destFile = new CommandLineParameter("new.vhd", "Path to the VHD file to create.", false);
             _sourceFile = new CommandLineParameter("base.vhd", "For differencing disks, the path to the base disk.", true);
             _typeSwitch = new CommandLineSwitch("t", "type", "type", "The type of disk to create, one of: fixed, dynamic, diff.  The default is dynamic.");
-            _sizeSwitch = new CommandLineSwitch("sz", "size", "size", "REQUIRED for fixed and dynamic disks, the size of the disk.  Use B, KB, MB, GB to specify units (units default to bytes if not specified).");
             _blockSizeSwitch = new CommandLineSwitch("bs", "blocksize", "size", "For dynamic disks, the allocation uint size for new disk regions in bytes.  The default is 2MB.    Use B, KB, MB, GB to specify units (units default to bytes if not specified).");
             _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
             _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("VHDCreate");
             parser.AddParameter(_destFile);
             parser.AddParameter(_sourceFile);
             parser.AddSwitch(_typeSwitch);
-            parser.AddSwitch(_sizeSwitch);
             parser.AddSwitch(_blockSizeSwitch);
             parser.AddSwitch(_helpSwitch);
             parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.DiskSize;
+        }
 
-            if (!_quietSwitch.IsPresent)
+        protected override void DoRun()
+        {
+            if (!_destFile.IsPresent)
             {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            if(!_destFile.IsPresent)
-            {
-                parser.DisplayHelp();
+                DisplayHelp();
                 Environment.ExitCode = 1;
                 return;
             }
 
             if ((_typeSwitch.IsPresent && _typeSwitch.Value == "dynamic") || !_typeSwitch.IsPresent)
             {
-                long size;
-                if(!_sizeSwitch.IsPresent || !Utilities.TryParseDiskSize(_sizeSwitch.Value, out size))
-                {
-                    parser.DisplayHelp();
-                    Environment.ExitCode = 1;
-                    return;
-                }
-
                 long blockSize = 2 * 1024 * 1024;
                 if (_blockSizeSwitch.IsPresent)
                 {
                     if (!Utilities.TryParseDiskSize(_blockSizeSwitch.Value, out blockSize))
                     {
-                        parser.DisplayHelp();
+                        DisplayHelp();
                         Environment.ExitCode = 1;
                         return;
                     }
@@ -106,9 +91,16 @@ namespace VHDCreate
                     return;
                 }
 
-                using(FileStream fs = new FileStream(_destFile.Value, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                if (DiskSize <= 0)
                 {
-                    Disk.InitializeDynamic(fs, Ownership.None, size, blockSize);
+                    Console.WriteLine("ERROR: disk size must be greater than zero.");
+                    Environment.ExitCode = 3;
+                    return;
+                }
+
+                using (FileStream fs = new FileStream(_destFile.Value, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                {
+                    Disk.InitializeDynamic(fs, Ownership.None, DiskSize, blockSize);
                 }
             }
             else if (_typeSwitch.Value == "diff")
@@ -116,7 +108,7 @@ namespace VHDCreate
                 // Create Diff
                 if (!_sourceFile.IsPresent)
                 {
-                    parser.DisplayHelp();
+                    DisplayHelp();
                     Environment.ExitCode = 1;
                     return;
                 }
@@ -125,23 +117,22 @@ namespace VHDCreate
             }
             else if (_typeSwitch.Value == "fixed")
             {
-                // Create Fixed disk
-                long size;
-                if (!_sizeSwitch.IsPresent || !Utilities.TryParseDiskSize(_sizeSwitch.Value, out size))
+                if (DiskSize <= 0)
                 {
-                    parser.DisplayHelp();
-                    Environment.ExitCode = 1;
+                    Console.WriteLine("ERROR: disk size must be greater than zero.");
+                    Environment.ExitCode = 3;
                     return;
                 }
 
+                // Create Fixed disk
                 using (FileStream fs = new FileStream(_destFile.Value, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                 {
-                    Disk.InitializeFixed(fs, Ownership.None, size);
+                    Disk.InitializeFixed(fs, Ownership.None, DiskSize);
                 }
             }
             else
             {
-                parser.DisplayHelp();
+                DisplayHelp();
                 Environment.ExitCode = 1;
                 return;
             }

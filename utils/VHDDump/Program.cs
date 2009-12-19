@@ -28,36 +28,27 @@ using DiscUtils.Vhd;
 
 namespace VHDDump
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _vhdFile;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _vhdFile;
 
         static void Main(string[] args)
         {
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
             _vhdFile = new CommandLineParameter("vhd_file", "Path to the VHD file to inspect.", false);
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("VHDDump");
             parser.AddParameter(_vhdFile);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.Default;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
+        protected override void DoRun()
+        {
             using (Stream fileStream = File.OpenRead(_vhdFile.Value))
             {
                 using (DiskImageFile vhdFile = new DiskImageFile(fileStream, Ownership.None))
@@ -78,7 +69,7 @@ namespace VHDDump
                     Console.WriteLine("-----------------");
                     Console.WriteLine("              Cookie: {0:x8}", info.Cookie);
                     Console.WriteLine("            Features: {0:x8}", info.Features);
-                    Console.WriteLine(" File Format Version: {0}.{1}", ((info.FileFormatVersion >> 16) & 0xFFFF), (info.FileFormatVersion & 0xFFFF) );
+                    Console.WriteLine(" File Format Version: {0}.{1}", ((info.FileFormatVersion >> 16) & 0xFFFF), (info.FileFormatVersion & 0xFFFF));
                     Console.WriteLine("       Creation Time: {0} (UTC)", info.CreationTimestamp);
                     Console.WriteLine("         Creator App: {0:x8}", info.CreatorApp);
                     Console.WriteLine("     Creator Version: {0}.{1}", ((info.CreatorVersion >> 16) & 0xFFFF), (info.CreatorVersion & 0xFFFF));

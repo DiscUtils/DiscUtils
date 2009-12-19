@@ -22,88 +22,77 @@
 
 using System;
 using System.IO;
+using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Fat;
 
 namespace FATExtract
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineMultiParameter _diskFiles;
-        private static CommandLineParameter _targetFileParam;
-        private static CommandLineSwitch _destDirSwitch;
-        private static CommandLineSwitch _partition;
-        private static CommandLineSwitch _volumeId;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineMultiParameter _diskFiles;
+        private CommandLineParameter _targetFileParam;
+        private CommandLineSwitch _destDirSwitch;
 
         static void Main(string[] args)
         {
-            _diskFiles = new CommandLineMultiParameter("disk", "Paths to the disks to inspect.  Values can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
+            _diskFiles = FileOrUriMultiParameter("disk", "Paths to the disks to inspect.", false);
             _targetFileParam = new CommandLineParameter("file", "The name of the file to extract.", false);
             _destDirSwitch = new CommandLineSwitch("d", "destdir", "dir", "The destination directory.  If not specified, the current directory is used.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _partition = new CommandLineSwitch("p", "partition", "num", "The number of the partition to access, in the range 0-n.  If not specified, 0 (the first partition) is the default.");
-            _volumeId = new CommandLineSwitch("v", "volume", "id", "The volume id of the volume to access, use the VolInfo tool to discover this id.  If specified, the partition parameter is ignored.");
-            _userName = new CommandLineSwitch("u", "user", "user_name", "If using iSCSI, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("pw", "password", "secret", "If using iSCSI, optionally use this parameter to specify the password to authenticate with.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("FATExtract");
             parser.AddMultiParameter(_diskFiles);
             parser.AddParameter(_targetFileParam);
             parser.AddSwitch(_destDirSwitch);
-            parser.AddSwitch(_partition);
-            parser.AddSwitch(_volumeId);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.UserAndPassword | StandardSwitches.PartitionOrVolume;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
-            int partition = -1;
-            if (_partition.IsPresent && !int.TryParse(_partition.Value, out partition))
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
+        protected override void DoRun()
+        {
             string destDir = _destDirSwitch.IsPresent ? _destDirSwitch.Value : Environment.CurrentDirectory;
 
-            string user = _userName.IsPresent ? _userName.Value : null;
-            string password = _password.IsPresent ? _password.Value : null;
-
-            using (Stream volumeStream = Utilities.OpenVolume(_volumeId.Value, partition, user, password, FileAccess.Read, _diskFiles.Values))
+            VolumeManager volMgr = new VolumeManager();
+            foreach (string disk in _diskFiles.Values)
             {
-                FatFileSystem fs = new FatFileSystem(volumeStream);
+                volMgr.AddDisk(VirtualDisk.OpenDisk(disk, FileAccess.Read, UserName, Password));
+            }
 
-                string fileName = _targetFileParam.Value;
-                int sep = fileName.LastIndexOf('\\');
-                if (sep >= 0)
-                {
-                    fileName = fileName.Substring(sep + 1);
-                }
 
-                using (FileStream outFile = new FileStream(destDir + "\\" + fileName, FileMode.Create, FileAccess.ReadWrite))
+            Stream partitionStream = null;
+            if (!string.IsNullOrEmpty(VolumeId))
+            {
+                partitionStream = volMgr.GetVolume(VolumeId).Open();
+            }
+            else if (Partition >= 0)
+            {
+                partitionStream = volMgr.GetPhysicalVolumes()[Partition].Open();
+            }
+            else
+            {
+                partitionStream = volMgr.GetLogicalVolumes()[0].Open();
+            }
+
+
+            FatFileSystem fs = new FatFileSystem(partitionStream);
+
+            string fileName = _targetFileParam.Value;
+            int sep = fileName.LastIndexOf('\\');
+            if (sep >= 0)
+            {
+                fileName = fileName.Substring(sep + 1);
+            }
+
+            using (FileStream outFile = new FileStream(destDir + "\\" + fileName, FileMode.Create, FileAccess.ReadWrite))
+            {
+                using (Stream inFile = fs.OpenFile(_targetFileParam.Value, FileMode.Open))
                 {
-                    using (Stream inFile = fs.OpenFile(_targetFileParam.Value, FileMode.Open))
-                    {
-                        PumpStreams(inFile, outFile);
-                    }
+                    PumpStreams(inFile, outFile);
                 }
             }
         }

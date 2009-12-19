@@ -27,43 +27,33 @@ using DiscUtils.Iso9660;
 
 namespace ISOCreate
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _isoFileParam;
-        private static CommandLineParameter _srcDir;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
-        private static CommandLineSwitch _volLabelSwitch;
+        private CommandLineParameter _isoFileParam;
+        private CommandLineParameter _srcDir;
+        private CommandLineSwitch _volLabelSwitch;
 
         static void Main(string[] args)
         {
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
             _isoFileParam = new CommandLineParameter("iso_file", "The ISO file to create.", false);
             _srcDir = new CommandLineParameter("sourcedir", "The directory to be added to the ISO", false);
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
             _volLabelSwitch = new CommandLineSwitch("vl", "vollabel", "label", "Volume Label for the ISO file.");
 
-            CommandLineParser parser = new CommandLineParser("ISOCreate");
             parser.AddParameter(_isoFileParam);
             parser.AddParameter(_srcDir);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
             parser.AddSwitch(_volLabelSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.Default;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
-
+        protected override void DoRun()
+        {
             DirectoryInfo di = new DirectoryInfo(_srcDir.Value);
             if (!di.Exists)
             {
@@ -91,7 +81,7 @@ namespace ISOCreate
                 builder.AddFile(file.FullName.Substring(basePath.Length), file.FullName);
             }
 
-            foreach(DirectoryInfo dir in di.GetDirectories())
+            foreach (DirectoryInfo dir in di.GetDirectories())
             {
                 PopulateFromFolder(builder, dir, basePath);
             }

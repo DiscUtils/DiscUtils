@@ -504,7 +504,7 @@ namespace DiscUtils.Nfs
 
                     if (actualPerms != requested)
                     {
-                        throw new UnauthorizedAccessException();
+                        throw new UnauthorizedAccessException(string.Format(CultureInfo.InvariantCulture, "Access denied opening '{0}'. Requested permission '{1}', got '{2}'", path, requested, actualPerms));
                     }
 
                     Nfs3FileStream result = new Nfs3FileStream(_client, handle, access);

@@ -22,12 +22,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using DiscUtils.Iscsi;
 
 namespace DiscUtils.Common
 {
+
+
     public class Utilities
     {
         public static string[] WordWrap(string text, int width)
@@ -56,91 +55,6 @@ namespace DiscUtils.Common
             return lines.ToArray();
         }
 
-        public static VirtualDisk OpenDisk(string path, FileAccess access, string username, string password)
-        {
-            if (path.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
-            {
-                return OpenIScsiDisk(path, access, username, password);
-            }
-            else
-            {
-                VirtualDisk result = VirtualDisk.OpenDisk(path, access);
-                if (result == null)
-                {
-                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "{0} is not a recognised virtual disk type", path));
-                }
-
-                return result;
-            }
-        }
-
-        public static VirtualDisk OpenIScsiDisk(string path, FileAccess access, string username, string password)
-        {
-            string targetAddress;
-            string targetName;
-            string lun = null;
-
-            if (!path.StartsWith("iscsi://", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("The iSCSI address is invalid");
-            }
-
-            int targetAddressEnd = path.IndexOf('/', 8);
-            if (targetAddressEnd < 8)
-            {
-                throw new ArgumentException("The iSCSI address is invalid");
-            }
-            targetAddress = path.Substring(8, targetAddressEnd - 8);
-
-
-            int targetNameEnd = path.IndexOf('?', targetAddressEnd + 1);
-            if (targetNameEnd < targetAddressEnd)
-            {
-                targetName = path.Substring(targetAddressEnd + 1);
-            }
-            else
-            {
-                targetName = path.Substring(targetAddressEnd + 1, targetNameEnd - (targetAddressEnd + 1));
-
-                string[] parms = path.Substring(targetNameEnd + 1).Split('&');
-
-                foreach (string param in parms)
-                {
-                    if (param.StartsWith("LUN=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        lun = param.Substring(4);
-                    }
-                }
-            }
-
-            if (lun == null)
-            {
-                throw new ArgumentException("No LUN specified in address", "path");
-            }
-
-            Initiator initiator = new Initiator();
-
-            if (!string.IsNullOrEmpty(username))
-            {
-                if (string.IsNullOrEmpty(password))
-                {
-                    password = Utilities.PromptForPassword();
-                }
-                initiator.SetCredentials(username, password);
-            }
-
-            Session session = initiator.ConnectTo(targetName, targetAddress);
-            foreach (var lunInfo in session.GetLuns())
-            {
-                if (lunInfo.ToString() == lun)
-                {
-                    return session.OpenDisk(lunInfo.Lun, access);
-                }
-            }
-
-            throw new FileNotFoundException("The iSCSI LUN could not be found", path);
-        }
-
         public static string PromptForPassword()
         {
             Console.WriteLine();
@@ -155,72 +69,6 @@ namespace DiscUtils.Common
             finally
             {
                 Console.ForegroundColor = restoreColor;
-            }
-        }
-
-        public static SparseStream OpenVolume(string volumeId, int partition, string user, string password, FileAccess access, params string[] disks)
-        {
-            VolumeManager volMgr = new VolumeManager();
-            foreach (string disk in disks)
-            {
-                volMgr.AddDisk(OpenDisk(disk, access, user, password));
-            }
-
-            if (string.IsNullOrEmpty(volumeId))
-            {
-                if (partition >= 0)
-                {
-                    PhysicalVolumeInfo[] physicalVolumes = volMgr.GetPhysicalVolumes();
-
-                    if (partition > physicalVolumes.Length)
-                    {
-                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Partition {0} not found", partition), "partition");
-                    }
-
-                    return physicalVolumes[partition].Open();
-                }
-                else
-                {
-                    return volMgr.GetLogicalVolumes()[0].Open();
-                }
-            }
-            else
-            {
-                VolumeInfo volInfo = volMgr.GetVolume(volumeId);
-                if (volInfo == null)
-                {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Volume {0} not found", volumeId), "volumeId");
-                }
-                return volInfo.Open();
-            }
-        }
-
-        public static VirtualDisk OpenOutputDisk(string format, string outFile, long capacity, Geometry geometry, string user, string password)
-        {
-            switch (format.ToUpperInvariant())
-            {
-                case "VMDK-FIXED":
-                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.MonolithicFlat);
-                case "VMDK-DYNAMIC":
-                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.MonolithicSparse);
-                case "VMDK-VMFSFIXED":
-                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.Vmfs);
-                case "VMDK-VMFSDYNAMIC":
-                    return DiscUtils.Vmdk.Disk.Initialize(outFile, capacity, geometry, DiscUtils.Vmdk.DiskCreateType.VmfsSparse);
-                case "VHD-FIXED":
-                    return DiscUtils.Vhd.Disk.InitializeFixed(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity, geometry);
-                case "VHD-DYNAMIC":
-                    return DiscUtils.Vhd.Disk.InitializeDynamic(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity, geometry);
-                case "VDI-FIXED":
-                    return DiscUtils.Vdi.Disk.InitializeFixed(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity);
-                case "VDI-DYNAMIC":
-                    return DiscUtils.Vdi.Disk.InitializeDynamic(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity);
-                case "RAW":
-                    return DiscUtils.Raw.Disk.Initialize(new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose, capacity);
-                case "ISCSI":
-                    return Utilities.OpenIScsiDisk(outFile, FileAccess.ReadWrite, user, password);
-                default:
-                    throw new NotSupportedException(format + " is not a recognized disk type");
             }
         }
 
@@ -252,13 +100,13 @@ namespace DiscUtils.Common
                 switch (unitChar)
                 {
                     case 'K':
-                        value = quantity * 1024;
+                        value = quantity * 1024L;
                         return true;
                     case 'M':
-                        value = quantity * 1024 * 1024;
+                        value = quantity * 1024L * 1024L;
                         return true;
                     case 'G':
-                        value = quantity * 1024 * 1024 * 1024;
+                        value = quantity * 1024L * 1024L * 1024L;
                         return true;
                     default:
                         value = 0;
@@ -270,24 +118,6 @@ namespace DiscUtils.Common
                 value = 0;
                 return false;
             }
-        }
-
-        public static void ShowHeader(Type program)
-        {
-            Console.WriteLine("{0} v{1}, available from http://discutils.codeplex.com", GetExeName(program), GetVersion(program));
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2009");
-            Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
-            Console.WriteLine();
-        }
-
-        public static string GetExeName(Type program)
-        {
-            return program.Assembly.GetName().Name;
-        }
-
-        public static string GetVersion(Type program)
-        {
-            return program.Assembly.GetName().Version.ToString(3);
         }
     }
 }

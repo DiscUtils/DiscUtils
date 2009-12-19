@@ -251,7 +251,8 @@ namespace DiscUtils.Iscsi
 
             ScsiInquiryStandardResponse resp = Send<ScsiInquiryStandardResponse>(cmd, null, 0, 0, ScsiInquiryCommand.InitialResponseDataLength);
 
-            return new LunInfo(lun, resp.DeviceType, resp.Removable, resp.VendorId, resp.ProductId, resp.ProductRevision);
+            TargetInfo targetInfo = new TargetInfo(TargetName, new List<TargetAddress>(_addresses).ToArray());
+            return new LunInfo(targetInfo, lun, resp.DeviceType, resp.Removable, resp.VendorId, resp.ProductId, resp.ProductRevision);
         }
 
         /// <summary>

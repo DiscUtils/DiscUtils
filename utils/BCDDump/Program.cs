@@ -28,36 +28,26 @@ using DiscUtils.Registry;
 
 namespace BCDDump
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _bcdFile;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _bcdFile;
 
         static void Main(string[] args)
         {
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
             _bcdFile = new CommandLineParameter("bcd_file", "Path to the BCD file to inspect.", false);
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("BCDDump");
             parser.AddParameter(_bcdFile);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
+            return StandardSwitches.Default;
+        }
 
-            bool parseResult = parser.Parse(args);
-
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
+        protected override void DoRun()
+        {
             using (Stream fileStream = File.OpenRead(_bcdFile.Value))
             {
                 RegistryHive hive = new RegistryHive(fileStream);

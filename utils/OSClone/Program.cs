@@ -31,7 +31,7 @@ using DiscUtils.Registry;
 
 namespace OSClone
 {
-    class Program
+    class Program : ProgramBase
     {
         // Shared to avoid continual re-allocation of a large buffer
         private static byte[] s_copyBuffer = new byte[10 * 1024 * 1024];
@@ -41,81 +41,33 @@ namespace OSClone
             @"\PAGEFILE.SYS", @"\HIBERFIL.SYS", @"\SYSTEM VOLUME INFORMATION"
         };
 
-        private static CommandLineParameter _sourceFile;
-        private static CommandLineParameter _destFile;
-        private static CommandLineSwitch _outFormat;
-        private static CommandLineSwitch _sizeSwitch;
-        private static CommandLineSwitch _labelSwitch;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _sourceFile;
+        private CommandLineParameter _destFile;
+        private CommandLineSwitch _labelSwitch;
 
         static void Main(string[] args)
         {
-            _sourceFile = new CommandLineParameter("in_file", "The disk image containing the Operating System image to be cloned.", false);
-            _destFile = new CommandLineParameter("out_file", "The path to the output disk image.", false);
-            _outFormat = new CommandLineSwitch("of", "outputFormat", "format", "The type of disk to output, one of RAW, VMDK-fixed, VMDK-dynamic, VMDK-vmfsFixed, VMDK-vmfsDynamic, VHD-fixed, VHD-dynamic, VDI-dynamic, VDI-fixed or iSCSI.");
-            _sizeSwitch = new CommandLineSwitch("sz", "size", "size", "The size of the output disk.  Use B, KB, MB, GB to specify units (units default to bytes if not specified).");
-            _labelSwitch = new CommandLineSwitch("l", "label", "name", "The volume label for the NTFS file system created.");
-            _userName = new CommandLineSwitch("u", "user", "user_name", "If using an iSCSI source or target, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("pw", "password", "secret", "If using an iSCSI source or target, optionally use this parameter to specify the password to authenticate with.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
+            Program program = new Program();
+            program.Run(args);
+        }
 
-            CommandLineParser parser = new CommandLineParser("OSClone");
+        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
+            _sourceFile = FileOrUriParameter("in_file", "The disk image containing the Operating System image to be cloned.", false);
+            _destFile = FileOrUriParameter("out_file", "The path to the output disk image.", false);
+            _labelSwitch = new CommandLineSwitch("l", "label", "name", "The volume label for the NTFS file system created.");
+
             parser.AddParameter(_sourceFile);
             parser.AddParameter(_destFile);
-            parser.AddSwitch(_outFormat);
-            parser.AddSwitch(_sizeSwitch);
             parser.AddSwitch(_labelSwitch);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.OutputFormat | StandardSwitches.UserAndPassword | StandardSwitches.DiskSize;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            if (!_sizeSwitch.IsPresent)
-            {
-                parser.DisplayHelp();
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            if (!_outFormat.IsPresent)
-            {
-                parser.DisplayHelp();
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            long diskSize;
-            if (!Utilities.TryParseDiskSize(_sizeSwitch.Value, out diskSize))
-            {
-                parser.DisplayHelp();
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            string user = _userName.IsPresent ? _userName.Value : null;
-            string password = _password.IsPresent ? _password.Value : null;
-            string label = _labelSwitch.IsPresent ? _labelSwitch.Value : "New Volume";
-
-            using (VirtualDisk sourceDisk = Utilities.OpenDisk(_sourceFile.Value, FileAccess.Read, user, password))
-            using (VirtualDisk destDisk = Utilities.OpenOutputDisk(_outFormat.Value, _destFile.Value, diskSize, null, user, password))
+        protected override void DoRun()
+        {
+            using (VirtualDisk sourceDisk = VirtualDisk.OpenDisk(_sourceFile.Value, FileAccess.Read, UserName, Password))
+            using (VirtualDisk destDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _destFile.Value, DiskSize, null, UserName, Password, null))
             {
                 // Copy the MBR from the source disk, and invent a new signature for this new disk
                 destDisk.SetMasterBootRecord(sourceDisk.GetMasterBootRecord());
@@ -139,6 +91,7 @@ namespace OSClone
                 BiosPartitionTable pt = BiosPartitionTable.Initialize(destDisk, WellKnownPartitionType.WindowsNtfs);
                 VolumeManager volMgr = new VolumeManager(destDisk);
 
+                string label = _labelSwitch.IsPresent ? _labelSwitch.Value : sourceNtfs.VolumeLabel;
                 using (NtfsFileSystem destNtfs = NtfsFileSystem.Format(volMgr.GetLogicalVolumes()[0], label, bootCode))
                 {
                     destNtfs.SetSecurity(@"\", sourceNtfs.GetSecurity(@"\"));
@@ -177,7 +130,7 @@ namespace OSClone
             {
                 foreach (var dir in sourceNtfs.GetDirectories(path))
                 {
-                    if(!IsExcluded(dir))
+                    if (!IsExcluded(dir))
                     {
                         destNtfs.CreateDirectory(dir);
 

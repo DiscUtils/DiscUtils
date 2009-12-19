@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -103,6 +103,7 @@
     <Compile Include="Iscsi\DataOutPacket.cs" />
     <Compile Include="Iscsi\Disk.cs" />
     <Compile Include="Iscsi\DiskStream.cs" />
+    <Compile Include="Iscsi\DiskTransport.cs" />
     <Compile Include="Iscsi\Initiator.cs" />
     <Compile Include="Iscsi\InvalidProtocolException.cs" />
     <Compile Include="Iscsi\IscsiException.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="LogicalDiskManager\VolumeRecord.cs" />
     <Compile Include="LogicalVolumeInfo.cs" />
     <Compile Include="MirrorStream.cs" />
+    <Compile Include="Nfs\DiskTransport.cs" />
     <Compile Include="Nfs\Nfs3AccessPermissions.cs" />
     <Compile Include="Nfs\Nfs3AccessResult.cs" />
     <Compile Include="Nfs\Nfs3CallResult.cs" />
@@ -365,8 +367,8 @@
     <Compile Include="Vhd\ParentLocator.cs" />
     <Compile Include="VirtualDisk.cs" />
     <Compile Include="VirtualDiskFactory.cs" />
-    <Compile Include="VirtualDiskFactoryAttribute.cs" />
     <Compile Include="VirtualDiskLayer.cs" />
+    <Compile Include="VirtualDiskTransport.cs" />
     <Compile Include="Vmdk\CommonSparseExtentHeader.cs" />
     <Compile Include="Vmdk\CommonSparseExtentStream.cs" />
     <Compile Include="Vmdk\CompressedGrainHeader.cs" />

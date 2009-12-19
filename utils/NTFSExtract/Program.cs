@@ -28,96 +28,83 @@ using DiscUtils.Ntfs;
 
 namespace NTFSExtract
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineMultiParameter _diskFiles;
-        private static CommandLineParameter _inFilePath;
-        private static CommandLineParameter _outFilePath;
-        private static CommandLineSwitch _attributeName;
-        private static CommandLineSwitch _attributeType;
-        private static CommandLineSwitch _partition;
-        private static CommandLineSwitch _volumeId;
-        private static CommandLineSwitch _hexDump;
-        private static CommandLineSwitch _userName;
-        private static CommandLineSwitch _password;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineMultiParameter _diskFiles;
+        private CommandLineParameter _inFilePath;
+        private CommandLineParameter _outFilePath;
+        private CommandLineSwitch _attributeName;
+        private CommandLineSwitch _attributeType;
+        private CommandLineSwitch _hexDump;
 
         static void Main(string[] args)
         {
-            _diskFiles = new CommandLineMultiParameter("disk", "Paths to the disks to inspect.  Values can be a file path, or a path to an iSCSI LUN (iscsi://<address>), for example iscsi://192.168.1.2/iqn.2002-2004.example.com:port1?LUN=2.  Use iSCSIBrowse to discover this address.", false);
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
+        {
+            _diskFiles = FileOrUriMultiParameter("disk", "The disks to inspect.", false);
             _inFilePath = new CommandLineParameter("file_path", "The path of the file to extract.", false);
             _outFilePath = new CommandLineParameter("out_file", "The output file to be written.", false);
             _attributeName = new CommandLineSwitch("a", "attribute", "name", "The name of the attribute to extract (the default is 'unnamed').");
             _attributeType = new CommandLineSwitch("t", "type", "type", "The type of the attribute to extract (the default is Data).  One of: StandardInformation, AttributeList, FileName, ObjectId, SecurityDescriptor, VolumeName, VolumeInformation, Data, IndexRoot, IndexAllocation, Bitmap, ReparsePoint, ExtendedAttributesInformation, ExtendedAttributes, PropertySet, LoggedUtilityStream.");
-            _partition = new CommandLineSwitch("p", "partition", "num", "The number of the partition to access, in the range 0-n.  If not specified, 0 (the first partition) is the default.");
-            _volumeId = new CommandLineSwitch("v", "volume", "id", "The volume id of the volume to access, use the VolInfo tool to discover this id.  If specified, the partition parameter is ignored.");
             _hexDump = new CommandLineSwitch("hd", "hexdump", null, "Output a HexDump of the NTFS stream to the console, in addition to writing it to the output file.");
-            _userName = new CommandLineSwitch("u", "user", "user_name", "If using iSCSI, optionally use this parameter to specify the user name to authenticate with.  If this parameter is specified without a password, you will be prompted to supply the password.");
-            _password = new CommandLineSwitch("pw", "password", "secret", "If using iSCSI, optionally use this parameter to specify the password to authenticate with.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("NTFSDump");
             parser.AddMultiParameter(_diskFiles);
             parser.AddParameter(_inFilePath);
             parser.AddParameter(_outFilePath);
             parser.AddSwitch(_attributeName);
             parser.AddSwitch(_attributeType);
-            parser.AddSwitch(_partition);
-            parser.AddSwitch(_volumeId);
             parser.AddSwitch(_hexDump);
-            parser.AddSwitch(_userName);
-            parser.AddSwitch(_password);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.UserAndPassword | StandardSwitches.PartitionOrVolume;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
-            int partition = -1;
-            if (_partition.IsPresent && !int.TryParse(_partition.Value, out partition))
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
+        protected override void DoRun()
+        {
             AttributeType type = AttributeType.Data;
             if (_attributeType.IsPresent && !string.IsNullOrEmpty(_attributeType.Value))
             {
                 type = (AttributeType)Enum.Parse(typeof(AttributeType), _attributeType.Value, true);
             }
 
-            string user = _userName.IsPresent ? _userName.Value : null;
-            string password = _password.IsPresent ? _password.Value : null;
-
-            using (Stream volumeStream = Utilities.OpenVolume(_volumeId.Value, partition, user, password, FileAccess.Read, _diskFiles.Values))
+            VolumeManager volMgr = new VolumeManager();
+            foreach (string disk in _diskFiles.Values)
             {
-                using (NtfsFileSystem fs = new NtfsFileSystem(volumeStream))
-                {
-                    using (SparseStream source = fs.OpenRawStream(_inFilePath.Value, type, _attributeName.Value, FileAccess.Read))
-                    {
-                        using (FileStream outFile = new FileStream(_outFilePath.Value, FileMode.Create, FileAccess.ReadWrite))
-                        {
-                            outFile.SetLength(source.Length);
-                            SparseStream.Pump(source, outFile);
-                        }
+                volMgr.AddDisk(VirtualDisk.OpenDisk(disk, FileAccess.Read, UserName, Password));
+            }
 
-                        if (_hexDump.IsPresent)
-                        {
-                            source.Position = 0;
-                            HexDump.Generate(source, Console.Out);
-                        }
+
+            Stream partitionStream = null;
+            if (!string.IsNullOrEmpty(VolumeId))
+            {
+                partitionStream = volMgr.GetVolume(VolumeId).Open();
+            }
+            else if (Partition >= 0)
+            {
+                partitionStream = volMgr.GetPhysicalVolumes()[Partition].Open();
+            }
+            else
+            {
+                partitionStream = volMgr.GetLogicalVolumes()[0].Open();
+            }
+
+            using (NtfsFileSystem fs = new NtfsFileSystem(partitionStream))
+            {
+                using (SparseStream source = fs.OpenRawStream(_inFilePath.Value, type, _attributeName.Value, FileAccess.Read))
+                {
+                    using (FileStream outFile = new FileStream(_outFilePath.Value, FileMode.Create, FileAccess.ReadWrite))
+                    {
+                        outFile.SetLength(source.Length);
+                        SparseStream.Pump(source, outFile);
+                    }
+
+                    if (_hexDump.IsPresent)
+                    {
+                        source.Position = 0;
+                        HexDump.Generate(source, Console.Out);
                     }
                 }
             }

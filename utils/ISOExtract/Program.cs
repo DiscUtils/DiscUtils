@@ -27,42 +27,33 @@ using DiscUtils.Iso9660;
 
 namespace ISOExtract
 {
-    class Program
+    class Program : ProgramBase
     {
-        private static CommandLineParameter _isoFileParam;
-        private static CommandLineParameter _targetFileParam;
-        private static CommandLineSwitch _destDirSwitch;
-        private static CommandLineSwitch _helpSwitch;
-        private static CommandLineSwitch _quietSwitch;
+        private CommandLineParameter _isoFileParam;
+        private CommandLineParameter _targetFileParam;
+        private CommandLineSwitch _destDirSwitch;
 
         static void Main(string[] args)
+        {
+            Program program = new Program();
+            program.Run(args);
+        }
+
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
         {
             _isoFileParam = new CommandLineParameter("iso_file", "The ISO file to extract files from.", false);
             _targetFileParam = new CommandLineParameter("file", "The name of the file to extract.", false);
             _destDirSwitch = new CommandLineSwitch("d", "destdir", "dir", "The destination directory.  If not specified, the current directory is used.");
-            _helpSwitch = new CommandLineSwitch(new string[] { "h", "?" }, "help", null, "Show this help.");
-            _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
 
-            CommandLineParser parser = new CommandLineParser("ISOExtract");
             parser.AddParameter(_isoFileParam);
             parser.AddParameter(_targetFileParam);
             parser.AddSwitch(_destDirSwitch);
-            parser.AddSwitch(_helpSwitch);
-            parser.AddSwitch(_quietSwitch);
 
-            bool parseResult = parser.Parse(args);
+            return StandardSwitches.Default;
+        }
 
-            if (!_quietSwitch.IsPresent)
-            {
-                Utilities.ShowHeader(typeof(Program));
-            }
-
-            if (_helpSwitch.IsPresent || !parseResult)
-            {
-                parser.DisplayHelp();
-                return;
-            }
-
+        protected override void DoRun()
+        {
             string destDir = _destDirSwitch.IsPresent ? _destDirSwitch.Value : Environment.CurrentDirectory;
 
             using (FileStream isoStream = new FileStream(_isoFileParam.Value, FileMode.Open, FileAccess.Read))
