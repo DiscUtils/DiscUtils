@@ -237,6 +237,23 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Create a new virtual disk, possibly within an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on</param>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <param name="capacity">The capacity of the new disk</param>
+        /// <param name="geometry">The geometry of the new disk (or null).</param>
+        /// <param name="parameters">Untyped parameters controlling the creation process (TBD)</param>
+        /// <returns>The newly created disk</returns>
+        public static VirtualDisk CreateDisk(DiscFileSystem fileSystem, string type, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        {
+            VirtualDiskFactory factory = TypeMap[type];
+            return factory.CreateDisk(new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path)), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), capacity, geometry, parameters ?? new Dictionary<string, string>());
+        }
+
+        /// <summary>
         /// Create a new virtual disk.
         /// </summary>
         /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
@@ -387,6 +404,11 @@ namespace DiscUtils
         /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
         public static VirtualDisk OpenDisk(DiscFileSystem fs, string path, FileAccess access)
         {
+            if (fs == null)
+            {
+                return OpenDisk(path, access);
+            }
+
             string extension = Path.GetExtension(path).ToUpperInvariant();
             if (extension.StartsWith(".", StringComparison.Ordinal))
             {
@@ -409,7 +431,7 @@ namespace DiscUtils
                 throw new ArgumentException("Path must not be null or empty", "path");
             }
 
-            if (path.IndexOf(':') < 0 && path[0] != '\\')
+            if (path.IndexOf(':') < 0 && !path.StartsWith(@"\\"))
             {
                 path = Path.GetFullPath(path);
             }
