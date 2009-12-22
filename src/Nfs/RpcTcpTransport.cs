@@ -68,12 +68,19 @@ namespace DiscUtils.Nfs
         public byte[] Send(byte[] message)
         {
             int retries = 0;
+            int retryLimit = RetryLimit;
             Exception lastException = null;
 
-            byte[] response = null;
-            while (response == null && retries < RetryLimit)
+            bool isNewConnection = (_socket == null);
+            if (isNewConnection)
             {
-                while (retries < RetryLimit && (_socket == null || !_socket.Connected))
+                retryLimit = 1;
+            }
+
+            byte[] response = null;
+            while (response == null && retries < retryLimit)
+            {
+                while (retries < retryLimit && (_socket == null || !_socket.Connected))
                 {
                     try
                     {
@@ -95,14 +102,29 @@ namespace DiscUtils.Nfs
                         {
                             _socket.Bind(new IPEndPoint(0, _localPort));
                         }
+
                         _socket.Connect(_address, _port);
                         _tcpStream = new NetworkStream(_socket, false);
                     }
-                    catch(IOException connectException)
+                    catch (IOException connectException)
                     {
                         retries++;
                         lastException = connectException;
-                        Thread.Sleep(1000);
+
+                        if (!isNewConnection)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                    }
+                    catch (SocketException se)
+                    {
+                        retries++;
+                        lastException = se;
+
+                        if (!isNewConnection)
+                        {
+                            Thread.Sleep(1000);
+                        }
                     }
                 }
 
