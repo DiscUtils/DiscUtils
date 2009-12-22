@@ -92,7 +92,8 @@ namespace DiscUtils.Vhd
         /// <param name="access">The access requested to the disk</param>
         internal Disk(FileLocator locator, string path, FileAccess access)
         {
-            DiskImageFile file = new DiskImageFile(locator.Open(path, FileMode.Open, access, FileShare.None), Ownership.Dispose);
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
+            DiskImageFile file = new DiskImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             ResolveFileChain(locator, path);
