@@ -44,9 +44,9 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The file system the referenced file exists on.
+        /// The file system the referenced file or directory exists on.
         /// </summary>
-        protected DiscFileSystem FileSystem
+        public DiscFileSystem FileSystem
         {
             get { return _fileSystem; }
         }
