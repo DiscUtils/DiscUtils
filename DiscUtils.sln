@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSClone", "utils\OSClone\OS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCDDump", "utils\BCDDump\BCDDump.csproj", "{EE65F039-0EFD-43FA-8B88-027ABE53589C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.PowerShell", "utils\DiscUtils.PowerShell\DiscUtils.PowerShell.csproj", "{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,6 +111,10 @@ Global
 		{EE65F039-0EFD-43FA-8B88-027ABE53589C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE65F039-0EFD-43FA-8B88-027ABE53589C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE65F039-0EFD-43FA-8B88-027ABE53589C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
