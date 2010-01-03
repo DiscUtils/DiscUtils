@@ -863,6 +863,21 @@
          </Type>
          <Type Name="VirtualDisk">
           <Members>
+           <Member Name="#CreateDisk(DiscUtils.DiscFileSystem,System.String,System.String,System.String,System.Int64,DiscUtils.Geometry,System.Collections.Generic.Dictionary`2&lt;System.String,System.String&gt;)">
+            <Messages>
+             <Message TypeName="NormalizeStringsToUppercase" Category="Microsoft.Globalization" CheckId="CA1308" Status="Excluded" Created="2010-01-03 10:18:44Z">
+              <Issue Name="ToUpperInvariant">
+               <Item>'VirtualDisk.CreateDisk(DiscFileSystem, string, string, string, long, Geometry, Dictionary&lt;string, string&gt;)'</Item>
+               <Item>'string.ToLowerInvariant()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="100" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#CreateDisk(System.String,System.String,System.String,System.Int64,DiscUtils.Geometry,System.String,System.String,System.Collections.Generic.Dictionary`2&lt;System.String,System.String&gt;)">
             <Messages>
              <Message TypeName="NormalizeStringsToUppercase" Category="Microsoft.Globalization" CheckId="CA1308" Status="Excluded" Created="2009-12-19 02:25:50Z">
@@ -6355,6 +6370,7 @@
     <Note Id="97" Modified="2009-12-19 02:26:50Z">Type is immutable</Note>
     <Note Id="98" Modified="2009-12-19 02:34:33Z">Aesthetically prefer lower case in this instance.</Note>
     <Note Id="99" Modified="2009-12-19 10:58:59Z">Don't use hard link information, or reference counts as yet.</Note>
+    <Note Id="100" Modified="2010-01-03 22:17:56Z">Variants are lower case</Note>
    </User>
   </Notes>
   <Rules>

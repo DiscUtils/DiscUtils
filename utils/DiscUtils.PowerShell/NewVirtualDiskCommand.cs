@@ -86,18 +86,8 @@ namespace DiscUtils.PowerShell
             string type = typeAndVariant[0];
             string variant = typeAndVariant.Length > 1 ? typeAndVariant[1] : null;
 
-            string child = SessionState.Path.ParseChildName(Name);
-            string parent = SessionState.Path.ParseParent(Name, null);
-            var parentPath = this.SessionState.Path.GetResolvedPSPathFromPSPath(parent)[0];
-
-            var parentObj = SessionState.InvokeProvider.Item.Get(new string[] { parentPath.Path }, false, true)[0];
-
-            // If we got a Volume, then we need to send a special marker to the provider indicating that we
-            // actually wanted the root directory on the volume, not the volume itself.
-            if (parentObj.BaseObject is VolumeInfo)
-            {
-                parentObj = SessionState.InvokeProvider.Item.Get(new string[] { Path.Combine(parentPath.Path, @"$Root") }, false, true)[0];
-            }
+            string child;
+            PSObject parentObj = ResolveNewDiskPath(out child);
 
             VirtualDisk disk = null;
             if (parentObj.BaseObject is DirectoryInfo)
@@ -128,7 +118,87 @@ namespace DiscUtils.PowerShell
 
         private void CreateDiffDisk()
         {
-            throw new NotImplementedException();
+            string child;
+            PSObject parentObj = ResolveNewDiskPath(out child);
+
+            PSObject baseDiskObj = SessionState.InvokeProvider.Item.Get(new string[] { BaseDisk }, false, true)[0];
+
+            VirtualDisk baseDisk = null;
+
+            try
+            {
+                if (baseDiskObj.BaseObject is FileInfo)
+                {
+                    baseDisk = VirtualDisk.OpenDisk(((FileInfo)baseDiskObj.BaseObject).FullName, FileAccess.Read);
+                }
+                else if (baseDiskObj.BaseObject is DiscFileInfo)
+                {
+                    DiscFileInfo dfi = (DiscFileInfo)baseDiskObj.BaseObject;
+                    baseDisk = VirtualDisk.OpenDisk(dfi.FileSystem, dfi.FullName, FileAccess.Read);
+                }
+                else
+                {
+                    WriteError(new ErrorRecord(
+                        new FileNotFoundException("The file specified by the BaseDisk parameter doesn't exist"),
+                        "BadBaseDiskLocation",
+                        ErrorCategory.InvalidArgument,
+                        null));
+                    return;
+                }
+
+                VirtualDisk newDisk = null;
+                if (parentObj.BaseObject is DirectoryInfo)
+                {
+                    string path = Path.Combine(((DirectoryInfo)parentObj.BaseObject).FullName, child);
+                    using (baseDisk.CreateDifferencingDisk(path)) { }
+                    newDisk = new OnDemandVirtualDisk(path, FileAccess.Read);
+                }
+                else if (parentObj.BaseObject is DiscDirectoryInfo)
+                {
+                    DiscDirectoryInfo ddi = (DiscDirectoryInfo)parentObj.BaseObject;
+                    string path = Path.Combine(ddi.FullName, child);
+                    using (baseDisk.CreateDifferencingDisk(ddi.FileSystem, path)) { }
+                    newDisk = new OnDemandVirtualDisk(ddi.FileSystem, path, FileAccess.Read);
+                }
+                else
+                {
+                    WriteError(new ErrorRecord(
+                        new DirectoryNotFoundException("Cannot create a virtual disk in that location"),
+                        "BadDiskLocation",
+                        ErrorCategory.InvalidArgument,
+                        null));
+                    return;
+                }
+
+                WriteObject(newDisk, false);
+            }
+            finally
+            {
+                if (baseDisk != null)
+                {
+                    baseDisk.Dispose();
+                }
+            }
+        }
+
+        private PSObject ResolveNewDiskPath(out string child)
+        {
+            PSObject parentObj;
+
+            child = SessionState.Path.ParseChildName(Name);
+            string parent = SessionState.Path.ParseParent(Name, null);
+            PathInfo parentPath = this.SessionState.Path.GetResolvedPSPathFromPSPath(parent)[0];
+
+            parentObj = SessionState.InvokeProvider.Item.Get(new string[] { parentPath.Path }, false, true)[0];
+
+            // If we got a Volume, then we need to send a special marker to the provider indicating that we
+            // actually wanted the root directory on the volume, not the volume itself.
+            if (parentObj.BaseObject is VolumeInfo)
+            {
+                parentObj = SessionState.InvokeProvider.Item.Get(new string[] { Path.Combine(parentPath.Path, @"$Root") }, false, true)[0];
+            }
+
+            return parentObj;
         }
 
     }

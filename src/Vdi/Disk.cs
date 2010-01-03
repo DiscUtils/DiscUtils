@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -165,6 +166,27 @@ namespace DiscUtils.Vdi
         public override IEnumerable<VirtualDiskLayer> Layers
         {
             get { yield return _diskImage; }
+        }
+
+        /// <summary>
+        /// Create a new differencing disk, possibly within an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
+        {
+            throw new NotImplementedException("Differencing disks not implemented for the VDI format");
+        }
+
+        /// <summary>
+        /// Create a new differencing disk.
+        /// </summary>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public override VirtualDisk CreateDifferencingDisk(string path)
+        {
+            throw new NotImplementedException("Differencing disks not implemented for the VDI format");
         }
     }
 }

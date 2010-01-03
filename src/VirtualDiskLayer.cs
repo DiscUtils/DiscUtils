@@ -75,9 +75,28 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the full path to this disk layer, or empty string.
+        /// </summary>
+        public virtual string FullPath
+        {
+            get { return ""; }
+        }
+
+        /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
         internal abstract long Capacity
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a <c>FileLocator</c> that can resolve relative paths, or <c>null</c>.
+        /// </summary>
+        /// <remarks>
+        /// Typically used to locate parent disks.
+        /// </remarks>
+        internal abstract FileLocator RelativeFileLocator
         {
             get;
         }

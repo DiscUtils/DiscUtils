@@ -211,6 +211,21 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Create a new differencing disk, possibly within an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public abstract VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path);
+
+        /// <summary>
+        /// Create a new differencing disk.
+        /// </summary>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public abstract VirtualDisk CreateDifferencingDisk(string path);
+
+        /// <summary>
         /// Gets the set of disk formats supported as an array of file extensions.
         /// </summary>
         public static ICollection<string> SupportedDiskFormats
@@ -431,7 +446,7 @@ namespace DiscUtils
                 throw new ArgumentException("Path must not be null or empty", "path");
             }
 
-            if (path.IndexOf(':') < 0 && !path.StartsWith(@"\\"))
+            if (path.IndexOf(':') < 0 && !path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
             {
                 path = Path.GetFullPath(path);
             }

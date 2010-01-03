@@ -53,6 +53,16 @@ namespace DiscUtils.Vhd
         private Ownership _ownsStream;
 
         /// <summary>
+        /// The object that can be used to locate relative file paths.
+        /// </summary>
+        private FileLocator _fileLocator;
+
+        /// <summary>
+        /// The file name of this VHD.
+        /// </summary>
+        private string _fileName;
+
+        /// <summary>
         /// Creates a new instance from a stream.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
@@ -79,6 +89,38 @@ namespace DiscUtils.Vhd
 
             ReadHeaders();
         }
+
+        /// <summary>
+        /// Creates a new instance from a file.
+        /// </summary>
+        /// <param name="path">The file path to open</param>
+        /// <param name="access">Controls how the file can be accessed</param>
+        public DiskImageFile(string path, FileAccess access)
+            : this(new LocalFileLocator(Path.GetDirectoryName(path)), Path.GetFileName(path), access)
+        {
+        }
+
+        internal DiskImageFile(FileLocator locator, string path, Stream stream, Ownership ownsStream)
+            : this(stream, ownsStream)
+        {
+            _fileLocator = locator.GetRelativeLocator(Path.GetDirectoryName(path));
+            _fileName = Path.GetFileName(path);
+        }
+
+        internal DiskImageFile(FileLocator locator, string path, FileAccess access)
+        {
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
+            _fileStream = locator.Open(path, FileMode.Open, access, share);
+            _ownsStream = Ownership.Dispose;
+
+            _fileLocator = locator.GetRelativeLocator(Path.GetDirectoryName(path));
+            _fileName = Path.GetFileName(path);
+
+            ReadFooter(true);
+
+            ReadHeaders();
+        }
+
 
         /// <summary>
         /// Disposes of underlying resources.
@@ -126,26 +168,29 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
-            if (geometry == null)
-            {
-                geometry = Geometry.FromCapacity(capacity);
+            InitializeFixedInternal(stream, capacity, geometry);
+            return new DiskImageFile(stream, ownsStream);
+        }
 
-                // This is to maintain legacy behaviour - if no geometry specified, we make the actual capacity exactly
-                // fit the disk geometry, rather than allowing it to be different.
-                capacity = geometry.Capacity;
+        internal static DiskImageFile InitializeFixed(FileLocator locator, string path, long capacity, Geometry geometry)
+        {
+            DiskImageFile result = null;
+            Stream stream = locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            try
+            {
+                InitializeFixedInternal(stream, capacity, geometry);
+                result = new DiskImageFile(locator, path, stream, Ownership.Dispose);
+                stream = null;
+            }
+            finally
+            {
+                if (stream != null)
+                {
+                    stream.Dispose();
+                }
             }
 
-            Footer footer = new Footer(geometry, capacity, FileType.Fixed);
-            footer.UpdateChecksum();
-
-            byte[] sector = new byte[Utilities.SectorSize];
-            footer.ToBytes(sector, 0);
-            stream.Position = Utilities.RoundUp(capacity, Utilities.SectorSize);
-            stream.Write(sector, 0, sector.Length);
-            stream.SetLength(stream.Position);
-
-            stream.Position = 0;
-            return new DiskImageFile(stream, ownsStream);
+            return result;
         }
 
         /// <summary>
@@ -197,6 +242,268 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry, long blockSize)
         {
+            InitializeDynamicInternal(stream, capacity, geometry, blockSize);
+
+            return new DiskImageFile(stream, ownsStream);
+        }
+
+        internal static DiskImageFile InitializeDynamic(FileLocator locator, string path, long capacity, Geometry geometry, long blockSize)
+        {
+            DiskImageFile result = null;
+            Stream stream = locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            try
+            {
+                InitializeDynamicInternal(stream, capacity, geometry, blockSize);
+                result = new DiskImageFile(locator, path, stream, Ownership.Dispose);
+                stream = null;
+            }
+            finally
+            {
+                if (stream != null)
+                {
+                    stream.Dispose();
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Initializes a stream as a differencing disk VHD file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="parent">The disk this file is a different from.</param>
+        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
+        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
+        /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
+        /// <returns>An object that accesses the stream as a VHD file</returns>
+        public static DiskImageFile InitializeDifferencing(
+            Stream stream, Ownership ownsStream, DiskImageFile parent,
+            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+        {
+            InitializeDifferencingInternal(stream, parent, parentAbsolutePath, parentRelativePath, parentModificationTimeUtc);
+
+            return new DiskImageFile(stream, ownsStream);
+        }
+
+        /// <summary>
+        /// Gets a value indicating if the VHD file is a differencing disk.
+        /// </summary>
+        public bool NeedsParent
+        {
+            get { return _footer.DiskType == FileType.Differencing; }
+        }
+
+        /// <summary>
+        /// Gets the location of the parent file, given a base path.
+        /// </summary>
+        /// <returns>Array of candidate file locations</returns>
+        public string[] GetParentLocations()
+        {
+            return GetParentLocations(_fileLocator);
+        }
+
+        /// <summary>
+        /// Gets the location of the parent file, given a base path.
+        /// </summary>
+        /// <param name="basePath">The full path to this file</param>
+        /// <returns>Array of candidate file locations</returns>
+        [Obsolete("Use GetParentLocations() by preference")]
+        public string[] GetParentLocations(string basePath)
+        {
+            return GetParentLocations(new LocalFileLocator(basePath));
+        }
+
+        /// <summary>
+        /// Gets the locations of the parent file.
+        /// </summary>
+        /// <param name="fileLocator">The file locator to use</param>
+        /// <returns>Array of candidate file locations</returns>
+        private string[] GetParentLocations(FileLocator fileLocator)
+        {
+            if (!NeedsParent)
+            {
+                throw new InvalidOperationException("Only differencing disks contain parent locations");
+            }
+
+            if (fileLocator == null)
+            {
+                // Use working directory by default
+                fileLocator = new LocalFileLocator("");
+            }
+
+            List<string> absPaths = new List<string>(8);
+            List<string> relPaths = new List<string>(8);
+            foreach (var pl in _dynamicHeader.ParentLocators)
+            {
+                if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode
+                    || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
+                {
+                    _fileStream.Position = pl.PlatformDataOffset;
+                    byte[] buffer = Utilities.ReadFully(_fileStream, pl.PlatformDataLength);
+                    string locationVal = Encoding.Unicode.GetString(buffer);
+
+                    if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode)
+                    {
+                        absPaths.Add(locationVal);
+                    }
+                    else // Relative
+                    {
+                        relPaths.Add(fileLocator.ResolveRelativePath(locationVal));
+                    }
+                }
+            }
+
+            // Order the paths to put absolute paths first
+            List<string> paths = new List<string>(absPaths.Count + relPaths.Count + 1);
+            paths.AddRange(absPaths);
+            paths.AddRange(relPaths);
+
+            // As a back-up, try to infer from the parent name...
+            if (paths.Count == 0)
+            {
+                paths.Add(fileLocator.ResolveRelativePath(_dynamicHeader.ParentUnicodeName));
+            }
+
+            return paths.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the unique id of the parent disk.
+        /// </summary>
+        public Guid ParentUniqueId
+        {
+            get { return _dynamicHeader == null ? Guid.Empty : _dynamicHeader.ParentUniqueId; }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the virtual disk.
+        /// </summary>
+        public Geometry Geometry
+        {
+            get { return _footer.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating if the layer only stores meaningful sectors.
+        /// </summary>
+        public override bool IsSparse
+        {
+            get { return _footer.DiskType != FileType.Fixed; }
+        }
+
+        /// <summary>
+        /// Gets the full path to this disk layer, or empty string.
+        /// </summary>
+        public override string FullPath
+        {
+            get
+            {
+                if (_fileLocator != null && _fileName != null)
+                {
+                    return _fileLocator.GetFullPath(_fileName);
+                }
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Gets detailed information about the VHD file.
+        /// </summary>
+        public DiskImageFileInfo Information
+        {
+            get { return new DiskImageFileInfo(_footer, _dynamicHeader, _fileStream); }
+        }
+
+        internal DiskImageFile CreateDifferencing(FileLocator fileLocator, string path)
+        {
+            Stream stream = fileLocator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+
+            string fullPath = _fileLocator.GetFullPath(_fileName);
+            string relativePath = fileLocator.MakeRelativePath(_fileLocator, _fileName);
+            DateTime lastWriteTime = _fileLocator.GetLastWriteTimeUtc(_fileName);
+
+            InitializeDifferencingInternal(stream, this, fullPath, relativePath, lastWriteTime);
+
+            return new DiskImageFile(fileLocator, path, stream, Ownership.Dispose);
+        }
+
+        internal override long Capacity
+        {
+            get { return _footer.CurrentSize; }
+        }
+
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return _fileLocator; }
+        }
+
+        internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
+        {
+            if (_footer.DiskType == FileType.Fixed)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
+            }
+            else if (_footer.DiskType == FileType.Dynamic)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
+            }
+            else
+            {
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
+            }
+        }
+
+        /// <summary>
+        /// Gets the unique id of this file.
+        /// </summary>
+        public Guid UniqueId
+        {
+            get { return _footer.UniqueId; }
+        }
+
+        /// <summary>
+        /// Gets the timestamp for this file (when it was created).
+        /// </summary>
+        public DateTime CreationTimestamp
+        {
+            get { return _footer.Timestamp; }
+        }
+
+        private static void InitializeFixedInternal(Stream stream, long capacity, Geometry geometry)
+        {
+            if (geometry == null)
+            {
+                geometry = Geometry.FromCapacity(capacity);
+
+                // This is to maintain legacy behaviour - if no geometry specified, we make the actual capacity exactly
+                // fit the disk geometry, rather than allowing it to be different.
+                capacity = geometry.Capacity;
+            }
+
+            Footer footer = new Footer(geometry, capacity, FileType.Fixed);
+            footer.UpdateChecksum();
+
+            byte[] sector = new byte[Utilities.SectorSize];
+            footer.ToBytes(sector, 0);
+            stream.Position = Utilities.RoundUp(capacity, Utilities.SectorSize);
+            stream.Write(sector, 0, sector.Length);
+            stream.SetLength(stream.Position);
+
+            stream.Position = 0;
+        }
+
+        private static void InitializeDynamicInternal(Stream stream, long capacity, Geometry geometry, long blockSize)
+        {
             if (blockSize > uint.MaxValue || blockSize < 0)
             {
                 throw new ArgumentOutOfRangeException("blockSize", "Must be in the range 0 to uint.MaxValue");
@@ -235,23 +542,9 @@ namespace DiscUtils.Vhd
             stream.Write(dynamicHeaderBlock, 0, 1024);
             stream.Write(bat, 0, batSize);
             stream.Write(footerBlock, 0, 512);
-
-            return new DiskImageFile(stream, ownsStream);
         }
 
-        /// <summary>
-        /// Initializes a stream as a differencing disk VHD file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="parent">The disk this file is a different from.</param>
-        /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
-        /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
-        /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
-        public static DiskImageFile InitializeDifferencing(
-            Stream stream, Ownership ownsStream, DiskImageFile parent,
-            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+        private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent, string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
             Footer footer = new Footer(parent.Geometry, parent._footer.CurrentSize, FileType.Differencing);
             footer.DataOffset = 512; // Offset of Dynamic Header
@@ -299,141 +592,6 @@ namespace DiscUtils.Vhd
             stream.Write(platformLocator1, 0, 512);
             stream.Write(platformLocator2, 0, 512);
             stream.Write(footerBlock, 0, 512);
-
-            return new DiskImageFile(stream, ownsStream);
-        }
-
-        /// <summary>
-        /// Gets a value indicating if the VHD file is a differencing disk.
-        /// </summary>
-        public bool NeedsParent
-        {
-            get { return _footer.DiskType == FileType.Differencing; }
-        }
-
-        /// <summary>
-        /// Gets the location of the parent file, given a base path.
-        /// </summary>
-        /// <param name="basePath">The full path to this file</param>
-        /// <returns>Array of candidate file locations</returns>
-        public string[] GetParentLocations(string basePath)
-        {
-            if (!NeedsParent)
-            {
-                throw new InvalidOperationException("Only differencing disks contain parent locations");
-            }
-
-            List<string> absPaths = new List<string>(8);
-            List<string> relPaths = new List<string>(8);
-            foreach (var pl in _dynamicHeader.ParentLocators)
-            {
-                if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode
-                    || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
-                {
-                    _fileStream.Position = pl.PlatformDataOffset;
-                    byte[] buffer = Utilities.ReadFully(_fileStream, pl.PlatformDataLength);
-                    string locationVal = Encoding.Unicode.GetString(buffer);
-
-                    if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode)
-                    {
-                        absPaths.Add(locationVal);
-                    }
-                    else // Relative
-                    {
-                        relPaths.Add(Utilities.ResolveRelativePath(basePath, locationVal));
-                    }
-                }
-            }
-
-            // Order the paths to put absolute paths first
-            List<string> paths = new List<string>(absPaths.Count + relPaths.Count + 1);
-            paths.AddRange(absPaths);
-            paths.AddRange(relPaths);
-
-            // As a back-up, try to infer from the parent name...
-            if (paths.Count == 0)
-            {
-                paths.Add(Utilities.ResolveRelativePath(basePath, _dynamicHeader.ParentUnicodeName));
-            }
-
-            return paths.ToArray();
-        }
-
-        /// <summary>
-        /// Gets the unique id of the parent disk.
-        /// </summary>
-        public Guid ParentUniqueId
-        {
-            get { return _dynamicHeader == null ? Guid.Empty : _dynamicHeader.ParentUniqueId; }
-        }
-
-        /// <summary>
-        /// Gets the geometry of the virtual disk.
-        /// </summary>
-        public Geometry Geometry
-        {
-            get { return _footer.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
-        /// </summary>
-        public override bool IsSparse
-        {
-            get { return _footer.DiskType != FileType.Fixed; }
-        }
-
-        /// <summary>
-        /// Gets detailed information about the VHD file.
-        /// </summary>
-        public DiskImageFileInfo Information
-        {
-            get { return new DiskImageFileInfo(_footer, _dynamicHeader, _fileStream); }
-        }
-
-        internal override long Capacity
-        {
-            get { return _footer.CurrentSize; }
-        }
-
-        internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
-        {
-            if (_footer.DiskType == FileType.Fixed)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
-            }
-            else if (_footer.DiskType == FileType.Dynamic)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
-            }
-            else
-            {
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
-            }
-        }
-
-        /// <summary>
-        /// Gets the unique id of this file.
-        /// </summary>
-        public Guid UniqueId
-        {
-            get { return _footer.UniqueId; }
-        }
-
-        /// <summary>
-        /// Gets the timestamp for this file (when it was created).
-        /// </summary>
-        public DateTime CreationTimestamp
-        {
-            get { return _footer.Timestamp; }
         }
 
         private void ReadFooter(bool fallbackToFront)

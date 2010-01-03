@@ -178,6 +178,12 @@ namespace DiscUtils.Vdi
             get { return _header.DiskSize; }
         }
 
+        internal override FileLocator RelativeFileLocator
+        {
+            // Differencing disks not yet supported.
+            get { return null; }
+        }
+
         /// <summary>
         /// Gets (a guess at) the geometry of the virtual disk.
         /// </summary>

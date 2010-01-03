@@ -29,11 +29,32 @@ namespace DiscUtils
 {
     internal abstract class FileLocator
     {
+        internal string MakeRelativePath(FileLocator fileLocator, string path)
+        {
+            if (!HasCommonRoot(fileLocator))
+            {
+                return null;
+            }
+
+            string ourFullPath = GetFullPath("") + @"\";
+            string otherFullPath = fileLocator.GetFullPath(path);
+
+            return Utilities.MakeRelativePath(otherFullPath, ourFullPath);
+        }
+
         public abstract bool Exists(string fileName);
 
         public abstract Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share);
 
         public abstract FileLocator GetRelativeLocator(string path);
+
+        public abstract string GetFullPath(string path);
+
+        public abstract DateTime GetLastWriteTimeUtc(string path);
+
+        public abstract bool HasCommonRoot(FileLocator other);
+
+        public abstract string ResolveRelativePath(string path);
     }
 
     internal sealed class LocalFileLocator : FileLocator
@@ -58,6 +79,51 @@ namespace DiscUtils
         public override FileLocator GetRelativeLocator(string path)
         {
             return new LocalFileLocator(Path.Combine(_dir, path));
+        }
+
+        public override string GetFullPath(string path)
+        {
+            string combinedPath = Path.Combine(_dir, path);
+            if (string.IsNullOrEmpty(combinedPath))
+            {
+                return Environment.CurrentDirectory;
+            }
+            else
+            {
+                return Path.GetFullPath(combinedPath);
+            }
+        }
+
+        public override DateTime GetLastWriteTimeUtc(string path)
+        {
+            return File.GetLastWriteTimeUtc(Path.Combine(_dir, path));
+        }
+
+        public override bool HasCommonRoot(FileLocator other)
+        {
+            LocalFileLocator otherLocal = other as LocalFileLocator;
+            if (otherLocal == null)
+            {
+                return false;
+            }
+
+            // If the paths have drive specifiers, then common root depends on them having a common
+            // drive letter.
+            string otherDir = otherLocal._dir;
+            if (otherDir.Length >= 2 && _dir.Length >= 2)
+            {
+                if (otherDir[1] == ':' && _dir[1] == ':')
+                {
+                    return Char.ToUpperInvariant(otherDir[0]) == Char.ToUpperInvariant(_dir[0]);
+                }
+            }
+
+            return true;
+        }
+
+        public override string ResolveRelativePath(string path)
+        {
+            return Utilities.ResolveRelativePath(_dir, path);
         }
     }
 
@@ -85,6 +151,34 @@ namespace DiscUtils
         public override FileLocator GetRelativeLocator(string path)
         {
             return new DiscFileLocator(_fileSystem, Path.Combine(_basePath, path));
+        }
+
+        public override string GetFullPath(string path)
+        {
+            return Path.Combine(_basePath, path);
+        }
+
+        public override DateTime GetLastWriteTimeUtc(string path)
+        {
+            return _fileSystem.GetLastWriteTimeUtc(Path.Combine(_basePath, path));
+        }
+
+        public override bool HasCommonRoot(FileLocator other)
+        {
+            DiscFileLocator otherDiscLocator = other as DiscFileLocator;
+
+            if (otherDiscLocator == null)
+            {
+                return false;
+            }
+
+            // Common root if the same file system instance.
+            return Object.ReferenceEquals(otherDiscLocator._fileSystem, _fileSystem);
+        }
+
+        public override string ResolveRelativePath(string path)
+        {
+            return Utilities.ResolveRelativePath(_basePath, path);
         }
     }
 }

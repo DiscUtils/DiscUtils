@@ -40,9 +40,9 @@ namespace DiscUtils.Vhd
             switch (variant)
             {
                 case "fixed":
-                    return Disk.InitializeFixed(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity, geometry);
+                    return Disk.InitializeFixed(locator, path, capacity, geometry);
                 case "dynamic":
-                    return Disk.InitializeDynamic(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity, geometry);
+                    return Disk.InitializeDynamic(locator, path, capacity, geometry, DynamicHeader.DefaultBlockSize);
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VDI disk variant '{0}'", variant), "variant");
             }

@@ -133,6 +133,11 @@ namespace DiscUtils.Raw
             get { return _content.Length; }
         }
 
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return null; }
+        }
+
         internal SparseStream Content
         {
             get { return _content; }

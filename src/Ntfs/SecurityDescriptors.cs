@@ -69,8 +69,12 @@ namespace DiscUtils.Ntfs
 
         public RawSecurityDescriptor GetDescriptorById(uint id)
         {
-            IdIndexData data = _idIndex[new IdIndexKey(id)];
-            return ReadDescriptor(data).Descriptor;
+            IdIndexData data;
+            if(_idIndex.TryGetValue(new IdIndexKey(id), out data))
+            {
+                return ReadDescriptor(data).Descriptor;
+            }
+            return null;
         }
 
         public uint AddDescriptor(RawSecurityDescriptor newDescriptor)

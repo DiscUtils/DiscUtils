@@ -64,10 +64,10 @@ namespace DiscUtils.Vhd
         /// <param name="path">The path to the disk image</param>
         public Disk(string path)
         {
-            DiskImageFile file = new DiskImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose);
+            DiskImageFile file = new DiskImageFile(path, FileAccess.ReadWrite);
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
-            ResolveFileChain(path);
+            ResolveFileChain();
         }
 
         /// <summary>
@@ -77,11 +77,25 @@ namespace DiscUtils.Vhd
         /// <param name="access">The access requested to the disk</param>
         public Disk(string path, FileAccess access)
         {
-            FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
-            DiskImageFile file = new DiskImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose);
+            DiskImageFile file = new DiskImageFile(path, access);
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
-            ResolveFileChain(path);
+            ResolveFileChain();
+        }
+
+        /// <summary>
+        /// Creates a new instance from a file on a file system.
+        /// </summary>
+        /// <param name="fileSystem">The file system containing the disk.</param>
+        /// <param name="path">The file system relative path to the disk.</param>
+        /// <param name="access">The access requested to the disk.</param>
+        public Disk(DiscFileSystem fileSystem, string path, FileAccess access)
+        {
+            FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            DiskImageFile file = new DiskImageFile(fileLocator, Path.GetFileName(path), access);
+            _files = new List<Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            ResolveFileChain();
         }
 
         /// <summary>
@@ -92,11 +106,10 @@ namespace DiscUtils.Vhd
         /// <param name="access">The access requested to the disk</param>
         internal Disk(FileLocator locator, string path, FileAccess access)
         {
-            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
-            DiskImageFile file = new DiskImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
+            DiskImageFile file = new DiskImageFile(locator, path, access);
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
-            ResolveFileChain(locator, path);
+            ResolveFileChain();
         }
 
         /// <summary>
@@ -146,13 +159,9 @@ namespace DiscUtils.Vhd
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
         private Disk(DiskImageFile file, Ownership ownsFile)
         {
-            if (file.NeedsParent)
-            {
-                throw new NotSupportedException("Differencing disks cannot be opened from a single file");
-            }
-
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsFile));
+            ResolveFileChain();
         }
 
         /// <summary>
@@ -160,8 +169,9 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="file">The file containing the disk</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
+        /// <param name="parentLocator">Object used to locate the parent disk</param>
         /// <param name="parentPath">Path to the parent disk (if required)</param>
-        private Disk(DiskImageFile file, Ownership ownsFile, string parentPath)
+        private Disk(DiskImageFile file, Ownership ownsFile, FileLocator parentLocator, string parentPath)
         {
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsFile));
@@ -169,11 +179,9 @@ namespace DiscUtils.Vhd
             {
                 _files.Add(
                     new Tuple<DiskImageFile, Ownership>(
-                        new DiskImageFile(
-                            new FileStream(parentPath, FileMode.Open, FileAccess.Read, FileShare.Read),
-                            Ownership.Dispose),
+                        new DiskImageFile(parentLocator, parentPath, FileAccess.Read),
                         Ownership.Dispose));
-                ResolveFileChain(parentPath);
+                ResolveFileChain();
             }
         }
 
@@ -184,15 +192,14 @@ namespace DiscUtils.Vhd
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
         /// <param name="parentFile">The file containing the disk's parent</param>
         /// <param name="ownsParent">Indicates if the new instance should control the lifetime of the parentFile</param>
-        /// <param name="parentPath">Path to the parent disk (if required)</param>
-        private Disk(DiskImageFile file, Ownership ownsFile, DiskImageFile parentFile, Ownership ownsParent, string parentPath)
+        private Disk(DiskImageFile file, Ownership ownsFile, DiskImageFile parentFile, Ownership ownsParent)
         {
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsFile));
             if (file.NeedsParent)
             {
                 _files.Add(new Tuple<DiskImageFile, Ownership>(parentFile, ownsParent));
-                ResolveFileChain(parentPath);
+                ResolveFileChain();
             }
             else
             {
@@ -261,6 +268,11 @@ namespace DiscUtils.Vhd
             return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity, geometry), Ownership.Dispose);
         }
 
+        internal static Disk InitializeFixed(FileLocator fileLocator, string path, long capacity, Geometry geometry)
+        {
+            return new Disk(DiskImageFile.InitializeFixed(fileLocator, path, capacity, geometry), Ownership.Dispose);
+        }
+
         /// <summary>
         /// Initializes a stream as a dynamically-sized VHD file.
         /// </summary>
@@ -299,6 +311,11 @@ namespace DiscUtils.Vhd
             return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity, blockSize), Ownership.Dispose);
         }
 
+        internal static Disk InitializeDynamic(FileLocator fileLocator, string path, long capacity, Geometry geometry, long blockSize)
+        {
+            return new Disk(DiskImageFile.InitializeDynamic(fileLocator, path, capacity, geometry, blockSize), Ownership.Dispose);
+        }
+
         /// <summary>
         /// Creates a new VHD differencing disk file.
         /// </summary>
@@ -307,42 +324,16 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the new file as a Disk</returns>
         public static Disk InitializeDifferencing(string path, string parentPath)
         {
-            DiskImageFile parent = null;
-            DiskImageFile newFile = null;
+            LocalFileLocator parentLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+            string parentFileName = Path.GetFileName(parentPath);
 
-            string fullParentPath = Path.GetFullPath(parentPath);
-            string fullNewFilePath = Path.GetFullPath(path);
-
-            try
+            DiskImageFile newFile;
+            using (DiskImageFile parent = new DiskImageFile(parentLocator, parentFileName, FileAccess.Read))
             {
-                parent = new DiskImageFile(
-                    new FileStream(fullParentPath, FileMode.Open, FileAccess.Read, FileShare.Read),
-                    Ownership.Dispose);
-
-                newFile = DiskImageFile.InitializeDifferencing(
-                    new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None),
-                    Ownership.Dispose,
-                    parent,
-                    fullParentPath,
-                    Utilities.MakeRelativePath(fullParentPath, fullNewFilePath),
-                    File.GetLastWriteTimeUtc(parentPath));
-
-                Disk newDisk = new Disk(newFile, Ownership.Dispose, fullParentPath);
-                newFile = null;
-                return newDisk;
+                LocalFileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
+                newFile = parent.CreateDifferencing(locator, Path.GetFileName(path));
             }
-            finally
-            {
-                if (parent != null)
-                {
-                    parent.Dispose();
-                }
-
-                if (newFile != null)
-                {
-                    newFile.Dispose();
-                }
-            }
+            return new Disk(newFile, Ownership.Dispose, parentLocator, parentFileName);
         }
 
         /// <summary>
@@ -361,7 +352,7 @@ namespace DiscUtils.Vhd
             string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTime)
         {
             DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath, parentRelativePath, parentModificationTime);
-            return new Disk(file, Ownership.Dispose, parent, ownsParent, parentAbsolutePath);
+            return new Disk(file, Ownership.Dispose, parent, ownsParent);
         }
 
         /// <summary>
@@ -417,29 +408,48 @@ namespace DiscUtils.Vhd
             }
         }
 
-        private void ResolveFileChain(string lastPath)
+        /// <summary>
+        /// Create a new differencing disk, possibly within an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
-            LocalFileLocator locator = new LocalFileLocator(Utilities.GetDirectoryFromPath(lastPath));
-            ResolveFileChain(locator, Utilities.GetFileFromPath(lastPath));
+            FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            DiskImageFile file = _files[0].First.CreateDifferencing(locator, Path.GetFileName(path));
+            return new Disk(file, Ownership.Dispose);
         }
 
-        private void ResolveFileChain(FileLocator fileLocator, string lastPath)
+        /// <summary>
+        /// Create a new differencing disk.
+        /// </summary>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public override VirtualDisk CreateDifferencingDisk(string path)
+        {
+            FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
+            DiskImageFile file = _files[0].First.CreateDifferencing(locator, Path.GetFileName(path));
+            return new Disk(file, Ownership.Dispose);
+        }
+
+        private void ResolveFileChain()
         {
             DiskImageFile file = _files[_files.Count - 1].First;
-            string filePath = lastPath;
 
             while (file.NeedsParent)
             {
+                FileLocator fileLocator = file.RelativeFileLocator;
                 bool found = false;
-                foreach (string testPath in file.GetParentLocations(filePath))
+                foreach (string testPath in file.GetParentLocations())
                 {
                     if (fileLocator.Exists(testPath))
                     {
-                        DiskImageFile newFile = new DiskImageFile(fileLocator.Open(testPath, FileMode.Open, FileAccess.Read, FileShare.Read), Ownership.Dispose);
+                        DiskImageFile newFile = new DiskImageFile(fileLocator, testPath, FileAccess.Read);
 
                         if (newFile.UniqueId != file.ParentUniqueId)
                         {
-                            throw new IOException(string.Format(CultureInfo.InstalledUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, filePath, newFile.UniqueId));
+                            throw new IOException(string.Format(CultureInfo.InstalledUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
                         }
 
                         file = newFile;
@@ -451,9 +461,10 @@ namespace DiscUtils.Vhd
 
                 if (!found)
                 {
-                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Failed to find parent for disk '{0}'", filePath));
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Failed to find parent for disk '{0}'", file.FullPath));
                 }
             }
         }
+
     }
 }

@@ -39,6 +39,9 @@ namespace DiscUtils.Vmdk
         private SparseStream _content;
         private FileLocator _layerLocator;
 
+        private string _path;
+
+
         /// <summary>
         /// Creates a new instance from a file on disk.
         /// </summary>
@@ -57,6 +60,7 @@ namespace DiscUtils.Vmdk
         /// <param name="access">The access requested to the disk.</param>
         public Disk(DiscFileSystem fileSystem, string path, FileAccess access)
         {
+            _path = path;
             _layerLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(_layerLocator, Path.GetFileName(path), access), Ownership.Dispose));
@@ -70,6 +74,12 @@ namespace DiscUtils.Vmdk
         /// <param name="ownsStream">Indicates if the new instances owns the stream.</param>
         public Disk(Stream stream, Ownership ownsStream)
         {
+            FileStream fileStream = stream as FileStream;
+            if (fileStream != null)
+            {
+                _path = fileStream.Name;
+            }
+
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
         }
@@ -95,9 +105,10 @@ namespace DiscUtils.Vmdk
 
         internal Disk(FileLocator layerLocator, string path, FileAccess access)
         {
+            _path = path;
             _layerLocator = layerLocator;
             _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(path, access), Ownership.Dispose));
+            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -331,6 +342,44 @@ namespace DiscUtils.Vmdk
                 {
                     yield return file.First;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Create a new differencing disk, possibly within an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
+        {
+            return InitializeDifferencing(fileSystem, path, DiffDiskCreateType(_files[0].First.CreateType), _path);
+        }
+
+        /// <summary>
+        /// Create a new differencing disk.
+        /// </summary>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public override VirtualDisk CreateDifferencingDisk(string path)
+        {
+            return InitializeDifferencing(path, DiffDiskCreateType(_files[0].First.CreateType), _layerLocator.GetFullPath(_path));
+        }
+
+        private static DiskCreateType DiffDiskCreateType(DiskCreateType diskCreateType)
+        {
+            switch (diskCreateType)
+            {
+                case DiskCreateType.FullDevice:
+                case DiskCreateType.MonolithicFlat:
+                case DiskCreateType.MonolithicSparse:
+                case DiskCreateType.PartitionedDevice:
+                case DiskCreateType.StreamOptimized:
+                case DiskCreateType.TwoGbMaxExtentFlat:
+                case DiskCreateType.TwoGbMaxExtentSparse:
+                    return DiskCreateType.MonolithicSparse;
+                default:
+                    return DiskCreateType.VmfsSparse;
             }
         }
 

@@ -49,60 +49,57 @@ namespace VHDDump
 
         protected override void DoRun()
         {
-            using (Stream fileStream = File.OpenRead(_vhdFile.Value))
+            using (DiskImageFile vhdFile = new DiskImageFile(_vhdFile.Value, FileAccess.Read))
             {
-                using (DiskImageFile vhdFile = new DiskImageFile(fileStream, Ownership.None))
+                DiskImageFileInfo info = vhdFile.Information;
+
+                FileInfo fileInfo = new FileInfo(_vhdFile.Value);
+
+                Console.WriteLine("File Info");
+                Console.WriteLine("---------");
+                Console.WriteLine("           File Name: {0}", fileInfo.FullName);
+                Console.WriteLine("           File Size: {0} bytes", fileInfo.Length);
+                Console.WriteLine("  File Creation Time: {0} (UTC)", fileInfo.CreationTimeUtc);
+                Console.WriteLine("     File Write Time: {0} (UTC)", fileInfo.LastWriteTimeUtc);
+                Console.WriteLine();
+
+                Console.WriteLine("Common Disk Info");
+                Console.WriteLine("-----------------");
+                Console.WriteLine("              Cookie: {0:x8}", info.Cookie);
+                Console.WriteLine("            Features: {0:x8}", info.Features);
+                Console.WriteLine(" File Format Version: {0}.{1}", ((info.FileFormatVersion >> 16) & 0xFFFF), (info.FileFormatVersion & 0xFFFF));
+                Console.WriteLine("       Creation Time: {0} (UTC)", info.CreationTimestamp);
+                Console.WriteLine("         Creator App: {0:x8}", info.CreatorApp);
+                Console.WriteLine("     Creator Version: {0}.{1}", ((info.CreatorVersion >> 16) & 0xFFFF), (info.CreatorVersion & 0xFFFF));
+                Console.WriteLine("     Creator Host OS: {0}", info.CreatorHostOS);
+                Console.WriteLine("       Original Size: {0} bytes", info.OriginalSize);
+                Console.WriteLine("        Current Size: {0} bytes", info.CurrentSize);
+                Console.WriteLine("    Geometry (C/H/S): {0}", info.Geometry);
+                Console.WriteLine("           Disk Type: {0}", info.DiskType);
+                Console.WriteLine("            Checksum: {0:x8}", info.FooterChecksum);
+                Console.WriteLine("           Unique Id: {0}", info.UniqueId);
+                Console.WriteLine("         Saved State: {0}", info.SavedState);
+                Console.WriteLine();
+
+                if (info.DiskType == FileType.Differencing || info.DiskType == FileType.Dynamic)
                 {
-                    DiskImageFileInfo info = vhdFile.Information;
-
-                    FileInfo fileInfo = new FileInfo(_vhdFile.Value);
-
-                    Console.WriteLine("File Info");
-                    Console.WriteLine("---------");
-                    Console.WriteLine("           File Name: {0}", fileInfo.FullName);
-                    Console.WriteLine("           File Size: {0} bytes", fileInfo.Length);
-                    Console.WriteLine("  File Creation Time: {0} (UTC)", fileInfo.CreationTimeUtc);
-                    Console.WriteLine("     File Write Time: {0} (UTC)", fileInfo.LastWriteTimeUtc);
                     Console.WriteLine();
-
-                    Console.WriteLine("Common Disk Info");
+                    Console.WriteLine("Dynamic Disk Info");
                     Console.WriteLine("-----------------");
-                    Console.WriteLine("              Cookie: {0:x8}", info.Cookie);
-                    Console.WriteLine("            Features: {0:x8}", info.Features);
-                    Console.WriteLine(" File Format Version: {0}.{1}", ((info.FileFormatVersion >> 16) & 0xFFFF), (info.FileFormatVersion & 0xFFFF));
-                    Console.WriteLine("       Creation Time: {0} (UTC)", info.CreationTimestamp);
-                    Console.WriteLine("         Creator App: {0:x8}", info.CreatorApp);
-                    Console.WriteLine("     Creator Version: {0}.{1}", ((info.CreatorVersion >> 16) & 0xFFFF), (info.CreatorVersion & 0xFFFF));
-                    Console.WriteLine("     Creator Host OS: {0}", info.CreatorHostOS);
-                    Console.WriteLine("       Original Size: {0} bytes", info.OriginalSize);
-                    Console.WriteLine("        Current Size: {0} bytes", info.CurrentSize);
-                    Console.WriteLine("    Geometry (C/H/S): {0}", info.Geometry);
-                    Console.WriteLine("           Disk Type: {0}", info.DiskType);
-                    Console.WriteLine("            Checksum: {0:x8}", info.FooterChecksum);
-                    Console.WriteLine("           Unique Id: {0}", info.UniqueId);
-                    Console.WriteLine("         Saved State: {0}", info.SavedState);
-                    Console.WriteLine();
-
-                    if (info.DiskType == FileType.Differencing || info.DiskType == FileType.Dynamic)
+                    Console.WriteLine("              Cookie: {0}", info.DynamicCookie);
+                    Console.WriteLine("      Header Version: {0}.{1}", ((info.DynamicHeaderVersion >> 16) & 0xFFFF), (info.DynamicHeaderVersion & 0xFFFF));
+                    Console.WriteLine("         Block Count: {0}", info.DynamicBlockCount);
+                    Console.WriteLine("          Block Size: {0} bytes", info.DynamicBlockSize);
+                    Console.WriteLine("            Checksum: {0:x8}", info.DynamicChecksum);
+                    Console.WriteLine("    Parent Unique Id: {0}", info.DynamicParentUniqueId);
+                    Console.WriteLine("   Parent Write Time: {0} (UTC)", info.DynamicParentTimestamp);
+                    Console.WriteLine("         Parent Name: {0}", info.DynamicParentUnicodeName);
+                    Console.Write("    Parent Locations: ");
+                    foreach (string parentLocation in info.DynamicParentLocators)
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("Dynamic Disk Info");
-                        Console.WriteLine("-----------------");
-                        Console.WriteLine("              Cookie: {0}", info.DynamicCookie);
-                        Console.WriteLine("      Header Version: {0}.{1}", ((info.DynamicHeaderVersion >> 16) & 0xFFFF), (info.DynamicHeaderVersion & 0xFFFF));
-                        Console.WriteLine("         Block Count: {0}", info.DynamicBlockCount);
-                        Console.WriteLine("          Block Size: {0} bytes", info.DynamicBlockSize);
-                        Console.WriteLine("            Checksum: {0:x8}", info.DynamicChecksum);
-                        Console.WriteLine("    Parent Unique Id: {0}", info.DynamicParentUniqueId);
-                        Console.WriteLine("   Parent Write Time: {0} (UTC)", info.DynamicParentTimestamp);
-                        Console.WriteLine("         Parent Name: {0}", info.DynamicParentUnicodeName);
-                        Console.Write("    Parent Locations: ");
-                        foreach (string parentLocation in info.DynamicParentLocators)
-                        {
-                            Console.Write("{0}\n                      ", parentLocation);
-                        }
-                        Console.WriteLine();
+                        Console.Write("{0}\n                      ", parentLocation);
                     }
+                    Console.WriteLine();
                 }
             }
         }

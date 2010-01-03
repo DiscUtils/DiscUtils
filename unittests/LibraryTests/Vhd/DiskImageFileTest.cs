@@ -61,10 +61,22 @@ namespace DiscUtils.Vhd
 
             using (DiskImageFile diffFile = new DiskImageFile(diffStream))
             {
+                // Testing the obsolete method - disable warning
+#pragma warning disable 618
                 string[] locations = diffFile.GetParentLocations(@"E:\FOO\");
+#pragma warning restore 618
                 Assert.AreEqual(2, locations.Length);
                 Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
                 Assert.AreEqual(@"E:\FOO\Base.vhd", locations[1]);
+            }
+
+            using (DiskImageFile diffFile = new DiskImageFile(diffStream))
+            {
+                // Testing the new method - note relative path because diff file initialized without a path
+                string[] locations = diffFile.GetParentLocations();
+                Assert.AreEqual(2, locations.Length);
+                Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
+                Assert.AreEqual(@".\Base.vhd", locations[1]);
             }
         }
 

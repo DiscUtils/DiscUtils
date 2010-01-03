@@ -465,6 +465,17 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets a <c>FileLocator</c> that can resolve relative paths, or <c>null</c>.
+        /// </summary>
+        /// <remarks>
+        /// Typically used to locate parent disks.
+        /// </remarks>
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return _extentLocator; }
+        }
+
+        /// <summary>
         /// Gets the Geometry of this disk.
         /// </summary>
         internal Geometry Geometry
@@ -478,6 +489,14 @@ namespace DiscUtils.Vmdk
         internal Geometry BiosGeometry
         {
             get { return _descriptor.BiosGeometry; }
+        }
+
+        /// <summary>
+        /// Gets the 'CreateType' of this disk.
+        /// </summary>
+        internal DiskCreateType CreateType
+        {
+            get { return _descriptor.CreateType; }
         }
 
         /// <summary>

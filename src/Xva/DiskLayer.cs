@@ -53,5 +53,10 @@ namespace DiscUtils.Xva
         {
             get { return _capacity; }
         }
+
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return null; }
+        }
     }
 }

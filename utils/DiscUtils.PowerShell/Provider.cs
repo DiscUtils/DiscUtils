@@ -130,7 +130,7 @@ namespace DiscUtils.PowerShell
         #region Item methods
         protected override void GetItem(string path)
         {
-            Object obj = FindItemByPath(NormalizePath(path));
+            Object obj = FindItemByPath(NormalizePath(path), false);
             if (obj != null)
             {
                 WriteItemObject(obj, path.Trim('\\'), true);
@@ -144,7 +144,7 @@ namespace DiscUtils.PowerShell
 
         protected override bool ItemExists(string path)
         {
-            bool result = FindItemByPath(NormalizePath(path)) != null;
+            bool result = FindItemByPath(NormalizePath(path), false) != null;
             return result;
         }
 
@@ -168,19 +168,179 @@ namespace DiscUtils.PowerShell
 
         protected override bool HasChildItems(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            object obj = FindItemByPath(NormalizePath(path), true);
+
+            if (obj is DiscFileInfo)
+            {
+                return false;
+            }
+            else if (obj is DiscDirectoryInfo)
+            {
+                return ((DiscDirectoryInfo)obj).GetFileSystemInfos().Length > 0;
+            }
+            else
             {
                 return true;
             }
+        }
 
-            return true;
+        protected override void RemoveItem(string path, bool recurse)
+        {
+            object obj = FindItemByPath(NormalizePath(path), false);
+
+            if (obj is DiscDirectoryInfo)
+            {
+                ((DiscDirectoryInfo)obj).Delete(true);
+            }
+            else if (obj is DiscFileInfo)
+            {
+                ((DiscFileInfo)obj).Delete();
+            }
+            else
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("Cannot delete items of this type: " + (obj != null ? obj.GetType() : null)),
+                    "UnknownObjectTypeToRemove",
+                    ErrorCategory.InvalidOperation,
+                    obj));
+            }
+        }
+
+        protected override void NewItem(string path, string itemTypeName, object newItemValue)
+        {
+            string parentPath = GetParentPath(path, null);
+
+            bool isFile = false;
+            if (string.IsNullOrEmpty(itemTypeName))
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("No type specified.  Specify \"file\" or \"directory\" as the type."),
+                    "NoTypeForNewItem",
+                    ErrorCategory.InvalidArgument,
+                    itemTypeName));
+                return;
+            }
+            else if (itemTypeName.ToUpperInvariant() == "FILE")
+            {
+                isFile = true;
+            }
+            else if (itemTypeName.ToUpperInvariant() == "DIRECTORY")
+            {
+                isFile = false;
+            }
+            else
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("The type is unknown for this provider.  Only \"file\" and \"directory\" can be specified."),
+                    "UnknownTypeForNewItem",
+                    ErrorCategory.InvalidArgument,
+                    itemTypeName));
+                return;
+            }
+
+            object obj = FindItemByPath(NormalizePath(parentPath), true);
+
+            if (obj is DiscDirectoryInfo)
+            {
+                DiscDirectoryInfo dirInfo = (DiscDirectoryInfo)obj;
+                if (isFile)
+                {
+                    using (dirInfo.FileSystem.OpenFile(Path.Combine(dirInfo.FullName, GetChildName(path)), FileMode.Create)) { }
+                }
+                else
+                {
+                    dirInfo.FileSystem.CreateDirectory(Path.Combine(dirInfo.FullName, GetChildName(path)));
+                }
+            }
+            else
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("Cannot create items in an object of this type: " + (obj != null ? obj.GetType() : null)),
+                    "UnknownObjectTypeForNewItemParent",
+                    ErrorCategory.InvalidOperation,
+                    obj));
+                return;
+            }
+        }
+
+        protected override void RenameItem(string path, string newName)
+        {
+            object obj = FindItemByPath(NormalizePath(path), true);
+
+            DiscFileSystemInfo fsiObj = obj as DiscFileSystemInfo;
+            if (fsiObj == null)
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("Cannot move items to this location"),
+                    "BadParentForNewItem",
+                    ErrorCategory.InvalidArgument,
+                    newName));
+                return;
+            }
+
+            string newFullName = Path.Combine(Path.GetDirectoryName(fsiObj.FullName.TrimEnd('\\')), newName);
+
+            if (obj is DiscDirectoryInfo)
+            {
+                DiscDirectoryInfo dirObj = (DiscDirectoryInfo)obj;
+                dirObj.MoveTo(newFullName);
+            }
+            else
+            {
+                DiscFileInfo fileObj = (DiscFileInfo)obj;
+                fileObj.MoveTo(newFullName);
+            }
+        }
+
+        protected override void CopyItem(string path, string copyPath, bool recurse)
+        {
+            DiscDirectoryInfo destDir;
+            string destFileName = null;
+
+            object destObj = FindItemByPath(NormalizePath(copyPath), true);
+            destDir = destObj as DiscDirectoryInfo;
+            if (destDir != null)
+            {
+                destFileName = GetChildName(path);
+            }
+            else if (destObj == null || destObj is DiscFileInfo)
+            {
+                destObj = FindItemByPath(NormalizePath(GetParentPath(copyPath, null)), true);
+                destDir = destObj as DiscDirectoryInfo;
+                destFileName = GetChildName(copyPath);
+            }
+
+            if (destDir == null)
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("Cannot copy items to this location"),
+                    "BadParentForNewItem",
+                    ErrorCategory.InvalidArgument,
+                    copyPath));
+                return;
+            }
+
+            object srcDirObj = FindItemByPath(NormalizePath(GetParentPath(path, null)), true);
+            DiscDirectoryInfo srcDir = srcDirObj as DiscDirectoryInfo;
+            string srcFileName = GetChildName(path);
+            if (srcDir == null)
+            {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("Cannot copy items from this location"),
+                    "BadParentForNewItem",
+                    ErrorCategory.InvalidArgument,
+                    copyPath));
+                return;
+            }
+
+            DoCopy(srcDir, srcFileName, destDir, destFileName, recurse);
         }
         #endregion
 
         #region Navigation methods
         protected override bool IsItemContainer(string path)
         {
-            object obj = FindItemByPath(NormalizePath(path));
+            object obj = FindItemByPath(NormalizePath(path), false);
 
             bool result = false;
             if (obj is VirtualDisk)
@@ -244,7 +404,7 @@ namespace DiscUtils.PowerShell
             }
         }
 
-        private object FindItemByPath(string path)
+        private object FindItemByPath(string path, bool preferFs)
         {
             string diskPath;
             string relPath;
@@ -298,7 +458,7 @@ namespace DiscUtils.PowerShell
                 volInfo = volMgr.GetVolume(DenormalizePath(pathElems[0]));
             }
             pathElems.RemoveAt(0);
-            if (volInfo == null || pathElems.Count == 0)
+            if (volInfo == null || (pathElems.Count == 0 && !preferFs))
             {
                 return volInfo;
             }
@@ -316,7 +476,7 @@ namespace DiscUtils.PowerShell
                 // Special marker in the path - disambiguates the root folder from the volume
                 // containing it.  By this point it's done it's job (we didn't return volInfo),
                 // so we just remove it.
-                if (pathElems[0] == "$Root")
+                if (pathElems.Count > 0 && pathElems[0] == "$Root")
                 {
                     pathElems.RemoveAt(0);
                 }
@@ -417,7 +577,7 @@ namespace DiscUtils.PowerShell
                 return;
             }
 
-            object obj = FindItemByPath(path);
+            object obj = FindItemByPath(path, false);
 
             if (obj is VirtualDisk)
             {
@@ -496,6 +656,98 @@ namespace DiscUtils.PowerShell
                 WriteItemObject(namesOnly ? file.Name : (object)file, MakePath(basePath, file.Name), false);
             }
         }
+
+        private void DoCopy(DiscDirectoryInfo srcDir, string srcFileName, DiscDirectoryInfo destDir, string destFileName, bool recurse)
+        {
+            string srcPath = Path.Combine(srcDir.FullName, srcFileName);
+            string destPath = Path.Combine(destDir.FullName, destFileName);
+
+            if ((srcDir.FileSystem.GetAttributes(srcPath) & FileAttributes.Directory) == 0)
+            {
+                DoCopyFile(srcDir.FileSystem, srcPath, destDir.FileSystem, destPath);
+            }
+            else
+            {
+                DoCopyDirectory(srcDir.FileSystem, srcPath, destDir.FileSystem, destPath);
+                if (recurse)
+                {
+                    DoRecursiveCopy(srcDir.FileSystem, srcPath, destDir.FileSystem, destPath);
+                }
+            }
+        }
+
+        private void DoRecursiveCopy(DiscFileSystem srcFs, string srcPath, DiscFileSystem destFs, string destPath)
+        {
+            foreach (var dir in srcFs.GetDirectories(srcPath))
+            {
+                string srcDirPath = Path.Combine(srcPath, dir);
+                string destDirPath = Path.Combine(destPath, dir);
+                DoCopyDirectory(srcFs, srcDirPath, destFs, destDirPath);
+                DoRecursiveCopy(srcFs, srcDirPath, destFs, destDirPath);
+            }
+
+            foreach (var file in srcFs.GetFiles(srcPath))
+            {
+                string srcFilePath = Path.Combine(srcPath, file);
+                string destFilePath = Path.Combine(destPath, file);
+                DoCopyFile(srcFs, srcFilePath, destFs, destFilePath);
+            }
+        }
+
+        private void DoCopyDirectory(DiscFileSystem srcFs, string srcPath, DiscFileSystem destFs, string destPath)
+        {
+            IWindowsFileSystem destWindowsFs = destFs as IWindowsFileSystem;
+            IWindowsFileSystem srcWindowsFs = srcFs as IWindowsFileSystem;
+
+            destFs.CreateDirectory(destPath);
+
+            if (srcWindowsFs != null && destWindowsFs != null)
+            {
+                if ((srcWindowsFs.GetAttributes(srcPath) & FileAttributes.ReparsePoint) != 0)
+                {
+                    destWindowsFs.SetReparsePoint(destPath, srcWindowsFs.GetReparsePoint(srcPath));
+                }
+                destWindowsFs.SetSecurity(destPath, srcWindowsFs.GetSecurity(srcPath));
+            }
+
+            destFs.SetAttributes(destPath, srcFs.GetAttributes(srcPath));
+        }
+
+        private void DoCopyFile(DiscFileSystem srcFs, string srcPath, DiscFileSystem destFs, string destPath)
+        {
+            IWindowsFileSystem destWindowsFs = destFs as IWindowsFileSystem;
+            IWindowsFileSystem srcWindowsFs = srcFs as IWindowsFileSystem;
+
+            using (Stream src = srcFs.OpenFile(srcPath, FileMode.Open, FileAccess.Read))
+            using (Stream dest = destFs.OpenFile(destPath, FileMode.Create, FileAccess.ReadWrite))
+            {
+                dest.SetLength(src.Length);
+                byte[] buffer = new byte[1024 * 1024];
+                int numRead = src.Read(buffer, 0, buffer.Length);
+                while (numRead > 0)
+                {
+                    dest.Write(buffer, 0, numRead);
+                    numRead = src.Read(buffer, 0, buffer.Length);
+                }
+            }
+
+            if (srcWindowsFs != null && destWindowsFs != null)
+            {
+                if ((srcWindowsFs.GetAttributes(srcPath) & FileAttributes.ReparsePoint) != 0)
+                {
+                    destWindowsFs.SetReparsePoint(destPath, srcWindowsFs.GetReparsePoint(srcPath));
+                }
+
+                var sd = srcWindowsFs.GetSecurity(srcPath);
+                if(sd != null)
+                {
+                    destWindowsFs.SetSecurity(destPath, sd);
+                }
+            }
+
+            destFs.SetAttributes(destPath, srcFs.GetAttributes(srcPath));
+            destFs.SetCreationTimeUtc(destPath, srcFs.GetCreationTimeUtc(srcPath));
+        }
     }
 
 
@@ -569,11 +821,26 @@ namespace DiscUtils.PowerShell
             get { throw new NotSupportedException("Access to virtual disk layers is not implemented for on-demand disks"); }
         }
 
+        public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
+        {
+            using (VirtualDisk disk = OpenDisk())
+            {
+                return disk.CreateDifferencingDisk(fileSystem, path);
+            }
+        }
+
+        public override VirtualDisk CreateDifferencingDisk(string path)
+        {
+            using (VirtualDisk disk = OpenDisk())
+            {
+                return disk.CreateDifferencingDisk(path);
+            }
+        }
+
         private VirtualDisk OpenDisk()
         {
             return VirtualDisk.OpenDisk(_fileSystem, _path, FileAccess.Read);
         }
-
 
         private class StreamWrapper : SparseStream
         {
