@@ -36,8 +36,10 @@ namespace DiscUtils.Vmdk
         /// </summary>
         private List<Tuple<DiskImageFile, Ownership>> _files;
 
+        /// <summary>
+        /// The stream representing the content of this disk.
+        /// </summary>
         private SparseStream _content;
-        private FileLocator _layerLocator;
 
         private string _path;
 
@@ -61,9 +63,9 @@ namespace DiscUtils.Vmdk
         public Disk(DiscFileSystem fileSystem, string path, FileAccess access)
         {
             _path = path;
-            _layerLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
             _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(_layerLocator, Path.GetFileName(path), access), Ownership.Dispose));
+            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(fileLocator, Path.GetFileName(path), access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -86,18 +88,6 @@ namespace DiscUtils.Vmdk
 
         internal Disk(DiskImageFile file, Ownership ownsStream)
         {
-            if (file.NeedsParent)
-            {
-                throw new ArgumentException("Cannot create disk from file that needs parent");
-            }
-
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsStream));
-        }
-
-        internal Disk(DiskImageFile file, Ownership ownsStream, FileLocator layerLocator)
-        {
-            _layerLocator = layerLocator;
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsStream));
             ResolveFileChain();
@@ -106,7 +96,6 @@ namespace DiscUtils.Vmdk
         internal Disk(FileLocator layerLocator, string path, FileAccess access)
         {
             _path = path;
-            _layerLocator = layerLocator;
             _files = new List<Tuple<DiskImageFile, Ownership>>();
             _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
             ResolveFileChain();
@@ -247,8 +236,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The new disk.</returns>
         public static Disk InitializeDifferencing(string path, DiskCreateType type, string parentPath)
         {
-            FileLocator fileLoc = new LocalFileLocator(Path.GetDirectoryName(path));
-            return new Disk(DiskImageFile.InitializeDifferencing(path, type, parentPath), Ownership.Dispose, fileLoc);
+            return new Disk(DiskImageFile.InitializeDifferencing(path, type, parentPath), Ownership.Dispose);
         }
 
         /// <summary>
@@ -261,8 +249,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The new disk.</returns>
         public static Disk InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type, string parentPath)
         {
-            FileLocator fileLoc = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            return new Disk(DiskImageFile.InitializeDifferencing(fileSystem, path, type, parentPath), Ownership.Dispose, fileLoc);
+            return new Disk(DiskImageFile.InitializeDifferencing(fileSystem, path, type, parentPath), Ownership.Dispose);
         }
 
         /// <summary>
@@ -363,7 +350,8 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
-            return InitializeDifferencing(path, DiffDiskCreateType(_files[0].First.CreateType), _layerLocator.GetFullPath(_path));
+            var firstLayer = _files[0].First;
+            return InitializeDifferencing(path, DiffDiskCreateType(firstLayer.CreateType), firstLayer.RelativeFileLocator.GetFullPath(_path));
         }
 
         private static DiskCreateType DiffDiskCreateType(DiskCreateType diskCreateType)
@@ -389,8 +377,7 @@ namespace DiscUtils.Vmdk
 
             while (file.NeedsParent)
             {
-                Stream fileStream = _layerLocator.Open(file.ParentLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
-                file = new DiskImageFile(fileStream, Ownership.Dispose, _layerLocator.GetRelativeLocator(Path.GetDirectoryName(file.ParentLocation)));
+                file = new DiskImageFile(file.RelativeFileLocator, file.ParentLocation, FileAccess.Read);
                 _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             }
         }

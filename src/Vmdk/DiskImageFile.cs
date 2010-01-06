@@ -34,7 +34,7 @@ namespace DiscUtils.Vmdk
     {
         private DescriptorFile _descriptor;
         private SparseStream _contentStream;
-        private FileLocator _extentLocator;
+        private FileLocator _fileLocator;
 
         private FileAccess _access;
 
@@ -91,7 +91,7 @@ namespace DiscUtils.Vmdk
                 }
             }
 
-            _extentLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+            _fileLocator = new LocalFileLocator(Path.GetDirectoryName(path));
         }
 
         /// <summary>
@@ -120,32 +120,6 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Creates a new instance from a stream, that can span multiple files.
-        /// </summary>
-        /// <param name="stream">The VMDK stream</param>
-        /// <param name="ownsStream">Indicates if the created instance should own the stream.</param>
-        /// <param name="extentLocator">The locator to read additional files that comprise the disk</param>
-        internal DiskImageFile(Stream stream, Ownership ownsStream, FileLocator extentLocator)
-        {
-            _access = stream.CanWrite ? FileAccess.ReadWrite : FileAccess.Read;
-
-            LoadDescriptor(stream);
-            _extentLocator = extentLocator;
-
-            if ((_descriptor.CreateType == DiskCreateType.MonolithicSparse
-                || _descriptor.CreateType == DiskCreateType.StreamOptimized)
-                && _descriptor.Extents.Count == 1)
-            {
-                _monolithicStream = stream;
-                _ownsMonolithicStream = ownsStream;
-            }
-            else if (ownsStream == Ownership.Dispose)
-            {
-                stream.Dispose();
-            }
-        }
-
-        /// <summary>
         /// Creates a new instance from a file.
         /// </summary>
         /// <param name="fileLocator">An object to open the file and any extents</param>
@@ -168,7 +142,7 @@ namespace DiscUtils.Vmdk
                 LoadDescriptor(s);
             }
 
-            _extentLocator = fileLocator;
+            _fileLocator = fileLocator.GetRelativeLocator(Path.GetDirectoryName(file));
         }
 
         /// <summary>
@@ -472,7 +446,7 @@ namespace DiscUtils.Vmdk
         /// </remarks>
         internal override FileLocator RelativeFileLocator
         {
-            get { return _extentLocator; }
+            get { return _fileLocator; }
         }
 
         /// <summary>
@@ -652,7 +626,7 @@ namespace DiscUtils.Vmdk
                 case ExtentType.Flat:
                 case ExtentType.Vmfs:
                     return SparseStream.FromStream(
-                        _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
                         Ownership.Dispose);
 
                 case ExtentType.Zero:
@@ -660,7 +634,7 @@ namespace DiscUtils.Vmdk
 
                 case ExtentType.Sparse:
                     return new HostedSparseExtentStream(
-                        _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
                         Ownership.Dispose,
                         extentStart,
                         parent,
@@ -668,7 +642,7 @@ namespace DiscUtils.Vmdk
 
                 case ExtentType.VmfsSparse:
                     return new ServerSparseExtentStream(
-                        _extentLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
                         Ownership.Dispose,
                         extentStart,
                         parent,
