@@ -339,6 +339,10 @@ namespace DiscUtils.Ntfs
                         {
                             childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
 
+                            RawSecurityDescriptor sd = DoGetSecurity(focusDir);
+                            DoSetSecurity(childDir, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
+                            childDirEntry.UpdateFrom(childDir);
+
                             // Update the directory entry by which we found the directory we've just modified
                             focusDirEntry.UpdateFrom(focusDir);
 
@@ -718,6 +722,11 @@ namespace DiscUtils.Ntfs
                             DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
                             Directory parentDir = GetDirectory(parentDirEntry.Reference);
                             entry = parentDir.AddEntry(file, Path.GetFileName(path));
+
+                            RawSecurityDescriptor sd = DoGetSecurity(parentDir);
+                            DoSetSecurity(file, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
+                            entry.UpdateFrom(file);
+
                             parentDirEntry.UpdateFrom(parentDir);
                         }
                         finally
@@ -1127,16 +1136,7 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     File file = GetFile(dirEntry.Reference);
-
-                    NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
-                    if (legacyStream != null)
-                    {
-                        return legacyStream.GetContent<SecurityDescriptor>().Descriptor;
-                    }
-
-                    NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
-                    StandardInformation si = stream.GetContent<StandardInformation>();
-                    return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
+                    return DoGetSecurity(file);
                 }
             }
         }
@@ -1158,30 +1158,10 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     File file = GetFile(dirEntry.Reference);
+                    DoSetSecurity(file, securityDescriptor);
 
-                    NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
-                    if (legacyStream != null)
-                    {
-                        SecurityDescriptor sd = new SecurityDescriptor();
-                        sd.Descriptor = securityDescriptor;
-                        legacyStream.SetContent(sd);
-                    }
-                    else
-                    {
-                        uint id = _context.SecurityDescriptors.AddDescriptor(securityDescriptor);
-
-                        // Update the standard information attribute - so it reflects the actual file state
-                        NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
-                        StandardInformation si = stream.GetContent<StandardInformation>();
-                        si.SecurityId = id;
-                        stream.SetContent(si);
-
-                        // Update the directory entry used to open the file, so it's accurate
-                        dirEntry.UpdateFrom(file);
-
-                        // Write attribute changes back to the Master File Table
-                        file.UpdateRecordInMft();
-                    }
+                    // Update the directory entry used to open the file
+                    dirEntry.UpdateFrom(file);
                 }
             }
         }
@@ -1580,6 +1560,43 @@ namespace DiscUtils.Ntfs
                 {
                     return null;
                 }
+            }
+        }
+
+        private RawSecurityDescriptor DoGetSecurity(File file)
+        {
+            NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
+            if (legacyStream != null)
+            {
+                return legacyStream.GetContent<SecurityDescriptor>().Descriptor;
+            }
+
+            NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+            StandardInformation si = stream.GetContent<StandardInformation>();
+            return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
+        }
+
+        private void DoSetSecurity(File file, RawSecurityDescriptor securityDescriptor)
+        {
+            NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
+            if (legacyStream != null)
+            {
+                SecurityDescriptor sd = new SecurityDescriptor();
+                sd.Descriptor = securityDescriptor;
+                legacyStream.SetContent(sd);
+            }
+            else
+            {
+                uint id = _context.SecurityDescriptors.AddDescriptor(securityDescriptor);
+
+                // Update the standard information attribute - so it reflects the actual file state
+                NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+                StandardInformation si = stream.GetContent<StandardInformation>();
+                si.SecurityId = id;
+                stream.SetContent(si);
+
+                // Write attribute changes back to the Master File Table
+                file.UpdateRecordInMft();
             }
         }
 

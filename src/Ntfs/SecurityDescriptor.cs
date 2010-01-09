@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace DiscUtils.Ntfs
 {
@@ -136,6 +137,47 @@ namespace DiscUtils.Ntfs
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "Descriptor: " + _securityDescriptor.GetSddlForm(AccessControlSections.All));
+        }
+
+        #endregion
+
+        #region SID inheritance calculation
+        internal static RawSecurityDescriptor CalcNewObjectDescriptor(RawSecurityDescriptor parent, bool isContainer)
+        {
+
+            RawAcl sacl = InheritAcl(parent.SystemAcl, isContainer);
+            RawAcl dacl = InheritAcl(parent.DiscretionaryAcl, isContainer);
+
+            return new RawSecurityDescriptor(parent.ControlFlags, parent.Owner, parent.Group, sacl, dacl);
+        }
+
+        private static RawAcl InheritAcl(RawAcl parentAcl, bool isContainer)
+        {
+            AceFlags inheritTest = isContainer ? AceFlags.ContainerInherit : AceFlags.ObjectInherit;
+
+            RawAcl newAcl = null;
+            if (parentAcl != null)
+            {
+                newAcl = new RawAcl(parentAcl.Revision, parentAcl.Count);
+                foreach (CommonAce ace in parentAcl)
+                {
+                    if ((ace.AceFlags & inheritTest) != 0)
+                    {
+                        AceFlags newFlags = ace.AceFlags;
+                        if ((newFlags & AceFlags.NoPropagateInherit) != 0)
+                        {
+                            newFlags &= ~(AceFlags.ContainerInherit | AceFlags.ObjectInherit | AceFlags.NoPropagateInherit);
+                        }
+
+                        newFlags &= ~AceFlags.InheritOnly;
+                        newFlags |= AceFlags.Inherited;
+
+                        CommonAce newAce = new CommonAce(newFlags, ace.AceQualifier, ace.AccessMask, ace.SecurityIdentifier, ace.IsCallback, ace.GetOpaque());
+                        newAcl.InsertAce(newAcl.Count, newAce);
+                    }
+                }
+            }
+            return newAcl;
         }
 
         #endregion

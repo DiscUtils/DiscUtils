@@ -21,6 +21,7 @@
 //
 
 using System.IO;
+using System.Security.AccessControl;
 using NUnit.Framework;
 
 namespace DiscUtils.Ntfs
@@ -28,6 +29,27 @@ namespace DiscUtils.Ntfs
     [TestFixture]
     public class NtfsFileSystemTest
     {
+        [Test]
+        public void AclInheritance()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            RawSecurityDescriptor sd = new RawSecurityDescriptor("O:BAG:BAD:(A;OICINP;GA;;;BA)");
+            ntfs.CreateDirectory("dir");
+            ntfs.SetSecurity("dir", sd);
+
+            ntfs.CreateDirectory(@"dir\subdir");
+            RawSecurityDescriptor inheritedSd = ntfs.GetSecurity(@"dir\subdir");
+
+            Assert.NotNull(inheritedSd);
+            Assert.AreEqual("O:BAG:BAD:(A;ID;GA;;;BA)", inheritedSd.GetSddlForm(AccessControlSections.All));
+
+            using (ntfs.OpenFile(@"dir\subdir\file", FileMode.Create, FileAccess.ReadWrite)) { }
+            inheritedSd = ntfs.GetSecurity(@"dir\subdir\file");
+            Assert.NotNull(inheritedSd);
+            Assert.AreEqual("O:BAG:BAD:", inheritedSd.GetSddlForm(AccessControlSections.All));
+        }
+
         [Test]
         public void ReparsePoints_Empty()
         {
