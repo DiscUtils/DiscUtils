@@ -354,8 +354,17 @@ namespace DiscUtils.Ntfs
         {
             if (attrRef.File.MftIndex != _baseRecord.MasterFileTableIndex)
             {
-                return _context.GetFileByRef(attrRef.File).InnerGetAttribute(attrRef.AttributeId);
+                var file = _context.GetFileByRef(attrRef.File);
+                if (file != null)
+                {
+                    return file.InnerGetAttribute(attrRef.AttributeId);
+                }
+                else
+                {
+                    return null;
+                }
             }
+
             return InnerGetAttribute(attrRef.AttributeId);
         }
 
@@ -390,7 +399,11 @@ namespace DiscUtils.Ntfs
                     StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(this, MftReference, attrListRec);
                     foreach (var record in attrList.Content)
                     {
-                        yield return GetAttribute(new AttributeReference(record.BaseFileReference, record.AttributeId));
+                        var attr = GetAttribute(new AttributeReference(record.BaseFileReference, record.AttributeId));
+                        if (attr != null)
+                        {
+                            yield return attr;
+                        }
                     }
                 }
                 else
