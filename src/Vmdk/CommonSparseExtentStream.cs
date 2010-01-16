@@ -103,14 +103,14 @@ namespace DiscUtils.Vmdk
                     if (_ownsFileStream == Ownership.Dispose && _fileStream != null)
                     {
                         _fileStream.Dispose();
-                        _fileStream = null;
                     }
+                    _fileStream = null;
 
                     if (_ownsParentDiskStream == Ownership.Dispose && _parentDiskStream != null)
                     {
                         _parentDiskStream.Dispose();
-                        _parentDiskStream = null;
                     }
+                    _parentDiskStream = null;
                 }
             }
             finally
