@@ -387,8 +387,7 @@ namespace DiscUtils
                     VirtualDiskFactory factory;
                     if (ExtensionMap.TryGetValue(extension, out factory))
                     {
-                        string[] segments = uri.Segments;
-                        result = factory.OpenDisk(transport.GetFileLocator(), segments[segments.Length - 1], access);
+                        result = factory.OpenDisk(transport.GetFileLocator(), transport.GetFileName(), access);
                     }
                 }
 

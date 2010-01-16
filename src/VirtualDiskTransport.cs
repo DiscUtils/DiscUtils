@@ -56,6 +56,8 @@ namespace DiscUtils
 
         public abstract FileLocator GetFileLocator();
 
+        public abstract string GetFileName();
+
         #region IDisposable Members
 
         public void Dispose()
@@ -94,6 +96,11 @@ namespace DiscUtils
         public override FileLocator GetFileLocator()
         {
             return new LocalFileLocator(Path.GetDirectoryName(_path));
+        }
+
+        public override string GetFileName()
+        {
+            return Path.GetFileName(_path);
         }
     }
 }

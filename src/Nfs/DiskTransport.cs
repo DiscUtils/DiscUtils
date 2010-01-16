@@ -30,7 +30,7 @@ namespace DiscUtils.Nfs
     internal sealed class DiskTransport : VirtualDiskTransport
     {
         private NfsFileSystem _fileSystem;
-        private string _basePath;
+        private string _path;
 
         public override void Connect(Uri uri, string username, string password)
         {
@@ -67,7 +67,7 @@ namespace DiscUtils.Nfs
             }
 
             _fileSystem = new NfsFileSystem(uri.Host, bestRoot);
-            _basePath = Utilities.GetDirectoryFromPath(fsPath.Substring(bestRoot.Length).Replace('/', '\\'));
+            _path = fsPath.Substring(bestRoot.Length).Replace('/', '\\');
         }
 
         public override void Dispose(bool disposing)
@@ -95,7 +95,12 @@ namespace DiscUtils.Nfs
 
         public override FileLocator GetFileLocator()
         {
-            return new DiscFileLocator(_fileSystem, _basePath);
+            return new DiscFileLocator(_fileSystem, Utilities.GetDirectoryFromPath(_path));
+        }
+
+        public override string GetFileName()
+        {
+            return Utilities.GetFileFromPath(_path);
         }
     }
 

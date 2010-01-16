@@ -68,5 +68,10 @@ namespace DiscUtils.Iscsi
         {
             throw new NotImplementedException();
         }
+
+        public override string GetFileName()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
