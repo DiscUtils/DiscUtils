@@ -105,7 +105,7 @@ namespace DiscUtils.Ntfs
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
             _context.Mft = new MasterFileTable();
-            File mftFile = new File(_context, MasterFileTable.GetBootstrapRecord(_context.RawStream, _context.BiosParameterBlock));
+            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord(_context.RawStream, _context.BiosParameterBlock));
             _context.Mft.Initialize(mftFile);
             return _context.Mft.GetClusterMap();
         }
@@ -124,7 +124,7 @@ namespace DiscUtils.Ntfs
 
             // Bootstrap the Master File Table
             _context.Mft = new MasterFileTable();
-            File mftFile = new File(_context, MasterFileTable.GetBootstrapRecord(_context.RawStream, _context.BiosParameterBlock));
+            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord(_context.RawStream, _context.BiosParameterBlock));
 
             // Verify basic MFT records before initializing the Master File Table
             PreVerifyMft(mftFile);
@@ -495,12 +495,12 @@ namespace DiscUtils.Ntfs
                     if (ar.IsNonResident)
                     {
                         NonResidentAttributeRecord nrr = (NonResidentAttributeRecord)ar;
-                        if (nrr.DataRuns.Count > 0)
+                        if (nrr.CookedDataRuns.Count > 0)
                         {
                             long totalVcn = 0;
-                            foreach (var run in nrr.DataRuns)
+                            foreach (var run in nrr.CookedDataRuns)
                             {
-                                totalVcn += run.RunLength;
+                                totalVcn += run.DataRun.RunLength;
                             }
                             if (totalVcn != nrr.LastVcn - nrr.StartVcn + 1)
                             {

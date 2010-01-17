@@ -37,7 +37,8 @@ namespace DiscUtils.Ntfs
     {
         private File _self;
         private Bitmap _bitmap;
-        private Stream _records;
+        private Stream _recordStream;
+        private ObjectCache<long, FileRecord> _recordCache;
 
         private int _recordLength;
         private int _bytesPerSector;
@@ -109,14 +110,16 @@ namespace DiscUtils.Ntfs
 
         public MasterFileTable()
         {
+            _recordCache = new ObjectCache<long, FileRecord>();
         }
 
-        public static FileRecord GetBootstrapRecord(Stream fsStream, BiosParameterBlock bpb)
+        public FileRecord GetBootstrapRecord(Stream fsStream, BiosParameterBlock bpb)
         {
             fsStream.Position = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
             byte[] mftSelfRecordData = Utilities.ReadFully(fsStream, bpb.MftRecordSize);
             FileRecord mftSelfRecord = new FileRecord(bpb.BytesPerSector);
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
+            _recordCache[MftIndex] = mftSelfRecord;
             return mftSelfRecord;
         }
 
@@ -128,7 +131,7 @@ namespace DiscUtils.Ntfs
             _bitmap = new Bitmap(bitmapStream.Open(FileAccess.ReadWrite), long.MaxValue);
 
             NtfsStream recordsStream = _self.GetStream(AttributeType.Data, null);
-            _records = recordsStream.Open(FileAccess.ReadWrite);
+            _recordStream = recordsStream.Open(FileAccess.ReadWrite);
 
             _recordLength = _self.Context.BiosParameterBlock.MftRecordSize;
             _bytesPerSector = _self.Context.BiosParameterBlock.BytesPerSector;
@@ -141,13 +144,14 @@ namespace DiscUtils.Ntfs
             FileRecord fileRec = new FileRecord(bpb.BytesPerSector, bpb.MftRecordSize, (uint)MftIndex);
             fileRec.Flags = FileRecordFlags.InUse;
             fileRec.SequenceNumber = 1;
+            _recordCache[MftIndex] = fileRec;
 
             _self = new File(context, fileRec);
 
             StandardInformation.InitializeNewFile(_self, FileAttributeFlags.Hidden | FileAttributeFlags.System);
 
             NtfsStream recordsStream = _self.CreateStream(AttributeType.Data, null, firstRecordsCluster, numRecordsClusters, (uint)bpb.BytesPerCluster);
-            _records = recordsStream.Open(FileAccess.ReadWrite);
+            _recordStream = recordsStream.Open(FileAccess.ReadWrite);
 
             NtfsStream bitmapStream = _self.CreateStream(AttributeType.Bitmap, null, firstBitmapCluster, numBitmapClusters, (uint)bpb.BytesPerCluster);
             using (Stream s = bitmapStream.Open(FileAccess.ReadWrite))
@@ -164,9 +168,9 @@ namespace DiscUtils.Ntfs
             // Write the MFT's own record to itself
             byte[] buffer = new byte[_recordLength];
             fileRec.ToBytes(buffer, 0);
-            _records.Position = 0;
-            _records.Write(buffer, 0, _recordLength);
-            _records.Flush();
+            _recordStream.Position = 0;
+            _recordStream.Write(buffer, 0, _recordLength);
+            _recordStream.Flush();
 
             return _self;
         }
@@ -176,6 +180,9 @@ namespace DiscUtils.Ntfs
             get { return _recordLength; }
         }
 
+        /// <summary>
+        /// Reads the records directly from the MFT stream - bypassing the record cache.
+        /// </summary>
         public IEnumerable<FileRecord> Records
         {
             get
@@ -204,7 +211,7 @@ namespace DiscUtils.Ntfs
             long index = _bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
 
             FileRecord newRecord;
-            if ((index + 1) * _recordLength <= _records.Length)
+            if ((index + 1) * _recordLength <= _recordStream.Length)
             {
                 newRecord = GetRecord(index, true);
                 newRecord.ReInitialize(_bytesPerSector, _recordLength, (uint)index);
@@ -213,6 +220,7 @@ namespace DiscUtils.Ntfs
             {
                 newRecord = new FileRecord(_bytesPerSector, _recordLength, (uint)index);
             }
+            _recordCache[index] = newRecord;
 
             newRecord.Flags = FileRecordFlags.InUse | flags;
 
@@ -226,6 +234,7 @@ namespace DiscUtils.Ntfs
             _bitmap.MarkPresent(index);
 
             FileRecord newRecord = new FileRecord(_bytesPerSector, _recordLength, (uint)index);
+            _recordCache[index] = newRecord;
             newRecord.Flags = FileRecordFlags.InUse | flags;
 
             WriteRecord(newRecord);
@@ -239,6 +248,7 @@ namespace DiscUtils.Ntfs
             record.Reset();
             WriteRecord(record);
 
+            _recordCache.Remove(fileRef.MftIndex);
             _bitmap.MarkAbsent(fileRef.MftIndex);
             _self.UpdateRecordInMft();
         }
@@ -265,19 +275,27 @@ namespace DiscUtils.Ntfs
         {
             if (_bitmap.IsPresent(index))
             {
-                if ((index + 1) * _recordLength <= _records.Length)
+                FileRecord result = _recordCache[index];
+                if (result != null)
                 {
-                    _records.Position = index * _recordLength;
-                    byte[] recordBuffer = Utilities.ReadFully(_records, _recordLength);
+                    return result;
+                }
 
-                    FileRecord record = new FileRecord(_bytesPerSector);
-                    record.FromBytes(recordBuffer, 0, ignoreMagic);
-                    return record;
+                if ((index + 1) * _recordLength <= _recordStream.Length)
+                {
+                    _recordStream.Position = index * _recordLength;
+                    byte[] recordBuffer = Utilities.ReadFully(_recordStream, _recordLength);
+
+                    result = new FileRecord(_bytesPerSector);
+                    result.FromBytes(recordBuffer, 0, ignoreMagic);
                 }
                 else
                 {
-                    return new FileRecord(_bytesPerSector, _recordLength, (uint)index);
+                    result = new FileRecord(_bytesPerSector, _recordLength, (uint)index);
                 }
+
+                _recordCache[index] = result;
+                return result;
             }
             return null;
         }
@@ -293,9 +311,9 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[_recordLength];
             record.ToBytes(buffer, 0);
 
-            _records.Position = record.MasterFileTableIndex * _recordLength;
-            _records.Write(buffer, 0, _recordLength);
-            _records.Flush();
+            _recordStream.Position = record.MasterFileTableIndex * _recordLength;
+            _recordStream.Write(buffer, 0, _recordLength);
+            _recordStream.Flush();
 
             // We may have modified our own meta-data by extending the data stream, so
             // make sure our records are up-to-date.

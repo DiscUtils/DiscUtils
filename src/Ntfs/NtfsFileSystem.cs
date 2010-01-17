@@ -73,7 +73,7 @@ namespace DiscUtils.Ntfs
 
             // Bootstrap the Master File Table
             _context.Mft = new MasterFileTable();
-            File mftFile = new File(_context, MasterFileTable.GetBootstrapRecord(stream, _context.BiosParameterBlock));
+            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord(stream, _context.BiosParameterBlock));
             _fileCache[MasterFileTable.MftIndex] = mftFile;
             _context.Mft.Initialize(mftFile);
 
@@ -1353,6 +1353,13 @@ namespace DiscUtils.Ntfs
                 return null;
             }
 
+            // Don't create file objects for file record segments that are part of another
+            // logical file.
+            if (record.BaseFile.Value != 0)
+            {
+                return null;
+            }
+
             File file = _fileCache[fileReference.MftIndex];
 
             if (file != null && file.MftReference.SequenceNumber != fileReference.SequenceNumber)
@@ -1380,6 +1387,13 @@ namespace DiscUtils.Ntfs
         {
             FileRecord record = _context.Mft.GetRecord(index, false);
             if (record == null)
+            {
+                return null;
+            }
+
+            // Don't create file objects for file record segments that are part of another
+            // logical file.
+            if (record.BaseFile.Value != 0)
             {
                 return null;
             }

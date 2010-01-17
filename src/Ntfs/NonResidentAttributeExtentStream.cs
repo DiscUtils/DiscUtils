@@ -31,7 +31,6 @@ namespace DiscUtils.Ntfs
         private File _file;
         private Stream _fsStream;
         private long _bytesPerCluster;
-        private List<CookedDataRun> _runs;
         private NonResidentAttributeRecord _record;
 
         private FileAccess _access;
@@ -47,7 +46,6 @@ namespace DiscUtils.Ntfs
             _file = file;
             _fsStream = _file.Context.RawStream;
             _bytesPerCluster = file.Context.BiosParameterBlock.BytesPerCluster;
-            _runs = CookedDataRun.Cook(record.DataRuns);
             _record = record;
             _access = access;
         }
@@ -80,7 +78,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return _record.DataRuns.Count == 0 ? 0 : ((1 + _record.LastVcn - _record.StartVcn) * _bytesPerCluster);
+                return _record.CookedDataRuns.Count == 0 ? 0 : ((1 + _record.LastVcn - _record.StartVcn) * _bytesPerCluster);
             }
         }
 
@@ -170,7 +168,7 @@ namespace DiscUtils.Ntfs
                 long numClusters = value / _bytesPerCluster;
                 if (value > Length)
                 {
-                    long numToAllocate = numClusters - (_record.DataRuns.Count == 0 ? 0 : (1 + _record.LastVcn - _record.StartVcn));
+                    long numToAllocate = numClusters - (_record.CookedDataRuns.Count == 0 ? 0 : (1 + _record.LastVcn - _record.StartVcn));
                     Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster, _file.IndexInMft == MasterFileTable.MftIndex, numClusters);
                     foreach (var run in runs)
                     {
@@ -232,11 +230,12 @@ namespace DiscUtils.Ntfs
             }
             else
             {
+                var runs = _record.CookedDataRuns;
                 int firstRunToDelete = FindDataRun((value - 1) / _bytesPerCluster) + 1;
 
                 RemoveAndFreeRuns(firstRunToDelete);
 
-                TruncateAndFreeRun(_runs.Count - 1, value - _runs[_runs.Count - 1].StartVcn);
+                TruncateAndFreeRun(runs.Count - 1, value - runs[runs.Count - 1].StartVcn);
 
                 _record.LastVcn = Utilities.Ceil(value, _bytesPerCluster) - 1;
             }
@@ -246,40 +245,47 @@ namespace DiscUtils.Ntfs
         {
             long firstClusterToFree = Utilities.Ceil(bytesRequired, _bytesPerCluster);
 
-            long oldLength = _runs[index].Length;
-            _runs[index].Length = firstClusterToFree;
-            _file.Context.ClusterBitmap.FreeClusters(new Tuple<long, long>(_runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
+            var runs = _record.CookedDataRuns;
+            long oldLength = runs[index].Length;
+            runs[index].Length = firstClusterToFree;
+            _file.Context.ClusterBitmap.FreeClusters(new Tuple<long, long>(runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
         }
 
         private void RemoveAndFreeRuns(int firstRunToDelete)
         {
-            Tuple<long, long>[] runs = new Tuple<long, long>[_runs.Count - firstRunToDelete];
-            for (int i = firstRunToDelete; i < _runs.Count; ++i)
+            var runs = _record.CookedDataRuns;
+
+            Tuple<long, long>[] deadRuns = new Tuple<long, long>[runs.Count - firstRunToDelete];
+            for (int i = firstRunToDelete; i < runs.Count; ++i)
             {
-                runs[i - firstRunToDelete] = new Tuple<long, long>(_runs[i].StartLcn, _runs[i].Length);
+                deadRuns[i - firstRunToDelete] = new Tuple<long, long>(runs[i].StartLcn, runs[i].Length);
             }
 
-            RemoveDataRuns(firstRunToDelete, _runs.Count - firstRunToDelete);
-            _file.Context.ClusterBitmap.FreeClusters(runs);
+            RemoveDataRuns(firstRunToDelete, runs.Count - firstRunToDelete);
+            _file.Context.ClusterBitmap.FreeClusters(deadRuns);
         }
 
         private int DoReadNormal(byte[] buffer, int offset, int count)
         {
+            var runs = _record.CookedDataRuns;
+
             long vcn = _position / _bytesPerCluster;
             int dataRunIdx = FindDataRun(vcn);
-            RawRead(dataRunIdx, _position - (_runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count, true);
+            RawRead(dataRunIdx, _position - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count, true);
             return count;
         }
 
         private int DoReadSparse(byte[] buffer, int offset, int count)
         {
+            var runs = _record.CookedDataRuns;
+
             long vcn = _position / _bytesPerCluster;
             int dataRunIdx = FindDataRun(vcn);
-            long runOffset = _position - (_runs[dataRunIdx].StartVcn * _bytesPerCluster);
+            long runOffset = _position - (runs[dataRunIdx].StartVcn * _bytesPerCluster);
 
-            if (_runs[dataRunIdx].IsSparse)
+            if (runs[dataRunIdx].IsSparse)
             {
-                int numBytes = (int)Math.Min(count, (_runs[dataRunIdx].Length * _bytesPerCluster) - runOffset);
+                int numBytes = (int)Math.Min(count, (runs[dataRunIdx].Length * _bytesPerCluster) - runOffset);
                 Array.Clear(buffer, offset, numBytes);
                 return numBytes;
             }
@@ -292,6 +298,8 @@ namespace DiscUtils.Ntfs
 
         private int DoReadCompressed(byte[] buffer, int offset, int count)
         {
+            var runs = _record.CookedDataRuns;
+
             long compressionUnitLength = _record.CompressionUnitSize * _bytesPerCluster;
 
             long startVcn = (_position / compressionUnitLength) * _record.CompressionUnitSize;
@@ -299,7 +307,7 @@ namespace DiscUtils.Ntfs
             long blockOffset = _position - (startVcn * _bytesPerCluster);
 
             int dataRunIdx = FindDataRun(startVcn);
-            if (_runs[dataRunIdx].IsSparse)
+            if (runs[dataRunIdx].IsSparse)
             {
                 int numBytes = (int)Math.Min(count, compressionUnitLength);
                 Array.Clear(buffer, offset, numBytes);
@@ -336,7 +344,7 @@ namespace DiscUtils.Ntfs
 
                 // Read to the end of the compression cluster
                 int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
-                RawRead(dataRunIdx, _position - (_runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, numBytes, true);
+                RawRead(dataRunIdx, _position - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, numBytes, true);
                 return numBytes;
             }
         }
@@ -447,6 +455,8 @@ namespace DiscUtils.Ntfs
         /// <param name="clearHoles">Whether to zero-out sparse runs, or to just skip</param>
         private void RawRead(int startRunIdx, long startRunOffset, byte[] data, int dataOffset, int count, bool clearHoles)
         {
+            var runs = _record.CookedDataRuns;
+
             int totalRead = 0;
             int runIdx = startRunIdx;
             long runOffset = startRunOffset;
@@ -454,9 +464,9 @@ namespace DiscUtils.Ntfs
 
             while (totalRead < count)
             {
-                int toRead = (int)Math.Min(count - totalRead, (_runs[runIdx].Length * _bytesPerCluster) - runOffset);
+                int toRead = (int)Math.Min(count - totalRead, (runs[runIdx].Length * _bytesPerCluster) - runOffset);
 
-                if (_runs[runIdx].IsSparse)
+                if (runs[runIdx].IsSparse)
                 {
                     if (clearHoles)
                     {
@@ -468,12 +478,12 @@ namespace DiscUtils.Ntfs
                 }
                 else
                 {
-                    _fsStream.Position = (_runs[runIdx].StartLcn * _bytesPerCluster) + runOffset;
+                    _fsStream.Position = (runs[runIdx].StartLcn * _bytesPerCluster) + runOffset;
                     int numRead = _fsStream.Read(data, dataOffset + totalRead, toRead);
                     totalRead += numRead;
                     runOffset += numRead;
 
-                    if (runOffset >= _runs[runIdx].Length * _bytesPerCluster)
+                    if (runOffset >= runs[runIdx].Length * _bytesPerCluster)
                     {
                         runOffset = 0;
                         runIdx++;
@@ -491,27 +501,28 @@ namespace DiscUtils.Ntfs
         /// <param name="count">Number of bytes to write</param>
         private void RawWrite(long position, byte[] data, int dataOffset, int count)
         {
+            var runs = _record.CookedDataRuns;
             long vcn = position / _bytesPerCluster;
             int runIdx = FindDataRun(vcn);
-            long runOffset = position - (_runs[runIdx].StartVcn * _bytesPerCluster);
+            long runOffset = position - (runs[runIdx].StartVcn * _bytesPerCluster);
 
             int totalWritten = 0;
             while (totalWritten < count)
             {
-                int toWrite = (int)Math.Min(count - totalWritten, (_runs[runIdx].Length * _bytesPerCluster) - runOffset);
+                int toWrite = (int)Math.Min(count - totalWritten, (runs[runIdx].Length * _bytesPerCluster) - runOffset);
 
-                if (_runs[runIdx].IsSparse)
+                if (runs[runIdx].IsSparse)
                 {
                     throw new NotImplementedException("Writing to sparse dataruns");
                 }
                 else
                 {
-                    _fsStream.Position = (_runs[runIdx].StartLcn * _bytesPerCluster) + runOffset;
+                    _fsStream.Position = (runs[runIdx].StartLcn * _bytesPerCluster) + runOffset;
                     _fsStream.Write(data, dataOffset + totalWritten, toWrite);
                     totalWritten += toWrite;
                     runOffset += toWrite;
 
-                    if (runOffset >= _runs[runIdx].Length * _bytesPerCluster)
+                    if (runOffset >= runs[runIdx].Length * _bytesPerCluster)
                     {
                         runOffset = 0;
                         runIdx++;
@@ -522,6 +533,7 @@ namespace DiscUtils.Ntfs
 
         private bool IsBlockCompressed(int startDataRunIdx, int compressionUnitSize)
         {
+            var runs = _record.CookedDataRuns;
             int clustersRemaining = compressionUnitSize;
             int dataRunIdx = startDataRunIdx;
 
@@ -530,15 +542,15 @@ namespace DiscUtils.Ntfs
                 // We're looking for this - a sparse record within compressionUnit Virtual Clusters
                 // from the start of the compression unit.  If we don't find it, then the compression
                 // unit is not actually compressed.
-                if (_runs[dataRunIdx].IsSparse)
+                if (runs[dataRunIdx].IsSparse)
                 {
                     return true;
                 }
-                if (_runs[dataRunIdx].Length > clustersRemaining)
+                if (runs[dataRunIdx].Length > clustersRemaining)
                 {
                     return false;
                 }
-                clustersRemaining -= (int)_runs[dataRunIdx].Length;
+                clustersRemaining -= (int)runs[dataRunIdx].Length;
                 dataRunIdx++;
             }
 
@@ -552,9 +564,11 @@ namespace DiscUtils.Ntfs
 
         private int FindDataRun(long targetVcn, int startIdx)
         {
-            for (int i = startIdx; i < _runs.Count; ++i)
+            var runs = _record.CookedDataRuns;
+
+            for (int i = startIdx; i < runs.Count; ++i)
             {
-                if (_runs[i].StartVcn + _runs[i].Length > targetVcn)
+                if (runs[i].StartVcn + runs[i].Length > targetVcn)
                 {
                     return i;
                 }
@@ -565,11 +579,12 @@ namespace DiscUtils.Ntfs
 
         private void AddDataRun(long startLcn, long length)
         {
+            var runs = _record.CookedDataRuns;
             long startVcn = 0;
             long prevLcn = 0;
-            if (_runs.Count > 0)
+            if (runs.Count > 0)
             {
-                CookedDataRun tailRun = _runs[_runs.Count - 1];
+                CookedDataRun tailRun = runs[runs.Count - 1];
                 startVcn = tailRun.StartVcn + tailRun.Length;
                 prevLcn = tailRun.StartLcn;
 
@@ -582,16 +597,14 @@ namespace DiscUtils.Ntfs
             }
 
             DataRun newRun = new DataRun(startLcn - prevLcn, length);
-            CookedDataRun newCookedRun = new CookedDataRun(newRun, startVcn, startLcn);
+            CookedDataRun newCookedRun = new CookedDataRun(newRun, startVcn, prevLcn);
 
-            _runs.Add(newCookedRun);
-            _record.DataRuns.Add(newRun);
+            _record.CookedDataRuns.Add(newCookedRun);
         }
 
         private void RemoveDataRuns(int index, int count)
         {
-            _runs.RemoveRange(index, count);
-            _record.DataRuns.RemoveRange(index, count);
+            _record.CookedDataRuns.RemoveRange(index, count);
         }
 
         public override IEnumerable<StreamExtent> Extents

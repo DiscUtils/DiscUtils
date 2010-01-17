@@ -33,7 +33,7 @@ namespace DiscUtils.Ntfs
 
         private MasterFileTable _mft;
         private FileRecord _baseRecord;
-        private ObjectCache<ushort, NtfsAttribute> _attributeCache;
+        private ObjectCache<long, NtfsAttribute> _attributeCache;
         private ObjectCache<string, Index> _indexCache;
 
         private bool _baseRecordDirty;
@@ -45,7 +45,7 @@ namespace DiscUtils.Ntfs
             _context = context;
             _mft = _context.Mft;
             _baseRecord = baseRecord;
-            _attributeCache = new ObjectCache<ushort, NtfsAttribute>();
+            _attributeCache = new ObjectCache<long, NtfsAttribute>();
             _indexCache = new ObjectCache<string, Index>();
         }
 
@@ -151,7 +151,6 @@ namespace DiscUtils.Ntfs
                     stream.SetContent(si);
                 }
 
-
                 // Make attributes non-resident until the data in the record fits, start with DATA attributes
                 // by default, then kick other 'can-be' attributes out, then try to defrag any non-resident attributes
                 // then finally move indexes.
@@ -164,7 +163,7 @@ namespace DiscUtils.Ntfs
                     {
                         if (!attr.IsNonResident && attr.AttributeType == AttributeType.Data)
                         {
-                            MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
+                            MakeAttributeNonResident(new AttributeReference(MftReference, attr.AttributeId), (int)attr.DataLength);
                             fixedAttribute = true;
                             break;
                         }
@@ -176,7 +175,7 @@ namespace DiscUtils.Ntfs
                         {
                             if (!attr.IsNonResident && _context.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
                             {
-                                MakeAttributeNonResident(attr.AttributeId, (int)attr.DataLength);
+                                MakeAttributeNonResident(new AttributeReference(MftReference, attr.AttributeId), (int)attr.DataLength);
                                 fixedAttribute = true;
                                 break;
                             }
@@ -187,9 +186,9 @@ namespace DiscUtils.Ntfs
                     {
                         foreach (var attr in _baseRecord.Attributes)
                         {
-                            if (attr.IsNonResident && ((NonResidentAttributeRecord)attr).DataRuns.Count > 4)
+                            if (attr.IsNonResident && ((NonResidentAttributeRecord)attr).CookedDataRuns.Count > 4)
                             {
-                                DefragAttribute(attr.AttributeId);
+                                DefragAttribute(new AttributeReference(MftReference, attr.AttributeId));
                                 fixedAttribute = true;
                                 break;
                             }
@@ -341,7 +340,9 @@ namespace DiscUtils.Ntfs
                 }
 
                 _baseRecord.RemoveAttribute(id.AttributeId);
-                _attributeCache.Remove(id.AttributeId);
+
+                long cacheId = (long)((id.File.MftIndex << 16) | id.AttributeId);
+                _attributeCache.Remove(cacheId);
             }
         }
 
@@ -352,20 +353,27 @@ namespace DiscUtils.Ntfs
         /// <returns>The attribute</returns>
         internal NtfsAttribute GetAttribute(AttributeReference attrRef)
         {
+            FileRecord attrFileRecord = _baseRecord;
             if (attrRef.File.MftIndex != _baseRecord.MasterFileTableIndex)
             {
-                var file = _context.GetFileByRef(attrRef.File);
-                if (file != null)
-                {
-                    return file.InnerGetAttribute(attrRef.AttributeId);
-                }
-                else
-                {
-                    return null;
-                }
+                attrFileRecord = _context.Mft.GetRecord(attrRef.File);
             }
 
-            return InnerGetAttribute(attrRef.AttributeId);
+            if (attrFileRecord == null)
+            {
+                return null;
+            }
+
+            long cacheId = (long)((attrRef.File.MftIndex << 16) | attrRef.AttributeId);
+            NtfsAttribute result = _attributeCache[cacheId];
+            if (result == null)
+            {
+                AttributeRecord attrRec = attrFileRecord.GetAttribute(attrRef.AttributeId);
+                result = NtfsAttribute.FromRecord(this, MftReference, attrRec);
+                _attributeCache[cacheId] = result;
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -410,7 +418,7 @@ namespace DiscUtils.Ntfs
                 {
                     foreach (var record in _baseRecord.Attributes)
                     {
-                        yield return InnerGetAttribute(record.AttributeId);
+                        yield return GetAttribute(new AttributeReference(MftReference, record.AttributeId));
                     }
                 }
             }
@@ -442,14 +450,9 @@ namespace DiscUtils.Ntfs
             {
                 throw new NotImplementedException("Changing residency of attributes in extended file records");
             }
-            MakeAttributeNonResident(attrRef.AttributeId, maxData);
-        }
 
-        private void MakeAttributeNonResident(ushort attrId, int maxData)
-        {
-            NtfsAttribute attr = InnerGetAttribute(attrId);
-
-            if(attr.IsNonResident)
+            NtfsAttribute attr = GetAttribute(attrRef);
+            if (attr.IsNonResident)
             {
                 throw new InvalidOperationException("Attribute is already non-resident");
             }
@@ -464,25 +467,20 @@ namespace DiscUtils.Ntfs
             {
                 throw new NotImplementedException("Changing residency of attributes in extended file records");
             }
-            MakeAttributeResident(attrRef.AttributeId, maxData);
-        }
 
-        internal void MakeAttributeResident(ushort attrId, int maxData)
-        {
-            NtfsAttribute attr = InnerGetAttribute(attrId);
-
+            NtfsAttribute attr = GetAttribute(attrRef);
             if (!attr.IsNonResident)
             {
                 throw new InvalidOperationException("Attribute is already resident");
             }
 
             attr.SetNonResident(false, maxData);
-            _baseRecord.SetAttribute(attr.Record);
+            _baseRecord.SetAttribute(attr.Record); 
         }
 
-        internal void DefragAttribute(ushort attrId)
+        internal void DefragAttribute(AttributeReference attrRef)
         {
-            NtfsAttribute attr = InnerGetAttribute(attrId);
+            NtfsAttribute attr = GetAttribute(attrRef);
 
             if (!attr.IsNonResident)
             {
@@ -812,19 +810,6 @@ namespace DiscUtils.Ntfs
                 return bestName;
             }
         }
-
-        private NtfsAttribute InnerGetAttribute(ushort id)
-        {
-            NtfsAttribute result = _attributeCache[id];
-            if (result == null)
-            {
-                AttributeRecord attrRec = _baseRecord.GetAttribute(id);
-                result = NtfsAttribute.FromRecord(this, MftReference, attrRec);
-                _attributeCache[id] = result;
-            }
-            return result;
-        }
-
 
         internal static File CreateNew(INtfsContext context)
         {
