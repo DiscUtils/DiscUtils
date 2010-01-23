@@ -84,21 +84,36 @@ namespace DiscUtils.Registry
         /// <param name="valueType">The type of the data</param>
         public void SetData(byte[] data, int offset, int count, RegistryValueType valueType)
         {
-            if (_cell.DataIndex == -1)
+            // If we can place the data in the DataIndex field, do that to save space / allocation
+            if ((valueType == RegistryValueType.Dword || valueType == RegistryValueType.DwordBigEndian) && count <= 4)
             {
-                _cell.DataIndex = _hive.AllocateRawCell(count);
-            }
+                if (_cell.DataLength >= 0)
+                {
+                    _hive.FreeCell(_cell.DataIndex);
+                }
 
-            if (!_hive.WriteRawCellData(_cell.DataIndex, data, offset, count))
+                _cell.DataLength = (int)((uint)count | 0x80000000);
+                _cell.DataIndex = Utilities.ToInt32LittleEndian(data, offset);
+                _cell.DataType = valueType;
+            }
+            else
             {
-                int newDataIndex = _hive.AllocateRawCell(count);
-                _hive.WriteRawCellData(newDataIndex, data, offset, count);
-                _hive.FreeCell(_cell.DataIndex);
-                _cell.DataIndex = newDataIndex;
-            }
+                if (_cell.DataIndex == -1 || _cell.DataLength < 0)
+                {
+                    _cell.DataIndex = _hive.AllocateRawCell(count);
+                }
 
-            _cell.DataLength = count;
-            _cell.DataType = valueType;
+                if (!_hive.WriteRawCellData(_cell.DataIndex, data, offset, count))
+                {
+                    int newDataIndex = _hive.AllocateRawCell(count);
+                    _hive.WriteRawCellData(newDataIndex, data, offset, count);
+                    _hive.FreeCell(_cell.DataIndex);
+                    _cell.DataIndex = newDataIndex;
+                }
+
+                _cell.DataLength = count;
+                _cell.DataType = valueType;
+            }
 
             _hive.UpdateCell(_cell, false);
         }
