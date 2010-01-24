@@ -67,10 +67,10 @@ namespace DiscUtils.Vhd
             _parentStream = parentStream;
             _ownsParentStream = ownsParentStream;
 
-            ReadBlockAllocationTable();
-
             _blockBitmaps = new byte[_dynamicHeader.MaxTableEntries][];
             _blockBitmapSize = (int)Utilities.RoundUp((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8, Utilities.SectorSize);
+
+            ReadBlockAllocationTable();
         }
 
         protected override void Dispose(bool disposing)
