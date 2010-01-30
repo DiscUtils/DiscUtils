@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -29,10 +29,10 @@ using System.Net;
 using System.Text;
 using DiscUtils.Ntfs;
 
-namespace DiscUtils.PowerShell
+namespace DiscUtils.PowerShell.Provider
 {
     [CmdletProvider("DiscUtils", ProviderCapabilities.Credentials)]
-    public sealed class Provider : NavigationCmdletProvider
+    public sealed class Provider : NavigationCmdletProvider, IContentCmdletProvider
     {
         #region Drive manipulation
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
@@ -118,6 +118,11 @@ namespace DiscUtils.PowerShell
             VirtualDiskPSDriveInfo vdDrive = drive as VirtualDiskPSDriveInfo;
             if (vdDrive == null)
             {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("invalid type of drive"),
+                    "BadDrive",
+                    ErrorCategory.InvalidArgument,
+                    null));
                 return null;
             }
 
@@ -130,11 +135,19 @@ namespace DiscUtils.PowerShell
         #region Item methods
         protected override void GetItem(string path)
         {
-            Object obj = FindItemByPath(NormalizePath(path), false);
+            GetItemParameters dynParams = DynamicParameters as GetItemParameters;
+            bool readOnly = !(dynParams != null && dynParams.ReadWrite.IsPresent);
+
+            Object obj = FindItemByPath(NormalizePath(path), false, readOnly);
             if (obj != null)
             {
                 WriteItemObject(obj, path.Trim('\\'), true);
             }
+        }
+
+        protected override object GetItemDynamicParameters(string path)
+        {
+            return new GetItemParameters();
         }
 
         protected override void SetItem(string path, object value)
@@ -144,7 +157,7 @@ namespace DiscUtils.PowerShell
 
         protected override bool ItemExists(string path)
         {
-            bool result = FindItemByPath(NormalizePath(path), false) != null;
+            bool result = FindItemByPath(NormalizePath(path), false, true) != null;
             return result;
         }
 
@@ -168,7 +181,7 @@ namespace DiscUtils.PowerShell
 
         protected override bool HasChildItems(string path)
         {
-            object obj = FindItemByPath(NormalizePath(path), true);
+            object obj = FindItemByPath(NormalizePath(path), true, true);
 
             if (obj is DiscFileInfo)
             {
@@ -186,7 +199,7 @@ namespace DiscUtils.PowerShell
 
         protected override void RemoveItem(string path, bool recurse)
         {
-            object obj = FindItemByPath(NormalizePath(path), false);
+            object obj = FindItemByPath(NormalizePath(path), false, false);
 
             if (obj is DiscDirectoryInfo)
             {
@@ -238,7 +251,7 @@ namespace DiscUtils.PowerShell
                 return;
             }
 
-            object obj = FindItemByPath(NormalizePath(parentPath), true);
+            object obj = FindItemByPath(NormalizePath(parentPath), true, false);
 
             if (obj is DiscDirectoryInfo)
             {
@@ -265,7 +278,7 @@ namespace DiscUtils.PowerShell
 
         protected override void RenameItem(string path, string newName)
         {
-            object obj = FindItemByPath(NormalizePath(path), true);
+            object obj = FindItemByPath(NormalizePath(path), true, false);
 
             DiscFileSystemInfo fsiObj = obj as DiscFileSystemInfo;
             if (fsiObj == null)
@@ -297,7 +310,7 @@ namespace DiscUtils.PowerShell
             DiscDirectoryInfo destDir;
             string destFileName = null;
 
-            object destObj = FindItemByPath(NormalizePath(copyPath), true);
+            object destObj = FindItemByPath(NormalizePath(copyPath), true, false);
             destDir = destObj as DiscDirectoryInfo;
             if (destDir != null)
             {
@@ -305,7 +318,7 @@ namespace DiscUtils.PowerShell
             }
             else if (destObj == null || destObj is DiscFileInfo)
             {
-                destObj = FindItemByPath(NormalizePath(GetParentPath(copyPath, null)), true);
+                destObj = FindItemByPath(NormalizePath(GetParentPath(copyPath, null)), true, false);
                 destDir = destObj as DiscDirectoryInfo;
                 destFileName = GetChildName(copyPath);
             }
@@ -320,7 +333,7 @@ namespace DiscUtils.PowerShell
                 return;
             }
 
-            object srcDirObj = FindItemByPath(NormalizePath(GetParentPath(path, null)), true);
+            object srcDirObj = FindItemByPath(NormalizePath(GetParentPath(path, null)), true, true);
             DiscDirectoryInfo srcDir = srcDirObj as DiscDirectoryInfo;
             string srcFileName = GetChildName(path);
             if (srcDir == null)
@@ -340,7 +353,7 @@ namespace DiscUtils.PowerShell
         #region Navigation methods
         protected override bool IsItemContainer(string path)
         {
-            object obj = FindItemByPath(NormalizePath(path), false);
+            object obj = FindItemByPath(NormalizePath(path), false, true);
 
             bool result = false;
             if (obj is VirtualDisk)
@@ -362,6 +375,87 @@ namespace DiscUtils.PowerShell
         protected override string MakePath(string parent, string child)
         {
             return NormalizePath(base.MakePath(DenormalizePath(parent), DenormalizePath(child)));
+        }
+
+        #endregion
+
+        #region IContentCmdletProvider Members
+
+        public void ClearContent(string path)
+        {
+            object destObj = FindItemByPath(NormalizePath(path), true, false);
+            if (destObj is DiscFileInfo)
+            {
+                using (Stream s = ((DiscFileInfo)destObj).Open(FileMode.Open, FileAccess.ReadWrite))
+                {
+                    s.SetLength(0);
+                }
+            }
+            else
+            {
+                WriteError(new ErrorRecord(
+                    new IOException("Cannot write to this item"),
+                    "BadContentDestination",
+                    ErrorCategory.InvalidOperation,
+                    destObj));
+            }
+        }
+
+        public object ClearContentDynamicParameters(string path)
+        {
+            return null;
+        }
+
+        public IContentReader GetContentReader(string path)
+        {
+            object destObj = FindItemByPath(NormalizePath(path), true, false);
+            if (destObj is DiscFileInfo)
+            {
+                return new FileContentReaderWriter(
+                    this,
+                    ((DiscFileInfo)destObj).Open(FileMode.Open, FileAccess.Read),
+                    DynamicParameters as ContentParameters);
+            }
+            else
+            {
+                WriteError(new ErrorRecord(
+                    new IOException("Cannot read from this item"),
+                    "BadContentSource",
+                    ErrorCategory.InvalidOperation,
+                    destObj));
+                return null;
+            }
+        }
+
+        public object GetContentReaderDynamicParameters(string path)
+        {
+            return new ContentParameters();
+        }
+
+        public IContentWriter GetContentWriter(string path)
+        {
+            object destObj = FindItemByPath(NormalizePath(path), true, false);
+            if (destObj is DiscFileInfo)
+            {
+                return new FileContentReaderWriter(
+                    this,
+                    ((DiscFileInfo)destObj).Open(FileMode.Open, FileAccess.ReadWrite),
+                    DynamicParameters as ContentParameters);
+            }
+            else
+            {
+                WriteError(new ErrorRecord(
+                    new IOException("Cannot write to this item"),
+                    "BadContentDestination",
+                    ErrorCategory.InvalidOperation,
+                    destObj));
+                return null;
+            }
+        }
+
+        public object GetContentWriterDynamicParameters(string path)
+        {
+            return new ContentParameters();
         }
 
         #endregion
@@ -404,8 +498,9 @@ namespace DiscUtils.PowerShell
             }
         }
 
-        private object FindItemByPath(string path, bool preferFs)
+        private object FindItemByPath(string path, bool preferFs, bool readOnly)
         {
+            FileAccess fileAccess = readOnly ? FileAccess.Read : FileAccess.ReadWrite;
             string diskPath;
             string relPath;
 
@@ -424,7 +519,7 @@ namespace DiscUtils.PowerShell
             VirtualDisk disk = Disk;
             if( disk == null )
             {
-                OnDemandVirtualDisk odvd = new OnDemandVirtualDisk(DenormalizePath(diskPath), FileAccess.Read);
+                OnDemandVirtualDisk odvd = new OnDemandVirtualDisk(DenormalizePath(diskPath), fileAccess);
                 if (odvd.IsValid)
                 {
                     disk = odvd;
@@ -577,7 +672,7 @@ namespace DiscUtils.PowerShell
                 return;
             }
 
-            object obj = FindItemByPath(path, false);
+            object obj = FindItemByPath(path, false, true);
 
             if (obj is VirtualDisk)
             {
@@ -752,234 +847,4 @@ namespace DiscUtils.PowerShell
 
 
 
-    public class OnDemandVirtualDisk : VirtualDisk
-    {
-        private DiscFileSystem _fileSystem;
-        private string _path;
-        private FileAccess _access;
-
-        public OnDemandVirtualDisk(string path, FileAccess access)
-        {
-            _path = path;
-            _access = access;
-        }
-
-        public OnDemandVirtualDisk(DiscFileSystem fileSystem, string path, FileAccess access)
-        {
-            _fileSystem = fileSystem;
-            _path = path;
-            _access = access;
-        }
-
-        public bool IsValid
-        {
-            get
-            {
-                try
-                {
-                    using (VirtualDisk disk = OpenDisk())
-                    {
-                        return disk != null;
-                    }
-                }
-                catch (IOException)
-                {
-                    return false;
-                }
-            }
-        }
-
-        public override Geometry Geometry
-        {
-            get
-            {
-                using (VirtualDisk disk = OpenDisk())
-                {
-                    return disk.Geometry;
-                }
-            }
-        }
-
-        public override long Capacity
-        {
-            get
-            {
-                using (VirtualDisk disk = OpenDisk())
-                {
-                    return disk.Capacity;
-                }
-            }
-        }
-
-        public override SparseStream Content
-        {
-            get { return new StreamWrapper(_fileSystem, _path, _access); }
-        }
-
-        public override IEnumerable<VirtualDiskLayer> Layers
-        {
-            get { throw new NotSupportedException("Access to virtual disk layers is not implemented for on-demand disks"); }
-        }
-
-        public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
-        {
-            using (VirtualDisk disk = OpenDisk())
-            {
-                return disk.CreateDifferencingDisk(fileSystem, path);
-            }
-        }
-
-        public override VirtualDisk CreateDifferencingDisk(string path)
-        {
-            using (VirtualDisk disk = OpenDisk())
-            {
-                return disk.CreateDifferencingDisk(path);
-            }
-        }
-
-        private VirtualDisk OpenDisk()
-        {
-            return VirtualDisk.OpenDisk(_fileSystem, _path, FileAccess.Read);
-        }
-
-        private class StreamWrapper : SparseStream
-        {
-            private DiscFileSystem _fileSystem;
-            private string _path;
-            private FileAccess _access;
-            private long _position;
-
-            public StreamWrapper(DiscFileSystem fileSystem, string path, FileAccess access)
-            {
-                _fileSystem = fileSystem;
-                _path = path;
-                _access = access;
-            }
-
-            public override IEnumerable<StreamExtent> Extents
-            {
-                get
-                {
-                    using (VirtualDisk disk = OpenDisk())
-                    {
-                        return new List<StreamExtent>(disk.Content.Extents);
-                    }
-                }
-            }
-
-            public override bool CanRead
-            {
-                get
-                {
-                    using (VirtualDisk disk = OpenDisk())
-                    {
-                        return disk.Content.CanRead;
-                    }
-                }
-            }
-
-            public override bool CanSeek
-            {
-                get
-                {
-                    using (VirtualDisk disk = OpenDisk())
-                    {
-                        return disk.Content.CanSeek;
-                    }
-                }
-            }
-
-            public override bool CanWrite
-            {
-                get
-                {
-                    using (VirtualDisk disk = OpenDisk())
-                    {
-                        return disk.Content.CanWrite;
-                    }
-                }
-            }
-
-            public override void Flush()
-            {
-            }
-
-            public override long Length
-            {
-                get
-                {
-                    using (VirtualDisk disk = OpenDisk())
-                    {
-                        return disk.Content.Length;
-                    }
-                }
-            }
-
-            public override long Position
-            {
-                get
-                {
-                    return _position;
-                }
-                set
-                {
-                    _position = value;
-                }
-            }
-
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                using (VirtualDisk disk = OpenDisk())
-                {
-                    disk.Content.Position = _position;
-                    return disk.Content.Read(buffer, offset, count);
-                }
-            }
-
-            public override long Seek(long offset, SeekOrigin origin)
-            {
-                long effectiveOffset = offset;
-                if (origin == SeekOrigin.Current)
-                {
-                    effectiveOffset += _position;
-                }
-                else if (origin == SeekOrigin.End)
-                {
-                    effectiveOffset += Length;
-                }
-
-                if (effectiveOffset < 0)
-                {
-                    throw new IOException("Attempt to move before beginning of disk");
-                }
-                else
-                {
-                    _position = effectiveOffset;
-                    return _position;
-                }
-            }
-
-            public override void SetLength(long value)
-            {
-                using (VirtualDisk disk = OpenDisk())
-                {
-                    disk.Content.SetLength(value);
-                }
-            }
-
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                using (VirtualDisk disk = OpenDisk())
-                {
-                    disk.Content.Position = _position;
-                    disk.Content.Write(buffer, offset, count);
-                }
-            }
-
-            private VirtualDisk OpenDisk()
-            {
-                return VirtualDisk.OpenDisk(_fileSystem, _path, FileAccess.Read);
-            }
-        }
-    }
 }

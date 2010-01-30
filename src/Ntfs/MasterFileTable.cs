@@ -152,10 +152,12 @@ namespace DiscUtils.Ntfs
 
             NtfsStream recordsStream = _self.CreateStream(AttributeType.Data, null, firstRecordsCluster, numRecordsClusters, (uint)bpb.BytesPerCluster);
             _recordStream = recordsStream.Open(FileAccess.ReadWrite);
+            Wipe(_recordStream);
 
             NtfsStream bitmapStream = _self.CreateStream(AttributeType.Bitmap, null, firstBitmapCluster, numBitmapClusters, (uint)bpb.BytesPerCluster);
             using (Stream s = bitmapStream.Open(FileAccess.ReadWrite))
             {
+                Wipe(s);
                 s.SetLength(8);
                 _bitmap = new Bitmap(s, long.MaxValue);
             }
@@ -210,16 +212,20 @@ namespace DiscUtils.Ntfs
         {
             long index = _bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
 
-            FileRecord newRecord;
-            if ((index + 1) * _recordLength <= _recordStream.Length)
+            if (index * _recordLength >= _recordStream.Length)
             {
-                newRecord = GetRecord(index, true);
-                newRecord.ReInitialize(_bytesPerSector, _recordLength, (uint)index);
+                // Note: 64 is significant, since bitmap extends by 8 bytes (=64 bits) at a time.
+                long newEndIndex = Utilities.RoundUp(index + 1, 64);
+                for (long i = index; i < newEndIndex; ++i)
+                {
+                    FileRecord record = new FileRecord(_bytesPerSector, _recordLength, (uint)i);
+                    WriteRecord(record);
+                }
             }
-            else
-            {
-                newRecord = new FileRecord(_bytesPerSector, _recordLength, (uint)index);
-            }
+
+            FileRecord newRecord = GetRecord(index, true);
+            newRecord.ReInitialize(_bytesPerSector, _recordLength, (uint)index);
+
             _recordCache[index] = newRecord;
 
             newRecord.Flags = FileRecordFlags.InUse | flags;
@@ -432,6 +438,20 @@ namespace DiscUtils.Ntfs
                 {
                     attr.Dump(writer, indent + "     ");
                 }
+            }
+        }
+
+        private static void Wipe(Stream s)
+        {
+            s.Position = 0;
+
+            byte[] buffer = new byte[64 * Sizes.OneKiB];
+            int numWiped = 0;
+            while (numWiped < s.Length)
+            {
+                int toWrite = (int)Math.Min(buffer.Length, s.Length - s.Position);
+                s.Write(buffer, 0, toWrite);
+                numWiped += toWrite;
             }
         }
     }

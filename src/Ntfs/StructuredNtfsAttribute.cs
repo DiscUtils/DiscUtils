@@ -37,12 +37,6 @@ namespace DiscUtils.Ntfs
             _structure = new T();
         }
 
-        public StructuredNtfsAttribute(NtfsAttribute toCopy)
-            : base(toCopy)
-        {
-            _structure = new T();
-        }
-
         public T Content
         {
             get

@@ -5817,6 +5817,25 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="FileChecker">
+          <Members>
+           <Member Name="#Check(System.IO.TextWriter,DiscUtils.ReportLevels)">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2010-01-30 10:57:52Z">
+              <Issue>
+               <Item>'FileChecker.Check(TextWriter, ReportLevels)'</Item>
+               <Item>'Exception'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="101" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="DiscUtils.Vmdk">
@@ -6371,6 +6390,7 @@
     <Note Id="98" Modified="2009-12-19 02:34:33Z">Aesthetically prefer lower case in this instance.</Note>
     <Note Id="99" Modified="2009-12-19 10:58:59Z">Don't use hard link information, or reference counts as yet.</Note>
     <Note Id="100" Modified="2010-01-03 22:17:56Z">Variants are lower case</Note>
+    <Note Id="101" Modified="2010-01-30 11:05:30Z">Deliberate catch of all exceptions as part of verification logic.</Note>
    </User>
   </Notes>
   <Rules>

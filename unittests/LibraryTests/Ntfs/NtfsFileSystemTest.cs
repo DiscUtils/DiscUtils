@@ -103,5 +103,54 @@ namespace DiscUtils.Ntfs
             NtfsFileSystem ntfs = new NtfsFileSystem(partStream);
             ntfs.Dump(TextWriter.Null, "");
         }
+
+        [Test]
+        public void ClusterInfo()
+        {
+            // 'Big' files have clusters
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.Write(new byte[(int)ntfs.ClusterSize], 0, (int)ntfs.ClusterSize);
+            }
+
+            var ranges = ntfs.PathToClusters("file");
+            Assert.AreEqual(1, ranges.Length);
+            Assert.AreEqual(1, ranges[0].Count);
+
+
+            // Short files have no clusters (stored in MFT)
+            using (Stream s = ntfs.OpenFile(@"file2", FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.WriteByte(1);
+            }
+            ranges = ntfs.PathToClusters("file2");
+            Assert.AreEqual(0, ranges.Length);
+        }
+
+        [Test]
+        public void ExtentInfo()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.Write(new byte[(int)ntfs.ClusterSize], 0, (int)ntfs.ClusterSize);
+            }
+
+            var extents = ntfs.PathToExtents("file");
+            Assert.AreEqual(1, extents.Length);
+            Assert.AreEqual(ntfs.ClusterSize, extents[0].Length);
+
+
+            using (Stream s = ntfs.OpenFile(@"file2", FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.WriteByte(1);
+                s.WriteByte(2);
+                s.WriteByte(3);
+            }
+            extents = ntfs.PathToExtents("file2");
+            Assert.AreEqual(1, extents.Length);
+            Assert.AreEqual(3, extents[0].Length);
+        }
     }
 }

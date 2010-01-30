@@ -184,6 +184,21 @@ namespace DiscUtils
             return true;
         }
 
+        public static bool IsPowerOfTwo(uint val)
+        {
+            if (val == 0)
+            {
+                return false;
+            }
+
+            while ((val & 1) != 1)
+            {
+                val >>= 1;
+            }
+
+            return val == 1;
+        }
+
         public static bool AreEqual(byte[] a, byte[] b)
         {
             if (a.Length != b.Length)
@@ -668,6 +683,53 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Read bytes until buffer filled or EOF.
+        /// </summary>
+        /// <param name="buffer">The stream to read</param>
+        /// <param name="pos">The position in buffer to read from</param>
+        /// <param name="data">The buffer to populate</param>
+        /// <param name="offset">Offset in the buffer to start</param>
+        /// <param name="length">The number of bytes to read</param>
+        /// <returns>The number of bytes actually read.</returns>
+        internal static int ReadFully(IBuffer buffer, long pos, byte[] data, int offset, int length)
+        {
+            int totalRead = 0;
+            int numRead = buffer.Read(pos, data, offset, length);
+            while (numRead > 0)
+            {
+                totalRead += numRead;
+                if (totalRead == length)
+                {
+                    break;
+                }
+
+                numRead = buffer.Read(pos, data, offset + totalRead, length - totalRead);
+            }
+
+            return totalRead;
+        }
+
+        /// <summary>
+        /// Read bytes until buffer filled or throw IOException.
+        /// </summary>
+        /// <param name="buffer">The buffer to read</param>
+        /// <param name="pos">The position in buffer to read from</param>
+        /// <param name="count">The number of bytes to read</param>
+        /// <returns>The data read from the stream</returns>
+        public static byte[] ReadFully(IBuffer buffer, long pos, int count)
+        {
+            byte[] result = new byte[count];
+            if (ReadFully(buffer, pos, result, 0, count) == count)
+            {
+                return result;
+            }
+            else
+            {
+                throw new IOException("Unable to complete read of " + count + " bytes");
+            }
+        }
+
+        /// <summary>
         /// Reads a disk sector (512 bytes).
         /// </summary>
         /// <param name="stream">The stream to read</param>
@@ -768,5 +830,6 @@ namespace DiscUtils
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         }
         #endregion
+
     }
 }

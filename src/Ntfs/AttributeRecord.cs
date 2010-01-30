@@ -90,6 +90,12 @@ namespace DiscUtils.Ntfs
             set;
         }
 
+        public abstract long InitializedDataLength
+        {
+            get;
+            set;
+        }
+
         public bool IsNonResident
         {
             get { return _nonResidentFlag != 0; }
@@ -107,7 +113,7 @@ namespace DiscUtils.Ntfs
 
         public abstract Range<long, long>[] GetClusters();
 
-        public abstract SparseStream OpenRaw(File file, FileAccess access);
+        public abstract IBuffer GetDataBuffer(File file);
 
         public abstract long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster);
 
@@ -225,9 +231,18 @@ namespace DiscUtils.Ntfs
             set { throw new NotSupportedException(); }
         }
 
-        public override SparseStream OpenRaw(File file, FileAccess access)
+        /// <summary>
+        /// The amount of initialized data in the attribute (in bytes)
+        /// </summary>
+        public override long InitializedDataLength
         {
-            return new ResidentAttributeStream(file, new SparseMemoryStream(_memoryBuffer, access));
+            get { return (long)DataLength; }
+            set { throw new NotSupportedException(); }
+        }
+
+        public override IBuffer GetDataBuffer(File file)
+        {
+            return _memoryBuffer;
         }
 
         public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
@@ -341,6 +356,7 @@ namespace DiscUtils.Ntfs
         private ulong _compressedSize;
 
         private List<CookedDataRun> _cookedDataRuns;
+        private NonResidentAttributeBuffer _dataBuffer;
 
         public NonResidentAttributeRecord(byte[] buffer, int offset, out int length)
         {
@@ -366,37 +382,6 @@ namespace DiscUtils.Ntfs
             _initializedDataSize = bytesPerCluster * numClusters;
         }
 
-        public NonResidentAttributeRecord(NonResidentAttributeRecord toCopy)
-            : base(toCopy)
-        {
-            base._nonResidentFlag = 1;
-            _startingVCN = toCopy._startingVCN;
-            _lastVCN = toCopy._lastVCN;
-            _dataRunsOffset = toCopy._dataRunsOffset;
-            _compressionUnitSize = toCopy._compressionUnitSize;
-            _dataAllocatedSize = toCopy._dataAllocatedSize;
-            _dataRealSize = toCopy._dataRealSize;
-            _initializedDataSize = toCopy._initializedDataSize;
-            _compressedSize = toCopy._compressedSize;
-
-            _cookedDataRuns = new List<CookedDataRun>(toCopy._cookedDataRuns);
-        }
-
-        public void SetData(NonResidentAttributeRecord source)
-        {
-            _lastVCN = _startingVCN + (source._lastVCN - source._startingVCN);
-            _cookedDataRuns = source._cookedDataRuns;
-        }
-
-        /// <summary>
-        /// Detaches the data associated with this attribute
-        /// </summary>
-        public void DetachData()
-        {
-            _lastVCN = _startingVCN;
-            _cookedDataRuns = new List<CookedDataRun>();
-        }
-
         /// <summary>
         /// The amount of space occupied by the attribute (in bytes)
         /// </summary>
@@ -404,15 +389,6 @@ namespace DiscUtils.Ntfs
         {
             get { return (long)_dataAllocatedSize; }
             set { _dataAllocatedSize = (ulong)value; }
-        }
-
-        /// <summary>
-        /// The amount of data in the attribute (in bytes)
-        /// </summary>
-        public long RealLength
-        {
-            get { return (long)_dataRealSize; }
-            set { _dataRealSize = (ulong)value; }
         }
 
         /// <summary>
@@ -427,7 +403,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// The amount of initialized data in the attribute (in bytes)
         /// </summary>
-        public long InitializedDataLength
+        public override long InitializedDataLength
         {
             get { return (long)_initializedDataSize; }
             set { _initializedDataSize = (ulong)value; }
@@ -490,9 +466,13 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override SparseStream OpenRaw(File file, FileAccess access)
+        public override IBuffer GetDataBuffer(File file)
         {
-            return new NonResidentAttributeExtentStream(file, access, this);
+            if (_dataBuffer == null)
+            {
+                _dataBuffer = new NonResidentAttributeBuffer(file, this);
+            }
+            return _dataBuffer;
         }
 
         public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)

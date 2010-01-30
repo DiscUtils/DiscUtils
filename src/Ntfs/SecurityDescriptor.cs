@@ -159,10 +159,12 @@ namespace DiscUtils.Ntfs
             if (parentAcl != null)
             {
                 newAcl = new RawAcl(parentAcl.Revision, parentAcl.Count);
-                foreach (CommonAce ace in parentAcl)
+                foreach (GenericAce ace in parentAcl)
                 {
                     if ((ace.AceFlags & inheritTest) != 0)
                     {
+                        GenericAce newAce = ace.Copy();
+
                         AceFlags newFlags = ace.AceFlags;
                         if ((newFlags & AceFlags.NoPropagateInherit) != 0)
                         {
@@ -172,7 +174,7 @@ namespace DiscUtils.Ntfs
                         newFlags &= ~AceFlags.InheritOnly;
                         newFlags |= AceFlags.Inherited;
 
-                        CommonAce newAce = new CommonAce(newFlags, ace.AceQualifier, ace.AccessMask, ace.SecurityIdentifier, ace.IsCallback, ace.GetOpaque());
+                        newAce.AceFlags = newFlags;
                         newAcl.InsertAce(newAcl.Count, newAce);
                     }
                 }

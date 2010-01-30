@@ -68,6 +68,10 @@ namespace DiscUtils.Ntfs
                 // The MFT grows sequentially across the disk
                 if (numFound < count)
                 {
+                    numFound += FindClusters(count - numFound, result, 0, totalClusters, isMft, true, 0);
+                }
+                if (numFound < count)
+                {
                     numFound += FindClusters(count - numFound, result, 0, totalClusters, isMft, false, 0);
                 }
             }

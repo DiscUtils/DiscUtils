@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -26,55 +26,35 @@ using System.IO;
 
 namespace DiscUtils.Ntfs
 {
-    internal class NonResidentAttributeExtentStream : SparseStream
+    internal class NonResidentAttributeBuffer : Buffer
     {
         private File _file;
         private Stream _fsStream;
         private long _bytesPerCluster;
         private NonResidentAttributeRecord _record;
 
-        private FileAccess _access;
-        private long _position;
-
-        private bool _atEOF;
-
         private byte[] _cachedDecompressedBlock;
         private long _cachedBlockStartVcn;
 
-        public NonResidentAttributeExtentStream(File file, FileAccess access, NonResidentAttributeRecord record)
+        public NonResidentAttributeBuffer(File file, NonResidentAttributeRecord record)
         {
             _file = file;
             _fsStream = _file.Context.RawStream;
             _bytesPerCluster = file.Context.BiosParameterBlock.BytesPerCluster;
             _record = record;
-            _access = access;
-        }
-
-        public override void Close()
-        {
-            base.Close();
         }
 
         public override bool CanRead
         {
-            get { return _access == FileAccess.Read || _access == FileAccess.ReadWrite; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return true; }
+            get { return _fsStream.CanRead; }
         }
 
         public override bool CanWrite
         {
-            get { return _access == FileAccess.Write || _access == FileAccess.ReadWrite; }
+            get { return _fsStream.CanWrite; }
         }
 
-        public override void Flush()
-        {
-        }
-
-        public override long Length
+        public override long Capacity
         {
             get
             {
@@ -82,29 +62,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override long Position
-        {
-            get
-            {
-                return _position;
-            }
-            set
-            {
-                _position = value;
-                _atEOF = false;
-            }
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
+        public override int Read(long pos, byte[] buffer, int offset, int count)
         {
             if (!CanRead)
             {
                 throw new IOException("Attempt to read from file not opened for read");
-            }
-
-            if (_atEOF)
-            {
-                throw new IOException("Attempt to read beyond end of file");
             }
 
             if (count < 0)
@@ -112,35 +74,27 @@ namespace DiscUtils.Ntfs
                 throw new ArgumentOutOfRangeException("count", "Attempt to read negative number of bytes");
             }
 
-            if (_position >= Length)
-            {
-                _atEOF = true;
-                return 0;
-            }
-
             // Limit read to length of attribute
-            int toRead = (int)Math.Min(count, Length - _position);
+            int toRead = (int)Math.Min(count, Capacity - pos);
 
             int numRead;
             if (_record.Flags == AttributeFlags.None)
             {
-                numRead = DoReadNormal(buffer, offset, toRead);
+                numRead = DoReadNormal(pos, buffer, offset, toRead);
             }
             else if (_record.Flags == AttributeFlags.Compressed)
             {
-                numRead = DoReadCompressed(buffer, offset, toRead);
+                numRead = DoReadCompressed(pos, buffer, offset, toRead);
             }
             else
             {
-                numRead = DoReadSparse(buffer, offset, toRead);
+                numRead = DoReadSparse(pos, buffer, offset, toRead);
             }
-
-            _position += numRead;
 
             return numRead;
         }
 
-        public override void SetLength(long value)
+        public override void SetCapacity(long value)
         {
             if (!CanWrite)
             {
@@ -152,21 +106,21 @@ namespace DiscUtils.Ntfs
                 throw new ArgumentException("Length not a multiple of cluster size", "value");
             }
 
-            if (value == Length)
+            if (value == Capacity)
             {
                 return;
             }
 
             _file.MarkMftRecordDirty();
 
-            if (value < Length)
+            if (value < Capacity)
             {
                 Truncate(value);
             }
             else
             {
                 long numClusters = value / _bytesPerCluster;
-                if (value > Length)
+                if (value > Capacity)
                 {
                     long numToAllocate = numClusters - (_record.CookedDataRuns.Count == 0 ? 0 : (1 + _record.LastVcn - _record.StartVcn));
                     Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster, _file.IndexInMft == MasterFileTable.MftIndex, numClusters);
@@ -179,7 +133,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
+        public override void Write(long pos, byte[] buffer, int offset, int count)
         {
             if (!CanWrite)
             {
@@ -196,29 +150,13 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            if (_position + count > Length)
+            if (pos + count > Capacity)
             {
-                SetLength(Utilities.RoundUp(_position + count, _bytesPerCluster));
+                SetCapacity(Utilities.RoundUp(pos + count, _bytesPerCluster));
             }
 
-            RawWrite(_position, buffer, offset, count);
-            _position += count;
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            long newPos = offset;
-            if (origin == SeekOrigin.Current)
-            {
-                newPos += _position;
-            }
-            else if (origin == SeekOrigin.End)
-            {
-                newPos += Length;
-            }
-            _position = newPos;
-            _atEOF = false;
-            return newPos;
+            RawWrite(pos, buffer, offset, count);
+            pos += count;
         }
 
         private void Truncate(long value)
@@ -265,23 +203,23 @@ namespace DiscUtils.Ntfs
             _file.Context.ClusterBitmap.FreeClusters(deadRuns);
         }
 
-        private int DoReadNormal(byte[] buffer, int offset, int count)
+        private int DoReadNormal(long pos, byte[] buffer, int offset, int count)
         {
             var runs = _record.CookedDataRuns;
 
-            long vcn = _position / _bytesPerCluster;
+            long vcn = pos / _bytesPerCluster;
             int dataRunIdx = FindDataRun(vcn);
-            RawRead(dataRunIdx, _position - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count, true);
+            RawRead(dataRunIdx, pos - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count, true);
             return count;
         }
 
-        private int DoReadSparse(byte[] buffer, int offset, int count)
+        private int DoReadSparse(long pos, byte[] buffer, int offset, int count)
         {
             var runs = _record.CookedDataRuns;
 
-            long vcn = _position / _bytesPerCluster;
+            long vcn = pos / _bytesPerCluster;
             int dataRunIdx = FindDataRun(vcn);
-            long runOffset = _position - (runs[dataRunIdx].StartVcn * _bytesPerCluster);
+            long runOffset = pos - (runs[dataRunIdx].StartVcn * _bytesPerCluster);
 
             if (runs[dataRunIdx].IsSparse)
             {
@@ -296,15 +234,15 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private int DoReadCompressed(byte[] buffer, int offset, int count)
+        private int DoReadCompressed(long pos, byte[] buffer, int offset, int count)
         {
             var runs = _record.CookedDataRuns;
 
             long compressionUnitLength = _record.CompressionUnitSize * _bytesPerCluster;
 
-            long startVcn = (_position / compressionUnitLength) * _record.CompressionUnitSize;
-            long targetCluster = (_position / _bytesPerCluster);
-            long blockOffset = _position - (startVcn * _bytesPerCluster);
+            long startVcn = (pos / compressionUnitLength) * _record.CompressionUnitSize;
+            long targetCluster = (pos / _bytesPerCluster);
+            long blockOffset = pos - (startVcn * _bytesPerCluster);
 
             int dataRunIdx = FindDataRun(startVcn);
             if (runs[dataRunIdx].IsSparse)
@@ -344,7 +282,7 @@ namespace DiscUtils.Ntfs
 
                 // Read to the end of the compression cluster
                 int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
-                RawRead(dataRunIdx, _position - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, numBytes, true);
+                RawRead(dataRunIdx, pos - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, numBytes, true);
                 return numBytes;
             }
         }
@@ -609,7 +547,12 @@ namespace DiscUtils.Ntfs
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { return new StreamExtent[] { new StreamExtent(0, Length) }; }
+            get { return new StreamExtent[] { new StreamExtent(0, Capacity) }; }
+        }
+
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            return StreamExtent.Intersect(Extents, new StreamExtent(start, count));
         }
     }
 }

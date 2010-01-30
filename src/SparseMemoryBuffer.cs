@@ -30,7 +30,7 @@ namespace DiscUtils
     /// </summary>
     /// <remarks>This class is useful for storing large sparse buffers in memory, unused
     /// chunks of the buffer are not stored (assumed to be zero).</remarks>
-    public sealed class SparseMemoryBuffer
+    public sealed class SparseMemoryBuffer : Buffer
     {
         private Dictionary<int, byte[]> _buffers;
         private int _chunkSize;
@@ -45,6 +45,22 @@ namespace DiscUtils
         {
             _chunkSize = chunkSize;
             _buffers = new Dictionary<int, byte[]>();
+        }
+
+        /// <summary>
+        /// Indicates this stream can be read (always <c>true</c>).
+        /// </summary>
+        public override bool CanRead
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Indicates this stream can be written (always <c>true</c>).
+        /// </summary>
+        public override bool CanWrite
+        {
+            get { return true; }
         }
 
         /// <summary>
@@ -82,7 +98,7 @@ namespace DiscUtils
         /// <param name="offset">The start offset within the destination buffer.</param>
         /// <param name="count">The number of bytes to read.</param>
         /// <returns>The actual number of bytes read</returns>
-        public int Read(long pos, byte[] buffer, int offset, int count)
+        public override int Read(long pos, byte[] buffer, int offset, int count)
         {
             int totalRead = 0;
 
@@ -116,7 +132,7 @@ namespace DiscUtils
         /// <param name="buffer">The source byte array.</param>
         /// <param name="offset">The start offset within the source byte array.</param>
         /// <param name="count">The number of bytes to write.</param>
-        public void Write(long pos, byte[] buffer, int offset, int count)
+        public override void Write(long pos, byte[] buffer, int offset, int count)
         {
             int totalWritten = 0;
 
@@ -145,7 +161,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the current capacity of the sparse buffer (number of logical bytes stored).
         /// </summary>
-        public long Capacity
+        public override long Capacity
         {
             get { return _capacity; }
         }
@@ -157,7 +173,7 @@ namespace DiscUtils
         /// <remarks>This method does not allocate any chunks, it merely records the logical
         /// capacity of the sparse buffer.  Writes beyond the specified capacity will increase
         /// the capacity.</remarks>
-        public void SetCapacity(long value)
+        public override void SetCapacity(long value)
         {
             _capacity = value;
         }
@@ -184,6 +200,26 @@ namespace DiscUtils
                 List<int> keys = new List<int>(_buffers.Keys);
                 keys.Sort();
                 return keys;
+            }
+        }
+
+        /// <summary>
+        /// Gets the parts of a buffer that are stored, within a specified range.
+        /// </summary>
+        /// <param name="start">The offset of the first byte of interest</param>
+        /// <param name="count">The number of bytes of interest</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            long end = start + count;
+            foreach (var chunk in AllocatedChunks)
+            {
+                long chunkStart = chunk * _chunkSize;
+                if (chunkStart >= start && (chunkStart + _chunkSize) <= end)
+                {
+                    long extentStart = Math.Max(start, chunk * _chunkSize);
+                    yield return new StreamExtent(extentStart, Math.Min(chunkStart + _chunkSize, end) - extentStart);
+                }
             }
         }
     }

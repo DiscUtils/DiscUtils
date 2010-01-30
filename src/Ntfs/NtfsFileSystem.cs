@@ -60,7 +60,7 @@ namespace DiscUtils.Ntfs
             _context.GetDirectoryByRef = GetDirectory;
             _context.GetDirectoryByIndex = GetDirectory;
             _context.AllocateFile = AllocateFile;
-            _context.DeleteFile = DeleteFile;
+            _context.ForgetFile = ForgetFile;
             _context.ReadOnly = !stream.CanWrite;
 
             _fileCache = new ObjectCache<long, File>();
@@ -1436,14 +1436,8 @@ namespace DiscUtils.Ntfs
             return result;
         }
 
-        internal void DeleteFile(File file)
+        internal void ForgetFile(File file)
         {
-            if (file.HardLinkCount != 0)
-            {
-                throw new InvalidOperationException("Attempt to delete an in-use file");
-            }
-
-            _context.Mft.RemoveRecord(file.MftReference);
             _fileCache.Remove(file.IndexInMft);
         }
 

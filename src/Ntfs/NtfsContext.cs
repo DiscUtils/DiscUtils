@@ -29,7 +29,7 @@ namespace DiscUtils.Ntfs
     internal delegate Directory GetDirectoryByIndexFn(long index);
     internal delegate Directory GetDirectoryByRefFn(FileReference reference);
     internal delegate File AllocateFileFn(FileRecordFlags flags);
-    internal delegate void DeleteFileFn(File file);
+    internal delegate void ForgetFileFn(File file);
 
     internal interface INtfsContext
     {
@@ -113,7 +113,7 @@ namespace DiscUtils.Ntfs
             get;
         }
 
-        DeleteFileFn DeleteFile
+        ForgetFileFn ForgetFile
         {
             get;
         }
@@ -142,7 +142,7 @@ namespace DiscUtils.Ntfs
         private GetDirectoryByIndexFn _getDirByIndexFn;
         private GetDirectoryByRefFn _getDirByRefFn;
         private AllocateFileFn _allocateFileFn;
-        private DeleteFileFn _deleteFileFn;
+        private ForgetFileFn _forgetFileFn;
         private bool _readOnly;
 
         public Stream RawStream
@@ -241,10 +241,10 @@ namespace DiscUtils.Ntfs
             set { _allocateFileFn = value; }
         }
 
-        public DeleteFileFn DeleteFile
+        public ForgetFileFn ForgetFile
         {
-            get { return _deleteFileFn; }
-            set { _deleteFileFn = value; }
+            get { return _forgetFileFn; }
+            set { _forgetFileFn = value; }
         }
 
         public bool ReadOnly

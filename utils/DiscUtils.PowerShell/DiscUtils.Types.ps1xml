@@ -41,7 +41,7 @@ Based on the file types.ps1xml:
       <CodeProperty>
         <Name>Mode</Name>
         <GetCodeReference>
-          <TypeName>DiscUtils.PowerShell.Provider</TypeName>
+          <TypeName>DiscUtils.PowerShell.Provider.Provider</TypeName>
           <MethodName>Mode</MethodName>
         </GetCodeReference>
       </CodeProperty>
@@ -53,7 +53,7 @@ Based on the file types.ps1xml:
       <CodeProperty>
         <Name>Mode</Name>
         <GetCodeReference>
-          <TypeName>DiscUtils.PowerShell.Provider</TypeName>
+          <TypeName>DiscUtils.PowerShell.Provider.Provider</TypeName>
           <MethodName>Mode</MethodName>
         </GetCodeReference>
       </CodeProperty>

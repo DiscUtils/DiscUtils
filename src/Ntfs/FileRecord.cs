@@ -68,7 +68,7 @@ namespace DiscUtils.Ntfs
         {
             Initialize("FILE", sectorSize, recordLength);
             _sequenceNumber++;
-            _flags = FileRecordFlags.InUse;
+            _flags = FileRecordFlags.None;
             _recordAllocatedSize = (uint)recordLength;
             _nextAttributeId = 1;
             _index = index;
@@ -358,7 +358,7 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == AttributeType.FileName)
                 {
-                    StructuredNtfsAttribute<FileNameRecord> fnAttr = new StructuredNtfsAttribute<FileNameRecord>(null, new FileReference(0), attr);
+                    StructuredNtfsAttribute<FileNameRecord> fnAttr = (StructuredNtfsAttribute<FileNameRecord>)NtfsAttribute.FromRecord(null, new FileReference(0), attr);
                     return fnAttr.Content.FileName;
                 }
             }

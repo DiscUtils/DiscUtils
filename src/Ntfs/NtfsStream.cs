@@ -29,44 +29,27 @@ namespace DiscUtils.Ntfs
     internal class NtfsStream
     {
         private File _file;
-        private AttributeType _attrType;
-        private string _name;
-        private IList<AttributeReference> _attrs;
+        private NtfsAttribute _attr;
 
-        public NtfsStream(File file, AttributeType attrType, string name, IList<AttributeReference> attrs)
+        public NtfsStream(File file, NtfsAttribute attr)
         {
             _file = file;
-            _attrType = attrType;
-            _name = name;
-            _attrs = attrs;
+            _attr = attr;
         }
 
-        public NtfsStream(File file, AttributeType attrType, string name, AttributeReference attr)
+        public NtfsAttribute Attribute
         {
-            _file = file;
-            _attrType = attrType;
-            _name = name;
-            _attrs = new AttributeReference[] { attr };
+            get { return _attr; }
         }
 
         public AttributeType AttributeType
         {
-            get { return _attrType; }
+            get { return _attr.Type; }
         }
 
         public string Name
         {
-            get { return _name; }
-        }
-
-        public AttributeReference[] GetAttributes()
-        {
-            AttributeReference[] results = new AttributeReference[_attrs.Count];
-            for (int i = 0; i < _attrs.Count; ++i)
-            {
-                results[i] = _attrs[i];
-            }
-            return results;
+            get { return _attr.Name; }
         }
 
         /// <summary>
@@ -107,34 +90,12 @@ namespace DiscUtils.Ntfs
 
         public SparseStream Open(FileAccess access)
         {
-            List<SparseStream> subStreams = new List<SparseStream>();
-            foreach (var attrRef in _attrs)
-            {
-                subStreams.Add(_file.GetAttribute(attrRef).OpenRaw(access));
-            }
-
-            AttributeRecord firstAttrRecord = _file.GetAttribute(_attrs[0]).Record;
-            if (firstAttrRecord.IsNonResident || _attrs.Count > 1)
-            {
-                NonResidentAttributeRecord baseRecord = (NonResidentAttributeRecord)firstAttrRecord;
-                return new NonResidentAttributeStream(_file, access, baseRecord, subStreams.ToArray());
-            }
-            else
-            {
-                return subStreams[0];
-            }
+            return _attr.Open(access);
         }
 
         internal Range<long, long>[] GetClusters()
         {
-            List<Range<long, long>> ranges = new List<Range<long, long>>();
-
-            foreach (var attrRef in _attrs)
-            {
-                ranges.AddRange(_file.GetAttribute(attrRef).GetClusters());
-            }
-
-            return ranges.ToArray();
+            return _attr.GetClusters();
         }
 
         internal StreamExtent[] GetAbsoluteExtents()
@@ -142,23 +103,17 @@ namespace DiscUtils.Ntfs
             List<StreamExtent> result = new List<StreamExtent>();
 
             long clusterSize = _file.Context.BiosParameterBlock.BytesPerCluster;
-
-            foreach (var attrRef in _attrs)
+            if (_attr.IsNonResident)
             {
-                NtfsAttribute attr = _file.GetAttribute(attrRef);
-                if (attr.IsNonResident)
+                Range<long, long>[] clusters = _attr.GetClusters();
+                foreach (var clusterRange in clusters)
                 {
-                    Range<long, long>[] clusters = attr.GetClusters();
-                    foreach (var clusterRange in clusters)
-                    {
-                        result.Add(new StreamExtent(clusterRange.Offset * clusterSize, clusterRange.Count * clusterSize));
-                    }
-                    return result.ToArray();
+                    result.Add(new StreamExtent(clusterRange.Offset * clusterSize, clusterRange.Count * clusterSize));
                 }
-                else
-                {
-                    result.Add(new StreamExtent(attr.OffsetToAbsolutePos(0), attr.Length));
-                }
+            }
+            else
+            {
+                result.Add(new StreamExtent(_attr.OffsetToAbsolutePos(0), _attr.Length));
             }
 
             return result.ToArray();

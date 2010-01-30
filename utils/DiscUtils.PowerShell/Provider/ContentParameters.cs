@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,32 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
+using System.Management.Automation;
 
-namespace DiscUtils
+namespace DiscUtils.PowerShell.Provider
 {
-    /// <summary>
-    /// Provides a sparse equivalent to MemoryStream.
-    /// </summary>
-    public sealed class SparseMemoryStream : BufferStream
+    public class ContentParameters
     {
-        /// <summary>
-        /// Creates a new instance with read/write access.
-        /// </summary>
-        public SparseMemoryStream()
-            : base(new SparseMemoryBuffer(16 * 1024), FileAccess.ReadWrite)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new instance using a pre-existing buffer.
-        /// </summary>
-        /// <param name="buffer">The buffer to use</param>
-        /// <param name="access">The access permitted to clients</param>
-        public SparseMemoryStream(SparseMemoryBuffer buffer, FileAccess access)
-            : base(buffer, access)
-        {
-        }
+        [Parameter]
+        public ContentEncoding Encoding { get; set; }
     }
 }

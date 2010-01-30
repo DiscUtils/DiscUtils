@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using System.Management.Automation;
 using DiscUtils.Common;
+using DiscUtils.PowerShell.Provider;
 
 namespace DiscUtils.PowerShell
 {
@@ -94,14 +95,14 @@ namespace DiscUtils.PowerShell
             {
                 string path = Path.Combine(((DirectoryInfo)parentObj.BaseObject).FullName, child);
                 using (VirtualDisk realDisk = VirtualDisk.CreateDisk(type, variant, path, size, null, null)) { }
-                disk = new OnDemandVirtualDisk(path, FileAccess.Read);
+                disk = new OnDemandVirtualDisk(path, FileAccess.ReadWrite);
             }
             else if (parentObj.BaseObject is DiscDirectoryInfo)
             {
                 DiscDirectoryInfo ddi = (DiscDirectoryInfo)parentObj.BaseObject;
                 string path = Path.Combine(ddi.FullName, child);
                 using (VirtualDisk realDisk = VirtualDisk.CreateDisk(ddi.FileSystem, type, variant, path, size, null, null)) { }
-                disk = new OnDemandVirtualDisk(ddi.FileSystem, path, FileAccess.Read);
+                disk = new OnDemandVirtualDisk(ddi.FileSystem, path, FileAccess.ReadWrite);
             }
             else
             {
@@ -151,14 +152,14 @@ namespace DiscUtils.PowerShell
                 {
                     string path = Path.Combine(((DirectoryInfo)parentObj.BaseObject).FullName, child);
                     using (baseDisk.CreateDifferencingDisk(path)) { }
-                    newDisk = new OnDemandVirtualDisk(path, FileAccess.Read);
+                    newDisk = new OnDemandVirtualDisk(path, FileAccess.ReadWrite);
                 }
                 else if (parentObj.BaseObject is DiscDirectoryInfo)
                 {
                     DiscDirectoryInfo ddi = (DiscDirectoryInfo)parentObj.BaseObject;
                     string path = Path.Combine(ddi.FullName, child);
                     using (baseDisk.CreateDifferencingDisk(ddi.FileSystem, path)) { }
-                    newDisk = new OnDemandVirtualDisk(ddi.FileSystem, path, FileAccess.Read);
+                    newDisk = new OnDemandVirtualDisk(ddi.FileSystem, path, FileAccess.ReadWrite);
                 }
                 else
                 {

@@ -43,14 +43,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormatVolumeCommand.cs" />
+    <Compile Include="Provider\ContentEncoding.cs" />
+    <Compile Include="Provider\ContentParameters.cs" />
+    <Compile Include="Provider\FileContentReaderWriter.cs" />
+    <Compile Include="Provider\GetItemParameters.cs" />
+    <Compile Include="InitializeVirtualDiskCommand.cs" />
+    <Compile Include="NewVolumeCommand.cs" />
     <Compile Include="NewVirtualDiskCommand.cs" />
-    <Compile Include="NewDriveParameters.cs" />
+    <Compile Include="Provider\NewDriveParameters.cs" />
+    <Compile Include="Provider\OnDemandVirtualDisk.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Provider.cs" />
+    <Compile Include="Provider\Provider.cs" />
     <Compile Include="SnapIn.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="VirtualDiskPSDriveInfo.cs" />
+    <Compile Include="Provider\VirtualDiskPSDriveInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DiscUtils.csproj">

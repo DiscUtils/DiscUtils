@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
@@ -31,24 +32,30 @@ namespace DiscUtils.Ntfs
         protected File _file;
         protected FileReference _containingFile;
         protected AttributeRecord _record;
+        protected Dictionary<AttributeReference, AttributeRecord> _extents;
 
         protected NtfsAttribute(File file, FileReference containingFile, AttributeRecord record)
         {
             _file = file;
             _containingFile = containingFile;
             _record = record;
+            _extents = new Dictionary<AttributeReference, AttributeRecord>();
+            _extents.Add(new AttributeReference(containingFile, record.AttributeId), _record);
         }
 
-        protected NtfsAttribute(NtfsAttribute toCopy)
+        public void AddExtent(FileReference containingFile, AttributeRecord record)
         {
-            _file = toCopy._file;
-            _containingFile = toCopy._containingFile;
-            _record = toCopy._record;
+            _extents.Add(new AttributeReference(containingFile, record.AttributeId), record);
         }
 
         public AttributeReference Reference
         {
             get { return new AttributeReference(_containingFile, _record.AttributeId); }
+        }
+
+        public AttributeType Type
+        {
+            get { return _record.AttributeType; }
         }
 
         public string Name
@@ -69,6 +76,16 @@ namespace DiscUtils.Ntfs
         public AttributeRecord Record
         {
             get { return _record; }
+        }
+
+        public IList<AttributeRecord> Extents
+        {
+            get { return new List<AttributeRecord>(_extents.Values); }
+        }
+
+        public ICollection<AttributeReference> ExtentRefs
+        {
+            get { return _extents.Keys; }
         }
 
         public bool IsNonResident
@@ -104,68 +121,24 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            byte[] buffer;
-            using (Stream attrStream = Open(FileAccess.ReadWrite))
-            {
-                buffer = Utilities.ReadFully(attrStream, Math.Min((int)attrStream.Length, maxData));
-                attrStream.SetLength(0);
-            }
+            IBuffer attrBuffer = _record.GetDataBuffer(_file);
+            byte[] tempBuffer = Utilities.ReadFully(attrBuffer, 0, Math.Min((int)attrBuffer.Capacity, maxData));
+            attrBuffer.SetCapacity(0);
 
             if (nonResident)
             {
-                NonResidentAttributeRecord newRecord = new NonResidentAttributeRecord(_record);
-                using (Stream attrStream = new NonResidentAttributeStream(_file, FileAccess.ReadWrite, newRecord, newRecord.OpenRaw(_file, FileAccess.Write)))
-                {
-                    attrStream.Write(buffer, 0, buffer.Length);
-                }
-                _record = newRecord;
+                _record = new NonResidentAttributeRecord(_record);
             }
             else
             {
-                ResidentAttributeRecord newRecord = new ResidentAttributeRecord(_record);
-                using (Stream attrStream = newRecord.OpenRaw(_file, FileAccess.Write))
-                {
-                    attrStream.Write(buffer, 0, buffer.Length);
-                }
-                _record = newRecord;
+                _record = new ResidentAttributeRecord(_record);
             }
 
-            _file.InvalidateAttributeStreams();
-        }
+            _extents.Clear();
+            _extents.Add(new AttributeReference(_file.MftReference, _record.AttributeId), _record);
 
-        public void Defrag()
-        {
-            if (!IsNonResident)
-            {
-                return;
-            }
-
-            NonResidentAttributeRecord thisRecord = (NonResidentAttributeRecord)_record;
-
-            NonResidentAttributeRecord newRecord = new NonResidentAttributeRecord(thisRecord);
-            newRecord.DetachData();
-
-            using (Stream oldStream = OpenRaw(FileAccess.ReadWrite))
-            {
-                using (Stream newStream = newRecord.OpenRaw(_file, FileAccess.Write))
-                {
-                    newStream.SetLength(oldStream.Length);
-
-                    byte[] buffer = new byte[_file.Context.BiosParameterBlock.BytesPerCluster * 2];
-                    int numRead = oldStream.Read(buffer, 0, buffer.Length);
-                    while (numRead > 0)
-                    {
-                        newStream.Write(buffer, 0, numRead);
-                        numRead = oldStream.Read(buffer, 0, buffer.Length);
-                    }
-                }
-
-                oldStream.SetLength(0);
-            }
-
-            thisRecord.DetachData();
-            thisRecord.SetData(newRecord);
-//            _file.InvalidateAttributeStreams();
+            attrBuffer = GetDataBuffer();
+            attrBuffer.Write(0, tempBuffer, 0, tempBuffer.Length);
         }
 
         public static NtfsAttribute FromRecord(File file, FileReference recordFile, AttributeRecord record)
@@ -229,21 +202,14 @@ namespace DiscUtils.Ntfs
             _record.Dump(writer, indent + "  ");
         }
 
-        internal SparseStream OpenRaw(FileAccess access)
-        {
-            return _record.OpenRaw(_file, access);
-        }
-
         internal SparseStream Open(FileAccess access)
         {
-            if (_record.IsNonResident)
-            {
-                return new NonResidentAttributeStream(_file, access, (NonResidentAttributeRecord)_record, OpenRaw(access));
-            }
-            else
-            {
-                return OpenRaw(access);
-            }
+            return new BufferStream(GetDataBuffer(), access);
+        }
+
+        internal IBuffer GetDataBuffer()
+        {
+            return new NtfsAttributeBuffer(_file, this);
         }
 
         protected string AttributeTypeName

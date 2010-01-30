@@ -24,9 +24,9 @@ using System.Collections.Generic;
 using System.Management.Automation;
 using DiscUtils.Ntfs;
 
-namespace DiscUtils.PowerShell
+namespace DiscUtils.PowerShell.Provider
 {
-    internal sealed class VirtualDiskPSDriveInfo : PSDriveInfo
+    public sealed class VirtualDiskPSDriveInfo : PSDriveInfo
     {
         private VirtualDisk _disk;
         private VolumeManager _volMgr;
@@ -50,7 +50,7 @@ namespace DiscUtils.PowerShell
             get { return _volMgr; }
         }
 
-        public DiscFileSystem GetFileSystem(VolumeInfo volInfo)
+        internal DiscFileSystem GetFileSystem(VolumeInfo volInfo)
         {
             DiscFileSystem result;
             if (!_fsCache.TryGetValue(volInfo.Identity, out result))

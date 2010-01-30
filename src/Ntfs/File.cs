@@ -33,20 +33,20 @@ namespace DiscUtils.Ntfs
 
         private MasterFileTable _mft;
         private FileRecord _baseRecord;
-        private ObjectCache<long, NtfsAttribute> _attributeCache;
         private ObjectCache<string, Index> _indexCache;
+        private List<NtfsAttribute> _attributes;
 
         private bool _baseRecordDirty;
-
-        private uint _attrStreamChangeId; // Indicates when AttributeStreams are invalid, and must be re-opened
 
         public File(INtfsContext context, FileRecord baseRecord)
         {
             _context = context;
             _mft = _context.Mft;
             _baseRecord = baseRecord;
-            _attributeCache = new ObjectCache<long, NtfsAttribute>();
             _indexCache = new ObjectCache<string, Index>();
+            _attributes = new List<NtfsAttribute>();
+
+            LoadAttributes();
         }
 
         public uint IndexInMft
@@ -186,19 +186,6 @@ namespace DiscUtils.Ntfs
                     {
                         foreach (var attr in _baseRecord.Attributes)
                         {
-                            if (attr.IsNonResident && ((NonResidentAttributeRecord)attr).CookedDataRuns.Count > 4)
-                            {
-                                DefragAttribute(new AttributeReference(MftReference, attr.AttributeId));
-                                fixedAttribute = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!fixedAttribute)
-                    {
-                        foreach (var attr in _baseRecord.Attributes)
-                        {
                             if (attr.AttributeType == AttributeType.IndexRoot
                                 && ShrinkIndexRoot(attr.Name))
                             {
@@ -265,28 +252,13 @@ namespace DiscUtils.Ntfs
 
         #region Attributes
 
-        private SparseStream InnerOpenAttribute(AttributeReference id, FileAccess access)
-        {
-            NtfsAttribute attr = GetAttribute(id);
-
-            if (attr == null)
-            {
-                throw new IOException("No such attribute: " + id);
-            }
-
-            return attr.Open(access);
-        }
-
         /// <summary>
         /// Creates a new unnamed attribute.
         /// </summary>
         /// <param name="type">The type of the new attribute</param>
-        private AttributeReference CreateAttribute(AttributeType type)
+        private NtfsAttribute CreateAttribute(AttributeType type)
         {
-            bool indexed = _context.AttributeDefinitions.IsIndexed(type);
-            ushort id = _baseRecord.CreateAttribute(type, null, indexed);
-            MarkMftRecordDirty();
-            return new AttributeReference(MftReference, id);
+            return CreateAttribute(type, null);
         }
 
         /// <summary>
@@ -294,12 +266,16 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
-        private AttributeReference CreateAttribute(AttributeType type, string name)
+        private NtfsAttribute CreateAttribute(AttributeType type, string name)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);
             ushort id = _baseRecord.CreateAttribute(type, name, indexed);
+
+            NtfsAttribute newAttr = NtfsAttribute.FromRecord(this, MftReference, _baseRecord.GetAttribute(id));
+
+            _attributes.Add(newAttr);
             MarkMftRecordDirty();
-            return new AttributeReference(MftReference, id);
+            return newAttr;
         }
 
         /// <summary>
@@ -310,23 +286,20 @@ namespace DiscUtils.Ntfs
         /// <param name="firstCluster">The first cluster to assign to the attribute</param>
         /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
         /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
-        private AttributeReference CreateAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        private NtfsAttribute CreateAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);
             ushort id = _baseRecord.CreateAttribute(type, name, firstCluster, numClusters, bytesPerCluster);
+
+            NtfsAttribute newAttr = NtfsAttribute.FromRecord(this, MftReference, _baseRecord.GetAttribute(id));
+
+            _attributes.Add(newAttr);
             MarkMftRecordDirty();
-            return new AttributeReference(MftReference, id);
+            return newAttr;
         }
 
-        private void RemoveAttribute(AttributeReference id)
+        private void RemoveAttribute(NtfsAttribute attr)
         {
-            if (id.File.MftIndex != _baseRecord.MasterFileTableIndex)
-            {
-                _context.GetFileByRef(id.File).RemoveAttribute(id);
-                return;
-            }
-
-            NtfsAttribute attr = GetAttribute(id);
             if (attr != null)
             {
                 if (attr.Record.AttributeType == AttributeType.IndexRoot)
@@ -334,15 +307,23 @@ namespace DiscUtils.Ntfs
                     _indexCache.Remove(attr.Record.Name);
                 }
 
-                using (Stream s = new FileStream(this, id, FileAccess.Write))
+                attr.GetDataBuffer().SetCapacity(0);
+
+                foreach(var extentRef in attr.ExtentRefs)
                 {
-                    s.SetLength(0);
+                    FileRecord fileRec = _context.Mft.GetRecord(extentRef.File);
+                    if (fileRec != null)
+                    {
+                        fileRec.RemoveAttribute(extentRef.AttributeId);
+                    }
+
+                    if (fileRec.Attributes.Count == 0)
+                    {
+                        _context.Mft.RemoveRecord(extentRef.File);
+                    }
                 }
 
-                _baseRecord.RemoveAttribute(id.AttributeId);
-
-                long cacheId = (long)((id.File.MftIndex << 16) | id.AttributeId);
-                _attributeCache.Remove(cacheId);
+                // TODO: remove entry from attribute list - also write new extension MFT records
             }
         }
 
@@ -353,27 +334,15 @@ namespace DiscUtils.Ntfs
         /// <returns>The attribute</returns>
         internal NtfsAttribute GetAttribute(AttributeReference attrRef)
         {
-            FileRecord attrFileRecord = _baseRecord;
-            if (attrRef.File.MftIndex != _baseRecord.MasterFileTableIndex)
+            foreach (var attr in _attributes)
             {
-                attrFileRecord = _context.Mft.GetRecord(attrRef.File);
+                if (attr.Reference.Equals(attrRef))
+                {
+                    return attr;
+                }
             }
 
-            if (attrFileRecord == null)
-            {
-                return null;
-            }
-
-            long cacheId = (long)((attrRef.File.MftIndex << 16) | attrRef.AttributeId);
-            NtfsAttribute result = _attributeCache[cacheId];
-            if (result == null)
-            {
-                AttributeRecord attrRec = attrFileRecord.GetAttribute(attrRef.AttributeId);
-                result = NtfsAttribute.FromRecord(this, MftReference, attrRec);
-                _attributeCache[cacheId] = result;
-            }
-
-            return result;
+            return null;
         }
 
         /// <summary>
@@ -384,7 +353,7 @@ namespace DiscUtils.Ntfs
         /// <returns>The attribute of <c>null</c>.</returns>
         internal NtfsAttribute GetAttribute(AttributeType type, string name)
         {
-            foreach (var attr in AllAttributes)
+            foreach (var attr in _attributes)
             {
                 if (attr.Record.AttributeType == type && attr.Name == name)
                 {
@@ -394,34 +363,57 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
+        private void LoadAttributes()
+        {
+            AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
+            if (attrListRec != null)
+            {
+                NtfsAttribute lastAttr = null;
+                AttributeType lastType = AttributeType.None;
+                string lastName = null;
+
+                StructuredNtfsAttribute<AttributeList> attrList = (StructuredNtfsAttribute<AttributeList>)NtfsAttribute.FromRecord(this, MftReference, attrListRec);
+                foreach (var record in attrList.Content)
+                {
+                    FileRecord attrFileRecord = _baseRecord;
+                    if (record.BaseFileReference.MftIndex != _baseRecord.MasterFileTableIndex)
+                    {
+                        attrFileRecord = _context.Mft.GetRecord(record.BaseFileReference);
+                    }
+
+                    if (attrFileRecord != null)
+                    {
+                        AttributeRecord attrRec = attrFileRecord.GetAttribute(record.AttributeId);
+
+                        if (lastAttr == null || lastType != record.Type || lastName != record.Name)
+                        {
+                            lastAttr = NtfsAttribute.FromRecord(this, record.BaseFileReference, attrRec);
+                            lastType = record.Type;
+                            lastName = record.Name;
+                            _attributes.Add(lastAttr);
+                        }
+                        else
+                        {
+                            lastAttr.AddExtent(record.BaseFileReference, attrRec);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (var record in _baseRecord.Attributes)
+                {
+                    _attributes.Add(NtfsAttribute.FromRecord(this, MftReference, record));
+                }
+            }
+        }
+
         /// <summary>
         /// Enumerates through all attributes.
         /// </summary>
         internal IEnumerable<NtfsAttribute> AllAttributes
         {
-            get
-            {
-                AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
-                if (attrListRec != null)
-                {
-                    StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(this, MftReference, attrListRec);
-                    foreach (var record in attrList.Content)
-                    {
-                        var attr = GetAttribute(new AttributeReference(record.BaseFileReference, record.AttributeId));
-                        if (attr != null)
-                        {
-                            yield return attr;
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var record in _baseRecord.Attributes)
-                    {
-                        yield return GetAttribute(new AttributeReference(MftReference, record.AttributeId));
-                    }
-                }
-            }
+            get { return _attributes; }
         }
 
         /// <summary>
@@ -433,7 +425,7 @@ namespace DiscUtils.Ntfs
         {
             List<NtfsAttribute> matches = new List<NtfsAttribute>();
 
-            foreach (var attr in AllAttributes)
+            foreach (var attr in _attributes)
             {
                 if (attr.Record.AttributeType == type && string.IsNullOrEmpty(attr.Name))
                 {
@@ -478,18 +470,6 @@ namespace DiscUtils.Ntfs
             _baseRecord.SetAttribute(attr.Record); 
         }
 
-        internal void DefragAttribute(AttributeReference attrRef)
-        {
-            NtfsAttribute attr = GetAttribute(attrRef);
-
-            if (!attr.IsNonResident)
-            {
-                throw new InvalidOperationException("Attribute is resident");
-            }
-
-            attr.Defrag();
-        }
-
         #endregion
 
         #region Streams
@@ -509,41 +489,11 @@ namespace DiscUtils.Ntfs
 
         public IEnumerable<NtfsStream> GetStreams(AttributeType attrType, string name)
         {
-            AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
-            if (attrListRec != null)
+            foreach(var attr in _attributes)
             {
-                AttributeListRecord lastRecord = null;
-                List<AttributeReference> attrRefs = new List<AttributeReference>();
-
-                StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(this, MftReference, attrListRec);
-                foreach (var record in attrList.Content)
+                if(attr.Type == attrType && attr.Name == name)
                 {
-                    if (record.Type == attrType && record.Name == name)
-                    {
-                        if (lastRecord != null && record.StartVcn == 0)
-                        {
-                            yield return new NtfsStream(this, lastRecord.Type, lastRecord.Name, attrRefs);
-                            attrRefs = new List<AttributeReference>();
-                        }
-
-                        lastRecord = record;
-                        attrRefs.Add(new AttributeReference(record.BaseFileReference, record.AttributeId));
-                    }
-                }
-
-                if (lastRecord != null)
-                {
-                    yield return new NtfsStream(this, lastRecord.Type, lastRecord.Name, attrRefs);
-                }
-            }
-            else
-            {
-                foreach (var record in _baseRecord.Attributes)
-                {
-                    if (record.AttributeType == attrType && record.Name == name)
-                    {
-                        yield return new NtfsStream(this, record.AttributeType, record.Name, new AttributeReference(MftReference, record.AttributeId));
-                    }
+                    yield return new NtfsStream(this, attr);
                 }
             }
         }
@@ -552,87 +502,34 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
-                if (attrListRec != null)
+                foreach (var attr in _attributes)
                 {
-                    AttributeListRecord lastRecord = null;
-                    List<AttributeReference> attrRefs = new List<AttributeReference>();
-
-                    StructuredNtfsAttribute<AttributeList> attrList = new StructuredNtfsAttribute<AttributeList>(this, MftReference, attrListRec);
-                    foreach (var record in attrList.Content)
-                    {
-                        if (lastRecord != null && (record.StartVcn == 0 || record.Type != lastRecord.Type || record.Name != lastRecord.Name))
-                        {
-                            yield return new NtfsStream(this, lastRecord.Type, lastRecord.Name, attrRefs);
-                            attrRefs = new List<AttributeReference>();
-                        }
-
-                        lastRecord = record;
-                        attrRefs.Add(new AttributeReference(record.BaseFileReference, record.AttributeId));
-                    }
-
-                    if (lastRecord != null)
-                    {
-                        yield return new NtfsStream(this, lastRecord.Type, lastRecord.Name, attrRefs);
-                    }
-                }
-                else
-                {
-                    foreach (var record in _baseRecord.Attributes)
-                    {
-                        yield return new NtfsStream(this, record.AttributeType, record.Name, new AttributeReference(MftReference, record.AttributeId));
-                    }
+                    yield return new NtfsStream(this, attr);
                 }
             }
         }
 
         public NtfsStream CreateStream(AttributeType attrType, string name)
         {
-            AttributeReference attrRef = CreateAttribute(attrType, name);
-            return new NtfsStream(this, attrType, name, attrRef);
+            return new NtfsStream(this, CreateAttribute(attrType, name));
         }
 
         public NtfsStream CreateStream(AttributeType attrType, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
-            AttributeReference attrRef = CreateAttribute(attrType, name, firstCluster, numClusters, bytesPerCluster);
-            return new NtfsStream(this, attrType, name, attrRef);
+            return new NtfsStream(this, CreateAttribute(attrType, name, firstCluster, numClusters, bytesPerCluster));
         }
 
         public SparseStream OpenStream(AttributeType attrType, string name, FileAccess access)
         {
-            return new FileStream(this, attrType, name, access);
-        }
-
-        internal SparseStream InnerOpenStream(AttributeType attrType, string name, FileAccess access)
-        {
-            NtfsStream stream = GetStream(attrType, name);
-            if (stream == null)
-            {
-                return null;
-            }
-
-            return stream.Open(access);
+            return new FileStream(this, GetAttribute(attrType, name), access);
         }
 
         public void RemoveStream(NtfsStream stream)
         {
-            foreach (var attr in stream.GetAttributes())
-            {
-                RemoveAttribute(attr);
-            }
+            RemoveAttribute(stream.Attribute);
         }
 
         #endregion
-
-        internal uint AttributeStreamChangeId
-        {
-            get { return _attrStreamChangeId; }
-        }
-
-        internal void InvalidateAttributeStreams()
-        {
-            _attrStreamChangeId++;
-        }
 
         public FileNameRecord GetFileNameRecord(string name, bool freshened)
         {
@@ -855,13 +752,44 @@ namespace DiscUtils.Ntfs
                 Context.ObjectIds.Remove(objId.Id);
             }
 
-            List<NtfsAttribute> attrs = new List<NtfsAttribute>(AllAttributes);
-            foreach (var attr in attrs)
+            foreach (var attr in _attributes)
             {
-                RemoveAttribute(attr.Reference);
+                attr.GetDataBuffer().SetCapacity(0);
             }
 
-            _context.DeleteFile(this);
+            AttributeRecord attrListRec = _baseRecord.GetAttribute(AttributeType.AttributeList);
+            if (attrListRec != null)
+            {
+                StructuredNtfsAttribute<AttributeList> attrList = (StructuredNtfsAttribute<AttributeList>)GetAttribute(new AttributeReference(MftReference, attrListRec.AttributeId));
+                foreach (var record in attrList.Content)
+                {
+                    FileRecord attrFileRecord = _baseRecord;
+                    if (record.BaseFileReference.MftIndex != _baseRecord.MasterFileTableIndex)
+                    {
+                        attrFileRecord = _context.Mft.GetRecord(record.BaseFileReference);
+                    }
+
+                    if (attrFileRecord != null)
+                    {
+                        attrFileRecord.RemoveAttribute(record.AttributeId);
+                        if (attrFileRecord.Attributes.Count == 0)
+                        {
+                            _context.Mft.RemoveRecord(record.BaseFileReference);
+                        }
+                    }
+                }
+            }
+
+            List<AttributeRecord> records = new List<AttributeRecord>(_baseRecord.Attributes);
+            foreach (var record in records)
+            {
+                _baseRecord.RemoveAttribute(record.AttributeId);
+            }
+
+            _attributes.Clear();
+
+            _context.Mft.RemoveRecord(MftReference);
+            _context.ForgetFile(this);
         }
 
         private static Guid CreateNewGuid(INtfsContext context)
@@ -887,36 +815,14 @@ namespace DiscUtils.Ntfs
         private class FileStream : SparseStream
         {
             private File _file;
-
-            private AttributeReference _attrId;
-            private AttributeType _attrType;
-            private string _attrName;
-            private bool _openByName;
-
-            private FileAccess _access;
-
+            private NtfsAttribute _attr;
             private SparseStream _wrapped;
-            private long _length;
-            private uint _lastKnownStreamChangeSeqNum;
 
-            public FileStream(File file, AttributeReference attrId, FileAccess access)
+            public FileStream(File file, NtfsAttribute attr, FileAccess access)
             {
                 _file = file;
-                _attrId = attrId;
-                _access = access;
-
-                ReopenWrapped();
-            }
-
-            public FileStream(File file, AttributeType attrType, string attrName, FileAccess access)
-            {
-                _file = file;
-                _attrType = attrType;
-                _attrName = attrName;
-                _access = access;
-                _openByName = true;
-
-                ReopenWrapped();
+                _attr = attr;
+                _wrapped = attr.Open(access);
             }
 
             public override void Close()
@@ -929,7 +835,6 @@ namespace DiscUtils.Ntfs
             {
                 get
                 {
-                    CheckStreamValid();
                     return _wrapped.Extents;
                 }
             }
@@ -938,7 +843,6 @@ namespace DiscUtils.Ntfs
             {
                 get
                 {
-                    CheckStreamValid();
                     return _wrapped.CanRead;
                 }
             }
@@ -947,7 +851,6 @@ namespace DiscUtils.Ntfs
             {
                 get
                 {
-                    CheckStreamValid();
                     return _wrapped.CanSeek;
                 }
             }
@@ -956,14 +859,12 @@ namespace DiscUtils.Ntfs
             {
                 get
                 {
-                    CheckStreamValid();
                     return _wrapped.CanWrite;
                 }
             }
 
             public override void Flush()
             {
-                CheckStreamValid();
                 _wrapped.Flush();
             }
 
@@ -971,8 +872,7 @@ namespace DiscUtils.Ntfs
             {
                 get
                 {
-                    CheckStreamValid();
-                    return _length;
+                    return _wrapped.Length;
                 }
             }
 
@@ -980,94 +880,41 @@ namespace DiscUtils.Ntfs
             {
                 get
                 {
-                    CheckStreamValid();
                     return _wrapped.Position;
                 }
                 set
                 {
-                    CheckStreamValid();
                     _wrapped.Position = value;
                 }
             }
 
             public override int Read(byte[] buffer, int offset, int count)
             {
-                CheckStreamValid();
                 return _wrapped.Read(buffer, offset, count);
             }
 
             public override long Seek(long offset, SeekOrigin origin)
             {
-                CheckStreamValid();
                 return _wrapped.Seek(offset, origin);
             }
 
             public override void SetLength(long value)
             {
                 ChangeAttributeResidencyByLength(value);
-                CheckStreamValid();
                 _wrapped.SetLength(value);
-                _length = value;
             }
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                long newLength = Math.Max(_wrapped.Position + count, _length);
+                long newLength = Math.Max(_wrapped.Position + count, Length);
 
                 ChangeAttributeResidencyByLength(newLength);
-                CheckStreamValid();
                 _wrapped.Write(buffer, offset, count);
-
-                if (newLength > _length)
-                {
-                    _length = newLength;
-                }
             }
 
             public override string ToString()
             {
-                return _file.ToString() + ".attr[" + _attrId + "]";
-            }
-
-            private void CheckStreamValid()
-            {
-                if (_lastKnownStreamChangeSeqNum != _file.AttributeStreamChangeId)
-                {
-                    ReopenWrapped();
-                }
-            }
-
-            private void ReopenWrapped()
-            {
-                long pos = 0;
-                if (_wrapped != null)
-                {
-                    pos = _wrapped.Position;
-                    _wrapped.Dispose();
-                }
-
-                SparseStream newStream;
-                if (_openByName)
-                {
-                    newStream = _file.InnerOpenStream(_attrType, _attrName, _access);
-                    if (newStream == null)
-                    {
-                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "No such attribute {0}", (_attrName ?? "<unnamed>") + ":" + _attrType));
-                    }
-                }
-                else
-                {
-                    newStream = _file.InnerOpenAttribute(_attrId, _access);
-                    if (newStream == null)
-                    {
-                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "No such attribute {0}", _attrId));
-                    }
-                }
-
-                _length = newStream.Length;
-                _lastKnownStreamChangeSeqNum = _file.AttributeStreamChangeId;
-                _wrapped = newStream;
-                _wrapped.Position = pos;
+                return _file.ToString() + ".attr[" + _attr.Id + "]";
             }
 
             /// <summary>
@@ -1084,18 +931,15 @@ namespace DiscUtils.Ntfs
                     return;
                 }
 
-                NtfsAttribute attr = _openByName ? _file.GetAttribute(_attrType, _attrName) : _file.GetAttribute(_attrId);
-                if (!attr.IsNonResident && value >= _file.MaxMftRecordSize)
+                if (!_attr.IsNonResident && value >= _file.MaxMftRecordSize)
                 {
-                    _file.MakeAttributeNonResident(attr.Reference, (int)Math.Min(value, _wrapped.Length));
-                    ReopenWrapped();
+                    _file.MakeAttributeNonResident(_attr.Reference, (int)Math.Min(value, _wrapped.Length));
                 }
-                else if (attr.IsNonResident && value <= _file.MaxMftRecordSize / 4)
+                else if (_attr.IsNonResident && value <= _file.MaxMftRecordSize / 4)
                 {
                     // Use of 1/4 of record size here is just a heuristic - the important thing is not to end up with
                     // zero-length non-resident attributes
-                    _file.MakeAttributeResident(attr.Reference, (int)value);
-                    ReopenWrapped();
+                    _file.MakeAttributeResident(_attr.Reference, (int)value);
                 }
             }
         }

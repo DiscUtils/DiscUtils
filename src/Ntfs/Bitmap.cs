@@ -45,6 +45,7 @@ namespace DiscUtils.Ntfs
                 throw new NotImplementedException("Large Bitmap");
             }
 
+            _stream.Position = 0;
             byte[] buffer = Utilities.ReadFully(stream, (int)stream.Length);
             _bitmap.Write(0, buffer, 0, buffer.Length);
         }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -56,6 +56,8 @@
     <Compile Include="BootConfig\ObjectType.cs" />
     <Compile Include="BootConfig\Store.cs" />
     <Compile Include="BootConfig\WellKnownElement.cs" />
+    <Compile Include="Buffer.cs" />
+    <Compile Include="BufferStream.cs" />
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
     <Compile Include="BuilderExtentSource.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="FileLocator.cs" />
     <Compile Include="FloppyDiskType.cs" />
     <Compile Include="Geometry.cs" />
+    <Compile Include="IBuffer.cs" />
     <Compile Include="IByteArraySerializable.cs" />
     <Compile Include="IClusterBasedFileSystem.cs" />
     <Compile Include="IDiagnosticTraceable.cs" />
@@ -251,10 +254,10 @@
     <Compile Include="Ntfs\IndexHeader.cs" />
     <Compile Include="Ntfs\IndexNode.cs" />
     <Compile Include="Ntfs\IndexRoot.cs" />
-    <Compile Include="Ntfs\NonResidentAttributeExtentStream.cs" />
+    <Compile Include="Ntfs\NonResidentAttributeBuffer.cs" />
     <Compile Include="Ntfs\NtfsContext.cs" />
     <Compile Include="Ntfs\MasterFileTable.cs" />
-    <Compile Include="Ntfs\NonResidentAttributeStream.cs" />
+    <Compile Include="Ntfs\NtfsAttributeBuffer.cs" />
     <Compile Include="Ntfs\NtfsAttribute.cs" />
     <Compile Include="Ntfs\NtfsFileStream.cs" />
     <Compile Include="Ntfs\NtfsFileSystem.cs" />
@@ -269,7 +272,6 @@
     <Compile Include="Ntfs\Quotas.cs" />
     <Compile Include="Ntfs\ReparsePointRecord.cs" />
     <Compile Include="Ntfs\ReparsePoints.cs" />
-    <Compile Include="Ntfs\ResidentAttributeStream.cs" />
     <Compile Include="Ntfs\SecurityDescriptor.cs" />
     <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />
     <Compile Include="Ntfs\SecurityDescriptors.cs" />
@@ -361,6 +363,7 @@
     <Compile Include="Vhd\DynamicDiskBuilder.cs" />
     <Compile Include="Vhd\DynamicHeader.cs" />
     <Compile Include="Vhd\DynamicStream.cs" />
+    <Compile Include="Vhd\FileChecker.cs" />
     <Compile Include="Vhd\FileType.cs" />
     <Compile Include="Vhd\Footer.cs" />
     <Compile Include="Vhd\Header.cs" />

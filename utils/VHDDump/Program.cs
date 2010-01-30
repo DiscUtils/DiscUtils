@@ -31,6 +31,7 @@ namespace VHDDump
     class Program : ProgramBase
     {
         private CommandLineParameter _vhdFile;
+        private CommandLineSwitch _dontCheck;
 
         static void Main(string[] args)
         {
@@ -41,14 +42,29 @@ namespace VHDDump
         protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
         {
             _vhdFile = new CommandLineParameter("vhd_file", "Path to the VHD file to inspect.", false);
+            _dontCheck = new CommandLineSwitch("nc", "noCheck", null, "Don't check the VHD file format for corruption");
 
             parser.AddParameter(_vhdFile);
+            parser.AddSwitch(_dontCheck);
 
             return StandardSwitches.Default;
         }
 
         protected override void DoRun()
         {
+            if (!_dontCheck.IsPresent)
+            {
+                using (Stream s = new FileStream(_vhdFile.Value, FileMode.Open, FileAccess.Read))
+                {
+                    FileChecker vhdChecker = new FileChecker(s);
+                    if (!vhdChecker.Check(Console.Out, ReportLevels.All))
+                    {
+                        Console.WriteLine("Aborting: Invalid VHD file");
+                        Environment.Exit(1);
+                    }
+                }
+            }
+
             using (DiskImageFile vhdFile = new DiskImageFile(_vhdFile.Value, FileAccess.Read))
             {
                 DiskImageFileInfo info = vhdFile.Information;
