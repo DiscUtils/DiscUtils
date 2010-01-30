@@ -159,5 +159,28 @@ namespace DiscUtils.Partitions
             Assert.IsFalse(((BiosPartitionInfo)table.Partitions[1]).IsActive);
             Assert.IsTrue(((BiosPartitionInfo)table.Partitions[2]).IsActive);
         }
+
+        [Test]
+        public void LargeDisk()
+        {
+            long capacity = 300 * 1024L * 1024L * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.LbaAssistedBiosGeometry(capacity);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            table.Create(150 * 1024L * 1024L * 1024, WellKnownPartitionType.WindowsNtfs, false);
+            table.Create(20 * 1024L * 1024L * 1024, WellKnownPartitionType.WindowsNtfs, false);
+            table.Create(20 * 1024L * 1024L * 1024, WellKnownPartitionType.WindowsNtfs, false);
+
+            Assert.AreEqual(3, table.Partitions.Count);
+            Assert.Greater(table[0].SectorCount * 512L, 140 * 1024L * 1024L * 1024);
+            Assert.Greater(table[1].SectorCount * 512L, 19 * 1024L * 1024L * 1024);
+            Assert.Greater(table[2].SectorCount * 512L, 19 * 1024L * 1024L * 1024);
+
+            Assert.Greater(table[0].FirstSector, 0);
+            Assert.Greater(table[1].FirstSector, table[0].LastSector);
+            Assert.Greater(table[2].FirstSector, table[1].LastSector);
+        }
     }
 }

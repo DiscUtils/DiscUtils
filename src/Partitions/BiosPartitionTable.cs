@@ -491,13 +491,27 @@ namespace DiscUtils.Partitions
             int startCylinder = 0;
             foreach (var r in list)
             {
-                if (!Utilities.RangesOverlap(startCylinder, startCylinder + numCylinders - 1, r.StartCylinder, r.EndCylinder))
+                int existingStart = r.StartCylinder;
+                int existingEnd = r.EndCylinder;
+
+                // LBA can represent bigger disk locations than CHS, so assume the LBA to be definitive in the case where it
+                // appears the CHS address has been truncated.
+                if (r.LBAStart > _diskGeometry.ToLogicalBlockAddress(r.StartCylinder, r.StartHead, r.StartSector))
+                {
+                    existingStart = _diskGeometry.ToChsAddress((int)r.LBAStart).Cylinder;
+                }
+                if (r.LBAStart + r.LBALength > _diskGeometry.ToLogicalBlockAddress(r.EndCylinder, r.EndHead, r.EndSector))
+                {
+                    existingEnd = _diskGeometry.ToChsAddress((int)(r.LBAStart + r.LBALength)).Cylinder;
+                }
+
+                if (!Utilities.RangesOverlap(startCylinder, startCylinder + numCylinders - 1, existingStart, existingEnd))
                 {
                     break;
                 }
                 else
                 {
-                    startCylinder = r.EndCylinder + 1;
+                    startCylinder = existingEnd + 1;
                 }
             }
 
