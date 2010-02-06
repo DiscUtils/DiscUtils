@@ -58,21 +58,34 @@ namespace DiscUtils.Ntfs
 
                 long totalClusters = ((SectorCount - 1) * Sizes.Sector) / _clusterSize;
 
-                int numBootClusters = (BootCode == null ? 2 : Utilities.Ceil(BootCode.Length, _clusterSize));
+                // Allocate a minimum of 8KB for the boot loader, but allow for more
+                int numBootClusters = Utilities.Ceil(Math.Max((int)(8 * Sizes.OneKiB), BootCode == null ? 0 : BootCode.Length), _clusterSize);
 
-                _mftMirrorCluster = totalClusters / 2;//(int)numBootClusters + 1;
+                // Place MFT mirror in the middle of the volume
+                _mftMirrorCluster = totalClusters / 2;
                 uint numMftMirrorClusters = 1;
 
-                _bitmapCluster = _mftMirrorCluster + 13;//(int)Sizes.OneMiB / _clusterSize;
+                // The bitmap is also near the middle
+                _bitmapCluster = _mftMirrorCluster + 13;
                 int numBitmapClusters = (int)Utilities.Ceil((totalClusters / 8), _clusterSize);
 
-                long mftBitmapCluster = 3 + totalClusters / 10; // _bitmapCluster + numBitmapClusters;
+                // The MFT bitmap goes 'near' the start - approx 10% in - but ensure we avoid the bootloader
+                long mftBitmapCluster = Math.Max(3 + totalClusters / 10, numBootClusters);
                 int numMftBitmapClusters = 1;
 
+                // The MFT follows it's bitmap
                 _mftCluster = mftBitmapCluster + numMftBitmapClusters;
                 int numMftClusters = 8;
 
-                CreateBiosParameterBlock(stream);
+
+                if ( _mftCluster + numMftClusters > _mftMirrorCluster
+                    || _bitmapCluster + numBitmapClusters >= totalClusters)
+                {
+                    throw new IOException("Unable to determine initial layout of NTFS metadata - disk may be too small");
+                }
+
+
+                CreateBiosParameterBlock(stream, numBootClusters * _clusterSize);
 
 
                 _context.Mft = new MasterFileTable();
@@ -308,18 +321,13 @@ namespace DiscUtils.Ntfs
             return dir;
         }
 
-        private void CreateBiosParameterBlock(Stream stream)
+        private void CreateBiosParameterBlock(Stream stream, int bootFileSize)
         {
-            byte[] bootSectors;
+            byte[] bootSectors = new byte[bootFileSize];
 
             if (BootCode != null)
             {
-                bootSectors = new byte[Utilities.RoundUp(BootCode.Length, _clusterSize)];
                 Array.Copy(BootCode, 0, bootSectors, 0, BootCode.Length);
-            }
-            else
-            {
-                bootSectors = new byte[_clusterSize];
             }
 
             BiosParameterBlock bpb = BiosParameterBlock.Initialized(DiskGeometry, _clusterSize, (uint)FirstSector, SectorCount, _mftRecordSize, _indexBufferSize);
