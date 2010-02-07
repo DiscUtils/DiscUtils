@@ -31,7 +31,7 @@ using DiscUtils.Ntfs;
 
 namespace DiscUtils.PowerShell.Provider
 {
-    [CmdletProvider("DiscUtils", ProviderCapabilities.Credentials)]
+    [CmdletProvider("VirtualDisk", ProviderCapabilities.Credentials)]
     public sealed class Provider : NavigationCmdletProvider, IContentCmdletProvider
     {
         #region Drive manipulation
