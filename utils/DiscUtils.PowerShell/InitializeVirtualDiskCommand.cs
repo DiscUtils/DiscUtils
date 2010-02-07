@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.IO;
 using System.Management.Automation;
 using DiscUtils.Partitions;
 using DiscUtils.PowerShell.Provider;
@@ -37,11 +36,11 @@ namespace DiscUtils.PowerShell
     [Cmdlet("Initialize", "VirtualDisk")]
     public class InitializeVirtualDiskCommand : PSCmdlet
     {
-        [Parameter(ValueFromPipeline=true)]
-        public PSObject InputObject { get; set; }
-
         [Parameter(Position = 0)]
         public string Path { get; set; }
+
+        [Parameter(ValueFromPipeline = true)]
+        public PSObject InputObject { get; set; }
 
         [Parameter]
         public VolumeManagerType VolumeManager { get; set; }
@@ -52,11 +51,13 @@ namespace DiscUtils.PowerShell
 
         protected override void ProcessRecord()
         {
+            PSObject diskObject = null;
             VirtualDisk disk = null;
 
             if (InputObject != null)
             {
-                disk = InputObject.BaseObject as VirtualDisk;
+                diskObject = InputObject;
+                disk = diskObject.BaseObject as VirtualDisk;
             }
             if (disk == null && string.IsNullOrEmpty(Path))
             {
@@ -70,7 +71,21 @@ namespace DiscUtils.PowerShell
 
             if (disk == null)
             {
-                disk = new OnDemandVirtualDisk(Path, FileAccess.ReadWrite);
+                diskObject = SessionState.InvokeProvider.Item.Get(Path)[0];
+                VirtualDisk vdisk = diskObject.BaseObject as VirtualDisk;
+
+                if (vdisk == null)
+                {
+                    WriteError(new ErrorRecord(
+                        new ArgumentException("Path specified is not a virtual disk"),
+                        "BadDiskSpecified",
+                        ErrorCategory.InvalidArgument,
+                        null));
+                    return;
+
+                }
+
+                disk = vdisk;
             }
 
             PartitionTable pt = null;
@@ -82,7 +97,23 @@ namespace DiscUtils.PowerShell
             {
                 pt = GuidPartitionTable.Initialize(disk);
             }
-            disk.Signature = Signature;
+
+            if (Signature != 0)
+            {
+                disk.Signature = Signature;
+            }
+            else
+            {
+                disk.Signature = new Random().Next();
+            }
+
+            // Changed volume layout, force a rescan
+            var drive = diskObject.Properties["PSDrive"].Value as VirtualDiskPSDriveInfo;
+            if (drive != null)
+            {
+                drive.RescanVolumes();
+            }
+
 
             WriteObject(disk);
         }

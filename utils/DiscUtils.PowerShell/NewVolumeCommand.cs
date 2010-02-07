@@ -34,7 +34,7 @@ namespace DiscUtils.PowerShell
         [Parameter(ValueFromPipeline = true)]
         public PSObject InputObject { get; set; }
 
-        [Parameter]
+        [Parameter(Position = 0)]
         public string Path { get; set; }
 
         [Parameter]
@@ -44,7 +44,7 @@ namespace DiscUtils.PowerShell
         public WellKnownPartitionType Type { get; set; }
 
         [Parameter]
-        public bool Active { get; set; }
+        public SwitchParameter Active { get; set; }
 
         public NewVolumeCommand()
         {
@@ -53,11 +53,13 @@ namespace DiscUtils.PowerShell
 
         protected override void ProcessRecord()
         {
+            PSObject diskObject = null;
             VirtualDisk disk = null;
 
             if (InputObject != null)
             {
-                disk = InputObject.BaseObject as VirtualDisk;
+                diskObject = InputObject;
+                disk = diskObject.BaseObject as VirtualDisk;
             }
             if (disk == null && string.IsNullOrEmpty(Path))
             {
@@ -71,7 +73,21 @@ namespace DiscUtils.PowerShell
 
             if (disk == null)
             {
-                disk = new OnDemandVirtualDisk(Path, FileAccess.ReadWrite);
+                diskObject = SessionState.InvokeProvider.Item.Get(Path)[0];
+                VirtualDisk vdisk = diskObject.BaseObject as VirtualDisk;
+
+                if (vdisk == null)
+                {
+                    WriteError(new ErrorRecord(
+                        new ArgumentException("Path specified is not a virtual disk"),
+                        "BadDiskSpecified",
+                        ErrorCategory.InvalidArgument,
+                        null));
+                    return;
+
+                }
+
+                disk = vdisk;
             }
 
             int newIndex;
@@ -96,9 +112,21 @@ namespace DiscUtils.PowerShell
             }
 
             long startSector = disk.Partitions[newIndex].FirstSector;
+            VolumeManager volMgr = null;
 
-            VolumeManager vm = new VolumeManager(disk);
-            foreach (var vol in vm.GetLogicalVolumes())
+            // Changed volume layout, force a rescan
+            var drive = diskObject.Properties["PSDrive"].Value as VirtualDiskPSDriveInfo;
+            if (drive != null)
+            {
+                drive.RescanVolumes();
+                volMgr = drive.VolumeManager;
+            }
+            else
+            {
+                volMgr = new VolumeManager(disk);
+            }
+
+            foreach (var vol in volMgr.GetLogicalVolumes())
             {
                 if (vol.PhysicalStartSector == startSector)
                 {

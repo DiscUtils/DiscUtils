@@ -23,6 +23,7 @@
 using System;
 using System.Management.Automation;
 using DiscUtils.Ntfs;
+using DiscUtils.PowerShell.Provider;
 
 namespace DiscUtils.PowerShell
 {
@@ -37,6 +38,9 @@ namespace DiscUtils.PowerShell
         [Parameter(ValueFromPipeline = true)]
         public PSObject InputObject { get; set; }
 
+        [Parameter(Position = 0)]
+        public string Path { get; set; }
+
         [Parameter]
         public FileSystemType Filesystem { get; set; }
 
@@ -49,13 +53,15 @@ namespace DiscUtils.PowerShell
 
         protected override void ProcessRecord()
         {
+            PSObject volInfoObj = null;
             VolumeInfo volInfo = null;
 
             if (InputObject != null)
             {
-                volInfo = InputObject.BaseObject as VolumeInfo;
+                volInfoObj = InputObject;
+                volInfo = volInfoObj.BaseObject as VolumeInfo;
             }
-            if (volInfo == null)
+            if (volInfo == null && string.IsNullOrEmpty(Path))
             {
                 WriteError(new ErrorRecord(
                     new ArgumentException("No volume specified"),
@@ -73,6 +79,28 @@ namespace DiscUtils.PowerShell
                     ErrorCategory.InvalidArgument,
                     null));
                 return;
+            }
+
+            if (volInfo == null)
+            {
+                volInfoObj = SessionState.InvokeProvider.Item.Get(Path)[0];
+                volInfo = volInfoObj.BaseObject as VolumeInfo;
+            }
+
+            if (volInfo == null)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("Path specified is not a disk volume"),
+                    "BadVolumeSpecified",
+                    ErrorCategory.InvalidArgument,
+                    null));
+                return;
+            }
+
+            var drive = volInfoObj.Properties["PSDrive"].Value as VirtualDiskPSDriveInfo;
+            if (drive != null)
+            {
+                drive.UncacheFileSystem(volInfo.Identity);
             }
 
             NtfsFileSystem.Format(volInfo, Label);

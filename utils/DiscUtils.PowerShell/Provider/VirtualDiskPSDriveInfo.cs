@@ -64,6 +64,40 @@ namespace DiscUtils.PowerShell.Provider
 
             return result;
         }
+
+        internal void RescanVolumes()
+        {
+            VolumeManager newVolMgr = new VolumeManager(_disk);
+            Dictionary<string, DiscFileSystem> newFsCache = new Dictionary<string,DiscFileSystem>();
+            Dictionary<string, DiscFileSystem> deadFileSystems = new Dictionary<string, DiscFileSystem>(_fsCache);
+
+            foreach (var volInfo in newVolMgr.GetLogicalVolumes())
+            {
+                if (_fsCache.ContainsKey(volInfo.Identity))
+                {
+                    newFsCache.Add(volInfo.Identity, _fsCache[volInfo.Identity]);
+                    deadFileSystems.Remove(volInfo.Identity);
+                }
+            }
+
+            foreach (var deadFs in deadFileSystems.Values)
+            {
+                deadFs.Dispose();
+            }
+
+            _volMgr = newVolMgr;
+            _fsCache = newFsCache;
+        }
+
+        internal void UncacheFileSystem(string volId)
+        {
+            DiscFileSystem fs;
+            if (_fsCache.TryGetValue(volId, out fs))
+            {
+                fs.Dispose();
+                _fsCache.Remove(volId);
+            }
+        }
     }
 
 }
