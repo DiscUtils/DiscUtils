@@ -127,7 +127,7 @@ namespace DiscUtils.Ntfs
 
                 File volumeFile = CreateSystemFile(MasterFileTable.VolumeIndex);
                 NtfsStream volNameStream = volumeFile.CreateStream(AttributeType.VolumeName, null);
-                volNameStream.SetContent(new VolumeName(Label));
+                volNameStream.SetContent(new VolumeName(Label ?? "New Volume"));
                 NtfsStream volInfoStream = volumeFile.CreateStream(AttributeType.VolumeInformation, null);
                 volInfoStream.SetContent(new VolumeInformation(3, 1, VolumeInformationFlags.None));
                 SetSecurityAttribute(volumeFile, "O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)");
