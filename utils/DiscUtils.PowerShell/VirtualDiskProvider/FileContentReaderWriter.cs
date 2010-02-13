@@ -28,7 +28,7 @@ using System.Management.Automation;
 using System.Management.Automation.Provider;
 using System.Text;
 
-namespace DiscUtils.PowerShell.Provider
+namespace DiscUtils.PowerShell.VirtualDiskProvider
 {
     internal sealed class FileContentReaderWriter : IContentWriter, IContentReader
     {

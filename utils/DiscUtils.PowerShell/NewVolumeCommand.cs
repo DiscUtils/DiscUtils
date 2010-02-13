@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using System.Management.Automation;
 using DiscUtils.Partitions;
-using DiscUtils.PowerShell.Provider;
+using DiscUtils.PowerShell.VirtualDiskProvider;
 
 namespace DiscUtils.PowerShell
 {

@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DiscUtils.PowerShell.Provider
+namespace DiscUtils.PowerShell.VirtualDiskProvider
 {
     public enum ContentEncoding
     {

@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Management.Automation;
 using DiscUtils.Ntfs;
 
-namespace DiscUtils.PowerShell.Provider
+namespace DiscUtils.PowerShell.VirtualDiskProvider
 {
     public sealed class VirtualDiskPSDriveInfo : PSDriveInfo
     {

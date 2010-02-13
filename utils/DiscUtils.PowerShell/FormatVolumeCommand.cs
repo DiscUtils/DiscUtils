@@ -23,7 +23,7 @@
 using System;
 using System.Management.Automation;
 using DiscUtils.Ntfs;
-using DiscUtils.PowerShell.Provider;
+using DiscUtils.PowerShell.VirtualDiskProvider;
 
 namespace DiscUtils.PowerShell
 {

@@ -22,7 +22,7 @@
 
 using System.Management.Automation;
 
-namespace DiscUtils.PowerShell.Provider
+namespace DiscUtils.PowerShell.VirtualDiskProvider
 {
     public class NewDriveParameters
     {

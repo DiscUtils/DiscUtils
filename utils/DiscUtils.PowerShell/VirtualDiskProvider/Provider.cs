@@ -29,7 +29,7 @@ using System.Net;
 using System.Text;
 using DiscUtils.Ntfs;
 
-namespace DiscUtils.PowerShell.Provider
+namespace DiscUtils.PowerShell.VirtualDiskProvider
 {
     [CmdletProvider("VirtualDisk", ProviderCapabilities.Credentials)]
     public sealed class Provider : NavigationCmdletProvider, IContentCmdletProvider
