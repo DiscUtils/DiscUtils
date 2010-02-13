@@ -44,21 +44,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FormatVolumeCommand.cs" />
-    <Compile Include="Provider\ContentEncoding.cs" />
-    <Compile Include="Provider\ContentParameters.cs" />
-    <Compile Include="Provider\FileContentReaderWriter.cs" />
-    <Compile Include="Provider\GetItemParameters.cs" />
     <Compile Include="InitializeVirtualDiskCommand.cs" />
     <Compile Include="NewVolumeCommand.cs" />
     <Compile Include="NewVirtualDiskCommand.cs" />
-    <Compile Include="Provider\NewDriveParameters.cs" />
-    <Compile Include="Provider\OnDemandVirtualDisk.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Provider\Provider.cs" />
     <Compile Include="SnapIn.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Provider\VirtualDiskPSDriveInfo.cs" />
+    <Compile Include="VirtualDiskProvider\ContentEncoding.cs" />
+    <Compile Include="VirtualDiskProvider\ContentParameters.cs" />
+    <Compile Include="VirtualDiskProvider\FileContentReaderWriter.cs" />
+    <Compile Include="VirtualDiskProvider\GetItemParameters.cs" />
+    <Compile Include="VirtualDiskProvider\NewDriveParameters.cs" />
+    <Compile Include="VirtualDiskProvider\OnDemandVirtualDisk.cs" />
+    <Compile Include="VirtualDiskProvider\Provider.cs" />
+    <Compile Include="VirtualDiskProvider\VirtualDiskPSDriveInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DiscUtils.csproj">
