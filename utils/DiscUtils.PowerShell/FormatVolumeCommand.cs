@@ -71,7 +71,7 @@ namespace DiscUtils.PowerShell
                 return;
             }
 
-            if(Filesystem != FileSystemType.Ntfs)
+            if (Filesystem != FileSystemType.Ntfs)
             {
                 WriteError(new ErrorRecord(
                     new ArgumentException("Unknown filesystem type"),
@@ -97,10 +97,14 @@ namespace DiscUtils.PowerShell
                 return;
             }
 
-            var drive = volInfoObj.Properties["PSDrive"].Value as VirtualDiskPSDriveInfo;
-            if (drive != null)
+            var driveProp = volInfoObj.Properties["PSDrive"];
+            if (driveProp != null)
             {
-                drive.UncacheFileSystem(volInfo.Identity);
+                var drive = driveProp.Value as VirtualDiskPSDriveInfo;
+                if (drive != null)
+                {
+                    drive.UncacheFileSystem(volInfo.Identity);
+                }
             }
 
             NtfsFileSystem.Format(volInfo, Label);
