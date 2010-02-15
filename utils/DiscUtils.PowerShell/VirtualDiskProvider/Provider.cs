@@ -59,7 +59,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                 return null;
             }
 
-            string[] mountPaths = NormalizePath(drive.Root).Split('!');
+            string[] mountPaths = Utilities.NormalizePath(drive.Root).Split('!');
             if (mountPaths.Length < 1 || mountPaths.Length > 2)
             {
                 WriteError(new ErrorRecord(
@@ -84,7 +84,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             try
             {
                 FileAccess access = dynParams.ReadWrite.IsPresent ? FileAccess.ReadWrite : FileAccess.Read;
-                VirtualDisk disk = VirtualDisk.OpenDisk(DenormalizePath(diskPath), access, user, password);
+                VirtualDisk disk = VirtualDisk.OpenDisk(Utilities.DenormalizePath(diskPath), access, user, password);
                 return new VirtualDiskPSDriveInfo(drive, MakePath(diskPath + "!", relPath), disk);
             }
             catch (IOException ioe)
@@ -138,7 +138,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             GetItemParameters dynParams = DynamicParameters as GetItemParameters;
             bool readOnly = !(dynParams != null && dynParams.ReadWrite.IsPresent);
 
-            Object obj = FindItemByPath(NormalizePath(path), false, readOnly);
+            Object obj = FindItemByPath(Utilities.NormalizePath(path), false, readOnly);
             if (obj != null)
             {
                 WriteItemObject(obj, path.Trim('\\'), true);
@@ -157,7 +157,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         protected override bool ItemExists(string path)
         {
-            bool result = FindItemByPath(NormalizePath(path), false, true) != null;
+            bool result = FindItemByPath(Utilities.NormalizePath(path), false, true) != null;
             return result;
         }
 
@@ -170,18 +170,18 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         #region Container methods
         protected override void GetChildItems(string path, bool recurse)
         {
-            GetChildren(NormalizePath(path), recurse, false);
+            GetChildren(Utilities.NormalizePath(path), recurse, false);
         }
 
         protected override void GetChildNames(string path, ReturnContainers returnContainers)
         {
             // TODO: returnContainers
-            GetChildren(NormalizePath(path), false, true);
+            GetChildren(Utilities.NormalizePath(path), false, true);
         }
 
         protected override bool HasChildItems(string path)
         {
-            object obj = FindItemByPath(NormalizePath(path), true, true);
+            object obj = FindItemByPath(Utilities.NormalizePath(path), true, true);
 
             if (obj is DiscFileInfo)
             {
@@ -199,7 +199,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         protected override void RemoveItem(string path, bool recurse)
         {
-            object obj = FindItemByPath(NormalizePath(path), false, false);
+            object obj = FindItemByPath(Utilities.NormalizePath(path), false, false);
 
             if (obj is DiscDirectoryInfo)
             {
@@ -251,7 +251,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                 return;
             }
 
-            object obj = FindItemByPath(NormalizePath(parentPath), true, false);
+            object obj = FindItemByPath(Utilities.NormalizePath(parentPath), true, false);
 
             if (obj is DiscDirectoryInfo)
             {
@@ -278,7 +278,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         protected override void RenameItem(string path, string newName)
         {
-            object obj = FindItemByPath(NormalizePath(path), true, false);
+            object obj = FindItemByPath(Utilities.NormalizePath(path), true, false);
 
             DiscFileSystemInfo fsiObj = obj as DiscFileSystemInfo;
             if (fsiObj == null)
@@ -310,7 +310,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             DiscDirectoryInfo destDir;
             string destFileName = null;
 
-            object destObj = FindItemByPath(NormalizePath(copyPath), true, false);
+            object destObj = FindItemByPath(Utilities.NormalizePath(copyPath), true, false);
             destDir = destObj as DiscDirectoryInfo;
             if (destDir != null)
             {
@@ -318,7 +318,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             }
             else if (destObj == null || destObj is DiscFileInfo)
             {
-                destObj = FindItemByPath(NormalizePath(GetParentPath(copyPath, null)), true, false);
+                destObj = FindItemByPath(Utilities.NormalizePath(GetParentPath(copyPath, null)), true, false);
                 destDir = destObj as DiscDirectoryInfo;
                 destFileName = GetChildName(copyPath);
             }
@@ -333,7 +333,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                 return;
             }
 
-            object srcDirObj = FindItemByPath(NormalizePath(GetParentPath(path, null)), true, true);
+            object srcDirObj = FindItemByPath(Utilities.NormalizePath(GetParentPath(path, null)), true, true);
             DiscDirectoryInfo srcDir = srcDirObj as DiscDirectoryInfo;
             string srcFileName = GetChildName(path);
             if (srcDir == null)
@@ -353,7 +353,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         #region Navigation methods
         protected override bool IsItemContainer(string path)
         {
-            object obj = FindItemByPath(NormalizePath(path), false, true);
+            object obj = FindItemByPath(Utilities.NormalizePath(path), false, true);
 
             bool result = false;
             if (obj is VirtualDisk)
@@ -374,7 +374,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         protected override string MakePath(string parent, string child)
         {
-            return NormalizePath(base.MakePath(DenormalizePath(parent), DenormalizePath(child)));
+            return Utilities.NormalizePath(base.MakePath(Utilities.DenormalizePath(parent), Utilities.DenormalizePath(child)));
         }
 
         #endregion
@@ -383,7 +383,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         public void ClearContent(string path)
         {
-            object destObj = FindItemByPath(NormalizePath(path), true, false);
+            object destObj = FindItemByPath(Utilities.NormalizePath(path), true, false);
             if (destObj is DiscFileInfo)
             {
                 using (Stream s = ((DiscFileInfo)destObj).Open(FileMode.Open, FileAccess.ReadWrite))
@@ -408,7 +408,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         public IContentReader GetContentReader(string path)
         {
-            object destObj = FindItemByPath(NormalizePath(path), true, false);
+            object destObj = FindItemByPath(Utilities.NormalizePath(path), true, false);
             if (destObj is DiscFileInfo)
             {
                 return new FileContentReaderWriter(
@@ -434,7 +434,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         public IContentWriter GetContentWriter(string path)
         {
-            object destObj = FindItemByPath(NormalizePath(path), true, false);
+            object destObj = FindItemByPath(Utilities.NormalizePath(path), true, false);
             if (destObj is DiscFileInfo)
             {
                 return new FileContentReaderWriter(
@@ -519,7 +519,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             VirtualDisk disk = Disk;
             if( disk == null )
             {
-                OnDemandVirtualDisk odvd = new OnDemandVirtualDisk(DenormalizePath(diskPath), fileAccess);
+                OnDemandVirtualDisk odvd = new OnDemandVirtualDisk(Utilities.DenormalizePath(diskPath), fileAccess);
                 if (odvd.IsValid)
                 {
                     disk = odvd;
@@ -550,7 +550,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             }
             else
             {
-                volInfo = volMgr.GetVolume(DenormalizePath(pathElems[0]));
+                volInfo = volMgr.GetVolume(Utilities.DenormalizePath(pathElems[0]));
             }
             pathElems.RemoveAt(0);
             if (volInfo == null || (pathElems.Count == 0 && !preferFs))
@@ -635,34 +635,6 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
             dispose = false;
             return null;
-        }
-
-        /// <summary>
-        /// Replace all ':' characters with '#'.
-        /// </summary>
-        /// <param name="path">The path to normalize</param>
-        /// <returns>The normalized path</returns>
-        /// <remarks>
-        /// PowerShell has a bug that prevents tab-completion if the paths contain ':'
-        /// characters, so in the external path for this provider we encode ':' as '#'.
-        /// </remarks>
-        private static string NormalizePath(string path)
-        {
-            return path.Replace(':', '#');
-        }
-
-        /// <summary>
-        /// Replace all '#' characters with ':'.
-        /// </summary>
-        /// <param name="path">The path to normalize</param>
-        /// <returns>The normalized path</returns>
-        /// <remarks>
-        /// PowerShell has a bug that prevents tab-completion if the paths contain ':'
-        /// characters, so in the external path for this provider we encode ':' as '#'.
-        /// </remarks>
-        private static string DenormalizePath(string path)
-        {
-            return path.Replace('#', ':');
         }
 
         private void GetChildren(string path, bool recurse, bool namesOnly)

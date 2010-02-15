@@ -73,7 +73,7 @@ namespace DiscUtils.PowerShell
             }
 
             long size;
-            if (!Utilities.TryParseDiskSize(Size, out size))
+            if (!DiscUtils.Common.Utilities.TryParseDiskSize(Size, out size))
             {
                 WriteError(new ErrorRecord(
                     new ArgumentException("Unable to parse the disk size"),

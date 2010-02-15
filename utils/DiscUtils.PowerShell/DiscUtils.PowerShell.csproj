@@ -51,6 +51,7 @@
     <Compile Include="SnapIn.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Utilities.cs" />
     <Compile Include="VirtualDiskProvider\ContentEncoding.cs" />
     <Compile Include="VirtualDiskProvider\ContentParameters.cs" />
     <Compile Include="VirtualDiskProvider\FileContentReaderWriter.cs" />
@@ -59,6 +60,9 @@
     <Compile Include="VirtualDiskProvider\OnDemandVirtualDisk.cs" />
     <Compile Include="VirtualDiskProvider\Provider.cs" />
     <Compile Include="VirtualDiskProvider\VirtualDiskPSDriveInfo.cs" />
+    <Compile Include="VirtualRegistryProvider\NewDriveParameters.cs" />
+    <Compile Include="VirtualRegistryProvider\Provider.cs" />
+    <Compile Include="VirtualRegistryProvider\VirtualRegistryPSDriveInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DiscUtils.csproj">

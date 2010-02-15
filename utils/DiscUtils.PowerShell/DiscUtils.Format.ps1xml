@@ -21,7 +21,7 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
   DEALINGS IN THE SOFTWARE.
 
-Based on the file FileSystem.Format.ps1xml:
+Based on the files FileSystem.format.ps1xml and Registry.format.ps1xml:
 
   Copyright (c) Microsoft Corporation.  All rights reserved.
 
@@ -35,6 +35,30 @@ Based on the file FileSystem.Format.ps1xml:
  -->
 
 <Configuration>
+  <Controls>
+    <Control>
+      <Name>VirtualRegistry-GroupingFormat</Name>
+      <CustomControl>
+        <CustomEntries>
+          <CustomEntry>
+            <CustomItem>
+              <Frame>
+                <LeftIndent>4</LeftIndent>
+                <CustomItem>
+                  <Text>Hive: </Text>
+                  <ExpressionBinding>
+                    <ScriptBlock>$_.PSParentPath.Replace("VirtualRegistry::", "")</ScriptBlock>
+                  </ExpressionBinding>
+                  <NewLine/>
+                </CustomItem>
+              </Frame>
+            </CustomItem>
+          </CustomEntry>
+        </CustomEntries>
+      </CustomControl>
+    </Control>
+  </Controls>
+
   <ViewDefinitions>
     
     <!-- View for DiscUtils.VirtualDisk -->
@@ -260,7 +284,83 @@ Based on the file FileSystem.Format.ps1xml:
         </WideEntries>
       </WideControl>
     </View>
-    
-    
+
+
+    <!-- Views for DiscUtils.Registry.RegistryKey -->
+    <View>
+      <Name>VR-children</Name>
+      <ViewSelectedBy>
+        <TypeName>DiscUtils.Registry.RegistryKey</TypeName>
+      </ViewSelectedBy>
+      <GroupBy>
+        <PropertyName>PSParentPath</PropertyName>
+        <CustomControlName>VirtualRegistry-GroupingFormat</CustomControlName>
+      </GroupBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Width>3</Width>
+            <Label>SKC</Label>
+            <Alignment>right</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Width>3</Width>
+            <Alignment>right</Alignment>
+            <Label>VC</Label>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Width>30</Width>
+            <Label>Name</Label>
+          </TableColumnHeader>
+          <TableColumnHeader/>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <PropertyName>SubKeyCount</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>ValueCount</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>if($_.PSParentPath.IndexOf("!") -lt 0) { $_.PSChildName.TrimEnd("!") } else { $_.PSChildName }</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>Property</PropertyName>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+
+    <View>
+      <Name>VR-System.Object[]</Name>
+      <ViewSelectedBy>
+        <TypeName>DiscUtils.Registry.RegistryKey</TypeName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <ScriptBlock>if($_.PSParentPath.IndexOf("!") -lt 0) { $_.PSChildName.TrimEnd("!") } else { $_.PSChildName }</ScriptBlock>
+                <Label>Name</Label>
+              </ListItem>
+              <ListItem>
+                <PropertyName>ValueCount</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Property</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>SubKeyCount</PropertyName>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
   </ViewDefinitions>
 </Configuration>
