@@ -2,7 +2,7 @@ $ver = "0.8"
 
 $basedir = "$pwd"
 $utilsdir = "C:\utils"
-$svn = "C:\Program Files\SlikSvn\bin\svn.exe"
+$hg = "C:\Program Files\TortoiseHg\hg.exe"
 $zip = "${utilsdir}\7za.exe"
 
 
@@ -12,7 +12,7 @@ New-Item -path "${basedir}" -name "layout" -type directory | out-null
 
 
 # Create the source zip
-& $svn export -r BASE "${basedir}" "${basedir}\layout\src"
+& $hg archive "${basedir}\layout\src"
 pushd layout\src
 & $zip a -r -tzip  "${basedir}\layout\DiscUtilsSrc-${ver}.zip" "*.*"
 popd
@@ -48,3 +48,15 @@ pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"
 popd
 
+
+# Create the PowerShell zip
+New-Item -path "${basedir}\layout\" -name "powershell" -type directory | out-null
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.dll" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.ps1xml" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.xml" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.psd1" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\powershell\LICENSE.TXT"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\README.TXT" "${basedir}\layout\powershell"
+pushd layout\powershell
+& $zip a -r -tzip "${basedir}\layout\DiscUtilsPowerShell-${ver}.zip" "*.*"
+popd

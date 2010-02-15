@@ -96,7 +96,8 @@ AliasesToExport = '*'
 
 # List of all files packaged with this module
 FileList = @('DiscUtils.psd1','DiscUtils.dll','DiscUtils.PowerShell.dll', 'DiscUtils.Common.dll',
-             'DiscUtils.Format.ps1xml','DiscUtils.Types.ps1xml','DiscUtils.PowerShell.dll-Help.xml')
+             'DiscUtils.Format.ps1xml','DiscUtils.Types.ps1xml','DiscUtils.PowerShell.dll-Help.xml',
+             'LICENSE.TXT')
 
 # Private data to pass to the module specified in ModuleToProcess
 PrivateData = ''
