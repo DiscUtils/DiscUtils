@@ -30,17 +30,19 @@
 # has not been corrupted.
 #
 
-
+Param([switch]$All, [switch]$Ntfs, [switch]$Cmdlets = $true)
 
 
 #
 #-- Variables
 #
 $DiscUtilsModule = "c:\work\codeplex\discutils\trunk\utils\DiscUtils.PowerShell\bin\release\discutils.psd1"
+$tempdir = "C:\temp\"
 $diskfile = "C:\temp\newdisk.vhd"
 $testdrive = "Q"
 $sig = 0x12345657
 $verbose = $false;
+$OneMB = $(1024 * 1024)
 
 #
 #-- Configure PowerShell
@@ -61,6 +63,36 @@ function Trace
         {
             Write-Host ("$prefix" + ":" + "$line")
         }
+    }
+}
+
+function AssertTrue
+{
+    param($value)
+
+    if(-not $value)
+    {
+        Write-Error "Assert failed.${$MyInvocation}"
+    }
+}
+
+function AssertInRange
+{
+    param($lower, $greater, $value)
+
+    if($($lower -gt $value) -or $($greater -le $value))
+    {
+        Write-Error "Assert failed.  $value not in range ${lower} <= x < ${greater}.${$MyInvocation}"
+    }
+}
+
+function SafeRemove
+{
+    param($file)
+
+    if(Test-Path $file)
+    {
+        Remove-Item $file
     }
 }
 
@@ -139,68 +171,122 @@ function Checkpoint
 
 
 #
-#-- Main logic
+#-- Main logic (Ntfs)
 #
-
-$TempMountRoot = ("$testdrive" + ":\")
-$ClusterData = New-Object byte[] 4096
-$FourMB = New-Object byte[] 4194304
-$NumFiles = 500
-
-# Check we're elevated
-CheckAdmin
-
-
-# Clean up from aborted prior runs
-if([System.IO.Directory]::Exists($TempMountRoot))
+function TestNtfs
 {
-    "Detaching disk ($TempMountRoot)..."
-    DetachDisk $diskfile
+    $TempMountRoot = ("$testdrive" + ":\")
+    $ClusterData = New-Object byte[] 4096
+    $FourMB = New-Object byte[] 4194304
+    $NumFiles = 500
+
+    # Check we're elevated
+    CheckAdmin
+
+
+    # Clean up from aborted prior runs
+    if([System.IO.Directory]::Exists($TempMountRoot))
+    {
+        "Detaching disk ($TempMountRoot)..."
+        DetachDisk $diskfile
+    }
+
+
+    CreateDisk 10MB
+
+
+    "Creating TestFile.txt"
+    New-Item -Type file vd:\Volume0\TestFile.txt
+    Set-Content vd:\Volume0\TestFile.txt "This is a test file"
+
+    Checkpoint
+
+    "Creating file.bin"
+    New-Item -type file vd:\Volume0\file.bin
+    Set-Content vd:\Volume0\file.bin $ClusterData
+
+    Checkpoint
+
+    "Removing file.bin"
+    Remove-Item vd:\Volume0\file.bin
+
+    Checkpoint
+
+    "Creating $($NumFiles * 2) files"
+    for($i = 0; $i -lt $NumFiles; $i++)
+    {
+        # Create some files with common prefix, and some with varying prefixes to
+        # exercise directory hash tree a little.
+        New-Item -type file "vd:\Volume0\file${i}.bin"
+        Set-Content vd:\Volume0\file${i}.bin $ClusterData
+        New-Item -type file "vd:\Volume0\${i}file.bin"
+        Set-Content vd:\Volume0\${i}file.bin $ClusterData
+    }
+
+    Checkpoint
+
+    #"Creating fragmented file"
+    #for($i = 0; $i -lt $NumFiles; $i++)
+    #{
+    #    Remove-Item "vd:\Volume0\file${i}.bin"
+    #}
+    #New-Item -type file "vd:\Volume0\fragfile.bin"
+    #Set-Content "vd:\Volume0\fragfile.bin" $FourMB
+
+    # Cleanup
+    Remove-PSDrive vd
+    RunChkdsk
 }
 
 
-CreateDisk 10MB
 
-
-"Creating TestFile.txt"
-New-Item -Type file vd:\Volume0\TestFile.txt
-Set-Content vd:\Volume0\TestFile.txt "This is a test file"
-
-Checkpoint
-
-"Creating file.bin"
-New-Item -type file vd:\Volume0\file.bin
-Set-Content vd:\Volume0\file.bin $ClusterData
-
-Checkpoint
-
-"Removing file.bin"
-Remove-Item vd:\Volume0\file.bin
-
-Checkpoint
-
-"Creating $($NumFiles * 2) files"
-for($i = 0; $i -lt $NumFiles; $i++)
+#
+#-- Main logic (Cmdlets)
+#
+function TestCmdlets
 {
-    # Create some files with common prefix, and some with varying prefixes to
-    # exercise directory hash tree a little.
-    New-Item -type file "vd:\Volume0\file${i}.bin"
-    Set-Content vd:\Volume0\file${i}.bin $ClusterData
-    New-Item -type file "vd:\Volume0\${i}file.bin"
-    Set-Content vd:\Volume0\${i}file.bin $ClusterData
+    "Checking New-VirtualDisk Cmdlet"
+
+    SafeRemove "${tempdir}newdisk.vmdk"
+    New-VirtualDisk "${tempdir}newdisk.vmdk" -Type VMDK-dynamic -Size 10MB | out-null
+    AssertTrue $(Test-Path "${tempdir}newdisk.vmdk")
+    AssertInRange 1024 $OneMB $(Get-Item "${tempdir}newdisk.vmdk").Length
+
+    SafeRemove "${tempdir}newdisk.vmdk"
+    SafeRemove "${tempdir}newdisk-flat.vmdk"
+    New-VirtualDisk "${tempdir}newdisk.vmdk" -Type VMDK-fixed -Size 10MB | out-null
+    AssertTrue $(Test-Path "${tempdir}newdisk.vmdk")
+    AssertInRange 1 $OneMB $(Get-Item "${tempdir}newdisk.vmdk").Length
+    AssertInRange $(9 * $OneMB) $(11 * $OneMB) $(Get-Item "${tempdir}newdisk-flat.vmdk").Length
+
+    SafeRemove "${tempdir}newdisk.vhd"
+    New-VirtualDisk "${tempdir}newdisk.vhd" -Type VHD-dynamic -Size 10MB | out-null
+    AssertTrue $(Test-Path "${tempdir}newdisk.vhd")
+    AssertInRange 1024 $OneMB $(Get-Item "${tempdir}newdisk.vhd").Length
+
+    SafeRemove "${tempdir}newdisk.vhd"
+    New-VirtualDisk "${tempdir}newdisk.vhd" -Type VHD-fixed -Size 10MB | out-null
+    AssertTrue $(Test-Path "${tempdir}newdisk.vhd")
+    AssertInRange $(9 * $OneMB) $(11 * $OneMB)  $(Get-Item "${tempdir}newdisk.vhd").Length
 }
 
-Checkpoint
-
-#"Creating fragmented file"
-#for($i = 0; $i -lt $NumFiles; $i++)
-#{
-#    Remove-Item "vd:\Volume0\file${i}.bin"
-#}
-#New-Item -type file "vd:\Volume0\fragfile.bin"
-#Set-Content "vd:\Volume0\fragfile.bin" $FourMB
 
 
-# Cleanup
-Remove-PSDrive vd
-RunChkdsk
+#
+#-- Parameters
+#
+if($All)
+{
+    $Ntfs = $true;
+    $Cmdlets = $true;
+}
+
+if($Ntfs)
+{
+    TestNtfs
+}
+
+if($Cmdlets)
+{
+    TestCmdlets
+}
