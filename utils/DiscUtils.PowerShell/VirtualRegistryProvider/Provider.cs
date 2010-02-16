@@ -30,8 +30,10 @@ using DiscUtils.Registry;
 namespace DiscUtils.PowerShell.VirtualRegistryProvider
 {
     [CmdletProvider("VirtualRegistry", ProviderCapabilities.None)]
-    public sealed class Provider : NavigationCmdletProvider, IPropertyCmdletProvider
+    public sealed class Provider : NavigationCmdletProvider, IDynamicPropertyCmdletProvider
     {
+        private static readonly string DefaultValueName = "(default)";
+
         #region Drive manipulation
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
@@ -245,13 +247,14 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
             RegistryKey key = FindItemByPath(path);
             foreach(var valueName in key.GetValueNames())
             {
-                if (providerSpecificPickList.Count == 0 || providerSpecificPickList.Contains(valueName))
+                string propName = valueName;
+                if (string.IsNullOrEmpty(valueName))
                 {
-                    string propName = valueName;
-                    if(string.IsNullOrEmpty(valueName))
-                    {
-                        propName = "(default)";
-                    }
+                    propName = DefaultValueName;
+                }
+
+                if (IsMatch(propName, providerSpecificPickList))
+                {
                     propVal.Properties.Add(new PSNoteProperty(propName, key.GetValue(valueName)));
                     foundProp = true;
                 }
@@ -274,6 +277,60 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
         }
 
         public object SetPropertyDynamicParameters(string path, PSObject propertyValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region IDynamicPropertyCmdletProvider Members
+
+        public void CopyProperty(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object CopyPropertyDynamicParameters(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MoveProperty(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object MovePropertyDynamicParameters(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void NewProperty(string path, string propertyName, string propertyTypeName, object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object NewPropertyDynamicParameters(string path, string propertyName, string propertyTypeName, object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveProperty(string path, string propertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object RemovePropertyDynamicParameters(string path, string propertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RenameProperty(string path, string sourceProperty, string destinationProperty)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object RenamePropertyDynamicParameters(string path, string sourceProperty, string destinationProperty)
         {
             throw new NotImplementedException();
         }
@@ -339,7 +396,7 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
             {
                 if (string.IsNullOrEmpty(valueNames[i]))
                 {
-                    valueNames[i] = "(default)";
+                    valueNames[i] = DefaultValueName;
                 }
             }
 
@@ -347,5 +404,29 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
             WriteItemObject(psObj, path.Trim('\\'), true);
         }
 
+        private bool IsMatch(string valueName, Collection<string> filters)
+        {
+            if (filters == null || filters.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var filter in filters)
+            {
+                if (WildcardPattern.ContainsWildcardCharacters(filter))
+                {
+                    if (new WildcardPattern(filter, WildcardOptions.IgnoreCase).IsMatch(valueName))
+                    {
+                        return true;
+                    }
+                }
+                else if (string.Compare(filter, valueName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
