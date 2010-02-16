@@ -273,12 +273,27 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
         public void SetProperty(string path, PSObject propertyValue)
         {
-            throw new NotImplementedException();
+            PSObject propVal = new PSObject();
+
+            RegistryKey key = FindItemByPath(path);
+            if (key == null)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("path"),
+                    "NoSuchRegistryKey",
+                    ErrorCategory.ObjectNotFound,
+                    path));
+            }
+
+            foreach (var prop in propertyValue.Properties)
+            {
+                key.SetValue(prop.Name, prop.Value);
+            }
         }
 
         public object SetPropertyDynamicParameters(string path, PSObject propertyValue)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #endregion
