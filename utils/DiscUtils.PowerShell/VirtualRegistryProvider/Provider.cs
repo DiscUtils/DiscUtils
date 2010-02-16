@@ -231,12 +231,38 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
         public void ClearProperty(string path, Collection<string> propertyToClear)
         {
-            throw new NotImplementedException();
+            PSObject propVal = new PSObject();
+
+            bool foundProp = false;
+            RegistryKey key = FindItemByPath(path);
+            foreach (var valueName in key.GetValueNames())
+            {
+                string propName = valueName;
+                if (string.IsNullOrEmpty(valueName))
+                {
+                    propName = DefaultValueName;
+                }
+
+                if (IsMatch(propName, propertyToClear))
+                {
+                    RegistryValueType type = key.GetValueType(valueName);
+                    object newVal = DefaultRegistryTypeValue(type);
+
+                    key.SetValue(valueName, newVal);
+                    propVal.Properties.Add(new PSNoteProperty(propName, newVal));
+                    foundProp = true;
+                }
+            }
+
+            if (foundProp)
+            {
+                WritePropertyObject(propVal, path);
+            }
         }
 
         public object ClearPropertyDynamicParameters(string path, Collection<string> propertyToClear)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void GetProperty(string path, Collection<string> providerSpecificPickList)
@@ -307,7 +333,7 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
         public object CopyPropertyDynamicParameters(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void MoveProperty(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
@@ -317,27 +343,70 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
         public object MovePropertyDynamicParameters(string sourcePath, string sourceProperty, string destinationPath, string destinationProperty)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void NewProperty(string path, string propertyName, string propertyTypeName, object value)
         {
-            throw new NotImplementedException();
+            RegistryKey key = FindItemByPath(path);
+            if (key == null)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("path"),
+                    "NoSuchRegistryKey",
+                    ErrorCategory.ObjectNotFound,
+                    path));
+            }
+
+            RegistryValueType type;
+            type = RegistryValueType.None;
+            if (!string.IsNullOrEmpty(propertyTypeName))
+            {
+                try
+                {
+                    type = (RegistryValueType)Enum.Parse(typeof(RegistryValueType), propertyTypeName, true);
+                }
+                catch(ArgumentException)
+                {
+                }
+            }
+
+            if(string.Compare(propertyName, DefaultValueName, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                propertyName = "";
+            }
+
+            key.SetValue(propertyName, value ?? DefaultRegistryTypeValue(type), type);
         }
 
         public object NewPropertyDynamicParameters(string path, string propertyName, string propertyTypeName, object value)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void RemoveProperty(string path, string propertyName)
         {
-            throw new NotImplementedException();
+            RegistryKey key = FindItemByPath(path);
+            if (key == null)
+            {
+                WriteError(new ErrorRecord(
+                    new ArgumentException("path"),
+                    "NoSuchRegistryKey",
+                    ErrorCategory.ObjectNotFound,
+                    path));
+            }
+
+            if (string.Compare(propertyName, DefaultValueName, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                propertyName = "";
+            }
+
+            key.DeleteValue(propertyName);
         }
 
         public object RemovePropertyDynamicParameters(string path, string propertyName)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void RenameProperty(string path, string sourceProperty, string destinationProperty)
@@ -347,7 +416,7 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
         public object RenamePropertyDynamicParameters(string path, string sourceProperty, string destinationProperty)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #endregion
@@ -443,5 +512,28 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
             return false;
         }
+
+        private static object DefaultRegistryTypeValue(RegistryValueType type)
+        {
+            switch (type)
+            {
+                case RegistryValueType.Binary:
+                case RegistryValueType.None:
+                    return new byte[] { };
+                case RegistryValueType.Dword:
+                case RegistryValueType.DwordBigEndian:
+                    return 0;
+                case RegistryValueType.QWord:
+                    return 0L;
+                case RegistryValueType.String:
+                case RegistryValueType.ExpandString:
+                    return "";
+                case RegistryValueType.MultiString:
+                    return new string[] { };
+            }
+
+            return null;
+        }
+
     }
 }
