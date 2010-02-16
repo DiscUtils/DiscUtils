@@ -83,9 +83,16 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
             try
             {
+                string fullPath = Utilities.DenormalizePath(diskPath);
+                var resolvedPath = SessionState.Path.GetResolvedPSPathFromPSPath(fullPath)[0];
+                if (resolvedPath.Provider.Name == "FileSystem")
+                {
+                    fullPath = resolvedPath.ProviderPath;
+                }
+
                 FileAccess access = dynParams.ReadWrite.IsPresent ? FileAccess.ReadWrite : FileAccess.Read;
-                VirtualDisk disk = VirtualDisk.OpenDisk(Utilities.DenormalizePath(diskPath), access, user, password);
-                return new VirtualDiskPSDriveInfo(drive, MakePath(diskPath + "!", relPath), disk);
+                VirtualDisk disk = VirtualDisk.OpenDisk(fullPath, access, user, password);
+                return new VirtualDiskPSDriveInfo(drive, MakePath(Utilities.NormalizePath(fullPath) + "!", relPath), disk);
             }
             catch (IOException ioe)
             {
