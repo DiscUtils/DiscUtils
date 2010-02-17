@@ -42,6 +42,7 @@ namespace DiscUtils.Vhd
         private long _nextBlockStart;
         private bool _newBlocksAllocated;
         private bool _autoCommitFooter = true;
+        private byte[] _footerCache;
 
         public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, Ownership ownsParentStream)
         {
@@ -603,10 +604,13 @@ namespace DiscUtils.Vhd
             if (_newBlocksAllocated)
             {
                 // Update the footer at the end of the file (if we allocated new blocks).
-                _fileStream.Position = 0;
-                byte[] footerData = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+                if (_footerCache == null)
+                {
+                    _fileStream.Position = 0;
+                    _footerCache = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+                }
                 _fileStream.Position = _nextBlockStart;
-                _fileStream.Write(footerData, 0, footerData.Length);
+                _fileStream.Write(_footerCache, 0, _footerCache.Length);
             }
         }
 
