@@ -372,6 +372,35 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Gets and sets whether the VHD footer is written every time a new block is allocated.
+        /// </summary>
+        /// <remarks>
+        /// This is enabled by default, disabling this can make write activity faster - however,
+        /// some software may be unable to access the VHD file if Dispose is not called on this class.
+        /// </remarks>
+        public bool AutoCommitFooter
+        {
+            get
+            {
+                DynamicStream dynContent = Content as DynamicStream;
+                if (dynContent == null)
+                {
+                    return true;
+                }
+                return dynContent.AutoCommitFooter;
+            }
+
+            set
+            {
+                DynamicStream dynContent = Content as DynamicStream;
+                if (dynContent != null)
+                {
+                    dynContent.AutoCommitFooter = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
         /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position

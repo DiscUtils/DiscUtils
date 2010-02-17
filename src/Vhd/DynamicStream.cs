@@ -41,6 +41,7 @@ namespace DiscUtils.Vhd
         private int _blockBitmapSize;
         private long _nextBlockStart;
         private bool _newBlocksAllocated;
+        private bool _autoCommitFooter = true;
 
         public DynamicStream(Stream fileStream, DynamicHeader dynamicHeader, long length, SparseStream parentStream, Ownership ownsParentStream)
         {
@@ -79,14 +80,7 @@ namespace DiscUtils.Vhd
             {
                 if (disposing)
                 {
-                    if (_newBlocksAllocated)
-                    {
-                        // Update the footer at the end of the file (if we allocated new blocks).
-                        _fileStream.Position = 0;
-                        byte[] footerData = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
-                        _fileStream.Position = _nextBlockStart;
-                        _fileStream.Write(footerData, 0, footerData.Length);
-                    }
+                    UpdateFooter();
 
                     if (_ownsParentStream == Ownership.Dispose && _parentStream != null)
                     {
@@ -98,6 +92,19 @@ namespace DiscUtils.Vhd
             finally
             {
                 base.Dispose(disposing);
+            }
+        }
+
+        public bool AutoCommitFooter
+        {
+            get { return _autoCommitFooter; }
+            set
+            {
+                _autoCommitFooter = value;
+                if (_autoCommitFooter)
+                {
+                    UpdateFooter();
+                }
             }
         }
 
@@ -570,6 +577,11 @@ namespace DiscUtils.Vhd
             _fileStream.Position = _dynamicHeader.TableOffset + (block * 4);
             _fileStream.Write(entryBuffer, 0, 4);
             _blockAllocationTable[block] = (uint)(newBlockStart / 512);
+
+            if (_autoCommitFooter)
+            {
+                UpdateFooter();
+            }
         }
 
         private void WriteBlockBitmap(long block)
@@ -583,6 +595,18 @@ namespace DiscUtils.Vhd
             if (_parentStream == null)
             {
                 throw new ObjectDisposedException("DynamicStream", "Attempt to use closed stream");
+            }
+        }
+
+        private void UpdateFooter()
+        {
+            if (_newBlocksAllocated)
+            {
+                // Update the footer at the end of the file (if we allocated new blocks).
+                _fileStream.Position = 0;
+                byte[] footerData = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+                _fileStream.Position = _nextBlockStart;
+                _fileStream.Write(footerData, 0, footerData.Length);
             }
         }
 

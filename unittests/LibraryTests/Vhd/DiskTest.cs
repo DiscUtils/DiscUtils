@@ -132,5 +132,58 @@ namespace DiscUtils.Vhd
                 Assert.IsNotNull(disk.Content);
             }
         }
+
+        [Test]
+        public void UndisposedChangedDynamic()
+        {
+            byte[] firstSector = new byte[512];
+            byte[] lastSector = new byte[512];
+
+            MemoryStream ms = new MemoryStream();
+            using (Disk newDisk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
+            {
+            }
+
+            using (Disk disk = new Disk(ms, Ownership.None))
+            {
+                disk.Content.Write(new byte[1024], 0, 1024);
+
+                ms.Position = 0;
+                ms.Read(firstSector, 0, 512);
+                ms.Seek(-512, SeekOrigin.End);
+                ms.Read(lastSector, 0, 512);
+                Assert.AreEqual(firstSector, lastSector);
+            }
+
+            // Check disabling AutoCommit really doesn't do the commit
+            using (Disk disk = new Disk(ms, Ownership.None))
+            {
+                disk.AutoCommitFooter = false;
+                disk.Content.Position = 10 * 1024 * 1024;
+                disk.Content.Write(new byte[1024], 0, 1024);
+
+                ms.Position = 0;
+                ms.Read(firstSector, 0, 512);
+                ms.Seek(-512, SeekOrigin.End);
+                ms.Read(lastSector, 0, 512);
+                Assert.AreNotEqual(firstSector, lastSector);
+            }
+
+            // Also check that after disposing, the commit happens
+            ms.Position = 0;
+            ms.Read(firstSector, 0, 512);
+            ms.Seek(-512, SeekOrigin.End);
+            ms.Read(lastSector, 0, 512);
+            Assert.AreEqual(firstSector, lastSector);
+
+
+            // Finally, check default value for AutoCommit lines up with behaviour
+            using (Disk disk = new Disk(ms, Ownership.None))
+            {
+                Assert.True(disk.AutoCommitFooter);
+            }
+        }
+
+
     }
 }
