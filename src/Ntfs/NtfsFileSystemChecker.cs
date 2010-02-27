@@ -104,8 +104,8 @@ namespace DiscUtils.Ntfs
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
-            _context.Mft = new MasterFileTable();
-            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord(_context.RawStream, _context.BiosParameterBlock));
+            _context.Mft = new MasterFileTable(_context);
+            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord());
             _context.Mft.Initialize(mftFile);
             return _context.Mft.GetClusterMap();
         }
@@ -123,8 +123,8 @@ namespace DiscUtils.Ntfs
             //
 
             // Bootstrap the Master File Table
-            _context.Mft = new MasterFileTable();
-            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord(_context.RawStream, _context.BiosParameterBlock));
+            _context.Mft = new MasterFileTable(_context);
+            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord());
 
             // Verify basic MFT records before initializing the Master File Table
             PreVerifyMft(mftFile);

@@ -88,7 +88,7 @@ namespace DiscUtils.Ntfs
                 CreateBiosParameterBlock(stream, numBootClusters * _clusterSize);
 
 
-                _context.Mft = new MasterFileTable();
+                _context.Mft = new MasterFileTable(_context);
                 File mftFile = _context.Mft.InitializeNew(_context, mftBitmapCluster, (ulong)numMftBitmapClusters, (long)_mftCluster, (ulong)numMftClusters);
 
 

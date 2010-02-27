@@ -108,16 +108,23 @@ namespace DiscUtils.Ntfs
         /// </summary>
         private const uint FirstAvailableMftIndex = 24;
 
-        public MasterFileTable()
+        public MasterFileTable(INtfsContext context)
         {
+            BiosParameterBlock bpb = context.BiosParameterBlock;
+
             _recordCache = new ObjectCache<long, FileRecord>();
+            _recordLength = bpb.MftRecordSize;
+            _bytesPerSector = bpb.BytesPerSector;
+
+            // Temporary record stream - until we've bootstrapped the MFT properly
+            _recordStream = new SubStream(context.RawStream, bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector, 24 * _recordLength);
         }
 
-        public FileRecord GetBootstrapRecord(Stream fsStream, BiosParameterBlock bpb)
+        public FileRecord GetBootstrapRecord()
         {
-            fsStream.Position = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
-            byte[] mftSelfRecordData = Utilities.ReadFully(fsStream, bpb.MftRecordSize);
-            FileRecord mftSelfRecord = new FileRecord(bpb.BytesPerSector);
+            _recordStream.Position = 0;
+            byte[] mftSelfRecordData = Utilities.ReadFully(_recordStream, _recordLength);
+            FileRecord mftSelfRecord = new FileRecord(_bytesPerSector);
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
             _recordCache[MftIndex] = mftSelfRecord;
             return mftSelfRecord;
@@ -133,8 +140,6 @@ namespace DiscUtils.Ntfs
             NtfsStream recordsStream = _self.GetStream(AttributeType.Data, null);
             _recordStream = recordsStream.Open(FileAccess.ReadWrite);
 
-            _recordLength = _self.Context.BiosParameterBlock.MftRecordSize;
-            _bytesPerSector = _self.Context.BiosParameterBlock.BytesPerSector;
         }
 
         public File InitializeNew(INtfsContext context, long firstBitmapCluster, ulong numBitmapClusters, long firstRecordsCluster, ulong numRecordsClusters)
@@ -279,7 +284,7 @@ namespace DiscUtils.Ntfs
 
         public FileRecord GetRecord(long index, bool ignoreMagic)
         {
-            if (_bitmap.IsPresent(index))
+            if (_bitmap == null || _bitmap.IsPresent(index))
             {
                 FileRecord result = _recordCache[index];
                 if (result != null)
