@@ -123,7 +123,7 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             ParentDirectory = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x00));
             CreationTime = ReadDateTime(buffer, offset + 0x08);
@@ -137,6 +137,8 @@ namespace DiscUtils.Ntfs
             byte fnLen = buffer[offset + 0x40];
             FileNameNamespace = (FileNameNamespace)buffer[offset + 0x41];
             FileName = Encoding.Unicode.GetString(buffer, offset + 0x42, fnLen * 2);
+
+            return 0x42 + fnLen * 2;
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -164,6 +166,7 @@ namespace DiscUtils.Ntfs
         }
 
         #endregion
+
         private static DateTime ReadDateTime(byte[] buffer, int offset)
         {
             try

@@ -68,7 +68,7 @@ namespace DiscUtils.Registry
             get { return _secDesc; }
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             _prevIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
             _nextIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
@@ -79,6 +79,8 @@ namespace DiscUtils.Registry
             Array.Copy(buffer, offset + 0x14, secDesc, 0, secDescSize);
             _secDesc = new RegistrySecurity();
             _secDesc.SetSecurityDescriptorBinaryForm(secDesc);
+
+            return 0x14 + secDescSize;
         }
 
         public override void WriteTo(byte[] buffer, int offset)

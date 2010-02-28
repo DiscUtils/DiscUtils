@@ -47,7 +47,7 @@ namespace DiscUtils.Registry
             get { return _listIndexes; }
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             _listType = Utilities.BytesToString(buffer, offset, 2);
             int numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
@@ -57,6 +57,8 @@ namespace DiscUtils.Registry
             {
                 _listIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x4)));
             }
+
+            return 4 + (_listIndexes.Count * 4);
         }
 
         public override void WriteTo(byte[] buffer, int offset)

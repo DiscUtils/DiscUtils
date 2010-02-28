@@ -218,10 +218,11 @@ namespace DiscUtils.Ntfs
             public uint Hash;
             public uint Id;
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
+                return 8;
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -243,12 +244,13 @@ namespace DiscUtils.Ntfs
 
         internal sealed class HashIndexData : IndexData, IByteArraySerializable
         {
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
                 SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
                 SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
+                return 0x14;
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -279,9 +281,10 @@ namespace DiscUtils.Ntfs
                 Id = id;
             }
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
+                return 4;
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -302,12 +305,13 @@ namespace DiscUtils.Ntfs
 
         internal sealed class IdIndexData : IndexData, IByteArraySerializable
         {
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
                 SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
                 SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
+                return 0x14;
             }
 
             public void WriteTo(byte[] buffer, int offset)

@@ -53,9 +53,10 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             Read(buffer, offset);
+            return SecurityDescriptor.Length + 0x14;
         }
 
         public void WriteTo(byte[] buffer, int offset)

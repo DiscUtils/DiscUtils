@@ -49,7 +49,7 @@ namespace DiscUtils.Iscsi
 
         #region IByteArraySerializable Members
 
-        public abstract void ReadFrom(byte[] buffer, int offset);
+        public abstract int ReadFrom(byte[] buffer, int offset);
 
         public abstract void WriteTo(byte[] buffer, int offset);
 

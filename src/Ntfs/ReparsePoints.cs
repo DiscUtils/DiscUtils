@@ -77,10 +77,11 @@ namespace DiscUtils.Ntfs
 
             #region IByteArraySerializable Members
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Tag = Utilities.ToUInt32LittleEndian(buffer, offset);
                 File = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 4));
+                return 12;
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -107,8 +108,9 @@ namespace DiscUtils.Ntfs
         {
             #region IByteArraySerializable Members
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
+                return 0;
             }
 
             public void WriteTo(byte[] buffer, int offset)

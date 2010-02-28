@@ -59,7 +59,7 @@ namespace DiscUtils.Registry
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             uint sig = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             if (sig != Signature)
@@ -96,6 +96,8 @@ namespace DiscUtils.Registry
             {
                 throw new IOException("Invalid checksum on registry file");
             }
+
+            return HeaderSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)

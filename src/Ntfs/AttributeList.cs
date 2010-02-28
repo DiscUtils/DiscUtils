@@ -42,7 +42,7 @@ namespace DiscUtils.Ntfs
             get { return _records; }
         }
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             _records.Clear();
 
@@ -53,6 +53,8 @@ namespace DiscUtils.Ntfs
                 pos += r.Read(buffer, pos);
                 _records.Add(r);
             }
+
+            return pos;
         }
 
         public void WriteTo(byte[] buffer, int offset)

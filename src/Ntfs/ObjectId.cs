@@ -31,9 +31,10 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             Id = Utilities.ToGuidLittleEndian(buffer, offset);
+            return 16;
         }
 
         public void WriteTo(byte[] buffer, int offset)

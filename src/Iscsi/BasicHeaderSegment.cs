@@ -34,7 +34,7 @@ namespace DiscUtils.Iscsi
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             Immediate = (buffer[offset] & 0x40) != 0;
             OpCode = (OpCode)(buffer[offset] & 0x3F);
@@ -42,6 +42,7 @@ namespace DiscUtils.Iscsi
             TotalAhsLength = buffer[offset + 4];
             DataSegmentLength = Utilities.ToInt32BigEndian(buffer, offset + 4) & 0x00FFFFFF;
             InitiatorTaskTag = Utilities.ToUInt32BigEndian(buffer, offset + 16);
+            return 48;
         }
 
         public void WriteTo(byte[] buffer, int offset)

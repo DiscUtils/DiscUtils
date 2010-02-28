@@ -33,12 +33,13 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             Tag = Utilities.ToUInt32LittleEndian(buffer, offset);
             ushort length = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             Content = new byte[length];
             Array.Copy(buffer, offset + 8, Content, 0, length);
+            return 8 + length;
         }
 
         public void WriteTo(byte[] buffer, int offset)

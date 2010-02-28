@@ -60,14 +60,15 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             _securityDescriptor = new RawSecurityDescriptor(buffer, offset);
+            return _securityDescriptor.BinaryLength;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            // Write out the security descriptor manually because on NFTS the DACL is written
+            // Write out the security descriptor manually because on NTFS the DACL is written
             // before the Owner & Group.  Writing the components in the same order means the
             // hashes will match for identical Security Descriptors.
 

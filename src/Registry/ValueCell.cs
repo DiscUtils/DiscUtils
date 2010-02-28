@@ -66,7 +66,7 @@ namespace DiscUtils.Registry
             get { return _name; }
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             int nameLen = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             _dataLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
@@ -78,6 +78,8 @@ namespace DiscUtils.Registry
             {
                 _name = Utilities.BytesToString(buffer, offset + 0x14, nameLen).Trim('\0');
             }
+
+            return 0x14 + nameLen;
         }
 
         public override void WriteTo(byte[] buffer, int offset)

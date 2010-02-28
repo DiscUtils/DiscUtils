@@ -32,7 +32,7 @@ namespace DiscUtils.Ntfs
         public Guid BirthObjectId;
         public Guid BirthDomainId;
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             MftReference = new FileRecordReference();
             MftReference.ReadFrom(buffer, offset);
@@ -40,6 +40,7 @@ namespace DiscUtils.Ntfs
             BirthVolumeId = Utilities.ToGuidLittleEndian(buffer, offset + 0x08);
             BirthObjectId = Utilities.ToGuidLittleEndian(buffer, offset + 0x18);
             BirthDomainId = Utilities.ToGuidLittleEndian(buffer, offset + 0x28);
+            return 0x38;
         }
 
         public void WriteTo(byte[] buffer, int offset)

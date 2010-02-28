@@ -100,9 +100,10 @@ namespace DiscUtils.Ntfs
         {
             public Guid Id;
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Id = Utilities.ToGuidLittleEndian(buffer, offset + 0);
+                return 16;
             }
 
             public void WriteTo(byte[] buffer, int offset)

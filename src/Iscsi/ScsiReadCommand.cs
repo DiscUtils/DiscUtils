@@ -50,7 +50,7 @@ namespace DiscUtils.Iscsi
             }
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
         }

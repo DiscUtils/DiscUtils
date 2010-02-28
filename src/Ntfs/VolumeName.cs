@@ -46,9 +46,10 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             _name = Encoding.Unicode.GetString(buffer, offset, buffer.Length - offset);
+            return buffer.Length - offset;
         }
 
         public void WriteTo(byte[] buffer, int offset)

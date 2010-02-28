@@ -60,9 +60,10 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             _val = Utilities.ToUInt64LittleEndian(buffer, offset);
+            return 8;
         }
 
         public void WriteTo(byte[] buffer, int offset)

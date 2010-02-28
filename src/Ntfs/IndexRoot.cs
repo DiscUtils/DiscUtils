@@ -81,12 +81,13 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             _attrType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
             _collationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, 0x04);
             _indexAllocationEntrySize = Utilities.ToUInt32LittleEndian(buffer, 0x08);
             _rawClustersPerIndexRecord = buffer[0x0C];
+            return 16;
         }
 
         public void WriteTo(byte[] buffer, int offset)

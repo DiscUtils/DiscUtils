@@ -98,9 +98,10 @@ namespace DiscUtils.Ntfs
                 Sid = sid;
             }
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Sid = new SecurityIdentifier(buffer, offset);
+                return Sid.BinaryLength;
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -132,9 +133,10 @@ namespace DiscUtils.Ntfs
                 OwnerId = ownerId;
             }
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 OwnerId = Utilities.ToInt32LittleEndian(buffer, offset);
+                return 4;
             }
 
             public void WriteTo(byte[] buffer, int offset)
@@ -178,7 +180,7 @@ namespace DiscUtils.Ntfs
                 Sid = sid;
             }
 
-            public void ReadFrom(byte[] buffer, int offset)
+            public int ReadFrom(byte[] buffer, int offset)
             {
                 Version = Utilities.ToInt32LittleEndian(buffer, offset);
                 Flags = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
@@ -190,7 +192,10 @@ namespace DiscUtils.Ntfs
                 if (buffer.Length - offset > 0x30)
                 {
                     Sid = new SecurityIdentifier(buffer, offset + 0x30);
+                    return 0x30 + Sid.BinaryLength;
                 }
+
+                return 0x30;
             }
 
             public void WriteTo(byte[] buffer, int offset)

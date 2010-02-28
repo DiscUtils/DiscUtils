@@ -44,11 +44,12 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             _majorVersion = buffer[offset + 0x08];
             _minorVersion = buffer[offset + 0x09];
             _flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            return 0x0C;
         }
 
         public void WriteTo(byte[] buffer, int offset)

@@ -38,7 +38,7 @@ namespace DiscUtils.Iscsi
             get { return TaskAttributes.Simple; }
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
         }

@@ -41,7 +41,7 @@ namespace DiscUtils.Registry
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             uint sig = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             if (sig != Signature)
@@ -54,6 +54,7 @@ namespace DiscUtils.Registry
             long unknown = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x0014));
             int unknown2 = Utilities.ToInt32LittleEndian(buffer, offset + 0x1C);
+            return HeaderSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)

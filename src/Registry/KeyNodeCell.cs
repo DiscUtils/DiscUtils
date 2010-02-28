@@ -73,7 +73,7 @@ namespace DiscUtils.Registry
         {
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             Flags = (RegistryKeyFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x04));
@@ -91,6 +91,8 @@ namespace DiscUtils.Registry
             int nameLength = Utilities.ToInt16LittleEndian(buffer, offset + 0x48);
             ClassNameLength = Utilities.ToInt16LittleEndian(buffer, offset + 0x4A);
             Name = Utilities.BytesToString(buffer, offset + 0x4C, nameLength);
+
+            return 0x4C + nameLength;
         }
 
         public override void WriteTo(byte[] buffer, int offset)

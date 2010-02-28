@@ -49,7 +49,7 @@ namespace DiscUtils.Registry
             _hive = hive;
         }
 
-        public override void ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             _hashType = Utilities.BytesToString(buffer, offset, 2);
             _numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
@@ -61,7 +61,7 @@ namespace DiscUtils.Registry
                 _subKeyIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8)));
                 _nameHashes.Add(Utilities.ToUInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8) + 0x4));
             }
-
+            return 0x4 + _numElements * 0x8;
         }
 
         public override void WriteTo(byte[] buffer, int offset)

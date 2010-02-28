@@ -60,7 +60,7 @@ namespace DiscUtils.Ntfs
 
         #region IByteArraySerializable Members
 
-        public void ReadFrom(byte[] buffer, int offset)
+        public int ReadFrom(byte[] buffer, int offset)
         {
             CreationTime = ReadDateTime(buffer, 0x00);
             ModificationTime = ReadDateTime(buffer, 0x08);
@@ -77,10 +77,13 @@ namespace DiscUtils.Ntfs
                 SecurityId = Utilities.ToUInt32LittleEndian(buffer, 0x34);
                 QuotaCharged = Utilities.ToUInt64LittleEndian(buffer, 0x38);
                 UpdateSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, 0x40);
+                _haveExtraFields = true;
+                return 0x48;
             }
             else
             {
                 _haveExtraFields = false;
+                return 0x30;
             }
         }
 
