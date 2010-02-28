@@ -472,7 +472,7 @@ namespace DiscUtils.Ntfs
         private bool IsBlockCompressed(int startDataRunIdx, int compressionUnitSize)
         {
             var runs = _record.CookedDataRuns;
-            int clustersRemaining = compressionUnitSize;
+            int clustersRemaining = Math.Min(compressionUnitSize, runs.Count - startDataRunIdx);
             int dataRunIdx = startDataRunIdx;
 
             while (clustersRemaining > 0)

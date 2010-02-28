@@ -72,8 +72,8 @@ namespace DiscUtils.Ntfs
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
             // Bootstrap the Master File Table
-            _context.Mft = new MasterFileTable();
-            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord(stream, _context.BiosParameterBlock));
+            _context.Mft = new MasterFileTable(_context);
+            File mftFile = new File(_context, _context.Mft.GetBootstrapRecord());
             _fileCache[MasterFileTable.MftIndex] = mftFile;
             _context.Mft.Initialize(mftFile);
 
