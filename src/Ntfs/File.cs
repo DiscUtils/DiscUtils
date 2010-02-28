@@ -173,7 +173,7 @@ namespace DiscUtils.Ntfs
                     {
                         foreach (var attr in _baseRecord.Attributes)
                         {
-                            if (!attr.IsNonResident && _context.AttributeDefinitions.CanBeNonResident(attr.AttributeType))
+                            if (!attr.IsNonResident && !_context.AttributeDefinitions.MustBeResident(attr.AttributeType))
                             {
                                 MakeAttributeNonResident(new AttributeReference(MftReference, attr.AttributeId), (int)attr.DataLength);
                                 fixedAttribute = true;
@@ -369,8 +369,6 @@ namespace DiscUtils.Ntfs
             if (attrListRec != null)
             {
                 NtfsAttribute lastAttr = null;
-                AttributeType lastType = AttributeType.None;
-                string lastName = null;
 
                 StructuredNtfsAttribute<AttributeList> attrList = (StructuredNtfsAttribute<AttributeList>)NtfsAttribute.FromRecord(this, MftReference, attrListRec);
                 foreach (var record in attrList.Content)
@@ -385,16 +383,17 @@ namespace DiscUtils.Ntfs
                     {
                         AttributeRecord attrRec = attrFileRecord.GetAttribute(record.AttributeId);
 
-                        if (lastAttr == null || lastType != record.Type || lastName != record.Name)
+                        if (attrRec != null)
                         {
-                            lastAttr = NtfsAttribute.FromRecord(this, record.BaseFileReference, attrRec);
-                            lastType = record.Type;
-                            lastName = record.Name;
-                            _attributes.Add(lastAttr);
-                        }
-                        else
-                        {
-                            lastAttr.AddExtent(record.BaseFileReference, attrRec);
+                            if (record.StartVcn == 0)
+                            {
+                                lastAttr = NtfsAttribute.FromRecord(this, record.BaseFileReference, attrRec);
+                                _attributes.Add(lastAttr);
+                            }
+                            else
+                            {
+                                lastAttr.AddExtent(record.BaseFileReference, attrRec);
+                            }
                         }
                     }
                 }
