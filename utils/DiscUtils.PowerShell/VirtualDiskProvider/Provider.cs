@@ -230,7 +230,6 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         {
             string parentPath = GetParentPath(path, null);
 
-            bool isFile = false;
             if (string.IsNullOrEmpty(itemTypeName))
             {
                 WriteError(new ErrorRecord(
@@ -240,36 +239,54 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                     itemTypeName));
                 return;
             }
-            else if (itemTypeName.ToUpperInvariant() == "FILE")
-            {
-                isFile = true;
-            }
-            else if (itemTypeName.ToUpperInvariant() == "DIRECTORY")
-            {
-                isFile = false;
-            }
-            else
-            {
-                WriteError(new ErrorRecord(
-                    new InvalidOperationException("The type is unknown for this provider.  Only \"file\" and \"directory\" can be specified."),
-                    "UnknownTypeForNewItem",
-                    ErrorCategory.InvalidArgument,
-                    itemTypeName));
-                return;
-            }
+            string itemTypeUpper = itemTypeName.ToUpperInvariant();
+
 
             object obj = FindItemByPath(Utilities.NormalizePath(parentPath), true, false);
 
             if (obj is DiscDirectoryInfo)
             {
                 DiscDirectoryInfo dirInfo = (DiscDirectoryInfo)obj;
-                if (isFile)
+                if (itemTypeUpper == "FILE")
                 {
                     using (dirInfo.FileSystem.OpenFile(Path.Combine(dirInfo.FullName, GetChildName(path)), FileMode.Create)) { }
                 }
-                else
+                else if (itemTypeUpper == "DIRECTORY")
                 {
                     dirInfo.FileSystem.CreateDirectory(Path.Combine(dirInfo.FullName, GetChildName(path)));
+                }
+                else if (itemTypeUpper == "HARDLINK")
+                {
+                    NtfsFileSystem ntfs = dirInfo.FileSystem as NtfsFileSystem;
+
+                    if(ntfs != null)
+                    {
+                        NewHardLinkDynamicParameters hlParams = (NewHardLinkDynamicParameters)DynamicParameters;
+
+                        var srcItems = SessionState.InvokeProvider.Item.Get(hlParams.SourcePath);
+                        if (srcItems.Count != 1)
+                        {
+                            WriteError(new ErrorRecord(
+                                new InvalidOperationException("The type is unknown for this provider.  Only \"file\" and \"directory\" can be specified."),
+                                "UnknownTypeForNewItem",
+                                ErrorCategory.InvalidArgument,
+                                itemTypeName));
+                            return;
+                        }
+
+                        DiscFileSystemInfo srcFsi = srcItems[0].BaseObject as DiscFileSystemInfo;
+
+                        ntfs.CreateHardLink(srcFsi.FullName, Path.Combine(dirInfo.FullName, GetChildName(path)));
+                    }
+                }
+                else
+                {
+                    WriteError(new ErrorRecord(
+                        new InvalidOperationException("The type is unknown for this provider.  Only \"file\" and \"directory\" can be specified."),
+                        "UnknownTypeForNewItem",
+                        ErrorCategory.InvalidArgument,
+                        itemTypeName));
+                    return;
                 }
             }
             else
@@ -281,6 +298,23 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                     obj));
                 return;
             }
+        }
+
+        protected override object NewItemDynamicParameters(string path, string itemTypeName, object newItemValue)
+        {
+            if (string.IsNullOrEmpty(itemTypeName))
+            {
+                return null;
+            }
+
+            string itemTypeUpper = itemTypeName.ToUpperInvariant();
+
+            if (itemTypeUpper == "HARDLINK")
+            {
+                return new NewHardLinkDynamicParameters();
+            }
+
+            return null;
         }
 
         protected override void RenameItem(string path, string newName)

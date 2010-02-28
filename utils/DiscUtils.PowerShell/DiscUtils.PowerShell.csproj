@@ -57,6 +57,7 @@
     <Compile Include="VirtualDiskProvider\FileContentReaderWriter.cs" />
     <Compile Include="VirtualDiskProvider\GetItemParameters.cs" />
     <Compile Include="VirtualDiskProvider\NewDriveParameters.cs" />
+    <Compile Include="VirtualDiskProvider\NewHardLinkDynamicParameters.cs" />
     <Compile Include="VirtualDiskProvider\OnDemandVirtualDisk.cs" />
     <Compile Include="VirtualDiskProvider\Provider.cs" />
     <Compile Include="VirtualDiskProvider\VirtualDiskPSDriveInfo.cs" />

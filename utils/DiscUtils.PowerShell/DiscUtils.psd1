@@ -29,7 +29,7 @@
 ModuleToProcess = 'DiscUtils.PowerShell.dll'
 
 # Version number of this module.
-ModuleVersion = '0.8.00'
+ModuleVersion = '0.8.0.0'
 
 # ID used to uniquely identify this module
 GUID = '464120bc-c6c2-4cd2-92c3-68532193590d'
