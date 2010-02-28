@@ -93,12 +93,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal bool CanBeNonResident(AttributeType attributeType)
+        internal bool MustBeResident(AttributeType attributeType)
         {
             AttributeDefinitionRecord record;
             if (_attrDefs.TryGetValue(attributeType, out record))
             {
-                return (record.Flags & AttributeTypeFlags.CanBeNonResident) != 0;
+                return (record.Flags & AttributeTypeFlags.MustBeResident) != 0;
             }
             return false;
         }

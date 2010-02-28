@@ -67,9 +67,10 @@ namespace DiscUtils.Ntfs
 
         public void Dump(TextWriter writer, string indent)
         {
+            writer.WriteLine(indent + "ATTRIBUTE LIST RECORDS");
             foreach (AttributeListRecord r in _records)
             {
-                r.Dump(writer, indent);
+                r.Dump(writer, indent + "  ");
             }
         }
 
@@ -172,7 +173,7 @@ namespace DiscUtils.Ntfs
 
         public void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "ATTRIBUTE RECORD");
+            writer.WriteLine(indent + "ATTRIBUTE LIST RECORD");
             writer.WriteLine(indent + "                 Type: " + Type);
             writer.WriteLine(indent + "        Record Length: " + RecordLength);
             writer.WriteLine(indent + "                 Name: " + Name);
