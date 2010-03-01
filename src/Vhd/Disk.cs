@@ -227,14 +227,17 @@ namespace DiscUtils.Vhd
                         _content = null;
                     }
 
-                    foreach (var record in _files)
+                    if (_files != null)
                     {
-                        if (record.Second == Ownership.Dispose)
+                        foreach (var record in _files)
                         {
-                            record.First.Dispose();
+                            if (record.Second == Ownership.Dispose)
+                            {
+                                record.First.Dispose();
+                            }
                         }
+                        _files = null;
                     }
-                    _files = null;
                 }
             }
             finally
