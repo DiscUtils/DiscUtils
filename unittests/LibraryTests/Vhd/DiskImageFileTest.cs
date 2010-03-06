@@ -54,8 +54,11 @@ namespace DiscUtils.Vhd
             MemoryStream diffStream = new MemoryStream();
             using (DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
+                // Write some data - exposes bug if mis-calculating where to write data
                 using (DiskImageFile diffFile = DiskImageFile.InitializeDifferencing(diffStream, Ownership.None, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", new DateTime(2007, 12, 31)))
                 {
+                    Disk disk = new Disk(new DiskImageFile[] { diffFile, baseFile }, Ownership.None);
+                    disk.Content.Write(new byte[512], 0, 512);
                 }
             }
 

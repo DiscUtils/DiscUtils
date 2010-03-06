@@ -73,6 +73,12 @@ namespace DiscUtils.Vhd
             _blockBitmapSize = (int)Utilities.RoundUp((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8, Utilities.SectorSize);
 
             ReadBlockAllocationTable();
+
+            // Detect where next block should go (cope if the footer is missing)
+            _fileStream.Position = Utilities.RoundDown(_fileStream.Length, Utilities.SectorSize) - Utilities.SectorSize;
+            byte[] footerBytes = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+            Footer footer = Footer.FromBytes(footerBytes, 0);
+            _nextBlockStart = _fileStream.Position - (footer.IsValid() ? Utilities.SectorSize : 0);
         }
 
         protected override void Dispose(bool disposing)
@@ -502,29 +508,10 @@ namespace DiscUtils.Vhd
             _fileStream.Position = _dynamicHeader.TableOffset;
             byte[] data = Utilities.ReadFully(_fileStream, _dynamicHeader.MaxTableEntries * 4);
 
-            uint lastBlockStartSector = 0;
-
             uint[] bat = new uint[_dynamicHeader.MaxTableEntries];
             for (int i = 0; i < _dynamicHeader.MaxTableEntries; ++i)
             {
-                uint val = Utilities.ToUInt32BigEndian(data, i * 4);
-                if (val != uint.MaxValue && val >= lastBlockStartSector)
-                {
-                    lastBlockStartSector = val;
-                }
-
-                bat[i] = val;
-            }
-
-            if (lastBlockStartSector == 0)
-            {
-                // No blocks allocated yet, so infer it's at the end of the BAT
-                _nextBlockStart = Utilities.RoundUp(_fileStream.Position, Utilities.SectorSize);
-            }
-            else
-            {
-                // Currently at start of last block in file, move to just beyond that block
-                _nextBlockStart = (lastBlockStartSector * (long)Utilities.SectorSize) + _blockBitmapSize + _dynamicHeader.BlockSize;
+                bat[i] = Utilities.ToUInt32BigEndian(data, i * 4);
             }
 
             _blockAllocationTable = bat;
