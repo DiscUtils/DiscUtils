@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -83,7 +83,7 @@ namespace DiscUtils.Ntfs
 
                 // Give the attribute some room to breathe, so long as it doesn't squeeze others out
                 // BROKEN, BROKEN, BROKEN - how to figure this out?  Query at the point of adding entries to the root node?
-                _rootNode.TotalSpaceAvailable += _file.MftRecordFreeSpace - 100;
+                _rootNode.TotalSpaceAvailable += _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name) - 100;
             }
 
             if (_file.StreamExists(AttributeType.IndexAllocation, _name))
@@ -138,7 +138,7 @@ namespace DiscUtils.Ntfs
             if (_rootNode.Depose())
             {
                 WriteRootNodeToDisk();
-                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace;
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
                 return true;
             }
 
@@ -301,7 +301,7 @@ namespace DiscUtils.Ntfs
             {
                 IndexEntry oldEntry;
                 IndexNode node;
-                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace;
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
                 if (_rootNode.TryFindEntry(key, out oldEntry, out node))
                 {
                     node.UpdateEntry(key, value);
@@ -321,7 +321,7 @@ namespace DiscUtils.Ntfs
 
         public bool Remove(byte[] key)
         {
-            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace;
+            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
             return _rootNode.RemoveEntry(key);
         }
 

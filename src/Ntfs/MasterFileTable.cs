@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -316,7 +316,7 @@ namespace DiscUtils.Ntfs
             int recordSize = record.Size;
             if (recordSize > _recordLength)
             {
-                throw new NotImplementedException("Multi-record files");
+                throw new IOException("Attempting to write over-sized MFT record");
             }
 
             byte[] buffer = new byte[_recordLength];

@@ -122,9 +122,10 @@ namespace DiscUtils.Ntfs
             foreach(NtfsStream stream in file.GetStreams(AttributeType.FileName, null))
             {
                 FileNameRecord streamName = stream.GetContent<FileNameRecord>();
-                if (nameRecord == streamName)
+                if (nameRecord.Equals(streamName))
                 {
                     file.RemoveStream(stream);
+                    break;
                 }
             }
 

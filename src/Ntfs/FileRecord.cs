@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -73,6 +73,7 @@ namespace DiscUtils.Ntfs
             _nextAttributeId = 1;
             _index = index;
             _hardLinkCount = 0;
+            _baseFile = new FileRecordReference(0);
 
             _attributes = new List<AttributeRecord>();
             _haveIndex = true;
@@ -108,6 +109,7 @@ namespace DiscUtils.Ntfs
         public FileRecordReference BaseFile
         {
             get { return _baseFile; }
+            set { _baseFile = value; }
         }
 
         public FileRecordFlags Flags
@@ -119,6 +121,11 @@ namespace DiscUtils.Ntfs
         public ICollection<AttributeRecord> Attributes
         {
             get { return new ReadOnlyCollection<AttributeRecord>(_attributes); }
+        }
+
+        public FileRecordReference Reference
+        {
+            get { return new FileRecordReference(MasterFileTableIndex, SequenceNumber); }
         }
 
         /// <summary>
@@ -166,6 +173,20 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Adds an existing attribute.
+        /// </summary>
+        /// <param name="attrRec">The attribute to add</param>
+        /// <returns>The new Id of the attribute</returns>
+        /// <remarks>This method is used to move an attribute between different MFT records</remarks>
+        internal ushort AddAttribute(AttributeRecord attrRec)
+        {
+            attrRec.AttributeId = _nextAttributeId++;
+            _attributes.Add(attrRec);
+            _attributes.Sort();
+            return attrRec.AttributeId;
+        }
+
+        /// <summary>
         /// Removes an attribute by it's id.
         /// </summary>
         /// <param name="id">The attribute's id</param>
@@ -176,6 +197,7 @@ namespace DiscUtils.Ntfs
                 if (_attributes[i].AttributeId == id)
                 {
                     _attributes.RemoveAt(i);
+                    break;
                 }
             }
         }

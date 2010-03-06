@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -106,8 +106,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                long recordStart = _file.Context.Mft.GetRecordOffset(_file.MftReference);
-                long attrStart = recordStart + _file.GetAttributeOffset(_record.AttributeId);
+                long attrStart = _file.GetAttributeOffset(new AttributeReference(_containingFile, _record.AttributeId));
                 long attrPos = _file.Context.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data, null).OffsetToAbsolutePos(attrStart);
 
                 return _record.OffsetToAbsolutePos(offset, attrPos, 0);

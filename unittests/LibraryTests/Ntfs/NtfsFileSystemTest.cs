@@ -152,5 +152,43 @@ namespace DiscUtils.Ntfs
             Assert.AreEqual(1, extents.Length);
             Assert.AreEqual(3, extents[0].Length);
         }
+
+        [Test]
+        public void ManyAttributes()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
+            {
+                s.WriteByte(32);
+            }
+
+            for (int i = 0; i < 50; ++i)
+            {
+                ntfs.CreateHardLink("file", "hl" + i);
+            }
+
+            using (Stream s = ntfs.OpenFile("hl35", FileMode.Open, FileAccess.ReadWrite))
+            {
+                Assert.AreEqual(32, s.ReadByte());
+                s.Position = 0;
+                s.WriteByte(12);
+            }
+
+            using (Stream s = ntfs.OpenFile("hl5", FileMode.Open, FileAccess.ReadWrite))
+            {
+                Assert.AreEqual(12, s.ReadByte());
+            }
+
+            for (int i = 0; i < 50; ++i)
+            {
+                ntfs.DeleteFile("hl" + i);
+            }
+
+            Assert.AreEqual(1, ntfs.GetFiles(@"\").Length);
+
+            ntfs.DeleteFile("file");
+
+            Assert.AreEqual(0, ntfs.GetFiles(@"\").Length);
+        }
     }
 }

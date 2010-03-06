@@ -432,7 +432,11 @@ namespace DiscUtils.Ntfs
                 File file = GetFile(dirEntry.Reference);
 
                 parentDir.RemoveEntry(dirEntry);
-                file.Delete();
+
+                if (file.HardLinkCount == 0)
+                {
+                    file.Delete();
+                }
             }
         }
 

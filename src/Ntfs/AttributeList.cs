@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -50,7 +50,7 @@ namespace DiscUtils.Ntfs
             while (pos < buffer.Length)
             {
                 AttributeListRecord r = new AttributeListRecord();
-                pos += r.Read(buffer, pos);
+                pos += r.ReadFrom(buffer, offset + pos);
                 _records.Add(r);
             }
 
@@ -59,12 +59,39 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            int pos = offset;
+            foreach (var record in _records)
+            {
+                record.WriteTo(buffer, offset + pos);
+                pos += record.Size;
+            }
         }
 
         public int Size
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                int total = 0;
+                foreach (var record in _records)
+                {
+                    total += record.Size;
+                }
+                return total;
+            }
+        }
+
+        internal bool ChangeAttrLocation(AttributeReference oldRef, AttributeReference newRef)
+        {
+            foreach (var record in _records)
+            {
+                if (record.AttributeReference.Equals(oldRef))
+                {
+                    record.AttributeReference = newRef;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -82,6 +109,7 @@ namespace DiscUtils.Ntfs
         public void Add(AttributeListRecord item)
         {
             _records.Add(item);
+            _records.Sort();
         }
 
         public void Clear()
@@ -114,6 +142,18 @@ namespace DiscUtils.Ntfs
             return _records.Remove(item);
         }
 
+        public void Remove(AttributeReference itemRef)
+        {
+            for (int i = 0; i < _records.Count; ++i)
+            {
+                if(_records[i].BaseFileReference == itemRef.File && _records[i].AttributeId == itemRef.AttributeId)
+                {
+                    _records.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
         #endregion
 
         #region IEnumerable<AttributeListRecord> Members
@@ -135,7 +175,7 @@ namespace DiscUtils.Ntfs
         #endregion
     }
 
-    internal class AttributeListRecord : IDiagnosticTraceable
+    internal class AttributeListRecord : IDiagnosticTraceable, IByteArraySerializable, IComparable<AttributeListRecord>
     {
         public AttributeType Type;
         public ushort RecordLength;
@@ -146,7 +186,19 @@ namespace DiscUtils.Ntfs
         public FileRecordReference BaseFileReference;
         public ushort AttributeId;
 
-        public int Read(byte[] data, int offset)
+        public AttributeReference AttributeReference
+        {
+            get { return new AttributeReference(BaseFileReference, AttributeId); }
+            set
+            {
+                BaseFileReference = value.File;
+                AttributeId = value.AttributeId;
+            }
+        }
+
+        #region IByteArraySerializable Members
+
+        public int ReadFrom(byte[] data, int offset)
         {
             Type = (AttributeType)Utilities.ToUInt32LittleEndian(data, offset + 0x00);
             RecordLength = Utilities.ToUInt16LittleEndian(data, offset + 0x04);
@@ -173,6 +225,78 @@ namespace DiscUtils.Ntfs
             return RecordLength;
         }
 
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            NameOffset = 0x20;
+            if (string.IsNullOrEmpty(Name))
+            {
+                NameLength = 0;
+            }
+            else
+            {
+                NameLength = (byte)Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset);
+            }
+            RecordLength = (ushort)((ushort)NameOffset + (ushort)NameLength);
+
+            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset);
+            Utilities.WriteBytesLittleEndian(RecordLength, buffer, offset + 0x04);
+            buffer[offset + 0x06] = NameLength;
+            buffer[offset + 0x07] = NameOffset;
+            Utilities.WriteBytesLittleEndian(StartVcn, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(BaseFileReference.Value, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian(AttributeId, buffer, offset + 0x18);
+        }
+
+        public int Size
+        {
+            get
+            {
+                return 0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name));
+            }
+        }
+
+        #endregion
+
+        #region IComparable<AttributeListRecord> Members
+
+        public int CompareTo(AttributeListRecord other)
+        {
+            int val = ((int)Type) - (int)other.Type;
+            if (val != 0)
+            {
+                return val;
+            }
+
+            val = string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+            if (val != 0)
+            {
+                return val;
+            }
+
+            return ((int)StartVcn) - (int)other.StartVcn;
+        }
+
+        #endregion
+
+        public static AttributeListRecord FromAttribute(NtfsAttribute attr)
+        {
+            AttributeListRecord newRecord = new AttributeListRecord()
+            {
+                Type = attr.Type,
+                Name = attr.Name,
+                StartVcn = 0,
+                BaseFileReference = attr.Reference.File,
+                AttributeId = attr.Id
+            };
+
+            if (attr.IsNonResident)
+            {
+                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr.Record).StartVcn;
+            }
+
+            return newRecord;
+        }
+
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "ATTRIBUTE LIST RECORD");
@@ -183,5 +307,6 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "  Base File Reference: " + BaseFileReference);
             writer.WriteLine(indent + "         Attribute ID: " + AttributeId);
         }
+
     }
 }

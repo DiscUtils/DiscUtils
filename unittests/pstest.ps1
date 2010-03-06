@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2008-2009, Kenneth Bell
+#  Copyright (c) 2008-2010, Kenneth Bell
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
 #  copy of this software and associated documentation files (the "Software"),
@@ -114,7 +114,7 @@ function InvokeDiskpart
 function AttachDisk
 {
     param($disk, $drive)
-    InvokeDiskpart @("select vdisk file=$disk", "attach vdisk readonly")
+    InvokeDiskpart @("select vdisk file=$disk", "attach vdisk")
     sleep -seconds 1
     InvokeDiskpart @("select vdisk file=$disk", "select partition=1", "assign letter=$drive")
 }
@@ -177,7 +177,7 @@ function TestNtfs
 {
     $TempMountRoot = ("$testdrive" + ":\")
     $ClusterData = New-Object byte[] 4096
-    $FourMB = New-Object byte[] 4194304
+    $FourMB = New-Object byte[] $(4 * $OneMB)
     $NumFiles = 500
 
     # Check we're elevated
@@ -192,12 +192,28 @@ function TestNtfs
     }
 
 
-    CreateDisk 10MB
+    CreateDisk 16MB
 
 
     "Creating TestFile.txt"
     New-Item -Type file vd:\Volume0\TestFile.txt
     Set-Content vd:\Volume0\TestFile.txt "This is a test file"
+
+    Checkpoint
+
+    "Creating 50 hard links"
+    for($i = 0; $i -lt 50; $i++)
+    {
+        New-Item -type HardLink "vd:\Volume0\hardlink${i}" -SourcePath "vd:\Volume0\TestFile.txt"
+    }
+
+    Checkpoint
+
+    "Removing hard links"
+    for($i = 0; $i -lt 50; $i++)
+    {
+        Remove-Item "vd:\Volume0\hardlink${i}"
+    }
 
     Checkpoint
 
