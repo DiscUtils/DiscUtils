@@ -275,7 +275,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public bool RemoveEntry(byte[] key)
+        public int GetEntry(byte[] key, out bool exactMatch)
         {
             for (int i = 0; i < _entries.Count; ++i)
             {
@@ -284,140 +284,132 @@ namespace DiscUtils.Ntfs
 
                 if ((focus.Flags & IndexEntryFlags.End) != 0)
                 {
-                    // No value when End flag is set.  Logically these nodes always
-                    // compare 'bigger', so if there are children we'll visit them.
-                    compVal = -1;
+                    exactMatch = false;
+                    return i;
                 }
                 else
                 {
                     compVal = _index.Compare(key, focus.KeyBuffer);
-                }
-
-                if (compVal == 0)
-                {
-                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                    if (compVal <= 0)
                     {
-                        IndexNode childNode = _index.GetSubBlock(this, focus).Node;
-                        IndexEntry biggestLeaf = childNode.FindBiggestLeaf();
+                        exactMatch = (compVal == 0);
+                        return i;
+                    }
+                }
+            }
+
+            throw new IOException("Corrupt index node - no End entry");
+        }
+
+        public bool RemoveEntry(byte[] key)
+        {
+            bool exactMatch;
+            int entryIndex = GetEntry(key, out exactMatch);
+            IndexEntry entry = _entries[entryIndex];
+
+            if (exactMatch)
+            {
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    // Get the next biggest entry in the index, which may be sibling or descendant of sibling
+                    IndexEntry replacementLeaf = _entries[entryIndex + 1];
+                    if ((replacementLeaf.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) == IndexEntryFlags.End)
+                    {
+                        entry.KeyBuffer = null;
+                        entry.DataBuffer = null;
+                        entry.Flags |= IndexEntryFlags.End;
+                        _entries.RemoveAt(entryIndex + 1);
+                    }
+                    else
+                    {
+                        if ((replacementLeaf.Flags & IndexEntryFlags.Node) != 0)
+                        {
+                            IndexNode giftingNode = _index.GetSubBlock(this, replacementLeaf).Node;
+                            replacementLeaf = giftingNode.FindSmallestLeaf();
+                        }
 
                         // Take a reference to the byte arrays because in the recursive case, these arrays
                         // may be changed as a new node is promoted.
-                        byte[] biggestLeafKey = biggestLeaf.KeyBuffer;
-                        byte[] biggestLeafData = biggestLeaf.DataBuffer;
+                        byte[] newKey = replacementLeaf.KeyBuffer;
+                        byte[] newData = replacementLeaf.DataBuffer;
 
-                        childNode.RemoveEntry(biggestLeaf.KeyBuffer);
+                        RemoveEntry(newKey);
 
                         // Just over-write our key & data with the replacement
-                        focus.KeyBuffer = biggestLeafKey;
-                        focus.DataBuffer = biggestLeafData;
-                    }
-                    else
-                    {
-                        _entries.RemoveAt(i);
-                    }
+                        entry.KeyBuffer = newKey;
+                        entry.DataBuffer = newData;
 
-                    Rebalance();
-
-                    _store();
-                    return true;
+                        LiftNode(entryIndex + 1);
+                    }
                 }
-                else if (compVal < 0)
+                else
                 {
-                    if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                    _entries.RemoveAt(entryIndex);
+                }
+
+                _store();
+                return true;
+            }
+            else
+            {
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexNode childNode = _index.GetSubBlock(this, entry).Node;
+                    if (childNode.RemoveEntry(key))
                     {
-                        IndexNode childNode = _index.GetSubBlock(this, focus).Node;
-                        if (childNode.RemoveEntry(key))
-                        {
-                            Rebalance();
-                            _store();
-                        }
+                        LiftNode(entryIndex);
+
+                        _store();
+                        return true;
                     }
-                    else
-                    {
-                        return false;
-                    }
+                }
+                else
+                {
+                    return false;
                 }
             }
 
             return false;
         }
 
-        private bool Rebalance()
+        /// <summary>
+        /// Removes redundant nodes (that contain only an 'End' entry).
+        /// </summary>
+        /// <param name="entryIndex">The index of the entry that may have a redundant child</param>
+        private void LiftNode(int entryIndex)
         {
-            bool result = false;
-
-            for (int i = 0; i < _entries.Count; ++i)
+            if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) != 0)
             {
-                var focus = _entries[i];
-                if ((focus.Flags & IndexEntryFlags.Node) != 0)
+                IndexNode childNode = _index.GetSubBlock(this, _entries[entryIndex]).Node;
+                if (childNode._entries.Count == 1)
                 {
-                    IndexNode childNode = _index.GetSubBlock(this, focus).Node;
-                    if (childNode.CalcEntriesSize() <= SpaceFree)
+                    long freeBlock = _entries[entryIndex].ChildrenVirtualCluster;
+                    _entries[entryIndex].Flags = (_entries[entryIndex].Flags & ~IndexEntryFlags.Node) | (childNode._entries[0].Flags & IndexEntryFlags.Node);
+                    _entries[entryIndex].ChildrenVirtualCluster = childNode._entries[0].ChildrenVirtualCluster;
+                    if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) != 0)
                     {
-                        Merge(childNode, focus);
-                        result = true;
+                        IndexNode newChildNode = _index.GetSubBlock(this, _entries[entryIndex]).Node;
+                        childNode._parent = this;
                     }
+                    _index.FreeBlock(freeBlock);
                 }
-            }
-
-            return result;
-        }
-
-        private IndexEntry FindBiggestLeaf()
-        {
-            if ((_entries[_entries.Count - 1].Flags & IndexEntryFlags.Node)!=0)
-            {
-                // If the end-node has children, the leaf is in the children
-                return _index.GetSubBlock(this, _entries[_entries.Count - 1]).Node.FindBiggestLeaf();
-            }
-            else
-            {
-                return _entries[_entries.Count - 2];
             }
         }
 
         /// <summary>
-        /// Merges the contents of a child node into this node.
+        /// Finds the smallest leaf entry in this tree.
         /// </summary>
-        private void Merge(IndexNode childNode, IndexEntry focus)
+        /// <returns></returns>
+        private IndexEntry FindSmallestLeaf()
         {
-            long targetVcn = focus.ChildrenVirtualCluster;
-
-            foreach(IndexEntry childEntry in childNode._entries)
+            if ((_entries[0].Flags & IndexEntryFlags.Node) != 0)
             {
-                if ((childEntry.Flags & IndexEntryFlags.End) == 0)
-                {
-                    AddEntry(childEntry, true);
-                }
-                else
-                {
-                    if ((childEntry.Flags & IndexEntryFlags.Node) != 0)
-                    {
-                        focus.ChildrenVirtualCluster = childEntry.ChildrenVirtualCluster;
-                    }
-                    else
-                    {
-                        focus.Flags &= ~IndexEntryFlags.Node;
-                        focus.ChildrenVirtualCluster = 0;
-                    }
-                }
+                return _index.GetSubBlock(this, _entries[0]).Node.FindSmallestLeaf();
             }
-
-            // All of the nodes that used to be one layer beneath us, are now peers,
-            // they need their parent pointers updating.
-            foreach (var entry in childNode._entries)
+            else
             {
-                if ((entry.Flags & IndexEntryFlags.Node) != 0)
-                {
-                    IndexBlock block = _index.GetSubBlockIfCached(entry);
-                    if (block != null)
-                    {
-                        block.Node._parent = this;
-                    }
-                }
+                return _entries[0];
             }
-
-            _index.FreeBlock(targetVcn);
         }
 
         /// <summary>
