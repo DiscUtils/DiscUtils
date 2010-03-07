@@ -132,7 +132,7 @@ namespace DiscUtils
     }
 
     /// <summary>
-    /// A stream implementing a block-orient read cache.
+    /// A stream implementing a block-oriented read cache.
     /// </summary>
     public sealed class BlockCacheStream : SparseStream
     {
