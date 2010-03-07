@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -337,44 +337,44 @@ namespace DiscUtils.BootConfig
     internal class DeviceElementValue : ElementValue
     {
         private Guid _parentObject;
-        private int _deviceType;
-        private int _length;
-        private int _partitionType;
-        private byte[] _diskIdentity;
-        private byte[] _partitionIdentity;
+        private DeviceRecord _record;
 
         public DeviceElementValue()
         {
             _parentObject = Guid.Empty;
-            _deviceType = 5;
-            _length = 0x48;
+
+            PartitionRecord record = new PartitionRecord();
+            record.Type = 5;
+            _record = record;
         }
 
         public DeviceElementValue(Guid parentObject, PhysicalVolumeInfo pvi)
         {
             _parentObject = parentObject;
-            _deviceType = 6;
-            _length = 0x48;
+
+            PartitionRecord record = new PartitionRecord();
+            record.Type = 6;
             if (pvi.VolumeType == PhysicalVolumeType.BiosPartition)
             {
-                _partitionType = 1;
-                _diskIdentity = new byte[4];
-                Utilities.WriteBytesLittleEndian(pvi.DiskSignature, _diskIdentity, 0);
-                _partitionIdentity = new byte[8];
-                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector * 512, _partitionIdentity, 0);
+                record.PartitionType = 1;
+                record.DiskIdentity = new byte[4];
+                Utilities.WriteBytesLittleEndian(pvi.DiskSignature, record.DiskIdentity, 0);
+                record.PartitionIdentity = new byte[8];
+                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector * 512, record.PartitionIdentity, 0);
             }
             else if (pvi.VolumeType == PhysicalVolumeType.GptPartition)
             {
-                _partitionType = 0;
-                _diskIdentity = new byte[16];
-                Utilities.WriteBytesLittleEndian(pvi.DiskIdentity, _diskIdentity, 0);
-                _partitionIdentity = new byte[16];
-                Utilities.WriteBytesLittleEndian(pvi.PartitionIdentity, _partitionIdentity, 0);
+                record.PartitionType = 0;
+                record.DiskIdentity = new byte[16];
+                Utilities.WriteBytesLittleEndian(pvi.DiskIdentity, record.DiskIdentity, 0);
+                record.PartitionIdentity = new byte[16];
+                Utilities.WriteBytesLittleEndian(pvi.PartitionIdentity, record.PartitionIdentity, 0);
             }
             else
             {
                 throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "Unknown how to convert volume type {0} to a Device element", pvi.VolumeType));
             }
+            _record = record;
         }
 
         public DeviceElementValue(byte[] value)
@@ -383,83 +383,15 @@ namespace DiscUtils.BootConfig
 
             // -- Start of data structure --
 
-            _deviceType = Utilities.ToInt32LittleEndian(value, 0x10);
-            _length = Utilities.ToInt32LittleEndian(value, 0x18);
-
-            if (_deviceType == 6)
-            {
-                _partitionType = Utilities.ToInt32LittleEndian(value, 0x34);
-
-                if (_partitionType == 1)
-                {
-                    // BIOS disk
-                    _diskIdentity = new byte[4];
-                    Array.Copy(value, 0x38, _diskIdentity, 0, 4);
-                    _partitionIdentity = new byte[8];
-                    Array.Copy(value, 0x20, _partitionIdentity, 0, 8);
-                }
-                else if (_partitionType == 0)
-                {
-                    // GPT disk
-                    _diskIdentity = new byte[16];
-                    Array.Copy(value, 0x38, _diskIdentity, 0, 16);
-                    _partitionIdentity = new byte[16];
-                    Array.Copy(value, 0x20, _partitionIdentity, 0, 16);
-                }
-                else
-                {
-                    throw new NotImplementedException("Unknown partition type: " + _partitionType);
-                }
-            }
-            else if (_deviceType == 5)
-            {
-                // Pseudo 'boot' device
-            }
-            else if (_deviceType == 8)
-            {
-                // location=custom:nnnnnnnnn
-            }
-            else
-            {
-                throw new NotImplementedException("Unknown device type: " + _deviceType);
-            }
+            _record = DeviceRecord.Parse(value, 0x10);
         }
 
         internal byte[] GetBytes()
         {
-            byte[] buffer = new byte[_length + 0x10];
+            byte[] buffer = new byte[_record.Size + 0x10];
+
             Utilities.WriteBytesLittleEndian(_parentObject, buffer, 0);
-
-            Utilities.WriteBytesLittleEndian(_deviceType, buffer, 0x10);
-            Utilities.WriteBytesLittleEndian(_length, buffer, 0x18);
-
-            if (_deviceType == 6)
-            {
-                Utilities.WriteBytesLittleEndian(_partitionType, buffer, 0x34);
-
-                if (_partitionType == 1)
-                {
-                    Array.Copy(_diskIdentity, 0, buffer, 0x38, 4);
-                    Array.Copy(_partitionIdentity, 0, buffer, 0x20, 8);
-                }
-                else if (_partitionType == 0)
-                {
-                    Array.Copy(_diskIdentity, 0, buffer, 0x38, 16);
-                    Array.Copy(_partitionIdentity, 0, buffer, 0x20, 16);
-                }
-                else
-                {
-                    throw new NotImplementedException("Unknown partition type: " + _partitionType);
-                }
-            }
-            else if (_deviceType == 5)
-            {
-                // Pseudo 'boot' device
-            }
-            else
-            {
-                throw new NotImplementedException("Unknown device type: " + _deviceType);
-            }
+            _record.GetBytes(buffer, 0x10);
 
             return buffer;
         }
@@ -477,20 +409,13 @@ namespace DiscUtils.BootConfig
 
         public override string ToString()
         {
-            if (_deviceType == 5)
+            if (_parentObject != Guid.Empty)
             {
-                return "<boot device>";
-            }
-
-            if (_partitionType == 1)
-            {
-                return string.Format(CultureInfo.InvariantCulture, "(disk:{0:X2}{1:X2}{2:X2}{3:X2} part-offset:{4})", _diskIdentity[0], _diskIdentity[1], _diskIdentity[2], _diskIdentity[3], Utilities.ToUInt64LittleEndian(_partitionIdentity, 0));
+                return _parentObject.ToString() + ":" + _record.ToString();
             }
             else
             {
-                Guid diskGuid = Utilities.ToGuidLittleEndian(_diskIdentity, 0);
-                Guid partitionGuid = Utilities.ToGuidLittleEndian(_partitionIdentity, 0);
-                return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid, partitionGuid);
+                return _record.ToString();
             }
         }
     }
