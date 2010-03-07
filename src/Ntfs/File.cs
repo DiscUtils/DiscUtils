@@ -111,6 +111,37 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public string GetFirstName(FileRecordReference dir, FileNameNamespace aliasNamespace)
+        {
+            foreach (StructuredNtfsAttribute<FileNameRecord> attr in GetAttributes(AttributeType.FileName))
+            {
+                FileNameRecord fnr = attr.Content;
+                if (fnr.ParentDirectory.Equals(dir) && fnr.FileNameNamespace == aliasNamespace)
+                {
+                    return fnr.FileName;
+                }
+            }
+
+            return null;
+        }
+
+        public bool HasWin32OrDosName
+        {
+            get
+            {
+                foreach (StructuredNtfsAttribute<FileNameRecord> attr in GetAttributes(AttributeType.FileName))
+                {
+                    FileNameRecord fnr = attr.Content;
+                    if (fnr.FileNameNamespace != FileNameNamespace.Posix)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
         public void Modified()
         {
             DateTime now = DateTime.UtcNow;
@@ -483,7 +514,10 @@ namespace DiscUtils.Ntfs
                         if (!extraFileRecords.TryGetValue(record.BaseFileReference.MftIndex, out attrFileRecord))
                         {
                             attrFileRecord = _context.Mft.GetRecord(record.BaseFileReference);
-                            extraFileRecords[attrFileRecord.MasterFileTableIndex] = attrFileRecord;
+                            if (attrFileRecord != null)
+                            {
+                                extraFileRecords[attrFileRecord.MasterFileTableIndex] = attrFileRecord;
+                            }
                         }
                     }
 
@@ -534,7 +568,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The attribute type</param>
         /// <returns>The attributes.</returns>
-        private NtfsAttribute[] GetAttributes(AttributeType type)
+        internal NtfsAttribute[] GetAttributes(AttributeType type)
         {
             List<NtfsAttribute> matches = new List<NtfsAttribute>();
 
@@ -1076,5 +1110,6 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
+
     }
 }

@@ -64,9 +64,9 @@ namespace DiscUtils.Ntfs
             get { return Index.Count == 0; }
         }
 
-        public IEnumerable<DirectoryEntry> GetAllEntries()
+        public IEnumerable<DirectoryEntry> GetAllEntries(bool filter)
         {
-            List<DirectoryIndexEntry> entries = FilterEntries(Index.Entries);
+            IEnumerable<DirectoryIndexEntry> entries = filter ? FilterEntries(Index.Entries) : Index.Entries;
 
             foreach (var entry in entries)
             {
@@ -83,6 +83,11 @@ namespace DiscUtils.Ntfs
 
         internal DirectoryEntry AddEntry(File file, string name)
         {
+            return AddEntry(file, name, Utilities.Is8Dot3(name.ToUpperInvariant()) ? FileNameNamespace.Win32AndDos : FileNameNamespace.Posix);
+        }
+
+        internal DirectoryEntry AddEntry(File file, string name, FileNameNamespace nameNamespace)
+        {
             if (name.Length > 255)
             {
                 throw new IOException("Invalid file name, more than 255 characters: " + name);
@@ -93,7 +98,7 @@ namespace DiscUtils.Ntfs
             }
 
             FileNameRecord newNameRecord = file.GetFileNameRecord(null, true);
-            newNameRecord.FileNameNamespace = Utilities.Is8Dot3(name.ToUpperInvariant()) ? FileNameNamespace.Win32AndDos : FileNameNamespace.Posix;
+            newNameRecord.FileNameNamespace = nameNamespace;
             newNameRecord.FileName = name;
             newNameRecord.ParentDirectory = MftReference;
 
@@ -239,5 +244,6 @@ namespace DiscUtils.Ntfs
                 return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen * 2);
             }
         }
+
     }
 }

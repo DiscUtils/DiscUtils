@@ -190,5 +190,53 @@ namespace DiscUtils.Ntfs
 
             Assert.AreEqual(0, ntfs.GetFiles(@"\").Length);
         }
+
+        [Test]
+        public void ShortNames()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            // Check we can find a short name in the same directory
+            using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) {}
+            ntfs.SetShortName("ALongFileName.txt", "ALONG~01.TXT");
+            Assert.AreEqual("ALONG~01.TXT", ntfs.GetShortName("ALongFileName.txt"));
+            Assert.IsTrue(ntfs.FileExists("ALONG~01.TXT"));
+
+            // Check path handling
+            ntfs.CreateDirectory("DIR");
+            using (Stream s = ntfs.OpenFile(@"DIR\ALongFileName2.txt", FileMode.CreateNew)) { }
+            ntfs.SetShortName(@"DIR\ALongFileName2.txt", "ALONG~02.TXT");
+            Assert.AreEqual("ALONG~02.TXT", ntfs.GetShortName(@"DIR\ALongFileName2.txt"));
+            Assert.IsTrue(ntfs.FileExists(@"DIR\ALONG~02.TXT"));
+
+            // Check we can open a file by the short name
+            using (Stream s = ntfs.OpenFile("ALONG~01.TXT", FileMode.Open)) { }
+
+            // Delete the long name, and make sure the file is gone
+            ntfs.DeleteFile("ALONG~01.TXT");
+            Assert.IsFalse(ntfs.FileExists("ALONG~01.TXT"));
+
+            // Delete the short name, and make sure the file is gone
+            ntfs.DeleteFile(@"DIR\ALONG~02.TXT");
+            Assert.IsFalse(ntfs.FileExists(@"DIR\ALongFileName2.txt"));
+        }
+
+        [Test]
+        public void HardLinkCount()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            // Check we can find a short name in the same directory
+            using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
+            Assert.AreEqual(1, ntfs.GetHardLinkCount("ALongFileName.txt"));
+
+            ntfs.CreateHardLink("ALongFileName.txt", "ALONG~01.TXT");
+            Assert.AreEqual(2, ntfs.GetHardLinkCount("ALongFileName.txt"));
+
+            // Check we don't find short names in a different directory
+            ntfs.CreateDirectory("DIR");
+            ntfs.CreateHardLink(@"ALongFileName.txt", @"DIR\SHORTN.TXT");
+            Assert.AreEqual(3, ntfs.GetHardLinkCount("ALongFileName.txt"));
+        }
     }
 }

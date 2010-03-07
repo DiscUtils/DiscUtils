@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
 using DiscUtils.BootConfig;
@@ -44,6 +45,8 @@ namespace OSClone
         private CommandLineParameter _sourceFile;
         private CommandLineParameter _destFile;
         private CommandLineSwitch _labelSwitch;
+
+        private Dictionary<long, string> _uniqueFiles = new Dictionary<long,string>();
 
         static void Main(string[] args)
         {
@@ -69,11 +72,19 @@ namespace OSClone
             using (VirtualDisk sourceDisk = VirtualDisk.OpenDisk(_sourceFile.Value, FileAccess.Read, UserName, Password))
             using (VirtualDisk destDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _destFile.Value, DiskSize, null, UserName, Password, null))
             {
+                if (destDisk is DiscUtils.Vhd.Disk)
+                {
+                    ((DiscUtils.Vhd.Disk)destDisk).AutoCommitFooter = false;
+                }
+
                 // Copy the MBR from the source disk, and invent a new signature for this new disk
                 destDisk.SetMasterBootRecord(sourceDisk.GetMasterBootRecord());
                 destDisk.Signature = new Random().Next();
 
-                NtfsFileSystem sourceNtfs = new NtfsFileSystem(sourceDisk.Partitions[0].Open());
+                SparseStream sourcePartStream = SparseStream.FromStream(sourceDisk.Partitions[0].Open(), Ownership.None);
+                sourcePartStream = new BlockCacheStream(sourcePartStream, Ownership.None);
+
+                NtfsFileSystem sourceNtfs = new NtfsFileSystem(sourcePartStream);
 
                 // Copy the OS boot code into memory, so we can apply it when formatting the new disk
                 byte[] bootCode;
@@ -124,7 +135,7 @@ namespace OSClone
             }
         }
 
-        private static void CopyFiles(NtfsFileSystem sourceNtfs, NtfsFileSystem destNtfs, string path, bool subs)
+        private void CopyFiles(NtfsFileSystem sourceNtfs, NtfsFileSystem destNtfs, string path, bool subs)
         {
             if (subs)
             {
@@ -132,19 +143,49 @@ namespace OSClone
                 {
                     if (!IsExcluded(dir))
                     {
-                        destNtfs.CreateDirectory(dir);
+                        int hardLinksRemaining = sourceNtfs.GetHardLinkCount(dir) - 1;
+                        bool newDir = false;
 
-                        FileAttributes fileAttrs = sourceNtfs.GetAttributes(dir);
-                        if ((fileAttrs & FileAttributes.ReparsePoint) != 0)
+                        long sourceFileId = sourceNtfs.GetFileId(dir);
+                        string refPath;
+                        if (_uniqueFiles.TryGetValue(sourceFileId, out refPath))
                         {
-                            destNtfs.SetReparsePoint(dir, sourceNtfs.GetReparsePoint(dir));
+                            // If this is another name for a known dir, recreate the hard link
+                            destNtfs.CreateHardLink(refPath, dir);
+                        }
+                        else
+                        {
+                            destNtfs.CreateDirectory(dir);
+                            newDir = true;
+
+                            FileAttributes fileAttrs = sourceNtfs.GetAttributes(dir);
+                            if ((fileAttrs & FileAttributes.ReparsePoint) != 0)
+                            {
+                                destNtfs.SetReparsePoint(dir, sourceNtfs.GetReparsePoint(dir));
+                            }
+
+                            destNtfs.SetAttributes(dir, fileAttrs);
+
+                            destNtfs.SetSecurity(dir, sourceNtfs.GetSecurity(dir));
                         }
 
-                        destNtfs.SetAttributes(dir, fileAttrs);
+                        // File may have a short name
+                        string shortName = sourceNtfs.GetShortName(dir);
+                        if (!string.IsNullOrEmpty(shortName) && shortName != dir)
+                        {
+                            destNtfs.SetShortName(dir, shortName);
+                            --hardLinksRemaining;
+                        }
 
-                        destNtfs.SetSecurity(dir, sourceNtfs.GetSecurity(dir));
 
-                        CopyFiles(sourceNtfs, destNtfs, dir, subs);
+                        if (newDir)
+                        {
+                            if (hardLinksRemaining > 0)
+                            {
+                                _uniqueFiles[sourceFileId] = dir;
+                            }
+                            CopyFiles(sourceNtfs, destNtfs, dir, subs);
+                        }
                     }
                 }
             }
@@ -152,12 +193,40 @@ namespace OSClone
             foreach (var file in sourceNtfs.GetFiles(path))
             {
                 Console.WriteLine(file);
-                CopyFile(sourceNtfs, destNtfs, file);
+
+                int hardLinksRemaining = sourceNtfs.GetHardLinkCount(file) - 1;
+                bool newFile = false;
+
+                long sourceFileId = sourceNtfs.GetFileId(file);
+                string refPath;
+                if (_uniqueFiles.TryGetValue(sourceFileId, out refPath))
+                {
+                    // If this is another name for a known file, recreate the hard link
+                    destNtfs.CreateHardLink(refPath, file);
+                }
+                else
+                {
+                    CopyFile(sourceNtfs, destNtfs, file);
+                    newFile = true;
+                }
+
+                // File may have a short name
+                string shortName = sourceNtfs.GetShortName(file);
+                if (!string.IsNullOrEmpty(shortName) && shortName != file)
+                {
+                    destNtfs.SetShortName(file, shortName);
+                    --hardLinksRemaining;
+                }
+
+                if (hardLinksRemaining > 0 && newFile)
+                {
+                    _uniqueFiles[sourceFileId] = file;
+                }
             }
         }
 
 
-        private static void CopyFile(NtfsFileSystem sourceNtfs, NtfsFileSystem destNtfs, string path)
+        private void CopyFile(NtfsFileSystem sourceNtfs, NtfsFileSystem destNtfs, string path)
         {
             if (IsExcluded(path))
             {

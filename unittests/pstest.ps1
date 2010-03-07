@@ -241,6 +241,13 @@ function TestNtfs
 
     Checkpoint
 
+    "Creating files with short names"
+    $RootDir = Get-Item 'vd:\Volume0\$Root'
+    New-Item -type file "vd:\Volume0\ALongFileName.txt"
+    $RootDir.FileSystem.SetShortName("\ALongFileName.txt","SHORT.TXT")
+
+    #Checkpoint
+
     #"Creating fragmented file"
     #for($i = 0; $i -lt $NumFiles; $i++)
     #{

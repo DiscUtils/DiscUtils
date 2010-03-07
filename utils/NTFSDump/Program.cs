@@ -79,8 +79,10 @@ namespace NTFSDump
                 partitionStream = volMgr.GetLogicalVolumes()[0].Open();
             }
 
+            SparseStream cacheStream = SparseStream.FromStream(partitionStream, Ownership.None);
+            cacheStream = new BlockCacheStream(cacheStream, Ownership.None);
 
-            NtfsFileSystem fs = new NtfsFileSystem(partitionStream);
+            NtfsFileSystem fs = new NtfsFileSystem(cacheStream);
             fs.NtfsOptions.HideHiddenFiles = !_showHidden.IsPresent;
             fs.NtfsOptions.HideSystemFiles = !_showSystem.IsPresent;
             fs.NtfsOptions.HideMetafiles = !_showMeta.IsPresent;

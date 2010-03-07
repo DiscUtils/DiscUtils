@@ -431,7 +431,31 @@ namespace DiscUtils.Ntfs
 
                 File file = GetFile(dirEntry.Reference);
 
+                // Remove the main reference
                 parentDir.RemoveEntry(dirEntry);
+
+                // Win32 and Dos names have an alternate alias, remove it as well...
+                FileNameNamespace? aliasNamespace = null;
+                if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Dos)
+                {
+                    aliasNamespace = FileNameNamespace.Win32;
+                }
+                if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Win32)
+                {
+                    aliasNamespace = FileNameNamespace.Dos;
+                }
+                if (aliasNamespace.HasValue)
+                {
+                    string alias = file.GetFirstName(parentDir.MftReference, aliasNamespace.Value);
+                    if (!string.IsNullOrEmpty(alias))
+                    {
+                        DirectoryEntry aliasEntry = parentDir.GetEntryByName(alias);
+                        if (aliasEntry != null)
+                        {
+                            parentDir.RemoveEntry(aliasEntry);
+                        }
+                    }
+                }
 
                 if (file.HardLinkCount == 0)
                 {
@@ -533,7 +557,7 @@ namespace DiscUtils.Ntfs
 
                 Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
-                return Utilities.Map<DirectoryEntry, string>(parentDir.GetAllEntries(), (m) => Utilities.CombinePaths(path, m.Details.FileName));
+                return Utilities.Map<DirectoryEntry, string>(parentDir.GetAllEntries(true), (m) => Utilities.CombinePaths(path, m.Details.FileName));
             }
         }
 
@@ -561,7 +585,7 @@ namespace DiscUtils.Ntfs
                 Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
                 List<string> result = new List<string>();
-                foreach (DirectoryEntry dirEntry in parentDir.GetAllEntries())
+                foreach (DirectoryEntry dirEntry in parentDir.GetAllEntries(true))
                 {
                     if (re.IsMatch(dirEntry.Details.FileName))
                     {
@@ -1118,8 +1142,28 @@ namespace DiscUtils.Ntfs
                 }
 
                 File file = GetFile(sourceDirEntry.Reference);
-                destinationDir.AddEntry(file, Path.GetFileName(destinationName));
+                destinationDir.AddEntry(file, Path.GetFileName(destinationName), FileNameNamespace.Posix);
                 destinationDirSelfEntry.UpdateFrom(destinationDir);
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of hard links to a given file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The number of hard links</returns>
+        /// <remarks>All files have at least one hard link</remarks>
+        public int GetHardLinkCount(string path)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+
+                return GetFile(dirEntry.Reference).HardLinkCount;
             }
         }
 
@@ -1324,6 +1368,156 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Gets the short name for a given path.
+        /// </summary>
+        /// <param name="path">The path to convert</param>
+        /// <returns>The short name</returns>
+        /// <remarks>
+        /// This method only gets the short name for the final part of the path, to
+        /// convert a complete path, call this method repeatedly, once for each path
+        /// segment.  If there is no short name for the given path,<c>null</c> is
+        /// returned.
+        /// </remarks>
+        public string GetShortName(string path)
+        {
+            using (new NtfsTransaction())
+            {
+                string parentPath = Path.GetDirectoryName(path);
+                DirectoryEntry parentEntry = GetDirectoryEntry(parentPath);
+                if (parentEntry == null || (parentEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
+                {
+                    throw new DirectoryNotFoundException("Parent directory not found");
+                }
+
+                Directory dir = GetDirectory(parentEntry.Reference);
+                if (dir == null)
+                {
+                    throw new DirectoryNotFoundException("Parent directory not found");
+                }
+
+                DirectoryEntry givenEntry = dir.GetEntryByName(Path.GetFileName(path));
+                if (givenEntry == null)
+                {
+                    throw new FileNotFoundException("Path not found", path);
+                }
+
+                if (givenEntry.Details.FileNameNamespace == FileNameNamespace.Dos)
+                {
+                    return givenEntry.Details.FileName;
+                }
+                else if (givenEntry.Details.FileNameNamespace == FileNameNamespace.Win32)
+                {
+                    File file = GetFile(givenEntry.Reference);
+
+                    foreach (var stream in file.GetStreams(AttributeType.FileName, null))
+                    {
+                        FileNameRecord fnr = stream.GetContent<FileNameRecord>();
+                        if (fnr.ParentDirectory.Equals(givenEntry.Details.ParentDirectory)
+                            && fnr.FileNameNamespace == FileNameNamespace.Dos)
+                        {
+                            return fnr.FileName;
+                        }
+
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Sets the short name for a given file or directory.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to change.</param>
+        /// <param name="shortName">The shortName, which should not include a path.</param>
+        public void SetShortName(string path, string shortName)
+        {
+            if (!Utilities.Is8Dot3(shortName))
+            {
+                throw new ArgumentException("Short name is not a valid 8.3 file name", "shortName");
+            }
+
+            using (new NtfsTransaction())
+            {
+                string parentPath = Path.GetDirectoryName(path);
+                DirectoryEntry parentEntry = GetDirectoryEntry(parentPath);
+                if (parentEntry == null || (parentEntry.Details.FileAttributes & FileAttributes.Directory) == 0)
+                {
+                    throw new DirectoryNotFoundException("Parent directory not found");
+                }
+
+                Directory dir = GetDirectory(parentEntry.Reference);
+                if (dir == null)
+                {
+                    throw new DirectoryNotFoundException("Parent directory not found");
+                }
+
+                DirectoryEntry givenEntry = dir.GetEntryByName(Path.GetFileName(path));
+                if (givenEntry == null)
+                {
+                    throw new FileNotFoundException("Path not found", path);
+                }
+
+                FileNameNamespace givenNamespace = givenEntry.Details.FileNameNamespace;
+                File file = GetFile(givenEntry.Reference);
+
+                if (givenNamespace == FileNameNamespace.Posix && file.HasWin32OrDosName)
+                {
+                    throw new InvalidOperationException("Cannot set a short name on hard links");
+                }
+
+                // Convert Posix/Win32AndDos to just Win32
+                if (givenEntry.Details.FileNameNamespace != FileNameNamespace.Win32)
+                {
+                    dir.RemoveEntry(givenEntry);
+                    dir.AddEntry(file, givenEntry.Details.FileName, FileNameNamespace.Win32);
+                }
+
+                // Remove any existing Dos names, and set the new one
+                List<NtfsStream> nameStreams = new List<NtfsStream>(file.GetStreams(AttributeType.FileName, null));
+                foreach (var stream in nameStreams)
+                {
+                    FileNameRecord fnr = stream.GetContent<FileNameRecord>();
+                    if (fnr.ParentDirectory.Equals(givenEntry.Details.ParentDirectory)
+                        && fnr.FileNameNamespace == FileNameNamespace.Dos)
+                    {
+                        DirectoryEntry oldEntry = dir.GetEntryByName(fnr.FileName);
+                        dir.RemoveEntry(oldEntry);
+                    }
+                }
+                dir.AddEntry(file, shortName, FileNameNamespace.Dos);
+
+                parentEntry.UpdateFrom(dir);
+            }
+        }
+
+        /// <summary>
+        /// Gets the file id for a given path.
+        /// </summary>
+        /// <param name="path">The path to get the id of</param>
+        /// <returns>The file id</returns>
+        /// <remarks>
+        /// The returned file id includes the MFT index of the primary file record for the file.
+        /// The file id can be used to determine if two paths refer to the same actual file.
+        /// The MFT index is held in the lower 48 bits of the id.
+        /// </remarks>
+        public long GetFileId(string path)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+                else
+                {
+                    return (long)dirEntry.Reference.Value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the volume label.
         /// </summary>
         public override string VolumeLabel
@@ -1523,7 +1717,7 @@ namespace DiscUtils.Ntfs
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
             }
 
-            foreach (DirectoryEntry de in parentDir.GetAllEntries())
+            foreach (DirectoryEntry de in parentDir.GetAllEntries(true))
             {
                 bool isDir = ((de.Details.FileAttributes & FileAttributes.Directory) != 0);
 
@@ -1614,7 +1808,7 @@ namespace DiscUtils.Ntfs
 
         private void DumpDirectory(Directory dir, TextWriter writer, string indent)
         {
-            foreach (DirectoryEntry dirEntry in dir.GetAllEntries())
+            foreach (DirectoryEntry dirEntry in dir.GetAllEntries(true))
             {
                 File file = GetFile(dirEntry.Reference);
                 Directory asDir = file as Directory;
