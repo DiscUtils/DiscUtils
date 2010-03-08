@@ -228,10 +228,12 @@ namespace DiscUtils.Ntfs
             ntfs.CreateDirectory("System Volume Information");
             ntfs.SetAttributes("System Volume Information", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory);
             ntfs.SetSecurity("System Volume Information", new RawSecurityDescriptor("O:BAG:SYD:(A;OICI;FA;;;SY)"));
+            ntfs.SetShortName("System Volume Information", "SYSTEM~1");
 
             using (Stream s = ntfs.OpenFile(@"System Volume Information\MountPointManagerRemoteDatabase", FileMode.Create)) { }
             ntfs.SetAttributes(@"System Volume Information\MountPointManagerRemoteDatabase", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Archive);
             ntfs.SetSecurity(@"System Volume Information\MountPointManagerRemoteDatabase", new RawSecurityDescriptor("O:BAG:SYD:(A;;FA;;;SY)"));
+            ntfs.SetShortName(@"System Volume Information\MountPointManagerRemoteDatabase", "MOUNTP~1");
             return ntfs;
         }
 
