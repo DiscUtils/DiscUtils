@@ -34,6 +34,7 @@ namespace DiscUtils.Ntfs
         MountedOnNT4 = 0x08,
         DeleteUSNUnderway = 0x10,
         RepairObjectIds = 0x20,
+        DisableShortNameCreation = 0x80,
         ModifiedByChkDsk = 0x8000
     }
 }
