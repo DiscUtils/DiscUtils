@@ -133,7 +133,7 @@ namespace DiscUtils.BootConfig
 
             if (Type == 5)
             {
-                Array.Clear(data, offset + 0x10, 0x48);
+                Array.Clear(data, offset + 0x10, 0x38);
             }
             else if(Type == 6)
             {
