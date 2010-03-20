@@ -20,9 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Globalization;
+using System.IO;
+using System.Management.Automation;
 
 namespace DiscUtils.PowerShell
 {
@@ -54,6 +54,50 @@ namespace DiscUtils.PowerShell
         public static string DenormalizePath(string path)
         {
             return path.Replace('#', ':');
+        }
+
+        public static Stream OpenPsPath(SessionState session, string filePath, FileAccess access, FileShare share)
+        {
+            var items = session.InvokeProvider.Item.Get(filePath);
+            if (items.Count == 1)
+            {
+                FileInfo itemAsFile = items[0].BaseObject as FileInfo;
+                if (itemAsFile != null)
+                {
+                    return itemAsFile.Open(FileMode.Open, access, share);
+                }
+
+                DiscFileInfo itemAsDiscFile = items[0].BaseObject as DiscFileInfo;
+                if (itemAsDiscFile != null)
+                {
+                    return itemAsDiscFile.Open(FileMode.Open, access);
+                }
+
+                throw new FileNotFoundException("Path is not a file", filePath);
+            }
+            else if (items.Count > 1)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "PowerShell path {0} is ambiguous", filePath));
+            }
+            else
+            {
+                throw new FileNotFoundException("No such file", filePath);
+            }
+        }
+
+        public static string ResolvePsPath(SessionState session, string filePath)
+        {
+            var paths = session.Path.GetResolvedPSPathFromPSPath(filePath);
+            if (paths.Count > 1)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "PowerShell path {0} is ambiguous", filePath));
+            }
+            else if (paths.Count < 1)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "PowerShell path {0} not found", filePath));
+            }
+
+            return paths[0].Path;
         }
 
     }

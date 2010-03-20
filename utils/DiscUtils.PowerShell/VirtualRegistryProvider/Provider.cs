@@ -67,7 +67,7 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
                     "InvalidRoot",
                     ErrorCategory.InvalidArgument,
                     drive));
-                //return null;
+                return null;
             }
             string filePath = mountPaths[0];
             string relPath = mountPaths.Length > 1 ? mountPaths[1] : "";
@@ -77,19 +77,8 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
             FileAccess access = dynParams.ReadWrite.IsPresent ? FileAccess.ReadWrite : FileAccess.Read;
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
 
-            filePath = SessionState.Path.GetResolvedPSPathFromPSPath(filePath)[0].Path;
-            var items = SessionState.InvokeProvider.Item.Get(filePath);
-            if (items.Count == 1)
-            {
-                if (items[0].BaseObject is FileInfo)
-                {
-                    hiveStream = ((FileInfo)items[0].BaseObject).Open(FileMode.Open, access, share);
-                }
-                else if (items[0].BaseObject is DiscFileInfo)
-                {
-                    hiveStream = ((DiscFileInfo)items[0].BaseObject).Open(FileMode.Open, access);
-                }
-            }
+            filePath = Utilities.ResolvePsPath(SessionState, filePath);
+            hiveStream = Utilities.OpenPsPath(SessionState, filePath, access, share);
 
 
             if (hiveStream == null)

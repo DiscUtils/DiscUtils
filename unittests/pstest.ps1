@@ -30,7 +30,7 @@
 # has not been corrupted.
 #
 
-Param([switch]$All, [switch]$Ntfs, [switch]$Cmdlets = $true)
+Param([switch]$All, [switch]$Ntfs, [switch]$Cmdlets, [switch]$Registry)
 
 
 #
@@ -39,6 +39,7 @@ Param([switch]$All, [switch]$Ntfs, [switch]$Cmdlets = $true)
 $DiscUtilsModule = "c:\work\codeplex\discutils\trunk\utils\DiscUtils.PowerShell\bin\release\discutils.psd1"
 $tempdir = "C:\temp\"
 $diskfile = "C:\temp\newdisk.vhd"
+$regfile = "C:\temp\newreg.hiv"
 $testdrive = "Q"
 $sig = 0x12345657
 $verbose = $false;
@@ -111,6 +112,42 @@ function InvokeDiskpart
     }
 }
 
+function InvokeReg
+{
+    param($cmd,$p1,$p2)
+
+    Trace "REG" "$cmd $p1 $p2"
+
+    $output = $(reg $cmd $p1 $p2)
+
+    if($LastExitCode -ge 1)
+    {
+        Write-Error "REG command failed: $cmd"
+        Exit
+    }
+}
+
+function LoadHive
+{
+    param($hive)
+
+    InvokeReg "load" "HKU\TempHive" "$hive"
+
+    $key = Get-Item "Registry::HKEY_USERS\TempHive"
+    if(-not $?)
+    {
+        Write-Error "Failed to load registry hive $hive"
+        Exit
+    }
+
+    $key.Close()
+}
+
+function UnloadHive
+{
+    InvokeReg "unload" "HKU\TempHive"
+}
+
 function AttachDisk
 {
     param($disk, $drive)
@@ -167,6 +204,16 @@ function Checkpoint
     Remove-PSDrive vd -Scope Global
     RunChkdsk
     New-PSDrive vd -PSProvider VirtualDisk -Root $diskfile -ReadWrite -Scope Global | out-null
+}
+
+function CheckpointRegistry
+{
+    Remove-PSDrive vr
+
+    LoadHive "${tempdir}newreg.hiv"
+    UnloadHive "${tempdir}newreg.hiv"
+
+    New-PSDrive vr -PSProvider VirtualRegistry -Root $regfile -Scope Global | out-null
 }
 
 
@@ -262,6 +309,17 @@ function TestNtfs
 }
 
 
+#
+#-- Main logic (Registry)
+#
+function TestRegistry
+{
+    New-VirtualRegistry $regfile
+    New-PSDrive vr -PSProvider virtualregistry -Root $regfile
+
+    CheckpointRegistry
+}
+
 
 #
 #-- Main logic (Cmdlets)
@@ -302,11 +360,17 @@ if($All)
 {
     $Ntfs = $true;
     $Cmdlets = $true;
+    $Registry = $true;
 }
 
 if($Ntfs)
 {
     TestNtfs
+}
+
+if($Registry)
+{
+    TestRegistry
 }
 
 if($Cmdlets)

@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="FormatVolumeCommand.cs" />
     <Compile Include="InitializeVirtualDiskCommand.cs" />
+    <Compile Include="NewVirtualRegistryCommand.cs" />
     <Compile Include="NewVolumeCommand.cs" />
     <Compile Include="NewVirtualDiskCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
