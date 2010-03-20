@@ -342,7 +342,6 @@ namespace DiscUtils.Registry
             BinHeader newBinHeader = new BinHeader();
             newBinHeader.FileOffset = lastBin.FileOffset + lastBin.BinSize;
             newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4 * (int)Sizes.OneKiB);
-            newBinHeader.Timestamp = DateTime.UtcNow;
 
             byte[] buffer = new byte[newBinHeader.Size];
             newBinHeader.WriteTo(buffer, 0);

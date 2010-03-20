@@ -32,11 +32,9 @@ namespace DiscUtils.Registry
 
         public int FileOffset;
         public int BinSize;
-        public DateTime Timestamp;
 
         public BinHeader()
         {
-            Timestamp = DateTime.UtcNow;
         }
 
         #region IByteArraySerializable Members
@@ -52,7 +50,7 @@ namespace DiscUtils.Registry
             FileOffset = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
             BinSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
             long unknown = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
-            Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x0014));
+            long unknown1 = Utilities.ToInt64LittleEndian(buffer, offset + 0x14);
             int unknown2 = Utilities.ToInt32LittleEndian(buffer, offset + 0x1C);
             return HeaderSize;
         }
@@ -62,7 +60,6 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(Signature, buffer, offset + 0x00);
             Utilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 0x04);
             Utilities.WriteBytesLittleEndian(BinSize, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(Timestamp.ToFileTimeUtc(), buffer, offset + 0x14);
         }
 
         public int Size
