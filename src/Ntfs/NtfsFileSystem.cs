@@ -111,6 +111,20 @@ namespace DiscUtils.Ntfs
 #endif
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_context != null && _context.Mft != null)
+                {
+                    _context.Mft.Dispose();
+                    _context.Mft = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
@@ -1821,7 +1835,7 @@ namespace DiscUtils.Ntfs
             return entry;
         }
 
-        private void RemoveFileFromDirectory(Directory dir, File file, string name)
+        private static void RemoveFileFromDirectory(Directory dir, File file, string name)
         {
             List<string> aliases = new List<string>();
 

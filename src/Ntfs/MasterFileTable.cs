@@ -33,7 +33,7 @@ namespace DiscUtils.Ntfs
     /// <remarks>This class only understands basic record structure, and is
     /// ignorant of files that span multiple records.  This class should only
     /// be used by the NtfsFileSystem and File classes.</remarks>
-    internal class MasterFileTable : IDiagnosticTraceable
+    internal class MasterFileTable : IDiagnosticTraceable, IDisposable
     {
         private File _self;
         private Bitmap _bitmap;
@@ -120,6 +120,17 @@ namespace DiscUtils.Ntfs
             _recordStream = new SubStream(context.RawStream, bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector, 24 * _recordLength);
         }
 
+        public void Dispose()
+        {
+            if (_recordStream != null)
+            {
+                _recordStream.Dispose();
+                _recordStream = null;
+            }
+
+            GC.SuppressFinalize(this);
+        }
+
         public FileRecord GetBootstrapRecord()
         {
             _recordStream.Position = 0;
@@ -133,6 +144,11 @@ namespace DiscUtils.Ntfs
         public void Initialize(File file)
         {
             _self = file;
+
+            if (_recordStream != null)
+            {
+                _recordStream.Dispose();
+            }
 
             NtfsStream bitmapStream = _self.GetStream(AttributeType.Bitmap, null);
             _bitmap = new Bitmap(bitmapStream.Open(FileAccess.ReadWrite), long.MaxValue);
