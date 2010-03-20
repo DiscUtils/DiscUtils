@@ -226,17 +226,41 @@ namespace DiscUtils.Ntfs
         {
             NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
 
-            // Check we can find a short name in the same directory
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
             Assert.AreEqual(1, ntfs.GetHardLinkCount("ALongFileName.txt"));
 
-            ntfs.CreateHardLink("ALongFileName.txt", "ALONG~01.TXT");
+            ntfs.CreateHardLink("ALongFileName.txt", "AHardLink.TXT");
             Assert.AreEqual(2, ntfs.GetHardLinkCount("ALongFileName.txt"));
 
-            // Check we don't find short names in a different directory
             ntfs.CreateDirectory("DIR");
-            ntfs.CreateHardLink(@"ALongFileName.txt", @"DIR\SHORTN.TXT");
+            ntfs.CreateHardLink(@"ALongFileName.txt", @"DIR\SHORTLNK.TXT");
             Assert.AreEqual(3, ntfs.GetHardLinkCount("ALongFileName.txt"));
+
+            // If we enumerate short names, then the initial long name results in two 'hardlinks'
+            ntfs.NtfsOptions.HideDosFileNames = false;
+            Assert.AreEqual(4, ntfs.GetHardLinkCount("ALongFileName.txt"));
+        }
+
+        [Test]
+        public void MoveLongName()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
+
+            Assert.IsTrue(ntfs.FileExists("ALONGF~1.TXT"));
+
+            ntfs.MoveFile("ALongFileName.txt", "ADifferentLongFileName.txt");
+
+            Assert.IsFalse(ntfs.FileExists("ALONGF~1.TXT"));
+            Assert.IsTrue(ntfs.FileExists("ADIFFE~1.TXT"));
+
+            ntfs.CreateDirectory("ALongDirectoryName");
+            Assert.IsTrue(ntfs.DirectoryExists("ALONGD~1"));
+
+            ntfs.MoveDirectory("ALongDirectoryName", "ADifferentLongDirectoryName");
+            Assert.IsFalse(ntfs.DirectoryExists("ALONGD~1"));
+            Assert.IsTrue(ntfs.DirectoryExists("ADIFFE~1"));
         }
     }
 }

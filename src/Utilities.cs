@@ -787,7 +787,7 @@ namespace DiscUtils
 
             foreach (char ch in split[0])
             {
-                if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%£-{}()@'`".IndexOf(ch) == -1)
+                if (!Is8Dot3Char(ch))
                 {
                     return false;
                 }
@@ -801,7 +801,7 @@ namespace DiscUtils
                 }
                 foreach (char ch in split[1])
                 {
-                    if ((ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && "_^$~!#%£-{}()@'`".IndexOf(ch) == -1)
+                    if (!Is8Dot3Char(ch))
                     {
                         return false;
                     }
@@ -809,6 +809,11 @@ namespace DiscUtils
             }
 
             return true;
+        }
+
+        internal static bool Is8Dot3Char(char ch)
+        {
+            return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || "_^$~!#%£-{}()@'`".IndexOf(ch) != -1;
         }
 
         /// <summary>

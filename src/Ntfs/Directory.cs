@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using DirectoryIndexEntry = System.Collections.Generic.KeyValuePair<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileRecordReference>;
@@ -81,11 +82,6 @@ namespace DiscUtils.Ntfs
         }
 
 
-        internal DirectoryEntry AddEntry(File file, string name)
-        {
-            return AddEntry(file, name, Utilities.Is8Dot3(name.ToUpperInvariant()) ? FileNameNamespace.Win32AndDos : FileNameNamespace.Posix);
-        }
-
         internal DirectoryEntry AddEntry(File file, string name, FileNameNamespace nameNamespace)
         {
             if (name.Length > 255)
@@ -139,6 +135,50 @@ namespace DiscUtils.Ntfs
 
             Modified();
             UpdateRecordInMft();
+        }
+
+        internal string CreateShortName(string name)
+        {
+            string baseName = string.Empty;
+            string ext = string.Empty;
+
+            int lastPeriod = name.LastIndexOf('.');
+
+            int i = 0;
+            while (baseName.Length < 6 && i < name.Length && i != lastPeriod)
+            {
+                char upperChar = Char.ToUpperInvariant(name[i]);
+                if (Utilities.Is8Dot3Char(upperChar))
+                {
+                    baseName += upperChar;
+                }
+                ++i;
+            }
+
+            if (lastPeriod >= 0)
+            {
+                i = lastPeriod + 1;
+                while (ext.Length < 3 && i < name.Length)
+                {
+                    char upperChar = Char.ToUpperInvariant(name[i]);
+                    if (Utilities.Is8Dot3Char(upperChar))
+                    {
+                        ext += upperChar;
+                    }
+                    ++i;
+                }
+            }
+
+            i = 1;
+            string candidate;
+            do
+            {
+                string suffix = string.Format(CultureInfo.InvariantCulture, "~{0}", i);
+                candidate = baseName.Substring(0, Math.Min(8 - suffix.Length, baseName.Length)) + suffix + (ext.Length > 0 ? "." + ext : "");
+                i++;
+            } while (GetEntryByName(candidate) != null);
+
+            return candidate;
         }
 
         internal new static Directory CreateNew(INtfsContext context)
@@ -244,6 +284,5 @@ namespace DiscUtils.Ntfs
                 return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen * 2);
             }
         }
-
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2009, Kenneth Bell
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -37,6 +37,7 @@ namespace DiscUtils.Ntfs
         private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.Offline | FileAttributes.ReparsePoint;
 
         private NtfsContext _context;
+        private bool _createShortNames;
 
         // Top-level file system structures
 
@@ -85,6 +86,13 @@ namespace DiscUtils.Ntfs
             _context.ObjectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
             _context.ReparsePoints = new ReparsePoints(GetFile(GetDirectoryEntry(@"$Extend\$Reparse").Reference));
             _context.Quotas = new Quotas(GetFile(GetDirectoryEntry(@"$Extend\$Quota").Reference));
+
+            File volumeInfoFile = GetFile(MasterFileTable.VolumeIndex);
+            VolumeInformation volInfo = volumeInfoFile.GetStream(AttributeType.VolumeInformation, null).GetContent<VolumeInformation>();
+
+            _createShortNames = _context.Options.ShortNameCreation == ShortFileNameOption.Enabled
+                || (_context.Options.ShortNameCreation == ShortFileNameOption.UseVolumeFlag
+                    && (volInfo.Flags & VolumeInformationFlags.DisableShortNameCreation) == 0);
 
 #if false
             byte[] buffer = new byte[1024];
@@ -311,7 +319,7 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-                destParentDir.AddEntry(newFile, Path.GetFileName(destinationFile));
+                AddFileToDirectory(newFile, destParentDir, Path.GetFileName(destinationFile));
                 destParentDirEntry.UpdateFrom(destParentDir);
             }
         }
@@ -337,7 +345,7 @@ namespace DiscUtils.Ntfs
                         Directory childDir = Directory.CreateNew(_context);
                         try
                         {
-                            childDirEntry = focusDir.AddEntry(childDir, pathElements[i]);
+                            childDirEntry = AddFileToDirectory(childDir, focusDir, pathElements[i]);
 
                             RawSecurityDescriptor sd = DoGetSecurity(focusDir);
                             DoSetSecurity(childDir, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
@@ -637,8 +645,8 @@ namespace DiscUtils.Ntfs
                         throw new IOException("Destination directory already exists");
                     }
 
-                    destParentDir.AddEntry(file, Path.GetFileName(destinationDirectoryName));
-                    sourceParentDir.RemoveEntry(sourceEntry);
+                    RemoveFileFromDirectory(sourceParentDir, file, sourceEntry.Details.FileName);
+                    AddFileToDirectory(file, destParentDir, Path.GetFileName(destinationDirectoryName));
                 }
             }
         }
@@ -700,8 +708,8 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-                destParentDir.AddEntry(file, Path.GetFileName(destinationName));
-                sourceParentDir.RemoveEntry(sourceEntry);
+                RemoveFileFromDirectory(sourceParentDir, file, sourceEntry.Details.FileName);
+                AddFileToDirectory(file, destParentDir, Path.GetFileName(destinationName));
             }
         }
 
@@ -749,7 +757,7 @@ namespace DiscUtils.Ntfs
                         {
                             DirectoryEntry parentDirEntry = GetDirectoryEntry(Path.GetDirectoryName(path));
                             Directory parentDir = GetDirectory(parentDirEntry.Reference);
-                            entry = parentDir.AddEntry(file, Path.GetFileName(path));
+                            entry = AddFileToDirectory(file, parentDir, Path.GetFileName(path));
 
                             RawSecurityDescriptor sd = DoGetSecurity(parentDir);
                             DoSetSecurity(file, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
@@ -1163,7 +1171,27 @@ namespace DiscUtils.Ntfs
                     throw new FileNotFoundException("File not found", path);
                 }
 
-                return GetFile(dirEntry.Reference).HardLinkCount;
+                File file = GetFile(dirEntry.Reference);
+
+                if (!_context.Options.HideDosFileNames)
+                {
+                    return file.HardLinkCount;
+                }
+                else
+                {
+                    int numHardLinks = 0;
+
+                    foreach (var fnStream in file.GetStreams(AttributeType.FileName, null))
+                    {
+                        var fnr = fnStream.GetContent<FileNameRecord>();
+                        if (fnr.FileNameNamespace != FileNameNamespace.Dos)
+                        {
+                            ++numHardLinks;
+                        }
+                    }
+
+                    return numHardLinks;
+                }
             }
         }
 
@@ -1766,6 +1794,60 @@ namespace DiscUtils.Ntfs
                 {
                     return null;
                 }
+            }
+        }
+
+        private DirectoryEntry AddFileToDirectory(File file, Directory dir, string name)
+        {
+            DirectoryEntry entry;
+
+            if (_createShortNames)
+            {
+                if (Utilities.Is8Dot3(name.ToUpperInvariant()))
+                {
+                    entry = dir.AddEntry(file, name, FileNameNamespace.Win32AndDos);
+                }
+                else
+                {
+                    entry = dir.AddEntry(file, name, FileNameNamespace.Win32);
+                    dir.AddEntry(file, dir.CreateShortName(name), FileNameNamespace.Dos);
+                }
+            }
+            else
+            {
+                entry = dir.AddEntry(file, name, FileNameNamespace.Posix);
+            }
+
+            return entry;
+        }
+
+        private void RemoveFileFromDirectory(Directory dir, File file, string name)
+        {
+            List<string> aliases = new List<string>();
+
+            DirectoryEntry dirEntry = dir.GetEntryByName(name);
+            if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Dos
+                || dirEntry.Details.FileNameNamespace == FileNameNamespace.Win32)
+            {
+                foreach (var fnStream in file.GetStreams(AttributeType.FileName, null))
+                {
+                    var fnr = fnStream.GetContent<FileNameRecord>();
+                    if ((fnr.FileNameNamespace == FileNameNamespace.Win32 || fnr.FileNameNamespace == FileNameNamespace.Dos)
+                        && fnr.ParentDirectory.Value == dir.MftReference.Value)
+                    {
+                        aliases.Add(fnr.FileName);
+                    }
+                }
+            }
+            else
+            {
+                aliases.Add(name);
+            }
+
+            foreach (var alias in aliases)
+            {
+                DirectoryEntry de = dir.GetEntryByName(alias);
+                dir.RemoveEntry(de);
             }
         }
 

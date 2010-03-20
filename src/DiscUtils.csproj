@@ -276,6 +276,7 @@
     <Compile Include="Ntfs\SecurityDescriptor.cs" />
     <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />
     <Compile Include="Ntfs\SecurityDescriptors.cs" />
+    <Compile Include="Ntfs\ShortFileNameOption.cs" />
     <Compile Include="Ntfs\StandardInformation.cs" />
     <Compile Include="Ntfs\StructuredNtfsAttribute.cs" />
     <Compile Include="Ntfs\UpperCase.cs" />

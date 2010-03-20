@@ -178,25 +178,25 @@ namespace DiscUtils.Ntfs
                 Quotas.Initialize(quotaFile);
 
                 Directory extendDir = CreateSystemDirectory(MasterFileTable.ExtendIndex);
-                extendDir.AddEntry(objIdFile, "$ObjId");
-                extendDir.AddEntry(reparseFile, "$Reparse");
-                extendDir.AddEntry(quotaFile, "$Quota");
+                extendDir.AddEntry(objIdFile, "$ObjId", FileNameNamespace.Win32AndDos);
+                extendDir.AddEntry(reparseFile, "$Reparse", FileNameNamespace.Win32AndDos);
+                extendDir.AddEntry(quotaFile, "$Quota", FileNameNamespace.Win32AndDos);
                 extendDir.UpdateRecordInMft();
 
 
                 Directory rootDir = CreateSystemDirectory(MasterFileTable.RootDirIndex);
-                rootDir.AddEntry(mftFile, "$MFT");
-                rootDir.AddEntry(mftMirrorFile, "$MFTMirr");
-                rootDir.AddEntry(logFile, "$LogFile");
-                rootDir.AddEntry(volumeFile, "$Volume");
-                rootDir.AddEntry(attrDefFile, "$AttrDef");
-                rootDir.AddEntry(rootDir, ".");
-                rootDir.AddEntry(bitmapFile, "$Bitmap");
-                rootDir.AddEntry(bootFile, "$Boot");
-                rootDir.AddEntry(badClusFile, "$BadClus");
-                rootDir.AddEntry(secureFile, "$Secure");
-                rootDir.AddEntry(upcaseFile, "$UpCase");
-                rootDir.AddEntry(extendDir, "$Extend");
+                rootDir.AddEntry(mftFile, "$MFT", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(mftMirrorFile, "$MFTMirr", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(logFile, "$LogFile", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(volumeFile, "$Volume", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(attrDefFile, "$AttrDef", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(rootDir, ".", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(bitmapFile, "$Bitmap", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(bootFile, "$Boot", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(badClusFile, "$BadClus", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(secureFile, "$Secure", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(upcaseFile, "$UpCase", FileNameNamespace.Win32AndDos);
+                rootDir.AddEntry(extendDir, "$Extend", FileNameNamespace.Win32AndDos);
                 SetSecurityAttribute(rootDir, "O:LAG:BUD:(A;OICI;FA;;;BA)(A;OICI;FA;;;SY)(A;OICIIO;GA;;;CO)(A;OICI;0x1200a9;;;BU)(A;CI;LC;;;BU)(A;CIIO;DC;;;BU)(A;;0x1200a9;;;WD)");
                 rootDir.UpdateRecordInMft();
 
@@ -228,12 +228,10 @@ namespace DiscUtils.Ntfs
             ntfs.CreateDirectory("System Volume Information");
             ntfs.SetAttributes("System Volume Information", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory);
             ntfs.SetSecurity("System Volume Information", new RawSecurityDescriptor("O:BAG:SYD:(A;OICI;FA;;;SY)"));
-            ntfs.SetShortName("System Volume Information", "SYSTEM~1");
 
             using (Stream s = ntfs.OpenFile(@"System Volume Information\MountPointManagerRemoteDatabase", FileMode.Create)) { }
             ntfs.SetAttributes(@"System Volume Information\MountPointManagerRemoteDatabase", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Archive);
             ntfs.SetSecurity(@"System Volume Information\MountPointManagerRemoteDatabase", new RawSecurityDescriptor("O:BAG:SYD:(A;;FA;;;SY)"));
-            ntfs.SetShortName(@"System Volume Information\MountPointManagerRemoteDatabase", "MOUNTP~1");
             return ntfs;
         }
 

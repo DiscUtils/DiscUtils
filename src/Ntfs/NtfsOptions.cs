@@ -32,6 +32,7 @@ namespace DiscUtils.Ntfs
         private bool _hideHiddenFiles;
         private bool _hideSystemFiles;
         private bool _hideDosFileNames;
+        private ShortFileNameOption _shortNameCreation;
 
         internal NtfsOptions()
         {
@@ -76,6 +77,15 @@ namespace DiscUtils.Ntfs
         {
             get { return _hideDosFileNames; }
             set { _hideDosFileNames = value; }
+        }
+
+        /// <summary>
+        /// Gets and sets whether short (8.3) file names are created automatically.
+        /// </summary>
+        public ShortFileNameOption ShortNameCreation
+        {
+            get { return _shortNameCreation; }
+            set { _shortNameCreation = value; }
         }
 
         /// <summary>

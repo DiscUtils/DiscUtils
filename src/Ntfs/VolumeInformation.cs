@@ -42,6 +42,11 @@ namespace DiscUtils.Ntfs
             _flags = flags;
         }
 
+        public VolumeInformationFlags Flags
+        {
+            get { return _flags; }
+        }
+
         #region IByteArraySerializable Members
 
         public int ReadFrom(byte[] buffer, int offset)
