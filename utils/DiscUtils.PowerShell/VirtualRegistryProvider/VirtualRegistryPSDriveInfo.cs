@@ -35,14 +35,17 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
             : base(toCopy.Name, toCopy.Provider, root, toCopy.Description, toCopy.Credential)
         {
             _hiveStream = stream;
-            _hive = new RegistryHive(_hiveStream);
+            _hive = new RegistryHive(_hiveStream, Ownership.Dispose);
         }
 
 
         internal void Close()
         {
-            _hive = null;
-            _hiveStream.Close();
+            if (_hive != null)
+            {
+                _hive.Dispose();
+                _hive = null;
+            }
         }
 
         internal RegistryHive Hive

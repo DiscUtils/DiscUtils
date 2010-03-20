@@ -30,11 +30,12 @@ namespace DiscUtils.Registry
     /// <summary>
     /// A registry hive.
     /// </summary>
-    public sealed class RegistryHive
+    public sealed class RegistryHive : IDisposable
     {
         private const long BinStart = 4 * Sizes.OneKiB;
 
         private Stream _fileStream;
+        private Ownership _ownsStream;
         private HiveHeader _header;
         private List<BinHeader> _bins;
 
@@ -42,10 +43,24 @@ namespace DiscUtils.Registry
         /// Creates a new instance from the contents of an existing stream.
         /// </summary>
         /// <param name="hive">The stream containing the registry hive</param>
+        /// <remarks>
+        /// The created object does not assume ownership of the stream.
+        /// </remarks>
         public RegistryHive(Stream hive)
+            : this(hive, Ownership.None)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance from the contents of an existing stream.
+        /// </summary>
+        /// <param name="hive">The stream containing the registry hive</param>
+        /// <param name="ownership">Whether the new object assumes object of the stream</param>
+        public RegistryHive(Stream hive, Ownership ownership)
         {
             _fileStream = hive;
             _fileStream.Position = 0;
+            _ownsStream = ownership;
 
             byte[] buffer = Utilities.ReadFully(_fileStream, HiveHeader.HeaderSize);
 
@@ -67,11 +82,37 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Disposes of this instance, freeing any underlying stream (if any).
+        /// </summary>
+        public void Dispose()
+        {
+            if (_fileStream != null && _ownsStream == Ownership.Dispose)
+            {
+                _fileStream.Dispose();
+                _fileStream = null;
+            }
+        }
+
+        /// <summary>
         /// Creates a new (empty) registry hive.
         /// </summary>
         /// <param name="stream">The stream to contain the new hive</param>
         /// <returns>The new hive</returns>
+        /// <remarks>
+        /// The returned object does not assume ownership of the stream.
+        /// </remarks>
         public static RegistryHive Create(Stream stream)
+        {
+            return Create(stream, Ownership.None);
+        }
+
+        /// <summary>
+        /// Creates a new (empty) registry hive.
+        /// </summary>
+        /// <param name="stream">The stream to contain the new hive</param>
+        /// <param name="ownership">Whether the returned object owns the stream</param>
+        /// <returns>The new hive</returns>
+        public static RegistryHive Create(Stream stream, Ownership ownership)
         {
             if (stream == null)
             {
@@ -130,7 +171,7 @@ namespace DiscUtils.Registry
             stream.Write(buffer, 0, buffer.Length);
 
             // Finally, return the new hive
-            return new RegistryHive(stream);
+            return new RegistryHive(stream, ownership);
         }
 
         /// <summary>
@@ -140,7 +181,7 @@ namespace DiscUtils.Registry
         /// <returns>The new hive</returns>
         public static RegistryHive Create(string path)
         {
-            return Create(new FileStream(path, FileMode.Create, FileAccess.ReadWrite));
+            return Create(new FileStream(path, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose);
         }
 
         /// <summary>

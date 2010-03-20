@@ -50,29 +50,31 @@ namespace BCDDump
         {
             using (Stream fileStream = File.OpenRead(_bcdFile.Value))
             {
-                RegistryHive hive = new RegistryHive(fileStream);
-
-                Store bcdDb = new Store(hive.Root);
-                foreach (var obj in bcdDb.Objects)
+                using (RegistryHive hive = new RegistryHive(fileStream))
                 {
-                    Console.WriteLine(obj.FriendlyName + ":");
-                    Console.WriteLine("               Id: " + obj.ToString());
-                    Console.WriteLine("             Type: " + obj.ObjectType);
-                    Console.WriteLine("   App Image Type: " + obj.ApplicationImageType);
-                    Console.WriteLine("         App Type: " + obj.ApplicationType);
-                    Console.WriteLine("  App can inherit: " + obj.IsInheritableBy(ObjectType.Application));
-                    Console.WriteLine("  Dev can inherit: " + obj.IsInheritableBy(ObjectType.Device));
-                    Console.WriteLine("  ELEMENTS");
-                    foreach (var elem in obj.Elements)
-                    {
-                        Console.WriteLine("    " + elem.FriendlyName + ":");
-                        Console.WriteLine("          Id: " + elem.ToString());
-                        Console.WriteLine("       Class: " + elem.Class);
-                        Console.WriteLine("      Format: " + elem.Format);
-                        Console.WriteLine("       Value: " + elem.Value);
-                    }
 
-                    Console.WriteLine();
+                    Store bcdDb = new Store(hive.Root);
+                    foreach (var obj in bcdDb.Objects)
+                    {
+                        Console.WriteLine(obj.FriendlyName + ":");
+                        Console.WriteLine("               Id: " + obj.ToString());
+                        Console.WriteLine("             Type: " + obj.ObjectType);
+                        Console.WriteLine("   App Image Type: " + obj.ApplicationImageType);
+                        Console.WriteLine("         App Type: " + obj.ApplicationType);
+                        Console.WriteLine("  App can inherit: " + obj.IsInheritableBy(ObjectType.Application));
+                        Console.WriteLine("  Dev can inherit: " + obj.IsInheritableBy(ObjectType.Device));
+                        Console.WriteLine("  ELEMENTS");
+                        foreach (var elem in obj.Elements)
+                        {
+                            Console.WriteLine("    " + elem.FriendlyName + ":");
+                            Console.WriteLine("          Id: " + elem.ToString());
+                            Console.WriteLine("       Class: " + elem.Class);
+                            Console.WriteLine("      Format: " + elem.Format);
+                            Console.WriteLine("       Value: " + elem.Value);
+                        }
+
+                        Console.WriteLine();
+                    }
                 }
             }
         }

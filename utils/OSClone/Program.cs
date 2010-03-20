@@ -117,15 +117,17 @@ namespace OSClone
                         // complex multi-volume / multi-boot scenarios at all.
                         using (Stream bcdStream = destNtfs.OpenFile(@"\boot\BCD", FileMode.Open, FileAccess.ReadWrite))
                         {
-                            RegistryHive hive = new RegistryHive(bcdStream);
-                            Store store = new Store(hive.Root);
-                            foreach (var obj in store.Objects)
+                            using (RegistryHive hive = new RegistryHive(bcdStream))
                             {
-                                foreach (var elem in obj.Elements)
+                                Store store = new Store(hive.Root);
+                                foreach (var obj in store.Objects)
                                 {
-                                    if (elem.Format == DiscUtils.BootConfig.ElementFormat.Device)
+                                    foreach (var elem in obj.Elements)
                                     {
-                                        elem.Value = DiscUtils.BootConfig.ElementValue.ForDevice(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
+                                        if (elem.Format == DiscUtils.BootConfig.ElementFormat.Device)
+                                        {
+                                            elem.Value = DiscUtils.BootConfig.ElementValue.ForDevice(elem.Value.ParentObject, volMgr.GetPhysicalVolumes()[0]);
+                                        }
                                     }
                                 }
                             }
