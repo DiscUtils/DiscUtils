@@ -106,6 +106,7 @@ namespace OSClone
                 using (NtfsFileSystem destNtfs = NtfsFileSystem.Format(volMgr.GetLogicalVolumes()[0], label, bootCode))
                 {
                     destNtfs.SetSecurity(@"\", sourceNtfs.GetSecurity(@"\"));
+                    destNtfs.NtfsOptions.ShortNameCreation = ShortFileNameOption.Disabled;
 
                     sourceNtfs.NtfsOptions.HideHiddenFiles = false;
                     sourceNtfs.NtfsOptions.HideSystemFiles = false;
@@ -197,9 +198,9 @@ namespace OSClone
                 Console.WriteLine(file);
 
                 int hardLinksRemaining = sourceNtfs.GetHardLinkCount(file) - 1;
-                bool newFile = false;
 
                 long sourceFileId = sourceNtfs.GetFileId(file);
+
                 string refPath;
                 if (_uniqueFiles.TryGetValue(sourceFileId, out refPath))
                 {
@@ -209,7 +210,11 @@ namespace OSClone
                 else
                 {
                     CopyFile(sourceNtfs, destNtfs, file);
-                    newFile = true;
+
+                    if (hardLinksRemaining > 0)
+                    {
+                        _uniqueFiles[sourceFileId] = file;
+                    }
                 }
 
                 // File may have a short name
@@ -217,12 +222,6 @@ namespace OSClone
                 if (!string.IsNullOrEmpty(shortName) && shortName != file)
                 {
                     destNtfs.SetShortName(file, shortName);
-                    --hardLinksRemaining;
-                }
-
-                if (hardLinksRemaining > 0 && newFile)
-                {
-                    _uniqueFiles[sourceFileId] = file;
                 }
             }
         }
