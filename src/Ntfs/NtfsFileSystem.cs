@@ -37,7 +37,7 @@ namespace DiscUtils.Ntfs
         private const FileAttributes NonSettableFileAttributes = FileAttributes.Directory | FileAttributes.Offline | FileAttributes.ReparsePoint;
 
         private NtfsContext _context;
-        private bool _createShortNames;
+        private VolumeInformation _volumeInfo;
 
         // Top-level file system structures
 
@@ -88,11 +88,7 @@ namespace DiscUtils.Ntfs
             _context.Quotas = new Quotas(GetFile(GetDirectoryEntry(@"$Extend\$Quota").Reference));
 
             File volumeInfoFile = GetFile(MasterFileTable.VolumeIndex);
-            VolumeInformation volInfo = volumeInfoFile.GetStream(AttributeType.VolumeInformation, null).GetContent<VolumeInformation>();
-
-            _createShortNames = _context.Options.ShortNameCreation == ShortFileNameOption.Enabled
-                || (_context.Options.ShortNameCreation == ShortFileNameOption.UseVolumeFlag
-                    && (volInfo.Flags & VolumeInformationFlags.DisableShortNameCreation) == 0);
+            _volumeInfo = volumeInfoFile.GetStream(AttributeType.VolumeInformation, null).GetContent<VolumeInformation>();
 
 #if false
             byte[] buffer = new byte[1024];
@@ -1815,7 +1811,7 @@ namespace DiscUtils.Ntfs
         {
             DirectoryEntry entry;
 
-            if (_createShortNames)
+            if (CreateShortNames)
             {
                 if (Utilities.Is8Dot3(name.ToUpperInvariant()))
                 {
@@ -1833,6 +1829,16 @@ namespace DiscUtils.Ntfs
             }
 
             return entry;
+        }
+
+        private bool CreateShortNames
+        {
+            get
+            {
+                return _context.Options.ShortNameCreation == ShortFileNameOption.Enabled
+                                || (_context.Options.ShortNameCreation == ShortFileNameOption.UseVolumeFlag
+                                    && (_volumeInfo.Flags & VolumeInformationFlags.DisableShortNameCreation) == 0);
+            }
         }
 
         private static void RemoveFileFromDirectory(Directory dir, File file, string name)
