@@ -685,7 +685,13 @@ namespace DiscUtils.Ntfs
 
         public SparseStream OpenStream(AttributeType attrType, string name, FileAccess access)
         {
-            return new FileStream(this, GetAttribute(attrType, name), access);
+            NtfsAttribute attr = GetAttribute(attrType, name);
+            if (attr != null)
+            {
+                return new FileStream(this, attr, access);
+            }
+
+            return null;
         }
 
         public void RemoveStream(NtfsStream stream)

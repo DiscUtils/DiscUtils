@@ -262,5 +262,13 @@ namespace DiscUtils.Ntfs
             Assert.IsFalse(ntfs.DirectoryExists("ALONGD~1"));
             Assert.IsTrue(ntfs.DirectoryExists("ADIFFE~1"));
         }
+
+        [Test]
+        public void OpenRawStream()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            Assert.Null(ntfs.OpenRawStream(@"$Extend\$ObjId", AttributeType.Data, null, FileAccess.Read));
+        }
     }
 }

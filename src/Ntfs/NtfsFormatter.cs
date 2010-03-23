@@ -166,6 +166,7 @@ namespace DiscUtils.Ntfs
 
 
                 File objIdFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex);
+                objIdFile.RemoveStream(objIdFile.GetStream(AttributeType.Data, null));
                 objIdFile.CreateIndex("$O", (AttributeType)0, AttributeCollationRule.MultipleUnsignedLongs);
                 objIdFile.UpdateRecordInMft();
 
