@@ -107,6 +107,10 @@ namespace DiscUtils.Ntfs
 #endif
         }
 
+        /// <summary>
+        /// Disposes of this instance
+        /// </summary>
+        /// <param name="disposing">Whether called from Dispose or from a finalizer</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
