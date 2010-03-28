@@ -37,11 +37,6 @@ namespace DiscUtils.Ntfs
             _records = new List<AttributeListRecord>();
         }
 
-        public IEnumerable<AttributeListRecord> Records
-        {
-            get { return _records; }
-        }
-
         public int ReadFrom(byte[] buffer, int offset)
         {
             _records.Clear();
@@ -78,20 +73,6 @@ namespace DiscUtils.Ntfs
                 }
                 return total;
             }
-        }
-
-        internal bool ChangeAttrLocation(AttributeReference oldRef, AttributeReference newRef)
-        {
-            foreach (var record in _records)
-            {
-                if (record.AttributeReference.Equals(oldRef))
-                {
-                    record.AttributeReference = newRef;
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -142,18 +123,6 @@ namespace DiscUtils.Ntfs
             return _records.Remove(item);
         }
 
-        public void Remove(AttributeReference itemRef)
-        {
-            for (int i = 0; i < _records.Count; ++i)
-            {
-                if(_records[i].BaseFileReference == itemRef.File && _records[i].AttributeId == itemRef.AttributeId)
-                {
-                    _records.RemoveAt(i);
-                    break;
-                }
-            }
-        }
-
         #endregion
 
         #region IEnumerable<AttributeListRecord> Members
@@ -185,16 +154,6 @@ namespace DiscUtils.Ntfs
         public ulong StartVcn;
         public FileRecordReference BaseFileReference;
         public ushort AttributeId;
-
-        public AttributeReference AttributeReference
-        {
-            get { return new AttributeReference(BaseFileReference, AttributeId); }
-            set
-            {
-                BaseFileReference = value.File;
-                AttributeId = value.AttributeId;
-            }
-        }
 
         #region IByteArraySerializable Members
 
@@ -278,20 +237,20 @@ namespace DiscUtils.Ntfs
 
         #endregion
 
-        public static AttributeListRecord FromAttribute(NtfsAttribute attr)
+        public static AttributeListRecord FromAttribute(AttributeRecord attr, FileRecordReference mftRecord)
         {
             AttributeListRecord newRecord = new AttributeListRecord()
             {
-                Type = attr.Type,
+                Type = attr.AttributeType,
                 Name = attr.Name,
                 StartVcn = 0,
-                BaseFileReference = attr.Reference.File,
-                AttributeId = attr.Id
+                BaseFileReference = mftRecord,
+                AttributeId = attr.AttributeId
             };
 
             if (attr.IsNonResident)
             {
-                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr.Record).StartVcn;
+                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr).StartVcn;
             }
 
             return newRecord;

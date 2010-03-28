@@ -224,7 +224,7 @@ function TestNtfs
 {
     $TempMountRoot = ("$testdrive" + ":\")
     $ClusterData = New-Object byte[] 4096
-    $FourMB = New-Object byte[] $(4 * $OneMB)
+    $FragFileBigBlock = New-Object byte[] $(4 * $OneMB)
     $NumFiles = 500
 
     # Check we're elevated
@@ -246,7 +246,7 @@ function TestNtfs
     New-Item -Type file vd:\Volume0\TestFile.txt
     Set-Content vd:\Volume0\TestFile.txt "This is a test file"
 
-    Checkpoint
+    #Checkpoint
 
     "Creating 50 hard links"
     for($i = 0; $i -lt 50; $i++)
@@ -254,7 +254,7 @@ function TestNtfs
         New-Item -type HardLink "vd:\Volume0\hardlink${i}" -SourcePath "vd:\Volume0\TestFile.txt"
     }
 
-    Checkpoint
+    #Checkpoint
 
     "Removing hard links"
     for($i = 0; $i -lt 50; $i++)
@@ -262,18 +262,18 @@ function TestNtfs
         Remove-Item "vd:\Volume0\hardlink${i}"
     }
 
-    Checkpoint
+    #Checkpoint
 
     "Creating file.bin"
     New-Item -type file vd:\Volume0\file.bin
     Set-Content vd:\Volume0\file.bin $ClusterData
 
-    Checkpoint
+    #Checkpoint
 
     "Removing file.bin"
     Remove-Item vd:\Volume0\file.bin
 
-    Checkpoint
+    #Checkpoint
 
     "Creating $($NumFiles * 2) files"
     for($i = 0; $i -lt $NumFiles; $i++)
@@ -286,22 +286,31 @@ function TestNtfs
         Set-Content vd:\Volume0\${i}file.bin $ClusterData
     }
 
-    Checkpoint
+    #Checkpoint
 
     "Creating files with short names"
     $RootDir = Get-Item 'vd:\Volume0\$Root'
     New-Item -type file "vd:\Volume0\ALongFileName.txt"
     $RootDir.FileSystem.SetShortName("\ALongFileName.txt","SHORT.TXT")
 
-    #Checkpoint
+    Checkpoint
 
-    #"Creating fragmented file"
+    "Creating fragmented file"
     #for($i = 0; $i -lt $NumFiles; $i++)
-    #{
-    #    Remove-Item "vd:\Volume0\file${i}.bin"
-    #}
-    #New-Item -type file "vd:\Volume0\fragfile.bin"
-    #Set-Content "vd:\Volume0\fragfile.bin" $FourMB
+    for($i = 0; $i -lt 100; $i++)
+    {
+        Remove-Item "vd:\Volume0\file${i}.bin"
+    }
+    New-Item -type file "vd:\Volume0\fragfile.bin"
+    Set-Content "vd:\Volume0\fragfile.bin" $FragFileBigBlock
+    Add-Content "vd:\Volume0\fragfile.bin" $ClusterData
+
+
+    Checkpoint
+
+    "Shrinking fragmented file"
+    Set-Content "vd:\Volume0\fragfile.bin" $ClusterData
+
 
     # Cleanup
     Remove-PSDrive vd

@@ -51,6 +51,7 @@ namespace DiscUtils.Ntfs
         public long RunOffset
         {
             get { return _runOffset; }
+            set { _runOffset = value; }
         }
 
         public bool IsSparse

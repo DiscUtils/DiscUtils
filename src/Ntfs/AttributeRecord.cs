@@ -45,27 +45,16 @@ namespace DiscUtils.Ntfs
 
         protected string _name;
 
-        protected int _debug_bufPos;
-        protected int _debug_length;
-
         public AttributeRecord()
         {
         }
 
-        public AttributeRecord(AttributeRecord toCopy)
-        {
-            _type = toCopy._type;
-            _nonResidentFlag = toCopy._nonResidentFlag;
-            _flags = toCopy._flags;
-            _attributeId = toCopy._attributeId;
-            _name = toCopy._name;
-        }
-
-        public AttributeRecord(AttributeType type, string name, ushort id)
+        public AttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags)
         {
             _type = type;
             _name = name;
             _attributeId = id;
+            _flags = flags;
         }
 
         public AttributeType AttributeType
@@ -83,6 +72,11 @@ namespace DiscUtils.Ntfs
         {
             get;
             set;
+        }
+
+        public abstract long StartVcn
+        {
+            get;
         }
 
         public abstract long DataLength
@@ -155,12 +149,8 @@ namespace DiscUtils.Ntfs
 
         protected virtual void Read(byte[] buffer, int offset, out int length)
         {
-            _debug_bufPos = offset;
-
             _type = (AttributeType)Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
             length = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-
-            _debug_length = length;
 
             _nonResidentFlag = buffer[offset + 0x08];
             byte nameLength = buffer[offset + 0x09];
@@ -181,6 +171,7 @@ namespace DiscUtils.Ntfs
 
         public abstract int Write(byte[] buffer, int offset);
         public abstract int Size { get; }
+        public abstract AttributeRecord Split(FileRecord fileRecord);
 
         public virtual void Dump(TextWriter writer, string indent)
         {
@@ -190,9 +181,8 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "            Name: " + _name);
             writer.WriteLine(indent + "           Flags: " + _flags);
             writer.WriteLine(indent + "     AttributeId: " + _attributeId);
-            writer.WriteLine(indent + "   DEBUG: bufPos: " + _debug_bufPos);
-            writer.WriteLine(indent + "   DEBUG: length: " + _debug_length);
         }
+
     }
 
     internal sealed class ResidentAttributeRecord : AttributeRecord
@@ -205,15 +195,8 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
-        public ResidentAttributeRecord(AttributeRecord toCopy)
-            : base(toCopy)
-        {
-            base._nonResidentFlag = 0;
-            _memoryBuffer = new SparseMemoryBuffer(1024);
-        }
-
-        public ResidentAttributeRecord(AttributeType type, string name, ushort id, bool indexed)
-            : base(type, name, id)
+        public ResidentAttributeRecord(AttributeType type, string name, ushort id, bool indexed, AttributeFlags flags)
+            : base(type, name, id, flags)
         {
             base._nonResidentFlag = 0;
             _indexedFlag = (byte)(indexed ? 1 : 0);
@@ -224,6 +207,11 @@ namespace DiscUtils.Ntfs
         {
             get { return Utilities.RoundUp(DataLength, 8); }
             set { throw new NotSupportedException(); }
+        }
+
+        public override long StartVcn
+        {
+            get { return 0; }
         }
 
         public override long DataLength
@@ -337,6 +325,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public override AttributeRecord Split(FileRecord fileRecord)
+        {
+            throw new InvalidOperationException("Attempting to split resident attribute");
+        }
+
         public override void Dump(TextWriter writer, string indent)
         {
             base.Dump(writer, indent);
@@ -364,15 +357,8 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
-        public NonResidentAttributeRecord(AttributeRecord toCopy)
-            : base(toCopy)
-        {
-            base._nonResidentFlag = 1;
-            _cookedDataRuns = new List<CookedDataRun>();
-        }
-
-        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, long firstCluster, ulong numClusters, uint bytesPerCluster)
-            : base(type, name, id)
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
+            : base(type, name, id, flags)
         {
             base._nonResidentFlag = 1;
             _cookedDataRuns = new List<CookedDataRun>();
@@ -381,6 +367,21 @@ namespace DiscUtils.Ntfs
             _dataAllocatedSize = bytesPerCluster * numClusters;
             _dataRealSize = bytesPerCluster * numClusters;
             _initializedDataSize = bytesPerCluster * numClusters;
+        }
+
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, List<CookedDataRun> dataRuns)
+            : base(type, name, id, flags)
+        {
+            base._nonResidentFlag = 1;
+            _cookedDataRuns = dataRuns;
+
+            if (dataRuns != null && dataRuns.Count != 0)
+            {
+                CookedDataRun lastRun = dataRuns[dataRuns.Count - 1];
+
+                _startingVCN = (ulong)dataRuns[0].StartVcn;
+                _lastVCN = (ulong)(lastRun.StartVcn + lastRun.Length - 1);
+            }
         }
 
         /// <summary>
@@ -410,7 +411,7 @@ namespace DiscUtils.Ntfs
             set { _initializedDataSize = (ulong)value; }
         }
 
-        public long StartVcn
+        public override long StartVcn
         {
             get { return (long)_startingVCN; }
         }
@@ -614,6 +615,24 @@ namespace DiscUtils.Ntfs
 
                 return Utilities.RoundUp(dataOffset + dataLen, 8);
             }
+        }
+
+        public override AttributeRecord Split(FileRecord fileRecord)
+        {
+            int splitIdx = _cookedDataRuns.Count / 2;
+
+            List<CookedDataRun> newRecordRuns = new List<CookedDataRun>();
+            while(_cookedDataRuns.Count > splitIdx)
+            {
+                newRecordRuns.Add(_cookedDataRuns[splitIdx]);
+                _cookedDataRuns.RemoveAt(splitIdx);
+            }
+            newRecordRuns[0].DataRun.RunOffset = newRecordRuns[0].StartLcn;
+
+            CookedDataRun lastRemRun = _cookedDataRuns[_cookedDataRuns.Count - 1];
+            _lastVCN = (ulong)(lastRemRun.StartVcn + lastRemRun.Length - 1);
+
+            return new NonResidentAttributeRecord(_type, _name, 0, _flags, newRecordRuns);
         }
 
         public override void Dump(TextWriter writer, string indent)

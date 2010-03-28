@@ -70,7 +70,7 @@ namespace DiscUtils.Ntfs
             _sequenceNumber++;
             _flags = FileRecordFlags.None;
             _recordAllocatedSize = (uint)recordLength;
-            _nextAttributeId = 1;
+            _nextAttributeId = 0;
             _index = index;
             _hardLinkCount = 0;
             _baseFile = new FileRecordReference(0);
@@ -118,9 +118,14 @@ namespace DiscUtils.Ntfs
             set { _flags = value; }
         }
 
-        public ICollection<AttributeRecord> Attributes
+        public List<AttributeRecord> Attributes
         {
-            get { return new ReadOnlyCollection<AttributeRecord>(_attributes); }
+            get { return _attributes; }
+        }
+
+        public AttributeRecord FirstAttribute
+        {
+            get { return _attributes.Count > 0 ? _attributes[0] : null; }
         }
 
         public FileRecordReference Reference
@@ -134,7 +139,8 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
         /// <param name="indexed">Whether the attribute is marked as indexed</param>
-        internal ushort CreateAttribute(AttributeType type, string name, bool indexed)
+        /// <param name="flags">Flags for the new attribute</param>
+        internal ushort CreateAttribute(AttributeType type, string name, bool indexed, AttributeFlags flags)
         {
             ushort id = _nextAttributeId++;
             _attributes.Add(
@@ -142,7 +148,29 @@ namespace DiscUtils.Ntfs
                     type,
                     name,
                     id,
-                    indexed)
+                    indexed,
+                    flags)
+                );
+            _attributes.Sort();
+            return id;
+        }
+
+        /// <summary>
+        /// Creates a new non-resident attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        /// <param name="flags">Flags for the new attribute</param>
+        internal ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags)
+        {
+            ushort id = _nextAttributeId++;
+            _attributes.Add(
+                new NonResidentAttributeRecord(
+                    type,
+                    name,
+                    id,
+                    flags,
+                    new List<CookedDataRun>())
                 );
             _attributes.Sort();
             return id;
@@ -153,10 +181,11 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
+        /// <param name="flags">Flags for the new attribute</param>
         /// <param name="firstCluster">The first cluster to assign to the attribute</param>
         /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
         /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
-        internal ushort CreateNonResidentAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        internal ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             ushort id = _nextAttributeId++;
             _attributes.Add(
@@ -164,6 +193,7 @@ namespace DiscUtils.Ntfs
                     type,
                     name,
                     id,
+                    flags,
                     firstCluster,
                     numClusters,
                     bytesPerCluster)
@@ -247,25 +277,6 @@ namespace DiscUtils.Ntfs
             }
 
             return null;
-        }
-
-        public void SetAttribute(AttributeRecord record)
-        {
-            for(int i = 0; i < _attributes.Count; ++i)
-            {
-                if (_attributes[i].AttributeType == record.AttributeType && _attributes[i].Name == record.Name)
-                {
-                    if (record.AttributeId != _attributes[i].AttributeId)
-                    {
-                        throw new InvalidOperationException("Attempt to set attribute where (type,name,id) don't match");
-                    }
-
-                    _attributes[i] = record;
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException("Attempt to create attribute by setting it");
         }
 
         internal void Reset()
