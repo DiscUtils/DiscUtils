@@ -318,7 +318,7 @@ namespace DiscUtils.Vdi
                 while (i < _blockTable.Length)
                 {
                     // Find next stored block
-                    while (i < _blockTable.Length && (_blockTable[i] == BlockZero && _blockTable[i] == BlockFree))
+                    while (i < _blockTable.Length && (_blockTable[i] == BlockZero || _blockTable[i] == BlockFree))
                     {
                         ++i;
                     }
