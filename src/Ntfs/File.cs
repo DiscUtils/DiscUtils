@@ -403,7 +403,7 @@ namespace DiscUtils.Ntfs
         private NtfsAttribute CreateAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);
-            ushort id = _records[0].CreateAttribute(type, name, firstCluster, numClusters, bytesPerCluster);
+            ushort id = _records[0].CreateNonResidentAttribute(type, name, firstCluster, numClusters, bytesPerCluster);
 
             NtfsAttribute newAttr = NtfsAttribute.FromRecord(this, MftReference, _records[0].GetAttribute(id));
 

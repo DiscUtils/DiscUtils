@@ -156,7 +156,7 @@ namespace DiscUtils.Ntfs
         /// <param name="firstCluster">The first cluster to assign to the attribute</param>
         /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
         /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
-        internal ushort CreateAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        internal ushort CreateNonResidentAttribute(AttributeType type, string name, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             ushort id = _nextAttributeId++;
             _attributes.Add(
