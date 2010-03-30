@@ -413,9 +413,13 @@ namespace DiscUtils.BootConfig
             {
                 return _parentObject.ToString() + ":" + _record.ToString();
             }
-            else
+            else if (_record != null)
             {
                 return _record.ToString();
+            }
+            else
+            {
+                return "<unknown>";
             }
         }
     }

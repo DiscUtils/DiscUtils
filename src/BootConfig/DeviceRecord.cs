@@ -51,6 +51,8 @@ namespace DiscUtils.BootConfig
                 case 6: // Disk partition
                     newRecord = new PartitionRecord();
                     break;
+                case 8: // custom:nnnnnn
+                    break;
                 default:
                     throw new NotImplementedException("Unknown device type: " + type);
 
@@ -187,6 +189,10 @@ namespace DiscUtils.BootConfig
                     Guid partitionGuid = Utilities.ToGuidLittleEndian(PartitionIdentity, 0);
                     return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid, partitionGuid);
                 }
+            }
+            else if (Type == 8)
+            {
+                return "custom:<unknown>";
             }
             else
             {
