@@ -488,7 +488,7 @@ namespace DiscUtils
         /// <returns>The directory part</returns>
         public static string GetDirectoryFromPath(string path)
         {
-            string trimmed = path.Trim('\\');
+            string trimmed = path.TrimEnd('\\');
 
             int index = trimmed.LastIndexOf('\\');
             if (index < 0)
