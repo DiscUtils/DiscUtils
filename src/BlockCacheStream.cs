@@ -147,6 +147,7 @@ namespace DiscUtils
         private Dictionary<long, CacheBlock> _blocks;
         private LinkedList<CacheBlock> _lru;
         private List<CacheBlock> _freeBlocks;
+        private int _blocksCreated;
         private int _totalBlocks;
         private byte[] _readBuffer;
         private int _blocksInReadBuffer;
@@ -193,10 +194,11 @@ namespace DiscUtils
             _totalBlocks = (int)(_settings.ReadCacheSize / _settings.BlockSize);
 
             _stats = new BlockCacheStatistics();
+            _stats.FreeReadBlocks = _totalBlocks;
+
             _blocks = new Dictionary<long, CacheBlock>();
             _lru = new LinkedList<CacheBlock>();
             _freeBlocks = new List<CacheBlock>(_totalBlocks);
-            CreateBlocks();
         }
 
         /// <summary>
@@ -396,11 +398,12 @@ namespace DiscUtils
                     }
 
                     // Allow for the end of the stream not being block-aligned
-                    int bytesToRead = (int)Math.Min(blocksToRead * blockSize, Length - _position);
+                    long readPosition = (firstBlock + blocksRead) * (long)blockSize;
+                    int bytesToRead = (int)Math.Min(blocksToRead * blockSize, Length - readPosition);
 
                     // Do the read
                     _stats.TotalReadsOut++;
-                    _wrappedStream.Position = (firstBlock + blocksRead) * (long)blockSize;
+                    _wrappedStream.Position = readPosition;
                     int bytesRead = Utilities.ReadFully(_wrappedStream, _readBuffer, 0, bytesToRead);
                     if (bytesRead != bytesToRead)
                     {
@@ -410,9 +413,15 @@ namespace DiscUtils
                     // Cache the read blocks
                     for(int i = 0; i < blocksToRead; ++i)
                     {
+                        int copyBytes = Math.Min(blockSize, bytesToRead - i * blockSize);
                         CacheBlock block = GetFreeBlock();
                         block.Block = firstBlock + blocksRead + i;
-                        Array.Copy(_readBuffer, i * blockSize, block.Data, 0, Math.Min(blockSize, bytesToRead - i * blockSize));
+                        Array.Copy(_readBuffer, i * blockSize, block.Data, 0, copyBytes);
+
+                        if (copyBytes < blockSize)
+                        {
+                            Array.Clear(_readBuffer, copyBytes, blockSize - copyBytes);
+                        }
 
                         StoreBlock(block);
                     }
@@ -484,7 +493,7 @@ namespace DiscUtils
         public override void SetLength(long value)
         {
             CheckDisposed();
-            throw new NotSupportedException("Changing the length of the stream is not supported");
+            _wrappedStream.SetLength(value);
         }
 
         /// <summary>
@@ -500,11 +509,6 @@ namespace DiscUtils
             _stats.TotalWritesIn++;
 
             long startPos = _position;
-
-            if (_position + count > Length)
-            {
-                throw new IOException("Attempt to write beyond end of stream");
-            }
 
             int blockSize = _settings.BlockSize;
             long firstBlock = _position / blockSize;
@@ -567,16 +571,6 @@ namespace DiscUtils
             }
         }
 
-        private void CreateBlocks()
-        {
-            int blockSize = _settings.BlockSize;
-            for (int i = 0; i < _totalBlocks; ++i)
-            {
-                _freeBlocks.Add(new CacheBlock(blockSize));
-            }
-            _stats.FreeReadBlocks = _freeBlocks.Count;
-        }
-
         private void StoreBlock(CacheBlock block)
         {
             _blocks[block.Block] = block;
@@ -590,8 +584,14 @@ namespace DiscUtils
                 int idx = _freeBlocks.Count - 1;
                 CacheBlock block = _freeBlocks[idx];
                 _freeBlocks.RemoveAt(idx);
-                _stats.FreeReadBlocks = _freeBlocks.Count;
+                _stats.FreeReadBlocks--;
                 return block;
+            }
+            else if (_blocksCreated < _totalBlocks)
+            {
+                _blocksCreated++;
+                _stats.FreeReadBlocks--;
+                return new CacheBlock(_settings.BlockSize);
             }
             else
             {
@@ -612,7 +612,7 @@ namespace DiscUtils
                     _blocks.Remove(i);
                     _lru.Remove(block);
                     _freeBlocks.Add(block);
-                    _stats.FreeReadBlocks = _freeBlocks.Count;
+                    _stats.FreeReadBlocks++;
                 }
             }
         }
