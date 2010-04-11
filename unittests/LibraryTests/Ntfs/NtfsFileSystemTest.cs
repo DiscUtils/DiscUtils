@@ -95,9 +95,8 @@ namespace DiscUtils.Ntfs
         [Test]
         public void Format_LargeDisk()
         {
-            long size = 320 * 1024 * 1024L * 1024;
+            long size = 1024L * 1024 * 1024L * 1024; // 1 TB
             SparseMemoryStream partStream = new SparseMemoryStream();
-            //VirtualDisk disk = Vhd.Disk.InitializeDynamic(partStream, Ownership.Dispose, size);
             NtfsFileSystem.Format(partStream, "New Partition", Geometry.FromCapacity(size), 0, size / 512);
 
             NtfsFileSystem ntfs = new NtfsFileSystem(partStream);
