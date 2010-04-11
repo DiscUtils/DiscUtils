@@ -238,15 +238,16 @@ function TestNtfs
         DetachDisk $diskfile
     }
 
-
+    "Creating disk"
     CreateDisk 16MB
 
+    Checkpoint
 
     "Creating TestFile.txt"
     New-Item -Type file vd:\Volume0\TestFile.txt
     Set-Content vd:\Volume0\TestFile.txt "This is a test file"
 
-    #Checkpoint
+    Checkpoint
 
     "Creating 50 hard links"
     for($i = 0; $i -lt 50; $i++)
@@ -254,7 +255,7 @@ function TestNtfs
         New-Item -type HardLink "vd:\Volume0\hardlink${i}" -SourcePath "vd:\Volume0\TestFile.txt"
     }
 
-    #Checkpoint
+    Checkpoint
 
     "Removing hard links"
     for($i = 0; $i -lt 50; $i++)
@@ -262,18 +263,18 @@ function TestNtfs
         Remove-Item "vd:\Volume0\hardlink${i}"
     }
 
-    #Checkpoint
+    Checkpoint
 
     "Creating file.bin"
     New-Item -type file vd:\Volume0\file.bin
     Set-Content vd:\Volume0\file.bin $ClusterData
 
-    #Checkpoint
+    Checkpoint
 
     "Removing file.bin"
     Remove-Item vd:\Volume0\file.bin
 
-    #Checkpoint
+    Checkpoint
 
     "Creating $($NumFiles * 2) files"
     for($i = 0; $i -lt $NumFiles; $i++)
