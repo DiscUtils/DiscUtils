@@ -179,17 +179,31 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
 
         protected override bool HasChildItems(string path)
         {
-            throw new NotImplementedException();
+            RegistryKey key = FindItemByPath(path);
+            return key.SubKeyCount != 0;
         }
 
         protected override void RemoveItem(string path, bool recurse)
         {
-            throw new NotImplementedException();
+            string parentPath = GetParentPath(path, null);
+
+            RegistryKey parentKey = FindItemByPath(parentPath);
+            if (recurse)
+            {
+                parentKey.DeleteSubKeyTree(GetChildName(path));
+            }
+            else
+            {
+                parentKey.DeleteSubKey(GetChildName(path));
+            }
         }
 
         protected override void NewItem(string path, string itemTypeName, object newItemValue)
         {
-            throw new NotImplementedException();
+            string parentPath = GetParentPath(path, null);
+
+            RegistryKey parentKey = FindItemByPath(parentPath);
+            WriteItemObject(parentKey.CreateSubKey(GetChildName(path)), path, true);
         }
 
         protected override void RenameItem(string path, string newName)
