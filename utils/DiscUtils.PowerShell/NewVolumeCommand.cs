@@ -35,7 +35,7 @@ namespace DiscUtils.PowerShell
         public PSObject InputObject { get; set; }
 
         [Parameter(Position = 0)]
-        public string Path { get; set; }
+        public string LiteralPath { get; set; }
 
         [Parameter]
         public string Size { get; set; }
@@ -61,7 +61,7 @@ namespace DiscUtils.PowerShell
                 diskObject = InputObject;
                 disk = diskObject.BaseObject as VirtualDisk;
             }
-            if (disk == null && string.IsNullOrEmpty(Path))
+            if (disk == null && string.IsNullOrEmpty(LiteralPath))
             {
                 WriteError(new ErrorRecord(
                     new ArgumentException("No disk specified"),
@@ -73,7 +73,7 @@ namespace DiscUtils.PowerShell
 
             if (disk == null)
             {
-                diskObject = SessionState.InvokeProvider.Item.Get(Path)[0];
+                diskObject = SessionState.InvokeProvider.Item.Get(LiteralPath)[0];
                 VirtualDisk vdisk = diskObject.BaseObject as VirtualDisk;
 
                 if (vdisk == null)

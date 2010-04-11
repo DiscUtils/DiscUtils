@@ -34,7 +34,7 @@ After a volume is formatted, it can be used to store files.</maml:para>
 			<command:parameterValue required="true" variableLength = "false" >PSObject</command:parameterValue>
 			</command:parameter>
 			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
-				<maml:name>Path</maml:name>
+				<maml:name>LiteralPath</maml:name>
 				<maml:description>
 					<maml:para>Path to the volume to be formatted.  The parameter is ignored if InputObject is also supplied.</maml:para>
 				</maml:description>
@@ -84,7 +84,7 @@ After a volume is formatted, it can be used to store files.</maml:para>
 			<dev:defaultValue>none</dev:defaultValue>
 		</command:parameter>
 		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="1">
-			<maml:name>Path</maml:name>
+			<maml:name>LiteralPath</maml:name>
 			<maml:description>
 				<maml:para>Path to the volume to be formatted.  The parameter is ignored if InputObject is also supplied.</maml:para>
 			</maml:description>
@@ -233,19 +233,19 @@ Two kinds of partition structure are supported currently - BIOS (also known as M
 	</maml:description>
 	<command:syntax>		<command:syntaxItem>
 			<maml:name>Initialize-VirtualDisk</maml:name>
+			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
+				<maml:name>LiteralPath</maml:name>
+				<maml:description>
+					<maml:para>Path to the virtual disk to be initialized.  The parameter is ignored if InputObject is also supplied.</maml:para>
+				</maml:description>
+			<command:parameterValue required="true" variableLength = "false" >String</command:parameterValue>
+			</command:parameter>
 			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "true (ByValue)" position = "named" >
 				<maml:name>InputObject</maml:name>
 				<maml:description>
 					<maml:para>An instance of DiscUtils.VirtualDisk, which is the disk to be initialized.  If this parameter is specified, the Path parameter is ignored.</maml:para>
 				</maml:description>
 			<command:parameterValue required="true" variableLength = "false" >PSObject</command:parameterValue>
-			</command:parameter>
-			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
-				<maml:name>Path</maml:name>
-				<maml:description>
-					<maml:para>Path to the virtual disk to be initialized.  The parameter is ignored if InputObject is also supplied.</maml:para>
-				</maml:description>
-			<command:parameterValue required="true" variableLength = "false" >String</command:parameterValue>
 			</command:parameter>
 			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "named" >
 				<maml:name>VolumeManager</maml:name>
@@ -284,6 +284,18 @@ Creation of LDM partitions is not supported.</maml:para>
 		</command:syntaxItem>
 	</command:syntax>
 	<command:parameters>
+		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="1">
+			<maml:name>LiteralPath</maml:name>
+			<maml:description>
+				<maml:para>Path to the virtual disk to be initialized.  The parameter is ignored if InputObject is also supplied.</maml:para>
+			</maml:description>
+			<command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+			<dev:type>
+				<maml:name>String</maml:name>
+				<maml:uri/>
+			</dev:type>
+			<dev:defaultValue>none</dev:defaultValue>
+		</command:parameter>
 		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="true (ByValue)" position="named">
 			<maml:name>InputObject</maml:name>
 			<maml:description>
@@ -292,18 +304,6 @@ Creation of LDM partitions is not supported.</maml:para>
 			<command:parameterValue required="true" variableLength="false">PSObject</command:parameterValue>
 			<dev:type>
 				<maml:name>PSObject</maml:name>
-				<maml:uri/>
-			</dev:type>
-			<dev:defaultValue>none</dev:defaultValue>
-		</command:parameter>
-		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="1">
-			<maml:name>Path</maml:name>
-			<maml:description>
-				<maml:para>Path to the virtual disk to be initialized.  The parameter is ignored if InputObject is also supplied.</maml:para>
-			</maml:description>
-			<command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-			<dev:type>
-				<maml:name>String</maml:name>
 				<maml:uri/>
 			</dev:type>
 			<dev:defaultValue>none</dev:defaultValue>
@@ -456,7 +456,7 @@ This cmdlet does not initialize the contents of the disk, or create a file syste
 	<command:syntax>		<command:syntaxItem>
 			<maml:name>New-VirtualDisk</maml:name>
 			<command:parameter required = "true" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
-				<maml:name>Name</maml:name>
+				<maml:name>LiteralPath</maml:name>
 				<maml:description>
 					<maml:para>This mandatory parameter specifies the name of the file to create.</maml:para>
 				</maml:description>
@@ -552,7 +552,7 @@ If a dynamic disk variant is created, the actual amount of storage consumed will
 		<command:syntaxItem>
 			<maml:name>New-VirtualDisk</maml:name>
 			<command:parameter required = "true" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
-				<maml:name>Name</maml:name>
+				<maml:name>LiteralPath</maml:name>
 				<maml:description>
 					<maml:para>This mandatory parameter specifies the name of the file to create.</maml:para>
 				</maml:description>
@@ -589,7 +589,7 @@ If a dynamic disk variant is created, the actual amount of storage consumed will
 	</command:syntax>
 	<command:parameters>
 		<command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1">
-			<maml:name>Name</maml:name>
+			<maml:name>LiteralPath</maml:name>
 			<maml:description>
 				<maml:para>This mandatory parameter specifies the name of the file to create.</maml:para>
 			</maml:description>
@@ -598,7 +598,7 @@ If a dynamic disk variant is created, the actual amount of storage consumed will
 				<maml:name>String</maml:name>
 				<maml:uri/>
 			</dev:type>
-			<dev:defaultValue></dev:defaultValue>
+			<dev:defaultValue>none</dev:defaultValue>
 		</command:parameter>
 		<command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="named">
 			<maml:name>Type</maml:name>
@@ -823,6 +823,156 @@ C:\PS&gt;			</maml:introduction>
 <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
 <!--Generated by Help Cmdlet Editor-->
 	<command:details>
+		<command:name>New-VirtualRegistry</command:name>
+		<maml:description>
+			<maml:para>Creates a new registry hive.</maml:para>
+		</maml:description>
+		<maml:copyright>
+           <maml:para />
+		<!--Add copy right info here.-->
+		</maml:copyright>
+		<command:verb>New</command:verb>
+		<command:noun>VirtualRegistry</command:noun>
+		<!--Add Dev version info here.-->
+		<dev:version />
+	</command:details>
+	<maml:description>
+	<!--This is the Description section-->
+		<maml:para>The New-VirtualRegistry cmdlet creates new Windows registry hives.
+
+To inspect and modify registry hives, create PowerShell drives using the 'virtualregistry' provider.</maml:para>
+	</maml:description>
+	<command:syntax>		<command:syntaxItem>
+			<maml:name>New-VirtualRegistry</maml:name>
+			<command:parameter required = "true" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
+				<maml:name>LiteralPath</maml:name>
+				<maml:description>
+					<maml:para>This mandatory parameter specifies the path of the registry hive to create.</maml:para>
+				</maml:description>
+			<command:parameterValue required="true" variableLength = "false" >String</command:parameterValue>
+			</command:parameter>
+			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "named" >
+				<maml:name>WarningAction</maml:name>
+				<maml:description>
+					<maml:para></maml:para>
+				</maml:description>
+			<command:parameterValue required="true" variableLength = "false" >ActionPreference</command:parameterValue>
+			</command:parameter>
+			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "named" >
+				<maml:name>WarningVariable</maml:name>
+				<maml:description>
+					<maml:para></maml:para>
+				</maml:description>
+			<command:parameterValue required="true" variableLength = "false" >String</command:parameterValue>
+			</command:parameter>
+		</command:syntaxItem>
+	</command:syntax>
+	<command:parameters>
+		<command:parameter required="true" variableLength="false" globbing="false" pipelineInput="false" position="1">
+			<maml:name>LiteralPath</maml:name>
+			<maml:description>
+				<maml:para>This mandatory parameter specifies the path of the registry hive to create.</maml:para>
+			</maml:description>
+			<command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+			<dev:type>
+				<maml:name>String</maml:name>
+				<maml:uri/>
+			</dev:type>
+			<dev:defaultValue>none</dev:defaultValue>
+		</command:parameter>
+		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="named">
+			<maml:name>WarningAction</maml:name>
+			<maml:description>
+				<maml:para></maml:para>
+			</maml:description>
+			<command:parameterValue required="true" variableLength="false">ActionPreference</command:parameterValue>
+			<dev:type>
+				<maml:name>ActionPreference</maml:name>
+				<maml:uri/>
+			</dev:type>
+			<dev:defaultValue></dev:defaultValue>
+		</command:parameter>
+		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="named">
+			<maml:name>WarningVariable</maml:name>
+			<maml:description>
+				<maml:para></maml:para>
+			</maml:description>
+			<command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+			<dev:type>
+				<maml:name>String</maml:name>
+				<maml:uri/>
+			</dev:type>
+			<dev:defaultValue></dev:defaultValue>
+		</command:parameter>
+	</command:parameters>
+	<command:inputTypes>
+		<command:inputType>
+			<dev:type>
+				<maml:name>None</maml:name>
+				<maml:uri/>
+				<maml:description>
+					<maml:para></maml:para>
+				</maml:description>
+			</dev:type>
+			<maml:description></maml:description>
+		</command:inputType>
+	</command:inputTypes>
+	<command:returnValues>
+		<command:returnValue>
+			<dev:type>
+				<maml:name>None</maml:name>
+				<maml:uri />
+				<maml:description>
+					<maml:para></maml:para>
+				</maml:description>
+			</dev:type>
+			<maml:description></maml:description>
+		</command:returnValue>
+	</command:returnValues>
+	<command:terminatingErrors>
+	</command:terminatingErrors>
+	<command:nonTerminatingErrors>
+	</command:nonTerminatingErrors>
+	<maml:alertSet>
+		<maml:title></maml:title>
+		<maml:alert>
+			<maml:para></maml:para>
+		</maml:alert>
+	</maml:alertSet>
+	<command:examples>
+		<command:example>
+			<maml:title>
+--------------  EXAMPLE 1 --------------			</maml:title>
+			<maml:introduction>
+				<maml:para>C:\PS&gt;</maml:para>
+C:\PS&gt;			</maml:introduction>
+  			<dev:code>New-VirtualRegistry C:\temp\registry.hiv</dev:code>
+  			<dev:remarks>
+				<maml:para>This example creates a new registry hive called C:\temp\registry.hiv</maml:para>
+				<maml:para></maml:para>
+				<maml:para></maml:para>
+				<maml:para>
+				</maml:para>
+				<maml:para></maml:para>
+  			</dev:remarks>
+			<command:commandLines>
+				<command:commandLine>
+					<command:commandText>
+					</command:commandText>
+				</command:commandLine>
+			</command:commandLines>
+		</command:example>
+	</command:examples>
+	<maml:relatedLinks>
+		<maml:navigationLink>
+			<maml:linkText>http://discutils.codeplex.com</maml:linkText>
+			<maml:uri/>
+		</maml:navigationLink>
+	</maml:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+<!--Generated by Help Cmdlet Editor-->
+	<command:details>
 		<command:name>New-Volume</command:name>
 		<maml:description>
 			<maml:para>Creates a new volume (aka partition) on a virtual disk.</maml:para>
@@ -850,7 +1000,7 @@ C:\PS&gt;			</maml:introduction>
 			<command:parameterValue required="true" variableLength = "false" >PSObject</command:parameterValue>
 			</command:parameter>
 			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "1" >
-				<maml:name>Path</maml:name>
+				<maml:name>LiteralPath</maml:name>
 				<maml:description>
 					<maml:para>Path to the virtual disk to be initialized.  The parameter is ignored if InputObject is also supplied.</maml:para>
 				</maml:description>
@@ -877,7 +1027,6 @@ Note the actual partition created may not be the precise size requested, due to 
 				<maml:description>
 					<maml:para>Marks the volume as active, indicating the volume contains a bootloader.</maml:para>
 				</maml:description>
-			<command:parameterValue required="false" variableLength = "false" >Boolean</command:parameterValue>
 			</command:parameter>
 			<command:parameter required = "false" variableLength = "false" globbing = "false" pipelineInput = "false" position = "named" >
 				<maml:name>WarningAction</maml:name>
@@ -909,7 +1058,7 @@ Note the actual partition created may not be the precise size requested, due to 
 			<dev:defaultValue>none</dev:defaultValue>
 		</command:parameter>
 		<command:parameter required="false" variableLength="false" globbing="false" pipelineInput="false" position="1">
-			<maml:name>Path</maml:name>
+			<maml:name>LiteralPath</maml:name>
 			<maml:description>
 				<maml:para>Path to the virtual disk to be initialized.  The parameter is ignored if InputObject is also supplied.</maml:para>
 			</maml:description>
@@ -951,9 +1100,8 @@ Note the actual partition created may not be the precise size requested, due to 
 			<maml:description>
 				<maml:para>Marks the volume as active, indicating the volume contains a bootloader.</maml:para>
 			</maml:description>
-			<command:parameterValue required="false" variableLength="false">Boolean</command:parameterValue>
 			<dev:type>
-				<maml:name>Boolean</maml:name>
+				<maml:name>SwitchParameter</maml:name>
 				<maml:uri/>
 			</dev:type>
 			<dev:defaultValue>False</dev:defaultValue>

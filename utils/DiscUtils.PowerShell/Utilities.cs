@@ -56,6 +56,35 @@ namespace DiscUtils.PowerShell
             return path.Replace('#', ':');
         }
 
+        public static Stream CreatePsPath(SessionState session, string filePath)
+        {
+            string parentPath = session.Path.ParseParent(filePath, null);
+            string childName = session.Path.ParseChildName(filePath);
+            var parentItems = session.InvokeProvider.Item.Get(parentPath);
+            if (parentItems.Count > 1)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "PowerShell path {0} is ambiguous", parentPath));
+            }
+            else if (parentItems.Count < 1)
+            {
+                throw new DirectoryNotFoundException("No such directory");
+            }
+
+            DirectoryInfo parentAsDir = parentItems[0].BaseObject as DirectoryInfo;
+            if (parentAsDir != null)
+            {
+                return File.Create(Path.Combine(parentAsDir.FullName, childName));
+            }
+
+            DiscDirectoryInfo parentAsDiscDir = parentItems[0].BaseObject as DiscDirectoryInfo;
+            if (parentAsDiscDir != null)
+            {
+                return parentAsDiscDir.FileSystem.OpenFile(Path.Combine(parentAsDiscDir.FullName, childName), FileMode.Create, FileAccess.ReadWrite);
+            }
+
+            throw new FileNotFoundException("Path is not a directory", parentPath);
+        }
+
         public static Stream OpenPsPath(SessionState session, string filePath, FileAccess access, FileShare share)
         {
             var items = session.InvokeProvider.Item.Get(filePath);

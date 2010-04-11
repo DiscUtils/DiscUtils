@@ -32,7 +32,7 @@ namespace DiscUtils.PowerShell
     public class NewVirtualDiskCommand : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 0)]
-        public string Name { get; set; }
+        public string LiteralPath { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName="New")]
         [ValidateLength(1,int.MaxValue)]
@@ -186,8 +186,8 @@ namespace DiscUtils.PowerShell
         {
             PSObject parentObj;
 
-            child = SessionState.Path.ParseChildName(Name);
-            string parent = SessionState.Path.ParseParent(Name, null);
+            child = SessionState.Path.ParseChildName(LiteralPath);
+            string parent = SessionState.Path.ParseParent(LiteralPath, null);
             PathInfo parentPath = this.SessionState.Path.GetResolvedPSPathFromPSPath(parent)[0];
 
             parentObj = SessionState.InvokeProvider.Item.Get(new string[] { parentPath.Path }, false, true)[0];

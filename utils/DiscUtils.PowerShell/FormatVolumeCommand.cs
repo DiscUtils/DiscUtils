@@ -39,7 +39,7 @@ namespace DiscUtils.PowerShell
         public PSObject InputObject { get; set; }
 
         [Parameter(Position = 0)]
-        public string Path { get; set; }
+        public string LiteralPath { get; set; }
 
         [Parameter]
         public FileSystemType Filesystem { get; set; }
@@ -61,7 +61,7 @@ namespace DiscUtils.PowerShell
                 volInfoObj = InputObject;
                 volInfo = volInfoObj.BaseObject as VolumeInfo;
             }
-            if (volInfo == null && string.IsNullOrEmpty(Path))
+            if (volInfo == null && string.IsNullOrEmpty(LiteralPath))
             {
                 WriteError(new ErrorRecord(
                     new ArgumentException("No volume specified"),
@@ -83,7 +83,7 @@ namespace DiscUtils.PowerShell
 
             if (volInfo == null)
             {
-                volInfoObj = SessionState.InvokeProvider.Item.Get(Path)[0];
+                volInfoObj = SessionState.InvokeProvider.Item.Get(LiteralPath)[0];
                 volInfo = volInfoObj.BaseObject as VolumeInfo;
             }
 

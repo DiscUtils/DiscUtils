@@ -30,11 +30,11 @@ namespace DiscUtils.PowerShell
     public class NewVirtualRegistryCommand : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 0)]
-        public string Path { get; set; }
+        public string LiteralPath { get; set; }
 
         protected override void ProcessRecord()
         {
-            using (Stream hiveStream = Utilities.OpenPsPath(SessionState, Path, FileAccess.ReadWrite, FileShare.None))
+            using (Stream hiveStream = Utilities.CreatePsPath(SessionState, LiteralPath))
             {
                 hiveStream.SetLength(0);
                 using (RegistryHive.Create(hiveStream)) { }
