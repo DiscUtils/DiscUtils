@@ -235,6 +235,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the URIs corresponding to this LUN.
         /// </summary>
+        /// <returns>An array of URIs as strings.</returns>
         /// <remarks>Multiple URIs are returned because multiple targets may serve the same LUN.</remarks>
         public string[] GetUris()
         {
