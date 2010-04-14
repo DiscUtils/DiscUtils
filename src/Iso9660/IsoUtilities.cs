@@ -302,9 +302,9 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// Converts a DirectoryRecord time to UTC.
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="offset"></param>
-        /// <returns></returns>
+        /// <param name="data">buffer containing the time data</param>
+        /// <param name="offset">offset in buffer of the time data</param>
+        /// <returns>The time in UTC</returns>
         public static DateTime ToUTCDateTimeFromDirectoryTime(byte[] data, int offset)
         {
             try
@@ -315,8 +315,9 @@ namespace DiscUtils.Iso9660
                     data[offset + 2],
                     data[offset + 3],
                     data[offset + 4],
-                    data[offset + 5]);
-                return relTime + TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
+                    data[offset + 5],
+                    DateTimeKind.Utc);
+                return relTime - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
             }
             catch(ArgumentOutOfRangeException)
             {
