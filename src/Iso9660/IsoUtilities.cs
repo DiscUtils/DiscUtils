@@ -377,7 +377,7 @@ namespace DiscUtils.Iso9660
                 DateTime time = new DateTime(year, month, day, hour, min, sec, hundredths * 10, DateTimeKind.Utc);
                 return time - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 16]);
             }
-            catch
+            catch(ArgumentOutOfRangeException)
             {
                 return DateTime.MinValue;
             }
