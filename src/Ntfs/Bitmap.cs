@@ -78,13 +78,22 @@ namespace DiscUtils.Ntfs
                 _bitmap.WriteByte(0);
             }
 
-            // TODO: improve perf - at least write byte at a time...
+            byte[] buffer = new byte[lastByte - firstByte + 1];
+            buffer[0] = GetByte(firstByte);
+            if (buffer.Length != 1)
+            {
+                buffer[buffer.Length - 1] = GetByte(lastByte);
+            }
+
             for (long i = index; i < index + count; ++i)
             {
-                long byteIdx = i / 8;
+                long byteIdx = (i / 8) - firstByte;
                 byte mask = (byte)(1 << (byte)(i % 8));
-                SetByte(byteIdx, (byte)(GetByte(byteIdx) | mask));
+
+                buffer[byteIdx] |= mask;
             }
+
+            SetBytes(firstByte, buffer);
         }
 
         public void MarkAbsent(long index)
@@ -184,6 +193,13 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[] { value };
             _bitmap.Position = index;
             _bitmap.Write(buffer, 0, 1);
+            _bitmap.Flush();
+        }
+
+        private void SetBytes(long index, byte[] buffer)
+        {
+            _bitmap.Position = index;
+            _bitmap.Write(buffer, 0, buffer.Length);
             _bitmap.Flush();
         }
 
