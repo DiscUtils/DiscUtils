@@ -164,7 +164,7 @@ namespace DiscUtils.Ntfs
 
         internal long SetTotalEntries(long numEntries)
         {
-            long length = Utilities.RoundUp(numEntries / 8, 8);
+            long length = Utilities.RoundUp(Utilities.Ceil(numEntries, 8), 8);
             _stream.SetLength(length);
             return length * 8;
         }
