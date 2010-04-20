@@ -319,27 +319,34 @@ namespace DiscUtils.Iso9660
                     DateTimeKind.Utc);
                 return relTime - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
             }
-            catch(ArgumentOutOfRangeException)
+            catch (ArgumentOutOfRangeException)
             {
                 // In case the ISO has a bad date encoded, we'll just fall back to using a fixed date
-                return new DateTime(1980, 1, 1);
+                return DateTime.MinValue;
             }
         }
 
         internal static void ToDirectoryTimeFromUTC(byte[] data, int offset, DateTime dateTime)
         {
-            if (dateTime.Year < 1900)
+            if (dateTime == DateTime.MinValue)
             {
-                throw new IOException("Year is out of range");
+                Array.Clear(data, offset, 7);
             }
+            else
+            {
+                if (dateTime.Year < 1900)
+                {
+                    throw new IOException("Year is out of range");
+                }
 
-            data[offset] = (byte)(dateTime.Year - 1900);
-            data[offset + 1] = (byte)dateTime.Month;
-            data[offset + 2] = (byte)dateTime.Day;
-            data[offset + 3] = (byte)dateTime.Hour;
-            data[offset + 4] = (byte)dateTime.Minute;
-            data[offset + 5] = (byte)dateTime.Second;
-            data[offset + 6] = 0;
+                data[offset] = (byte)(dateTime.Year - 1900);
+                data[offset + 1] = (byte)dateTime.Month;
+                data[offset + 2] = (byte)dateTime.Day;
+                data[offset + 3] = (byte)dateTime.Hour;
+                data[offset + 4] = (byte)dateTime.Minute;
+                data[offset + 5] = (byte)dateTime.Second;
+                data[offset + 6] = 0;
+            }
         }
 
         internal static DateTime ToDateTimeFromVolumeDescriptorTime(byte[] data, int offset)
