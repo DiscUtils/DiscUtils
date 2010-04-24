@@ -5016,6 +5016,21 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="Bitmap">
+          <Messages>
+           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Excluded" Created="2010-04-24 10:14:47Z" FixCategory="NonBreaking">
+            <Issue Name="NonBreaking">
+             <Item>'Bitmap'</Item>
+             <Item>'BlockCacheStream'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="27" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="Index">
           <Members>
            <Member Name="#EntryAsString(DiscUtils.Ntfs.IndexEntry,System.String,System.String)">
@@ -6325,6 +6340,7 @@
     <Note Id="24" Modified="2008-11-23 17:52:13Z">Well known acronym</Note>
     <Note Id="25" Modified="2008-11-23 11:21:13Z">Part of a set of re-usable bit-swapping methods.</Note>
     <Note Id="26" Modified="2008-11-23 17:54:26Z">Well known acronyms</Note>
+    <Note Id="27" Modified="2010-04-24 10:16:01Z">BlockCacheStreams do not actually need to be disposed</Note>
     <Note Id="28" Modified="2009-01-20 20:13:20Z">Naming follows best practice - acronyms in Camel Case</Note>
     <Note Id="29" Modified="2008-12-15 22:03:59Z">Deliberate use of namespace to separate technologies.</Note>
     <Note Id="30" Modified="2008-12-15 22:04:20Z">DiscUtils is the establish project name.</Note>
