@@ -128,7 +128,7 @@ namespace DiscUtils
         /// <summary>
         /// Reads the first sector of the disk, known as the Master Boot Record.
         /// </summary>
-        /// <remarks>The MBR as a byte array</remarks>
+        /// <returns>The MBR as a byte array</returns>
         public virtual byte[] GetMasterBootRecord()
         {
             byte[] sector = new byte[Sizes.Sector];

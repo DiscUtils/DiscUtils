@@ -75,7 +75,43 @@ namespace DiscUtils.Registry
         /// Gets a named value stored within this key.
         /// </summary>
         /// <param name="name">The name of the value to retrieve</param>
-        /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
+        /// <returns>The value as a .NET object.</returns>
+        /// <remarks>The mapping from registry type of .NET type is as follows:
+        /// <list type="table">
+        ///   <listheader>
+        ///     <term>Value Type</term>
+        ///     <term>.NET type</term>
+        ///   </listheader>
+        ///   <item>
+        ///     <description>String</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>ExpandString</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>Link</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWord</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWordBigEndian</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>MultiString</description>
+        ///     <description>string[]</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>QWord</description>
+        ///     <description>ulong</description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
         public object GetValue(string name)
         {
             return GetValue(name, null, Microsoft.Win32.RegistryValueOptions.None);
@@ -86,7 +122,43 @@ namespace DiscUtils.Registry
         /// </summary>
         /// <param name="name">The name of the value to retrieve.</param>
         /// <param name="defaultValue">The default value to return, if no existing value is stored.</param>
-        /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
+        /// <returns>The value as a .NET object.</returns>
+        /// <remarks>The mapping from registry type of .NET type is as follows:
+        /// <list type="table">
+        ///   <listheader>
+        ///     <term>Value Type</term>
+        ///     <term>.NET type</term>
+        ///   </listheader>
+        ///   <item>
+        ///     <description>String</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>ExpandString</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>Link</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWord</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWordBigEndian</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>MultiString</description>
+        ///     <description>string[]</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>QWord</description>
+        ///     <description>ulong</description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
         public object GetValue(string name, object defaultValue)
         {
             return GetValue(name, defaultValue, Microsoft.Win32.RegistryValueOptions.None);
@@ -98,7 +170,43 @@ namespace DiscUtils.Registry
         /// <param name="name">The name of the value to retrieve.</param>
         /// <param name="defaultValue">The default value to return, if no existing value is stored.</param>
         /// <param name="options">Flags controlling how the value is processed before it's returned.</param>
-        /// <returns>The value as a .NET object, <see cref="RegistryValue.Value"/>.</returns>
+        /// <returns>The value as a .NET object.</returns>
+        /// <remarks>The mapping from registry type of .NET type is as follows:
+        /// <list type="table">
+        ///   <listheader>
+        ///     <term>Value Type</term>
+        ///     <term>.NET type</term>
+        ///   </listheader>
+        ///   <item>
+        ///     <description>String</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>ExpandString</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>Link</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWord</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWordBigEndian</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>MultiString</description>
+        ///     <description>string[]</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>QWord</description>
+        ///     <description>ulong</description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
         public object GetValue(string name, object defaultValue, Microsoft.Win32.RegistryValueOptions options)
         {
             RegistryValue regVal = GetRegistryValue(name);

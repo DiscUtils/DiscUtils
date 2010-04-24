@@ -327,7 +327,7 @@ namespace DiscUtils.Vhd
         /// <returns>An object that accesses the new file as a Disk</returns>
         public static Disk InitializeDifferencing(string path, string parentPath)
         {
-            LocalFileLocator parentLocator = new LocalFileLocator(Path.GetDirectoryName(path));
+            LocalFileLocator parentLocator = new LocalFileLocator(Path.GetDirectoryName(parentPath));
             string parentFileName = Path.GetFileName(parentPath);
 
             DiskImageFile newFile;

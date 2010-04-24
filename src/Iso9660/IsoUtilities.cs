@@ -302,9 +302,9 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// Converts a DirectoryRecord time to UTC.
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="offset"></param>
-        /// <returns></returns>
+        /// <param name="data">buffer containing the time data</param>
+        /// <param name="offset">offset in buffer of the time data</param>
+        /// <returns>The time in UTC</returns>
         public static DateTime ToUTCDateTimeFromDirectoryTime(byte[] data, int offset)
         {
             try
@@ -315,55 +315,79 @@ namespace DiscUtils.Iso9660
                     data[offset + 2],
                     data[offset + 3],
                     data[offset + 4],
-                    data[offset + 5]);
-                return relTime + TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
+                    data[offset + 5],
+                    DateTimeKind.Utc);
+                return relTime - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
             }
-            catch(ArgumentOutOfRangeException)
+            catch (ArgumentOutOfRangeException)
             {
                 // In case the ISO has a bad date encoded, we'll just fall back to using a fixed date
-                return new DateTime(1980, 1, 1);
+                return DateTime.MinValue;
             }
         }
 
         internal static void ToDirectoryTimeFromUTC(byte[] data, int offset, DateTime dateTime)
         {
-            if (dateTime.Year < 1900)
+            if (dateTime == DateTime.MinValue)
             {
-                throw new IOException("Year is out of range");
+                Array.Clear(data, offset, 7);
             }
+            else
+            {
+                if (dateTime.Year < 1900)
+                {
+                    throw new IOException("Year is out of range");
+                }
 
-            data[offset] = (byte)(dateTime.Year - 1900);
-            data[offset + 1] = (byte)dateTime.Month;
-            data[offset + 2] = (byte)dateTime.Day;
-            data[offset + 3] = (byte)dateTime.Hour;
-            data[offset + 4] = (byte)dateTime.Minute;
-            data[offset + 5] = (byte)dateTime.Second;
-            data[offset + 6] = 0;
+                data[offset] = (byte)(dateTime.Year - 1900);
+                data[offset + 1] = (byte)dateTime.Month;
+                data[offset + 2] = (byte)dateTime.Day;
+                data[offset + 3] = (byte)dateTime.Hour;
+                data[offset + 4] = (byte)dateTime.Minute;
+                data[offset + 5] = (byte)dateTime.Second;
+                data[offset + 6] = 0;
+            }
         }
 
-        public static DateTime ToDateTimeFromVolumeDescriptorTime(byte[] data, int offset)
+        internal static DateTime ToDateTimeFromVolumeDescriptorTime(byte[] data, int offset)
         {
-            bool nonNull = false;
+            bool allNull = true;
             for (int i = 0; i < 16; ++i)
             {
                 if (data[offset + i] != (byte)'0' && data[offset + i] != 0)
                 {
-                    nonNull = true;
+                    allNull = false;
                     break;
                 }
             }
 
-            if (!nonNull)
+            if (allNull)
             {
                 return DateTime.MinValue;
             }
 
-            // Note: work around bugs in burning software that put zero bytes (rather than '0' characters for fractions)
-            if (data[offset + 14] == 0) { data[offset + 14] = (byte)'0'; }
-            if (data[offset + 15] == 0) { data[offset + 15] = (byte)'0'; }
-
             string strForm = Encoding.ASCII.GetString(data, offset, 16);
-            return DateTime.ParseExact(strForm, "yyyyMMddHHmmssff", CultureInfo.InvariantCulture) + TimeSpan.FromMinutes(15 * (sbyte)data[offset + 16]);
+
+            // Work around bugs in burning software that may use zero bytes (rather than '0' characters)
+            strForm = strForm.Replace('\0', '0');
+
+            int year = SafeParseInt(1, 9999, strForm.Substring(0, 4));
+            int month = SafeParseInt(1, 12, strForm.Substring(4, 2));
+            int day = SafeParseInt(1, 31, strForm.Substring(6, 2));
+            int hour = SafeParseInt(0, 23, strForm.Substring(8, 2));
+            int min = SafeParseInt(0, 59, strForm.Substring(10, 2));
+            int sec = SafeParseInt(0, 59, strForm.Substring(12, 2));
+            int hundredths = SafeParseInt(0, 99, strForm.Substring(14, 2));
+
+            try
+            {
+                DateTime time = new DateTime(year, month, day, hour, min, sec, hundredths * 10, DateTimeKind.Utc);
+                return time - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 16]);
+            }
+            catch(ArgumentOutOfRangeException)
+            {
+                return DateTime.MinValue;
+            }
         }
 
         internal static void ToVolumeDescriptorTimeFromUTC(byte[] buffer, int offset, DateTime dateTime)
@@ -426,5 +450,28 @@ namespace DiscUtils.Iso9660
                 return false;
             }
         }
+
+        private static int SafeParseInt(int minVal, int maxVal, string str)
+        {
+            int val;
+            if (!int.TryParse(str, out val))
+            {
+                return minVal;
+            }
+
+            if (val < minVal)
+            {
+                return minVal;
+            }
+            else if (val > maxVal)
+            {
+                return maxVal;
+            }
+            else
+            {
+                return val;
+            }
+        }
+
     }
 }

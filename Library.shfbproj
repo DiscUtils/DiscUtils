@@ -57,6 +57,7 @@
       <NamespaceSummaryItem name="DiscUtils.Raw" isDocumented="True">Classes to access the contents of raw disk images (IMG, IMA, FLP, VFD file extensions).</NamespaceSummaryItem>
       <NamespaceSummaryItem name="DiscUtils.LogicalDiskManager" isDocumented="True">Classes to access Windows logical volumes inside a disk, created using Logical Disk Manager - these are also known as 'dynamic disks'.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="DiscUtils.BootConfig" isDocumented="True">Classes to access and modify a Windows Boot Configuration Database (BCD), that controls the Windows boot process.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="DiscUtils.Nfs" isDocumented="True">Classes implementing the NFS storage protocol.</NamespaceSummaryItem>
     </NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
     <SdkLinkType>Msdn</SdkLinkType>

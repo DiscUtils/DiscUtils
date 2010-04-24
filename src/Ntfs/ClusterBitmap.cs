@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -129,6 +128,13 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        /// <summary>
+        /// Sets the total number of clusters managed in the volume.
+        /// </summary>
+        /// <param name="numClusters">Total number of clusters in the volume</param>
+        /// <remarks>
+        /// Any clusters represented in the bitmap beyond the total number in the volume are marked as in-use.
+        /// </remarks>
         internal void SetTotalClusters(long numClusters)
         {
             long actualClusters = _bitmap.SetTotalEntries(numClusters);
