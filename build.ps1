@@ -1,5 +1,3 @@
-$ver = "0.1"
-
 $basedir = "$pwd"
 $utilsdir = "C:\utils"
 $msbuild = "c:\windows\Microsoft.NET\Framework\v3.5\msbuild.exe"
