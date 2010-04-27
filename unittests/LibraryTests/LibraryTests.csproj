@@ -58,6 +58,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Version.cs">
+      <Link>Version.cs</Link>
+    </Compile>
     <Compile Include="BlockCacheTest.cs" />
     <Compile Include="BootConfig\BcdObjectTest.cs" />
     <Compile Include="BootConfig\ElementTest.cs" />

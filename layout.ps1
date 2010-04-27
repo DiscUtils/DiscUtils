@@ -1,9 +1,4 @@
-$ver = "0.8"
-
-$basedir = "$pwd"
-$utilsdir = "C:\utils"
-$hg = "C:\Program Files\TortoiseHg\hg.exe"
-$zip = "${utilsdir}\7za.exe"
+. .\common.ps1
 
 
 # Clean the layout dir

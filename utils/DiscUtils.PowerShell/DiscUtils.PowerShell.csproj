@@ -47,6 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Version.cs">
+      <Link>Version.cs</Link>
+    </Compile>
     <Compile Include="FormatVolumeCommand.cs" />
     <Compile Include="InitializeVirtualDiskCommand.cs" />
     <Compile Include="NewVirtualRegistryCommand.cs" />
