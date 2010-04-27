@@ -10,7 +10,7 @@ if(-not (Test-Path $signingkey))
 $now = get-date
 $rev = & ${hg} id -i
 $filebuild = (new-timespan -start (get-date -year 2010 -month 1 -day 1) -end $now).Days
-$filerev = (($now.Hour * 60 + $now.Minute) * 60 + $now.Second) / 2
+$filerev = [int]((($now.Hour * 60 + $now.Minute) * 60 + $now.Second) / 2)
 $lines = Get-Content "${basedir}\Version.cs"
 $lines = $lines | Foreach-Object { $_ -replace "AssemblyDescription\(.*\)", "AssemblyDescription(""Revision: $rev"")" }
 $lines = $lines | Foreach-Object { $_ -replace "AssemblyFileVersion\(.*\)", "AssemblyFileVersion(""${ver}.${filebuild}.${filerev}"")" }
