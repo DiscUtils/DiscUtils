@@ -1,5 +1,5 @@
-$old = "2008"
-$new = "2008-2009"
+$old = "2008-2009"
+$new = "2008-2010"
 
 foreach ($file in Get-ChildItem .\* -include *.cs -recurse)
 {
@@ -8,5 +8,5 @@ foreach ($file in Get-ChildItem .\* -include *.cs -recurse)
 }
 
 
-$lines = Get-Content "Library.shfb"
-$lines | Foreach-Object { $_ -replace $old, $new} | Set-Content "Library.shfb"
+$lines = Get-Content "Library.shfbproj"
+$lines | Foreach-Object { $_ -replace $old, $new} | Set-Content "Library.shfbproj"
