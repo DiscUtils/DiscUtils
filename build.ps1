@@ -21,27 +21,26 @@ $lines | Set-Content "${basedir}\Version.cs";
 del ${basedir}\help -recurse -force | out-null
 & ${vcsexpress} "${basedir}\DiscUtils.sln" /clean Debug | out-null
 & ${vcsexpress} "${basedir}\DiscUtils.sln" /clean Release | out-null
-
-# Enable code signing
-$lines = Get-Content "${basedir}\src\DiscUtils.csproj";
-$lines | Foreach-Object { $_ -replace "<SignAssembly>.*</SignAssembly>", "<SignAssembly>true</SignAssembly>"} | Set-Content "${basedir}\src\DiscUtils.csproj";
-
+& ${vcsexpress} "${basedir}\DiscUtils.sln" /clean SignedRelease | out-null
 
 # Compile
-& ${vcsexpress} "${basedir}\DiscUtils.sln" /build Release | out-null
-& ${vcsexpress} "${basedir}\DiscUtils.sln" /build Debug | out-null
+& ${vcsexpress} "${basedir}\DiscUtils.sln" /build SignedRelease | out-null
 
 
-# Disable code signing again
-$lines = Get-Content "${basedir}\src\DiscUtils.csproj";
-$lines | Foreach-Object { $_ -replace "<SignAssembly>.*</SignAssembly>", "<SignAssembly>false</SignAssembly>"} | Set-Content "${basedir}\src\DiscUtils.csproj";
+# Check assembly signed
+$assm = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom("${basedir}\src\bin\SignedRelease\discutils.dll")
+if(-not $assm.GetName().GetPublicKeyToken())
+{
+  Write-Host "Assembly not signed"
+  Exit
+}
 
 # Restore Version.cs
 $lines = Get-Content "${basedir}\Version.cs"
 $lines = $lines | Foreach-Object { $_ -replace "AssemblyDescription\(.*\)", "AssemblyDescription(""Private Build"")" }
 $lines = $lines | Foreach-Object { $_ -replace "AssemblyFileVersion\(.*\)", "AssemblyFileVersion(""${fullver}"")" }
 $lines = $lines | Foreach-Object { $_ -replace "AssemblyVersion\(.*\)", "AssemblyVersion(""${fullver}"")" }
-$lines | Set-Content "${basedir}\Version.cs";
+$lines | Set-Content "${basedir}\Version.cs"
 
 # Generate help
 & ${msbuild} ${basedir}\Library.shfbproj

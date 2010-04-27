@@ -37,7 +37,7 @@
     <PresentationStyle>vs2005</PresentationStyle>
     <NamingMethod>MemberName</NamingMethod>
     <DocumentationSources>
-      <DocumentationSource sourceFile="src\DiscUtils.csproj" />
+      <DocumentationSource sourceFile="src\DiscUtils.csproj" configuration="SignedRelease" />
     </DocumentationSources>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />
