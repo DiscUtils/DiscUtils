@@ -87,7 +87,7 @@ namespace DiscUtils.Wim
             }
             else
             {
-                result.ShortName = "";
+                result.ShortName = null;
             }
 
             if (startPos + length > reader.Position)

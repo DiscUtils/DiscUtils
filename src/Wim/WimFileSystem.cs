@@ -527,6 +527,33 @@ namespace DiscUtils.Wim
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Gets the short name for a given path.
+        /// </summary>
+        /// <param name="path">The path to convert</param>
+        /// <returns>The short name</returns>
+        /// <remarks>
+        /// This method only gets the short name for the final part of the path, to
+        /// convert a complete path, call this method repeatedly, once for each path
+        /// segment.  If there is no short name for the given path,<c>null</c> is
+        /// returned.
+        /// </remarks>
+        public string GetShortName(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+            return dirEntry.ShortName;
+        }
+
+        /// <summary>
+        /// Sets the short name for a given file or directory.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to change.</param>
+        /// <param name="shortName">The shortName, which should not include a path.</param>
+        public void SetShortName(string path, string shortName)
+        {
+            throw new NotSupportedException();
+        }
+
         #endregion
     }
 }
