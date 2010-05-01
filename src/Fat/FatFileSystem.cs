@@ -918,6 +918,11 @@ namespace DiscUtils.Fat
         public override string[] GetDirectories(string path)
         {
             Directory dir = GetDirectory(path);
+            if (dir == null)
+            {
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
+            }
+
             DirectoryEntry[] entries = dir.GetDirectories();
             List<string> dirs = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)

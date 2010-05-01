@@ -30,8 +30,10 @@ namespace DiscUtils
     public class DiscFileSystemFileTest
     {
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreateFile(DiscFileSystem fs)
+        public void CreateFile(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite))
             {
                 s.WriteByte(1);
@@ -52,8 +54,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void CreateFileInvalid_Long(DiscFileSystem fs)
+        public void CreateFileInvalid_Long(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.GetFileInfo(new string('X', 256)).Open(FileMode.Create, FileAccess.ReadWrite))
             {
                 s.WriteByte(1);
@@ -63,8 +67,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void CreateFileInvalid_Characters(DiscFileSystem fs)
+        public void CreateFileInvalid_Characters(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.GetFileInfo("A\0File").Open(FileMode.Create, FileAccess.ReadWrite))
             {
                 s.WriteByte(1);
@@ -72,8 +78,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void DeleteFile(DiscFileSystem fs)
+        public void DeleteFile(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite)) { }
 
             Assert.AreEqual(1, fs.Root.GetFiles().Length);
@@ -86,9 +94,12 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Length(DiscFileSystem fs)
+        public void Length(NewFileSystemDelegate fsFactory)
         {
-            using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite)) {
+            DiscFileSystem fs = fsFactory();
+
+            using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite))
+            {
                 s.SetLength(3128);
             }
 
@@ -144,8 +155,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(FileNotFoundException))]
         [Category("ThrowsException")]
-        public void Open_FileNotFound(DiscFileSystem fs)
+        public void Open_FileNotFound(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
             using (Stream s = di.Open(FileMode.Open)) { }
         }
@@ -153,8 +166,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void Open_FileExists(DiscFileSystem fs)
+        public void Open_FileExists(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
             using (Stream s = di.Open(FileMode.Create)) { s.WriteByte(1); }
 
@@ -164,8 +179,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void Open_DirExists(DiscFileSystem fs)
+        public void Open_DirExists(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("FOO.TXT");
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -173,8 +190,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Open_Read(DiscFileSystem fs)
+        public void Open_Read(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
 
             using (Stream s = di.Open(FileMode.Create))
@@ -194,8 +213,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void Open_Read_Fail(DiscFileSystem fs)
+        public void Open_Read_Fail(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
             using (Stream s = di.Open(FileMode.Create, FileAccess.Read))
             {
@@ -204,8 +225,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Open_Write(DiscFileSystem fs)
+        public void Open_Write(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
             using (Stream s = di.Open(FileMode.Create, FileAccess.Write))
             {
@@ -218,8 +241,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void Open_Write_Fail(DiscFileSystem fs)
+        public void Open_Write_Fail(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
             using (Stream s = di.Open(FileMode.Create, FileAccess.ReadWrite))
             {
@@ -235,16 +260,20 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Name(DiscFileSystem fs)
+        public void Name(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             Assert.AreEqual("foo.txt", fs.GetFileInfo("foo.txt").Name);
             Assert.AreEqual("foo.txt", fs.GetFileInfo(@"path\foo.txt").Name);
             Assert.AreEqual("foo.txt", fs.GetFileInfo(@"\foo.txt").Name);
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Attributes(DiscFileSystem fs)
+        public void Attributes(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
             using (Stream s = fi.Open(FileMode.Create)) { }
 
@@ -263,8 +292,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(ArgumentException))]
         [Category("ThrowsException")]
-        public void Attributes_ChangeType(DiscFileSystem fs)
+        public void Attributes_ChangeType(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
             using (Stream s = fi.Open(FileMode.Create)) { }
 
@@ -272,8 +303,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Exists(DiscFileSystem fs)
+        public void Exists(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
 
             Assert.IsFalse(fi.Exists);
@@ -286,8 +319,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreationTimeUtc(DiscFileSystem fs)
+        public void CreationTimeUtc(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
 
             Assert.GreaterOrEqual(DateTime.UtcNow, fs.GetFileInfo("foo.txt").CreationTimeUtc);
@@ -295,8 +330,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreationTime(DiscFileSystem fs)
+        public void CreationTime(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
 
             Assert.GreaterOrEqual(DateTime.Now, fs.GetFileInfo("foo.txt").CreationTime);
@@ -304,8 +341,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void LastAccessTime(DiscFileSystem fs)
+        public void LastAccessTime(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
 
@@ -318,8 +357,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void LastWriteTime(DiscFileSystem fs)
+        public void LastWriteTime(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
 
@@ -332,8 +373,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Delete(DiscFileSystem fs)
+        public void Delete(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
             fs.GetFileInfo("foo.txt").Delete();
 
@@ -343,8 +386,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(FileNotFoundException))]
         [Category("ThrowsException")]
-        public void Delete_Dir(DiscFileSystem fs)
+        public void Delete_Dir(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("foo.txt");
             fs.GetFileInfo("foo.txt").Delete();
         }
@@ -352,14 +397,18 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(FileNotFoundException))]
         [Category("ThrowsException")]
-        public void Delete_NoFile(DiscFileSystem fs)
+        public void Delete_NoFile(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.GetFileInfo("foo.txt").Delete();
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CopyFile(DiscFileSystem fs)
+        public void CopyFile(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
 
             using (Stream s = fi.Create())
@@ -392,8 +441,10 @@ namespace DiscUtils
 
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void MoveFile(DiscFileSystem fs)
+        public void MoveFile(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
 
             using (Stream s = fi.Create())
@@ -417,8 +468,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void MoveFile_Overwrite(DiscFileSystem fs)
+        public void MoveFile_Overwrite(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
             using (Stream s = fi.Create())
             {
@@ -438,14 +491,18 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Equals(DiscFileSystem fs)
+        public void Equals(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             Assert.AreEqual(fs.GetFileInfo("foo.txt"), fs.GetFileInfo("foo.txt"));
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Parent(DiscFileSystem fs)
+        public void Parent(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"SOMEDIR\ADIR");
             using (Stream s = fs.OpenFile(@"SOMEDIR\ADIR\FILE.TXT", FileMode.Create)) { }
 
@@ -455,8 +512,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void VolumeLabel(DiscFileSystem fs)
+        public void VolumeLabel(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             string volLabel = fs.VolumeLabel;
             Assert.NotNull(volLabel);
         }

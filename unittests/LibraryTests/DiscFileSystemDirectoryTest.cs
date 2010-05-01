@@ -32,8 +32,10 @@ namespace DiscUtils
     public class DiscFileSystemDirectoryTest
     {
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Create(DiscFileSystem fs)
+        public void Create(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOMEDIR");
             dirInfo.Create();
 
@@ -41,8 +43,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreateRecursive(DiscFileSystem fs)
+        public void CreateRecursive(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR");
             dirInfo.Create();
 
@@ -52,8 +56,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreateExisting(DiscFileSystem fs)
+        public void CreateExisting(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOMEDIR");
             dirInfo.Create();
             dirInfo.Create();
@@ -64,8 +70,10 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void CreateInvalid_Long(DiscFileSystem fs)
+        public void CreateInvalid_Long(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(new String('X', 256));
             dirInfo.Create();
         }
@@ -73,15 +81,19 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void CreateInvalid_Characters(DiscFileSystem fs)
+        public void CreateInvalid_Characters(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOME\0DIR");
             dirInfo.Create();
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Exists(DiscFileSystem fs)
+        public void Exists(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR");
             dirInfo.Create();
 
@@ -94,16 +106,20 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void FullName(DiscFileSystem fs)
+        public void FullName(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             Assert.AreEqual(@"\", fs.Root.FullName);
             Assert.AreEqual(@"SOMEDIR\", fs.GetDirectoryInfo(@"SOMEDIR").FullName);
             Assert.AreEqual(@"SOMEDIR\CHILDDIR\", fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").FullName);
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Delete(DiscFileSystem fs)
+        public void Delete(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"Fred");
             Assert.AreEqual(1, fs.Root.GetDirectories().Length);
 
@@ -112,8 +128,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void DeleteRecursive(DiscFileSystem fs)
+        public void DeleteRecursive(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"Fred\child");
             Assert.AreEqual(1, fs.Root.GetDirectories().Length);
 
@@ -124,24 +142,30 @@ namespace DiscUtils
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void DeleteRoot(DiscFileSystem fs)
+        public void DeleteRoot(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.Root.Delete();
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
-        public void DeleteNonEmpty_NonRecursive(DiscFileSystem fs)
+        public void DeleteNonEmpty_NonRecursive(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"Fred\child");
             fs.Root.GetDirectories(@"Fred")[0].Delete();
         }
 
         [TestCaseSource(typeof(FileSystemSource), "QuickReadWriteFileSystems")]
         [Category("SlowTest")]
-        public void CreateDeleteLeakTest(DiscFileSystem fs)
+        public void CreateDeleteLeakTest(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             for (int i = 0; i < 2000; ++i)
             {
                 fs.CreateDirectory(@"Fred");
@@ -160,8 +184,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Move(DiscFileSystem fs)
+        public void Move(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
             fs.GetDirectoryInfo(@"SOMEDIR\CHILD").MoveTo("NEWDIR");
 
@@ -170,15 +196,19 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Extension(DiscFileSystem fs)
+        public void Extension(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             Assert.AreEqual("dir", fs.GetDirectoryInfo("fred.dir").Extension);
             Assert.AreEqual("", fs.GetDirectoryInfo("fred").Extension);
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void GetDirectories(DiscFileSystem fs)
+        public void GetDirectories(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
             fs.CreateDirectory(@"A.DIR");
 
@@ -204,14 +234,18 @@ namespace DiscUtils
 
         [ExpectedException(typeof(DirectoryNotFoundException))]
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void GetDirectories_BadPath(DiscFileSystem fs)
+        public void GetDirectories_BadPath(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.GetDirectories(@"\baddir");
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void GetFiles(DiscFileSystem fs)
+        public void GetFiles(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
             fs.CreateDirectory(@"AAA.DIR");
             using (Stream s = fs.OpenFile(@"FOO.TXT", FileMode.Create)) { }
@@ -229,8 +263,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void GetFileSystemInfos(DiscFileSystem fs)
+        public void GetFileSystemInfos(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory(@"SOMEDIR\CHILD\GCHILD");
             fs.CreateDirectory(@"AAA.EXT");
             using (Stream s = fs.OpenFile(@"FOO.TXT", FileMode.Create)) { }
@@ -245,22 +281,28 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Parent(DiscFileSystem fs)
+        public void Parent(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("SOMEDIR");
 
             Assert.AreEqual(fs.Root, fs.Root.GetDirectories("SOMEDIR")[0].Parent);
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Parent_Root(DiscFileSystem fs)
+        public void Parent_Root(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             Assert.IsNull(fs.Root.Parent);
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreationTimeUtc(DiscFileSystem fs)
+        public void CreationTimeUtc(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("DIR");
 
             Assert.GreaterOrEqual(DateTime.UtcNow, fs.Root.GetDirectories("DIR")[0].CreationTimeUtc);
@@ -268,8 +310,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void CreationTime(DiscFileSystem fs)
+        public void CreationTime(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("DIR");
 
             Assert.GreaterOrEqual(DateTime.Now, fs.Root.GetDirectories("DIR")[0].CreationTime);
@@ -277,8 +321,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void LastAccessTime(DiscFileSystem fs)
+        public void LastAccessTime(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("DIR");
             DiscDirectoryInfo di = fs.GetDirectoryInfo("DIR");
 
@@ -291,8 +337,10 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void LastWriteTime(DiscFileSystem fs)
+        public void LastWriteTime(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             fs.CreateDirectory("DIR");
             DiscDirectoryInfo di = fs.GetDirectoryInfo("DIR");
 
@@ -305,14 +353,18 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void Equals(DiscFileSystem fs)
+        public void Equals(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             Assert.AreEqual(fs.GetDirectoryInfo("foo"), fs.GetDirectoryInfo("foo"));
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        public void RootBehaviour(DiscFileSystem fs)
+        public void RootBehaviour(NewFileSystemDelegate fsFactory)
         {
+            DiscFileSystem fs = fsFactory();
+
             // Not all file systems can modify the root directory, so we just make sure 'get' and 'no-op' change work.
             fs.Root.Attributes = fs.Root.Attributes;
             fs.Root.CreationTimeUtc = fs.Root.CreationTimeUtc;
@@ -321,244 +373,4 @@ namespace DiscUtils
         }
     }
 
-    public class FileSystemSource
-    {
-        public FileSystemSource()
-        {
-        }
-
-        public IEnumerable<TestCaseData> ReadWriteFileSystems
-        {
-            get
-            {
-                yield return new TestCaseData(
-                    new DelayLoadFileSystem(FatFileSystem)).SetName("FAT");
-
-                // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
-                yield return new TestCaseData(
-                    new DelayLoadFileSystem(DiagnosticNtfsFileSystem)).SetName("NTFS");
-            }
-        }
-
-
-        public IEnumerable<TestCaseData> QuickReadWriteFileSystems
-        {
-            get
-            {
-                yield return new TestCaseData(
-                    new DelayLoadFileSystem(FatFileSystem)).SetName("FAT");
-
-                yield return new TestCaseData(
-                    new DelayLoadFileSystem(NtfsFileSystem)).SetName("NTFS");
-            }
-        }
-
-        private static DiscFileSystem FatFileSystem()
-        {
-            SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
-            SparseMemoryStream ms = new SparseMemoryStream();
-            Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            return Fat.FatFileSystem.FormatFloppy(ms, FloppyDiskType.Extended, null);
-        }
-
-        public static DiscFileSystem DiagnosticNtfsFileSystem()
-        {
-            SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
-            SparseMemoryStream ms = new SparseMemoryStream();
-            Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
-            var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<Ntfs.NtfsFileSystem, Ntfs.NtfsFileSystemChecker>(ms);
-            discFs.CheckpointInterval = 1;
-            discFs.GlobalIOTraceCapturesStackTraces = false;
-            return discFs;
-        }
-
-        public Ntfs.NtfsFileSystem NtfsFileSystem()
-        {
-            SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
-            SparseMemoryStream ms = new SparseMemoryStream();
-            Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            return Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
-        }
-
-        private delegate DiscFileSystem FileSystemLoaderDelegate();
-
-        private class DelayLoadFileSystem : DiscFileSystem
-        {
-            private FileSystemLoaderDelegate _loader;
-            private DiscFileSystem _wrapped;
-
-            public DelayLoadFileSystem(FileSystemLoaderDelegate loader)
-            {
-                _loader = loader;
-            }
-
-            private void Load()
-            {
-                if (_wrapped == null)
-                {
-                    _wrapped = _loader();
-                }
-            }
-
-            public override string FriendlyName
-            {
-                get
-                {
-                    Load();
-                    return _wrapped.FriendlyName;
-                }
-            }
-
-            public override bool CanWrite
-            {
-                get
-                {
-                    Load();
-                    return _wrapped.CanWrite;
-                }
-            }
-
-            public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
-            {
-                Load();
-                _wrapped.CopyFile(sourceFile, destinationFile, overwrite);
-            }
-
-            public override void CreateDirectory(string path)
-            {
-                Load();
-                _wrapped.CreateDirectory(path);
-            }
-
-            public override void DeleteDirectory(string path)
-            {
-                Load();
-                _wrapped.DeleteDirectory(path);
-            }
-
-            public override void DeleteFile(string path)
-            {
-                Load();
-                _wrapped.DeleteFile(path);
-            }
-
-            public override bool DirectoryExists(string path)
-            {
-                Load();
-                return _wrapped.DirectoryExists(path);
-            }
-
-            public override bool FileExists(string path)
-            {
-                Load();
-                return _wrapped.FileExists(path);
-            }
-
-            public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
-            {
-                Load();
-                return _wrapped.GetDirectories(path, searchPattern, searchOption);
-            }
-
-            public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
-            {
-                Load();
-                return _wrapped.GetFiles(path, searchPattern, searchOption);
-            }
-
-            public override string[] GetFileSystemEntries(string path)
-            {
-                Load();
-                return _wrapped.GetFileSystemEntries(path);
-            }
-
-            public override string[] GetFileSystemEntries(string path, string searchPattern)
-            {
-                Load();
-                return _wrapped.GetFileSystemEntries(path, searchPattern);
-            }
-
-            public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
-            {
-                Load();
-                _wrapped.MoveDirectory(sourceDirectoryName, destinationDirectoryName);
-            }
-
-            public override void MoveFile(string sourceName, string destinationName, bool overwrite)
-            {
-                Load();
-                _wrapped.MoveFile(sourceName, destinationName, overwrite);
-            }
-
-            public override Stream OpenFile(string path, FileMode mode, FileAccess access)
-            {
-                Load();
-                return _wrapped.OpenFile(path, mode, access);
-            }
-
-            public override FileAttributes GetAttributes(string path)
-            {
-                Load();
-                return _wrapped.GetAttributes(path);
-            }
-
-            public override void SetAttributes(string path, FileAttributes newValue)
-            {
-                Load();
-                _wrapped.SetAttributes(path, newValue);
-            }
-
-            public override DateTime GetCreationTimeUtc(string path)
-            {
-                Load();
-                return _wrapped.GetCreationTimeUtc(path);
-            }
-
-            public override void SetCreationTimeUtc(string path, DateTime newTime)
-            {
-                Load();
-                _wrapped.SetCreationTimeUtc(path, newTime);
-            }
-
-            public override DateTime GetLastAccessTimeUtc(string path)
-            {
-                Load();
-                return _wrapped.GetLastAccessTimeUtc(path);
-            }
-
-            public override void SetLastAccessTimeUtc(string path, DateTime newTime)
-            {
-                Load();
-                _wrapped.SetLastAccessTimeUtc(path, newTime);
-            }
-
-            public override DateTime GetLastWriteTimeUtc(string path)
-            {
-                Load();
-                return _wrapped.GetLastWriteTimeUtc(path);
-            }
-
-            public override void SetLastWriteTimeUtc(string path, DateTime newTime)
-            {
-                Load();
-                _wrapped.SetLastWriteTimeUtc(path, newTime);
-            }
-
-            public override long GetFileLength(string path)
-            {
-                Load();
-                return _wrapped.GetFileLength(path);
-            }
-
-            public override string VolumeLabel
-            {
-                get
-                {
-                    Load();
-                    return _wrapped.VolumeLabel;
-                }
-            }
-        }
-    }
 }
