@@ -241,6 +241,24 @@ namespace DiscUtils.Ntfs
         }
 
         [Test]
+        public void HasHardLink()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
+            Assert.IsFalse(ntfs.HasHardLinks("ALongFileName.txt"));
+
+            ntfs.CreateHardLink("ALongFileName.txt", "AHardLink.TXT");
+            Assert.IsTrue(ntfs.HasHardLinks("ALongFileName.txt"));
+
+            using (Stream s = ntfs.OpenFile("ALongFileName2.txt", FileMode.CreateNew)) { }
+
+            // If we enumerate short names, then the initial long name results in two 'hardlinks'
+            ntfs.NtfsOptions.HideDosFileNames = false;
+            Assert.IsTrue(ntfs.HasHardLinks("ALongFileName2.txt"));
+        }
+
+        [Test]
         public void MoveLongName()
         {
             NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();

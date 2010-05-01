@@ -361,7 +361,7 @@ namespace DiscUtils
             return Fat.FatFileSystem.FormatFloppy(ms, FloppyDiskType.Extended, null);
         }
 
-        public DiscFileSystem DiagnosticNtfsFileSystem()
+        public static DiscFileSystem DiagnosticNtfsFileSystem()
         {
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();

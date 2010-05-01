@@ -554,6 +554,33 @@ namespace DiscUtils.Wim
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Gets the file id for a given path.
+        /// </summary>
+        /// <param name="path">The path to get the id of</param>
+        /// <returns>The file id, or -1</returns>
+        /// <remarks>
+        /// The returned file id uniquely identifies the file, and is shared by all hard
+        /// links to the same file.  The value -1 indicates no unique identifier is
+        /// available, and so it can be assumed the file has no hard links.
+        /// </remarks>
+        public long GetFileId(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+            return dirEntry.HardLink == 0 ? -1 : (long)dirEntry.HardLink;
+        }
+
+        /// <summary>
+        /// Indicates whether the file is known by other names.
+        /// </summary>
+        /// <param name="path">The file to inspect</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        public bool HasHardLinks(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+            return dirEntry.HardLink != 0;
+        }
+
         #endregion
     }
 }

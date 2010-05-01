@@ -1210,6 +1210,16 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Indicates whether the file is known by other names.
+        /// </summary>
+        /// <param name="path">The file to inspect</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        public bool HasHardLinks(string path)
+        {
+            return GetHardLinkCount(path) > 1;
+        }
+
+        /// <summary>
         /// Gets the security descriptor associated with the file or directory.
         /// </summary>
         /// <param name="path">The file or directory to inspect.</param>

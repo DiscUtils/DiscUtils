@@ -82,5 +82,24 @@ namespace DiscUtils
         /// <param name="path">The full path to the file or directory to change.</param>
         /// <param name="shortName">The shortName, which should not include a path.</param>
         void SetShortName(string path, string shortName);
+
+        /// <summary>
+        /// Gets the file id for a given path.
+        /// </summary>
+        /// <param name="path">The path to get the id of</param>
+        /// <returns>The file id, or -1</returns>
+        /// <remarks>
+        /// The returned file id uniquely identifies the file, and is shared by all hard
+        /// links to the same file.  The value -1 indicates no unique identifier is
+        /// available, and so it can be assumed the file has no hard links.
+        /// </remarks>
+        long GetFileId(string path);
+
+        /// <summary>
+        /// Indicates whether the file is known by other names.
+        /// </summary>
+        /// <param name="path">The file to inspect</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        bool HasHardLinks(string path);
     }
 }
