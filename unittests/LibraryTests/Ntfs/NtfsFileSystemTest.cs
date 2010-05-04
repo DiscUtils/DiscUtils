@@ -1,5 +1,5 @@
-﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+//
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -238,6 +238,24 @@ namespace DiscUtils.Ntfs
             // If we enumerate short names, then the initial long name results in two 'hardlinks'
             ntfs.NtfsOptions.HideDosFileNames = false;
             Assert.AreEqual(4, ntfs.GetHardLinkCount("ALongFileName.txt"));
+        }
+
+        [Test]
+        public void HasHardLink()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
+            Assert.IsFalse(ntfs.HasHardLinks("ALongFileName.txt"));
+
+            ntfs.CreateHardLink("ALongFileName.txt", "AHardLink.TXT");
+            Assert.IsTrue(ntfs.HasHardLinks("ALongFileName.txt"));
+
+            using (Stream s = ntfs.OpenFile("ALongFileName2.txt", FileMode.CreateNew)) { }
+
+            // If we enumerate short names, then the initial long name results in two 'hardlinks'
+            ntfs.NtfsOptions.HideDosFileNames = false;
+            Assert.IsTrue(ntfs.HasHardLinks("ALongFileName2.txt"));
         }
 
         [Test]

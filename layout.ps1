@@ -1,9 +1,4 @@
-$ver = "0.8"
-
-$basedir = "$pwd"
-$utilsdir = "C:\utils"
-$hg = "C:\Program Files\TortoiseHg\hg.exe"
-$zip = "${utilsdir}\7za.exe"
+. .\common.ps1
 
 
 # Clean the layout dir
@@ -29,20 +24,20 @@ popd
 
 # Create the Binary zip
 New-Item -path "${basedir}\layout\" -name "bin" -type directory | out-null
-Copy-Item "${basedir}\utils\ISOCreate\bin\Release\*.dll" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\ISOCreate\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\ISOExtract\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\FATExtract\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\NTFSDump\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\NTFSExtract\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\VHDCreate\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\VHDDump\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\iSCSIBrowse\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\VirtualDiskConvert\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\VolInfo\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\DiskDump\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\OSClone\bin\Release\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\BCDDump\bin\Release\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\ISOCreate\bin\SignedRelease\*.dll" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\ISOCreate\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\ISOExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\FATExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\NTFSDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\NTFSExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VHDCreate\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VHDDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\iSCSIBrowse\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VirtualDiskConvert\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VolInfo\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\DiskDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\OSClone\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\BCDDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\bin\LICENSE.TXT"
 pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"
@@ -51,10 +46,10 @@ popd
 
 # Create the PowerShell zip
 New-Item -path "${basedir}\layout\" -name "powershell" -type directory | out-null
-Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.dll" "${basedir}\layout\powershell"
-Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.ps1xml" "${basedir}\layout\powershell"
-Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.xml" "${basedir}\layout\powershell"
-Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\release\*.psd1" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\SignedRelease\*.dll" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\SignedRelease\*.ps1xml" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\SignedRelease\*.xml" "${basedir}\layout\powershell"
+Copy-Item "${basedir}\utils\DiscUtils.PowerShell\bin\SignedRelease\*.psd1" "${basedir}\layout\powershell"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\powershell\LICENSE.TXT"
 Copy-Item "${basedir}\utils\DiscUtils.PowerShell\README.TXT" "${basedir}\layout\powershell"
 pushd layout\powershell

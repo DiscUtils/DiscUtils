@@ -1,5 +1,5 @@
-﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+//
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -62,5 +62,44 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path to the file or directory to remove the reparse point from</param>
         void RemoveReparsePoint(string path);
+
+        /// <summary>
+        /// Gets the short name for a given path.
+        /// </summary>
+        /// <param name="path">The path to convert</param>
+        /// <returns>The short name</returns>
+        /// <remarks>
+        /// This method only gets the short name for the final part of the path, to
+        /// convert a complete path, call this method repeatedly, once for each path
+        /// segment.  If there is no short name for the given path,<c>null</c> is
+        /// returned.
+        /// </remarks>
+        string GetShortName(string path);
+
+        /// <summary>
+        /// Sets the short name for a given file or directory.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to change.</param>
+        /// <param name="shortName">The shortName, which should not include a path.</param>
+        void SetShortName(string path, string shortName);
+
+        /// <summary>
+        /// Gets the file id for a given path.
+        /// </summary>
+        /// <param name="path">The path to get the id of</param>
+        /// <returns>The file id, or -1</returns>
+        /// <remarks>
+        /// The returned file id uniquely identifies the file, and is shared by all hard
+        /// links to the same file.  The value -1 indicates no unique identifier is
+        /// available, and so it can be assumed the file has no hard links.
+        /// </remarks>
+        long GetFileId(string path);
+
+        /// <summary>
+        /// Indicates whether the file is known by other names.
+        /// </summary>
+        /// <param name="path">The file to inspect</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        bool HasHardLinks(string path);
     }
 }

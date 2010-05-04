@@ -1,5 +1,5 @@
-﻿//
-// Copyright (c) 2008-2009, Kenneth Bell
+//
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -87,7 +87,7 @@ namespace DiscUtils.Wim
             }
             else
             {
-                result.ShortName = "";
+                result.ShortName = null;
             }
 
             if (startPos + length > reader.Position)

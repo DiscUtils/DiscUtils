@@ -1,0 +1,10 @@
+$ver = "0.9"
+$fullver = "${ver}.0.0"
+
+$basedir = "$pwd"
+$utilsdir = "C:\utils"
+$hg = "C:\Program Files\TortoiseHg\hg.exe"
+$msbuild = "c:\windows\Microsoft.NET\Framework\v3.5\msbuild.exe"
+$vcsexpress = "C:\Program Files\Microsoft Visual Studio 10.0\Common7\IDE\VCSExpress.exe"
+$signingkey = "${pwd}\DiscUtilsSigningKey.snk"
+$zip = "${utilsdir}\7za.exe"

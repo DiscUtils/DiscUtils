@@ -1,5 +1,5 @@
-﻿//
-// Copyright (c) 2009, Kenneth Bell
+//
+// Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -135,7 +135,7 @@ namespace DiscUtils.Iscsi
         [ProtocolKey("InitiatorName", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
         public string InitiatorName
         {
-            get { return "iqn.2009-04.discutils.codeplex.com"; }
+            get { return "iqn.2008-2010-04.discutils.codeplex.com"; }
         }
 
         /// <summary>
