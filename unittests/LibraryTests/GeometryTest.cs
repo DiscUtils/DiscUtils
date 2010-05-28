@@ -46,7 +46,7 @@ namespace DiscUtils
             const int TestHead = 15;
             const int TestSector = 63;
 
-            int lba = g.ToLogicalBlockAddress(TestCylinder, TestHead, TestSector);
+            long lba = g.ToLogicalBlockAddress(TestCylinder, TestHead, TestSector);
             ChsAddress chs = g.ToChsAddress(lba);
 
             Assert.AreEqual(TestCylinder, chs.Cylinder);

@@ -182,5 +182,20 @@ namespace DiscUtils.Partitions
             Assert.Greater(table[1].FirstSector, table[0].LastSector);
             Assert.Greater(table[2].FirstSector, table[1].LastSector);
         }
+
+        [Test]
+        public void VeryLargePartition()
+        {
+            long capacity = 1300 * 1024L * 1024L * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.LbaAssistedBiosGeometry(capacity);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            // exception occurs here
+            int i = table.CreatePrimaryByCylinder(0, 150000, (byte)WellKnownPartitionType.WindowsNtfs, true);
+
+            Assert.AreEqual(150000, geom.ToChsAddress(table[0].LastSector).Cylinder);
+        }
     }
 }

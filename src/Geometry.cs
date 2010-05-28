@@ -132,7 +132,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="chsAddress">The CHS address to convert</param>
         /// <returns>The Logical Block Address (in sectors)</returns>
-        public int ToLogicalBlockAddress(ChsAddress chsAddress)
+        public long ToLogicalBlockAddress(ChsAddress chsAddress)
         {
             return ToLogicalBlockAddress(chsAddress.Cylinder, chsAddress.Head, chsAddress.Sector);
         }
@@ -144,7 +144,7 @@ namespace DiscUtils
         /// <param name="head">The head of the address</param>
         /// <param name="sector">The sector of the address</param>
         /// <returns>The Logical Block Address (in sectors)</returns>
-        public int ToLogicalBlockAddress(int cylinder, int head, int sector)
+        public long ToLogicalBlockAddress(int cylinder, int head, int sector)
         {
             if (cylinder < 0)
             {
@@ -167,7 +167,7 @@ namespace DiscUtils
                 throw new ArgumentOutOfRangeException("sector", sector, "sector number is less than one (sectors are 1-based)");
             }
 
-            return (((cylinder * _headsPerCylinder) + head) * _sectorsPerTrack) + sector - 1;
+            return (((cylinder * (long)_headsPerCylinder) + head) * _sectorsPerTrack) + sector - 1;
         }
 
         /// <summary>
@@ -175,15 +175,15 @@ namespace DiscUtils
         /// </summary>
         /// <param name="logicalBlockAddress">The logical block address (in sectors)</param>
         /// <returns>The address in CHS form.</returns>
-        public ChsAddress ToChsAddress(int logicalBlockAddress)
+        public ChsAddress ToChsAddress(long logicalBlockAddress)
         {
             if (logicalBlockAddress < 0)
             {
                 throw new ArgumentOutOfRangeException("logicalBlockAddress", logicalBlockAddress, "Logical Block Address is negative");
             }
 
-            int cylinder = (logicalBlockAddress / (_headsPerCylinder * _sectorsPerTrack));
-            int temp = (logicalBlockAddress % (_headsPerCylinder * _sectorsPerTrack));
+            int cylinder = (int)(logicalBlockAddress / (_headsPerCylinder * _sectorsPerTrack));
+            int temp = (int)(logicalBlockAddress % (_headsPerCylinder * _sectorsPerTrack));
             int head = temp / _sectorsPerTrack;
             int sector = (temp % _sectorsPerTrack) + 1;
 
@@ -288,16 +288,19 @@ namespace DiscUtils
         /// than requested (an exact capacity is not always possible).</remarks>
         public static Geometry FromCapacity(long capacity)
         {
-            int totalSectors = (int)(capacity / 512);
-
+            int totalSectors;
             int cylinders;
             int headsPerCylinder;
             int sectorsPerTrack;
 
             // If more than ~128GB truncate at ~128GB
-            if (totalSectors > 65535 * 16 * 255)
+            if (capacity > 65535 * (long)16 * 255 * 512)
             {
                 totalSectors = 65535 * 16 * 255;
+            }
+            else
+            {
+                totalSectors = (int)(capacity / 512);
             }
 
             // If more than ~32GB, break partition table compatibility.

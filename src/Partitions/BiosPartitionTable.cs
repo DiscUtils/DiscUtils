@@ -189,8 +189,8 @@ namespace DiscUtils.Partitions
                 throw new ArgumentException("Last cylinder must be greater than first");
             }
 
-            int lbaStart = (first == 0) ? _diskGeometry.ToLogicalBlockAddress(0, 1, 1) : _diskGeometry.ToLogicalBlockAddress(first, 0, 1);
-            int lbaLast = _diskGeometry.ToLogicalBlockAddress(last, _diskGeometry.HeadsPerCylinder - 1, _diskGeometry.SectorsPerTrack);
+            long lbaStart = (first == 0) ? _diskGeometry.ToLogicalBlockAddress(0, 1, 1) : _diskGeometry.ToLogicalBlockAddress(first, 0, 1);
+            long lbaLast = _diskGeometry.ToLogicalBlockAddress(last, _diskGeometry.HeadsPerCylinder - 1, _diskGeometry.SectorsPerTrack);
 
             return CreatePrimaryBySector(lbaStart, lbaLast, type, markActive);
         }
@@ -203,7 +203,7 @@ namespace DiscUtils.Partitions
         /// <param name="type">The BIOS (MBR) type of the new partition</param>
         /// <param name="markActive">Whether to mark the partition active (bootable)</param>
         /// <returns>The index of the new partition</returns>
-        public int CreatePrimaryBySector(int first, int last, byte type, bool markActive)
+        public int CreatePrimaryBySector(long first, long last, byte type, bool markActive)
         {
             if (first >= last)
             {
