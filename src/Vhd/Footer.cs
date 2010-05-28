@@ -31,6 +31,7 @@ namespace DiscUtils.Vhd
         public const uint FeatureTemporary = 0x1;
         public const uint FeatureReservedMustBeSet = 0x2;
         public const uint Version1 = 0x00010000;
+        public const uint Version6_1 = 0x00060001;
         public static readonly DateTime EpochUtc = new DateTime(2000, 1, 1, 0, 0, 0, 0);
         public const string VirtualPCSig = "vpc ";
         public const string VirtualServerSig = "vs  ";
@@ -70,7 +71,7 @@ namespace DiscUtils.Vhd
             DataOffset = -1;
             Timestamp = DateTime.UtcNow;
             CreatorApp = "dutl";
-            CreatorVersion = Version1;
+            CreatorVersion = Version6_1;
             CreatorHostOS = WindowsHostOS;
             OriginalSize = capacity;
             CurrentSize = capacity;
