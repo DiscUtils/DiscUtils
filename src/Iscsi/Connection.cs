@@ -186,7 +186,7 @@ namespace DiscUtils.Iscsi
 
                     if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
                     {
-                        throw new InvalidProtocolException("Target indicated failure: " + resp.Status);
+                        throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure");
                     }
 
                     isFinal = resp.Header.FinalPdu;
@@ -197,7 +197,7 @@ namespace DiscUtils.Iscsi
 
                     if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
                     {
-                        throw new InvalidProtocolException("Target indicated failure: " + resp.Status);
+                        throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure");
                     }
 
 

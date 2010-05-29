@@ -147,8 +147,10 @@
     <Compile Include="Iscsi\RejectPacket.cs" />
     <Compile Include="Iscsi\Response.cs" />
     <Compile Include="Iscsi\ScsiCommand.cs" />
+    <Compile Include="Iscsi\ScsiCommandException.cs" />
     <Compile Include="Iscsi\ScsiInquiryCommand.cs" />
     <Compile Include="Iscsi\ScsiInquiryStandardResponse.cs" />
+    <Compile Include="Iscsi\ScsiRawCommand.cs" />
     <Compile Include="Iscsi\ScsiReadCapacityCommand.cs" />
     <Compile Include="Iscsi\ScsiReadCapacityResponse.cs" />
     <Compile Include="Iscsi\ScsiReadCommand.cs" />

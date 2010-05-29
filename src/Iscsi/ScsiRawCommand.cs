@@ -24,16 +24,23 @@ using System;
 
 namespace DiscUtils.Iscsi
 {
-    internal class ScsiReadCommand : ScsiCommand
+    internal class ScsiRawCommand : ScsiCommand
     {
-        private uint _logicalBlockAddress;
-        private ushort _numBlocks;
+        private byte[] _buffer;
+        private int _offset;
+        private int _length;
 
-        public ScsiReadCommand(ulong targetLun, uint logicalBlockAddress, ushort numBlocks)
+        public ScsiRawCommand(ulong targetLun, byte[] buffer, int offset, int length)
             : base(targetLun)
         {
-            _logicalBlockAddress = logicalBlockAddress;
-            _numBlocks = numBlocks;
+            _buffer = buffer;
+            _offset = offset;
+            _length = length;
+        }
+
+        public override TaskAttributes TaskAttributes
+        {
+            get { return TaskAttributes.Simple; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)
@@ -43,17 +50,12 @@ namespace DiscUtils.Iscsi
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            buffer[offset + 0] = 0x28; // OpCode: READ(10)
-            buffer[offset + 1] = 0;
-            Utilities.WriteBytesBigEndian(_logicalBlockAddress, buffer, offset + 2);
-            buffer[offset + 6] = 0;
-            Utilities.WriteBytesBigEndian(_numBlocks, buffer, offset + 7);
-            buffer[offset + 9] = 0;
+            Array.Copy(_buffer, _offset, buffer, offset, _length);
         }
 
         public override int Size
         {
-            get { return 10; }
+            get { return _length; }
         }
     }
 }

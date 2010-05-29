@@ -26,8 +26,6 @@ namespace DiscUtils.Iscsi
 {
     internal class ScsiWriteCommand : ScsiCommand
     {
-        private uint _dataLength;
-
         private uint _logicalBlockAddress;
         private ushort _numBlocks;
 
@@ -48,18 +46,6 @@ namespace DiscUtils.Iscsi
             get
             {
                 return TaskAttributes.Simple;
-            }
-        }
-
-        public uint ExpectedDataTransferLength
-        {
-            get
-            {
-                return _dataLength;
-            }
-            set
-            {
-                _dataLength = value;
             }
         }
 

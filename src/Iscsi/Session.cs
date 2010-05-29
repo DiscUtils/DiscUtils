@@ -325,6 +325,37 @@ namespace DiscUtils.Iscsi
             Send(cmd, buffer, offset, blockCount * blockSize, null, 0, 0);
         }
 
+        /// <summary>
+        /// Performs a raw SCSI command.
+        /// </summary>
+        /// <param name="lun">The target LUN for the command</param>
+        /// <param name="command">The command (a SCSI Command Descriptor Block, aka CDB)</param>
+        /// <param name="outBuffer">Buffer of data to send with the command (or <c>null</c>)</param>
+        /// <param name="outBufferOffset">Offset of first byte of data to send with the command</param>
+        /// <param name="outBufferLength">Amount of data to send with the command</param>
+        /// <param name="inBuffer">Buffer to receive data from the command (or <c>null</c>)</param>
+        /// <param name="inBufferOffset">Offset of the first byte position to fill with received data</param>
+        /// <param name="inBufferLength">The expected amount of data to receive</param>
+        /// <returns>The number of bytes of data received</returns>
+        /// <remarks>
+        /// <para>This method permits the caller to send raw SCSI commands to a LUN.</para>
+        /// <para>The command .</para>
+        /// </remarks>
+        public int RawCommand(long lun, byte[] command, byte[] outBuffer, int outBufferOffset, int outBufferLength, byte[] inBuffer, int inBufferOffset, int inBufferLength)
+        {
+            if (outBuffer == null && outBufferLength != 0)
+            {
+                throw new ArgumentException("outBufferLength must be 0 if outBuffer null", "outBufferLength");
+            }
+            if (inBuffer == null && inBufferLength != 0)
+            {
+                throw new ArgumentException("inBufferLength must be 0 if inBuffer null", "inBufferLength");
+            }
+
+            ScsiRawCommand cmd = new ScsiRawCommand((ulong)lun, command, 0, command.Length);
+            return Send(cmd, outBuffer, outBufferOffset, outBufferLength, inBuffer, inBufferOffset, inBufferLength);
+        }
+
         internal Connection ActiveConnection
         {
             get { return _currentConnection; }

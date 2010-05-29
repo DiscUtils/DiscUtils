@@ -23,15 +23,49 @@
 
 namespace DiscUtils.Iscsi
 {
-    internal enum ScsiStatus : byte
+    /// <summary>
+    /// Enumeration of SCSI command status codes.
+    /// </summary>
+    public enum ScsiStatus : byte
     {
+        /// <summary>
+        /// Indicates that the command completed without error.
+        /// </summary>
         Good = 0x00,
+
+        /// <summary>
+        /// An unsupported condition occured.
+        /// </summary>
         CheckCondition = 0x02,
+
+        /// <summary>
+        /// For some commands only - indicates the specified condition was met.
+        /// </summary>
         ConditionMet = 0x04,
+
+        /// <summary>
+        /// The device is busy.
+        /// </summary>
         Busy = 0x08,
+
+        /// <summary>
+        /// Delivered command conflicts with an existing reservation.
+        /// </summary>
         ReservationConflict = 0x18,
+
+        /// <summary>
+        /// The buffer of outstanding commands is full.
+        /// </summary>
         TaskSetFull = 0x28,
+
+        /// <summary>
+        /// An ACA condition exists.
+        /// </summary>
         AcaActive = 0x30,
+
+        /// <summary>
+        /// The command was aborted.
+        /// </summary>
         TaskAborted = 0x40
     }
 }

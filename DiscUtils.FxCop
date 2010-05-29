@@ -2777,42 +2777,6 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="ScsiReadCommand">
-          <Members>
-           <Member Name="#ExpectedDataTransferLength">
-            <Accessors>
-             <Accessor Name="#get_ExpectedDataTransferLength()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
-                <Issue>
-                 <Item>'ScsiReadCommand.ExpectedDataTransferLength.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="56" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-             <Accessor Name="#set_ExpectedDataTransferLength(System.UInt32)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
-                <Issue>
-                 <Item>'ScsiReadCommand.ExpectedDataTransferLength.set(uint)'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="56" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="ScsiReportLunsResponse">
           <Messages>
            <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-09 08:55:03Z">
@@ -2829,38 +2793,6 @@
          </Type>
          <Type Name="ScsiWriteCommand">
           <Members>
-           <Member Name="#ExpectedDataTransferLength">
-            <Accessors>
-             <Accessor Name="#get_ExpectedDataTransferLength()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
-                <Issue>
-                 <Item>'ScsiWriteCommand.ExpectedDataTransferLength.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="56" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-             <Accessor Name="#set_ExpectedDataTransferLength(System.UInt32)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-16 10:32:27Z">
-                <Issue>
-                 <Item>'ScsiWriteCommand.ExpectedDataTransferLength.set(uint)'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="56" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
            <Member Name="#NumBlocks">
             <Accessors>
              <Accessor Name="#get_NumBlocks()">
@@ -3226,6 +3158,22 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="6" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RawCommand(System.Int64,System.Byte[],System.Byte[],System.Int32,System.Int32,System.Byte[],System.Int32,System.Int32)">
+            <Messages>
+             <Message Id="lun" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-05-29 06:26:25Z">
+              <Issue Name="MemberParameter">
+               <Item>'Session.RawCommand(long, byte[], byte[], int, int, byte[], int, int)'</Item>
+               <Item>lun</Item>
+               <Item>'lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="103" />
                </User>
               </Notes>
              </Message>
@@ -4988,20 +4936,6 @@
        </Namespace>
        <Namespace Name="DiscUtils.Ntfs">
         <Types>
-         <Type Name="AttributeList">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2009-05-23 13:41:59Z">
-            <Issue>
-             <Item>'AttributeList'</Item>
-            </Issue>
-            <Notes>
-             <User Name="Kenneth">
-              <Note Id="69" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
-         </Type>
          <Type Name="AttributeType">
           <Messages>
            <Message TypeName="MarkEnumsWithFlags" Category="Microsoft.Design" CheckId="CA1027" Status="Excluded" Created="2009-03-20 16:51:42Z">
@@ -6165,24 +6099,6 @@
        </Namespace>
        <Namespace Name="DiscUtils.Wim">
         <Types>
-         <Type Name="DirectoryEntry">
-          <Members>
-           <Member Name="#HardLink">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-12-19 10:35:39Z">
-              <Issue>
-               <Item>'DirectoryEntry.HardLink'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="99" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="FileHeader">
           <Members>
            <Member Name="#PartNumber">
@@ -6382,7 +6298,6 @@
     <Note Id="66" Modified="2009-05-23 14:11:32Z">Fields reflect data structure.</Note>
     <Note Id="67" Modified="2009-05-23 14:12:40Z">Methods reflect structure of descriptor files.</Note>
     <Note Id="68" Modified="2009-05-23 14:18:31Z">Reflects data structure</Note>
-    <Note Id="69" Modified="2009-05-23 14:19:02Z">Reflect disk structures, not used yet.</Note>
     <Note Id="70" Modified="2009-05-31 08:40:46Z">Wim is correct form of WIM acronym.</Note>
     <Note Id="71" Modified="2009-05-31 08:48:01Z">Need initialization ordering guarantee between the two static fields.</Note>
     <Note Id="72" Modified="2009-05-31 08:48:34Z">Namespace appropriate for new file system format</Note>
@@ -6416,6 +6331,7 @@
     <Note Id="100" Modified="2010-01-03 22:17:56Z">Variants are lower case</Note>
     <Note Id="101" Modified="2010-01-30 11:05:30Z">Deliberate catch of all exceptions as part of verification logic.</Note>
     <Note Id="102" Modified="2010-03-20 17:30:43Z">Appropriate use - since it indicates use of a flag, not that it is a flag.</Note>
+    <Note Id="103" Modified="2010-05-29 06:27:27Z">Lun is standard term.</Note>
    </User>
   </Notes>
   <Rules>
