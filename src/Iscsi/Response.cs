@@ -28,6 +28,9 @@ namespace DiscUtils.Iscsi
         public BasicHeaderSegment Header;
         public byte ResponseCode;
         public ScsiStatus Status;
+        public uint ExpectedDataSequenceNumber;
+        public uint BidiReadResidualCount;
+        public uint ResidualCount;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -50,6 +53,9 @@ namespace DiscUtils.Iscsi
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+            ExpectedDataSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 36);
+            BidiReadResidualCount = Utilities.ToUInt32BigEndian(headerData, headerOffset + 40);
+            ResidualCount = Utilities.ToUInt32BigEndian(headerData, headerOffset + 44);
         }
     }
 }

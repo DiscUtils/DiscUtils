@@ -34,6 +34,7 @@ namespace DiscUtils.Iscsi
     public class ScsiCommandException : IscsiException
     {
         private ScsiStatus _status;
+        private byte[] _senseData;
 
         /// <summary>
         /// Creates a new instance.
@@ -74,6 +75,19 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
+        /// Creates a new instance containing a message.
+        /// </summary>
+        /// <param name="status">The SCSI status code</param>
+        /// <param name="message">The reason for the exception</param>
+        /// <param name="senseData">The SCSI sense data</param>
+        public ScsiCommandException(ScsiStatus status, string message, byte[] senseData)
+            : base(message)
+        {
+            _status = status;
+            _senseData = senseData;
+        }
+
+        /// <summary>
         /// Creates a new instance containing a message and an inner exception.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
@@ -105,6 +119,7 @@ namespace DiscUtils.Iscsi
             : base(info, context)
         {
             _status = (ScsiStatus)info.GetByte("status");
+            _senseData = (byte[])info.GetValue("senseData", typeof(byte[]));
         }
 
         /// <summary>
@@ -117,6 +132,7 @@ namespace DiscUtils.Iscsi
         {
             base.GetObjectData(info, context);
             info.AddValue("status", (byte)_status);
+            info.AddValue("senseData", _senseData);
         }
 
         /// <summary>
@@ -125,6 +141,15 @@ namespace DiscUtils.Iscsi
         public ScsiStatus Status
         {
             get { return _status; }
+        }
+
+        /// <summary>
+        /// Gets the SCSI sense data (if any) associated with this exception.
+        /// </summary>
+        /// <returns>The SCSI sense data, or <c>null</c>.</returns>
+        public byte[] GetSenseData()
+        {
+            return _senseData;
         }
     }
 }

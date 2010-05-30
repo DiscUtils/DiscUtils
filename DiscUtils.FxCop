@@ -2733,6 +2733,48 @@
          </Type>
          <Type Name="Response">
           <Members>
+           <Member Name="#BidiReadResidualCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-05-30 15:18:34Z">
+              <Issue>
+               <Item>'Response.BidiReadResidualCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="105" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExpectedDataSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-05-30 15:18:34Z">
+              <Issue>
+               <Item>'Response.ExpectedDataSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="105" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ResidualCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-05-30 15:18:34Z">
+              <Issue>
+               <Item>'Response.ResidualCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="105" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#ResponseCode">
             <Messages>
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-16 10:32:27Z">
@@ -2790,6 +2832,38 @@
             </Notes>
            </Message>
           </Messages>
+         </Type>
+         <Type Name="ScsiStatus">
+          <Messages>
+           <Message TypeName="EnumStorageShouldBeInt32" Category="Microsoft.Design" CheckId="CA1028" Status="Excluded" Created="2010-05-29 07:09:53Z">
+            <Issue Name="NotInt32">
+             <Item>'ScsiStatus'</Item>
+             <Item>'byte'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="69" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#AcaActive">
+            <Messages>
+             <Message Id="Aca" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-05-29 07:09:53Z">
+              <Issue Name="Member">
+               <Item>Aca</Item>
+               <Item>'ScsiStatus.AcaActive'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="104" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
          </Type>
          <Type Name="ScsiWriteCommand">
           <Members>
@@ -6298,6 +6372,7 @@
     <Note Id="66" Modified="2009-05-23 14:11:32Z">Fields reflect data structure.</Note>
     <Note Id="67" Modified="2009-05-23 14:12:40Z">Methods reflect structure of descriptor files.</Note>
     <Note Id="68" Modified="2009-05-23 14:18:31Z">Reflects data structure</Note>
+    <Note Id="69" Modified="2010-05-29 07:14:45Z">Defined as a single byte.</Note>
     <Note Id="70" Modified="2009-05-31 08:40:46Z">Wim is correct form of WIM acronym.</Note>
     <Note Id="71" Modified="2009-05-31 08:48:01Z">Need initialization ordering guarantee between the two static fields.</Note>
     <Note Id="72" Modified="2009-05-31 08:48:34Z">Namespace appropriate for new file system format</Note>
@@ -6332,6 +6407,8 @@
     <Note Id="101" Modified="2010-01-30 11:05:30Z">Deliberate catch of all exceptions as part of verification logic.</Note>
     <Note Id="102" Modified="2010-03-20 17:30:43Z">Appropriate use - since it indicates use of a flag, not that it is a flag.</Note>
     <Note Id="103" Modified="2010-05-29 06:27:27Z">Lun is standard term.</Note>
+    <Note Id="104" Modified="2010-05-29 07:14:56Z">Derived from standard</Note>
+    <Note Id="105" Modified="2010-05-30 15:18:55Z">Defined by standard</Note>
    </User>
   </Notes>
   <Rules>
@@ -6362,6 +6439,9 @@
    </Rule>
    <Rule TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006">
     <Resolution Name="Default">Consider a design where {0} doesn't nest generic type {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="EnumStorageShouldBeInt32" Category="Microsoft.Design" CheckId="CA1028">
+    <Resolution Name="NotInt32">If possible, make the underlying type of {0} System.Int32 instead of {1}.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>

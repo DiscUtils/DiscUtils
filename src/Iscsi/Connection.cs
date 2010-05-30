@@ -184,7 +184,14 @@ namespace DiscUtils.Iscsi
                 {
                     Response resp = ParseResponse<Response>(pdu);
 
-                    if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
+                    if (resp.StatusPresent && resp.Status == ScsiStatus.CheckCondition)
+                    {
+                        ushort senseLength = Utilities.ToUInt16BigEndian(pdu.ContentData, 0);
+                        byte[] senseData = new byte[senseLength];
+                        Array.Copy(pdu.ContentData, 2, senseData, 0, senseLength);
+                        throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure", senseData);
+                    }
+                    else if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
                     {
                         throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure");
                     }
