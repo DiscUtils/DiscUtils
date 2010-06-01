@@ -365,6 +365,7 @@
     <Compile Include="StreamBuilder.cs" />
     <Compile Include="StreamExtent.cs" />
     <Compile Include="StripedStream.cs" />
+    <Compile Include="SubBuffer.cs" />
     <Compile Include="SubStream.cs" />
     <Compile Include="ThreadSafeStream.cs" />
     <Compile Include="Tuple.cs" />
