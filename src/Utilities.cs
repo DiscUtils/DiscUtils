@@ -431,6 +431,21 @@ namespace DiscUtils
                 );
         }
 
+        public static byte[] ToByteArray(byte[] buffer, int offset, int length)
+        {
+            byte[] result = new byte[length];
+            Array.Copy(buffer, offset, result, 0, length);
+            return result;
+        }
+
+        public static T ToStruct<T>(byte[] buffer, int offset)
+            where T : IByteArraySerializable, new()
+        {
+            T result = new T();
+            result.ReadFrom(buffer, offset);
+            return result;
+        }
+
         /// <summary>
         /// Primitive conversion from Unicode to ASCII that preserves special characters.
         /// </summary>
