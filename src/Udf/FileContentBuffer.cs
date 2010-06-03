@@ -65,7 +65,7 @@ namespace DiscUtils.Udf
                         throw new NotImplementedException("Extents that are not 'recorded and allocated' not implemented");
                     }
 
-                    CookedExtent newExtent = new CookedExtent { FileContentOffset = filePos, StartPos = sad.ExtentLocation * _blockSize, Length = sad.ExtentLength };
+                    CookedExtent newExtent = new CookedExtent { FileContentOffset = filePos, StartPos = sad.ExtentLocation * (long)_blockSize, Length = sad.ExtentLength };
                     _extents.Add(newExtent);
 
                     filePos += sad.ExtentLength;

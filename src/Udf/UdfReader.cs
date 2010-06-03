@@ -171,7 +171,7 @@ namespace DiscUtils.Udf
             bool terminatorFound = false;
             while (!terminatorFound)
             {
-                _data.Position = sector * _sectorSize;
+                _data.Position = sector * (long)_sectorSize;
 
                 DescriptorTag dt;
                 if (!DescriptorTag.TryFromStream(_data, out dt))
@@ -244,12 +244,12 @@ namespace DiscUtils.Udf
 
         private bool ProbeSectorSize(int size)
         {
-            if (_data.Length < 257 * size)
+            if (_data.Length < 257 * (long)size)
             {
                 return false;
             }
 
-            _data.Position = 256 * size;
+            _data.Position = 256 * (long)size;
 
             DescriptorTag dt;
             if (!DescriptorTag.TryFromStream(_data, out dt))

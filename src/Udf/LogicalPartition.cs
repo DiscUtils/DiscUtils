@@ -90,7 +90,7 @@ namespace DiscUtils.Udf
             _partitionMap = partitionMap;
 
             PhysicalPartition physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
-            long fileEntryPos = partitionMap.MetadataFileLocation * volumeDescriptor.LogicalBlockSize;
+            long fileEntryPos = partitionMap.MetadataFileLocation * (long)volumeDescriptor.LogicalBlockSize;
 
             byte[] entryData = Utilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
             if(!DescriptorTag.IsValid(entryData, 0))
