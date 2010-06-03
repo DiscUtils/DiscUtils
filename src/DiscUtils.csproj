@@ -411,6 +411,13 @@
     <Compile Include="Vdi\ImageFlags.cs" />
     <Compile Include="Vdi\ImageType.cs" />
     <Compile Include="Vdi\PreHeaderRecord.cs" />
+    <Compile Include="Vfs\IVfsDirectory.cs" />
+    <Compile Include="Vfs\IVfsFile.cs" />
+    <Compile Include="Vfs\VfsContext.cs" />
+    <Compile Include="Vfs\VfsDirEntry.cs" />
+    <Compile Include="Vfs\VfsFileSystem.cs" />
+    <Compile Include="Vfs\VfsFileSystemFacade.cs" />
+    <Compile Include="Vfs\VfsReadOnlyFileSystem.cs" />
     <Compile Include="Vhd\Disk.cs" />
     <Compile Include="Vhd\DiskBuilder.cs" />
     <Compile Include="Vhd\DiskFactory.cs" />

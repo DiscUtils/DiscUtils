@@ -122,7 +122,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
         /// <param name="recursive">Determines if the all descendants should be deleted</param>
-        public void DeleteDirectory(string path, bool recursive)
+        public virtual void DeleteDirectory(string path, bool recursive)
         {
             if (recursive)
             {
