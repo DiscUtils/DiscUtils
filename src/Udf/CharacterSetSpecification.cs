@@ -26,7 +26,7 @@ using System.Text;
 
 namespace DiscUtils.Udf
 {
-    public enum CharacterSetType : byte
+    internal enum CharacterSetType : byte
     {
         CharacterSet0 = 0,
         CharacterSet1 = 1,

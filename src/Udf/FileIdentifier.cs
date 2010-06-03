@@ -21,8 +21,8 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
@@ -36,7 +36,7 @@ namespace DiscUtils.Udf
         Metadata = 0x10
     }
 
-    internal class FileIdentifier : IByteArraySerializable
+    internal class FileIdentifier : VfsDirEntry, IByteArraySerializable
     {
         public DescriptorTag DescriptorTag;
         public ushort FileVersionNumber;
@@ -72,21 +72,49 @@ namespace DiscUtils.Udf
             get { throw new NotImplementedException(); }
         }
 
-        internal string SearchName
+        public override bool IsDirectory
         {
-            get
-            {
-                if (Name.IndexOf('.') == -1)
-                {
-                    return Name + ".";
-                }
-                else
-                {
-                    return Name;
-                }
-            }
+            get { return (FileCharacteristics & FileCharacteristic.Directory) != 0; }
         }
 
+        public override string FileName
+        {
+            get { return Name; }
+        }
 
+        public override bool HasVfsTimeInfo
+        {
+            get { return false; }
+        }
+
+        public override DateTime LastAccessTimeUtc
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public override DateTime LastWriteTimeUtc
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public override DateTime CreationTimeUtc
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public override bool HasVfsFileAttributes
+        {
+            get { return false; }
+        }
+
+        public override FileAttributes FileAttributes
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public override long UniqueCacheId
+        {
+            get { return ((long)FileLocation.ExtentLocation.Partition) << 32 | FileLocation.ExtentLocation.LogicalBlock; }
+        }
     }
 }

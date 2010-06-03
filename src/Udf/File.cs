@@ -21,10 +21,12 @@
 //
 
 using System;
+using System.IO;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    internal class File
+    internal class File : IVfsFile
     {
         protected UdfContext _context;
         protected Partition _partition;
@@ -40,7 +42,7 @@ namespace DiscUtils.Udf
             _blockSize = blockSize;
         }
 
-        public IBuffer Content
+        public IBuffer FileContent
         {
             get
             {
@@ -59,19 +61,67 @@ namespace DiscUtils.Udf
             get { return _fileEntry.InformationControlBlock.FileType; }
         }
 
-        public DateTime AccessTimeUtc
+        public DateTime LastAccessTimeUtc
         {
             get { return _fileEntry.AccessTime; }
+            set { throw new NotSupportedException(); }
         }
 
-        public DateTime ModificationTimeUtc
+        public DateTime LastWriteTimeUtc
         {
             get { return _fileEntry.ModificationTime; }
+            set { throw new NotSupportedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
             get { return _fileEntry.CreationTime; }
+            set { throw new NotSupportedException(); }
+        }
+
+        public FileAttributes FileAttributes
+        {
+            get
+            {
+                FileAttributes attribs = (FileAttributes)0;
+                InformationControlBlockFlags flags = _fileEntry.InformationControlBlock.Flags;
+
+                if (_fileEntry.InformationControlBlock.FileType == FileType.Directory)
+                {
+                    attribs |= FileAttributes.Directory;
+                }
+                else if (_fileEntry.InformationControlBlock.FileType == FileType.Fifo
+                    || _fileEntry.InformationControlBlock.FileType == FileType.Socket
+                    || _fileEntry.InformationControlBlock.FileType == FileType.SpecialBlockDevice
+                    || _fileEntry.InformationControlBlock.FileType == FileType.SpecialCharacterDevice
+                    || _fileEntry.InformationControlBlock.FileType == FileType.TerminalEntry)
+                {
+                    attribs |= FileAttributes.Device;
+                }
+
+                if ((flags & InformationControlBlockFlags.Archive) != 0)
+                {
+                    attribs |= FileAttributes.Archive;
+                }
+
+                if ((flags & InformationControlBlockFlags.System) != 0)
+                {
+                    attribs |= FileAttributes.System | FileAttributes.Hidden;
+                }
+
+                if ((int)attribs == 0)
+                {
+                    attribs = FileAttributes.Normal;
+                }
+
+                return attribs;
+            }
+            set { throw new NotSupportedException(); }
+        }
+
+        public long FileLength
+        {
+            get { return (long)_fileEntry.InformationLength; }
         }
 
         public static File FromDescriptor(UdfContext context, LongAllocationDescriptor icb)
@@ -98,6 +148,5 @@ namespace DiscUtils.Udf
                 throw new NotImplementedException("Only ExtendedFileEntries implemented");
             }
         }
-
     }
 }

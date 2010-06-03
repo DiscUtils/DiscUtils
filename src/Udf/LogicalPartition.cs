@@ -112,7 +112,7 @@ namespace DiscUtils.Udf
 
         public override IBuffer Content
         {
-            get { return _metadataFile.Content; }
+            get { return _metadataFile.FileContent; }
         }
     }
 }

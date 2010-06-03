@@ -23,10 +23,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    internal class UdfContext
+    internal class UdfContext : VfsContext
     {
         public Dictionary<ushort, PhysicalPartition> PhysicalPartitions;
         public int PhysicalSectorSize;

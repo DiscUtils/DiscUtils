@@ -23,24 +23,25 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    internal class Directory : File
+    internal class Directory : File, IVfsDirectory<FileIdentifier, File>
     {
         private List<FileIdentifier> _entries;
 
         public Directory(UdfContext context, LogicalPartition partition, ExtendedFileEntry fileEntry)
             : base(context, partition, fileEntry, (uint)partition.LogicalBlockSize)
         {
-            if (Content.Capacity > int.MaxValue)
+            if (FileContent.Capacity > int.MaxValue)
             {
                 throw new NotImplementedException("Very large directory");
             }
 
             _entries = new List<FileIdentifier>();
 
-            byte[] contentBytes = Utilities.ReadFully(Content, 0, (int)Content.Capacity);
+            byte[] contentBytes = Utilities.ReadFully(FileContent, 0, (int)FileContent.Capacity);
 
             int pos = 0;
             while (pos < contentBytes.Length)
@@ -57,7 +58,12 @@ namespace DiscUtils.Udf
             }
         }
 
-        public List<FileIdentifier> Entries
+        public File CreateNewFile(string name)
+        {
+            throw new NotSupportedException();
+        }
+
+        public List<FileIdentifier> AllEntries
         {
             get
             {
@@ -65,7 +71,7 @@ namespace DiscUtils.Udf
             }
         }
 
-        internal FileIdentifier GetEntryByName(string name)
+        public FileIdentifier GetEntryByName(string name)
         {
             foreach (var entry in _entries)
             {
