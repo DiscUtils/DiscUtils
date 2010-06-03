@@ -379,6 +379,7 @@
     <Compile Include="Udf\ExtendedFileEntry.cs" />
     <Compile Include="Udf\File.cs" />
     <Compile Include="Udf\FileContentBuffer.cs" />
+    <Compile Include="Udf\FileEntry.cs" />
     <Compile Include="Udf\FileIdentifier.cs" />
     <Compile Include="Udf\FilePermissions.cs" />
     <Compile Include="Udf\FileSetDescriptor.cs" />

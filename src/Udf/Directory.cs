@@ -31,7 +31,7 @@ namespace DiscUtils.Udf
     {
         private List<FileIdentifier> _entries;
 
-        public Directory(UdfContext context, LogicalPartition partition, ExtendedFileEntry fileEntry)
+        public Directory(UdfContext context, LogicalPartition partition, FileEntry fileEntry)
             : base(context, partition, fileEntry, (uint)partition.LogicalBlockSize)
         {
             if (FileContent.Capacity > int.MaxValue)

@@ -26,35 +26,13 @@ using System.Text;
 
 namespace DiscUtils.Udf
 {
-    internal class ExtendedFileEntry : IByteArraySerializable
+    internal class ExtendedFileEntry : FileEntry, IByteArraySerializable
     {
-        public DescriptorTag DescriptorTag;
-        public InformationControlBlock InformationControlBlock;
-        public uint Uid;
-        public uint Gid;
-        public FilePermissions Permissions;
-        public ushort FileLinkCount;
-        public byte RecordFormat;
-        public byte RecordDisplayAttributes;
-        public uint RecordLength;
-        public ulong InformationLength;
         public ulong ObjectSize;
-        public ulong LogicalBlocksRecorded;
-        public DateTime AccessTime;
-        public DateTime ModificationTime;
         public DateTime CreationTime;
-        public DateTime AttributeTime;
-        public uint Checkpoint;
-        public LongAllocationDescriptor ExtendedAttributeIcb;
         public LongAllocationDescriptor StreamDirectoryIcb;
-        public ImplementationEntityIdentifier ImplementationIdentifier;
-        public ulong UniqueId;
-        public int ExtendedAttributesLength;
-        public int AllocationDescriptorsLength;
-        public byte[] ExtendedAttributes;
-        public byte[] AllocationDescriptors;
 
-        public int ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
             DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
             InformationControlBlock = Utilities.ToStruct<InformationControlBlock>(buffer, offset + 16);
@@ -85,12 +63,12 @@ namespace DiscUtils.Udf
             return (int)(216 + ExtendedAttributesLength + AllocationDescriptorsLength);
         }
 
-        public void WriteTo(byte[] buffer, int offset)
+        public override void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
         }
 
-        public int Size
+        public override int Size
         {
             get { throw new NotImplementedException(); }
         }

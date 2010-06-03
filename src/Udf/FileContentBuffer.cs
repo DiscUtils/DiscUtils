@@ -29,11 +29,11 @@ namespace DiscUtils.Udf
     internal class FileContentBuffer : IBuffer
     {
         private Partition _partition;
-        private ExtendedFileEntry _fileEntry;
+        private FileEntry _fileEntry;
         private uint _blockSize;
         private List<CookedExtent> _extents;
 
-        public FileContentBuffer(Partition partition, ExtendedFileEntry fileEntry, uint blockSize)
+        public FileContentBuffer(Partition partition, FileEntry fileEntry, uint blockSize)
         {
             _partition = partition;
             _fileEntry = fileEntry;

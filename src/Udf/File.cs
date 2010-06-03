@@ -30,11 +30,11 @@ namespace DiscUtils.Udf
     {
         protected UdfContext _context;
         protected Partition _partition;
-        protected ExtendedFileEntry _fileEntry;
+        protected FileEntry _fileEntry;
         protected uint _blockSize;
         protected IBuffer _content;
 
-        public File(UdfContext context, Partition partition, ExtendedFileEntry fileEntry, uint blockSize)
+        public File(UdfContext context, Partition partition, FileEntry fileEntry, uint blockSize)
         {
             _context = context;
             _partition = partition;
@@ -75,7 +75,18 @@ namespace DiscUtils.Udf
 
         public DateTime CreationTimeUtc
         {
-            get { return _fileEntry.CreationTime; }
+            get
+            {
+                ExtendedFileEntry efe = _fileEntry as ExtendedFileEntry;
+                if (efe != null)
+                {
+                    return efe.CreationTime;
+                }
+                else
+                {
+                    return LastWriteTimeUtc;
+                }
+            }
             set { throw new NotSupportedException(); }
         }
 
@@ -134,6 +145,18 @@ namespace DiscUtils.Udf
             if (rootDirTag.TagIdentifier == TagIdentifier.ExtendedFileEntry)
             {
                 ExtendedFileEntry fileEntry = Utilities.ToStruct<ExtendedFileEntry>(rootDirData, 0);
+                if (fileEntry.InformationControlBlock.FileType == FileType.Directory)
+                {
+                    return new Directory(context, partition, fileEntry);
+                }
+                else
+                {
+                    return new File(context, partition, fileEntry, (uint)partition.LogicalBlockSize);
+                }
+            }
+            else if (rootDirTag.TagIdentifier == TagIdentifier.FileEntry)
+            {
+                FileEntry fileEntry = Utilities.ToStruct<FileEntry>(rootDirData, 0);
                 if (fileEntry.InformationControlBlock.FileType == FileType.Directory)
                 {
                     return new Directory(context, partition, fileEntry);
