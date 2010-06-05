@@ -98,6 +98,7 @@ namespace DiscUtils.Udf
     {
         private Stream _data;
         private uint _sectorSize;
+        private LogicalVolumeDescriptor _lvd;
 
         public VfsUdfReader(Stream data)
             : base(null)
@@ -164,7 +165,6 @@ namespace DiscUtils.Udf
 
             PrimaryVolumeDescriptor pvd = null;
             ImplementationUseVolumeDescriptor iuvd = null;
-            LogicalVolumeDescriptor lvd = null;
             UnallocatedSpaceDescriptor usd = null;
 
             uint sector = avdp.MainDescriptorSequence.Location;
@@ -199,7 +199,7 @@ namespace DiscUtils.Udf
                         break;
 
                     case TagIdentifier.LogicalVolumeDescriptor:
-                        lvd = LogicalVolumeDescriptor.FromStream(_data, sector, _sectorSize);
+                        _lvd = LogicalVolumeDescriptor.FromStream(_data, sector, _sectorSize);
                         break;
 
                     case TagIdentifier.UnallocatedSpaceDescriptor:
@@ -218,13 +218,13 @@ namespace DiscUtils.Udf
             }
 
             // Convert logical partition descriptors into actual partition objects
-            for (int i = 0; i < lvd.PartitionMaps.Length; ++i)
+            for (int i = 0; i < _lvd.PartitionMaps.Length; ++i)
             {
-                Context.LogicalPartitions.Add(LogicalPartition.FromDescriptor(Context, lvd, i));
+                Context.LogicalPartitions.Add(LogicalPartition.FromDescriptor(Context, _lvd, i));
             }
 
 
-            byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, lvd.FileSetDescriptorLocation);
+            byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, _lvd.FileSetDescriptorLocation);
             if(DescriptorTag.IsValid(fsdBuffer, 0))
             {
                 FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
@@ -235,6 +235,11 @@ namespace DiscUtils.Udf
         public override string FriendlyName
         {
             get { return "OSTA Universal Disk Format"; }
+        }
+
+        public override string VolumeLabel
+        {
+            get { return _lvd.LogicalVolumeIdentifier; }
         }
 
         protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)

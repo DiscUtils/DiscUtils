@@ -74,6 +74,14 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public override abstract string VolumeLabel
+        {
+            get;
+        }
+
+        /// <summary>
         /// Copies a file - not supported on read-only file systems.
         /// </summary>
         /// <param name="sourceFile">The source file</param>
@@ -118,6 +126,11 @@ namespace DiscUtils.Vfs
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
+            if (IsRoot(path))
+            {
+                return true;
+            }
+
             TDirEntry dirEntry = GetDirectoryEntry(path);
 
             if (dirEntry != null)
@@ -187,7 +200,7 @@ namespace DiscUtils.Vfs
         public override string[] GetFileSystemEntries(string path)
         {
             TDirectory parentDir = GetDirectory(path);
-            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries, (m) => Utilities.CombinePaths(path, m.FileName));
+            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries, (m) => Utilities.CombinePaths(path, FormatFileName(m.FileName)));
         }
 
         /// <summary>
@@ -244,6 +257,19 @@ namespace DiscUtils.Vfs
         /// <returns>The new stream.</returns>
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
+            if (!CanWrite)
+            {
+                if (mode != FileMode.Open)
+                {
+                    throw new NotSupportedException("Only existing files can be opened");
+                }
+
+                if (access != FileAccess.Read)
+                {
+                    throw new NotSupportedException("Files cannot be opened for write");
+                }
+            }
+
             string fileName = Utilities.GetFileFromPath(path);
             string attributeName = null;
 
@@ -335,6 +361,11 @@ namespace DiscUtils.Vfs
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
+            if (IsRoot(path))
+            {
+                return _rootDir.FileAttributes;
+            }
+
             TDirEntry dirEntry = GetDirectoryEntry(path);
             if (dirEntry == null)
             {
@@ -369,7 +400,7 @@ namespace DiscUtils.Vfs
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (IsRoot(path))
             {
                 return _rootDir.CreationTimeUtc;
             }
@@ -407,7 +438,7 @@ namespace DiscUtils.Vfs
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (IsRoot(path))
             {
                 return _rootDir.LastAccessTimeUtc;
             }
@@ -445,7 +476,7 @@ namespace DiscUtils.Vfs
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (IsRoot(path))
             {
                 return _rootDir.LastWriteTimeUtc;
             }
@@ -499,10 +530,27 @@ namespace DiscUtils.Vfs
         /// <returns>The corresponding file object</returns>
         protected abstract TFile ConvertDirEntryToFile(TDirEntry dirEntry);
 
+        /// <summary>
+        /// Converts an internal directory entry name into an external one.
+        /// </summary>
+        /// <param name="name">The name to convert</param>
+        /// <returns>The external name</returns>
+        /// <remarks>
+        /// This method is called on a single path element (i.e. name contains no path
+        /// separators).
+        /// </remarks>
+        protected virtual string FormatFileName(string name)
+        {
+            return name;
+        }
 
         internal TFile GetFile(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (IsRoot(path))
+            {
+                return _rootDir;
+            }
+            else if (path == null)
             {
                 return default(TFile);
             }
@@ -532,7 +580,7 @@ namespace DiscUtils.Vfs
 
         internal TDirectory GetDirectory(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (IsRoot(path))
             {
                 return _rootDir;
             }
@@ -549,6 +597,11 @@ namespace DiscUtils.Vfs
         internal TDirEntry GetDirectoryEntry(string path)
         {
             return GetDirectoryEntry(_rootDir, path);
+        }
+
+        private static bool IsRoot(string path)
+        {
+            return string.IsNullOrEmpty(path) || path == @"\";
         }
 
         private TDirEntry GetDirectoryEntry(TDirectory dir, string path)
@@ -598,6 +651,12 @@ namespace DiscUtils.Vfs
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
             }
 
+            string resultPrefixPath = path;
+            if (IsRoot(path))
+            {
+                resultPrefixPath = @"\";
+            }
+
             foreach (TDirEntry de in parentDir.AllEntries)
             {
                 bool isDir = de.IsDirectory;
@@ -606,13 +665,13 @@ namespace DiscUtils.Vfs
                 {
                     if (regex.IsMatch(de.SearchName))
                     {
-                        results.Add(Path.Combine(path, de.FileName));
+                        results.Add(Path.Combine(resultPrefixPath, FormatFileName(de.FileName)));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Path.Combine(path, de.FileName), regex, subFolders, dirs, files);
+                    DoSearch(results, Path.Combine(resultPrefixPath, FormatFileName(de.FileName)), regex, subFolders, dirs, files);
                 }
             }
         }
