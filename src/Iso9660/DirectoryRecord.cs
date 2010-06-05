@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.IO;
 using System.Text;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
@@ -37,7 +39,7 @@ namespace DiscUtils.Iso9660
         MultiExtent = 0x80
     }
 
-    internal struct DirectoryRecord
+    internal class DirectoryRecord : VfsDirEntry
     {
         public byte ExtendedAttributeRecordLength;
         public uint LocationOfExtent;
@@ -52,6 +54,8 @@ namespace DiscUtils.Iso9660
         public static int ReadFrom(byte[] src, int offset, Encoding enc, out DirectoryRecord record)
         {
             int length = src[offset + 0];
+
+            record = new DirectoryRecord();
             record.ExtendedAttributeRecordLength = src[offset + 1];
             record.LocationOfExtent = IsoUtilities.ToUInt32FromBoth(src, offset + 2);
             record.DataLength = IsoUtilities.ToUInt32FromBoth(src, offset + 10);
@@ -109,6 +113,66 @@ namespace DiscUtils.Iso9660
             }
 
             return (uint)(33 + nameBytes + (((nameBytes & 0x1) == 0) ? 1 : 0));
+        }
+
+        public override bool IsDirectory
+        {
+            get { return (Flags & FileFlags.Directory) != 0; }
+        }
+
+        public override string FileName
+        {
+            get { return FileIdentifier; }
+        }
+
+        public override bool HasVfsTimeInfo
+        {
+            get { return true; }
+        }
+
+        public override DateTime LastAccessTimeUtc
+        {
+            get { return RecordingDateAndTime; }
+        }
+
+        public override DateTime LastWriteTimeUtc
+        {
+            get { return RecordingDateAndTime; }
+        }
+
+        public override DateTime CreationTimeUtc
+        {
+            get { return RecordingDateAndTime; }
+        }
+
+        public override bool HasVfsFileAttributes
+        {
+            get { return true; }
+        }
+
+        public override FileAttributes FileAttributes
+        {
+            get
+            {
+                FileAttributes attrs = FileAttributes.ReadOnly;
+
+                if ((Flags & FileFlags.Directory) != 0)
+                {
+                    attrs |= FileAttributes.Directory;
+                }
+
+                if ((Flags & FileFlags.Hidden) != 0)
+                {
+                    attrs |= FileAttributes.Hidden;
+                }
+
+                return attrs;
+            }
+        }
+
+        public override long UniqueCacheId
+        {
+            get { return (((long)LocationOfExtent) << 32) | DataLength; }
         }
     }
 

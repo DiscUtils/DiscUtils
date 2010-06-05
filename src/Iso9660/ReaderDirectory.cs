@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -24,33 +24,23 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
-    internal class ReaderDirectory
+    internal class ReaderDirectory : File, IVfsDirectory<DirectoryRecord, File>
     {
-        private CDReader _reader;
-        private PathTableRecord _ptr;
-        private Encoding _enc;
-
         private List<DirectoryRecord> _records;
-        private ReaderDirectory _parent;
 
-        public ReaderDirectory(CDReader reader, PathTableRecord ptr, Encoding enc, ReaderDirectory parent)
+        public ReaderDirectory(IsoContext context, DirectoryRecord dirEntry)
+            : base(context, dirEntry)
         {
-            _reader = reader;
-            _ptr = ptr;
-            _enc = enc;
-            _parent = parent;
-
             byte[] buffer = new byte[IsoUtilities.SectorSize];
-            Stream extent = reader.GetDirectoryExtentStream(ptr.LocationOfExtent);
+            Stream extent = new ExtentStream(_context.DataStream, dirEntry.LocationOfExtent, uint.MaxValue, 0, 0);
 
             _records = new List<DirectoryRecord>();
 
-            uint totalLength = uint.MaxValue; // Will correct later...
+            uint totalLength = dirEntry.DataLength;
             uint totalRead = 0;
             while (totalRead < totalLength)
             {
@@ -66,50 +56,24 @@ namespace DiscUtils.Iso9660
                 while (pos < bytesRead && buffer[pos] != 0)
                 {
                     DirectoryRecord dr;
-                    uint length = (uint)DirectoryRecord.ReadFrom(buffer, (int)pos, enc, out dr);
+                    uint length = (uint)DirectoryRecord.ReadFrom(buffer, (int)pos, context.VolumeDescriptor.CharacterEncoding, out dr);
 
-                    // If this is the 'self' entry, then use it to limit the amount of data read.
-                    if (dr.FileIdentifier == "\0")
+                    if(!IsoUtilities.IsSpecialDirectory(dr))
                     {
-                        totalLength = Math.Min(totalLength, dr.DataLength);
+                        _records.Add(dr);
                     }
-
-                    _records.Add(dr);
 
                     pos += length;
                 }
             }
         }
 
-        public ReaderDirectory Parent
+        public List<DirectoryRecord> AllEntries
         {
-            get
-            {
-                if (_parent == null)
-                {
-                    _parent = new ReaderDirectory(_reader, _reader.LookupPathTable((ushort)(_ptr.ParentDirectoryNumber - 1)), _enc, null);
-                }
-
-                return _parent;
-            }
+            get { return _records; }
         }
 
-        public string FullName
-        {
-            get
-            {
-                if (_ptr.DirectoryIdentifier == "\0")
-                {
-                    return @"\";
-                }
-                else
-                {
-                    return Parent.FullName + _ptr.DirectoryIdentifier + @"\";
-                }
-            }
-        }
-
-        public bool TryGetFile(string name, out DirectoryRecord result)
+        public DirectoryRecord GetEntryByName(string name)
         {
             bool anyVerMatch = (name.IndexOf(';') < 0);
             string normName = IsoUtilities.NormalizeFileName(name).ToUpper(CultureInfo.InvariantCulture);
@@ -123,88 +87,21 @@ namespace DiscUtils.Iso9660
                 string toComp = IsoUtilities.NormalizeFileName(r.FileIdentifier).ToUpper(CultureInfo.InvariantCulture);
                 if (!anyVerMatch && toComp == normName)
                 {
-                    result = r;
-                    return true;
+                    return r;
                 }
                 else if (anyVerMatch && toComp.StartsWith(normName, StringComparison.Ordinal))
                 {
-                    result = r;
-                    return true;
+                    return r;
                 }
             }
 
-            result = new DirectoryRecord();
-            return false;
+            return null;
         }
 
-        internal List<DirectoryRecord> GetRecords()
+        public File CreateNewFile(string name)
         {
-            return _records;
+            throw new NotSupportedException();
         }
 
-        internal List<string> SearchFiles(string pattern, bool subFolders)
-        {
-            string fullPattern = pattern;
-            if (!pattern.Contains(";"))
-            {
-                fullPattern += ";*";
-            }
-
-            Regex re = Utilities.ConvertWildcardsToRegEx(fullPattern);
-
-            List<string> results = new List<string>();
-            DoSearch(results, subFolders, null, re);
-            return results;
-        }
-
-        internal List<string> SearchDirectories(string pattern, bool subFolders)
-        {
-            Regex re = Utilities.ConvertWildcardsToRegEx(pattern);
-
-            List<string> results = new List<string>();
-            DoSearch(results, subFolders, re, null);
-            return results;
-        }
-
-        internal List<string> SearchFileInfos(string pattern, bool subFolders)
-        {
-            Regex dirPattern = Utilities.ConvertWildcardsToRegEx(pattern);
-            Regex filePattern = dirPattern;
-            if (!pattern.Contains(";"))
-            {
-                filePattern = Utilities.ConvertWildcardsToRegEx(pattern + ";*");
-            }
-
-            List<string> results = new List<string>();
-            DoSearch(results, subFolders, dirPattern, filePattern);
-            return results;
-        }
-
-        private void DoSearch(List<string> results, bool subFolders, Regex dirPattern, Regex filePattern)
-        {
-            foreach (DirectoryRecord r in _records)
-            {
-                if ((r.Flags & FileFlags.Directory) != 0)
-                {
-                    if (!IsoUtilities.IsSpecialDirectory(r))
-                    {
-                        if (dirPattern != null && dirPattern.IsMatch(IsoUtilities.NormalizeDirectoryNameForSearch(r.FileIdentifier)))
-                        {
-                            results.Add(Utilities.CombinePaths(FullName, r.FileIdentifier) + @"\");
-                        }
-
-                        if (subFolders)
-                        {
-                            ReaderDirectory subFolder = _reader.GetDirectory(Utilities.CombinePaths(FullName, r.FileIdentifier));
-                            subFolder.DoSearch(results, true, dirPattern, filePattern);
-                        }
-                    }
-                }
-                else if (filePattern != null && filePattern.IsMatch(IsoUtilities.NormalizeFileName(r.FileIdentifier)))
-                {
-                    results.Add(Utilities.CombinePaths(FullName, r.FileIdentifier));
-                }
-            }
-        }
     }
 }
