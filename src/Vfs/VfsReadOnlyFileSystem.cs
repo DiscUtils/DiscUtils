@@ -42,7 +42,7 @@ namespace DiscUtils.Vfs
         /// Creates a new instance.
         /// </summary>
         /// <param name="defaultOptions">The default file system options</param>
-        public VfsReadOnlyFileSystem(DiscFileSystemOptions defaultOptions)
+        protected VfsReadOnlyFileSystem(DiscFileSystemOptions defaultOptions)
             : base(defaultOptions)
         {
         }

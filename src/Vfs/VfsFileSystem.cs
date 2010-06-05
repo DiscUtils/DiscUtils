@@ -49,7 +49,7 @@ namespace DiscUtils.Vfs
         /// Creates a new instance.
         /// </summary>
         /// <param name="defaultOptions">The default file system options</param>
-        public VfsFileSystem(DiscFileSystemOptions defaultOptions)
+        protected VfsFileSystem(DiscFileSystemOptions defaultOptions)
             : base(defaultOptions)
         {
             _fileCache = new ObjectCache<long, TFile>();

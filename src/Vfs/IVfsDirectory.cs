@@ -38,7 +38,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets all of the directory entries.
         /// </summary>
-        List<TDirEntry> AllEntries { get; }
+        ICollection<TDirEntry> AllEntries { get; }
 
         /// <summary>
         /// Gets a specific directory entry, by name.

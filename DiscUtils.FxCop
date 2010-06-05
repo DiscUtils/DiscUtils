@@ -344,6 +344,32 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Vfs">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Vfs</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="109" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+      <Issue Name="Namespace">
+       <Item>Vfs</Item>
+       <Item>DiscUtils.Vfs</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="110" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Vhd">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
@@ -5817,6 +5843,211 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Vfs">
+        <Types>
+         <Type Name="IVfsDirectory`2">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'IVfsDirectory&lt;TDirEntry, TFile&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="IVfsFile">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'IVfsFile'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="IVfsFileWithStreams">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'IVfsFileWithStreams'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VfsContext">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsContext'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VfsDirEntry">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsDirEntry'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#HasVfsFileAttributes">
+            <Messages>
+             <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue Name="Member">
+               <Item>Vfs</Item>
+               <Item>'VfsDirEntry.HasVfsFileAttributes'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="110" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#HasVfsTimeInfo">
+            <Messages>
+             <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue Name="Member">
+               <Item>Vfs</Item>
+               <Item>'VfsDirEntry.HasVfsTimeInfo'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="110" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="VfsFileSystem`4">
+          <Messages>
+           <Message TypeName="AvoidExcessiveParametersOnGenericTypes" Category="Microsoft.Design" CheckId="CA1005" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'VfsFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="107" />
+             </User>
+            </Notes>
+           </Message>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VfsFileSystemFacade">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsFileSystemFacade'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#GetRealFileSystem`4()">
+            <Messages>
+             <Message TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'VfsFileSystemFacade.GetRealFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;()'</Item>
+               <Item>'TContext'</Item>
+              </Issue>
+              <Issue>
+               <Item>'VfsFileSystemFacade.GetRealFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;()'</Item>
+               <Item>'TDirEntry'</Item>
+              </Issue>
+              <Issue>
+               <Item>'VfsFileSystemFacade.GetRealFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;()'</Item>
+               <Item>'TDirectory'</Item>
+              </Issue>
+              <Issue>
+               <Item>'VfsFileSystemFacade.GetRealFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;()'</Item>
+               <Item>'TFile'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="106" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="VfsReadOnlyFileSystem`4">
+          <Messages>
+           <Message TypeName="AvoidExcessiveParametersOnGenericTypes" Category="Microsoft.Design" CheckId="CA1005" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'VfsReadOnlyFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="108" />
+             </User>
+            </Notes>
+           </Message>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsReadOnlyFileSystem&lt;TDirEntry, TFile, TDirectory, TContext&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="110" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Vhd">
         <Types>
          <Type Name="DynamicDiskBuilder+BlockAllocationTableExtent">
@@ -6409,11 +6640,19 @@
     <Note Id="103" Modified="2010-05-29 06:27:27Z">Lun is standard term.</Note>
     <Note Id="104" Modified="2010-05-29 07:14:56Z">Derived from standard</Note>
     <Note Id="105" Modified="2010-05-30 15:18:55Z">Defined by standard</Note>
+    <Note Id="106" Modified="2010-06-05 14:22:39Z">Bogus warning</Note>
+    <Note Id="107" Modified="2010-06-05 14:23:28Z">As designed</Note>
+    <Note Id="108" Modified="2010-06-05 14:24:18Z">Extends VfsFileSystem</Note>
+    <Note Id="109" Modified="2010-06-05 14:25:41Z">DiscUtils is the project name</Note>
+    <Note Id="110" Modified="2010-06-05 14:26:42Z">Vfs is the filesystem abstraction</Note>
    </User>
   </Notes>
   <Rules>
    <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
     <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidExcessiveParametersOnGenericTypes" Category="Microsoft.Design" CheckId="CA1005">
+    <Resolution Name="Default">Consider a design where {0} has no more than 2 type parameters.</Resolution>
    </Rule>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
@@ -6442,6 +6681,9 @@
    </Rule>
    <Rule TypeName="EnumStorageShouldBeInt32" Category="Microsoft.Design" CheckId="CA1028">
     <Resolution Name="NotInt32">If possible, make the underlying type of {0} System.Int32 instead of {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="GenericMethodsShouldProvideTypeParameter" Category="Microsoft.Design" CheckId="CA1004">
+    <Resolution Name="Default">Consider a design where {0} doesn't require explicit type parameter {1} in any call to it.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>

@@ -63,7 +63,7 @@ namespace DiscUtils.Udf
             throw new NotSupportedException();
         }
 
-        public List<FileIdentifier> AllEntries
+        public ICollection<FileIdentifier> AllEntries
         {
             get
             {

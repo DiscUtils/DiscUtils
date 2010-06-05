@@ -68,7 +68,7 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        public List<DirectoryRecord> AllEntries
+        public ICollection<DirectoryRecord> AllEntries
         {
             get { return _records; }
         }
