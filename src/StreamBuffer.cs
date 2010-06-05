@@ -29,7 +29,7 @@ namespace DiscUtils
     /// <summary>
     /// Converts a Stream into an IBuffer instance.
     /// </summary>
-    public class StreamBuffer : Buffer, IDisposable
+    public sealed class StreamBuffer : Buffer, IDisposable
     {
         private SparseStream _stream;
         private Ownership _ownership;
