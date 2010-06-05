@@ -82,7 +82,7 @@ namespace DiscUtils.Vfs
         /// Opens an existing stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
-        /// <returns></returns>
+        /// <returns>An object representing the stream.</returns>
         /// <remarks>The implementation must not implicitly create the stream if it doesn't already
         /// exist.</remarks>
         Stream OpenExistingStream(string name);

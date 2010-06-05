@@ -48,6 +48,11 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Provides access to the actual file system implementation
         /// </summary>
+        /// <typeparam name="TDirEntry">The concrete type representing directory entries</typeparam>
+        /// <typeparam name="TFile">The concrete type representing files</typeparam>
+        /// <typeparam name="TDirectory">The concrete type representing directories</typeparam>
+        /// <typeparam name="TContext">The concrete type holding global state</typeparam>
+        /// <returns>The actual file system instance.</returns>
         protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem<TDirEntry, TFile, TDirectory, TContext>()
             where TDirEntry : VfsDirEntry
             where TFile : IVfsFile
