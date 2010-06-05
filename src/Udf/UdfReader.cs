@@ -42,6 +42,16 @@ namespace DiscUtils.Udf
         }
 
         /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="data">The stream containing the UDF file system</param>
+        /// <param name="sectorSize">The sector size of the physical media</param>
+        public UdfReader(Stream data, int sectorSize)
+            :base (new VfsUdfReader(data, sectorSize))
+        {
+        }
+
+        /// <summary>
         /// Detects if a stream contains a valid UDF file system.
         /// </summary>
         /// <param name="data">The stream to inspect</param>
@@ -99,6 +109,7 @@ namespace DiscUtils.Udf
         private Stream _data;
         private uint _sectorSize;
         private LogicalVolumeDescriptor _lvd;
+        private PrimaryVolumeDescriptor _pvd;
 
         public VfsUdfReader(Stream data)
             : base(null)
@@ -163,10 +174,6 @@ namespace DiscUtils.Udf
             AnchorVolumeDescriptorPointer avdp = AnchorVolumeDescriptorPointer.FromStream(_data, 256, _sectorSize);
 
 
-            PrimaryVolumeDescriptor pvd = null;
-            ImplementationUseVolumeDescriptor iuvd = null;
-            UnallocatedSpaceDescriptor usd = null;
-
             uint sector = avdp.MainDescriptorSequence.Location;
             bool terminatorFound = false;
             while (!terminatorFound)
@@ -182,11 +189,11 @@ namespace DiscUtils.Udf
                 switch (dt.TagIdentifier)
                 {
                     case TagIdentifier.PrimaryVolumeDescriptor:
-                        pvd = PrimaryVolumeDescriptor.FromStream(_data, sector, _sectorSize);
+                        _pvd = PrimaryVolumeDescriptor.FromStream(_data, sector, _sectorSize);
                         break;
 
                     case TagIdentifier.ImplementationUseVolumeDescriptor:
-                        iuvd = ImplementationUseVolumeDescriptor.FromStream(_data, sector, _sectorSize);
+                        // Not used
                         break;
 
                     case TagIdentifier.PartitionDescriptor:
@@ -203,7 +210,7 @@ namespace DiscUtils.Udf
                         break;
 
                     case TagIdentifier.UnallocatedSpaceDescriptor:
-                        usd = UnallocatedSpaceDescriptor.FromStream(_data, sector, _sectorSize);
+                        // Not used for reading
                         break;
 
                     case TagIdentifier.TerminatingDescriptor:

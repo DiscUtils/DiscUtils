@@ -123,21 +123,5 @@ namespace DiscUtils.Udf
             result = dt;
             return true;
         }
-
-        public static bool TryFromBuffer(IBuffer buffer, long pos, out DescriptorTag result)
-        {
-            byte[] next = Utilities.ReadFully(buffer, pos, 512);
-            if (!DescriptorTag.IsValid(next, 0))
-            {
-                result = null;
-                return false;
-            }
-
-            DescriptorTag dt = new DescriptorTag();
-            dt.ReadFrom(next, 0);
-
-            result = dt;
-            return true;
-        }
     }
 }

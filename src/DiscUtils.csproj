@@ -376,7 +376,6 @@
     <Compile Include="Udf\AnchorVolumeDescriptorPointer.cs" />
     <Compile Include="Udf\BaseTaggedDescriptor.cs" />
     <Compile Include="Udf\CharacterSetSpecification.cs" />
-    <Compile Include="Udf\Crc.cs" />
     <Compile Include="Udf\DescriptorTag.cs" />
     <Compile Include="Udf\Directory.cs" />
     <Compile Include="Udf\ExtendedFileEntry.cs" />
@@ -396,7 +395,6 @@
     <Compile Include="Udf\UdfReader.cs" />
     <Compile Include="Udf\EntityIdentifier.cs" />
     <Compile Include="Udf\ExtentDescriptor.cs" />
-    <Compile Include="Udf\ImplementationUseVolumeDescriptor.cs" />
     <Compile Include="Udf\LogicalBlockAddress.cs" />
     <Compile Include="Udf\LogicalVolumeDescriptor.cs" />
     <Compile Include="Udf\PartitionDescriptor.cs" />

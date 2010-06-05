@@ -50,7 +50,7 @@ namespace DiscUtils.Udf
             Tag = new DescriptorTag();
             Tag.ReadFrom(buffer, offset);
 
-            if (Crc.Compute(buffer, offset + Tag.Size, Tag.DescriptorCrcLength) != Tag.DescriptorCrc)
+            if (UdfUtilities.ComputeCrc(buffer, offset + Tag.Size, Tag.DescriptorCrcLength) != Tag.DescriptorCrc)
             {
                 throw new InvalidDataException("Invalid Anchor Volume Descriptor Pointer (invalid CRC)");
             }

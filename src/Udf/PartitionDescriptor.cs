@@ -26,36 +26,6 @@ using System.Text;
 
 namespace DiscUtils.Udf
 {
-    internal class PartitionHeader : IByteArraySerializable
-    {
-        public ShortAllocationDescriptor UnallocatedSpaceTable;
-        public ShortAllocationDescriptor UnallocatedSpaceBitmap;
-        public ShortAllocationDescriptor PartitionIntegrityTable;
-        public ShortAllocationDescriptor FreedSpaceTable;
-        public ShortAllocationDescriptor FreedSpaceBitmap;
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            UnallocatedSpaceTable = Utilities.ToStruct<ShortAllocationDescriptor>(buffer, offset);
-            UnallocatedSpaceBitmap = Utilities.ToStruct<ShortAllocationDescriptor>(buffer, offset + 8);
-            PartitionIntegrityTable = Utilities.ToStruct<ShortAllocationDescriptor>(buffer, offset + 16);
-            FreedSpaceTable = Utilities.ToStruct<ShortAllocationDescriptor>(buffer, offset + 24);
-            FreedSpaceBitmap = Utilities.ToStruct<ShortAllocationDescriptor>(buffer, offset + 32);
-
-            return 128;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 128; }
-        }
-    }
-
     internal class PartitionDescriptor : BaseTaggedDescriptor<PartitionDescriptor>
     {
         public uint VolumeDescriptorSequenceNumber;
@@ -88,11 +58,6 @@ namespace DiscUtils.Udf
             ImplementationUse = Utilities.ToByteArray(buffer, offset + 228, 128);
 
             return 512;
-        }
-
-        public PartitionHeader Header
-        {
-            get { return Utilities.ToStruct<PartitionHeader>(PartitionContentsUse, 0); }
         }
     }
 }

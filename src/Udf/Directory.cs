@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Globalization;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
@@ -75,7 +75,7 @@ namespace DiscUtils.Udf
         {
             foreach (var entry in _entries)
             {
-                if (string.Compare(entry.Name, name, true) == 0)
+                if (string.Compare(entry.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return entry;
                 }

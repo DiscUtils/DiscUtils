@@ -56,11 +56,6 @@ namespace DiscUtils.Udf
             }
         }
 
-        public FileType FileType
-        {
-            get { return _fileEntry.InformationControlBlock.FileType; }
-        }
-
         public DateTime LastAccessTimeUtc
         {
             get { return _fileEntry.AccessTime; }

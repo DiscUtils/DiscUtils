@@ -42,11 +42,6 @@ namespace DiscUtils.Udf
             _descriptor = descriptor;
         }
 
-        public ushort PartitionNumber
-        {
-            get { return _partitionNumber; }
-        }
-
         public override IBuffer Content
         {
             get { return _contentBuffer; }

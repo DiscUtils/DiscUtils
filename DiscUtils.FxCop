@@ -308,6 +308,42 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Udf">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-06-05 14:17:36Z">
+      <Issue>
+       <Item>DiscUtils.Udf</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="111" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Udf" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+      <Issue Name="Namespace">
+       <Item>Udf</Item>
+       <Item>DiscUtils.Udf</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="115" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Udf</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="114" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Vdi">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-12-15 22:03:38Z">
@@ -5843,6 +5879,1729 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Udf">
+        <Types>
+         <Type Name="AnchorVolumeDescriptorPointer">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'AnchorVolumeDescriptorPointer'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="ApplicationEntityIdentifier">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'ApplicationEntityIdentifier'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="CharacterSetSpecification">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'CharacterSetSpecification'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Information">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'CharacterSetSpecification.Information'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Type">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'CharacterSetSpecification.Type'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DescriptorTag">
+          <Members>
+           <Member Name="#DescriptorVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'DescriptorTag.DescriptorVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TagChecksum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'DescriptorTag.TagChecksum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TagSerialNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'DescriptorTag.TagSerialNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DomainEntityIdentifier">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'DomainEntityIdentifier'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="EntityIdentifier">
+          <Members>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'EntityIdentifier.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ExtendedFileEntry">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'ExtendedFileEntry'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#ObjectSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'ExtendedFileEntry.ObjectSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#StreamDirectoryIcb">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'ExtendedFileEntry.StreamDirectoryIcb'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ExtentAllocationDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'ExtentAllocationDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="ExtentDescriptor">
+          <Members>
+           <Member Name="#Length">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'ExtentDescriptor.Length'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="File">
+          <Members>
+           <Member Name="#_context">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'File._context'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FileEntry">
+          <Members>
+           <Member Name="#AttributeTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.AttributeTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Checkpoint">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.Checkpoint'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DescriptorTag">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.DescriptorTag'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExtendedAttributeIcb">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.ExtendedAttributeIcb'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExtendedAttributes">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.ExtendedAttributes'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileLinkCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.FileLinkCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Gid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.Gid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.ImplementationIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LogicalBlocksRecorded">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.LogicalBlocksRecorded'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Permissions">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.Permissions'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RecordDisplayAttributes">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.RecordDisplayAttributes'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RecordFormat">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.RecordFormat'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RecordLength">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.RecordLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Uid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.Uid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UniqueId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileEntry.UniqueId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FileIdentifier">
+          <Members>
+           <Member Name="#DescriptorTag">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileIdentifier.DescriptorTag'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileVersionNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileIdentifier.FileVersionNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationUse">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileIdentifier.ImplementationUse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FileSetDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'FileSetDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#AbstractFileIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.AbstractFileIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CharacterSetList">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.CharacterSetList'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CopyrightFileIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.CopyrightFileIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DescriptorTag">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.DescriptorTag'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DomainIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.DomainIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileSetCharset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.FileSetCharset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileSetDescriptorNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.FileSetDescriptorNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileSetIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.FileSetIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileSetNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.FileSetNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InterchangeLevel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.InterchangeLevel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LogicalVolumeIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.LogicalVolumeIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LogicalVolumeIdentifierCharset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.LogicalVolumeIdentifierCharset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaximumCharacterSetList">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.MaximumCharacterSetList'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaximumInterchangeLevel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.MaximumInterchangeLevel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#NextExtent">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.NextExtent'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RecordingTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.RecordingTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SystemStreamDirectoryIcb">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'FileSetDescriptor.SystemStreamDirectoryIcb'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ImplementationEntityIdentifier">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'ImplementationEntityIdentifier'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="InformationControlBlock">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'InformationControlBlock'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#MaxEntries">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'InformationControlBlock.MaxEntries'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ParentICBLocation">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'InformationControlBlock.ParentICBLocation'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PriorDirectEntries">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'InformationControlBlock.PriorDirectEntries'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#StrategyParameter">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'InformationControlBlock.StrategyParameter'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#StrategyType">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'InformationControlBlock.StrategyType'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="LogicalVolumeDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'LogicalVolumeDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#DescriptorCharset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'LogicalVolumeDescriptor.DescriptorCharset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DomainIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'LogicalVolumeDescriptor.DomainIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'LogicalVolumeDescriptor.ImplementationIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationUse">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'LogicalVolumeDescriptor.ImplementationUse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeDescriptorSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'LogicalVolumeDescriptor.VolumeDescriptorSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="LongAllocationDescriptor">
+          <Members>
+           <Member Name="#ImplementationUse">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'LongAllocationDescriptor.ImplementationUse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MetadataPartition">
+          <Members>
+           <Member Name="#_partitionMap">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartition._partitionMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MetadataPartitionMap">
+          <Members>
+           <Member Name="#AlignmentUnitSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartitionMap.AlignmentUnitSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#AllocationUnitSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartitionMap.AllocationUnitSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartitionMap.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MetadataBitmapFileLocation">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartitionMap.MetadataBitmapFileLocation'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MetadataMirrorFileLocation">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartitionMap.MetadataMirrorFileLocation'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'MetadataPartitionMap.VolumeSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PartitionDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'PartitionDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#AccessType">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionDescriptor.AccessType'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionDescriptor.ImplementationIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationUse">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionDescriptor.ImplementationUse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PartitionContents">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionDescriptor.PartitionContents'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PartitionContentsUse">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:41:56Z">
+              <Issue>
+               <Item>'PartitionDescriptor.PartitionContentsUse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PartitionFlags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionDescriptor.PartitionFlags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeDescriptorSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionDescriptor.VolumeDescriptorSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PartitionMap">
+          <Members>
+           <Member Name="#Type">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PartitionMap.Type'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PhysicalPartition">
+          <Members>
+           <Member Name="#_descriptor">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PhysicalPartition._descriptor'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#_partitionNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:51:41Z">
+              <Issue>
+               <Item>'PhysicalPartition._partitionNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PrimaryVolumeDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'PrimaryVolumeDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#ApplicationIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.ApplicationIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CharacterSetList">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.CharacterSetList'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DescriptorCharSet">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.DescriptorCharSet'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExplanatoryCharSet">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.ExplanatoryCharSet'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.ImplementationIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImplementationUse">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.ImplementationUse'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InterchangeLevel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.InterchangeLevel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxCharacterSetList">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.MaxCharacterSetList'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxInterchangeLevel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.MaxInterchangeLevel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxVolumeSquenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.MaxVolumeSquenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PredecessorVolumeDescriptorSequenceLocation">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.PredecessorVolumeDescriptorSequenceLocation'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PrimaryVolumeDescriptorNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.PrimaryVolumeDescriptorNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RecordingTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.RecordingTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeDescriptorSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.VolumeDescriptorSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.VolumeIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.VolumeSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeSetIdentifier">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'PrimaryVolumeDescriptor.VolumeSetIdentifier'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ShortAllocationDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'ShortAllocationDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="SparablePartitionMap">
+          <Members>
+           <Member Name="#PacketLength">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'SparablePartitionMap.PacketLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PartitionNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'SparablePartitionMap.PartitionNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SparingTableSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'SparablePartitionMap.SparingTableSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'SparablePartitionMap.VolumeSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Type1Partition">
+          <Members>
+           <Member Name="#_partitionMap">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'Type1Partition._partitionMap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Type1PartitionMap">
+          <Members>
+           <Member Name="#VolumeSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'Type1PartitionMap.VolumeSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="UdfEntityIdentifier">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'UdfEntityIdentifier'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="UdfReader">
+          <Messages>
+           <Message Id="Udf" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue Name="Type">
+             <Item>Udf</Item>
+             <Item>'UdfReader'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="115" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="UnallocatedSpaceDescriptor">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
+            <Issue>
+             <Item>'UnallocatedSpaceDescriptor'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="112" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#VolumeDescriptorSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'UnallocatedSpaceDescriptor.VolumeDescriptorSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="VfsUdfReader">
+          <Members>
+           <Member Name="#_pvd">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:41:56Z">
+              <Issue>
+               <Item>'VfsUdfReader._pvd'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="VirtualPartitionMap">
+          <Members>
+           <Member Name="#PartitionNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'VirtualPartitionMap.PartitionNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#VolumeSequenceNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
+              <Issue>
+               <Item>'VirtualPartitionMap.VolumeSequenceNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="113" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Vfs">
         <Types>
          <Type Name="IVfsDirectory`2">
@@ -6645,6 +8404,11 @@
     <Note Id="108" Modified="2010-06-05 14:24:18Z">Extends VfsFileSystem</Note>
     <Note Id="109" Modified="2010-06-05 14:25:41Z">DiscUtils is the project name</Note>
     <Note Id="110" Modified="2010-06-05 14:26:42Z">Vfs is the filesystem abstraction</Note>
+    <Note Id="111" Modified="2010-06-05 14:28:03Z">Follows project pattern</Note>
+    <Note Id="112" Modified="2010-06-05 14:54:52Z">Instantiated using template method</Note>
+    <Note Id="113" Modified="2010-06-05 14:55:28Z">Fields defined by UDF spec</Note>
+    <Note Id="114" Modified="2010-06-05 14:55:50Z">DiscUtils is project name</Note>
+    <Note Id="115" Modified="2010-06-05 14:56:06Z">Using well-known acronym</Note>
    </User>
   </Notes>
   <Rules>
