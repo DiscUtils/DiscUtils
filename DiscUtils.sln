@@ -5,11 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils", "src\DiscUtils.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.Common", "utils\DiscUtils.Common\DiscUtils.Common.csproj", "{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISOExtract", "utils\ISOExtract\ISOExtract.csproj", "{15A44DEB-305C-4995-B68E-6BCA4414164D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISOCreate", "utils\ISOCreate\ISOCreate.csproj", "{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FATExtract", "utils\FATExtract\FATExtract.csproj", "{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryTests", "unittests\LibraryTests\LibraryTests.csproj", "{A33BA1D9-BBEA-4513-9180-D392436F62FA}"
 EndProject
@@ -25,8 +21,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualDiskConvert", "utils
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iSCSIBrowse", "utils\iSCSIBrowse\iSCSIBrowse.csproj", "{F8C736C2-6310-4F03-ABEB-4DAB473B181B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTFSExtract", "utils\NTFSExtract\NTFSExtract.csproj", "{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolInfo", "utils\VolInfo\VolInfo.csproj", "{484C9CBA-8F33-4964-82CE-D8B340C8FF83}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiskDump", "utils\DiskDump\DiskDump.csproj", "{C4FD3AC2-A5DE-4CE8-B5B3-D3E96DAB7975}"
@@ -36,6 +30,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCDDump", "utils\BCDDump\BCDDump.csproj", "{EE65F039-0EFD-43FA-8B88-027ABE53589C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.PowerShell", "utils\DiscUtils.PowerShell\DiscUtils.PowerShell.csproj", "{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExtract", "utils\FileExtract\FileExtract.csproj", "{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,24 +52,12 @@ Global
 		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
 		{40F44FCF-5C77-404D-82BD-9E17BDA5E04B}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
-		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15A44DEB-305C-4995-B68E-6BCA4414164D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{15A44DEB-305C-4995-B68E-6BCA4414164D}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
-		{15A44DEB-305C-4995-B68E-6BCA4414164D}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
 		{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}.Release|Any CPU.Build.0 = Release|Any CPU
 		{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
 		{13F4D518-5F41-4C08-A4AE-CBEEEFFFE866}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
-		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
-		{54F1CE9C-495F-4A01-8CC1-0FCA8981E2C1}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
 		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A33BA1D9-BBEA-4513-9180-D392436F62FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -116,12 +100,6 @@ Global
 		{F8C736C2-6310-4F03-ABEB-4DAB473B181B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F8C736C2-6310-4F03-ABEB-4DAB473B181B}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
 		{F8C736C2-6310-4F03-ABEB-4DAB473B181B}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
-		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
-		{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
 		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{484C9CBA-8F33-4964-82CE-D8B340C8FF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -152,6 +130,12 @@ Global
 		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
 		{3EAEA514-1EBB-40BD-8C4A-ECAC5F44A038}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
+		{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
+		{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

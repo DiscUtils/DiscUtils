@@ -26,10 +26,8 @@ popd
 New-Item -path "${basedir}\layout\" -name "bin" -type directory | out-null
 Copy-Item "${basedir}\utils\ISOCreate\bin\SignedRelease\*.dll" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\ISOCreate\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\ISOExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\FATExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\NTFSDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
-Copy-Item "${basedir}\utils\NTFSExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\FileExtract\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VHDCreate\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VHDDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\iSCSIBrowse\bin\SignedRelease\*.exe" "${basedir}\layout\bin"

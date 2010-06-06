@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BA7FC8E0-4751-4F34-9876-C58A5D92DABE}</ProjectGuid>
+    <ProjectGuid>{41820C69-FDD8-4E7B-B43B-BA8FD22E1542}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NTFSExtract</RootNamespace>
-    <AssemblyName>NTFSExtract</AssemblyName>
+    <RootNamespace>FileExtract</RootNamespace>
+    <AssemblyName>FileExtract</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>

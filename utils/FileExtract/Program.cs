@@ -24,15 +24,16 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
-using DiscUtils.Fat;
+using DiscUtils.Ntfs;
 
-namespace FATExtract
+namespace FileExtract
 {
     class Program : ProgramBase
     {
         private CommandLineMultiParameter _diskFiles;
-        private CommandLineParameter _targetFileParam;
-        private CommandLineSwitch _destDirSwitch;
+        private CommandLineParameter _inFilePath;
+        private CommandLineParameter _outFilePath;
+        private CommandLineSwitch _hexDump;
 
         static void Main(string[] args)
         {
@@ -40,23 +41,23 @@ namespace FATExtract
             program.Run(args);
         }
 
-        protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
+        protected override ProgramBase.StandardSwitches DefineCommandLine(CommandLineParser parser)
         {
-            _diskFiles = FileOrUriMultiParameter("disk", "Paths to the disks to inspect.", false);
-            _targetFileParam = new CommandLineParameter("file", "The name of the file to extract.", false);
-            _destDirSwitch = new CommandLineSwitch("d", "destdir", "dir", "The destination directory.  If not specified, the current directory is used.");
+            _diskFiles = FileOrUriMultiParameter("disk", "The disks to inspect.", false);
+            _inFilePath = new CommandLineParameter("file_path", "The path of the file to extract.", false);
+            _outFilePath = new CommandLineParameter("out_file", "The output file to be written.", false);
+            _hexDump = new CommandLineSwitch("hd", "hexdump", null, "Output a HexDump of the NTFS stream to the console, in addition to writing it to the output file.");
 
             parser.AddMultiParameter(_diskFiles);
-            parser.AddParameter(_targetFileParam);
-            parser.AddSwitch(_destDirSwitch);
+            parser.AddParameter(_inFilePath);
+            parser.AddParameter(_outFilePath);
+            parser.AddSwitch(_hexDump);
 
             return StandardSwitches.UserAndPassword | StandardSwitches.PartitionOrVolume;
         }
 
         protected override void DoRun()
         {
-            string destDir = _destDirSwitch.IsPresent ? _destDirSwitch.Value : Environment.CurrentDirectory;
-
             VolumeManager volMgr = new VolumeManager();
             foreach (string disk in _diskFiles.Values)
             {
@@ -64,35 +65,38 @@ namespace FATExtract
             }
 
 
-            Stream partitionStream = null;
+            VolumeInfo volInfo = null;
             if (!string.IsNullOrEmpty(VolumeId))
             {
-                partitionStream = volMgr.GetVolume(VolumeId).Open();
+                volInfo = volMgr.GetVolume(VolumeId);
             }
             else if (Partition >= 0)
             {
-                partitionStream = volMgr.GetPhysicalVolumes()[Partition].Open();
+                volInfo = volMgr.GetPhysicalVolumes()[Partition];
             }
             else
             {
-                partitionStream = volMgr.GetLogicalVolumes()[0].Open();
+                volInfo = volMgr.GetLogicalVolumes()[0];
             }
 
 
-            FatFileSystem fs = new FatFileSystem(partitionStream);
+            DiscUtils.FileSystemInfo fsInfo = FileSystemManager.DetectFileSystems(volInfo)[0];
 
-            string fileName = _targetFileParam.Value;
-            int sep = fileName.LastIndexOf('\\');
-            if (sep >= 0)
-            {
-                fileName = fileName.Substring(sep + 1);
-            }
 
-            using (FileStream outFile = new FileStream(destDir + "\\" + fileName, FileMode.Create, FileAccess.ReadWrite))
+            using (DiscFileSystem fs = fsInfo.Open(volInfo))
             {
-                using (Stream inFile = fs.OpenFile(_targetFileParam.Value, FileMode.Open))
+                using (Stream source = fs.OpenFile(_inFilePath.Value, FileMode.Open, FileAccess.Read))
                 {
-                    PumpStreams(inFile, outFile);
+                    using (FileStream outFile = new FileStream(_outFilePath.Value, FileMode.Create, FileAccess.ReadWrite))
+                    {
+                        PumpStreams(source, outFile);
+                    }
+
+                    if (_hexDump.IsPresent)
+                    {
+                        source.Position = 0;
+                        HexDump.Generate(source, Console.Out);
+                    }
                 }
             }
         }
