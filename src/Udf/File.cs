@@ -51,7 +51,7 @@ namespace DiscUtils.Udf
                     return _content;
                 }
 
-                _content = new FileContentBuffer(_partition, _fileEntry, _blockSize);
+                _content = new FileContentBuffer(_context, _partition, _fileEntry, _blockSize);
                 return _content;
             }
         }

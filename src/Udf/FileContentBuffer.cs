@@ -28,13 +28,15 @@ namespace DiscUtils.Udf
 {
     internal class FileContentBuffer : IBuffer
     {
+        private UdfContext _context;
         private Partition _partition;
         private FileEntry _fileEntry;
         private uint _blockSize;
         private List<CookedExtent> _extents;
 
-        public FileContentBuffer(Partition partition, FileEntry fileEntry, uint blockSize)
+        public FileContentBuffer(UdfContext context, Partition partition, FileEntry fileEntry, uint blockSize)
         {
+            _context = context;
             _partition = partition;
             _fileEntry = fileEntry;
             _blockSize = blockSize;
@@ -65,7 +67,12 @@ namespace DiscUtils.Udf
                         throw new NotImplementedException("Extents that are not 'recorded and allocated' not implemented");
                     }
 
-                    CookedExtent newExtent = new CookedExtent { FileContentOffset = filePos, StartPos = sad.ExtentLocation * (long)_blockSize, Length = sad.ExtentLength };
+                    CookedExtent newExtent = new CookedExtent {
+                        FileContentOffset = filePos,
+                        Partition = int.MaxValue,
+                        StartPos = sad.ExtentLocation * (long)_blockSize,
+                        Length = sad.ExtentLength
+                    };
                     _extents.Add(newExtent);
 
                     filePos += sad.ExtentLength;
@@ -75,6 +82,31 @@ namespace DiscUtils.Udf
             else if (allocType == AllocationType.Embedded)
             {
                 // do nothing
+            }
+            else if (allocType == AllocationType.LongDescriptors)
+            {
+                long filePos = 0;
+
+                int i = 0;
+                while (i < activeBuffer.Length)
+                {
+                    LongAllocationDescriptor lad = Utilities.ToStruct<LongAllocationDescriptor>(activeBuffer, i);
+                    if (lad.ExtentLength == 0)
+                    {
+                        break;
+                    }
+
+                    CookedExtent newExtent = new CookedExtent {
+                        FileContentOffset = filePos,
+                        Partition = lad.ExtentLocation.Partition,
+                        StartPos = lad.ExtentLocation.LogicalBlock * (long)_blockSize,
+                        Length = lad.ExtentLength
+                    };
+                    _extents.Add(newExtent);
+
+                    filePos += lad.ExtentLength;
+                    i += lad.Size;
+                }
             }
             else
             {
@@ -166,7 +198,19 @@ namespace DiscUtils.Udf
                 long extentOffset = (pos + totalRead) - extent.FileContentOffset;
                 int toRead = (int)Math.Min(totalToRead - totalRead, extent.Length - extentOffset);
 
-                int numRead = _partition.Content.Read(extent.StartPos + extentOffset, buffer, offset + totalRead, toRead);
+
+                Partition part;
+                if (extent.Partition != int.MaxValue)
+                {
+                    part = _context.LogicalPartitions[extent.Partition];
+                }
+                else
+                {
+                    part = _partition;
+                }
+
+
+                int numRead = part.Content.Read(extent.StartPos + extentOffset, buffer, offset + totalRead, toRead);
                 if (numRead == 0)
                 {
                     return totalRead;
@@ -181,6 +225,7 @@ namespace DiscUtils.Udf
         private class CookedExtent
         {
             public long FileContentOffset;
+            public int Partition;
             public long StartPos;
             public long Length;
         }
