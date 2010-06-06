@@ -309,6 +309,10 @@
     <Compile Include="Ntfs\VolumeInformationFlags.cs" />
     <Compile Include="Ntfs\VolumeName.cs" />
     <Compile Include="ObjectCache.cs" />
+    <Compile Include="Optical\Disc.cs" />
+    <Compile Include="Optical\DiscFactory.cs" />
+    <Compile Include="Optical\DiscImageFile.cs" />
+    <Compile Include="Optical\Mode2Buffer.cs" />
     <Compile Include="Ownership.cs" />
     <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
     <Compile Include="Partitions\BiosPartitionInfo.cs" />
