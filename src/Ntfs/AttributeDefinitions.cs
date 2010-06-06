@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -91,6 +92,19 @@ namespace DiscUtils.Ntfs
                 buffer = new byte[AttributeDefinitionRecord.Size];
                 s.Write(buffer, 0, buffer.Length);
             }
+        }
+
+        internal AttributeDefinitionRecord Lookup(string name)
+        {
+            foreach (var record in _attrDefs.Values)
+            {
+                if (string.Compare(name, record.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return record;
+                }
+            }
+
+            return null;
         }
 
         internal bool MustBeResident(AttributeType attributeType)

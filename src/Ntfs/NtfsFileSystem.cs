@@ -732,7 +732,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
-        /// <param name="access">The access permissions for the created stream.</param>
+        /// <param name="access">The access permissions for the returned stream.</param>
         /// <returns>The new stream.</returns>
         public override Stream OpenFile(string path, FileMode mode, FileAccess access)
         {
@@ -740,17 +740,36 @@ namespace DiscUtils.Ntfs
             {
                 string fileName = Utilities.GetFileFromPath(path);
                 string attributeName = null;
+                AttributeType attributeType = AttributeType.Data;
 
-                int streamSepPos = fileName.IndexOf(':');
-                if (streamSepPos >= 0)
+                string[] fileNameElements = fileName.Split(new char[]{':'}, 3);
+                fileName = fileNameElements[0];
+
+                if(fileNameElements.Length > 1)
                 {
-                    attributeName = fileName.Substring(streamSepPos + 1);
+                    attributeName = fileNameElements[1];
+                    if(string.IsNullOrEmpty(attributeName))
+                    {
+                        attributeName = null;
+                    }
+                }
+
+                if(fileNameElements.Length > 2)
+                {
+                    string typeName = fileNameElements[2];
+                    AttributeDefinitionRecord typeDefn = _context.AttributeDefinitions.Lookup(typeName);
+                    if(typeDefn == null)
+                    {
+                        throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such attribute type '{0}'", typeName), path);
+                    }
+
+                    attributeType = typeDefn.Type;
                 }
 
                 string dirName;
                 try
                 {
-                    dirName = Path.GetDirectoryName(path);
+                    dirName = Utilities.GetDirectoryFromPath(path);
                 }
                 catch (ArgumentException)
                 {
@@ -794,20 +813,20 @@ namespace DiscUtils.Ntfs
                 }
 
 
-                if ((entry.Details.FileAttributes & FileAttributes.Directory) != 0)
+                if ((entry.Details.FileAttributes & FileAttributes.Directory) != 0 && attributeType == AttributeType.Data)
                 {
                     throw new IOException("Attempt to open directory as a file");
                 }
                 else
                 {
                     File file = GetFile(entry.Reference);
-                    NtfsStream ntfsStream = file.GetStream(AttributeType.Data, attributeName);
+                    NtfsStream ntfsStream = file.GetStream(attributeType, attributeName);
 
                     if (ntfsStream == null)
                     {
                         if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
                         {
-                            ntfsStream = file.CreateStream(AttributeType.Data, attributeName);
+                            ntfsStream = file.CreateStream(attributeType, attributeName);
                         }
                         else
                         {
@@ -815,7 +834,7 @@ namespace DiscUtils.Ntfs
                         }
                     }
 
-                    SparseStream stream = new NtfsFileStream(this, entry, AttributeType.Data, attributeName, access);
+                    SparseStream stream = new NtfsFileStream(this, entry, attributeType, attributeName, access);
 
                     if (mode == FileMode.Create || mode == FileMode.Truncate)
                     {
@@ -835,6 +854,7 @@ namespace DiscUtils.Ntfs
         /// <param name="name">The name of the stream</param>
         /// <param name="access">The desired access to the stream</param>
         /// <returns>A stream that can be used to access the file stream</returns>
+        [Obsolete(@"Use OpenFile with filename:attributename:$attributetype syntax (e.g. \FILE.TXT:STREAM:$DATA)", false)]
         public SparseStream OpenRawStream(string file, AttributeType type, string name, FileAccess access)
         {
             using (new NtfsTransaction())

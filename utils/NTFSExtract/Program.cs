@@ -93,12 +93,18 @@ namespace NTFSExtract
 
             using (NtfsFileSystem fs = new NtfsFileSystem(partitionStream))
             {
-                using (SparseStream source = fs.OpenRawStream(_inFilePath.Value, type, _attributeName.Value, FileAccess.Read))
+                using (Stream source = fs.OpenFile(_inFilePath.Value, FileMode.Open, FileAccess.Read))
                 {
                     using (FileStream outFile = new FileStream(_outFilePath.Value, FileMode.Create, FileAccess.ReadWrite))
                     {
                         outFile.SetLength(source.Length);
-                        SparseStream.Pump(source, outFile);
+                        byte[] buffer = new byte[1024 * 1024];
+                        int numRead = source.Read(buffer, 0, buffer.Length);
+                        while (numRead > 0)
+                        {
+                            outFile.Write(buffer, 0, numRead);
+                            numRead = source.Read(buffer, 0, buffer.Length);
+                        }
                     }
 
                     if (_hexDump.IsPresent)

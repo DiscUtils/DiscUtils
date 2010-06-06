@@ -285,7 +285,9 @@ namespace DiscUtils.Ntfs
         {
             NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
 
+#pragma warning disable 618
             Assert.Null(ntfs.OpenRawStream(@"$Extend\$ObjId", AttributeType.Data, null, FileAccess.Read));
+#pragma warning restore 618
         }
     }
 }
