@@ -25,11 +25,18 @@ using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
-    /// <summary>    /// Class for reading existing ISO images.    /// </summary>
+    /// <summary>
+    /// Class for reading existing ISO images.
+    /// </summary>
     public class CDReader : VfsFileSystemFacade
     {
 
-        /// <summary>        /// Creates a new instance.        /// </summary>        /// <param name="data">The stream to read the ISO image from.</param>        /// <param name="joliet">Whether to read Joliet extensions.</param>        public CDReader(Stream data, bool joliet)
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="data">The stream to read the ISO image from.</param>
+        /// <param name="joliet">Whether to read Joliet extensions.</param>
+        public CDReader(Stream data, bool joliet)
             : base(new VfsCDReader(data, joliet, false))
         {
         }
@@ -39,7 +46,8 @@ namespace DiscUtils.Iso9660
         /// </summary>
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>
-        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files</param>        public CDReader(Stream data, bool joliet, bool hideVersions)
+        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files</param>
+        public CDReader(Stream data, bool joliet, bool hideVersions)
             : base(new VfsCDReader(data, joliet, hideVersions))
         {
         }
