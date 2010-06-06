@@ -74,11 +74,6 @@ namespace DiscUtils.Optical
             _file = new DiscImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose, OpticalFormat.None);
         }
 
-        private Disc(DiscImageFile file)
-        {
-            _file = file;
-        }
-
         /// <summary>
         /// Disposes of underlying resources.
         /// </summary>
@@ -108,7 +103,7 @@ namespace DiscUtils.Optical
         /// </summary>
         public override Geometry Geometry
         {
-            get { return _file.Geometry; }
+            get { return DiscImageFile.Geometry; }
         }
 
         /// <summary>

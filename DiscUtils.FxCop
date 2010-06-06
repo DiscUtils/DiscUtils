@@ -228,6 +228,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Optical">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-06-06 16:14:24Z">
+      <Issue>
+       <Item>DiscUtils.Optical</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="118" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-06 16:14:24Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Optical</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="119" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Partitions">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
@@ -5233,6 +5258,30 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Optical">
+        <Types>
+         <Type Name="DiscImageFile">
+          <Members>
+           <Member Name="#Dispose(System.Boolean)">
+            <Messages>
+             <Message Id="_content" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Status="Excluded" Created="2010-06-06 16:14:24Z">
+              <Issue>
+               <Item>'DiscImageFile'</Item>
+               <Item>'DiscImageFile._content'</Item>
+               <Item>'SparseStream'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="116" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Partitions">
         <Types>
          <Type Name="BiosPartitionTypes">
@@ -7780,6 +7829,66 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="VfsFileSystemFactory">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-06 16:14:24Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsFileSystemFactory'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="117" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VfsFileSystemFactoryAttribute">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-06 16:14:24Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsFileSystemFactoryAttribute'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="117" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VfsFileSystemInfo">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-06 16:14:24Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsFileSystemInfo'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="117" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="VfsFileSystemOpener">
+          <Messages>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-06 16:17:44Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'VfsFileSystemOpener'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="117" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="VfsReadOnlyFileSystem`4">
           <Messages>
            <Message TypeName="AvoidExcessiveParametersOnGenericTypes" Category="Microsoft.Design" CheckId="CA1005" Status="Excluded" Created="2010-06-05 14:17:36Z">
@@ -8409,6 +8518,10 @@
     <Note Id="113" Modified="2010-06-05 14:55:28Z">Fields defined by UDF spec</Note>
     <Note Id="114" Modified="2010-06-05 14:55:50Z">DiscUtils is project name</Note>
     <Note Id="115" Modified="2010-06-05 14:56:06Z">Using well-known acronym</Note>
+    <Note Id="116" Modified="2010-06-06 16:23:08Z">Use different technique for tracking</Note>
+    <Note Id="117" Modified="2010-06-06 16:23:32Z">Vfs is the namespace.</Note>
+    <Note Id="118" Modified="2010-06-06 16:23:45Z">Follows project guidelines</Note>
+    <Note Id="119" Modified="2010-06-06 16:23:55Z">Utils is part of project name.</Note>
    </User>
   </Notes>
   <Rules>
@@ -8433,6 +8546,9 @@
    <Rule TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702">
     <Resolution Name="MemberParameterShouldBeDiscreteTerm">In member {0}, the compound word '{1}' in parameter name {2} exists as a discrete term. If your usage is intended to be single word, case it as '{3}' or strip the first token entirely if it represents any sort of Hungarian notation.</Resolution>
     <Resolution Name="MemberShouldBeDiscreteTerm">The compound word '{0}' in member name {1} exists as a discrete term. If your usage is intended to be single word, case it as '{2}' or strip the first token entirely if it represents any sort of Hungarian notation.</Resolution>
+   </Rule>
+   <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
+    <Resolution Name="Default">{0} contains field {1} that is of IDisposable type: {2}. Change the Dispose method on {0} to call Dispose or Close on this field.</Resolution>
    </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>

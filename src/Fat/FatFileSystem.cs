@@ -1360,6 +1360,44 @@ namespace DiscUtils.Fat
         }
         #endregion
 
+        /// <summary>
+        /// Detects if a stream contains a FAT file system.
+        /// </summary>
+        /// <param name="stream">The stream to inspect</param>
+        /// <returns><c>true</c> if the stream appears to be a FAT file system, else <c>false</c></returns>
+        public static bool Detect(Stream stream)
+        {
+            if (stream.Length < 512)
+            {
+                return false;
+            }
+
+            stream.Position = 0;
+            byte[] bytes = Utilities.ReadFully(stream, 512);
+            ushort bpbBytesPerSec = Utilities.ToUInt16LittleEndian(bytes, 11);
+            if (bpbBytesPerSec != 512)
+            {
+                return false;
+            }
+
+            byte bpbNumFATs = bytes[16];
+            if (bpbNumFATs == 0 || bpbNumFATs > 2)
+            {
+                return false;
+            }
+
+            ushort bpbTotSec16 = Utilities.ToUInt16LittleEndian(bytes, 19);
+            uint bpbTotSec32 = Utilities.ToUInt32LittleEndian(bytes, 32);
+
+            if (!((bpbTotSec16 == 0) ^ (bpbTotSec32 == 0)))
+            {
+                return false;
+            }
+
+            uint totalSectors = bpbTotSec16 + bpbTotSec32;
+            return (totalSectors * (long)bpbBytesPerSec <= stream.Length);
+        }
+
         internal FileAllocationTable Fat
         {
             get { return _fat; }

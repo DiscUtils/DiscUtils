@@ -51,5 +51,30 @@ namespace DiscUtils.Iso9660
             : base(new VfsCDReader(data, joliet, hideVersions))
         {
         }
+
+        /// <summary>
+        /// Detects if a stream contains a valid ISO file system.
+        /// </summary>
+        /// <param name="data">The stream to inspect</param>
+        /// <returns><c>true</c> if the stream contains an ISO file system, else false.</returns>
+        public static bool Detect(Stream data)
+        {
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
+
+            if (data.Length < 0x8000 + IsoUtilities.SectorSize)
+            {
+                return false;
+            }
+
+            data.Position = 0x8000;
+            int numRead = Utilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
+            if (numRead != IsoUtilities.SectorSize)
+            {
+                return false;
+            }
+
+            BaseVolumeDescriptor bvd = new BaseVolumeDescriptor(buffer, 0);
+            return bvd.StandardIdentifier == "CD001";
+        }
     }
 }

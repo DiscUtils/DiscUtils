@@ -35,6 +35,7 @@ namespace DiskDump
         private CommandLineMultiParameter _inFiles;
         private CommandLineSwitch _showContent;
         private CommandLineSwitch _showVolContent;
+        private CommandLineSwitch _showFiles;
 
         static void Main(string[] args)
         {
@@ -47,10 +48,12 @@ namespace DiskDump
             _inFiles = FileOrUriMultiParameter("disk", "Paths to the disks to inspect.  Where a volume manager is used to span volumes across multiple virtual disks, specify all disks in the set.", false);
             _showContent = new CommandLineSwitch("db", "diskbytes", null, "Includes a hexdump of all disk content in the output");
             _showVolContent = new CommandLineSwitch("vb", "volbytes", null, "Includes a hexdump of all volumes content in the output");
+            _showFiles = new CommandLineSwitch("sf", "showfiles", null, "Includes a list of all files found in volumes");
 
             parser.AddMultiParameter(_inFiles);
             parser.AddSwitch(_showContent);
             parser.AddSwitch(_showVolContent);
+            parser.AddSwitch(_showFiles);
 
             return StandardSwitches.UserAndPassword;
         }
@@ -87,27 +90,29 @@ namespace DiskDump
                 Console.WriteLine();
 
 
+                Console.WriteLine();
+                Console.WriteLine("  Partitions");
+                Console.WriteLine();
                 if (disk.IsPartitioned)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("  Partitions");
-                    Console.WriteLine();
-                    Console.WriteLine("  T   Start (bytes)     End (bytes)       Type");
+                    Console.WriteLine("    T   Start (bytes)     End (bytes)       Type");
+                    Console.WriteLine("    ==  ================  ================  ==================");
                     foreach (var partition in disk.Partitions.Partitions)
                     {
-                        Console.WriteLine("  {0:X2}  {1:X16}  {2:X16}  {3}", partition.BiosType, partition.FirstSector * 512, partition.LastSector * 512 + 512, partition.TypeAsString);
-                    }
-                    Console.WriteLine();
+                        Console.WriteLine("    {0:X2}  {1:X16}  {2:X16}  {3}", partition.BiosType, partition.FirstSector * 512, partition.LastSector * 512 + 512, partition.TypeAsString);
 
-                    PartitionTable bpt = disk.Partitions as BiosPartitionTable;
-                    if (bpt != null)
-                    {
-                        foreach (BiosPartitionInfo pi in bpt.Partitions)
+                        BiosPartitionInfo bpi = partition as BiosPartitionInfo;
+                        if (bpi != null)
                         {
-                            Console.WriteLine("  {0} {1}", pi.Start.ToString(), pi.End.ToString());
+                            Console.WriteLine("        {0,-16}  {1}", bpi.Start.ToString(), bpi.End.ToString());
                         }
                         Console.WriteLine();
                     }
+                }
+                else
+                {
+                    Console.WriteLine("    No partitions");
+                    Console.WriteLine();
                 }
             }
 
@@ -161,11 +166,15 @@ namespace DiskDump
                     Console.WriteLine("    Disk Geometry: " + vol.PhysicalGeometry);
                     Console.WriteLine("    BIOS Geometry: " + vol.BiosGeometry);
                     Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
+
+                    DiscUtils.FileSystemInfo[] fileSystemInfos = FileSystemManager.DetectFileSystems(vol);
+                    Console.WriteLine("    File Systems: " + string.Join<DiscUtils.FileSystemInfo>(", ", fileSystemInfos));
+
                     Console.WriteLine();
 
                     if (_showVolContent.IsPresent)
                     {
-                        Console.WriteLine("    Contents...");
+                        Console.WriteLine("    Binary Contents...");
                         try
                         {
                             using (Stream s = vol.Open())
@@ -178,6 +187,19 @@ namespace DiskDump
                             Console.WriteLine(e.ToString());
                         }
                         Console.WriteLine();
+                    }
+
+                    if (_showFiles.IsPresent)
+                    {
+                        foreach (var fsi in fileSystemInfos)
+                        {
+                            Console.WriteLine("    Files ({0})...", fsi.Name);
+                            using (DiscFileSystem fs = fsi.Open(vol))
+                            {
+                                ShowDir(fs.Root, 6);
+                            }
+                            Console.WriteLine();
+                        }
                     }
                 }
             }
@@ -223,6 +245,20 @@ namespace DiskDump
                     HexDump.Generate(disk.Content, Console.Out);
                     Console.WriteLine();
                 }
+            }
+        }
+
+
+        private static void ShowDir(DiscDirectoryInfo dirInfo, int indent)
+        {
+            Console.WriteLine("{0}{1,-50} [{2}]", new String(' ', indent), dirInfo.FullName, dirInfo.CreationTimeUtc);
+            foreach (DiscDirectoryInfo subDir in dirInfo.GetDirectories())
+            {
+                ShowDir(subDir, indent + 0);
+            }
+            foreach (DiscFileInfo file in dirInfo.GetFiles())
+            {
+                Console.WriteLine("{0}{1,-50} [{2}]", new String(' ', indent), file.FullName, file.CreationTimeUtc);
             }
         }
     }

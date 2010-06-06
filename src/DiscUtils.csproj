@@ -108,7 +108,10 @@
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
+    <Compile Include="Fat\FileSystemFactory.cs" />
     <Compile Include="FileLocator.cs" />
+    <Compile Include="FileSystemInfo.cs" />
+    <Compile Include="FileSystemManager.cs" />
     <Compile Include="FloppyDiskType.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="IBuffer.cs" />
@@ -272,6 +275,7 @@
     <Compile Include="Ntfs\FileNameRecord.cs" />
     <Compile Include="Ntfs\FileRecord.cs" />
     <Compile Include="Ntfs\FileRecordReference.cs" />
+    <Compile Include="Ntfs\FileSystemFactory.cs" />
     <Compile Include="Ntfs\FixupRecordBase.cs" />
     <Compile Include="Ntfs\GenericFixupRecord.cs" />
     <Compile Include="Ntfs\Index.cs" />
@@ -312,7 +316,9 @@
     <Compile Include="Optical\Disc.cs" />
     <Compile Include="Optical\DiscFactory.cs" />
     <Compile Include="Optical\DiscImageFile.cs" />
+    <Compile Include="Optical\FileSystemFactory.cs" />
     <Compile Include="Optical\Mode2Buffer.cs" />
+    <Compile Include="Optical\OpticalFormat.cs" />
     <Compile Include="Ownership.cs" />
     <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
     <Compile Include="Partitions\BiosPartitionInfo.cs" />
@@ -423,6 +429,9 @@
     <Compile Include="Vfs\VfsDirEntry.cs" />
     <Compile Include="Vfs\VfsFileSystem.cs" />
     <Compile Include="Vfs\VfsFileSystemFacade.cs" />
+    <Compile Include="Vfs\VfsFileSystemFactory.cs" />
+    <Compile Include="Vfs\VfsFileSystemFactoryAttribute.cs" />
+    <Compile Include="Vfs\VfsFileSystemInfo.cs" />
     <Compile Include="Vfs\VfsReadOnlyFileSystem.cs" />
     <Compile Include="Vhd\Disk.cs" />
     <Compile Include="Vhd\DiskBuilder.cs" />

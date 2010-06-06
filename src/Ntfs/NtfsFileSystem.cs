@@ -1694,6 +1694,32 @@ namespace DiscUtils.Ntfs
         #endregion
 
         /// <summary>
+        /// Detects if a stream contains an NTFS file system.
+        /// </summary>
+        /// <param name="stream">The stream to inspect</param>
+        /// <returns><c>true</c> if NTFS is detected, else <c>false</c>.</returns>
+        public static bool Detect(Stream stream)
+        {
+            if (stream.Length < 512)
+            {
+                return false;
+            }
+
+            stream.Position = 0;
+            byte[] bytes = Utilities.ReadFully(stream, 512);
+            BiosParameterBlock bpb = BiosParameterBlock.FromBytes(bytes, 0);
+
+            if (bpb.SignatureByte != 0x80 || bpb.TotalSectors16 != 0 || bpb.TotalSectors32 != 0
+                || bpb.TotalSectors64 == 0 || bpb.MftRecordSize == 0 || bpb.MftCluster == 0 || bpb.BytesPerSector == 0)
+            {
+                return false;
+            }
+
+            long mftPos = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
+            return mftPos < bpb.TotalSectors64 * bpb.BytesPerSector && mftPos < stream.Length;
+        }
+
+        /// <summary>
         /// Writes a diagnostic dump of key NTFS structures.
         /// </summary>
         /// <param name="writer">The writer to receive the dump.</param>
@@ -1979,6 +2005,5 @@ namespace DiscUtils.Ntfs
                 file.UpdateRecordInMft();
             }
         }
-
     }
 }

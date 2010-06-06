@@ -38,7 +38,6 @@ namespace DiscUtils.Optical
 
         private SparseStream _content;
         private OpticalFormat _format;
-        private long _numSectors;
 
         /// <summary>
         /// Creates a new instance from a stream.
@@ -81,8 +80,6 @@ namespace DiscUtils.Optical
             {
                 _format = format;
             }
-
-            _numSectors = stream.Length / (_format == OpticalFormat.Mode1 ? Mode1SectorSize : Mode2SectorSize);
 
             _content = stream as SparseStream;
             if (_content == null)
@@ -151,7 +148,7 @@ namespace DiscUtils.Optical
         /// Optical discs don't fit the CHS model, so dummy CHS data provided, but
         /// sector size is accurate.
         /// </remarks>
-        internal Geometry Geometry
+        internal static Geometry Geometry
         {
             // Note external sector size is always 2048 - 2352 just has extra header
             // & error-correction info
