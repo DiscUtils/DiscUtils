@@ -167,7 +167,7 @@ namespace DiskDump
                     Console.WriteLine("    BIOS Geometry: " + vol.BiosGeometry);
                     Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
 
-                    DiscUtils.FileSystemInfo[] fileSystemInfos = FileSystemManager.DetectFileSystems(vol);
+                    DiscUtils.FileSystemInfo[] fileSystemInfos = FileSystemManager.DetectDefaultFileSystems(vol);
                     Console.WriteLine("    File Systems: " + string.Join<DiscUtils.FileSystemInfo>(", ", fileSystemInfos));
 
                     Console.WriteLine();
