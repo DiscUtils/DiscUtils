@@ -58,6 +58,11 @@ namespace DiscUtils.Udf
         /// <returns><c>true</c> if the stream contains a UDF file system, else false.</returns>
         public static bool Detect(Stream data)
         {
+            if (data.Length < IsoUtilities.SectorSize)
+            {
+                return false;
+            }
+
             long vdpos = 0x8000; // Skip lead-in
 
             byte[] buffer = new byte[IsoUtilities.SectorSize];
