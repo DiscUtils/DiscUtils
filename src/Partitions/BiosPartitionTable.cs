@@ -326,22 +326,25 @@ namespace DiscUtils.Partitions
         /// <returns>The detected geometry</returns>
         public static Geometry DetectGeometry(Stream disk)
         {
-            disk.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
-            if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
+            if (disk.Length >= Utilities.SectorSize)
             {
-                byte maxHead = 0;
-                byte maxSector = 0;
-                foreach (var record in ReadPrimaryRecords(bootSector))
+                disk.Position = 0;
+                byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+                if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
                 {
-                    maxHead = Math.Max(maxHead, record.EndHead);
-                    maxSector = Math.Max(maxSector, record.EndSector);
-                }
+                    byte maxHead = 0;
+                    byte maxSector = 0;
+                    foreach (var record in ReadPrimaryRecords(bootSector))
+                    {
+                        maxHead = Math.Max(maxHead, record.EndHead);
+                        maxSector = Math.Max(maxSector, record.EndSector);
+                    }
 
-                if (maxHead > 0 && maxSector > 0)
-                {
-                    int cylSize = (maxHead + 1) * maxSector * 512;
-                    return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
+                    if (maxHead > 0 && maxSector > 0)
+                    {
+                        int cylSize = (maxHead + 1) * maxSector * 512;
+                        return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
+                    }
                 }
             }
 
@@ -355,6 +358,11 @@ namespace DiscUtils.Partitions
         /// <returns><c>true</c> if the partition table is valid, else <c>false</c>.</returns>
         public static bool IsValid(Stream disk)
         {
+            if (disk.Length < Utilities.SectorSize)
+            {
+                return false;
+            }
+
             disk.Position = 0;
             byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
 
