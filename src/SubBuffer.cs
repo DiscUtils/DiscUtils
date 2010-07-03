@@ -28,7 +28,7 @@ namespace DiscUtils
     /// <summary>
     /// Class representing a portion of an existing buffer.
     /// </summary>
-    public class SubBuffer : Buffer
+    internal class SubBuffer : Buffer
     {
         private long _first;
         private long _length;
