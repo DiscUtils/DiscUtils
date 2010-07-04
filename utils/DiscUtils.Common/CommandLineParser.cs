@@ -129,6 +129,7 @@ namespace DiscUtils.Common
                     {
                         Console.WriteLine("  " + line);
                     }
+                    Console.WriteLine();
                 }
             }
         }

@@ -71,6 +71,11 @@ namespace DiscUtils.Common
             get { return _outputDiskVariant; }
         }
 
+        protected bool Quiet
+        {
+            get { return _quietSwitch.IsPresent; }
+        }
+
         protected bool Verbose
         {
             get { return _verboseSwitch.IsPresent; }
@@ -162,6 +167,11 @@ namespace DiscUtils.Common
                     string[] typeAndVariant = _outFormatSwitch.Value.Split(new char[] { '-' }, 2);
                     _outputDiskType = typeAndVariant[0];
                     _outputDiskVariant = typeAndVariant[1];
+                }
+                else
+                {
+                    DisplayHelp();
+                    return;
                 }
             }
 
@@ -272,7 +282,7 @@ namespace DiscUtils.Common
                 "of",
                 "outputFormat",
                 "format",
-                "The type of disk to output, one of " + string.Join(", ", ots, 0, ots.Length - 1) + " or " + ots[ots.Length - 1] + ".");
+                "Mandatory - the type of disk to output, one of " + string.Join(", ", ots, 0, ots.Length - 1) + " or " + ots[ots.Length - 1] + ".");
         }
 
         private string ExeName
