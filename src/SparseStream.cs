@@ -66,7 +66,22 @@ namespace DiscUtils
         /// single extent.</remarks>
         public static SparseStream FromStream(Stream stream, Ownership takeOwnership)
         {
-            return new SparseWrapperStream(stream, takeOwnership);
+            return new SparseWrapperStream(stream, takeOwnership, null);
+        }
+
+        /// <summary>
+        /// Converts any stream into a sparse stream.
+        /// </summary>
+        /// <param name="stream">The stream to convert.</param>
+        /// <param name="takeOwnership"><c>true</c> to have the new stream dispose the wrapped
+        /// stream when it is disposed.</param>
+        /// <param name="extents">The set of extents actually stored in <c>stream</c></param>
+        /// <returns>A sparse stream</returns>
+        /// <remarks>The returned stream has the entire wrapped stream as a
+        /// single extent.</remarks>
+        public static SparseStream FromStream(Stream stream, Ownership takeOwnership, IEnumerable<StreamExtent> extents)
+        {
+            return new SparseWrapperStream(stream, takeOwnership, extents);
         }
 
         /// <summary>
@@ -89,62 +104,8 @@ namespace DiscUtils
         /// <remarks><paramref name="outStream"/> must support seeking.</remarks>
         public static void Pump(SparseStream inStream, Stream outStream, int chunkSize)
         {
-            if (!outStream.CanSeek)
-            {
-                throw new ArgumentException("Stream does not support seek operations", "outStream");
-            }
-
-            byte[] copyBuffer = new byte[Math.Max(512 * Sizes.OneKiB, chunkSize)];
-
-            foreach (var extent in inStream.Extents)
-            {
-                inStream.Position = extent.Start;
-
-                long extentOffset = 0;
-                while (extentOffset < extent.Length)
-                {
-                    int toRead = (int)Math.Min(copyBuffer.Length, extent.Length - extentOffset);
-                    int numRead = Utilities.ReadFully(inStream, copyBuffer, 0, toRead);
-
-                    int copyBufferOffset = 0;
-                    for (int i = 0; i < numRead; i += chunkSize)
-                    {
-                        if (IsAllZeros(copyBuffer, i, Math.Min(chunkSize, numRead - i)))
-                        {
-                            if (copyBufferOffset < i)
-                            {
-                                outStream.Position = extent.Start + extentOffset + copyBufferOffset;
-                                outStream.Write(copyBuffer, copyBufferOffset, i - copyBufferOffset);
-                            }
-                            copyBufferOffset = i + chunkSize;
-                        }
-                    }
-
-                    if (copyBufferOffset < numRead)
-                    {
-                        outStream.Position = extent.Start + extentOffset + copyBufferOffset;
-                        outStream.Write(copyBuffer, copyBufferOffset, numRead - copyBufferOffset);
-                    }
-
-                    extentOffset += numRead;
-                }
-            }
-
-            // Ensure the output stream is at least as long as the input stream.  This uses
-            // read/write, rather than SetLength, to avoid failing on streams that can't be
-            // explicitly resized.  Side-effect of this, is that if outStream is an NTFS
-            // file stream, then actual clusters will be allocated out to at least the
-            // length of the input stream.
-            if (outStream.Length < inStream.Length)
-            {
-                inStream.Position = inStream.Length - 1;
-                int b = inStream.ReadByte();
-                if (b >= 0)
-                {
-                    outStream.Position = inStream.Length - 1;
-                    outStream.WriteByte((byte)b);
-                }
-            }
+            StreamPump pump = new StreamPump(inStream, outStream, chunkSize);
+            pump.Run();
         }
 
         /// <summary>
@@ -156,19 +117,6 @@ namespace DiscUtils
         public static SparseStream ReadOnly(SparseStream toWrap, Ownership ownership)
         {
             return new SparseReadOnlyWrapperStream(toWrap, ownership);
-        }
-
-        private static bool IsAllZeros(byte[] buffer, int offset, int count)
-        {
-            for (int j = 0; j < count; j++)
-            {
-                if (buffer[offset + j] != 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private class SparseReadOnlyWrapperStream : SparseStream
@@ -264,11 +212,16 @@ namespace DiscUtils
         {
             private Stream _wrapped;
             private Ownership _ownsWrapped;
+            private List<StreamExtent> _extents;
 
-            public SparseWrapperStream(Stream wrapped, Ownership ownsWrapped)
+            public SparseWrapperStream(Stream wrapped, Ownership ownsWrapped, IEnumerable<StreamExtent> extents)
             {
                 _wrapped = wrapped;
                 _ownsWrapped = ownsWrapped;
+                if (extents != null)
+                {
+                    _extents = new List<StreamExtent>(extents);
+                }
             }
 
             protected override void Dispose(bool disposing)
@@ -341,6 +294,10 @@ namespace DiscUtils
 
             public override void Write(byte[] buffer, int offset, int count)
             {
+                if (_extents != null)
+                {
+                    throw new InvalidOperationException("Attempt to write to stream with explicit extents");
+                }
                 _wrapped.Write(buffer, offset, count);
             }
 
@@ -348,7 +305,14 @@ namespace DiscUtils
             {
                 get
                 {
-                    yield return new StreamExtent(0, _wrapped.Length);
+                    if (_extents != null)
+                    {
+                        return _extents;
+                    }
+                    else
+                    {
+                        return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
+                    }
                 }
             }
         }

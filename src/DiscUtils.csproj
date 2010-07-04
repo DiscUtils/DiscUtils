@@ -374,6 +374,7 @@
     <Compile Include="SparseMemoryBuffer.cs" />
     <Compile Include="SparseMemoryStream.cs" />
     <Compile Include="SparseStream.cs" />
+    <Compile Include="StreamPump.cs" />
     <Compile Include="StreamBuffer.cs" />
     <Compile Include="StreamBuilder.cs" />
     <Compile Include="StreamExtent.cs" />
