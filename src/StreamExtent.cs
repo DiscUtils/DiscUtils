@@ -304,7 +304,7 @@ namespace DiscUtils
                     long extentStartBlock = extent.Start / blockSize;
                     long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
 
-                    if (rangeStart != null && extentStartBlock > rangeStart + 1)
+                    if (rangeStart != null && extentStartBlock > rangeStart + rangeLength)
                     {
                         // This extent is non-contiguous (in terms of blocks), so write out the last range and start new
                         yield return new Range<long, long>((long)rangeStart, rangeLength);
