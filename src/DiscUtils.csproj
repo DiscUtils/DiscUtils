@@ -82,6 +82,7 @@
     <Compile Include="BuilderBufferExtent.cs" />
     <Compile Include="BuilderExtent.cs" />
     <Compile Include="BuilderExtentSource.cs" />
+    <Compile Include="BuilderSparseStreamExtent.cs" />
     <Compile Include="BuilderStreamExtent.cs" />
     <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
@@ -321,6 +322,7 @@
     <Compile Include="Optical\OpticalFormat.cs" />
     <Compile Include="Ownership.cs" />
     <Compile Include="Partitions\BiosExtendedPartitionTable.cs" />
+    <Compile Include="Partitions\BiosPartitionedDiskBuilder.cs" />
     <Compile Include="Partitions\BiosPartitionInfo.cs" />
     <Compile Include="Partitions\BiosPartitionRecord.cs" />
     <Compile Include="Partitions\BiosPartitionTable.cs" />

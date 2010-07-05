@@ -87,6 +87,7 @@
     <Compile Include="Iso9660\IsoFileInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileSystemTest.cs" />
     <Compile Include="Ntfs\NtfsFileSystemTest.cs" />
+    <Compile Include="Partitions\BiosPartitionedDiskBuilderTest.cs" />
     <Compile Include="Partitions\BiosPartitionTableTest.cs" />
     <Compile Include="Partitions\GuidPartitionTableTest.cs" />
     <Compile Include="Program.cs" />

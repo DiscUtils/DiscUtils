@@ -188,7 +188,10 @@ namespace DiscUtils
             {
                 foreach (var extent in _extents)
                 {
-                    yield return new StreamExtent(extent.Start, extent.Length);
+                    foreach (var streamExtent in extent.StreamExtents)
+                    {
+                        yield return streamExtent;
+                    }
                 }
             }
         }
@@ -198,7 +201,7 @@ namespace DiscUtils
             int min = 0;
             int max = _extents.Count - 1;
 
-            if (_extents.Count == 0 || _extents[_extents.Count - 1].Start < pos)
+            if (_extents.Count == 0 || (_extents[_extents.Count - 1].Start + _extents[_extents.Count - 1].Length) <= pos)
             {
                 return null;
             }
@@ -229,7 +232,7 @@ namespace DiscUtils
         private class SearchExtent : BuilderExtent
         {
             public SearchExtent(long pos)
-                : base(pos, 0)
+                : base(pos, 1)
             {
             }
 
@@ -256,12 +259,12 @@ namespace DiscUtils
         {
             public int Compare(BuilderExtent x, BuilderExtent y)
             {
-                if (x.Start < y.Start && (x.Start + x.Length) <= (y.Start + y.Length))
+                if (x.Start + x.Length <= y.Start)
                 {
                     // x < y, with no intersection
                     return -1;
                 }
-                else if (x.Start > y.Start && (x.Start + x.Length) > (y.Start + y.Length))
+                else if (x.Start >= y.Start + y.Length)
                 {
                     // x > y, with no intersection
                     return 1;

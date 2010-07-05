@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,48 +20,39 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace DiscUtils
 {
-    internal abstract class BuilderExtent
+    internal class BuilderSparseStreamExtent : BuilderExtent
     {
-        private long _start;
-        private long _length;
+        private SparseStream _stream;
 
-        public BuilderExtent(long start, long length)
+        public BuilderSparseStreamExtent(long start, SparseStream stream)
+            : base(start, stream.Length)
         {
-            _start = start;
-            _length = length;
+            _stream = stream;
         }
 
-        internal long Start
+        public override IEnumerable<StreamExtent> StreamExtents
         {
-            get { return _start; }
+            get { return StreamExtent.Offset(_stream.Extents, Start); }
         }
 
-        internal long Length
+        internal override void PrepareForRead()
         {
-            get { return _length; }
         }
 
-        /// <summary>
-        /// Gets the parts of the stream that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public virtual IEnumerable<StreamExtent> StreamExtents
+        internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
-            get
-            {
-                return new StreamExtent[] { new StreamExtent(Start, Length) };
-            }
+            _stream.Position = diskOffset - Start;
+            return _stream.Read(block, offset, count);
         }
 
-        internal abstract void PrepareForRead();
-
-        internal abstract int Read(long diskOffset, byte[] block, int offset, int count);
-
-        internal abstract void DisposeReadState();
-
+        internal override void DisposeReadState()
+        {
+        }
     }
 }
