@@ -97,8 +97,8 @@ namespace DiscUtils.Vhd
             public BlockAllocationTableExtent(long start, int maxEntries)
                 : base(start, Utilities.RoundUp(maxEntries * 4, 512))
             {
-                _entries = new uint[maxEntries];
-                for (int i = 0; i < maxEntries; ++i)
+                _entries = new uint[Length / 4];
+                for (int i = 0; i < _entries.Length; ++i)
                 {
                     _entries[i] = 0xFFFFFFFF;
                 }
