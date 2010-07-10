@@ -776,7 +776,17 @@ namespace DiscUtils.Ntfs
                     throw new IOException("Invalid path: " + path);
                 }
 
-                DirectoryEntry entry = GetDirectoryEntry(Path.Combine(dirName, fileName));
+                string dirEntryPath;
+                try
+                {
+                    dirEntryPath = Path.Combine(dirName, fileName);
+                }
+                catch (ArgumentException)
+                {
+                    throw new IOException("Invalid path: " + path);
+                }
+
+                DirectoryEntry entry = GetDirectoryEntry(dirEntryPath);
                 if (entry == null)
                 {
                     if (mode == FileMode.Open)
