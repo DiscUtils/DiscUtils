@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -31,6 +32,11 @@ namespace DiscUtils.Raw
         public override string[] Variants
         {
             get { return new string[] {}; }
+        }
+
+        public override DiskImageBuilder GetImageBuilder(string variant)
+        {
+            throw new NotSupportedException();
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)

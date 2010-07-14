@@ -35,6 +35,11 @@ namespace DiscUtils.Vdi
             get { return new string[] { "fixed", "dynamic" }; }
         }
 
+        public override DiskImageBuilder GetImageBuilder(string variant)
+        {
+            throw new NotImplementedException();
+        }
+
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
         {
             switch (variant)

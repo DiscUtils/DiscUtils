@@ -35,6 +35,25 @@ namespace DiscUtils.Vhd
             get { return new string[] { "fixed", "dynamic" }; }
         }
 
+        public override DiskImageBuilder GetImageBuilder(string variant)
+        {
+            DiskBuilder builder = new DiskBuilder();
+
+            switch (variant)
+            {
+                case "fixed":
+                    builder.DiskType = FileType.Fixed;
+                    break;
+                case "dynamic":
+                    builder.DiskType = FileType.Dynamic;
+                    break;
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
+            }
+
+            return builder;
+        }
+
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
         {
             switch (variant)
@@ -44,7 +63,7 @@ namespace DiscUtils.Vhd
                 case "dynamic":
                     return Disk.InitializeDynamic(locator, path, capacity, geometry, DynamicHeader.DefaultBlockSize);
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VDI disk variant '{0}'", variant), "variant");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
             }
         }
 

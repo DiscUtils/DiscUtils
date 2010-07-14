@@ -53,6 +53,8 @@ namespace DiscUtils
     {
         public abstract string[] Variants { get; }
 
+        public abstract DiskImageBuilder GetImageBuilder(string variant);
+
         public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters);
 
         public abstract VirtualDisk OpenDisk(string path, FileAccess access);

@@ -20,7 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace DiscUtils.Vmdk
@@ -31,6 +33,31 @@ namespace DiscUtils.Vmdk
         public override string[] Variants
         {
             get { return new string[] { "fixed", "dynamic", "vmfsfixed", "vmfsdynamic" }; }
+        }
+
+        public override DiskImageBuilder GetImageBuilder(string variant)
+        {
+            DiskBuilder builder = new DiskBuilder();
+
+            switch (variant)
+            {
+                case "fixed":
+                    builder.DiskType = DiskCreateType.MonolithicFlat;
+                    break;
+                case "dynamic":
+                    builder.DiskType = DiskCreateType.MonolithicSparse;
+                    break;
+                case "vmfsfixed":
+                    builder.DiskType = DiskCreateType.Vmfs;
+                    break;
+                case "vmfsdynamic":
+                    builder.DiskType = DiskCreateType.VmfsSparse;
+                    break;
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), "variant");
+            }
+
+            return builder;
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
@@ -53,6 +80,8 @@ namespace DiscUtils.Vmdk
                 case "vmfsdynamic":
                     vmdkParams.CreateType = DiskCreateType.VmfsSparse;
                     break;
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), "variant");
             }
 
             return Disk.Initialize(locator, path, vmdkParams);
