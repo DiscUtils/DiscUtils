@@ -231,6 +231,8 @@ namespace DiscUtils
                     {
                         yield return new StreamExtent(extentStart, extentEnd - extentStart);
                         extentStart = extentEnd;
+                        extentEnd = long.MaxValue;
+                        overlapsFound = 0;
                     }
                 }
             }
