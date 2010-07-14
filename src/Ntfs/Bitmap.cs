@@ -121,20 +121,29 @@ namespace DiscUtils.Ntfs
 
             long firstByte = index / 8;
             long lastByte = (index + count - 1) / 8;
-
             if (lastByte >= _bitmap.Length)
             {
                 _bitmap.Position = Utilities.RoundUp(lastByte + 1, 8) - 1;
                 _bitmap.WriteByte(0);
             }
 
+            byte[] buffer = new byte[lastByte - firstByte + 1];
+            buffer[0] = GetByte(firstByte);
+            if (buffer.Length != 1)
+            {
+                buffer[buffer.Length - 1] = GetByte(lastByte);
+            }
+
+
             for (long i = index; i < index + count; ++i)
             {
-                long byteIdx = i / 8;
+                long byteIdx = i / 8 - firstByte;
                 byte mask = (byte)(1 << (byte)(i % 8));
 
-                SetByte(byteIdx, (byte)(GetByte(byteIdx) & ~mask));
+                buffer[byteIdx] &= (byte)~mask;
             }
+
+            SetBytes(firstByte, buffer);
 
             if (index < _nextAvailable)
             {
