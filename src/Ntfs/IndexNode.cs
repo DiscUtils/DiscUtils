@@ -394,7 +394,7 @@ namespace DiscUtils.Ntfs
                     _index.FreeBlock(freeBlock);
                 }
 
-                if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) == 0)
+                if ((_entries[entryIndex].Flags & (IndexEntryFlags.Node | IndexEntryFlags.End)) == 0)
                 {
                     IndexEntry entry = _entries[entryIndex];
                     _entries.RemoveAt(entryIndex);
