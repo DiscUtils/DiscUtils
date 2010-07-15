@@ -28,6 +28,7 @@ using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Partitions;
 using DiscUtils.Ntfs;
+using System.Security.Principal;
 
 namespace DiskClone
 {
@@ -68,13 +69,21 @@ namespace DiskClone
                 return new string[]
                 {
                     "DiskClone clones a live disk into a virtual disk file.  The volumes cloned must be formatted with NTFS, and partitioned using a conventional partition table.",
-                    "Only Windows 7 is supported."
+                    "Only Windows 7 is supported.",
+                    "The tool must be run with administrator privilege."
                 };
             }
         }
 
         protected override void DoRun()
         {
+            if (!IsAdministrator())
+            {
+                Console.WriteLine("\nThis utility must be run as an administrator!\n");
+                Environment.Exit(1);
+            }
+
+
             string[] sourceVolume = _volumes.Values;
 
             uint diskNumber;
@@ -220,6 +229,12 @@ namespace DiskClone
             backupCmpnts.DeleteSnapshots(snapshotSetId, 2 /*VSS_OBJECT_SNAPSHOT_SET*/, true, out numDeleteFailed, out deleteFailed);
 
             Marshal.ReleaseComObject(backupCmpnts);
+        }
+
+        private static bool IsAdministrator()
+        {
+            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
         private static IEnumerable<StreamExtent> BitmapToRanges(byte[] bitmap, int bytesPerCluster)
