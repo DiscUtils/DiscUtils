@@ -36,6 +36,7 @@ Copy-Item "${basedir}\utils\VolInfo\bin\SignedRelease\*.exe" "${basedir}\layout\
 Copy-Item "${basedir}\utils\DiskDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\OSClone\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\BCDDump\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\DiskClone\bin\SignedRelease\*.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\bin\LICENSE.TXT"
 pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"
