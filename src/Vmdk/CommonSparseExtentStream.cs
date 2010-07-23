@@ -82,7 +82,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// The data corresponding to the current grain (or null).
         /// </summary>
-        protected uint[] _grainTable;
+        protected byte[] _grainTable;
 
         /// <summary>
         /// Current position in the extent.
@@ -223,7 +223,7 @@ namespace DiscUtils.Vmdk
 
                     int numToRead = Math.Min(maxToRead - totalRead, grainSize - grainOffset);
 
-                    if (_grainTable[grain] == 0)
+                    if (GetGrainTableEntry(grain) == 0)
                     {
                         _parentDiskStream.Position = _position + _diskOffset;
                         numRead = _parentDiskStream.Read(buffer, offset + totalRead, numToRead);
@@ -231,7 +231,7 @@ namespace DiscUtils.Vmdk
                     else
                     {
                         int bufferOffset = offset + totalRead;
-                        long grainStart = ((long)_grainTable[grain]) * Sizes.Sector;
+                        long grainStart = ((long)GetGrainTableEntry(grain)) * Sizes.Sector;
                         numRead = ReadGrain(buffer, bufferOffset, grainStart, grainOffset, numToRead);
                     }
                 }
@@ -241,6 +241,16 @@ namespace DiscUtils.Vmdk
             } while (numRead != 0 && totalRead < maxToRead);
 
             return totalRead;
+        }
+
+        protected uint GetGrainTableEntry(int grain)
+        {
+            return Utilities.ToUInt32LittleEndian(_grainTable, grain * 4);
+        }
+
+        protected void SetGrainTableEntry(int grain, uint value)
+        {
+            Utilities.WriteBytesLittleEndian(value, _grainTable, grain * 4);
         }
 
         public override void SetLength(long value)
@@ -332,7 +342,7 @@ namespace DiscUtils.Vmdk
 
                     int grain = grainTableOffset / grainSize;
 
-                    if (_grainTable[grain] == 0)
+                    if (GetGrainTableEntry(grain) == 0)
                     {
                         pos += grainSize;
                     }
@@ -364,7 +374,7 @@ namespace DiscUtils.Vmdk
 
                     int grain = grainTableOffset / grainSize;
 
-                    if (_grainTable[grain] == 0)
+                    if (GetGrainTableEntry(grain) == 0)
                     {
                         foundEnd = true;
                     }
@@ -409,20 +419,15 @@ namespace DiscUtils.Vmdk
                 return false;
             }
 
-            uint[] newGrainTable = _grainTable;
+            byte[] newGrainTable = _grainTable;
             _grainTable = null;
             if (newGrainTable == null)
             {
-                newGrainTable = new uint[_header.NumGTEsPerGT];
+                newGrainTable = new byte[_header.NumGTEsPerGT * 4];
             }
 
             _fileStream.Position = ((long)_globalDirectory[index]) * Sizes.Sector;
-            byte[] buffer = Utilities.ReadFully(_fileStream, (int)(_header.NumGTEsPerGT * 4));
-
-            for (int i = 0; i < _header.NumGTEsPerGT; ++i)
-            {
-                newGrainTable[i] = Utilities.ToUInt32LittleEndian(buffer, i * 4);
-            }
+            Utilities.ReadFully(_fileStream, newGrainTable, 0, newGrainTable.Length);
 
             _currentGrainTable = index;
             _grainTable = newGrainTable;

@@ -106,13 +106,13 @@ namespace DiscUtils.Vmdk
                 int grain = grainTableOffset / grainSize;
                 int grainOffset = grainTableOffset - (grain * grainSize);
 
-                if (_grainTable[grain] == 0)
+                if (GetGrainTableEntry(grain) == 0)
                 {
                     AllocateGrain(grainTable, grain);
                 }
 
                 int numToWrite = Math.Min(count - totalWritten, grainSize - grainOffset);
-                _fileStream.Position = (((long)_grainTable[grain]) * Sizes.Sector) + grainOffset;
+                _fileStream.Position = (((long)GetGrainTableEntry(grain)) * Sizes.Sector) + grainOffset;
                 _fileStream.Write(buffer, offset + totalWritten, numToWrite);
 
                 _position += numToWrite;
@@ -198,7 +198,7 @@ namespace DiscUtils.Vmdk
             _fileStream.Write(content, 0, content.Length);
 
             LoadGrainTable(grainTable);
-            _grainTable[grain] = (uint)(grainStartPos / Sizes.Sector);
+            SetGrainTableEntry(grain, (uint)(grainStartPos / Sizes.Sector));
             WriteGrainTable();
         }
 
@@ -209,19 +209,13 @@ namespace DiscUtils.Vmdk
                 throw new InvalidOperationException("No grain table loaded");
             }
 
-            byte[] buffer = new byte[_header.NumGTEsPerGT * 4];
-            for (int i = 0; i < _grainTable.Length; ++i)
-            {
-                Utilities.WriteBytesLittleEndian(_grainTable[i], buffer, i * 4);
-            }
-
             _fileStream.Position = _globalDirectory[_currentGrainTable] * (long)Sizes.Sector;
-            _fileStream.Write(buffer, 0, buffer.Length);
+            _fileStream.Write(_grainTable, 0, _grainTable.Length);
 
             if (_redundantGlobalDirectory != null)
             {
                 _fileStream.Position = _redundantGlobalDirectory[_currentGrainTable] * (long)Sizes.Sector;
-                _fileStream.Write(buffer, 0, buffer.Length);
+                _fileStream.Write(_grainTable, 0, _grainTable.Length);
             }
         }
     }
