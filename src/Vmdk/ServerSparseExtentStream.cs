@@ -42,7 +42,7 @@ namespace DiscUtils.Vmdk
             _serverHeader = ServerSparseExtentHeader.Read(firstSectors, 0);
             _header = _serverHeader;
 
-            _gtCoverage = _header.NumGTEsPerGT * _header.GrainSize * Sizes.Sector;
+            _gtCoverage = _header.NumGTEsPerGT * (long)_header.GrainSize * Sizes.Sector;
 
             LoadGlobalDirectory();
         }
@@ -101,10 +101,10 @@ namespace DiscUtils.Vmdk
         private void AllocateGrains(int grainTable, int grain, int count)
         {
             // Calculate start pos for new grain
-            long grainStartPos = _serverHeader.FreeSector * Sizes.Sector;
+            long grainStartPos = ((long)_serverHeader.FreeSector) * Sizes.Sector;
 
             // Copy-on-write semantics, read the bytes from parent and write them out to this extent.
-            _parentDiskStream.Position = _diskOffset + ((grain + (_header.NumGTEsPerGT * grainTable)) * _header.GrainSize * Sizes.Sector);
+            _parentDiskStream.Position = _diskOffset + ((grain + (_header.NumGTEsPerGT * (long)grainTable)) * _header.GrainSize * Sizes.Sector);
             byte[] content = Utilities.ReadFully(_parentDiskStream, (int)_header.GrainSize * Sizes.Sector * count);
             _fileStream.Position = grainStartPos;
             _fileStream.Write(content, 0, content.Length);
@@ -127,8 +127,9 @@ namespace DiscUtils.Vmdk
         {
             // Write out new blank grain table.
             uint startSector = _serverHeader.FreeSector;
+
             byte[] emptyGrainTable = new byte[_header.NumGTEsPerGT * 4];
-            _fileStream.Position = startSector * Sizes.Sector;
+            _fileStream.Position = startSector * (long)Sizes.Sector;
             _fileStream.Write(emptyGrainTable, 0, emptyGrainTable.Length);
 
             // Update header
@@ -152,7 +153,7 @@ namespace DiscUtils.Vmdk
             {
                 Utilities.WriteBytesLittleEndian(_globalDirectory[i], buffer, i * 4);
             }
-            _fileStream.Position = _serverHeader.GdOffset * Sizes.Sector;
+            _fileStream.Position = ((long)_serverHeader.GdOffset) * Sizes.Sector;
             _fileStream.Write(buffer, 0, buffer.Length);
         }
 
@@ -163,7 +164,7 @@ namespace DiscUtils.Vmdk
                 throw new InvalidOperationException("No grain table loaded");
             }
 
-            _fileStream.Position = _globalDirectory[_currentGrainTable] * Sizes.Sector;
+            _fileStream.Position = _globalDirectory[_currentGrainTable] * (long)Sizes.Sector;
             _fileStream.Write(_grainTable, 0, _grainTable.Length);
         }
     }
