@@ -289,5 +289,18 @@ namespace DiscUtils.Ntfs
             Assert.Null(ntfs.OpenRawStream(@"$Extend\$ObjId", AttributeType.Data, null, FileAccess.Read));
 #pragma warning restore 618
         }
+
+        [Test]
+        public void GetAlternateDataStreams()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            ntfs.OpenFile("AFILE.TXT", FileMode.Create).Close();
+            Assert.AreEqual(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+
+            ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Close();
+            Assert.AreEqual(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.AreEqual("ALTSTREAM", ntfs.GetAlternateDataStreams("AFILE.TXT")[0]);
+        }
     }
 }

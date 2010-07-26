@@ -1600,6 +1600,36 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Gets the names of the alternate data streams for a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>
+        /// The list of alternate data streams (or empty, if none).  To access the contents
+        /// of the alternate streams, use OpenFile(path + ":" + name, ...).
+        /// </returns>
+        public string[] GetAlternateDataStreams(string path)
+        {
+            DirectoryEntry dirEntry = GetDirectoryEntry(path);
+            if(dirEntry == null)
+            {
+                    throw new FileNotFoundException("File not found", path);
+            }
+
+            File file = GetFile(dirEntry.Reference);
+
+            List<string> names = new List<string>();
+            foreach (var attr in file.AllStreams)
+            {
+                if (attr.AttributeType == AttributeType.Data && !string.IsNullOrEmpty(attr.Name))
+                {
+                    names.Add(attr.Name);
+                }
+            }
+
+            return names.ToArray();
+        }
+
+        /// <summary>
         /// Gets the volume label.
         /// </summary>
         public override string VolumeLabel
