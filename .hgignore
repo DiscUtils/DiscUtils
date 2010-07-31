@@ -1,0 +1,12 @@
+glob:*.patch
+glob:*.snk
+glob:*.suo
+glob:*.user
+glob:*\bin\
+glob:*\obj\
+glob:DiscUtilsWorking.sln
+glob:src\DiscUtils.dll.xml
+glob:unittests\results.xml
+glob:layout
+glob:Help
+glob:scratch
