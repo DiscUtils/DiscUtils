@@ -1,0 +1,53 @@
+<value>
+  <struct>
+    <member>
+      <name>version</name>
+      <value>
+        <struct>
+          <member>
+            <name>hostname</name>
+            <value>cheesy-2</value>
+          </member>
+          <member>
+            <name>date</name>
+            <value>2008-11-08</value>
+          </member>
+          <member>
+            <name>product_version</name>
+            <value>1.0.0</value>
+          </member>
+          <member>
+            <name>product_brand</name>
+            <value>DiscUtils .NET</value>
+          </member>
+          <member>
+            <name>build_number</name>
+            <value>0</value>
+          </member>
+          <member>
+            <name>xapi_major</name>
+            <value>1</value>
+          </member>
+          <member>
+            <name>xapi_minor</name>
+            <value>2</value>
+          </member>
+          <member>
+            <name>export_vsn</name>
+            <value>2</value>
+          </member>
+        </struct>
+      </value>
+    </member>
+    <member>
+      <name>objects</name>
+      <value>
+        <array>
+          <data>
+{0}
+          </data>
+        </array>
+      </value>
+    </member>
+  </struct>
+</value>
