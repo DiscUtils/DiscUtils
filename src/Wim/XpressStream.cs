@@ -109,7 +109,7 @@ namespace DiscUtils.Wim
 
         private HuffmanTree ReadHuffmanTree()
         {
-            uint[] lengths = new uint[256 + 16 * 16];
+            uint[] lengths = new uint[256 + (16 * 16)];
 
             for (int i = 0; i < lengths.Length; i += 2)
             {

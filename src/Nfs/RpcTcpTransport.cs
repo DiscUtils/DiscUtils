@@ -72,7 +72,7 @@ namespace DiscUtils.Nfs
             int retryLimit = RetryLimit;
             Exception lastException = null;
 
-            bool isNewConnection = (_socket == null);
+            bool isNewConnection = _socket == null;
             if (isNewConnection)
             {
                 retryLimit = 1;
@@ -174,7 +174,7 @@ namespace DiscUtils.Nfs
                 byte[] header = Utilities.ReadFully(_tcpStream, 4);
                 uint headerVal = Utilities.ToUInt32BigEndian(header, 0);
 
-                lastFragFound = ((headerVal & 0x80000000) != 0);
+                lastFragFound = (headerVal & 0x80000000) != 0;
                 byte[] frag = Utilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
 
                 if (ms != null)

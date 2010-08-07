@@ -62,8 +62,8 @@ namespace DiscUtils.Optical
             while (totalRead < totalToRead)
             {
                 long thisPos = pos + totalRead;
-                long sector = (thisPos / DiscImageFile.Mode1SectorSize);
-                int sectorOffset = (int)(thisPos - sector * DiscImageFile.Mode1SectorSize);
+                long sector = thisPos / DiscImageFile.Mode1SectorSize;
+                int sectorOffset = (int)(thisPos - (sector * DiscImageFile.Mode1SectorSize));
 
                 int numRead = Utilities.ReadFully(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0, DiscImageFile.Mode2SectorSize);
                 if (numRead < DiscImageFile.Mode2SectorSize)

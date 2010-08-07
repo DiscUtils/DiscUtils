@@ -196,11 +196,11 @@ namespace DiscUtils.Iscsi
         internal bool ShouldTransmit(object currentValue, Type valueType, KeyUsagePhase phase, bool discoverySession)
         {
             return
-                ((Phase & phase) != 0
+                (Phase & phase) != 0
                 && (discoverySession ? (UsedForDiscovery == true) : true)
                 && currentValue != null
                 && GetValueAsString(currentValue, valueType) != DefaultValue
-                && (Sender & KeySender.Initiator) != 0);
+                && (Sender & KeySender.Initiator) != 0;
         }
     }
 }

@@ -217,7 +217,7 @@ namespace DiscUtils.Ntfs
                         _bitmap.MarkPresentRange(runStart, focusCluster - runStart);
 
                         result.Add(new Tuple<long, long>(runStart, focusCluster - runStart));
-                        numFound += (focusCluster - runStart);
+                        numFound += focusCluster - runStart;
                     }
                 }
 

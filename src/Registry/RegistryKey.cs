@@ -705,10 +705,10 @@ namespace DiscUtils.Registry
             _hive.UpdateCell(valueCell, true);
 
             // Update the value list, re-allocating if necessary
-            byte[] newValueList = new byte[_cell.NumValues * 4 + 4];
+            byte[] newValueList = new byte[(_cell.NumValues * 4) + 4];
             Array.Copy(valueList, 0, newValueList, 0, insertIdx * 4);
             Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
-            Array.Copy(valueList, insertIdx * 4, newValueList, insertIdx * 4 + 4, (_cell.NumValues - insertIdx) * 4);
+            Array.Copy(valueList, insertIdx * 4, newValueList, (insertIdx * 4) + 4, (_cell.NumValues - insertIdx) * 4);
             if (_cell.ValueListIndex == -1 || !_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
             {
                 int newListCellIndex = _hive.AllocateRawCell(Utilities.RoundUp(newValueList.Length, 8));

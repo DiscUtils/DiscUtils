@@ -357,7 +357,7 @@ namespace DiscUtils.Partitions
                     _secondaryHeader = new GptHeader(_primaryHeader);
                     _secondaryHeader.HeaderLba = _secondaryHeader.AlternateHeaderLba;
                     _secondaryHeader.AlternateHeaderLba = _secondaryHeader.HeaderLba;
-                    _secondaryHeader.PartitionEntriesLba = _secondaryHeader.HeaderLba - (((_secondaryHeader.PartitionEntryCount * _secondaryHeader.PartitionEntrySize) + diskGeometry.BytesPerSector - 1)) / diskGeometry.BytesPerSector;
+                    _secondaryHeader.PartitionEntriesLba = _secondaryHeader.HeaderLba - Utilities.RoundUp(_secondaryHeader.PartitionEntryCount * _secondaryHeader.PartitionEntrySize, diskGeometry.BytesPerSector);
 
                     // If the disk is writeable, fix up the secondary partition table based on the
                     // (valid) primary table.

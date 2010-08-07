@@ -43,7 +43,7 @@ namespace DiscUtils.Wim
         private uint _buffer;
         private int _bufferAvailable;
 
-        byte[] _readBuffer = new byte[2];
+        private byte[] _readBuffer = new byte[2];
 
         public LzxBitStream(Stream byteStream)
         {

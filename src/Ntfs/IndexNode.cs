@@ -173,7 +173,7 @@ namespace DiscUtils.Ntfs
             foreach (var entry in _entries)
             {
                 totalEntriesSize += (uint)entry.Size;
-                haveSubNodes |= ((entry.Flags & IndexEntryFlags.Node) != 0);
+                haveSubNodes |= (entry.Flags & IndexEntryFlags.Node) != 0;
             }
 
             _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
@@ -294,7 +294,7 @@ namespace DiscUtils.Ntfs
                     compVal = _index.Compare(key, focus.KeyBuffer);
                     if (compVal <= 0)
                     {
-                        exactMatch = (compVal == 0);
+                        exactMatch = compVal == 0;
                         return i;
                     }
                 }

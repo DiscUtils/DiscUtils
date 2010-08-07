@@ -136,7 +136,7 @@ namespace DiscUtils.Ntfs
 
             for (long i = index; i < index + count; ++i)
             {
-                long byteIdx = i / 8 - firstByte;
+                long byteIdx = (i / 8) - firstByte;
                 byte mask = (byte)(1 << (byte)(i % 8));
 
                 buffer[byteIdx] &= (byte)~mask;

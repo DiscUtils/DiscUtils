@@ -76,7 +76,7 @@ namespace DiscUtils.Iso9660
 
         public DirectoryRecord GetEntryByName(string name)
         {
-            bool anyVerMatch = (name.IndexOf(';') < 0);
+            bool anyVerMatch = name.IndexOf(';') < 0;
             string normName = IsoUtilities.NormalizeFileName(name).ToUpper(CultureInfo.InvariantCulture);
             if (anyVerMatch)
             {

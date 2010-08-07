@@ -117,7 +117,7 @@ namespace DiscUtils.Fat
         {
             get
             {
-                return (_name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' '));
+                return _name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ');
             }
         }
 
@@ -224,7 +224,7 @@ namespace DiscUtils.Fat
                 value = FatFileSystem.Epoch;
             }
 
-            date = (ushort)(((value.Year - 1980 << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
+            date = (ushort)((((value.Year - 1980) << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
             time = (ushort)(((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second / 2) & 0x001F));
             tenths = (byte)(((value.Second % 2) * 100) + (value.Millisecond / 10));
         }

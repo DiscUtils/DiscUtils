@@ -68,7 +68,7 @@ namespace DiscUtils.Vdi
             result.BlocksAllocated = 0;
 
             result.BlocksOffset = ((PreHeaderRecord.Size + result.HeaderSize + 511) / 512) * 512;
-            result.DataOffset = (uint)(((result.BlocksOffset + result.BlockCount * 4 + 511) / 512) * 512);
+            result.DataOffset = (uint)(((result.BlocksOffset + (result.BlockCount * 4) + 511) / 512) * 512);
 
             result.UniqueId = Guid.NewGuid();
             result.ModificationId = Guid.NewGuid();
@@ -118,7 +118,7 @@ namespace DiscUtils.Vdi
                 ParentId = Utilities.ToGuidLittleEndian(buffer, offset + 332);
                 HeaderSize = 348;
                 BlocksOffset = HeaderSize + PreHeaderRecord.Size;
-                DataOffset = (uint)(BlocksOffset + BlockCount * 4);
+                DataOffset = (uint)(BlocksOffset + (BlockCount * 4));
                 BlockExtraSize = 0;
                 ParentModificationId = Guid.Empty;
             }

@@ -231,7 +231,7 @@ namespace DiscUtils.Iso9660
             Dictionary<BuildDirectoryMember, uint> primaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
             Dictionary<BuildDirectoryMember, uint> supplementaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
 
-            long focus = DiskStart + 3 * IsoUtilities.SectorSize; // Primary, Supplementary, End (fixed at end...)
+            long focus = DiskStart + (3 * IsoUtilities.SectorSize); // Primary, Supplementary, End (fixed at end...)
 
             // ####################################################################
             // # 1. Fix file locations
@@ -322,7 +322,7 @@ namespace DiscUtils.Iso9660
             // ####################################################################
             PrimaryVolumeDescriptor pvDesc = new PrimaryVolumeDescriptor(
                 (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
-                (uint)(primaryPathTableLength),                            // PathTableSize
+                (uint)primaryPathTableLength,                              // PathTableSize
                 (uint)(startOfFirstPathTable / IsoUtilities.SectorSize),   // TypeLPathTableLocation
                 (uint)(startOfSecondPathTable / IsoUtilities.SectorSize),  // TypeMPathTableLocation
                 (uint)(startOfFirstDirData / IsoUtilities.SectorSize),     // RootDirectory.LocationOfExtent
@@ -335,7 +335,7 @@ namespace DiscUtils.Iso9660
 
             SupplementaryVolumeDescriptor svDesc = new SupplementaryVolumeDescriptor(
                 (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
-                (uint)(supplementaryPathTableLength),                      // PathTableSize
+                (uint)supplementaryPathTableLength,                        // PathTableSize
                 (uint)(startOfThirdPathTable / IsoUtilities.SectorSize),   // TypeLPathTableLocation
                 (uint)(startOfFourthPathTable / IsoUtilities.SectorSize),  // TypeMPathTableLocation
                 (uint)(startOfSecondDirData / IsoUtilities.SectorSize),    // RootDirectory.LocationOfExtent

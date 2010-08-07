@@ -142,7 +142,7 @@ namespace DiscUtils.Fat
 
             if (!TryLoadCurrentCluster())
             {
-                if (_position == _length || _position == DetectLength() && !_atEOF)
+                if ((_position == _length || _position == DetectLength()) && !_atEOF)
                 {
                     _atEOF = true;
                     return 0;
@@ -469,7 +469,7 @@ namespace DiscUtils.Fat
                 }
             }
 
-            return (uint)((long)(_knownClusters.Count - 1) * (long)(_reader.ClusterSize));
+            return (uint)((long)(_knownClusters.Count - 1) * (long)_reader.ClusterSize);
         }
     }
 }

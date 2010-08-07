@@ -815,7 +815,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            FileNameRecord fnr = (attr == null ? new FileNameRecord() : new FileNameRecord(attr.Content));
+            FileNameRecord fnr = attr == null ? new FileNameRecord() : new FileNameRecord(attr.Content);
 
             if (freshened)
             {

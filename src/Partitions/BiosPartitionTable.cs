@@ -440,7 +440,7 @@ namespace DiscUtils.Partitions
             BiosPartitionRecord[] records = new BiosPartitionRecord[4];
             for (int i = 0; i < 4; ++i)
             {
-                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0, i);
+                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + (i * 0x10), 0, i);
             }
 
             return records;

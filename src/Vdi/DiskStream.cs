@@ -369,7 +369,7 @@ namespace DiscUtils.Vdi
             byte[] buffer = new byte[4];
             Utilities.WriteBytesLittleEndian(_blockTable[block], buffer, 0);
 
-            _fileStream.Position = _fileHeader.BlocksOffset + block * 4;
+            _fileStream.Position = _fileHeader.BlocksOffset + (block * 4);
             _fileStream.Write(buffer, 0, 4);
         }
 

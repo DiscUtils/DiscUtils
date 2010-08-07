@@ -314,7 +314,7 @@ namespace DiscUtils.Vmdk
             {
                 foreach (var file in _files)
                 {
-                    yield return (file.First as VirtualDiskLayer);
+                    yield return file.First as VirtualDiskLayer;
                 }
             }
         }

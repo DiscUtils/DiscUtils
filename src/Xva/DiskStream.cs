@@ -126,7 +126,7 @@ namespace DiscUtils.Xva
             }
 
             long chunkOffset = _position - (chunk * Sizes.OneMiB);
-            int toRead = Math.Min((int)(Math.Min(Sizes.OneMiB - chunkOffset, _length - _position)), count);
+            int toRead = Math.Min((int)Math.Min(Sizes.OneMiB - chunkOffset, _length - _position), count);
 
             _currentChunkData.Position = chunkOffset;
 

@@ -88,7 +88,7 @@ namespace DiscUtils.Xva
         {
             string searchStr = path;
             searchStr = searchStr.Replace(@"\", "/");
-            searchStr = (searchStr.EndsWith(@"/", StringComparison.Ordinal) ? searchStr : searchStr + @"/");
+            searchStr = searchStr.EndsWith(@"/", StringComparison.Ordinal) ? searchStr : searchStr + @"/";
 
             foreach (string filePath in _files.Keys)
             {

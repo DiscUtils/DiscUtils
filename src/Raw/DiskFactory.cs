@@ -51,7 +51,7 @@ namespace DiscUtils.Raw
 
         public override VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access)
         {
-            FileShare share = (access == FileAccess.Read ? FileShare.Read : FileShare.None);
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new Disk(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
         }
     }

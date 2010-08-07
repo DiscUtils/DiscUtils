@@ -321,7 +321,7 @@ namespace DiscUtils.Fat
         /// </summary>
         public bool MirrorFat
         {
-            get { return ((_bpbExtFlags & 0x08) == 0); }
+            get { return (_bpbExtFlags & 0x08) == 0; }
         }
 
         /// <summary>
@@ -875,7 +875,7 @@ namespace DiscUtils.Fat
             else
             {
                 DirectoryEntry dirEntry = GetDirectoryEntry(path);
-                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) != 0);
+                return dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) != 0;
             }
         }
 
@@ -894,7 +894,7 @@ namespace DiscUtils.Fat
             else
             {
                 DirectoryEntry dirEntry = GetDirectoryEntry(path);
-                return (dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) == 0);
+                return dirEntry != null && (dirEntry.Attributes & FatAttributes.Directory) == 0;
             }
         }
 
@@ -1375,9 +1375,9 @@ namespace DiscUtils.Fat
              * Make sure the stream is at least as large as the partition requires.
              */
 
-            if (stream.Length < pos + sectorCount * Utilities.SectorSize)
+            if (stream.Length < pos + (sectorCount * Utilities.SectorSize))
             {
-                stream.SetLength(pos + sectorCount * Utilities.SectorSize);
+                stream.SetLength(pos + (sectorCount * Utilities.SectorSize));
             }
 
             /*
@@ -1424,7 +1424,7 @@ namespace DiscUtils.Fat
             }
 
             uint totalSectors = bpbTotSec16 + bpbTotSec32;
-            return (totalSectors * (long)bpbBytesPerSec <= stream.Length);
+            return totalSectors * (long)bpbBytesPerSec <= stream.Length;
         }
 
         internal FileAllocationTable Fat
@@ -1636,7 +1636,7 @@ namespace DiscUtils.Fat
         {
             uint numClusters = (uint)(sectors / sectorsPerCluster);
             uint fatBytes = (numClusters * (ushort)fatType) / 8;
-            return ((fatBytes + Utilities.SectorSize - 1) / Utilities.SectorSize);
+            return (fatBytes + Utilities.SectorSize - 1) / Utilities.SectorSize;
         }
 
         private void ReadBS(int offset)
@@ -1868,7 +1868,7 @@ namespace DiscUtils.Fat
 
             foreach (DirectoryEntry de in entries)
             {
-                bool isDir = ((de.Attributes & FatAttributes.Directory) != 0);
+                bool isDir = (de.Attributes & FatAttributes.Directory) != 0;
 
                 if ((isDir && dirs) || (!isDir && files))
                 {

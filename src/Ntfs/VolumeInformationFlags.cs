@@ -25,7 +25,7 @@ using System;
 namespace DiscUtils.Ntfs
 {
     [Flags]
-    enum VolumeInformationFlags : ushort
+    internal enum VolumeInformationFlags : ushort
     {
         None = 0x00,
         Dirty = 0x01,

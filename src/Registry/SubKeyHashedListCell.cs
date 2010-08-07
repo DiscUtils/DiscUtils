@@ -62,7 +62,7 @@ namespace DiscUtils.Registry
                 _nameHashes.Add(Utilities.ToUInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8) + 0x4));
             }
 
-            return 0x4 + _numElements * 0x8;
+            return 0x4 + (_numElements * 0x8);
         }
 
         public override void WriteTo(byte[] buffer, int offset)
@@ -78,7 +78,7 @@ namespace DiscUtils.Registry
 
         public override int Size
         {
-            get { return 0x4 + _numElements * 0x8; }
+            get { return 0x4 + (_numElements * 0x8); }
         }
 
         /// <summary>

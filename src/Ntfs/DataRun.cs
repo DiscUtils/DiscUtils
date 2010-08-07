@@ -66,7 +66,7 @@ namespace DiscUtils.Ntfs
 
             _runLength = ReadVarLong(buffer, offset + 1, runLengthSize);
             _runOffset = ReadVarLong(buffer, offset + 1 + runLengthSize, runOffsetSize);
-            _isSparse = (runOffsetSize == 0);
+            _isSparse = runOffsetSize == 0;
 
             return 1 + runLengthSize + runOffsetSize;
         }
@@ -151,7 +151,7 @@ namespace DiscUtils.Ntfs
             int len = 0;
             do
             {
-                lastByteHighBitSet = ((val & 0x80) != 0);
+                lastByteHighBitSet = (val & 0x80) != 0;
                 val >>= 8;
                 len++;
             }

@@ -140,7 +140,7 @@ namespace DiscUtils.Ntfs
             FileNameNamespace = (FileNameNamespace)buffer[offset + 0x41];
             FileName = Encoding.Unicode.GetString(buffer, offset + 0x42, fnLen * 2);
 
-            return 0x42 + fnLen * 2;
+            return 0x42 + (fnLen * 2);
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -163,7 +163,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return 0x42 + FileName.Length * 2;
+                return 0x42 + (FileName.Length * 2);
             }
         }
 

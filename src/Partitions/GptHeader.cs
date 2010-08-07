@@ -99,7 +99,7 @@ namespace DiscUtils.Partitions
                 return false;
             }
 
-            return (Crc == CalcCrc(buffer, offset, HeaderSize));
+            return Crc == CalcCrc(buffer, offset, HeaderSize);
         }
 
         public void WriteTo(byte[] buffer, int offset)

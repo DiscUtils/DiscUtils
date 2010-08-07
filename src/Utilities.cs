@@ -45,7 +45,7 @@ namespace DiscUtils
         /// <returns>The rounded-up value</returns>
         public static long RoundUp(long value, long unit)
         {
-            return (((value + (unit - 1)) / unit) * unit);
+            return ((value + (unit - 1)) / unit) * unit;
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace DiscUtils
         /// <returns>The rounded-up value</returns>
         public static int RoundUp(int value, int unit)
         {
-            return (((value + (unit - 1)) / unit) * unit);
+            return ((value + (unit - 1)) / unit) * unit;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace DiscUtils
         /// <returns>The rounded-down value</returns>
         public static long RoundDown(long value, long unit)
         {
-            return ((value / unit) * unit);
+            return (value / unit) * unit;
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace DiscUtils
 
         public static ulong BitSwap(ulong value)
         {
-            return ((ulong)(BitSwap((uint)(value & 0xFFFFFFFF))) << 32) | BitSwap((uint)(value >> 32));
+            return (((ulong)BitSwap((uint)(value & 0xFFFFFFFF))) << 32) | BitSwap((uint)(value >> 32));
         }
 
         public static short BitSwap(short value)

@@ -273,7 +273,7 @@ namespace DiscUtils.Registry
                 case RegistryValueType.String:
                 case RegistryValueType.ExpandString:
                     string strValue = value.ToString();
-                    data = new byte[strValue.Length * 2 + 2];
+                    data = new byte[(strValue.Length * 2) + 2];
                     Encoding.Unicode.GetBytes(strValue, 0, strValue.Length, data, 0);
                     break;
 
@@ -289,7 +289,7 @@ namespace DiscUtils.Registry
 
                 case RegistryValueType.MultiString:
                     string multiStrValue = string.Join("\0", (string[])value) + "\0";
-                    data = new byte[multiStrValue.Length * 2 + 2];
+                    data = new byte[(multiStrValue.Length * 2) + 2];
                     Encoding.Unicode.GetBytes(multiStrValue, 0, multiStrValue.Length, data, 0);
                     break;
 

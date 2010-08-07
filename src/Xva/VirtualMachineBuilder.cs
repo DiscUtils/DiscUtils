@@ -129,7 +129,7 @@ namespace DiscUtils.Xva
                             HashAlgorithm hashAlg = new SHA1Managed();
                             Stream chunkStream;
 
-                            long diskBytesLeft = diskStream.Length - i * Sizes.OneMiB;
+                            long diskBytesLeft = diskStream.Length - (i * Sizes.OneMiB);
                             if(diskBytesLeft < Sizes.OneMiB)
                             {
                                 chunkStream = new ConcatStream(

@@ -242,7 +242,7 @@ namespace DiscUtils.Ntfs
             long compressionUnitLength = _record.CompressionUnitSize * _bytesPerCluster;
 
             long startVcn = (pos / compressionUnitLength) * _record.CompressionUnitSize;
-            long targetCluster = (pos / _bytesPerCluster);
+            long targetCluster = pos / _bytesPerCluster;
             long blockOffset = pos - (startVcn * _bytesPerCluster);
 
             int dataRunIdx = FindDataRun(startVcn);

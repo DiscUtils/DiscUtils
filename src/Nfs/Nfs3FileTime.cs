@@ -55,7 +55,7 @@ namespace DiscUtils.Nfs
 
         public DateTime ToDateTime()
         {
-            return new DateTime((_seconds * TicksPerSec + (_nseconds / TicksPerNanoSec)) + NfsEpoch.Ticks);
+            return new DateTime(((_seconds * TicksPerSec) + (_nseconds / TicksPerNanoSec)) + NfsEpoch.Ticks);
         }
 
         ////public TimeSpan ToTimeSpan()

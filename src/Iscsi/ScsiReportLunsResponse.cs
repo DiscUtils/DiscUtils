@@ -64,7 +64,7 @@ namespace DiscUtils.Iscsi
 
         public override uint NeededDataLength
         {
-            get { return _availableLuns * 8 + 8; }
+            get { return (_availableLuns * 8) + 8; }
         }
     }
 }

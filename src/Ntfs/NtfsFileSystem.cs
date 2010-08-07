@@ -506,7 +506,7 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     DirectoryEntry dirEntry = GetDirectoryEntry(path);
-                    return (dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0);
+                    return dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) != 0;
                 }
             }
         }
@@ -521,7 +521,7 @@ namespace DiscUtils.Ntfs
             using (new NtfsTransaction())
             {
                 DirectoryEntry dirEntry = GetDirectoryEntry(path);
-                return (dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) == 0);
+                return dirEntry != null && (dirEntry.Details.FileAttributes & FileAttributes.Directory) == 0;
             }
         }
 
@@ -1861,7 +1861,7 @@ namespace DiscUtils.Ntfs
 
             foreach (DirectoryEntry de in parentDir.GetAllEntries(true))
             {
-                bool isDir = ((de.Details.FileAttributes & FileAttributes.Directory) != 0);
+                bool isDir = (de.Details.FileAttributes & FileAttributes.Directory) != 0;
 
                 if ((isDir && dirs) || (!isDir && files))
                 {

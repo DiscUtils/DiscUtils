@@ -106,7 +106,7 @@ namespace DiscUtils.Vhd
             result.ParentLocators = new ParentLocator[8];
             for (int i = 0; i < 8; ++i)
             {
-                result.ParentLocators[i] = ParentLocator.FromBytes(data, offset + 576 + i * 24);
+                result.ParentLocators[i] = ParentLocator.FromBytes(data, offset + 576 + (i * 24));
             }
 
             return result;
@@ -129,7 +129,7 @@ namespace DiscUtils.Vhd
 
             for (int i = 0; i < 8; ++i)
             {
-                ParentLocators[i].ToBytes(data, offset + 576 + i * 24);
+                ParentLocators[i].ToBytes(data, offset + 576 + (i * 24));
             }
 
             Array.Clear(data, offset + 1024 - 256, 256);

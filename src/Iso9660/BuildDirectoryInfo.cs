@@ -79,7 +79,7 @@ namespace DiscUtils.Iso9660
         {
             List<BuildDirectoryMember> sorted = GetSortedMembers();
 
-            long total = (34 * 2); // Two pseudo entries (self & parent)
+            long total = 34 * 2; // Two pseudo entries (self & parent)
 
             foreach (BuildDirectoryMember m in sorted)
             {

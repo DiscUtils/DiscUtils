@@ -68,10 +68,10 @@ namespace DiscUtils.Wim
         private long _position;
 
         // Block state
-        HuffmanTree _mainTree = null;
-        HuffmanTree _lengthTree = null;
-        HuffmanTree _alignedOffsetTree = null;
-        uint[] _repeatedOffsets = new uint[] { 1, 1, 1 };
+        private HuffmanTree _mainTree = null;
+        private HuffmanTree _lengthTree = null;
+        private HuffmanTree _alignedOffsetTree = null;
+        private uint[] _repeatedOffsets = new uint[] { 1, 1, 1 };
 
         public LzxStream(Stream stream, int windowBits, int fileSize)
         {
@@ -327,7 +327,7 @@ namespace DiscUtils.Wim
 
             if (_mainTree == null)
             {
-                lengths = new uint[256 + 8 * _numPositionSlots];
+                lengths = new uint[256 + (8 * _numPositionSlots)];
             }
             else
             {
@@ -365,7 +365,7 @@ namespace DiscUtils.Wim
 
             if (oldTree == null)
             {
-                lengths = new uint[256 + 8 * _numPositionSlots];
+                lengths = new uint[256 + (8 * _numPositionSlots)];
             }
             else
             {

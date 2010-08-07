@@ -115,7 +115,7 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(Length, buffer, offset + 0x0028);
 
             Encoding.Unicode.GetBytes(Path, 0, Path.Length, buffer, offset + 0x0030);
-            Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0030 + Path.Length * 2);
+            Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0030 + (Path.Length * 2));
 
             Utilities.WriteBytesLittleEndian(Guid1, buffer, offset + 0x0070);
             Utilities.WriteBytesLittleEndian(Guid2, buffer, offset + 0x0094);

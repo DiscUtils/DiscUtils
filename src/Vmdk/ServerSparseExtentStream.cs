@@ -88,7 +88,7 @@ namespace DiscUtils.Vmdk
                     numGrains = 1;
                 }
 
-                int numToWrite = Math.Min(count - totalWritten, grainSize * numGrains - startGrainOffset);
+                int numToWrite = Math.Min(count - totalWritten, (grainSize * numGrains) - startGrainOffset);
                 _fileStream.Position = (((long)GetGrainTableEntry(startGrain)) * Sizes.Sector) + startGrainOffset;
                 _fileStream.Write(buffer, offset + totalWritten, numToWrite);
 
@@ -119,7 +119,7 @@ namespace DiscUtils.Vmdk
             LoadGrainTable(grainTable);
             for (int i = 0; i < count; ++i)
             {
-                SetGrainTableEntry(grain + i, (uint)((grainStartPos / Sizes.Sector) + _header.GrainSize * i));
+                SetGrainTableEntry(grain + i, (uint)((grainStartPos / Sizes.Sector) + (_header.GrainSize * i)));
             }
 
             WriteGrainTable();

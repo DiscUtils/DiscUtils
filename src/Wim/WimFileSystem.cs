@@ -440,7 +440,7 @@ namespace DiscUtils.Wim
 
             foreach (DirectoryEntry de in parentDir)
             {
-                bool isDir = ((de.Attributes & FileAttributes.Directory) != 0);
+                bool isDir = (de.Attributes & FileAttributes.Directory) != 0;
 
                 if ((isDir && dirs) || (!isDir && files))
                 {

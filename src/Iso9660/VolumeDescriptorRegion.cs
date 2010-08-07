@@ -26,7 +26,7 @@ namespace DiscUtils.Iso9660
 {
     internal abstract class VolumeDescriptorDiskRegion : BuilderExtent
     {
-        byte[] _readCache;
+        private byte[] _readCache;
 
         public VolumeDescriptorDiskRegion(long start)
             : base(start, IsoUtilities.SectorSize)

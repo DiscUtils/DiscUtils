@@ -600,7 +600,7 @@ namespace DiscUtils.Vmdk
 
                         using (Stream fs = fileLocator.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                         {
-                            long extentSize = Math.Min(2 * Sizes.OneGiB - Sizes.OneMiB, capacity - totalSize);
+                            long extentSize = Math.Min((2 * Sizes.OneGiB) - Sizes.OneMiB, capacity - totalSize);
                             CreateExtent(fs, extentSize, extentType);
                             extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, extentSize / Sizes.Sector, extentType, fileName, 0));
                             totalSize += extentSize;

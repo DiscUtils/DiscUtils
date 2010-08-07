@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
             _file = file;
             _name = name;
             _bpb = bpb;
-            _isFileIndex = (name == "$I30");
+            _isFileIndex = name == "$I30";
 
             _blockCache = new ObjectCache<long, IndexBlock>();
 
@@ -71,7 +71,7 @@ namespace DiscUtils.Ntfs
             _file = file;
             _name = name;
             _bpb = bpb;
-            _isFileIndex = (name == "$I30");
+            _isFileIndex = name == "$I30";
 
             _blockCache = new ObjectCache<long, IndexBlock>();
 

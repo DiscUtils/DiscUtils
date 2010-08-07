@@ -419,7 +419,7 @@ namespace DiscUtils
                     // Cache the read blocks
                     for (int i = 0; i < blocksToRead; ++i)
                     {
-                        int copyBytes = Math.Min(blockSize, bytesToRead - i * blockSize);
+                        int copyBytes = Math.Min(blockSize, bytesToRead - (i * blockSize));
                         CacheBlock block = GetFreeBlock();
                         block.Block = firstBlock + blocksRead + i;
                         Array.Copy(_readBuffer, i * blockSize, block.Data, 0, copyBytes);
