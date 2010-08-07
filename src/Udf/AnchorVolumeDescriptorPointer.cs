@@ -49,6 +49,5 @@ namespace DiscUtils.Udf
 
             return 512;
         }
-
     }
 }

@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Ntfs
 {
     internal class IndexHeader
@@ -56,5 +55,4 @@ namespace DiscUtils.Ntfs
             buffer[offset + 0x0F] = 0;
         }
     }
-
 }

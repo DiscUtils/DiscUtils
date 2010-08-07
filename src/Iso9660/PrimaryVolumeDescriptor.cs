@@ -73,5 +73,4 @@ namespace DiscUtils.Iso9660
             buffer[offset + 881] = FileStructureVersion;
         }
     }
-
 }

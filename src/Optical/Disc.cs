@@ -89,6 +89,7 @@ namespace DiscUtils.Optical
                     {
                         _file.Dispose();
                     }
+
                     _file = null;
                 }
             }

@@ -49,8 +49,6 @@ namespace DiscUtils.Nfs
             get { return ProgramVersion; }
         }
 
-
-
         public List<Nfs3Export> Exports()
         {
             MemoryStream ms = new MemoryStream();
@@ -64,6 +62,7 @@ namespace DiscUtils.Nfs
                 {
                     exports.Add(new Nfs3Export(reply.BodyReader));
                 }
+
                 return exports;
             }
             else
@@ -86,6 +85,7 @@ namespace DiscUtils.Nfs
                 {
                     return new Nfs3MountResult(reply.BodyReader);
                 }
+
                 throw new Nfs3Exception(status);
             }
             else
@@ -93,6 +93,5 @@ namespace DiscUtils.Nfs
                 throw new RpcException(reply.Header.ReplyHeader);
             }
         }
-
     }
 }

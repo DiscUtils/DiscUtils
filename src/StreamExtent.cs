@@ -108,7 +108,6 @@ namespace DiscUtils
                 }
             }
 
-
             while (validStreamsRemaining > 0)
             {
                 // Find the end of this extent
@@ -136,7 +135,8 @@ namespace DiscUtils
                             streamsValid[i] = enums[i].MoveNext();
                         }
                     }
-                } while (foundIntersection && validStreamsRemaining > 0);
+                }
+                while (foundIntersection && validStreamsRemaining > 0);
 
                 // Return the discovered extent
                 yield return new StreamExtent(extentStart, extentEnd - extentStart);
@@ -277,6 +277,7 @@ namespace DiscUtils
                     {
                         extentNumBlocks--;
                     }
+
                     lastBlock = extentNextBlock - 1;
 
                     totalBlocks += extentNumBlocks;

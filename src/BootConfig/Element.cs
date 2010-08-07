@@ -88,8 +88,10 @@ namespace DiscUtils.BootConfig
                 {
                     _value = LoadValue();
                 }
+
                 return _value;
             }
+
             set
             {
                 if (Format != value.Format)
@@ -116,7 +118,7 @@ namespace DiscUtils.BootConfig
             ElementClass idClass = GetClass(identifier);
             if (idClass == ElementClass.Library)
             {
-                switch(identifier)
+                switch (identifier)
                 {
                     case 0x11000001: return "device";
                     case 0x12000002: return "path";
@@ -181,6 +183,7 @@ namespace DiscUtils.BootConfig
 
                             case 0x27000030: return "customactions";
                         }
+
                         break;
 
                     case ApplicationType.OsLoader:
@@ -241,6 +244,7 @@ namespace DiscUtils.BootConfig
 
                             case 0x250000E0: return "bootstatuspolicy";
                         }
+
                         break;
 
                     case ApplicationType.Resume:
@@ -253,6 +257,7 @@ namespace DiscUtils.BootConfig
                             case 0x21000005: return "associatedosdevice";
                             case 0x26000006: return "debugoptionenabled";
                         }
+
                         break;
 
                     case ApplicationType.MemoryDiagnostics:
@@ -263,6 +268,7 @@ namespace DiscUtils.BootConfig
                             case 0x25000003: return "failurecount";
                             case 0x25000004: return "testtofail";
                         }
+
                         break;
 
                     case ApplicationType.NtLoader:
@@ -271,6 +277,7 @@ namespace DiscUtils.BootConfig
                         {
                             case 0x22000001: return "bpbstring";
                         }
+
                         break;
 
                     case ApplicationType.Startup:
@@ -279,6 +286,7 @@ namespace DiscUtils.BootConfig
                             case 0x26000001: return "pxesoftreboot";
                             case 0x22000002: return "applicationname";
                         }
+
                         break;
                 }
             }

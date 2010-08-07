@@ -50,6 +50,7 @@ namespace DiscUtils.Iscsi
                         return entry.Value;
                     }
                 }
+
                 return null;
             }
 
@@ -63,6 +64,7 @@ namespace DiscUtils.Iscsi
                         return;
                     }
                 }
+
                 _records.Add(new KeyValuePair<string, string>(key, value));
             }
         }
@@ -134,7 +136,7 @@ namespace DiscUtils.Iscsi
         {
             int i = offset;
 
-            foreach(var entry in _records)
+            foreach (var entry in _records)
             {
                 i += Encoding.ASCII.GetBytes(entry.Key, 0, entry.Key.Length, buffer, i);
                 buffer[i++] = (byte)'=';

@@ -93,7 +93,6 @@ namespace DiscUtils.Vmdk
                 throw new IOException("Attempt to write beyond end of stream");
             }
 
-
             int totalWritten = 0;
             while (totalWritten < count)
             {
@@ -136,7 +135,6 @@ namespace DiscUtils.Vmdk
 
                 // This is really a zlib stream, so has header and footer.  We ignore this right now, but we sanity
                 // check against expected header values...
-
                 ushort header = Utilities.ToUInt16BigEndian(readBuffer, 0);
 
                 if ((header % 31) != 0)
@@ -153,7 +151,6 @@ namespace DiscUtils.Vmdk
                 {
                     throw new NotSupportedException("ZLib compression using preset dictionary");
                 }
-
 
                 Stream readStream = new MemoryStream(readBuffer, 2, hdr.DataSize - 2, false);
                 DeflateStream deflateStream = new DeflateStream(readStream, CompressionMode.Decompress);

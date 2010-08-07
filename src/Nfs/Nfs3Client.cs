@@ -109,6 +109,7 @@ namespace DiscUtils.Nfs
             {
                 _cachedAttributes[result.ObjectHandle] = result.ObjectAttributes;
             }
+
             if (result.DirAttributes != null)
             {
                 _cachedAttributes[dirHandle] = result.DirAttributes;
@@ -265,7 +266,7 @@ namespace DiscUtils.Nfs
                     throw new Nfs3Exception(result.Status);
                 }
 
-                foreach(var entry in result.DirEntries)
+                foreach (var entry in result.DirEntries)
                 {
                     _cachedAttributes[entry.FileHandle] = entry.FileAttributes;
                     yield return entry;
@@ -273,8 +274,8 @@ namespace DiscUtils.Nfs
                 }
 
                 cookieVerifier = result.CookieVerifier;
-
-            } while (!result.Eof);
+            }
+            while (!result.Eof);
         }
     }
 }

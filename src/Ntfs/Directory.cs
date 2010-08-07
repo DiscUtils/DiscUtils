@@ -33,7 +33,6 @@ namespace DiscUtils.Ntfs
     {
         private IndexView<FileNameRecord, FileRecordReference> _index;
 
-
         public Directory(INtfsContext context, FileRecord baseRecord)
             : base(context, baseRecord)
         {
@@ -81,14 +80,13 @@ namespace DiscUtils.Ntfs
             UpdateRecordInMft();
         }
 
-
         internal DirectoryEntry AddEntry(File file, string name, FileNameNamespace nameNamespace)
         {
             if (name.Length > 255)
             {
                 throw new IOException("Invalid file name, more than 255 characters: " + name);
             }
-            else if(name.IndexOfAny(new char[] { '\0', '/' }) != -1)
+            else if (name.IndexOfAny(new char[] { '\0', '/' }) != -1)
             {
                 throw new IOException(@"Invalid file name, contains '\0' or '/': " + name);
             }
@@ -120,7 +118,7 @@ namespace DiscUtils.Ntfs
 
             Index.Remove(dirEntry.Details);
 
-            foreach(NtfsStream stream in file.GetStreams(AttributeType.FileName, null))
+            foreach (NtfsStream stream in file.GetStreams(AttributeType.FileName, null))
             {
                 FileNameRecord streamName = stream.GetContent<FileNameRecord>();
                 if (nameRecord.Equals(streamName))
@@ -152,6 +150,7 @@ namespace DiscUtils.Ntfs
                 {
                     baseName += upperChar;
                 }
+
                 ++i;
             }
 
@@ -165,6 +164,7 @@ namespace DiscUtils.Ntfs
                     {
                         ext += upperChar;
                     }
+
                     ++i;
                 }
             }
@@ -176,7 +176,8 @@ namespace DiscUtils.Ntfs
                 string suffix = string.Format(CultureInfo.InvariantCulture, "~{0}", i);
                 candidate = baseName.Substring(0, Math.Min(8 - suffix.Length, baseName.Length)) + suffix + (ext.Length > 0 ? "." + ext : "");
                 i++;
-            } while (GetEntryByName(candidate) != null);
+            }
+            while (GetEntryByName(candidate) != null);
 
             return candidate;
         }

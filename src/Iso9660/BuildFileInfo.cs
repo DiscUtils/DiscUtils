@@ -133,7 +133,6 @@ namespace DiscUtils.Iso9660
             string candidate = parts[0] + '.' + parts[1] + ';' + parts[2];
 
             // TODO: Make unique
-
             return candidate;
         }
     }

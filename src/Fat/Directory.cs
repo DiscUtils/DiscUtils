@@ -36,7 +36,7 @@ namespace DiscUtils.Fat
         private long _parentId;
         private Stream _dirStream;
 
-        private Dictionary<long,DirectoryEntry> _entries;
+        private Dictionary<long, DirectoryEntry> _entries;
         private List<long> _freeEntries;
         private long _endOfEntries;
 
@@ -95,6 +95,7 @@ namespace DiscUtils.Fat
                     dirs.Add(dirEntry);
                 }
             }
+
             return dirs.ToArray();
         }
 
@@ -108,6 +109,7 @@ namespace DiscUtils.Fat
                     files.Add(dirEntry);
                 }
             }
+
             return files.ToArray();
         }
 
@@ -120,7 +122,6 @@ namespace DiscUtils.Fat
         {
             return (id < 0) ? null : _entries[id];
         }
-
 
         public Directory GetChildDirectory(string name)
         {
@@ -158,10 +159,11 @@ namespace DiscUtils.Fat
                 try
                 {
                     uint firstCluster;
-                    if( !_fileSystem.Fat.TryGetFreeCluster(out firstCluster))
+                    if (!_fileSystem.Fat.TryGetFreeCluster(out firstCluster))
                     {
                         throw new IOException("Failed to allocate first cluster for new directory");
                     }
+
                     _fileSystem.Fat.SetEndOfChain(firstCluster);
 
                     DirectoryEntry newEntry = new DirectoryEntry(normalizedName, FatAttributes.Directory);
@@ -264,6 +266,7 @@ namespace DiscUtils.Fat
                 {
                     throw new IOException("No parent entry on disk to update");
                 }
+
                 _dirStream.Position = _parentEntryLocation;
                 value.WriteTo(_dirStream);
                 _parentEntry = value;
@@ -273,7 +276,7 @@ namespace DiscUtils.Fat
 
         private void LoadEntries()
         {
-            _entries = new Dictionary<long,DirectoryEntry>();
+            _entries = new Dictionary<long, DirectoryEntry>();
             _freeEntries = new List<long>();
 
             _selfEntryLocation = -1;
@@ -336,7 +339,7 @@ namespace DiscUtils.Fat
 
         internal long FindEntryByNormalizedName(string name)
         {
-            foreach(long id in _entries.Keys)
+            foreach (long id in _entries.Keys)
             {
                 DirectoryEntry focus = _entries[id];
                 if (focus.NormalizedName == name)

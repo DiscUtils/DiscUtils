@@ -109,6 +109,7 @@ namespace DiscUtils.Optical
                     {
                         _toDispose.Dispose();
                     }
+
                     _toDispose = null;
                 }
             }
@@ -154,6 +155,5 @@ namespace DiscUtils.Optical
             // & error-correction info
             get { return new Geometry(1, 1, 1, Mode1SectorSize); }
         }
-
     }
 }

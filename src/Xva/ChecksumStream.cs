@@ -73,6 +73,7 @@ namespace DiscUtils.Xva
             {
                 return _position;
             }
+
             set
             {
                 _position = value;
@@ -92,6 +93,7 @@ namespace DiscUtils.Xva
                     result[i * 2] = (byte)"0123456789abcdef"[(hash[i] >> 4) & 0x0F];
                     result[i * 2 + 1] = (byte)"0123456789abcdef"[hash[i] & 0x0F];
                 }
+
                 _data = result;
             }
 

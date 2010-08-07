@@ -72,7 +72,6 @@ namespace DiscUtils.Partitions
             Array.Copy(toCopy.Buffer, Buffer, Buffer.Length);
         }
 
-
         public bool ReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.BytesToString(buffer, offset + 0, 8);

@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 using System.Collections.Generic;
 
 namespace DiscUtils.Iscsi

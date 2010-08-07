@@ -68,6 +68,7 @@ namespace DiscUtils.Ntfs
             {
                 hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", Content[i]);
             }
+
             writer.WriteLine(linePrefix + "               Data:" + hex + (Content.Length > 32 ? "..." : ""));
         }
 

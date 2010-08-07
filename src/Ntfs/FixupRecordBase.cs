@@ -99,6 +99,7 @@ namespace DiscUtils.Ntfs
                 {
                     return;
                 }
+
                 if (diskMagic != _magic)
                 {
                     throw new IOException("Corrupt record");
@@ -146,7 +147,9 @@ namespace DiscUtils.Ntfs
         }
 
         protected abstract void Read(byte[] buffer, int offset);
+
         protected abstract ushort Write(byte[] buffer, int offset);
+
         protected abstract int CalcSize();
 
         private void UnprotectBuffer(byte[] buffer, int offset)

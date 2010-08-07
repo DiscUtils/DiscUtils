@@ -121,7 +121,6 @@ namespace DiscUtils.Vhd
             ReadHeaders();
         }
 
-
         /// <summary>
         /// Disposes of underlying resources.
         /// </summary>
@@ -404,6 +403,7 @@ namespace DiscUtils.Vhd
                 {
                     return _fileLocator.GetFullPath(_fileName);
                 }
+
                 return "";
             }
         }
@@ -447,6 +447,7 @@ namespace DiscUtils.Vhd
                 {
                     parent.Dispose();
                 }
+
                 return new SubStream(_fileStream, 0, _fileStream.Length - 512);
             }
             else if (_footer.DiskType == FileType.Dynamic)
@@ -455,6 +456,7 @@ namespace DiscUtils.Vhd
                 {
                     parent.Dispose();
                 }
+
                 return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
             }
             else
@@ -598,7 +600,6 @@ namespace DiscUtils.Vhd
         {
             long length = _fileStream.Length;
 
-
             _fileStream.Position = _fileStream.Length - Utilities.SectorSize;
             byte[] sector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
 
@@ -638,9 +639,9 @@ namespace DiscUtils.Vhd
                         throw new IOException("Invalid Dynamic Disc Header");
                     }
                 }
+
                 pos = hdr.DataOffset;
             }
         }
-
     }
 }

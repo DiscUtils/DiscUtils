@@ -82,7 +82,11 @@ namespace DiscUtils.Udf
                     return LastWriteTimeUtc;
                 }
             }
-            set { throw new NotSupportedException(); }
+
+            set
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public FileAttributes FileAttributes
@@ -122,7 +126,11 @@ namespace DiscUtils.Udf
 
                 return attribs;
             }
-            set { throw new NotSupportedException(); }
+
+            set
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public long FileLength

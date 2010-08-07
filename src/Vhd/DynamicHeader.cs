@@ -44,7 +44,9 @@ namespace DiscUtils.Vhd
         public string ParentUnicodeName;
         public ParentLocator[] ParentLocators;
 
-        public DynamicHeader() { }
+        public DynamicHeader()
+        {
+        }
 
         public DynamicHeader(long dataOffset, long tableOffset, uint blockSize, long diskSize)
         {
@@ -163,6 +165,7 @@ namespace DiscUtils.Vhd
             {
                 Checksum += value;
             }
+
             Checksum = ~Checksum;
 
             return Checksum;

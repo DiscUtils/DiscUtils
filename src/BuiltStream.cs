@@ -56,6 +56,7 @@ namespace DiscUtils
                         _currentExtent.DisposeReadState();
                         _currentExtent = null;
                     }
+
                     if (_baseStream != null)
                     {
                         _baseStream.Dispose();
@@ -168,6 +169,7 @@ namespace DiscUtils
             {
                 newPos += _length;
             }
+
             _position = newPos;
             return newPos;
         }
@@ -280,11 +282,19 @@ namespace DiscUtils
             public int Compare(BuilderExtent x, BuilderExtent y)
             {
                 long val = x.Start - y.Start;
-                if (val < 0) { return -1; }
-                else if (val > 0) { return 1; }
-                else { return 0; }
+                if (val < 0)
+                {
+                    return -1;
+                }
+                else if (val > 0)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
             }
         }
-
     }
 }

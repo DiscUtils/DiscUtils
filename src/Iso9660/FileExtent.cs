@@ -73,5 +73,4 @@ namespace DiscUtils.Iso9660
             _readStream = null;
         }
     }
-
 }

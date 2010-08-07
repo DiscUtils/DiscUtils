@@ -82,6 +82,7 @@ namespace DiscUtils.Vdi
                 result.Cylinders = (int)Math.Min(totalSectors / (255 * 63), 1024);
                 result.Heads = 255;
             }
+
             result.Sectors = 63;
 
             return result;

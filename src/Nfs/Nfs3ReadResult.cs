@@ -20,14 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class Nfs3ReadResult : Nfs3CallResult
     {
         public Nfs3FileAttributes FileAttributes { get; set; }
+
         public int Count { get; set; }
+
         public bool Eof { get; set; }
+
         public byte[] Data { get; set; }
 
         public Nfs3ReadResult(XdrDataReader reader)
@@ -37,6 +39,7 @@ namespace DiscUtils.Nfs
             {
                 FileAttributes = new Nfs3FileAttributes(reader);
             }
+
             if (Status == Nfs3Status.Ok)
             {
                 Count = reader.ReadInt32();

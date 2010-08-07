@@ -44,6 +44,7 @@ namespace DiscUtils.Ntfs
                 Initialize();
                 return _structure;
             }
+
             set
             {
                 _structure = value;
@@ -96,6 +97,7 @@ namespace DiscUtils.Ntfs
                         _structure.ReadFrom(buffer, 0);
                         _hasContent = (s.Length != 0);
                 }
+
                 _initialized = true;
             }
         }

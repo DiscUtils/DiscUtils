@@ -124,7 +124,8 @@ namespace DiscUtils.Ntfs
                 buffer[offset + pos] = (byte)(val & 0xFF);
                 val >>= 8;
                 pos++;
-            } while (val != 0 && val != -1);
+            }
+            while (val != 0 && val != -1);
 
             // Avoid appearing to have a negative number that is actually positive,
             // record an extra empty byte if needed.
@@ -153,8 +154,8 @@ namespace DiscUtils.Ntfs
                 lastByteHighBitSet = ((val & 0x80) != 0);
                 val >>= 8;
                 len++;
-            } while (val != 0 && val != -1) ;
-
+            }
+            while (val != 0 && val != -1);
 
             if ((isPositive && lastByteHighBitSet) || (!isPositive && !lastByteHighBitSet))
             {

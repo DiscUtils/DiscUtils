@@ -70,6 +70,7 @@ namespace DiscUtils
             {
                 return _position;
             }
+
             set
             {
                 _position = value;

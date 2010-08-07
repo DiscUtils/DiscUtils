@@ -41,7 +41,7 @@ namespace DiscUtils.Nfs
         {
             byte[] buffer = Utilities.ReadFully(_stream, count);
 
-            if((count & 0x3) != 0)
+            if ((count & 0x3) != 0)
             {
                 Utilities.ReadFully(_stream, 4 - (count & 0x3));
             }
@@ -62,6 +62,7 @@ namespace DiscUtils.Nfs
             {
                 return ReadBytes((int)length);
             }
+
             throw new IOException("Attempt to read buffer that is too long");
         }
 
@@ -76,6 +77,5 @@ namespace DiscUtils.Nfs
             byte[] data = ReadBuffer(maxLength);
             return Encoding.ASCII.GetString(data);
         }
-
     }
 }

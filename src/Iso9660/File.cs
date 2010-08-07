@@ -43,6 +43,7 @@ namespace DiscUtils.Iso9660
             {
                 return _dirEntry.LastAccessTimeUtc;
             }
+
             set
             {
                 throw new NotSupportedException();
@@ -55,6 +56,7 @@ namespace DiscUtils.Iso9660
             {
                 return _dirEntry.LastWriteTimeUtc;
             }
+
             set
             {
                 throw new NotSupportedException();
@@ -67,6 +69,7 @@ namespace DiscUtils.Iso9660
             {
                 return _dirEntry.CreationTimeUtc;
             }
+
             set
             {
                 throw new NotSupportedException();
@@ -79,6 +82,7 @@ namespace DiscUtils.Iso9660
             {
                 return _dirEntry.FileAttributes;
             }
+
             set
             {
                 throw new NotSupportedException();

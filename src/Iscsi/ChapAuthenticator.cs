@@ -38,7 +38,6 @@ namespace DiscUtils.Iscsi
         private byte _identifier;
         private byte[] _challenge;
 
-
         public ChapAuthenticator(string name, string password)
         {
             _name = name;
@@ -125,7 +124,6 @@ namespace DiscUtils.Iscsi
 
             return data;
         }
-
 
         private enum State
         {

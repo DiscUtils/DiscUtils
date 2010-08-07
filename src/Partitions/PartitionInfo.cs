@@ -53,7 +53,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Gets the length of the partition in sectors.
         /// </summary>
-        public virtual long SectorCount {
+        public virtual long SectorCount
+        {
             get { return 1 + LastSector - FirstSector; }
         }
 

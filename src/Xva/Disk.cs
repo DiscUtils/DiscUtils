@@ -63,6 +63,7 @@ namespace DiscUtils.Xva
                     _content = null;
                 }
             }
+
             base.Dispose(disposing);
         }
 
@@ -111,6 +112,7 @@ namespace DiscUtils.Xva
                 {
                     _content = new DiskStream(_vm.Archive, _capacity, _location);
                 }
+
                 return _content;
             }
         }

@@ -62,5 +62,4 @@ namespace DiscUtils.Iso9660
             buffer[offset + 6] = VolumeDescriptorVersion;
         }
     }
-
 }

@@ -67,7 +67,8 @@ namespace DiscUtils.Udf
                         throw new NotImplementedException("Extents that are not 'recorded and allocated' not implemented");
                     }
 
-                    CookedExtent newExtent = new CookedExtent {
+                    CookedExtent newExtent = new CookedExtent
+                    {
                         FileContentOffset = filePos,
                         Partition = int.MaxValue,
                         StartPos = sad.ExtentLocation * (long)_blockSize,
@@ -96,7 +97,8 @@ namespace DiscUtils.Udf
                         break;
                     }
 
-                    CookedExtent newExtent = new CookedExtent {
+                    CookedExtent newExtent = new CookedExtent
+                    {
                         FileContentOffset = filePos,
                         Partition = lad.ExtentLocation.Partition,
                         StartPos = lad.ExtentLocation.LogicalBlock * (long)_blockSize,
@@ -198,7 +200,6 @@ namespace DiscUtils.Udf
                 long extentOffset = (pos + totalRead) - extent.FileContentOffset;
                 int toRead = (int)Math.Min(totalToRead - totalRead, extent.Length - extentOffset);
 
-
                 Partition part;
                 if (extent.Partition != int.MaxValue)
                 {
@@ -208,7 +209,6 @@ namespace DiscUtils.Udf
                 {
                     part = _partition;
                 }
-
 
                 int numRead = part.Content.Read(extent.StartPos + extentOffset, buffer, offset + totalRead, toRead);
                 if (numRead == 0)

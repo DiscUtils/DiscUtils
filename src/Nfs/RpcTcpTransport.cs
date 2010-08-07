@@ -40,7 +40,7 @@ namespace DiscUtils.Nfs
         private const int RetryLimit = 20;
 
         public RpcTcpTransport(string address, int port)
-            :this(address, port, 0)
+            : this(address, port, 0)
         {
         }
 
@@ -58,6 +58,7 @@ namespace DiscUtils.Nfs
                 _tcpStream.Dispose();
                 _tcpStream = null;
             }
+
             if (_socket != null)
             {
                 _socket.Close();
@@ -89,6 +90,7 @@ namespace DiscUtils.Nfs
                             _tcpStream.Close();
                             _tcpStream = null;
                         }
+
                         if (_socket != null)
                         {
                             _socket.Close();
@@ -175,7 +177,7 @@ namespace DiscUtils.Nfs
                 lastFragFound = ((headerVal & 0x80000000) != 0);
                 byte[] frag = Utilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
 
-                if(ms != null)
+                if (ms != null)
                 {
                     ms.Write(frag, 0, frag.Length);
                 }

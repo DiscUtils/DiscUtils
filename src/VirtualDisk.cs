@@ -70,6 +70,7 @@ namespace DiscUtils
                 {
                     _transport.Dispose();
                 }
+
                 _transport = null;
             }
         }
@@ -406,7 +407,6 @@ namespace DiscUtils
                     transport.Dispose();
                 }
             }
-
         }
 
         /// <summary>

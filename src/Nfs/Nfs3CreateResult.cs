@@ -20,13 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class Nfs3CreateResult : Nfs3CallResult
     {
         public Nfs3FileHandle FileHandle { get; set; }
+
         public Nfs3FileAttributes FileAttributes { get; set; }
+
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
 
         public Nfs3CreateResult(XdrDataReader reader)
@@ -38,6 +39,7 @@ namespace DiscUtils.Nfs
                 {
                     FileHandle = new Nfs3FileHandle(reader);
                 }
+
                 if (reader.ReadBool())
                 {
                     FileAttributes = new Nfs3FileAttributes(reader);

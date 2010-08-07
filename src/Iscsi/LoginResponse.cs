@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Iscsi
 {
     internal enum StatusClass
@@ -30,7 +29,6 @@ namespace DiscUtils.Iscsi
         InitiatorError = 2,
         TargetError = 3
     }
-
 
     internal class LoginResponse : BaseResponse
     {

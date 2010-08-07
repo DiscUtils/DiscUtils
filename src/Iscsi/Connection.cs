@@ -93,7 +93,6 @@ namespace DiscUtils.Iscsi
         internal int MaxTargetReceiveDataSegmentLength { get; set; }
         #endregion
 
-
         internal ushort Id
         {
             get { return _id; }
@@ -162,8 +161,6 @@ namespace DiscUtils.Iscsi
                 {
                     toSend = Math.Min(Math.Min(outBufferCount - numSent, numApproved), MaxTargetReceiveDataSegmentLength);
 
-                    // toSend = numSent
-
                     DataOutPacket pkt = new DataOutPacket(this, cmd.TargetLun);
                     packet = pkt.GetBytes(outBuffer, outBufferOffset + numSent, toSend, /*numSent + toSend == outBufferCount*/toSend == numApproved, pktsSent++, (uint)numSent, targetTransferTag);
                     _stream.Write(packet, 0, packet.Length);
@@ -207,7 +204,6 @@ namespace DiscUtils.Iscsi
                         throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure");
                     }
 
-
                     if (resp.ReadData != null)
                     {
                         Array.Copy(resp.ReadData, 0, inBuffer, inBufferOffset + resp.BufferOffset, resp.ReadData.Length);
@@ -216,7 +212,6 @@ namespace DiscUtils.Iscsi
 
                     isFinal = resp.Header.FinalPdu;
                 }
-
             }
 
             _session.NextTaskTag();
@@ -271,6 +266,7 @@ namespace DiscUtils.Iscsi
                     {
                         throw new InvalidProtocolException("Unexpected response parameter " + line.Key + " expected " + TargetNameParameter);
                     }
+
                     currentTarget = line.Value;
                     currentAddresses = new List<TargetAddress>();
                 }
@@ -285,6 +281,7 @@ namespace DiscUtils.Iscsi
                     currentAddresses.Add(TargetAddress.Parse(line.Value));
                 }
             }
+
             if (currentTarget != null)
             {
                 targets.Add(new TargetInfo(currentTarget, currentAddresses.ToArray()));
@@ -297,7 +294,7 @@ namespace DiscUtils.Iscsi
         {
             get
             {
-                switch(_loginStage)
+                switch (_loginStage)
                 {
                     case LoginStages.SecurityNegotiation:
                         return LoginStages.LoginOperationalNegotiation;
@@ -320,6 +317,7 @@ namespace DiscUtils.Iscsi
             {
                 throw new InvalidProtocolException("Unexpected status sequence number " + number + ", expected " + _expectedStatusSequenceNumber);
             }
+
             _expectedStatusSequenceNumber = number + 1;
         }
 
@@ -340,8 +338,8 @@ namespace DiscUtils.Iscsi
             {
                 authParam += "," + _authenticators[i].Identifier;
             }
-            parameters.Add(AuthMethodParameter, authParam);
 
+            parameters.Add(AuthMethodParameter, authParam);
 
             //
             // Send the request...
@@ -354,7 +352,6 @@ namespace DiscUtils.Iscsi
 
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
-
 
             //
             // Read the response...
@@ -383,7 +380,7 @@ namespace DiscUtils.Iscsi
 
                 settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
             }
-            else if(resp.TextData != null)
+            else if (resp.TextData != null)
             {
                 settings.ReadFrom(resp.TextData, 0, resp.TextData.Length);
             }
@@ -397,6 +394,7 @@ namespace DiscUtils.Iscsi
                     break;
                 }
             }
+
             settings.Remove(AuthMethodParameter);
             settings.Remove("TargetPortalGroupTag");
 
@@ -407,7 +405,6 @@ namespace DiscUtils.Iscsi
 
             parameters = new TextBuffer();
             ConsumeParameters(settings, parameters);
-
 
             while (!resp.Transit)
             {
@@ -423,7 +420,6 @@ namespace DiscUtils.Iscsi
 
                 _stream.Write(packet, 0, packet.Length);
                 _stream.Flush();
-
 
                 //
                 // Read the response...
@@ -483,13 +479,11 @@ namespace DiscUtils.Iscsi
             byte[] paramBuffer = new byte[parameters.Size];
             parameters.WriteTo(paramBuffer, 0);
 
-
             LoginRequest req = new LoginRequest(this);
             byte[] packet = req.GetBytes(paramBuffer, 0, paramBuffer.Length, true);
 
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
-
 
             //
             // Read the response...
@@ -531,13 +525,11 @@ namespace DiscUtils.Iscsi
                 paramBuffer = new byte[parameters.Size];
                 parameters.WriteTo(paramBuffer, 0);
 
-
                 req = new LoginRequest(this);
                 packet = req.GetBytes(paramBuffer, 0, paramBuffer.Length, true);
 
                 _stream.Write(packet, 0, packet.Length);
                 _stream.Flush();
-
 
                 //
                 // Read the response...

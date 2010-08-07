@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -152,6 +151,7 @@ namespace DiscUtils
                     result.Add(val);
                 }
             }
+
             return result;
         }
 
@@ -465,6 +465,7 @@ namespace DiscUtils
                 dest[i + offset] = (byte)chars[i];
                 ++i;
             }
+
             while (i < count)
             {
                 dest[i + offset] = 0;
@@ -586,6 +587,7 @@ namespace DiscUtils
             {
                 merged += @"\";
             }
+
             if (basePath.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 merged = @"\\" + merged;
@@ -616,6 +618,7 @@ namespace DiscUtils
                 {
                     break;
                 }
+
                 ++i;
             }
 
@@ -639,6 +642,7 @@ namespace DiscUtils
                 result.Append(pathElements[j]);
                 result.Append(@"\");
             }
+
             result.Append(pathElements[pathElements.Count - 1]);
 
             // If the target was a directory, put the terminator back
@@ -814,6 +818,7 @@ namespace DiscUtils
                 {
                     return false;
                 }
+
                 foreach (char ch in split[1])
                 {
                     if (!Is8Dot3Char(ch))
@@ -846,10 +851,10 @@ namespace DiscUtils
             {
                 pattern += ".";
             }
+
             string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", "[^.]") + "$";
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         }
         #endregion
-
     }
 }

@@ -72,8 +72,13 @@ namespace DiscUtils.Iso9660
         /// </remarks>
         public string VolumeIdentifier
         {
-            get { return _buildParams.VolumeIdentifier; }
-            set {
+            get
+            {
+                return _buildParams.VolumeIdentifier;
+            }
+
+            set
+            {
                 if (value.Length > 32)
                 {
                     throw new ArgumentException("Not a valid volume identifier");
@@ -248,7 +253,6 @@ namespace DiscUtils.Iso9660
                 focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
             }
 
-
             // ####################################################################
             // # 2. Fix directory locations
             // ####################################################################
@@ -313,11 +317,9 @@ namespace DiscUtils.Iso9660
             // Find the end of the disk
             totalLength = focus;
 
-
             // ####################################################################
             // # 4. Prepare volume descriptors now other structures are fixed
             // ####################################################################
-
             PrimaryVolumeDescriptor pvDesc = new PrimaryVolumeDescriptor(
                 (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
                 (uint)(primaryPathTableLength),                            // PathTableSize
@@ -402,9 +404,5 @@ namespace DiscUtils.Iso9660
 
             return focus;
         }
-
-
     }
-
-
 }

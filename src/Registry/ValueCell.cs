@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Registry
 {
     internal sealed class ValueCell : Cell
@@ -114,5 +113,4 @@ namespace DiscUtils.Registry
             get { return 0x14 + (string.IsNullOrEmpty(_name) ? 0 : _name.Length); }
         }
     }
-
 }

@@ -203,10 +203,10 @@ namespace DiscUtils.Wim
                     {
                         _resources[hashHash] = new List<ResourceInfo>(1);
                     }
+
                     _resources[hashHash].Add(info);
                 }
             }
         }
-
     }
 }

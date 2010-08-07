@@ -170,10 +170,10 @@ namespace DiscUtils.Vhd
                     {
                         ReportError("BAT: multiple blocks occupying same file space");
                     }
+
                     seenBlocks[streamBlockIdx] = true;
                 }
             }
-
         }
 
         private void CheckDynamicHeader()
@@ -228,6 +228,7 @@ namespace DiscUtils.Vhd
             {
                 ReportError("DynHeader: BAT offset is before last header");
             }
+
             if ((_dynamicHeader.TableOffset % 512) != 0)
             {
                 ReportError("DynHeader: BAT offset is not sector aligned");
@@ -247,6 +248,7 @@ namespace DiscUtils.Vhd
             {
                 ReportWarning("DynHeader: Using non-standard block size '" + _dynamicHeader.BlockSize + "'");
             }
+
             if (!Utilities.IsPowerOfTwo(_dynamicHeader.BlockSize))
             {
                 ReportError("DynHeader: Block size is not a power of 2");
@@ -343,7 +345,6 @@ namespace DiscUtils.Vhd
         {
             long length = _fileStream.Length;
 
-
             _fileStream.Position = _fileStream.Length - Utilities.SectorSize;
             byte[] sector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
 
@@ -380,7 +381,6 @@ namespace DiscUtils.Vhd
                 _footer = header;
             }
         }
-
 
         private static void Abort()
         {

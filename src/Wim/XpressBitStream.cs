@@ -90,6 +90,5 @@ namespace DiscUtils.Wim
                 _bufferAvailable += 16;
             }
         }
-
     }
 }

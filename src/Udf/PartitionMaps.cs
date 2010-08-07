@@ -41,6 +41,7 @@ namespace DiscUtils.Udf
         }
 
         protected abstract int Parse(byte[] buffer, int offset);
+
         public abstract int Size { get; }
 
         public static PartitionMap CreateFrom(byte[] buffer, int offset)
@@ -70,7 +71,6 @@ namespace DiscUtils.Udf
                         throw new InvalidDataException("Unrecognized partition map entity id: " + id);
                 }
             }
-
 
             if (result != null)
             {

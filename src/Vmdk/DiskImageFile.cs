@@ -334,7 +334,6 @@ namespace DiscUtils.Vmdk
                 biosGeometry = Geometry.MakeBiosSafe(geometry, parameters.Capacity);
             }
 
-
             DiskAdapterType adapterType = (parameters.AdapterType == DiskAdapterType.None) ? DiskAdapterType.LsiLogicScsi : parameters.AdapterType;
             DiskCreateType createType = (parameters.CreateType == DiskCreateType.None) ? DiskCreateType.MonolithicSparse : parameters.CreateType;
 
@@ -453,6 +452,7 @@ namespace DiscUtils.Vmdk
                 {
                     result += extent.SizeInSectors * Sizes.Sector;
                 }
+
                 return result;
             }
         }
@@ -503,6 +503,7 @@ namespace DiscUtils.Vmdk
                 {
                     parent.Dispose();
                 }
+
                 parent = null;
             }
 
@@ -537,6 +538,7 @@ namespace DiscUtils.Vmdk
                     streams[i] = OpenExtent(_descriptor.Extents[i], extentStart, parent, (i == streams.Length - 1) ? ownsParent : Ownership.None);
                     extentStart += _descriptor.Extents[i].SizeInSectors * Sizes.Sector;
                 }
+
                 return new ConcatStream(Ownership.Dispose, streams);
             }
         }
@@ -769,7 +771,6 @@ namespace DiscUtils.Vmdk
             extentStream.Position = 0;
             extentStream.Write(header.GetBytes(), 0, Sizes.Sector);
 
-
             // Zero-out the descriptor space
             if (descriptorLength > 0)
             {
@@ -778,16 +779,15 @@ namespace DiscUtils.Vmdk
                 extentStream.Write(descriptor, 0, descriptor.Length);
             }
 
-
             // Generate the redundant grain dir, and write it
             byte[] grainDir = new byte[numGrainTables * 4];
             for (int i = 0; i < numGrainTables; ++i)
             {
                 Utilities.WriteBytesLittleEndian((uint)(redundantGrainTablesStart + (i * Utilities.Ceil(gtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
             }
+
             extentStream.Position = redundantGrainDirStart * Sizes.Sector;
             extentStream.Write(grainDir, 0, grainDir.Length);
-
 
             // Write out the blank grain tables
             byte[] grainTable = new byte[gtesPerGt * 4];
@@ -797,15 +797,14 @@ namespace DiscUtils.Vmdk
                 extentStream.Write(grainTable, 0, grainTable.Length);
             }
 
-
             // Generate the main grain dir, and write it
             for (int i = 0; i < numGrainTables; ++i)
             {
                 Utilities.WriteBytesLittleEndian((uint)(grainTablesStart + (i * Utilities.Ceil(gtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
             }
+
             extentStream.Position = grainDirStart * Sizes.Sector;
             extentStream.Write(grainDir, 0, grainDir.Length);
-
 
             // Write out the blank grain tables
             for (int i = 0; i < numGrainTables; ++i)
@@ -948,6 +947,5 @@ namespace DiscUtils.Vmdk
             baseDescriptor.CreateType = type;
             return baseDescriptor;
         }
-
     }
 }

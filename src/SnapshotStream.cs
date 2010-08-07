@@ -61,7 +61,6 @@ namespace DiscUtils
 
         private long _position;
 
-
         /// <summary>
         /// Creates a new instance, wrapping an existing stream.
         /// </summary>
@@ -86,14 +85,17 @@ namespace DiscUtils
                 {
                     _baseStream.Dispose();
                 }
+
                 _baseStream = null;
 
                 if (_diffStream != null)
                 {
                     _diffStream.Dispose();
                 }
+
                 _diffStream = null;
             }
+
             base.Dispose(disposing);
         }
 
@@ -152,8 +154,6 @@ namespace DiscUtils
         /// </summary>
         public void ForgetSnapshot()
         {
-            // This is actually merge... :)
-
             if (_diffStream == null)
             {
                 throw new InvalidOperationException("No snapshot");
@@ -246,6 +246,7 @@ namespace DiscUtils
             {
                 return _position;
             }
+
             set
             {
                 _position = value;
@@ -274,6 +275,7 @@ namespace DiscUtils
                 {
                     throw new IOException("Attempt to read beyond end of file");
                 }
+
                 int toRead = (int)Math.Min(count, _diffStream.Length - _position);
 
                 // If the read is within the base stream's range, then touch it first to get the

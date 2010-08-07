@@ -94,6 +94,7 @@ namespace DiscUtils.Registry
                         total++;
                     }
                 }
+
                 return total;
             }
         }
@@ -112,6 +113,7 @@ namespace DiscUtils.Registry
             {
                 return result;
             }
+
             result = DoFindKey(name, _listIndexes.Count - 1, out cellIndex);
             if (result >= 0)
             {
@@ -224,6 +226,7 @@ namespace DiscUtils.Registry
                             _hive.FreeCell(_listIndexes[i]);
                             _listIndexes.RemoveAt(i);
                         }
+
                         return _hive.UpdateCell(this, false);
                     }
                 }
@@ -286,6 +289,7 @@ namespace DiscUtils.Registry
                     {
                         CellIndex = cellIndex;
                     }
+
                     return -result;
                 }
                 else
@@ -303,6 +307,4 @@ namespace DiscUtils.Registry
             #endregion
         }
     }
-
-
 }

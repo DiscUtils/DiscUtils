@@ -164,6 +164,7 @@ namespace DiscUtils.Wim
                     result.Add(Path.Combine(path, dirEntry.FileName));
                 }
             }
+
             return result.ToArray();
         }
 
@@ -180,6 +181,7 @@ namespace DiscUtils.Wim
             {
                 throw new NotSupportedException("No write support for WIM files");
             }
+
             if (access != FileAccess.Read)
             {
                 throw new NotSupportedException("No write support for WIM files");
@@ -212,6 +214,7 @@ namespace DiscUtils.Wim
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
+
             return dirEntry.Attributes;
         }
 
@@ -227,6 +230,7 @@ namespace DiscUtils.Wim
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
+
             return DateTime.FromFileTimeUtc(dirEntry.CreationTime);
         }
 
@@ -242,6 +246,7 @@ namespace DiscUtils.Wim
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
+
             return DateTime.FromFileTimeUtc(dirEntry.LastAccessTime);
         }
 
@@ -257,6 +262,7 @@ namespace DiscUtils.Wim
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
+
             return DateTime.FromFileTimeUtc(dirEntry.LastWriteTime);
         }
 
@@ -344,6 +350,7 @@ namespace DiscUtils.Wim
                     dir.Add(entry);
                     entry = DirectoryEntry.ReadFrom(reader);
                 }
+
                 _directories.Add(dirId, dir);
                 dirId = reader.Position;
             }
@@ -379,6 +386,7 @@ namespace DiscUtils.Wim
             {
                 path = path.Substring(0, path.Length - 1);
             }
+
             if (!string.IsNullOrEmpty(path) && !path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = @"\" + path;

@@ -57,6 +57,7 @@ namespace DiscUtils.LogicalDiskManager
             {
                 vols.Add(new DynamicVolume(this, record.VolumeGuid));
             }
+
             return vols.ToArray();
         }
 
@@ -106,7 +107,6 @@ namespace DiscUtils.LogicalDiskManager
         private LogicalVolumeStatus GetComponentStatus(ComponentRecord cmpnt)
         {
             // NOTE: no support for RAID, so either valid or failed...
-
             LogicalVolumeStatus status = LogicalVolumeStatus.Healthy;
 
             foreach (var extent in _database.GetComponentExtents(cmpnt.Id))
@@ -151,6 +151,7 @@ namespace DiscUtils.LogicalDiskManager
                     {
                         throw new IOException("Volume extents are non-contiguous");
                     }
+
                     pos += extent.SizeLba;
                 }
 
@@ -209,10 +210,11 @@ namespace DiscUtils.LogicalDiskManager
             {
                 return 1;
             }
-            else if(x.OffsetInVolumeLba < y.OffsetInVolumeLba)
+            else if (x.OffsetInVolumeLba < y.OffsetInVolumeLba)
             {
                 return -1;
             }
+
             return 0;
         }
 
@@ -226,6 +228,7 @@ namespace DiscUtils.LogicalDiskManager
             {
                 return -1;
             }
+
             return 0;
         }
 
@@ -233,7 +236,6 @@ namespace DiscUtils.LogicalDiskManager
         {
             return (LogicalVolumeStatus)Math.Max((int)x, (int)y);
         }
-
 
         #region IDiagnosticTraceable Members
 

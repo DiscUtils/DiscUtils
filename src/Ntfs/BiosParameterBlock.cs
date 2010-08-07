@@ -176,6 +176,7 @@ namespace DiscUtils.Ntfs
                     size = (size >> 1) & 0x7FFFFFFF;
                     val++;
                 }
+
                 return (byte)-val;
             }
         }

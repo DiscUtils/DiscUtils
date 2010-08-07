@@ -121,7 +121,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-
         public IDictionary<AttributeReference, AttributeRecord> Extents
         {
             get { return _extents; }
@@ -201,39 +200,39 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        //public void SetNonResident(bool nonResident, int maxData)
-        //{
-        //    if (nonResident == _record.IsNonResident)
-        //    {
-        //        return;
-        //    }
+        ////public void SetNonResident(bool nonResident, int maxData)
+        ////{
+        ////    if (nonResident == _record.IsNonResident)
+        ////    {
+        ////        return;
+        ////    }
 
-        //    IBuffer attrBuffer = GetDataBuffer();
-        //    byte[] tempBuffer = Utilities.ReadFully(attrBuffer, 0, Math.Min((int)attrBuffer.Capacity, maxData));
+        ////    IBuffer attrBuffer = GetDataBuffer();
+        ////    byte[] tempBuffer = Utilities.ReadFully(attrBuffer, 0, Math.Min((int)attrBuffer.Capacity, maxData));
 
-        //    AttributeReference baseReference = Reference;
-        //    foreach(var extent in _extents)
-        //    {
-        //        extent.Value.GetDataBuffer(_file).SetCapacity(0);
-        //        _file.RemoveAttributeExtent(extent.Key);
-        //    }
+        ////    AttributeReference baseReference = Reference;
+        ////    foreach (var extent in _extents)
+        ////    {
+        ////        extent.Value.GetDataBuffer(_file).SetCapacity(0);
+        ////        _file.RemoveAttributeExtent(extent.Key);
+        ////    }
 
-        //    if (nonResident)
-        //    {
-        //        _record = 
-        //        _record = new NonResidentAttributeRecord(_record);
-        //    }
-        //    else
-        //    {
-        //        _record = new ResidentAttributeRecord(_record);
-        //    }
+        ////    if (nonResident)
+        ////    {
+        ////        _record =
+        ////        _record = new NonResidentAttributeRecord(_record);
+        ////    }
+        ////    else
+        ////    {
+        ////        _record = new ResidentAttributeRecord(_record);
+        ////    }
 
-        //    _extents.Clear();
-        //    _extents.Add(new AttributeReference(_file.MftReference, _record.AttributeId), _record);
+        ////    _extents.Clear();
+        ////    _extents.Add(new AttributeReference(_file.MftReference, _record.AttributeId), _record);
 
-        //    attrBuffer = GetDataBuffer();
-        //    attrBuffer.Write(0, tempBuffer, 0, tempBuffer.Length);
-        //}
+        ////    attrBuffer = GetDataBuffer();
+        ////    attrBuffer.Write(0, tempBuffer, 0, tempBuffer.Length);
+        ////}
 
         public static NtfsAttribute FromRecord(File file, FileRecordReference recordFile, AttributeRecord record)
         {
@@ -342,5 +341,4 @@ namespace DiscUtils.Ntfs
             }
         }
     }
-
 }

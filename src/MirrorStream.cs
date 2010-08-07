@@ -69,6 +69,7 @@ namespace DiscUtils
                     {
                         stream.Dispose();
                     }
+
                     _wrapped = null;
                 }
             }
@@ -109,6 +110,7 @@ namespace DiscUtils
             {
                 return _wrapped[0].Position;
             }
+
             set
             {
                 _wrapped[0].Position = value;

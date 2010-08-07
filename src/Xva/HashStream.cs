@@ -35,7 +35,6 @@ namespace DiscUtils.Xva
 
         private long _hashPos;
 
-
         public HashStream(Stream wrapped, Ownership ownsWrapped, HashAlgorithm hashAlg)
         {
             _wrapped = wrapped;
@@ -90,6 +89,7 @@ namespace DiscUtils.Xva
             {
                 return _wrapped.Position;
             }
+
             set
             {
                 _wrapped.Position = value;

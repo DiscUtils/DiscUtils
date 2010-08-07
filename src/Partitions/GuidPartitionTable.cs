@@ -106,7 +106,6 @@ namespace DiscUtils.Partitions
             BiosPartitionTable pt = BiosPartitionTable.Initialize(disk, diskGeometry);
             pt.CreatePrimaryByCylinder(0, diskGeometry.Cylinders - 1, BiosPartitionTypes.GptProtective, false);
 
-
             // Create the GPT headers, and blank-out the entry areas
             const int EntryCount = 128;
             const int EntrySize = 128;
@@ -294,12 +293,10 @@ namespace DiscUtils.Partitions
             }
         }
 
-
         internal SparseStream Open(GptEntry entry)
         {
             return new SubStream(_diskData, entry.FirstUsedLogicalBlock * _diskGeometry.BytesPerSector, entry.LastUsedLogicalBlock * _diskGeometry.BytesPerSector);
         }
-
 
         private void Init(Stream disk, Geometry diskGeometry)
         {
@@ -370,7 +367,6 @@ namespace DiscUtils.Partitions
                     }
                 }
             }
-
         }
 
         private long FindGap(long numSectors)
@@ -467,6 +463,7 @@ namespace DiscUtils.Partitions
             {
                 return false;
             }
+
             return true;
         }
 
@@ -510,8 +507,10 @@ namespace DiscUtils.Partitions
                         found = true;
                         break;
                     }
+
                     entriesSoFar++;
                 }
+
                 position++;
             }
 
@@ -577,6 +576,5 @@ namespace DiscUtils.Partitions
 
             return count;
         }
-
     }
 }

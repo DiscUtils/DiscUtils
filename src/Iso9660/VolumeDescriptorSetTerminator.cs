@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Iso9660
 {
     internal class VolumeDescriptorSetTerminator : BaseVolumeDescriptor

@@ -166,5 +166,4 @@ namespace DiscUtils.Vfs
             throw new NotSupportedException();
         }
     }
-
 }

@@ -129,6 +129,7 @@ namespace DiscUtils.Ntfs
                         AddDataRun(run.First, run.Second);
                     }
                 }
+
                 _record.LastVcn = _record.StartVcn + numClusters - 1;
             }
         }
@@ -316,6 +317,7 @@ namespace DiscUtils.Ntfs
                     {
                         throw new IOException("Found short non-compressed sub-block");
                     }
+
                     Array.Copy(compBuffer, sourceIdx, resultBuffer, destIdx, SubBlockSize);
                     sourceIdx += SubBlockSize;
                     destIdx += SubBlockSize;
@@ -399,7 +401,6 @@ namespace DiscUtils.Ntfs
             int runIdx = startRunIdx;
             long runOffset = startRunOffset;
 
-
             while (totalRead < count)
             {
                 int toRead = (int)Math.Min(count - totalRead, (runs[runIdx].Length * _bytesPerCluster) - runOffset);
@@ -410,6 +411,7 @@ namespace DiscUtils.Ntfs
                     {
                         Array.Clear(data, dataOffset + totalRead, toRead);
                     }
+
                     totalRead += toRead;
                     runOffset = 0;
                     runIdx++;
@@ -472,7 +474,7 @@ namespace DiscUtils.Ntfs
         private bool IsBlockCompressed(int startDataRunIdx, int compressionUnitSize)
         {
             var runs = _record.CookedDataRuns;
-            int clustersRemaining = (int)Math.Min(compressionUnitSize, (runs[runs.Count - 1].StartVcn + runs[runs.Count-1].Length) - runs[startDataRunIdx].StartVcn);
+            int clustersRemaining = (int)Math.Min(compressionUnitSize, (runs[runs.Count - 1].StartVcn + runs[runs.Count - 1].Length) - runs[startDataRunIdx].StartVcn);
             int dataRunIdx = startDataRunIdx;
 
             while (clustersRemaining > 0)
@@ -484,10 +486,12 @@ namespace DiscUtils.Ntfs
                 {
                     return true;
                 }
+
                 if (runs[dataRunIdx].Length > clustersRemaining)
                 {
                     return false;
                 }
+
                 clustersRemaining -= (int)runs[dataRunIdx].Length;
                 dataRunIdx++;
             }

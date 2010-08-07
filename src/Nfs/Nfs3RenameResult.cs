@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3RenameResult : Nfs3CallResult
     {
         public Nfs3WeakCacheConsistency FromDirCacheConsistency { get; set; }
+
         public Nfs3WeakCacheConsistency ToDirCacheConsistency { get; set; }
 
         public Nfs3RenameResult(XdrDataReader reader)

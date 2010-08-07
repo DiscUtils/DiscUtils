@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
-
 namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3WeakCacheConsistencyAttr
     {
         public long Size { get; set; }
+
         public Nfs3FileTime ModifyTime { get; set; }
+
         public Nfs3FileTime ChangeTime { get; set; }
 
         public Nfs3WeakCacheConsistencyAttr(XdrDataReader reader)
@@ -41,6 +41,7 @@ namespace DiscUtils.Nfs
     internal sealed class Nfs3WeakCacheConsistency
     {
         public Nfs3WeakCacheConsistencyAttr Before { get; set; }
+
         public Nfs3FileAttributes After { get; set; }
 
         public Nfs3WeakCacheConsistency(XdrDataReader reader)
@@ -49,6 +50,7 @@ namespace DiscUtils.Nfs
             {
                 Before = new Nfs3WeakCacheConsistencyAttr(reader);
             }
+
             if (reader.ReadBool())
             {
                 After = new Nfs3FileAttributes(reader);

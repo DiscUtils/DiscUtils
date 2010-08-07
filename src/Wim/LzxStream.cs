@@ -65,7 +65,6 @@ namespace DiscUtils.Wim
         private byte[] _buffer;
         private int _bufferCount;
 
-
         private long _position;
 
         // Block state
@@ -115,6 +114,7 @@ namespace DiscUtils.Wim
             {
                 return _position;
             }
+
             set
             {
                 throw new NotSupportedException();
@@ -203,6 +203,7 @@ namespace DiscUtils.Wim
                         {
                             offsetValue = absoluteValue + _fileSize;
                         }
+
                         Utilities.WriteBytesLittleEndian(offsetValue, _buffer, i + 1);
                     }
 
@@ -234,6 +235,7 @@ namespace DiscUtils.Wim
             {
                 _alignedOffsetTree = ReadFixedHuffmanTree(8, 3);
             }
+
             ReadMainTree();
             ReadLengthTree();
             
@@ -434,6 +436,5 @@ namespace DiscUtils.Wim
             AlignedOffset = 2,
             Uncompressed = 3
         }
-
     }
 }

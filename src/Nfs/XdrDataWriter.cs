@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 using System.IO;
 using System.Text;
 
@@ -70,6 +69,5 @@ namespace DiscUtils.Nfs
         {
             WriteBuffer(Encoding.ASCII.GetBytes(value));
         }
-
     }
 }

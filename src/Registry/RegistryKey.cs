@@ -52,6 +52,7 @@ namespace DiscUtils.Registry
                 SecurityCell secCell = _hive.GetCell<SecurityCell>(_cell.SecurityIndex);
                 return secCell.SecurityDescriptor;
             }
+
             return null;
         }
 
@@ -221,6 +222,7 @@ namespace DiscUtils.Registry
                     return regVal.Value;
                 }
             }
+
             return defaultValue;
         }
 
@@ -326,6 +328,7 @@ namespace DiscUtils.Registry
             {
                 return regVal.DataType;
             }
+
             return RegistryValueType.None;
         }
 
@@ -340,6 +343,7 @@ namespace DiscUtils.Registry
             {
                 names.Add(value.Name);
             }
+
             return names.ToArray();
         }
 
@@ -424,6 +428,7 @@ namespace DiscUtils.Registry
                 {
                     return Encoding.Unicode.GetString(_hive.RawCellData(_cell.ClassNameIndex, _cell.ClassNameLength));
                 }
+
                 return null;
             }
         }
@@ -529,6 +534,7 @@ namespace DiscUtils.Registry
             {
                 subKeyObj.DeleteSubKeyTree(child);
             }
+
             DeleteSubKey(subkey);
         }
 
@@ -756,6 +762,7 @@ namespace DiscUtils.Registry
                 _cell.SubKeysIndex = list.LinkSubKey(name, cellIndex);
                 _cell.NumSubKeys++;
             }
+
             _hive.UpdateCell(_cell, false);
         }
 
@@ -842,6 +849,5 @@ namespace DiscUtils.Registry
 
             _hive.FreeCell(list.Index);
         }
-
     }
 }

@@ -120,6 +120,7 @@ namespace DiscUtils.Vdi
                 CheckDisposed();
                 return _position;
             }
+
             set
             {
                 CheckDisposed();
@@ -322,6 +323,7 @@ namespace DiscUtils.Vdi
                     {
                         ++i;
                     }
+
                     int start = i;
 
                     // Find next absent block

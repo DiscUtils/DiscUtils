@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Xva
 {
     internal class TarHeaderExtent : BuilderBufferExtent

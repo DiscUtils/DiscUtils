@@ -28,6 +28,7 @@ namespace DiscUtils.Iso9660
     internal class IsoContext : VfsContext
     {
         public CommonVolumeDescriptor VolumeDescriptor { get; set; }
+
         public Stream DataStream { get; set; }
     }
 }

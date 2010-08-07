@@ -27,6 +27,7 @@ namespace DiscUtils.Nfs
     internal sealed class Nfs3MountResult
     {
         public Nfs3FileHandle FileHandle { get; set; }
+
         public List<int> AuthFlavours { get; set; }
 
         internal Nfs3MountResult(XdrDataReader reader)

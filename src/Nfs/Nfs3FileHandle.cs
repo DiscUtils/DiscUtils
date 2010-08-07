@@ -118,6 +118,7 @@ namespace DiscUtils.Nfs
                     value = (value << 1) ^ Value[i];
                 }
             }
+
             return value;
         }
     }

@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class Nfs3AccessResult : Nfs3CallResult
     {
         public Nfs3FileAttributes ObjectAttributes { get; set; }
+
         public Nfs3AccessPermissions Access { get; set; }
 
         public Nfs3AccessResult(XdrDataReader reader)
@@ -35,6 +35,7 @@ namespace DiscUtils.Nfs
             {
                 ObjectAttributes = new Nfs3FileAttributes(reader);
             }
+
             Access = (Nfs3AccessPermissions)reader.ReadInt32();
         }
     }

@@ -62,6 +62,5 @@ namespace DiscUtils
         internal abstract int Read(long diskOffset, byte[] block, int offset, int count);
 
         internal abstract void DisposeReadState();
-
     }
 }

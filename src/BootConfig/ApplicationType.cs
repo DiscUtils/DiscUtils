@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.BootConfig
 {
     /// <summary>
@@ -29,7 +28,7 @@ namespace DiscUtils.BootConfig
     public enum ApplicationType
     {
         /// <summary>
-        /// Unknown.
+        /// Unknown type.
         /// </summary>
         None = 0,
 

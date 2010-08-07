@@ -20,10 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Xva
 {
-
     /// <summary>
     /// Class representing a single layer of an XVA disk.
     /// </summary>

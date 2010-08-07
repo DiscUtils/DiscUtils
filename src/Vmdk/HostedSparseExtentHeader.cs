@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Vmdk
 {
     internal class HostedSparseExtentHeader : CommonSparseExtentHeader

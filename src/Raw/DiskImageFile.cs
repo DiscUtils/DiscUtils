@@ -79,6 +79,7 @@ namespace DiscUtils.Raw
                     {
                         _content.Dispose();
                     }
+
                     _content = null;
                 }
             }

@@ -59,6 +59,7 @@ namespace DiscUtils.Xva
             {
                 checkSum += buffer[offset + i];
             }
+
             Utilities.StringToBytes(LongToOctal(checkSum, 7), buffer, offset + 148, 7);
             buffer[155] = 0;
         }

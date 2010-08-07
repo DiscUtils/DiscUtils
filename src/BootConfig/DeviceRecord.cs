@@ -30,6 +30,7 @@ namespace DiscUtils.BootConfig
     internal abstract class DeviceRecord
     {
         public int Type { get; set; }
+
         public int Length { get; set; }
 
         public static DeviceRecord Parse(byte[] data, int offset)
@@ -55,7 +56,6 @@ namespace DiscUtils.BootConfig
                     break;
                 default:
                     throw new NotImplementedException("Unknown device type: " + type);
-
             }
 
             if (newRecord != null)
@@ -68,7 +68,7 @@ namespace DiscUtils.BootConfig
 
         public abstract void GetBytes(byte[] data, int offset);
 
-        public abstract int Size { get;}
+        public abstract int Size { get; }
 
         protected virtual void DoParse(byte[] data, int offset)
         {
@@ -87,7 +87,9 @@ namespace DiscUtils.BootConfig
     internal class PartitionRecord : DeviceRecord
     {
         public int PartitionType { get; set; }
+
         public byte[] DiskIdentity { get; set; }
+
         public byte[] PartitionIdentity { get; set; }
 
         protected override void DoParse(byte[] data, int offset)
@@ -137,7 +139,7 @@ namespace DiscUtils.BootConfig
             {
                 Array.Clear(data, offset + 0x10, 0x38);
             }
-            else if(Type == 6)
+            else if (Type == 6)
             {
                 Utilities.WriteBytesLittleEndian(PartitionType, data, offset + 0x24);
 

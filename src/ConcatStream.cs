@@ -64,6 +64,7 @@ namespace DiscUtils
                     {
                         stream.Dispose();
                     }
+
                     _streams = null;
                 }
             }
@@ -119,6 +120,7 @@ namespace DiscUtils
                 {
                     length += _streams[i].Length;
                 }
+
                 return length;
             }
         }
@@ -130,6 +132,7 @@ namespace DiscUtils
                 CheckDisposed();
                 return _position;
             }
+
             set
             {
                 CheckDisposed();
@@ -155,7 +158,8 @@ namespace DiscUtils
 
                 totalRead += numRead;
                 _position += numRead;
-            } while (numRead != 0);
+            }
+            while (numRead != 0);
 
             return totalRead;
         }
@@ -195,6 +199,7 @@ namespace DiscUtils
             {
                 throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to reduce stream length to less than {0}", lastStreamOffset));
             }
+
             _streams[lastStream].SetLength(value - lastStreamOffset);
         }
 
@@ -216,7 +221,7 @@ namespace DiscUtils
                 // Write (limited to the stream's length), except for final stream - that may be
                 // extendable
                 int numToWrite;
-                if(streamIdx == _streams.Length - 1)
+                if (streamIdx == _streams.Length - 1)
                 {
                     numToWrite = count - totalWritten;
                 }

@@ -64,6 +64,5 @@ namespace DiscUtils.Iscsi
             Array.Copy(data, offset, buffer, 48, count);
             return buffer;
         }
-
     }
 }

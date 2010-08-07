@@ -53,11 +53,13 @@ namespace DiscUtils.Ntfs
 
             _file.CreateStream(AttributeType.IndexRoot, _name);
 
-            _root = new IndexRoot() {
+            _root = new IndexRoot()
+            {
                 AttributeType = (uint)attrType,
                 CollationRule = collationRule,
                 IndexAllocationSize = (uint)bpb.IndexBufferSize,
-                RawClustersPerIndexRecord = bpb.RawIndexBufferSize };
+                RawClustersPerIndexRecord = bpb.RawIndexBufferSize
+            };
 
             _comparer = _root.GetCollator(upCase);
 
@@ -107,18 +109,18 @@ namespace DiscUtils.Ntfs
             get { return _root.IndexAllocationSize; }
         }
 
-        public IEnumerable<KeyValuePair<byte[],byte[]>> Entries
+        public IEnumerable<KeyValuePair<byte[], byte[]>> Entries
         {
             get
             {
-                foreach(var entry in Enumerate(_rootNode))
+                foreach (var entry in Enumerate(_rootNode))
                 {
-                    yield return new KeyValuePair<byte[],byte[]>(entry.KeyBuffer, entry.DataBuffer);
+                    yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
                 }
             }
         }
 
-        public IEnumerable<KeyValuePair<byte[],byte[]>> FindAll(IComparable<byte[]> query)
+        public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query)
         {
             foreach (var entry in FindAllIn(query, _rootNode))
             {
@@ -349,6 +351,7 @@ namespace DiscUtils.Ntfs
                 {
                     ++i;
                 }
+
                 return i;
             }
         }
@@ -576,6 +579,5 @@ namespace DiscUtils.Ntfs
                 return _wrapped.CompareTo(Convert<K>(other));
             }
         }
-
     }
 }

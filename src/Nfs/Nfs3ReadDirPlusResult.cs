@@ -27,8 +27,11 @@ namespace DiscUtils.Nfs
     internal class Nfs3ReadDirPlusResult : Nfs3CallResult
     {
         public Nfs3FileAttributes DirAttributes { get; set; }
+
         public byte[] CookieVerifier { get; set; }
+
         public List<Nfs3DirectoryEntry> DirEntries { get; set; }
+
         public bool Eof { get; set; }
 
         public Nfs3ReadDirPlusResult(XdrDataReader reader)
@@ -38,6 +41,7 @@ namespace DiscUtils.Nfs
             {
                 DirAttributes = new Nfs3FileAttributes(reader);
             }
+
             if (Status == Nfs3Status.Ok)
             {
                 CookieVerifier = reader.ReadBytes(Nfs3.CookieVerifierSize);

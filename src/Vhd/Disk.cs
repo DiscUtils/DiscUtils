@@ -125,6 +125,7 @@ namespace DiscUtils.Vhd
             {
                 throw new ArgumentException("At least one file must be provided");
             }
+
             if (files[files.Count - 1].NeedsParent)
             {
                 throw new ArgumentException("Final image file needs a parent");
@@ -236,6 +237,7 @@ namespace DiscUtils.Vhd
                                 record.First.Dispose();
                             }
                         }
+
                         _files = null;
                     }
                 }
@@ -336,6 +338,7 @@ namespace DiscUtils.Vhd
                 LocalFileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
                 newFile = parent.CreateDifferencing(locator, Path.GetFileName(path));
             }
+
             return new Disk(newFile, Ownership.Dispose, parentLocator, parentFileName);
         }
 
@@ -390,6 +393,7 @@ namespace DiscUtils.Vhd
                 {
                     return true;
                 }
+
                 return dynContent.AutoCommitFooter;
             }
 
@@ -420,8 +424,10 @@ namespace DiscUtils.Vhd
                     {
                         stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
                     }
+
                     _content = stream;
                 }
+
                 return _content;
             }
         }
@@ -497,6 +503,5 @@ namespace DiscUtils.Vhd
                 }
             }
         }
-
     }
 }

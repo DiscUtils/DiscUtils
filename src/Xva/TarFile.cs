@@ -63,6 +63,7 @@ namespace DiscUtils.Xva
                 stream = new SubStream(_fileStream, file.Start, file.Length);
                 return true;
             }
+
             stream = null;
             return false;
         }
@@ -74,6 +75,7 @@ namespace DiscUtils.Xva
                 FileRecord file = _files[path];
                 return new SubStream(_fileStream, file.Start, file.Length);
             }
+
             throw new FileNotFoundException("File is not in archive", path);
         }
 

@@ -67,9 +67,9 @@ namespace DiscUtils.Ntfs
 
         public int MftRecordFreeSpace(AttributeType attrType, string attrName)
         {
-            foreach(var record in _records)
+            foreach (var record in _records)
             {
-                if(record.GetAttribute(attrType, attrName) != null)
+                if (record.GetAttribute(attrType, attrName) != null)
                 {
                     return _mft.RecordSize - record.Size;
                 }
@@ -97,7 +97,6 @@ namespace DiscUtils.Ntfs
                         Directory parentDir = _context.GetDirectoryByRef(attr.Content.ParentDirectory);
                         if (parentDir != null)
                         {
-
                             foreach (string dirName in parentDir.Names)
                             {
                                 result.Add(Path.Combine(dirName, name));
@@ -181,7 +180,7 @@ namespace DiscUtils.Ntfs
 
         public void UpdateRecordInMft()
         {
-            if(_dirty)
+            if (_dirty)
             {
                 if (NtfsTransaction.Current != null)
                 {
@@ -286,6 +285,7 @@ namespace DiscUtils.Ntfs
                     newAttrHome = targetRecord;
                 }
             }
+
             if (newAttrHome == null)
             {
                 newAttrHome = _mft.AllocateRecord(FileRecordFlags.None);
@@ -322,7 +322,7 @@ namespace DiscUtils.Ntfs
         private bool ExpelAttribute(FileRecord record)
         {
             List<AttributeRecord> attrs = record.Attributes;
-            for(int i = attrs.Count - 1; i >= 0; --i)
+            for (int i = attrs.Count - 1; i >= 0; --i)
             {
                 AttributeRecord attr = attrs[i];
                 if (attr.AttributeType > AttributeType.AttributeList)
@@ -570,6 +570,7 @@ namespace DiscUtils.Ntfs
                     return attr;
                 }
             }
+
             return null;
         }
 
@@ -620,7 +621,7 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-                foreach(var extraFileRecord in extraFileRecords)
+                foreach (var extraFileRecord in extraFileRecords)
                 {
                     _records.Add(extraFileRecord.Value);
                 }
@@ -733,14 +734,15 @@ namespace DiscUtils.Ntfs
             {
                 return stream;
             }
+
             return null;
         }
 
         public IEnumerable<NtfsStream> GetStreams(AttributeType attrType, string name)
         {
-            foreach(var attr in _attributes)
+            foreach (var attr in _attributes)
             {
-                if(attr.Type == attrType && attr.Name == name)
+                if (attr.Type == attrType && attr.Name == name)
                 {
                     yield return new NtfsStream(this, attr);
                 }
@@ -806,6 +808,7 @@ namespace DiscUtils.Ntfs
                         attr = a;
                     }
                 }
+
                 if (attr == null)
                 {
                     throw new FileNotFoundException("File name not found on file", name);
@@ -1065,7 +1068,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-
         /// <summary>
         /// Wrapper for Resident/Non-Resident attribute streams, that remains valid
         /// despite the attribute oscillating between resident and not.
@@ -1140,6 +1142,7 @@ namespace DiscUtils.Ntfs
                 {
                     return _wrapped.Position;
                 }
+
                 set
                 {
                     _wrapped.Position = value;
@@ -1201,6 +1204,5 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
-
     }
 }

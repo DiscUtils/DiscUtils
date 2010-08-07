@@ -158,6 +158,5 @@ namespace DiscUtils.BootConfig
             RegistryKey key = _rootKey.OpenSubKey(path);
             key.SetValue("Element", value);
         }
-
     }
 }

@@ -20,16 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class RpcCallHeader
     {
         public uint RpcVersion { get; set; }
+
         public uint Program { get; set; }
+
         public uint Version { get; set; }
+
         public uint Proc { get; set; }
+
         public RpcAuthentication Credentials { get; set; }
+
         public RpcAuthentication Verifier { get; set; }
 
         public RpcCallHeader()

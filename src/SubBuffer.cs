@@ -113,6 +113,7 @@ namespace DiscUtils
             {
                 throw new ArgumentOutOfRangeException("count", "Attempt to write negative bytes");
             }
+
             if (pos + count > _length)
             {
                 throw new ArgumentOutOfRangeException("count", "Attempt to write beyond end of substream");

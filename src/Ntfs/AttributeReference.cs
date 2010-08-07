@@ -114,6 +114,7 @@ namespace DiscUtils.Ntfs
             {
                 return false;
             }
+
             return Equals(objAsAttrRef);
         }
 

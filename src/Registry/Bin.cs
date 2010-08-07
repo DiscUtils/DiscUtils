@@ -65,6 +65,7 @@ namespace DiscUtils.Registry
                 {
                     _freeCells.Add(new Range<int, int>(pos, size));
                 }
+
                 pos += Math.Abs(size);
             }
         }
@@ -76,6 +77,7 @@ namespace DiscUtils.Registry
             {
                 return null;
             }
+
             return Cell.Parse(_hive, index, _buffer, index + 4 - _header.FileOffset);
         }
 
@@ -88,8 +90,8 @@ namespace DiscUtils.Registry
             {
                 throw new ArgumentException("Attempt to free non-allocated cell");
             }
-            len = Math.Abs(len);
 
+            len = Math.Abs(len);
 
             // If there's a free cell before this one, combine
             int i = 0;
@@ -116,7 +118,6 @@ namespace DiscUtils.Registry
 
             // Record the new free cell
             _freeCells.Insert(i, new Range<int, int>(freeIndex, len));
-
 
             // Free cells are indicated by length > 0
             Utilities.WriteBytesLittleEndian(len, _buffer, freeIndex);
@@ -153,7 +154,6 @@ namespace DiscUtils.Registry
             return result;
         }
 
-
         internal bool WriteRawCellData(int cellIndex, byte[] data, int offset, int count)
         {
             int index = cellIndex - _header.FileOffset;
@@ -181,7 +181,6 @@ namespace DiscUtils.Registry
             }
 
             // Very inefficient algorithm - will lead to fragmentation
-
             for (int i = 0; i < _freeCells.Count; ++i)
             {
                 int result = _freeCells[i].Offset + _header.FileOffset;

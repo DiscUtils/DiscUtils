@@ -39,7 +39,6 @@ namespace DiscUtils.Vmdk
         {
             List<BuilderExtent> extents = new List<BuilderExtent>();
 
-
             ServerSparseExtentHeader header = DiskImageFile.CreateServerSparseExtentHeader(_content.Length);
             GlobalDirectoryExtent gdExtent = new GlobalDirectoryExtent(header);
 
@@ -71,7 +70,6 @@ namespace DiscUtils.Vmdk
 
             return extents;
         }
-
 
         private class GlobalDirectoryExtent : BuilderExtent
         {
@@ -180,7 +178,6 @@ namespace DiscUtils.Vmdk
 
                 return (grainTableSectors + (numDataGrains * header.GrainSize)) * Sizes.Sector;
             }
-
         }
     }
 }

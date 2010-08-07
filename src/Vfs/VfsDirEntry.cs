@@ -123,5 +123,4 @@ namespace DiscUtils.Vfs
             }
         }
     }
-
 }

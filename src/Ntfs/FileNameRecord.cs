@@ -109,6 +109,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     Allocated Size: " + AllocatedSize);
             writer.WriteLine(indent + "          Real Size: " + RealSize);
             writer.WriteLine(indent + "              Flags: " + Flags);
+
             if ((Flags & FileAttributeFlags.ReparsePoint) != 0)
             {
                 writer.WriteLine(indent + "  Reparse Point Tag: " + EASizeOrReparsePointTag);
@@ -117,6 +118,7 @@ namespace DiscUtils.Ntfs
             {
                 writer.WriteLine(indent + "      Ext Attr Size: " + (EASizeOrReparsePointTag & 0xFFFF));
             }
+
             writer.WriteLine(indent + "          Namespace: " + FileNameNamespace);
             writer.WriteLine(indent + "          File Name: " + FileName);
         }
@@ -182,10 +184,12 @@ namespace DiscUtils.Ntfs
         internal static FileAttributes ConvertFlags(FileAttributeFlags flags)
         {
             FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
+
             if ((flags & FileAttributeFlags.Directory) != 0)
             {
                 result |= FileAttributes.Directory;
             }
+
             return result;
         }
 
@@ -199,7 +203,7 @@ namespace DiscUtils.Ntfs
 
         public bool Equals(FileNameRecord other)
         {
-            if(other == null)
+            if (other == null)
             {
                 return false;
             }

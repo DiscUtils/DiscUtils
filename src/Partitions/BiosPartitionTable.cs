@@ -227,6 +227,7 @@ namespace DiscUtils.Partitions
             {
                 startAddr = new ChsAddress(1023, 254, 63);
             }
+
             if (endAddr.Cylinder > 1023)
             {
                 endAddr = new ChsAddress(1023, 254, 63);
@@ -280,6 +281,7 @@ namespace DiscUtils.Partitions
                         result.Add(new BiosPartitionInfo(this, r));
                     }
                 }
+
                 return new ReadOnlyCollection<BiosPartitionInfo>(result);
             }
         }
@@ -299,6 +301,7 @@ namespace DiscUtils.Partitions
                         result.Add(new BiosPartitionInfo(this, r));
                     }
                 }
+
                 return new ReadOnlyCollection<PartitionInfo>(result);
             }
         }
@@ -439,6 +442,7 @@ namespace DiscUtils.Partitions
             {
                 records[i] = new BiosPartitionRecord(bootSector, 0x01BE + i * 0x10, 0, i);
             }
+
             return records;
         }
 
@@ -478,6 +482,7 @@ namespace DiscUtils.Partitions
                     {
                         return BiosPartitionTypes.Fat32Lba;
                     }
+
                 case WellKnownPartitionType.WindowsNtfs:
                     return BiosPartitionTypes.Ntfs;
                 case WellKnownPartitionType.Linux:
@@ -508,6 +513,7 @@ namespace DiscUtils.Partitions
                 {
                     existingStart = _diskGeometry.ToChsAddress((int)r.LBAStart).Cylinder;
                 }
+
                 if (r.LBAStart + r.LBALength > _diskGeometry.ToLogicalBlockAddress(r.EndCylinder, r.EndHead, r.EndSector))
                 {
                     existingEnd = _diskGeometry.ToChsAddress((int)(r.LBAStart + r.LBALength)).Cylinder;

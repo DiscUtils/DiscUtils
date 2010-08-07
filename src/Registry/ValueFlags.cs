@@ -44,5 +44,4 @@ namespace DiscUtils.Registry
         Unknown4000 = 0x4000,
         Unknown8000 = 0x8000
     }
-
 }

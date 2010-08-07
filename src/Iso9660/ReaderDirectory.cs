@@ -50,6 +50,7 @@ namespace DiscUtils.Iso9660
                 {
                     throw new IOException("Failed to read whole directory");
                 }
+
                 totalRead += (uint)bytesRead;
 
                 uint pos = 0;
@@ -58,7 +59,7 @@ namespace DiscUtils.Iso9660
                     DirectoryRecord dr;
                     uint length = (uint)DirectoryRecord.ReadFrom(buffer, (int)pos, context.VolumeDescriptor.CharacterEncoding, out dr);
 
-                    if(!IsoUtilities.IsSpecialDirectory(dr))
+                    if (!IsoUtilities.IsSpecialDirectory(dr))
                     {
                         _records.Add(dr);
                     }
@@ -102,6 +103,5 @@ namespace DiscUtils.Iso9660
         {
             throw new NotSupportedException();
         }
-
     }
 }

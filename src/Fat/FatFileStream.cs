@@ -58,6 +58,7 @@ namespace DiscUtils.Fat
                         dirEntry.FileSize = (int)_stream.Length;
                         dirEntry.LastWriteTime = now;
                     }
+
                     _dir.UpdateEntry(_dirId, dirEntry);
                 }
                 finally

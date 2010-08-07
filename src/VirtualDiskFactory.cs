@@ -58,6 +58,7 @@ namespace DiscUtils
         public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters);
 
         public abstract VirtualDisk OpenDisk(string path, FileAccess access);
+
         public abstract VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access);
 
         public VirtualDisk OpenDisk(DiscFileSystem fileSystem, string path, FileAccess access)

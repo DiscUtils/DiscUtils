@@ -94,7 +94,6 @@ namespace DiscUtils.LogicalDiskManager
         {
             int length = buffer[offset];
 
-
             ulong result = 0;
             for (int i = 0; i < length; ++i)
             {

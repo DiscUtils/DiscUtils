@@ -184,7 +184,6 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-
             if (!record.IsNonResident)
             {
                 record.GetDataBuffer(_file).Write(pos, buffer, offset, count);
@@ -214,7 +213,7 @@ namespace DiscUtils.Ntfs
                     byte[] wipeBuffer = new byte[bytesPerCluster * 4];
 
                     long wipePos = record.InitializedDataLength;
-                    while(wipePos < pos)
+                    while (wipePos < pos)
                     {
                         long extentStartPos;
                         IBuffer extentBuffer = GetExtentBuffer(wipePos, out extentStartPos);

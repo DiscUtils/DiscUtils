@@ -68,7 +68,6 @@ namespace DiscUtils.Udf
             get { return 512; }
         }
 
-
         public abstract int Parse(byte[] buffer, int offset);
     }
 

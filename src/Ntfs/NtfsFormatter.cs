@@ -29,9 +29,13 @@ namespace DiscUtils.Ntfs
     internal class NtfsFormatter
     {
         public string Label { get; set; }
-        public Geometry DiskGeometry { get; set;}
+
+        public Geometry DiskGeometry { get; set; }
+
         public long FirstSector { get; set; }
+
         public long SectorCount { get; set; }
+
         public byte[] BootCode { get; set; }
 
         private int _clusterSize;
@@ -77,20 +81,16 @@ namespace DiscUtils.Ntfs
                 _mftCluster = mftBitmapCluster + numMftBitmapClusters;
                 int numMftClusters = 8;
 
-
                 if ( _mftCluster + numMftClusters > _mftMirrorCluster
                     || _bitmapCluster + numBitmapClusters >= totalClusters)
                 {
                     throw new IOException("Unable to determine initial layout of NTFS metadata - disk may be too small");
                 }
 
-
                 CreateBiosParameterBlock(stream, numBootClusters * _clusterSize);
-
 
                 _context.Mft = new MasterFileTable(_context);
                 File mftFile = _context.Mft.InitializeNew(_context, mftBitmapCluster, (ulong)numMftBitmapClusters, (long)_mftCluster, (ulong)numMftClusters);
-
 
                 File bitmapFile = CreateFixedSystemFile(MasterFileTable.BitmapIndex, _bitmapCluster, (ulong)numBitmapClusters, true);
                 _context.ClusterBitmap = new ClusterBitmap(bitmapFile);
@@ -101,9 +101,7 @@ namespace DiscUtils.Ntfs
                 _context.ClusterBitmap.SetTotalClusters(totalClusters);
                 bitmapFile.UpdateRecordInMft();
 
-
                 File mftMirrorFile = CreateFixedSystemFile(MasterFileTable.MftMirrorIndex, _mftMirrorCluster, numMftMirrorClusters, true);
-
 
                 File logFile = CreateSystemFile(MasterFileTable.LogFileIndex);
                 using (Stream s = logFile.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
@@ -124,7 +122,6 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-
                 File volumeFile = CreateSystemFile(MasterFileTable.VolumeIndex);
                 NtfsStream volNameStream = volumeFile.CreateStream(AttributeType.VolumeName, null);
                 volNameStream.SetContent(new VolumeName(Label ?? "New Volume"));
@@ -133,43 +130,35 @@ namespace DiscUtils.Ntfs
                 SetSecurityAttribute(volumeFile, "O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)");
                 volumeFile.UpdateRecordInMft();
 
-
                 _context.GetFileByIndex = delegate(long index) { return new File(_context, _context.Mft.GetRecord(index, false)); };
                 _context.AllocateFile = delegate(FileRecordFlags frf) { return new File(_context, _context.Mft.AllocateRecord(frf)); };
-
 
                 File attrDefFile = CreateSystemFile(MasterFileTable.AttrDefIndex);
                 _context.AttributeDefinitions.WriteTo(attrDefFile);
                 SetSecurityAttribute(attrDefFile, "O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)");
                 attrDefFile.UpdateRecordInMft();
 
-
                 File bootFile = CreateFixedSystemFile(MasterFileTable.BootIndex, 0, (uint)numBootClusters, false);
                 SetSecurityAttribute(bootFile, "O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)");
                 bootFile.UpdateRecordInMft();
 
-
                 File badClusFile = CreateSystemFile(MasterFileTable.BadClusIndex);
                 badClusFile.CreateStream(AttributeType.Data, "$Bad");
                 badClusFile.UpdateRecordInMft();
-
 
                 File secureFile = CreateSystemFile(MasterFileTable.SecureIndex, FileRecordFlags.HasViewIndex);
                 secureFile.RemoveStream(secureFile.GetStream(AttributeType.Data, null));
                 _context.SecurityDescriptors = SecurityDescriptors.Initialize(secureFile);
                 secureFile.UpdateRecordInMft();
 
-
                 File upcaseFile = CreateSystemFile(MasterFileTable.UpCaseIndex);
                 _context.UpperCase = UpperCase.Initialize(upcaseFile);
                 upcaseFile.UpdateRecordInMft();
-
 
                 File objIdFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex);
                 objIdFile.RemoveStream(objIdFile.GetStream(AttributeType.Data, null));
                 objIdFile.CreateIndex("$O", (AttributeType)0, AttributeCollationRule.MultipleUnsignedLongs);
                 objIdFile.UpdateRecordInMft();
-
 
                 File reparseFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex);
                 reparseFile.CreateIndex("$R", (AttributeType)0, AttributeCollationRule.MultipleUnsignedLongs);
@@ -183,7 +172,6 @@ namespace DiscUtils.Ntfs
                 extendDir.AddEntry(reparseFile, "$Reparse", FileNameNamespace.Win32AndDos);
                 extendDir.AddEntry(quotaFile, "$Quota", FileNameNamespace.Win32AndDos);
                 extendDir.UpdateRecordInMft();
-
 
                 Directory rootDir = CreateSystemDirectory(MasterFileTable.RootDirIndex);
                 rootDir.AddEntry(mftFile, "$MFT", FileNameNamespace.Win32AndDos);
@@ -200,7 +188,6 @@ namespace DiscUtils.Ntfs
                 rootDir.AddEntry(extendDir, "$Extend", FileNameNamespace.Win32AndDos);
                 SetSecurityAttribute(rootDir, "O:LAG:BUD:(A;OICI;FA;;;BA)(A;OICI;FA;;;SY)(A;OICIIO;GA;;;CO)(A;OICI;0x1200a9;;;BU)(A;CI;LC;;;BU)(A;CIIO;DC;;;BU)(A;;0x1200a9;;;WD)");
                 rootDir.UpdateRecordInMft();
-
 
                 // A number of records are effectively 'reserved'
                 for (long i = MasterFileTable.ExtendIndex + 1; i <= 15; i++)
@@ -230,7 +217,10 @@ namespace DiscUtils.Ntfs
             ntfs.SetAttributes("System Volume Information", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory);
             ntfs.SetSecurity("System Volume Information", new RawSecurityDescriptor("O:BAG:SYD:(A;OICI;FA;;;SY)"));
 
-            using (Stream s = ntfs.OpenFile(@"System Volume Information\MountPointManagerRemoteDatabase", FileMode.Create)) { }
+            using (Stream s = ntfs.OpenFile(@"System Volume Information\MountPointManagerRemoteDatabase", FileMode.Create))
+            {
+            }
+
             ntfs.SetAttributes(@"System Volume Information\MountPointManagerRemoteDatabase", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Archive);
             ntfs.SetSecurity(@"System Volume Information\MountPointManagerRemoteDatabase", new RawSecurityDescriptor("O:BAG:SYD:(A;;FA;;;SY)"));
             return ntfs;
@@ -344,9 +334,7 @@ namespace DiscUtils.Ntfs
             stream.Position = (SectorCount - 1) * Sizes.Sector;
             stream.Write(bootSectors, 0, Sizes.Sector);
 
-
             _context.BiosParameterBlock = bpb;
         }
-
     }
 }

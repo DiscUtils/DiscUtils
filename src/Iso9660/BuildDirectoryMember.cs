@@ -97,7 +97,6 @@ namespace DiscUtils.Iso9660
             }
         }
 
-
         internal abstract long GetDataSize(Encoding enc);
 
         internal uint GetDirectoryRecordSize(Encoding enc)
@@ -173,5 +172,4 @@ namespace DiscUtils.Iso9660
 
         internal static readonly Comparer<BuildDirectoryMember> SortedComparison = new DirectorySortedComparison();
     }
-
 }

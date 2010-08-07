@@ -43,7 +43,6 @@ namespace DiscUtils.Vmdk
 
         private string _path;
 
-
         /// <summary>
         /// Creates a new instance from a file on disk.
         /// </summary>
@@ -298,8 +297,10 @@ namespace DiscUtils.Vmdk
                     {
                         stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
                     }
+
                     _content = stream;
                 }
+
                 return _content;
             }
         }

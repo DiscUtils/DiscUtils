@@ -71,6 +71,7 @@ namespace DiscUtils.Ntfs
                 {
                     total += record.Size;
                 }
+
                 return total;
             }
         }
@@ -83,7 +84,6 @@ namespace DiscUtils.Ntfs
                 r.Dump(writer, indent + "  ");
             }
         }
-
 
         #region ICollection<AttributeListRecord> Members
 
@@ -195,6 +195,7 @@ namespace DiscUtils.Ntfs
             {
                 NameLength = (byte)Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset);
             }
+
             RecordLength = (ushort)((ushort)NameOffset + (ushort)NameLength);
 
             Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset);
@@ -266,6 +267,5 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "  Base File Reference: " + BaseFileReference);
             writer.WriteLine(indent + "         Attribute ID: " + AttributeId);
         }
-
     }
 }

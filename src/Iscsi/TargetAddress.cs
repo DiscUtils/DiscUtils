@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
 using System.Globalization;
 
@@ -131,10 +130,12 @@ namespace DiscUtils.Iscsi
             {
                 result += ":" + _networkPort;
             }
+
             if (!string.IsNullOrEmpty(_targetGroupTag))
             {
                 result += "," + _targetGroupTag;
             }
+
             return result;
         }
 

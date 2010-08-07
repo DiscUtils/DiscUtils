@@ -152,6 +152,7 @@ namespace DiscUtils
                     factories.Add((VfsFileSystemFactory)Activator.CreateInstance(type));
                 }
             }
+
             return factories;
         }
     }

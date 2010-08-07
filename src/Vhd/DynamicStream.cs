@@ -50,14 +50,17 @@ namespace DiscUtils.Vhd
             {
                 throw new ArgumentNullException("fileStream");
             }
+
             if (dynamicHeader == null)
             {
                 throw new ArgumentNullException("dynamicHeader");
             }
+
             if (parentStream == null)
             {
                 throw new ArgumentNullException("parentStream");
             }
+
             if (length < 0)
             {
                 throw new ArgumentOutOfRangeException("length", length, "Negative lengths not allowed");
@@ -104,7 +107,11 @@ namespace DiscUtils.Vhd
 
         public bool AutoCommitFooter
         {
-            get { return _autoCommitFooter; }
+            get
+            {
+                return _autoCommitFooter;
+            }
+
             set
             {
                 _autoCommitFooter = value;
@@ -163,6 +170,7 @@ namespace DiscUtils.Vhd
                 CheckDisposed();
                 return _position;
             }
+
             set
             {
                 CheckDisposed();
@@ -217,6 +225,7 @@ namespace DiscUtils.Vhd
                             _parentStream.Position = _position;
                             Utilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
                         }
+
                         numRead += toRead;
                         _position += toRead;
                     }
@@ -380,7 +389,6 @@ namespace DiscUtils.Vhd
                         _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
                         sectorInBlock++;
                     }
-
                 }
 
                 WriteBlockBitmap(block);
@@ -596,10 +604,10 @@ namespace DiscUtils.Vhd
                     _fileStream.Position = 0;
                     _footerCache = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
                 }
+
                 _fileStream.Position = _nextBlockStart;
                 _fileStream.Write(_footerCache, 0, _footerCache.Length);
             }
         }
-
     }
 }

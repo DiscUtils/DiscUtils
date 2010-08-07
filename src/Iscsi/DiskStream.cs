@@ -80,6 +80,7 @@ namespace DiscUtils.Iscsi
             {
                 return _position;
             }
+
             set
             {
                 _position = value;

@@ -58,5 +58,4 @@ namespace DiscUtils
             return new BuilderStreamExtent(pos, _stream);
         }
     }
-
 }

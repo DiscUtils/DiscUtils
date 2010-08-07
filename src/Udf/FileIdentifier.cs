@@ -47,7 +47,6 @@ namespace DiscUtils.Udf
         public byte[] ImplementationUse;
         public string Name;
 
-
         public int ReadFrom(byte[] buffer, int offset)
         {
             DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);

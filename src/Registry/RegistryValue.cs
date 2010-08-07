@@ -72,6 +72,7 @@ namespace DiscUtils.Registry
                 Array.Copy(buffer, result, len);
                 return result;
             }
+
             return _hive.RawCellData(_cell.DataIndex, _cell.DataLength);
         }
 
@@ -227,6 +228,7 @@ namespace DiscUtils.Registry
                     {
                         result += string.Format(CultureInfo.InvariantCulture, "{0:X2} ", (int)data[i]);
                     }
+
                     return result + string.Format(CultureInfo.InvariantCulture, " ({0} bytes)", data.Length);
             }
         }
@@ -295,8 +297,8 @@ namespace DiscUtils.Registry
                     data = (byte[])value;
                     break;
             }
+
             return data;
         }
-
     }
 }

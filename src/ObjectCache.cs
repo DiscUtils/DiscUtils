@@ -44,8 +44,10 @@ namespace DiscUtils
                 {
                     return (V)wRef.Target;
                 }
+
                 return default(V);
             }
+
             set
             {
                 _entries[key] = new WeakReference(value);

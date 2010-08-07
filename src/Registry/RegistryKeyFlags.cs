@@ -110,5 +110,4 @@ namespace DiscUtils.Registry
         /// </summary>
         Unknown8000 = 0x8000
     }
-
 }

@@ -101,7 +101,6 @@ namespace DiscUtils.Ntfs
             _context.RawStream.Position = 0;
             byte[] bytes = Utilities.ReadFully(_context.RawStream, 512);
 
-
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
             _context.Mft = new MasterFileTable(_context);
@@ -114,7 +113,6 @@ namespace DiscUtils.Ntfs
         {
             _context.RawStream.Position = 0;
             byte[] bytes = Utilities.ReadFully(_context.RawStream, 512);
-
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
@@ -133,7 +131,6 @@ namespace DiscUtils.Ntfs
             // Now the MFT is up and running, do more detailed analysis of it's contents - double-accounted clusters, etc
             VerifyMft();
             _context.Mft.Dump(_report, "INFO: ");
-
 
             //-----------------------------------------------------------------------
             // INDEXES
@@ -160,7 +157,6 @@ namespace DiscUtils.Ntfs
             //
             VerifyObjectIds();
 
-
             //-----------------------------------------------------------------------
             // FINISHED
             //
@@ -185,6 +181,7 @@ namespace DiscUtils.Ntfs
                 ReportError("$Extend does not exist in root directory");
                 Abort();
             }
+
             Directory extendDir = new Directory(_context, _context.Mft.GetRecord(extendDirEntry.Reference));
 
             DirectoryEntry objIdDirEntry = extendDir.GetEntryByName("$ObjId");
@@ -203,7 +200,7 @@ namespace DiscUtils.Ntfs
                 ReportError("'System Volume Information' does not exist in root directory");
                 Abort();
             }
-            //Directory sysVolInfDir = new Directory(_context, _context.Mft.GetRecord(sysVolInfDirEntry.Reference));
+            ////Directory sysVolInfDir = new Directory(_context, _context.Mft.GetRecord(sysVolInfDirEntry.Reference));
         }
 
         private void VerifyObjectIds()
@@ -339,10 +336,10 @@ namespace DiscUtils.Ntfs
                 entry.Read(buffer, offset + pos);
                 pos += entry.Size;
 
-                if((entry.Flags & IndexEntryFlags.Node) != 0)
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
                     long bitmapIdx = entry.ChildrenVirtualCluster / Utilities.Ceil(root.IndexAllocationSize, _context.BiosParameterBlock.SectorsPerCluster * _context.BiosParameterBlock.BytesPerSector);
-                    if(!bitmap.IsPresent(bitmapIdx))
+                    if (!bitmap.IsPresent(bitmapIdx))
                     {
                         ReportError("Index entry {0} is non-leaf, but child vcn {1} is not in bitmap at index {2}", Index.EntryAsString(entry, fileName, indexName), entry.ChildrenVirtualCluster, bitmapIdx);
                     }
@@ -363,13 +360,11 @@ namespace DiscUtils.Ntfs
                     ok = false;
                 }
 
-
                 lastEntry = entry;
             }
 
             return ok;
         }
-
 
         private void PreVerifyMft(File file)
         {
@@ -385,6 +380,7 @@ namespace DiscUtils.Ntfs
                     Abort();
                 }
             }
+
             foreach (var range in file.GetAttribute(AttributeType.Bitmap, null).GetClusters())
             {
                 if (!VerifyClusterRange(range))
@@ -394,11 +390,9 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-
             using (Stream mftStream = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             using (Stream bitmapStream = file.OpenStream(AttributeType.Bitmap, null, FileAccess.Read))
             {
-
                 Bitmap bitmap = new Bitmap(bitmapStream, long.MaxValue);
 
                 long index = 0;
@@ -424,6 +418,7 @@ namespace DiscUtils.Ntfs
                             {
                                 bldr.Append(string.Format(CultureInfo.InvariantCulture, " {0:X2}", recordData[i]));
                             }
+
                             ReportInfo("MFT record binary data for index {0}:{1}", index, bldr.ToString());
                         }
                     }
@@ -502,6 +497,7 @@ namespace DiscUtils.Ntfs
                             {
                                 totalVcn += run.DataRun.RunLength;
                             }
+
                             if (totalVcn != nrr.LastVcn - nrr.StartVcn + 1)
                             {
                                 ReportError("Declared VCNs doesn't match data runs.  AttrId={0}", ar.AttributeId);
@@ -515,9 +511,9 @@ namespace DiscUtils.Ntfs
                     ReportError("Failure parsing attribute at pos={0}", pos);
                     return false;
                 }
+
                 pos += attrLen;
             }
-
 
             //
             // Now consider record as a whole
@@ -555,11 +551,13 @@ namespace DiscUtils.Ntfs
                 ReportError("Invalid cluster range {0} - negative start", range);
                 ok = false;
             }
+
             if (range.Count <= 0)
             {
                 ReportError("Invalid cluster range {0} - negative/zero count", range);
                 ok = false;
             }
+
             if ((range.Offset + range.Count) * _context.BiosParameterBlock.BytesPerCluster > _context.RawStream.Length)
             {
                 ReportError("Invalid cluster range {0} - beyond end of disk", range);
@@ -568,7 +566,6 @@ namespace DiscUtils.Ntfs
 
             return ok;
         }
-
 
         private static void Abort()
         {

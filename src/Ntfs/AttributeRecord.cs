@@ -132,7 +132,7 @@ namespace DiscUtils.Ntfs
         public int CompareTo(AttributeRecord other)
         {
             int val = ((int)_type) - (int)other._type;
-            if(val != 0)
+            if (val != 0)
             {
                 return val;
             }
@@ -145,7 +145,6 @@ namespace DiscUtils.Ntfs
 
             return ((int)_attributeId) - (int)other._attributeId;
         }
-
 
         protected virtual void Read(byte[] buffer, int offset, out int length)
         {
@@ -170,7 +169,9 @@ namespace DiscUtils.Ntfs
         }
 
         public abstract int Write(byte[] buffer, int offset);
+
         public abstract int Size { get; }
+
         public abstract AttributeRecord Split(FileRecord fileRecord);
 
         public virtual void Dump(TextWriter writer, string indent)
@@ -182,7 +183,6 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "           Flags: " + _flags);
             writer.WriteLine(indent + "     AttributeId: " + _attributeId);
         }
-
     }
 
     internal sealed class ResidentAttributeRecord : AttributeRecord
@@ -290,6 +290,7 @@ namespace DiscUtils.Ntfs
             {
                 Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength * 2);
             }
+
             _memoryBuffer.Read(0, buffer, offset + dataOffset, (int)_memoryBuffer.Capacity);
 
             return (int)length;
@@ -440,7 +441,7 @@ namespace DiscUtils.Ntfs
             var cookedRuns = CookedDataRuns;
 
             List<Range<long, long>> result = new List<Range<long, long>>(cookedRuns.Count);
-            foreach(var run in cookedRuns)
+            foreach (var run in cookedRuns)
             {
                 if (!run.IsSparse)
                 {
@@ -474,6 +475,7 @@ namespace DiscUtils.Ntfs
             {
                 _dataBuffer = new NonResidentAttributeBuffer(file, this);
             }
+
             return _dataBuffer;
         }
 
@@ -533,6 +535,7 @@ namespace DiscUtils.Ntfs
                 dataRuns.Add(run);
                 pos += len;
             }
+
             _cookedDataRuns = CookedDataRun.Cook(dataRuns);
         }
 
@@ -559,6 +562,7 @@ namespace DiscUtils.Ntfs
             {
                 dataLen += run.DataRun.Write(buffer, offset + dataOffset + dataLen);
             }
+
             buffer[offset + dataOffset + dataLen] = 0; // NULL terminator
             dataLen++;
 
@@ -603,6 +607,7 @@ namespace DiscUtils.Ntfs
                 {
                     nameLength = (byte)Name.Length;
                 }
+
                 ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
 
                 // Write out data first, since we know where it goes...
@@ -611,6 +616,7 @@ namespace DiscUtils.Ntfs
                 {
                     dataLen += run.DataRun.Size;
                 }
+
                 dataLen++; // NULL terminator
 
                 return Utilities.RoundUp(dataOffset + dataLen, 8);
@@ -622,11 +628,12 @@ namespace DiscUtils.Ntfs
             int splitIdx = _cookedDataRuns.Count / 2;
 
             List<CookedDataRun> newRecordRuns = new List<CookedDataRun>();
-            while(_cookedDataRuns.Count > splitIdx)
+            while (_cookedDataRuns.Count > splitIdx)
             {
                 newRecordRuns.Add(_cookedDataRuns[splitIdx]);
                 _cookedDataRuns.RemoveAt(splitIdx);
             }
+
             newRecordRuns[0].DataRun.RunOffset = newRecordRuns[0].StartLcn;
 
             CookedDataRun lastRemRun = _cookedDataRuns[_cookedDataRuns.Count - 1];
@@ -676,6 +683,7 @@ namespace DiscUtils.Ntfs
             {
                 throw new ArgumentOutOfRangeException("startVcn", startVcn, "VCN must be >= 0");
             }
+
             if (_startLcn < 0)
             {
                 throw new ArgumentOutOfRangeException("prevLcn", prevLcn, "LCN must be >= 0");
@@ -723,7 +731,5 @@ namespace DiscUtils.Ntfs
 
             return result;
         }
-
     }
-
 }

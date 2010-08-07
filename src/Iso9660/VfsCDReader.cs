@@ -62,7 +62,6 @@ namespace DiscUtils.Iso9660
                     break;
                 }
 
-
                 bvd = new BaseVolumeDescriptor(buffer, 0);
                 switch (bvd.VolumeDescriptorType)
                 {
@@ -81,8 +80,8 @@ namespace DiscUtils.Iso9660
                 }
 
                 vdpos += IsoUtilities.SectorSize;
-            } while (bvd.VolumeDescriptorType != VolumeDescriptorType.SetTerminator);
-
+            }
+            while (bvd.VolumeDescriptorType != VolumeDescriptorType.SetTerminator);
 
             CommonVolumeDescriptor volDesc;
             if (joliet && svdPos != 0)
@@ -143,6 +142,5 @@ namespace DiscUtils.Iso9660
 
             return name;
         }
-
     }
 }

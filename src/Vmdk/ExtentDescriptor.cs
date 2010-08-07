@@ -251,8 +251,6 @@ namespace DiscUtils.Vmdk
             return result.ToArray();
         }
 
-
-
         public override string ToString()
         {
             string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" + _fileName + "\"";
@@ -260,6 +258,7 @@ namespace DiscUtils.Vmdk
             {
                 return basic + " " + _offset;
             }
+
             return basic;
         }
     }

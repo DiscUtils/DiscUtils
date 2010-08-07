@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Iscsi
 {
     internal abstract class ScsiCommand : IByteArraySerializable

@@ -48,6 +48,7 @@ namespace DiscUtils.Nfs
                 {
                     transport.Dispose();
                 }
+
                 _transports = null;
             }
         }
@@ -72,8 +73,8 @@ namespace DiscUtils.Nfs
                 transport = new RpcTcpTransport(_serverAddress, port);
                 _transports[program] = transport;
             }
+
             return transport;
         }
-
     }
 }

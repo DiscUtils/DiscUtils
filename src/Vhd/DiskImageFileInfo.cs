@@ -155,7 +155,6 @@ namespace DiscUtils.Vhd
             get { return _footer.SavedState; }
         }
 
-
         /// <summary>
         /// Gets the cookie indicating a dynamic disk header (should be "cxsparse").
         /// </summary>
@@ -242,6 +241,5 @@ namespace DiscUtils.Vhd
                 return vals;
             }
         }
-
     }
 }

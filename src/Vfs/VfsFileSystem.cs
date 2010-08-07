@@ -224,6 +224,7 @@ namespace DiscUtils.Vfs
                     result.Add(Path.Combine(path, dirEntry.FileName));
                 }
             }
+
             return result.ToArray();
         }
 
@@ -307,7 +308,6 @@ namespace DiscUtils.Vfs
                 throw new IOException("File already exists");
             }
 
-
             if (entry.IsDirectory)
             {
                 throw new IOException("Attempt to open directory as a file");
@@ -371,7 +371,6 @@ namespace DiscUtils.Vfs
             {
                 throw new FileNotFoundException("File not found", path);
             }
-
 
             if (dirEntry.HasVfsFileAttributes)
             {
@@ -676,5 +675,4 @@ namespace DiscUtils.Vfs
             }
         }
     }
-
 }

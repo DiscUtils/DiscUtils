@@ -20,15 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class Nfs3DirectoryEntry
     {
         public ulong FileId { get; set; }
+
         public string Name { get; set; }
+
         public ulong Cookie { get; set; }
+
         public Nfs3FileAttributes FileAttributes { get; set; }
+
         public Nfs3FileHandle FileHandle { get; set; }
 
         public Nfs3DirectoryEntry(XdrDataReader reader)
@@ -40,6 +43,7 @@ namespace DiscUtils.Nfs
             {
                 FileAttributes = new Nfs3FileAttributes(reader);
             }
+
             if (reader.ReadBool())
             {
                 FileHandle = new Nfs3FileHandle(reader);

@@ -116,6 +116,7 @@ namespace DiscUtils.Wim
                     _position += totalRead * 8;
                     return totalRead;
                 }
+
                 totalRead += numRead;
             }
 
@@ -147,6 +148,5 @@ namespace DiscUtils.Wim
                 _bufferAvailable += 16;
             }
         }
-
     }
 }

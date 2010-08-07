@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Iscsi
 {
     internal enum LogoutReason
@@ -48,7 +47,6 @@ namespace DiscUtils.Iscsi
             _basicHeader.TotalAhsLength = 0;
             _basicHeader.DataSegmentLength = 0;
             _basicHeader.InitiatorTaskTag = _connection.Session.CurrentTaskTag;
-
 
             byte[] buffer = new byte[Utilities.RoundUp(48, 4)];
             _basicHeader.WriteTo(buffer, 0);

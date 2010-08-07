@@ -89,8 +89,8 @@ namespace DiscUtils.Iso9660
             {
                 length += di.GetPathTableEntrySize(enc);
             }
+
             return length;
         }
-
     }
 }

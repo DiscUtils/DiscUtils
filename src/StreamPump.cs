@@ -231,6 +231,7 @@ namespace DiscUtils
                                 OutputStream.Write(copyBuffer, copyBufferOffset, i - copyBufferOffset);
                                 BytesWritten += i - copyBufferOffset;
                             }
+
                             copyBufferOffset = i + SparseChunkSize;
                         }
                     }
@@ -291,6 +292,5 @@ namespace DiscUtils
 
             return true;
         }
-
     }
 }

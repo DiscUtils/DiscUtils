@@ -20,20 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3FileSystemInfo
     {
         public uint ReadMaxBytes { get; set; }
+
         public uint ReadPreferredBytes { get; set; }
+
         public uint ReadMultipleSize { get; set; }
+
         public uint WriteMaxBytes { get; set; }
+
         public uint WritePreferredBytes { get; set; }
+
         public uint WriteMultipleSize { get; set; }
+
         public uint DirectoryPreferredBytes { get; set; }
+
         public long MaxFileSize { get; set; }
+
         public Nfs3FileTime TimePrecision { get; set; }
+
         public Nfs3FileSystemProperties FileSystemProperties { get; set; }
 
         public Nfs3FileSystemInfo(XdrDataReader reader)

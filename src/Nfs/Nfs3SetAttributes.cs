@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal enum Nfs3SetTimeMethod
@@ -33,16 +32,27 @@ namespace DiscUtils.Nfs
     internal sealed class Nfs3SetAttributes
     {
         public bool SetMode { get; set; }
+
         public UnixFilePermissions Mode { get; set; }
+
         public bool SetUid { get; set; }
+
         public uint Uid { get; set; }
+
         public bool SetGid { get; set; }
+
         public uint Gid { get; set; }
+
         public bool SetSize { get; set; }
+
         public long Size { get; set; }
+
         public Nfs3SetTimeMethod SetAccessTime { get; set; }
+
         public Nfs3FileTime AccessTime { get; set; }
+
         public Nfs3SetTimeMethod SetModifyTime { get; set; }
+
         public Nfs3FileTime ModifyTime { get; set; }
 
         public void Write(XdrDataWriter writer)

@@ -20,14 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class Nfs3WriteResult : Nfs3CallResult
     {
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
+
         public int Count { get; set; }
+
         public int HowCommitted { get; set; }
+
         public byte[] WriteVerifier { get; set; }
 
         public Nfs3WriteResult(XdrDataReader reader)

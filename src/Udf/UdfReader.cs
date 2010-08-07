@@ -80,7 +80,6 @@ namespace DiscUtils.Udf
                     break;
                 }
 
-
                 bvd = new BaseVolumeDescriptor(buffer, 0);
                 switch (bvd.StandardIdentifier)
                 {
@@ -106,7 +105,6 @@ namespace DiscUtils.Udf
 
             return foundUdfMarker;
         }
-
     }
 
     internal sealed class VfsUdfReader : VfsReadOnlyFileSystem<FileIdentifier, File, Directory, UdfContext>
@@ -178,7 +176,6 @@ namespace DiscUtils.Udf
 
             AnchorVolumeDescriptorPointer avdp = AnchorVolumeDescriptorPointer.FromStream(_data, 256, _sectorSize);
 
-
             uint sector = avdp.MainDescriptorSequence.Location;
             bool terminatorFound = false;
             while (!terminatorFound)
@@ -207,6 +204,7 @@ namespace DiscUtils.Udf
                         {
                             throw new IOException("Duplicate partition number reading UDF Partition Descriptor");
                         }
+
                         Context.PhysicalPartitions[pd.PartitionNumber] = new PhysicalPartition(pd, dataBuffer, _sectorSize);
                         break;
 
@@ -234,7 +232,6 @@ namespace DiscUtils.Udf
             {
                 Context.LogicalPartitions.Add(LogicalPartition.FromDescriptor(Context, _lvd, i));
             }
-
 
             byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, _lvd.FileSetDescriptorLocation);
             if(DescriptorTag.IsValid(fsdBuffer, 0))
@@ -277,6 +274,5 @@ namespace DiscUtils.Udf
             return dt.TagIdentifier == TagIdentifier.AnchorVolumeDescriptorPointer
                 && dt.TagLocation == 256;
         }
-
     }
 }

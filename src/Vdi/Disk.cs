@@ -156,6 +156,7 @@ namespace DiscUtils.Vdi
                 {
                     _content = _diskImage.OpenContent(null, Ownership.None);
                 }
+
                 return _content;
             }
         }

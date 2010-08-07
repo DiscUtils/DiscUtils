@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.LogicalDiskManager
 {
     internal sealed class ComponentRecord : DatabaseRecord
@@ -62,5 +61,4 @@ namespace DiscUtils.LogicalDiskManager
             }
         }
     }
-
 }

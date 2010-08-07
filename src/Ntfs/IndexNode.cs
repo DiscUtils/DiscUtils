@@ -41,7 +41,6 @@ namespace DiscUtils.Ntfs
 
         private List<IndexEntry> _entries;
 
-
         public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, IndexNode parent, uint allocatedSize)
         {
             _store = store;
@@ -121,6 +120,7 @@ namespace DiscUtils.Ntfs
                     {
                         throw new NotImplementedException("Changing index entry sizes");
                     }
+
                     _entries[i] = newEntry;
                     _store();
                     return;
@@ -141,6 +141,7 @@ namespace DiscUtils.Ntfs
                         IndexBlock subNode = _index.GetSubBlock(this, focus);
                         return subNode.Node.TryFindEntry(key, out entry, out node);
                     }
+
                     break;
                 }
                 else
@@ -197,6 +198,7 @@ namespace DiscUtils.Ntfs
             {
                 totalEntriesSize += entry.Size;
             }
+
             return totalEntriesSize;
         }
 
@@ -257,7 +259,6 @@ namespace DiscUtils.Ntfs
                         if (SpaceFree < 0)
                         {
                             // The node is too small to hold the entry, so need to juggle...
-
                             if (_parent != null)
                             {
                                 Divide();
@@ -270,6 +271,7 @@ namespace DiscUtils.Ntfs
 
                         _store();
                     }
+
                     break;
                 }
             }
@@ -391,6 +393,7 @@ namespace DiscUtils.Ntfs
                         IndexNode newChildNode = _index.GetSubBlock(this, _entries[entryIndex]).Node;
                         childNode._parent = this;
                     }
+
                     _index.FreeBlock(freeBlock);
                 }
 
@@ -480,6 +483,7 @@ namespace DiscUtils.Ntfs
             {
                 newEntries.Add(_entries[i]);
             }
+
             newEntries.Add(newTerm);
 
             // Copy the node pointer from the elected 'mid' entry to the new node

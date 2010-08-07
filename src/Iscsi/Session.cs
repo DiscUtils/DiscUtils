@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -113,6 +112,7 @@ namespace DiscUtils.Iscsi
             {
                 _currentConnection.Close(LogoutReason.CloseSession);
             }
+
             _currentConnection = null;
         }
 
@@ -127,7 +127,7 @@ namespace DiscUtils.Iscsi
         /// Gets the name of the iSCSI target this session is connected to.
         /// </summary>
         [ProtocolKey("TargetName", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
-        public string TargetName { get; internal set;}
+        public string TargetName { get; internal set; }
 
         /// <summary>
         /// Gets the name of the iSCSI initiator seen by the target for this session.
@@ -208,6 +208,7 @@ namespace DiscUtils.Iscsi
                 cmd = new ScsiReportLunsCommand(resp.NeededDataLength);
                 resp = Send<ScsiReportLunsResponse>(cmd, null, 0, 0, (int)resp.NeededDataLength);
             }
+
             if (resp.Truncated)
             {
                 throw new InvalidProtocolException("Truncated response");
@@ -218,6 +219,7 @@ namespace DiscUtils.Iscsi
             {
                 result[i] = GetInfo((long)resp.Luns[i]);
             }
+
             return result;
         }
 
@@ -347,6 +349,7 @@ namespace DiscUtils.Iscsi
             {
                 throw new ArgumentException("outBufferLength must be 0 if outBuffer null", "outBufferLength");
             }
+
             if (inBuffer == null && inBufferLength != 0)
             {
                 throw new ArgumentException("inBufferLength must be 0 if inBuffer null", "inBufferLength");

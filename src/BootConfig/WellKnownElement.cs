@@ -26,7 +26,6 @@
 //
 //
 
-
 namespace DiscUtils.BootConfig
 {
     /// <summary>

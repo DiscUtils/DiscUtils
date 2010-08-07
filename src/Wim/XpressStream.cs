@@ -77,6 +77,7 @@ namespace DiscUtils.Wim
             {
                 return _position;
             }
+
             set
             {
                 throw new NotSupportedException();
@@ -191,6 +192,7 @@ namespace DiscUtils.Wim
             {
                 throw new InvalidDataException("Truncated stream");
             }
+
             return b;
         }
 

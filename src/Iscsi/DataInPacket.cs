@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Iscsi
 {
     internal class DataInPacket : BaseResponse
@@ -59,6 +58,7 @@ namespace DiscUtils.Iscsi
             {
                 Status = (ScsiStatus)headerData[headerOffset + 3];
             }
+
             Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
             TargetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);

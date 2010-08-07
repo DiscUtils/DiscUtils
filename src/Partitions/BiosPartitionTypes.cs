@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Partitions
 {
     /// <summary>
@@ -28,7 +27,9 @@ namespace DiscUtils.Partitions
     /// </summary>
     public sealed class BiosPartitionTypes
     {
-        private BiosPartitionTypes() { }
+        private BiosPartitionTypes()
+        {
+        }
 
         /// <summary>
         /// Microsoft FAT12 (fewer than 32,680 sectors in the volume).

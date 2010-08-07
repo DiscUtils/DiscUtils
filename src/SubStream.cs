@@ -110,6 +110,7 @@ namespace DiscUtils
             {
                 return _position;
             }
+
             set
             {
                 if (value <= _length)
@@ -152,6 +153,7 @@ namespace DiscUtils
             {
                 throw new ArgumentOutOfRangeException("offset", "Attempt to move before start of stream");
             }
+
             _position = absNewPos;
             return _position;
         }
@@ -167,6 +169,7 @@ namespace DiscUtils
             {
                 throw new ArgumentOutOfRangeException("count", "Attempt to write negative bytes");
             }
+
             if (_position + count > _length)
             {
                 throw new ArgumentOutOfRangeException("count", "Attempt to write beyond end of substream");

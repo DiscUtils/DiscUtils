@@ -50,7 +50,6 @@ namespace DiscUtils.Fat
         {
             _name = name;
             _attr = (byte)attrs;
-
         }
 
         internal DirectoryEntry(DirectoryEntry toCopy)
@@ -107,6 +106,7 @@ namespace DiscUtils.Fat
             {
                 return (_name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ')).TrimEnd('.');
             }
+
             set
             {
                 NormalizedName = FatUtilities.NormalizeFileName(value);
@@ -127,6 +127,7 @@ namespace DiscUtils.Fat
             {
                 return _name;
             }
+
             set
             {
                 if (value.Length == 11)
@@ -172,7 +173,11 @@ namespace DiscUtils.Fat
 
         public uint FirstCluster
         {
-            get { return (uint)(_firstClusterHi << 16) | _firstClusterLo; }
+            get
+            {
+                return (uint)(_firstClusterHi << 16) | _firstClusterLo;
+            }
+
             set
             {
                 _firstClusterHi = (ushort)((value >> 16) & 0xFFFF);
@@ -223,6 +228,5 @@ namespace DiscUtils.Fat
             time = (ushort)(((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second / 2) & 0x001F));
             tenths = (byte)(((value.Second % 2) * 100) + (value.Millisecond / 10));
         }
-
     }
 }

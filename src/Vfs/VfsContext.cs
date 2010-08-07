@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Vfs
 {
     /// <summary>
@@ -29,5 +28,4 @@ namespace DiscUtils.Vfs
     public abstract class VfsContext
     {
     }
-
 }

@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal enum RpcAcceptStatus
@@ -47,6 +46,5 @@ namespace DiscUtils.Nfs
                 MismatchInfo = new RpcMismatchInfo(reader);
             }
         }
-
     }
 }

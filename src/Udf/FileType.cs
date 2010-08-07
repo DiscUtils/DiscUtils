@@ -48,6 +48,5 @@ namespace DiscUtils.Udf
         UdfMetadataFile = 250,
         UdfMetadataMirrorFile = 251,
         UdfMetadataBitmapFile = 252,
-
     }
 }

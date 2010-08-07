@@ -102,6 +102,7 @@ namespace DiscUtils.Fat
             {
                 return _position;
             }
+
             set
             {
                 if (value >= 0)
@@ -191,6 +192,7 @@ namespace DiscUtils.Fat
             {
                 newPos += Length;
             }
+
             _position = newPos;
             _atEOF = false;
             return newPos;
@@ -217,6 +219,7 @@ namespace DiscUtils.Fat
                 {
                     _knownClusters.RemoveAt(_knownClusters.Count - 1);
                 }
+
                 _knownClusters.Add(FatBuffer.EndOfChain);
 
                 if (desiredNumClusters == 0)
@@ -264,7 +267,6 @@ namespace DiscUtils.Fat
             }
 
             // TODO: Free space check...
-
             try
             {
                 while (bytesRemaining > 0)
@@ -360,6 +362,7 @@ namespace DiscUtils.Fat
             {
                 _fat.SetNext(_knownClusters[_knownClusters.Count - 2], cluster);
             }
+
             _knownClusters[_knownClusters.Count - 1] = cluster;
             _knownClusters.Add(_fat.GetNext(cluster));
 
@@ -468,6 +471,5 @@ namespace DiscUtils.Fat
 
             return (uint)((long)(_knownClusters.Count - 1) * (long)(_reader.ClusterSize));
         }
-
     }
 }

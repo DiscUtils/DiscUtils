@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Wim
 {
     /// <summary>
@@ -49,7 +48,9 @@ namespace DiscUtils.Wim
             for (int i = 0; i < _lengths.Length; ++i)
             {
                 if (_lengths[i] > maxLength)
+                {
                     maxLength = _lengths[i];
+                }
             }
 
             _numBits = (int)maxLength;
@@ -104,6 +105,5 @@ namespace DiscUtils.Wim
                 _buffer[i] = uint.MaxValue;
             }
         }
-
     }
 }

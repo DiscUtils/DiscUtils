@@ -141,6 +141,7 @@ namespace DiscUtils.Xva
                             {
                                 chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
                             }
+
                             HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
 
                             tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], i), chunkHashStream);
@@ -207,7 +208,6 @@ namespace DiscUtils.Xva
             string srName = "SR";
             int srId = id++;
 
-
             string vbdRefs = "";
             for (int i = 0; i < _disks.Count; ++i)
             {
@@ -219,7 +219,6 @@ namespace DiscUtils.Xva
             {
                 vdiRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vdiIds[i]);
             }
-
 
             StringBuilder objectsString = new StringBuilder();
 

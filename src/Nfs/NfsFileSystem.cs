@@ -73,6 +73,7 @@ namespace DiscUtils.Nfs
                     _client = null;
                 }
             }
+
             base.Dispose(disposing);
         }
 
@@ -162,9 +163,8 @@ namespace DiscUtils.Nfs
                 setAttrs.SetSize = true;
                 destFileHandle = _client.Create(destParent, destFileName, !overwrite, setAttrs);
 
-
                 // Copy the file contents
-                using(Nfs3FileStream sourceFs = new Nfs3FileStream(_client, sourceFileHandle, FileAccess.Read))
+                using (Nfs3FileStream sourceFs = new Nfs3FileStream(_client, sourceFileHandle, FileAccess.Read))
                 using (Nfs3FileStream destFs = new Nfs3FileStream(_client, destFileHandle, FileAccess.Write))
                 {
                     int bufferSize = (int)Math.Max(1 * Sizes.OneMiB, Math.Min(_client.FileSystemInfo.WritePreferredBytes, _client.FileSystemInfo.ReadPreferredBytes));
@@ -516,6 +516,7 @@ namespace DiscUtils.Nfs
                     {
                         result.SetLength(0);
                     }
+
                     return result;
                 }
             }
@@ -740,6 +741,7 @@ namespace DiscUtils.Nfs
             {
                 throw new FileNotFoundException("No such file or directory", path);
             }
+
             return handle;
         }
 
@@ -775,6 +777,5 @@ namespace DiscUtils.Nfs
         {
             throw new IOException("NFS Status: " + ne.Message, ne);
         }
-
     }
 }

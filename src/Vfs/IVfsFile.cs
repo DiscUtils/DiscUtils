@@ -87,5 +87,4 @@ namespace DiscUtils.Vfs
         /// exist.</remarks>
         Stream OpenExistingStream(string name);
     }
-
 }

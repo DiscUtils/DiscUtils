@@ -76,9 +76,21 @@ namespace DiscUtils.Iscsi
         {
             byte value = 0;
 
-            if (isFinalData) value |= 0x80;
-            if (expectReadFromTarget) value |= 0x40;
-            if (expectWriteToTarget) value |= 0x20;
+            if (isFinalData)
+            {
+                value |= 0x80;
+            }
+
+            if (expectReadFromTarget)
+            {
+                value |= 0x40;
+            }
+
+            if (expectWriteToTarget)
+            {
+                value |= 0x20;
+            }
+
             value |= (byte)((int)taskAttr & 0x3);
 
             return value;

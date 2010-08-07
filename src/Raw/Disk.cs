@@ -34,7 +34,6 @@ namespace DiscUtils.Raw
     {
         private DiskImageFile _file;
 
-
         /// <summary>
         /// Creates a new instance from an existing stream.
         /// </summary>
@@ -96,6 +95,7 @@ namespace DiscUtils.Raw
                     {
                         _file.Dispose();
                     }
+
                     _file = null;
                 }
             }

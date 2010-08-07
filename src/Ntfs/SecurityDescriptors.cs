@@ -74,6 +74,7 @@ namespace DiscUtils.Ntfs
             {
                 return ReadDescriptor(data).Descriptor;
             }
+
             return null;
         }
 
@@ -259,7 +260,7 @@ namespace DiscUtils.Ntfs
                 Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
                 Utilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
                 Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
-                //Array.Copy(new byte[] { (byte)'I', 0, (byte)'I', 0 }, 0, buffer, offset + 0x14, 4);
+                ////Array.Copy(new byte[] { (byte)'I', 0, (byte)'I', 0 }, 0, buffer, offset + 0x14, 4);
             }
 
             public int Size
@@ -370,6 +371,5 @@ namespace DiscUtils.Ntfs
                 return CompareTo(other.Hash);
             }
         }
-
     }
 }

@@ -350,6 +350,7 @@ namespace DiscUtils.Ntfs
             {
                 pos += attr.Write(buffer, offset + pos);
             }
+
             Utilities.WriteBytesLittleEndian(uint.MaxValue, buffer, offset + pos);
 
             return headerEnd;
@@ -379,6 +380,7 @@ namespace DiscUtils.Ntfs
                 {
                     return offset;
                 }
+
                 offset += attr.Size;
             }
 
@@ -403,9 +405,20 @@ namespace DiscUtils.Ntfs
         {
             FileAttributeFlags result = FileAttributeFlags.None;
 
-            if ((source & FileRecordFlags.IsDirectory) != 0) result |= FileAttributeFlags.Directory;
-            if ((source & FileRecordFlags.HasViewIndex) != 0) result |= FileAttributeFlags.IndexView;
-            if ((source & FileRecordFlags.IsMetaFile) != 0) result |= FileAttributeFlags.Hidden | FileAttributeFlags.System;
+            if ((source & FileRecordFlags.IsDirectory) != 0)
+            {
+                result |= FileAttributeFlags.Directory;
+            }
+
+            if ((source & FileRecordFlags.HasViewIndex) != 0)
+            {
+                result |= FileAttributeFlags.IndexView;
+            }
+
+            if ((source & FileRecordFlags.IsMetaFile) != 0)
+            {
+                result |= FileAttributeFlags.Hidden | FileAttributeFlags.System;
+            }
 
             return result;
         }

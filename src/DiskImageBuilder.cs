@@ -112,6 +112,5 @@ namespace DiscUtils
 
             s_typeMap = typeMap;
         }
-
     }
 }

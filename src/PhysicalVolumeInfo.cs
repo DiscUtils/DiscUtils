@@ -219,6 +219,7 @@ namespace DiscUtils
                 {
                     return gpi.Identity;
                 }
+
                 return Guid.Empty;
             }
         }

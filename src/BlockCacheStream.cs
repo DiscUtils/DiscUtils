@@ -20,49 +20,52 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     /// <summary>
     /// Settings controlling BlockCache instances.
     /// </summary>
     public sealed class BlockCacheSettings
     {
         /// <summary>
-        /// Creates a new instance, with default settings.
+        /// Initializes a new instance of the BlockCacheSettings class.
         /// </summary>
         public BlockCacheSettings()
         {
-            BlockSize = (int)(4 * Sizes.OneKiB);
-            ReadCacheSize = 4 * Sizes.OneMiB;
-            LargeReadSize = 64 * Sizes.OneKiB;
-            OptimumReadSize = (int)(64 * Sizes.OneKiB);
-        }
-
-        internal BlockCacheSettings(BlockCacheSettings settings)
-        {
-            BlockSize = settings.BlockSize;
-            ReadCacheSize = settings.ReadCacheSize;
-            LargeReadSize = settings.LargeReadSize;
-            OptimumReadSize = settings.OptimumReadSize;
+            this.BlockSize = (int)(4 * Sizes.OneKiB);
+            this.ReadCacheSize = 4 * Sizes.OneMiB;
+            this.LargeReadSize = 64 * Sizes.OneKiB;
+            this.OptimumReadSize = (int)(64 * Sizes.OneKiB);
         }
 
         /// <summary>
-        /// The size (in bytes) of each cached block.
+        /// Initializes a new instance of the BlockCacheSettings class.
+        /// </summary>
+        /// <param name="settings">The cache settings</param>
+        internal BlockCacheSettings(BlockCacheSettings settings)
+        {
+            this.BlockSize = settings.BlockSize;
+            this.ReadCacheSize = settings.ReadCacheSize;
+            this.LargeReadSize = settings.LargeReadSize;
+            this.OptimumReadSize = settings.OptimumReadSize;
+        }
+
+        /// <summary>
+        /// Gets or sets the size (in bytes) of each cached block.
         /// </summary>
         public int BlockSize { get; set; }
 
         /// <summary>
-        /// The size (in bytes) of the read cache.
+        /// Gets or sets the size (in bytes) of the read cache.
         /// </summary>
         public long ReadCacheSize { get; set; }
 
         /// <summary>
-        /// The maximum read size that will be cached, and not bypass the cache.
+        /// Gets or sets the maximum read size that will be cached.
         /// </summary>
         /// <remarks>Large reads are not cached, on the assumption they will not
         /// be repeated.  This setting controls what is considered 'large'.
@@ -70,7 +73,7 @@ namespace DiscUtils
         public long LargeReadSize { get; set; }
 
         /// <summary>
-        /// The optimum size of a read to the wrapped stream.
+        /// Gets or sets the optimum size of a read to the wrapped stream.
         /// </summary>
         /// <remarks>This value must be a multiple of BlockSize</remarks>
         public int OptimumReadSize { get; set; }
@@ -174,11 +177,11 @@ namespace DiscUtils
             {
                 throw new ArgumentException("The wrapped stream does not support reading", "toWrap");
             }
+
             if (!toWrap.CanSeek)
             {
                 throw new ArgumentException("The wrapped stream does not support seeking", "toWrap");
             }
-
 
             _wrappedStream = toWrap;
             _ownWrapped = ownership;
@@ -188,6 +191,7 @@ namespace DiscUtils
             {
                 throw new ArgumentException("Invalid settings, OptimumReadSize must be a multiple of BlockSize", "settings");
             }
+
             _readBuffer = new byte[_settings.OptimumReadSize];
             _blocksInReadBuffer = _settings.OptimumReadSize / _settings.BlockSize;
 
@@ -213,6 +217,7 @@ namespace DiscUtils
                 {
                     _wrappedStream.Dispose();
                 }
+
                 _wrappedStream = null;
             }
 
@@ -299,6 +304,7 @@ namespace DiscUtils
                 CheckDisposed();
                 return _position;
             }
+
             set
             {
                 CheckDisposed();
@@ -411,7 +417,7 @@ namespace DiscUtils
                     }
 
                     // Cache the read blocks
-                    for(int i = 0; i < blocksToRead; ++i)
+                    for (int i = 0; i < blocksToRead; ++i)
                     {
                         int copyBytes = Math.Min(blockSize, bytesToRead - i * blockSize);
                         CacheBlock block = GetFreeBlock();
@@ -425,6 +431,7 @@ namespace DiscUtils
 
                         StoreBlock(block);
                     }
+
                     blocksRead += blocksToRead;
 
                     // Propogate the data onto the caller
@@ -445,6 +452,7 @@ namespace DiscUtils
             {
                 _stats.ReadCacheHits++;
             }
+
             if (servicedOutsideCache)
             {
                 _stats.ReadCacheMisses++;
@@ -526,14 +534,11 @@ namespace DiscUtils
                 throw;
             }
 
-
             int offsetInNextBlock = (int)(_position % blockSize);
-
             if (offsetInNextBlock != 0)
             {
                 _stats.UnalignedWritesIn++;
             }
-
 
             // For each block touched, if it's cached, update it
             int bytesProcessed = 0;
@@ -617,10 +622,10 @@ namespace DiscUtils
             }
         }
 
-
         private sealed class CacheBlock : IEquatable<CacheBlock>
         {
             public long Block { get; set; }
+
             public byte[] Data { get; private set; }
 
             public CacheBlock(int size)

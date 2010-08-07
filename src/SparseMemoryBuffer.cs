@@ -82,6 +82,7 @@ namespace DiscUtils
                     return 0;
                 }
             }
+
             set
             {
                 byte[] buffer = new byte[1];

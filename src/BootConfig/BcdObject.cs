@@ -176,6 +176,7 @@ namespace DiscUtils.BootConfig
                 {
                     return name;
                 }
+
                 return _id.ToString("B");
             }
         }
@@ -211,7 +212,7 @@ namespace DiscUtils.BootConfig
         /// <returns><c>true</c> if the settings can be inherited, else <c>false</c></returns>
         public bool IsInheritableBy(ObjectType type)
         {
-            if(type == ObjectType.Inherit)
+            if (type == ObjectType.Inherit)
             {
                 throw new ArgumentException("Can not test inheritability by inherit objects", "type");
             }
@@ -273,6 +274,7 @@ namespace DiscUtils.BootConfig
             {
                 return new Element(_storage, _id, ApplicationType, id);
             }
+
             return null;
         }
 

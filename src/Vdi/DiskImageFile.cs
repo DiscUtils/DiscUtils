@@ -118,6 +118,7 @@ namespace DiscUtils.Vdi
             {
                 Utilities.WriteBytesLittleEndian((uint)i, blockTable, i * 4);
             }
+
             header.BlocksAllocated = header.BlockCount;
 
             stream.Position = 0;
@@ -153,6 +154,7 @@ namespace DiscUtils.Vdi
             {
                 blockTable[i] = 0xFF;
             }
+
             header.BlocksAllocated = 0;
 
             stream.Position = 0;

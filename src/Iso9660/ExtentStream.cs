@@ -106,6 +106,7 @@ namespace DiscUtils.Iso9660
             {
                 newPos += _dataLength;
             }
+
             _position = newPos;
             return newPos;
         }

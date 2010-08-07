@@ -95,6 +95,7 @@ namespace DiscUtils.Vmdk
                 _position += numToWrite;
                 totalWritten += numToWrite;
             }
+
             _atEof = _position == Length;
         }
 
@@ -120,6 +121,7 @@ namespace DiscUtils.Vmdk
             {
                 SetGrainTableEntry(grain + i, (uint)((grainStartPos / Sizes.Sector) + _header.GrainSize * i));
             }
+
             WriteGrainTable();
         }
 
@@ -153,6 +155,7 @@ namespace DiscUtils.Vmdk
             {
                 Utilities.WriteBytesLittleEndian(_globalDirectory[i], buffer, i * 4);
             }
+
             _fileStream.Position = ((long)_serverHeader.GdOffset) * Sizes.Sector;
             _fileStream.Write(buffer, 0, buffer.Length);
         }

@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -170,7 +169,7 @@ namespace DiscUtils.Iscsi
         /// </summary>
         public long Lun
         {
-            get { return _lun;}
+            get { return _lun; }
         }
 
         /// <summary>
@@ -244,6 +243,7 @@ namespace DiscUtils.Iscsi
             {
                 results.Add(targetAddress.ToUri().ToString() + "/" + _targetInfo.Name + "?LUN=" + ToString());
             }
+
             return results.ToArray();
         }
 

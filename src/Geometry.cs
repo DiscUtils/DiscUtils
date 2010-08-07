@@ -150,18 +150,22 @@ namespace DiscUtils
             {
                 throw new ArgumentOutOfRangeException("cylinder", cylinder, "cylinder number is negative");
             }
+
             if (head >= _headsPerCylinder)
             {
                 throw new ArgumentOutOfRangeException("head", head, "head number is larger than disk geometry");
             }
+
             if (head < 0)
             {
                 throw new ArgumentOutOfRangeException("head", head, "head number is negative");
             }
+
             if (sector > _sectorsPerTrack)
             {
                 throw new ArgumentOutOfRangeException("sector", sector, "sector number is larger than disk geometry");
             }
+
             if (sector < 1)
             {
                 throw new ArgumentOutOfRangeException("sector", sector, "sector number is less than one (sectors are 1-based)");
@@ -252,7 +256,7 @@ namespace DiscUtils
             }
 
             int sectors = 63;
-            int cylinders = (int)Math.Min(1024, capacity/(sectors * heads * Sizes.Sector));
+            int cylinders = (int)Math.Min(1024, capacity / (sectors * heads * Sizes.Sector));
             return new Geometry(cylinders, heads, sectors, Sizes.Sector);
         }
 
@@ -265,7 +269,7 @@ namespace DiscUtils
         /// <remarks>This method returns the LBA-Assisted geometry if the given geometry isn't BIOS-safe.</remarks>
         public static Geometry MakeBiosSafe(Geometry geometry, long capacity)
         {
-            if(geometry == null)
+            if (geometry == null)
             {
                 return LbaAssistedBiosGeometry(capacity);
             }
@@ -337,8 +341,8 @@ namespace DiscUtils
                     sectorsPerTrack = 63;
                     headsPerCylinder = 16;
                 }
-
             }
+
             cylinders = (totalSectors / sectorsPerTrack) / headsPerCylinder;
 
             return new Geometry(cylinders, headsPerCylinder, sectorsPerTrack);

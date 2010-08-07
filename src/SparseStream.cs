@@ -176,6 +176,7 @@ namespace DiscUtils
                 {
                     return _wrapped.Position;
                 }
+
                 set
                 {
                     _wrapped.Position = value;
@@ -271,6 +272,7 @@ namespace DiscUtils
                 {
                     return _wrapped.Position;
                 }
+
                 set
                 {
                     _wrapped.Position = value;
@@ -298,6 +300,7 @@ namespace DiscUtils
                 {
                     throw new InvalidOperationException("Attempt to write to stream with explicit extents");
                 }
+
                 _wrapped.Write(buffer, offset, count);
             }
 

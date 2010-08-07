@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Iscsi
 {
     internal enum RejectReason : byte
@@ -45,7 +44,6 @@ namespace DiscUtils.Iscsi
         public BasicHeaderSegment Header;
         public RejectReason Reason;
         public uint DataSequenceNumber;
-
 
         public override void Parse(ProtocolDataUnit pdu)
         {

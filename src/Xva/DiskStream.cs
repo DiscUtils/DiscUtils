@@ -83,12 +83,14 @@ namespace DiscUtils.Xva
             {
                 return _position;
             }
+
             set
             {
                 if (value > _length)
                 {
                     throw new IOException("Attempt to move beyond end of stream");
                 }
+
                 _position = value;
             }
         }
@@ -114,10 +116,12 @@ namespace DiscUtils.Xva
                     _currentChunkData.Dispose();
                     _currentChunkData = null;
                 }
+
                 if (!_archive.TryOpenFile(string.Format(CultureInfo.InvariantCulture, @"{0}/{1:X8}", _dir, chunk), out _currentChunkData))
                 {
                     _currentChunkData = new ZeroStream(Sizes.OneMiB);
                 }
+
                 _currentChunkIndex = chunk;
             }
 
@@ -180,6 +184,7 @@ namespace DiscUtils.Xva
                     {
                         ++i;
                     }
+
                     int start = i;
 
                     // Find next absent block

@@ -104,6 +104,7 @@ namespace DiscUtils.LogicalDiskManager
             {
                 return IsLdmPartition(pi);
             }
+
             return false;
         }
 
@@ -152,6 +153,5 @@ namespace DiscUtils.LogicalDiskManager
         }
 
         #endregion
-
     }
 }

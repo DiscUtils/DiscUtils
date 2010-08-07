@@ -58,7 +58,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[AttributeDefinitionRecord.Size];
             using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             {
-                while(Utilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
+                while (Utilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
                 {
                     AttributeDefinitionRecord record = new AttributeDefinitionRecord();
                     record.Read(buffer, 0);
@@ -114,6 +114,7 @@ namespace DiscUtils.Ntfs
             {
                 return (record.Flags & AttributeTypeFlags.MustBeResident) != 0;
             }
+
             return false;
         }
 
@@ -124,6 +125,7 @@ namespace DiscUtils.Ntfs
             {
                 return (record.Flags & AttributeTypeFlags.Indexed) != 0;
             }
+
             return false;
         }
 
@@ -137,6 +139,5 @@ namespace DiscUtils.Ntfs
             adr.MaxSize = maxSize;
             _attrDefs.Add(attributeType, adr);
         }
-
     }
 }

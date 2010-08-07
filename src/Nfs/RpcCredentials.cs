@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     /// <summary>
@@ -33,6 +32,7 @@ namespace DiscUtils.Nfs
         }
 
         internal abstract RpcAuthFlavour AuthFlavour { get; }
+
         internal abstract void Write(XdrDataWriter writer);
     }
 
@@ -41,7 +41,6 @@ namespace DiscUtils.Nfs
     /// </summary>
     public sealed class RpcNullCredentials : RpcCredentials
     {
-
         internal override RpcAuthFlavour AuthFlavour
         {
             get { return RpcAuthFlavour.Null; }

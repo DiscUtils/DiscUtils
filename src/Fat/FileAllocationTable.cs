@@ -84,6 +84,7 @@ namespace DiscUtils.Fat
             {
                 _buffer.WriteDirtyRegions(_stream, _firstFatSector * Utilities.SectorSize + _buffer.Size * i);
             }
+
             _buffer.ClearDirtyRegions();
         }
 

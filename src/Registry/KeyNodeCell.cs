@@ -123,5 +123,4 @@ namespace DiscUtils.Registry
             return "Key:" + Name + "[" + Flags + "] <" + Timestamp + ">";
         }
     }
-
 }

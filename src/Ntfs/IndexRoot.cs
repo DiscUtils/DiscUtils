@@ -135,7 +135,6 @@ namespace DiscUtils.Ntfs
                     return 1;
                 }
 
-
                 uint xHash = Utilities.ToUInt32LittleEndian(x, 0);
                 uint yHash = Utilities.ToUInt32LittleEndian(y, 0);
 
@@ -193,6 +192,7 @@ namespace DiscUtils.Ntfs
                 {
                     return 1;
                 }
+
                 return 0;
             }
         }
@@ -228,6 +228,7 @@ namespace DiscUtils.Ntfs
                         return 1;
                     }
                 }
+
                 return 0;
             }
         }
@@ -298,6 +299,7 @@ namespace DiscUtils.Ntfs
                 {
                     return 1;
                 }
+
                 return 0;
             }
         }

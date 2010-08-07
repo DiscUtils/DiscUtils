@@ -80,6 +80,7 @@ namespace DiscUtils.Nfs
                     _fileSystem = null;
                 }
             }
+
             base.Dispose(disposing);
         }
 
@@ -103,5 +104,4 @@ namespace DiscUtils.Nfs
             return Utilities.GetFileFromPath(_path);
         }
     }
-
 }

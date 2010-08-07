@@ -30,7 +30,6 @@ namespace DiscUtils.Iso9660
     /// </summary>
     public class CDReader : VfsFileSystemFacade
     {
-
         /// <summary>
         /// Creates a new instance.
         /// </summary>

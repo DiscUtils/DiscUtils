@@ -57,7 +57,7 @@ namespace DiscUtils.Fat
         private FatType _type;
         private byte[] _buffer;
         private uint _nextFreeCandidate;
-        private Dictionary<uint,uint> _dirtySectors;
+        private Dictionary<uint, uint> _dirtySectors;
 
         public FatBuffer(FatType type, byte[] buffer)
         {
@@ -132,6 +132,7 @@ namespace DiscUtils.Fat
             {
                 _nextFreeCandidate = cluster;
             }
+
             SetNext(cluster, FreeCluster);
         }
 

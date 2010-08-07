@@ -20,8 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
-
 namespace DiscUtils.Iscsi
 {
     internal enum LogoutResponseCode
@@ -52,7 +50,6 @@ namespace DiscUtils.Iscsi
             {
                 throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LogoutResponse + " was " + _headerSegment.OpCode);
             }
-
 
             Response = (LogoutResponseCode)headerData[headerOffset + 2];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);

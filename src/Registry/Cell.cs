@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Registry
 {
     /// <summary>
@@ -82,7 +81,9 @@ namespace DiscUtils.Registry
         #region IByteArraySerializable Members
 
         public abstract int ReadFrom(byte[] buffer, int offset);
+
         public abstract void WriteTo(byte[] buffer, int offset);
+
         public abstract int Size
         {
             get;

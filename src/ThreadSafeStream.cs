@@ -78,9 +78,11 @@ namespace DiscUtils
                 throw new ArgumentException("Wrapped stream must support seeking", "toWrap");
             }
 
-            _common = new CommonState {
+            _common = new CommonState
+            {
                 WrappedStream = toWrap,
-                WrappedStreamOwnership = ownership };
+                WrappedStreamOwnership = ownership
+            };
             _ownsCommon = true;
         }
 
@@ -109,6 +111,7 @@ namespace DiscUtils
                         {
                             _common.WrappedStream.Dispose();
                         }
+
                         _common.Dispose();
                     }
                 }
@@ -225,6 +228,7 @@ namespace DiscUtils
             {
                 return _position;
             }
+
             set
             {
                 _position = value;
@@ -320,6 +324,7 @@ namespace DiscUtils
                 {
                     throw new ObjectDisposedException("ThreadSafeStream");
                 }
+
                 return wrapped;
             }
         }

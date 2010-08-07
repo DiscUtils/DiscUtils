@@ -48,7 +48,6 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Data truncated too far");
             }
 
-
             _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset) / 8;
             int pos = 8;
             while (pos <= count - 8 && _luns.Count < _availableLuns)

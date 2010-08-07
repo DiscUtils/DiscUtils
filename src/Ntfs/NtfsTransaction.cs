@@ -35,7 +35,6 @@ namespace DiscUtils.Ntfs
 
         private DateTime _timestamp;
 
-
         public NtfsTransaction()
         {
             if (s_instance == null)

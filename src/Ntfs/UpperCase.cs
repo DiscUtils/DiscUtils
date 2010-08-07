@@ -97,6 +97,5 @@ namespace DiscUtils.Ntfs
             // determining factor.
             return xLength - yLength;
         }
-
     }
 }

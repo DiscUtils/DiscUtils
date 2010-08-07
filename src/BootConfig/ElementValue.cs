@@ -39,7 +39,10 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets the parent object (only for Device values).
         /// </summary>
-        public virtual Guid ParentObject { get { return Guid.Empty; } }
+        public virtual Guid ParentObject
+        {
+            get { return Guid.Empty; }
+        }
 
         /// <summary>
         /// Gets a value representing a device (aka partition).
@@ -93,6 +96,7 @@ namespace DiscUtils.BootConfig
             {
                 ulValues[i] = (ulong)values[i];
             }
+
             return new IntegerListElementValue(ulValues);
         }
 
@@ -128,6 +132,7 @@ namespace DiscUtils.BootConfig
             {
                 strValues[i] = values[i].ToString("B");
             }
+
             return new GuidListElementValue(strValues);
         }
     }
@@ -239,6 +244,7 @@ namespace DiscUtils.BootConfig
             {
                 Utilities.WriteBytesLittleEndian(_values[i], bytes, i * 8);
             }
+
             return bytes;
         }
     }
@@ -374,15 +380,13 @@ namespace DiscUtils.BootConfig
             {
                 throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "Unknown how to convert volume type {0} to a Device element", pvi.VolumeType));
             }
+
             _record = record;
         }
 
         public DeviceElementValue(byte[] value)
         {
             _parentObject = Utilities.ToGuidLittleEndian(value, 0x00);
-
-            // -- Start of data structure --
-
             _record = DeviceRecord.Parse(value, 0x10);
         }
 
@@ -405,7 +409,6 @@ namespace DiscUtils.BootConfig
         {
             get { return ElementFormat.Device; }
         }
-
 
         public override string ToString()
         {

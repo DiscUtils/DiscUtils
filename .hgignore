@@ -10,3 +10,4 @@ glob:unittests\results.xml
 glob:layout
 glob:Help
 glob:scratch
+glob:*StyleCop.Cache

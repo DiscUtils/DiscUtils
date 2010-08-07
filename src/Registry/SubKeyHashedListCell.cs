@@ -61,6 +61,7 @@ namespace DiscUtils.Registry
                 _subKeyIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8)));
                 _nameHashes.Add(Utilities.ToUInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8) + 0x4));
             }
+
             return 0x4 + _numElements * 0x8;
         }
 
@@ -118,6 +119,7 @@ namespace DiscUtils.Registry
             {
                 return result;
             }
+
             result = FindKeyAt(name, _subKeyIndexes.Count - 1, out cellIndex);
             if (result >= 0)
             {
@@ -209,6 +211,7 @@ namespace DiscUtils.Registry
                     hash |= (uint)((hashStr[i] & 0xFF) << (i * 8));
                 }
             }
+
             return hash;
         }
 
@@ -301,18 +304,17 @@ namespace DiscUtils.Registry
             public int Compare(int x, int y)
             {
                 // TODO: Be more efficient at ruling out no-hopes by using the hash values
-
                 KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(x);
                 int result = string.Compare(((KeyNodeCell)cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
                 if (result == 0)
                 {
                     CellIndex = x;
                 }
+
                 return result;
             }
 
             #endregion
         }
     }
-
 }

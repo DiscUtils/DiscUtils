@@ -59,6 +59,5 @@ namespace DiscUtils.Iscsi
 
             return buffer;
         }
-
     }
 }

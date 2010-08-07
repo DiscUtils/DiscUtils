@@ -48,6 +48,7 @@ namespace DiscUtils.Iscsi
                 {
                     _session.Dispose();
                 }
+
                 _session = null;
             }
 

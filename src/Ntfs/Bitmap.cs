@@ -134,7 +134,6 @@ namespace DiscUtils.Ntfs
                 buffer[buffer.Length - 1] = GetByte(lastByte);
             }
 
-
             for (long i = index; i < index + count; ++i)
             {
                 long byteIdx = i / 8 - firstByte;
@@ -211,6 +210,5 @@ namespace DiscUtils.Ntfs
             _bitmap.Write(buffer, 0, buffer.Length);
             _bitmap.Flush();
         }
-
     }
 }

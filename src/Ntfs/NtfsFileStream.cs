@@ -90,6 +90,7 @@ namespace DiscUtils.Ntfs
             {
                 return _baseStream.Position;
             }
+
             set
             {
                 using (new NtfsTransaction())
@@ -165,6 +166,5 @@ namespace DiscUtils.Ntfs
                 _isDirty = false;
             }
         }
-
     }
 }

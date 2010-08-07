@@ -33,7 +33,6 @@ namespace DiscUtils.Wim
         public uint RefCount;
         public byte[] Hash;
 
-
         public void Read(byte[] buffer, int offset)
         {
             Header = new ShortResourceHeader();

@@ -27,7 +27,8 @@ namespace DiscUtils.Nfs
     /// <summary>
     /// NFS status codes.
     /// </summary>
-    public enum Nfs3Status {
+    public enum Nfs3Status
+    {
         /// <summary>
         /// Indicates the call completed successfully.
         /// </summary>
@@ -194,9 +195,7 @@ namespace DiscUtils.Nfs
         /// An unknown error occured.
         /// </summary>
         Unknown = -1
-    };
-
-
+    }
 
     internal sealed class Nfs3 : RpcProgram
     {
@@ -222,8 +221,6 @@ namespace DiscUtils.Nfs
         {
             get { return ProgramVersion; }
         }
-
-
 
         public Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
         {

@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Nfs
 {
     internal class Nfs3FileSystemInfoResult : Nfs3CallResult
     {
         public Nfs3FileAttributes PostOpAttributes { get; set; }
+
         public Nfs3FileSystemInfo FileSystemInfo { get; set; }
 
         public Nfs3FileSystemInfoResult(XdrDataReader reader)
@@ -35,6 +35,7 @@ namespace DiscUtils.Nfs
             {
                 PostOpAttributes = new Nfs3FileAttributes(reader);
             }
+
             if (Status == Nfs3Status.Ok)
             {
                 FileSystemInfo = new Nfs3FileSystemInfo(reader);
