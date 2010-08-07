@@ -81,7 +81,7 @@ namespace DiscUtils.Ntfs
                 _mftCluster = mftBitmapCluster + numMftBitmapClusters;
                 int numMftClusters = 8;
 
-                if ( _mftCluster + numMftClusters > _mftMirrorCluster
+                if (_mftCluster + numMftClusters > _mftMirrorCluster
                     || _bitmapCluster + numBitmapClusters >= totalClusters)
                 {
                     throw new IOException("Unable to determine initial layout of NTFS metadata - disk may be too small");

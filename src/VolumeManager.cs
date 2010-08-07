@@ -185,7 +185,7 @@ namespace DiscUtils
         /// </summary>
         private void Scan()
         {
-            Dictionary<string,PhysicalVolumeInfo> newPhysicalVolumes = ScanForPhysicalVolumes();
+            Dictionary<string, PhysicalVolumeInfo> newPhysicalVolumes = ScanForPhysicalVolumes();
             Dictionary<string, LogicalVolumeInfo> newLogicalVolumes = ScanForLogicalVolumes(newPhysicalVolumes.Values);
 
             _physicalVolumes = newPhysicalVolumes;

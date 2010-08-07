@@ -28,7 +28,7 @@ namespace DiscUtils.Iso9660
 {
     internal struct PathTableRecord
     {
-        //public byte ExtendedAttributeRecordLength;
+        ////public byte ExtendedAttributeRecordLength;
         public uint LocationOfExtent;
         public ushort ParentDirectoryNumber;
         public string DirectoryIdentifier;

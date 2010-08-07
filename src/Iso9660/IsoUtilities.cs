@@ -78,7 +78,7 @@ namespace DiscUtils.Iso9660
                 throw new IOException("Attempt to write string with invalid a-characters");
             }
 
-            //WriteASCII(buffer, offset, numBytes, true, str);
+            ////WriteASCII(buffer, offset, numBytes, true, str);
             WriteString(buffer, offset, numBytes, true, str, Encoding.ASCII);
         }
 
@@ -90,7 +90,7 @@ namespace DiscUtils.Iso9660
                 throw new IOException("Attempt to write string with invalid d-characters");
             }
 
-            //WriteASCII(buffer, offset, numBytes, true, str);
+            ////WriteASCII(buffer, offset, numBytes, true, str);
             WriteString(buffer, offset, numBytes, true, str, Encoding.ASCII);
         }
 

@@ -305,7 +305,7 @@ namespace DiscUtils.Partitions
             {
                 bpt = new BiosPartitionTable(disk, diskGeometry);
             }
-            catch(IOException ioe)
+            catch (IOException ioe)
             {
                 throw new IOException("Invalid GPT disk, protective MBR table not present or invalid", ioe);
             }

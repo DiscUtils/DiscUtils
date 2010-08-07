@@ -70,7 +70,7 @@ namespace DiscUtils.Ntfs
         public RawSecurityDescriptor GetDescriptorById(uint id)
         {
             IdIndexData data;
-            if(_idIndex.TryGetValue(new IdIndexKey(id), out data))
+            if (_idIndex.TryGetValue(new IdIndexKey(id), out data))
             {
                 return ReadDescriptor(data).Descriptor;
             }

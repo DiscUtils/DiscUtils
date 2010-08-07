@@ -53,7 +53,7 @@ namespace DiscUtils.Udf
             {
                 result = new Type1PartitionMap();
             }
-            else if(type == 2)
+            else if (type == 2)
             {
                 EntityIdentifier id = Utilities.ToStruct<UdfEntityIdentifier>(buffer, offset + 4);
                 switch (id.Identifier)

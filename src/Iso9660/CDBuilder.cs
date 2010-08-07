@@ -165,7 +165,7 @@ namespace DiscUtils.Iso9660
         /// </remarks>
         public BuildFileInfo AddFile(string name, string sourcePath)
         {
-            string[] nameElements = name.Split(new char[]{'\\'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] nameElements = name.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             BuildDirectoryInfo dir = GetDirectory(nameElements, nameElements.Length - 1, true);
 
             BuildDirectoryMember existing;
@@ -327,8 +327,7 @@ namespace DiscUtils.Iso9660
                 (uint)(startOfSecondPathTable / IsoUtilities.SectorSize),  // TypeMPathTableLocation
                 (uint)(startOfFirstDirData / IsoUtilities.SectorSize),     // RootDirectory.LocationOfExtent
                 (uint)_rootDirectory.GetDataSize(Encoding.ASCII),          // RootDirectory.DataLength
-                buildTime
-                );
+                buildTime);
             pvDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
             PrimaryVolumeDescriptorRegion pvdr = new PrimaryVolumeDescriptorRegion(pvDesc, DiskStart);
             fixedRegions.Insert(0, pvdr);
@@ -341,8 +340,7 @@ namespace DiscUtils.Iso9660
                 (uint)(startOfSecondDirData / IsoUtilities.SectorSize),    // RootDirectory.LocationOfExtent
                 (uint)_rootDirectory.GetDataSize(suppEncoding),            // RootDirectory.DataLength
                 buildTime,
-                suppEncoding
-                );
+                suppEncoding);
             svDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
             SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, DiskStart + IsoUtilities.SectorSize);
             fixedRegions.Insert(1, svdr);

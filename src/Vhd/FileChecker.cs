@@ -116,7 +116,7 @@ namespace DiscUtils.Vhd
 
             _fileStream.Position = _dynamicHeader.TableOffset;
             byte[] batData = Utilities.ReadFully(_fileStream, batSize);
-            uint[] bat = new uint[batSize/4];
+            uint[] bat = new uint[batSize / 4];
             for (int i = 0; i < bat.Length; ++i)
             {
                 bat[i] = Utilities.ToUInt32BigEndian(batData, i * 4);
@@ -182,7 +182,7 @@ namespace DiscUtils.Vhd
             long pos = _footer.DataOffset;
             while (pos != -1)
             {
-                if((pos % 512) != 0)
+                if ((pos % 512) != 0)
                 {
                     ReportError("DynHeader: Unaligned header @{0}", pos);
                 }

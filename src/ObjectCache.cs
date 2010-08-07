@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace DiscUtils
 {
-    internal class ObjectCache<K,V> : IEnumerable<V>
+    internal class ObjectCache<K, V> : IEnumerable<V>
     {
         private Dictionary<K, WeakReference> _entries;
 

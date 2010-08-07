@@ -167,7 +167,7 @@ namespace DiscUtils
                 _baseStream.Position = extent.Start;
 
                 int totalRead = 0;
-                while(totalRead < extent.Length)
+                while (totalRead < extent.Length)
                 {
                     int toRead = (int)Math.Min(extent.Length - totalRead, buffer.Length);
 
@@ -280,7 +280,7 @@ namespace DiscUtils
 
                 // If the read is within the base stream's range, then touch it first to get the
                 // (potentially) stale data.
-                if(_position < _baseStream.Length)
+                if (_position < _baseStream.Length)
                 {
                     int baseToRead = (int)Math.Min(toRead, _baseStream.Length - _position);
                     _baseStream.Position = _position;

@@ -48,7 +48,7 @@ namespace DiscUtils.Vdi
 
         public int Read(byte[] buffer, int offset)
         {
-            FileInfo = Utilities.BytesToString(buffer, offset + 0, 64).TrimEnd(new char[]{'\0'});
+            FileInfo = Utilities.BytesToString(buffer, offset + 0, 64).TrimEnd(new char[] { '\0' });
             Signature = Utilities.ToUInt32LittleEndian(buffer, offset + 64);
             Version = new FileVersion(Utilities.ToUInt32LittleEndian(buffer, offset + 68));
             return Size;

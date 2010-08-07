@@ -78,11 +78,11 @@ namespace DiscUtils.LogicalDiskManager
             LogSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x15B);
         }
 
-        //private static int CalcChecksum()
-        //{
-        //    // Zero checksum bytes (0x08, 4)
-        //    // Add all byte values for 512 bytes
-        //    throw new NotImplementedException();
-        //}
+        ////private static int CalcChecksum()
+        ////{
+        ////    // Zero checksum bytes (0x08, 4)
+        ////    // Add all byte values for 512 bytes
+        ////    throw new NotImplementedException();
+        ////}
     }
 }

@@ -567,14 +567,14 @@ namespace DiscUtils.Vmdk
                 if (type == DiskCreateType.MonolithicFlat || type == DiskCreateType.VmfsSparse || type == DiskCreateType.Vmfs)
                 {
                     string adornment = "flat";
-                    if(type == DiskCreateType.VmfsSparse)
+                    if (type == DiskCreateType.VmfsSparse)
                     {
                         adornment = string.IsNullOrEmpty(baseDescriptor.ParentFileNameHint) ? "sparse" : "delta";
                     }
 
                     string fileName = AdornFileName(file, adornment);
 
-                    using(Stream fs = fileLocator.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                    using (Stream fs = fileLocator.Open(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
                     {
                         CreateExtent(fs, capacity, extentType);
                         extents.Add(new ExtentDescriptor(ExtentAccess.ReadWrite, capacity / Sizes.Sector, extentType, fileName, 0));
@@ -628,7 +628,7 @@ namespace DiscUtils.Vmdk
         {
             FileAccess access = FileAccess.Read;
             FileShare share = FileShare.Read;
-            if(extent.Access == ExtentAccess.ReadWrite && _access != FileAccess.Read)
+            if (extent.Access == ExtentAccess.ReadWrite && _access != FileAccess.Read)
             {
                 access = FileAccess.ReadWrite;
                 share = FileShare.None;
@@ -694,7 +694,7 @@ namespace DiscUtils.Vmdk
                 CreateSparseExtent(extentStream, size, descriptorLength, out descriptorStart);
                 return;
             }
-            else if(type == ExtentType.VmfsSparse)
+            else if (type == ExtentType.VmfsSparse)
             {
                 ServerSparseExtentHeader header = CreateServerSparseExtentHeader(size);
 

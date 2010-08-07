@@ -70,7 +70,7 @@ namespace DiscUtils.Ntfs
             return _index.TryGetValue(key, out value);
         }
 
-        internal IEnumerable<KeyValuePair<Guid,ObjectIdRecord>> All
+        internal IEnumerable<KeyValuePair<Guid, ObjectIdRecord>> All
         {
             get
             {

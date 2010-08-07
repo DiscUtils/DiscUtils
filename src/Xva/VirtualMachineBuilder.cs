@@ -130,7 +130,7 @@ namespace DiscUtils.Xva
                             Stream chunkStream;
 
                             long diskBytesLeft = diskStream.Length - (i * Sizes.OneMiB);
-                            if(diskBytesLeft < Sizes.OneMiB)
+                            if (diskBytesLeft < Sizes.OneMiB)
                             {
                                 chunkStream = new ConcatStream(
                                     Ownership.Dispose,
@@ -192,7 +192,7 @@ namespace DiscUtils.Xva
             long[] vdiSizes = new long[_disks.Count];
 
             int diskIdx = 0;
-            foreach(var disk in _disks)
+            foreach (var disk in _disks)
             {
                 vbdGuids[diskIdx] = Guid.NewGuid();
                 vbdIds[diskIdx] = id++;

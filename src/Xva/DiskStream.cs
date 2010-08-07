@@ -102,7 +102,7 @@ namespace DiscUtils.Xva
                 return 0;
             }
 
-            if(_position > _length)
+            if (_position > _length)
             {
                 throw new IOException("Attempt to read beyond end of stream");
             }
@@ -111,7 +111,7 @@ namespace DiscUtils.Xva
 
             if (_currentChunkIndex != chunk || _currentChunkData == null)
             {
-                if(_currentChunkData != null)
+                if (_currentChunkData != null)
                 {
                     _currentChunkData.Dispose();
                     _currentChunkData = null;

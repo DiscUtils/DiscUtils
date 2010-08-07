@@ -47,7 +47,7 @@ namespace DiscUtils.Udf
         /// <param name="data">The stream containing the UDF file system</param>
         /// <param name="sectorSize">The sector size of the physical media</param>
         public UdfReader(Stream data, int sectorSize)
-            :base (new VfsUdfReader(data, sectorSize))
+            : base(new VfsUdfReader(data, sectorSize))
         {
         }
 
@@ -234,7 +234,7 @@ namespace DiscUtils.Udf
             }
 
             byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, _lvd.FileSetDescriptorLocation);
-            if(DescriptorTag.IsValid(fsdBuffer, 0))
+            if (DescriptorTag.IsValid(fsdBuffer, 0))
             {
                 FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
                 RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);

@@ -36,7 +36,7 @@ namespace DiscUtils.LogicalDiskManager
         public string GroupName;
         public string DiskGroupId;
         public long CommittedSequence; // 0xA
-        public long PendingSequence; //0xA
+        public long PendingSequence; // 0xA
         public uint Unknown2; // 1
         public uint Unknown3; // 1
         public uint Unknown4; // 3
@@ -82,11 +82,11 @@ namespace DiscUtils.LogicalDiskManager
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64BigEndian(buffer, offset + 0xBD));
         }
 
-        //private static int CalcChecksum()
-        //{
-        //    // Zero checksum bytes (0x08, 4)
-        //    // Add all byte values for ?? bytes
-        //    throw new NotImplementedException();
-        //}
+        ////private static int CalcChecksum()
+        ////{
+        ////    // Zero checksum bytes (0x08, 4)
+        ////    // Add all byte values for ?? bytes
+        ////    throw new NotImplementedException();
+        ////}
     }
 }

@@ -67,15 +67,15 @@ namespace DiscUtils.Iso9660
                 {
                     case VolumeDescriptorType.Boot:
                         break;
-                    case VolumeDescriptorType.Primary: //Primary Vol Descriptor
+                    case VolumeDescriptorType.Primary: // Primary Vol Descriptor
                         pvdPos = vdpos;
                         break;
-                    case VolumeDescriptorType.Supplementary: //Supplementary Vol Descriptor
+                    case VolumeDescriptorType.Supplementary: // Supplementary Vol Descriptor
                         svdPos = vdpos;
                         break;
-                    case VolumeDescriptorType.Partition: //Volume Partition Descriptor
+                    case VolumeDescriptorType.Partition: // Volume Partition Descriptor
                         break;
-                    case VolumeDescriptorType.SetTerminator: //Volume Descriptor Set Terminator
+                    case VolumeDescriptorType.SetTerminator: // Volume Descriptor Set Terminator
                         break;
                 }
 

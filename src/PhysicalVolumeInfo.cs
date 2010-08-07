@@ -72,8 +72,7 @@ namespace DiscUtils
         internal PhysicalVolumeInfo(
             string diskId,
             VirtualDisk disk,
-            PartitionInfo partitionInfo
-            )
+            PartitionInfo partitionInfo)
         {
             _diskId = diskId;
             _disk = disk;
@@ -89,8 +88,7 @@ namespace DiscUtils
         /// <param name="disk">The disk itself</param>
         internal PhysicalVolumeInfo(
             string diskId,
-            VirtualDisk disk
-            )
+            VirtualDisk disk)
         {
             _diskId = diskId;
             _disk = disk;

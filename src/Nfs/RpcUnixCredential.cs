@@ -51,7 +51,7 @@ namespace DiscUtils.Nfs
         /// <param name="user">The user's unique id (UID)</param>
         /// <param name="primaryGroup">The user's primary group id (GID)</param>
         public RpcUnixCredential(int user, int primaryGroup)
-            : this(user, primaryGroup, new int[]{})
+            : this(user, primaryGroup, new int[] { })
         {
         }
 

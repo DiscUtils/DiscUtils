@@ -139,7 +139,7 @@ namespace DiscUtils.Ntfs
                 long byteIdx = (i / 8) - firstByte;
                 byte mask = (byte)(1 << (byte)(i % 8));
 
-                buffer[byteIdx] &= (byte)~mask;
+                buffer[byteIdx] &= (byte)(~mask);
             }
 
             SetBytes(firstByte, buffer);

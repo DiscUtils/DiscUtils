@@ -746,23 +746,23 @@ namespace DiscUtils.Ntfs
                 string attributeName = null;
                 AttributeType attributeType = AttributeType.Data;
 
-                string[] fileNameElements = fileName.Split(new char[]{':'}, 3);
+                string[] fileNameElements = fileName.Split(new char[] { ':' }, 3);
                 fileName = fileNameElements[0];
 
-                if(fileNameElements.Length > 1)
+                if (fileNameElements.Length > 1)
                 {
                     attributeName = fileNameElements[1];
-                    if(string.IsNullOrEmpty(attributeName))
+                    if (string.IsNullOrEmpty(attributeName))
                     {
                         attributeName = null;
                     }
                 }
 
-                if(fileNameElements.Length > 2)
+                if (fileNameElements.Length > 2)
                 {
                     string typeName = fileNameElements[2];
                     AttributeDefinitionRecord typeDefn = _context.AttributeDefinitions.Lookup(typeName);
-                    if(typeDefn == null)
+                    if (typeDefn == null)
                     {
                         throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such attribute type '{0}'", typeName), path);
                     }
@@ -1611,7 +1611,7 @@ namespace DiscUtils.Ntfs
         public string[] GetAlternateDataStreams(string path)
         {
             DirectoryEntry dirEntry = GetDirectoryEntry(path);
-            if(dirEntry == null)
+            if (dirEntry == null)
             {
                     throw new FileNotFoundException("File not found", path);
             }

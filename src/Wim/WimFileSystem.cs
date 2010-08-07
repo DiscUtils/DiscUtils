@@ -48,7 +48,7 @@ namespace DiscUtils.Wim
                 throw new ArgumentException("No such image: " + index, "index");
             }
 
-            using(Stream metaDataStream = _file.OpenResourceStream(metaDataFileInfo))
+            using (Stream metaDataStream = _file.OpenResourceStream(metaDataFileInfo))
             {
                 ReadMetaData(metaDataStream);
             }

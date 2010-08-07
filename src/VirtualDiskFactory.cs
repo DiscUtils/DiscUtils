@@ -35,7 +35,7 @@ namespace DiscUtils
         public VirtualDiskFactoryAttribute(string type, string fileExtensions)
         {
             _type = type;
-            _fileExtensions = fileExtensions.Replace(".","").Split(',');
+            _fileExtensions = fileExtensions.Replace(".", "").Split(',');
         }
 
         public string Type

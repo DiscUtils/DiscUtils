@@ -31,7 +31,7 @@ namespace DiscUtils.Raw
     {
         public override string[] Variants
         {
-            get { return new string[] {}; }
+            get { return new string[] { }; }
         }
 
         public override DiskImageBuilder GetImageBuilder(string variant)

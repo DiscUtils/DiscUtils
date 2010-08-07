@@ -85,7 +85,7 @@ namespace DiscUtils.Xva
         {
             string result = "";
 
-            while(value > 0)
+            while (value > 0)
             {
                 result = ((char)('0' + (value % 8))) + result;
                 value = value / 8;

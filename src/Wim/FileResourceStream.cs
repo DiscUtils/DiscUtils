@@ -158,7 +158,7 @@ namespace DiscUtils.Wim
             Stream rawChunkStream = new SubStream(_baseStream, _offsetDelta + _chunkOffsets[chunk], _chunkLength[chunk]);
             if ((_header.Flags & ResourceFlags.Compressed) != 0 && _chunkLength[chunk] != targetUncompressed)
             {
-                if(_lzxCompression)
+                if (_lzxCompression)
                 {
                     return new LzxStream(rawChunkStream, 15, E8DecodeFileSize);
                 }

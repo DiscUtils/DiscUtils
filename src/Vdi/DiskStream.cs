@@ -28,8 +28,8 @@ namespace DiscUtils.Vdi
 {
     internal class DiskStream : SparseStream
     {
-        private const uint BlockFree = unchecked((uint)(int)~0);
-        private const uint BlockZero = unchecked((uint)(int)~1);
+        private const uint BlockFree = unchecked((uint)(int)(~0));
+        private const uint BlockZero = unchecked((uint)(int)(~1));
 
         private Stream _fileStream;
         private Ownership _ownsStream;

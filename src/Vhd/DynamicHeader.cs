@@ -59,7 +59,7 @@ namespace DiscUtils.Vhd
             ParentTimestamp = Footer.EpochUtc;
             ParentUnicodeName = "";
             ParentLocators = new ParentLocator[8];
-            for(int i = 0; i < 8; ++i)
+            for (int i = 0; i < 8; ++i)
             {
                 ParentLocators[i] = new ParentLocator();
             }

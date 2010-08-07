@@ -207,7 +207,7 @@ namespace DiscUtils.Vhd
                 {
                     int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
                     int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
-                    int toRead = (int)Math.Min(maxToRead - numRead, _dynamicHeader.BlockSize - offsetInBlock);//512 - offsetInSector);
+                    int toRead = (int)Math.Min(maxToRead - numRead, _dynamicHeader.BlockSize - offsetInBlock); // 512 - offsetInSector);
 
                     if (offsetInSector != 0 || toRead < Utilities.SectorSize)
                     {

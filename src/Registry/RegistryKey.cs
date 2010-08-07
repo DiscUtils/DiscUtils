@@ -688,7 +688,7 @@ namespace DiscUtils.Registry
             }
 
             int insertIdx = 0;
-            while(insertIdx < _cell.NumValues)
+            while (insertIdx < _cell.NumValues)
             {
                 int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx * 4);
                 ValueCell cell = _hive.GetCell<ValueCell>(valueCellIndex);
@@ -839,7 +839,7 @@ namespace DiscUtils.Registry
             SubKeyIndirectListCell indirectList = list as SubKeyIndirectListCell;
             if (indirectList != null)
             {
-                //foreach (int listIndex in indirectList.CellIndexes)
+                ////foreach (int listIndex in indirectList.CellIndexes)
                 for (int i = 0; i < indirectList.CellIndexes.Count; ++i)
                 {
                     int listIndex = indirectList.CellIndexes[i];

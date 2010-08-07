@@ -56,7 +56,7 @@ namespace DiscUtils.Iscsi
 
             set
             {
-                for (int i = 0; i < _records.Count; ++i )
+                for (int i = 0; i < _records.Count; ++i)
                 {
                     if (_records[i].Key == key)
                     {

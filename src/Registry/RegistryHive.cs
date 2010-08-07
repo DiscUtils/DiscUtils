@@ -295,7 +295,7 @@ namespace DiscUtils.Registry
                 Bin bin = LoadBin(binHeader);
                 int cellIndex = bin.AllocateCell(minSize);
 
-                if(cellIndex >= 0)
+                if (cellIndex >= 0)
                 {
                     return cellIndex;
                 }

@@ -149,8 +149,7 @@ namespace DiscUtils.Ntfs
                     name,
                     id,
                     indexed,
-                    flags)
-                );
+                    flags));
             _attributes.Sort();
             return id;
         }
@@ -170,8 +169,7 @@ namespace DiscUtils.Ntfs
                     name,
                     id,
                     flags,
-                    new List<CookedDataRun>())
-                );
+                    new List<CookedDataRun>()));
             _attributes.Sort();
             return id;
         }
@@ -196,8 +194,7 @@ namespace DiscUtils.Ntfs
                     flags,
                     firstCluster,
                     numClusters,
-                    bytesPerCluster)
-                );
+                    bytesPerCluster));
             _attributes.Sort();
             return id;
         }

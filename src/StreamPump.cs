@@ -38,7 +38,7 @@ namespace DiscUtils
         /// <summary>
         /// The number of bytes written to <c>OutputStream</c>.
         /// </summary>
-        public long BytesWritten { get; set;}
+        public long BytesWritten { get; set; }
 
         /// <summary>
         /// The absolute position in <c>InputStream</c>.
@@ -94,7 +94,7 @@ namespace DiscUtils
         /// <summary>
         /// The number of bytes read from <c>InputStream</c>.
         /// </summary>
-        public long BytesRead { get; private set;}
+        public long BytesRead { get; private set; }
 
         /// <summary>
         /// The number of bytes written to <c>OutputStream</c>.

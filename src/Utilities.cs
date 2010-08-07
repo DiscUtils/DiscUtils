@@ -170,7 +170,7 @@ namespace DiscUtils
         }
 
         #region Bit Twiddling
-        public static  bool IsAllZeros(byte[] buffer, int offset, int count)
+        public static bool IsAllZeros(byte[] buffer, int offset, int count)
         {
             int end = offset + count;
             for (int i = offset; i < end; ++i)
@@ -427,8 +427,7 @@ namespace DiscUtils
                 buffer[offset + 12],
                 buffer[offset + 13],
                 buffer[offset + 14],
-                buffer[offset + 15]
-                );
+                buffer[offset + 15]);
         }
 
         public static byte[] ToByteArray(byte[] buffer, int offset, int length)

@@ -58,7 +58,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the length of the file.
         /// </summary>
-        long FileLength { get;}
+        long FileLength { get; }
 
         /// <summary>
         /// Gets a buffer to access the file's contents.

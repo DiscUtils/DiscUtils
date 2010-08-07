@@ -78,7 +78,7 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian((ushort)controlFlags, buffer, offset + 0x02);
 
             // Blank out offsets, will fill later
-            for(int i = 0x04; i < 0x14; ++i)
+            for (int i = 0x04; i < 0x14; ++i)
             {
                 buffer[offset + i] = 0;
             }

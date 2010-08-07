@@ -53,7 +53,7 @@ namespace DiscUtils.Vmdk
         public DiskCreateType DiskType
         {
             get { return _diskType; }
-            set { _diskType = value;}
+            set { _diskType = value; }
         }
 
         /// <summary>
