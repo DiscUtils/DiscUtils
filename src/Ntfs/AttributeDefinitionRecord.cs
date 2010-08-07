@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Text;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Text;
+
     internal enum AttributeCollationRule : int
     {
         Binary                = 0x00000000,

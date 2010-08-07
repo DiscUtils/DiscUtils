@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+
     internal struct FileRecordReference : IByteArraySerializable, IComparable<FileRecordReference>
     {
         private ulong _val;

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils.LogicalDiskManager
 {
+    using System.Collections.Generic;
+
     [LogicalVolumeFactory()]
     internal class DynamicDiskManagerFactory : LogicalVolumeFactory
     {

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Abstract base class for implementations of IBuffer.
     /// </summary>

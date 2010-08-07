@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Nfs
 {
+    using System;
+
     internal class Nfs3FileTime
     {
         private readonly DateTime NfsEpoch = new DateTime(1970, 1, 1);

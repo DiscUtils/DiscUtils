@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Partitions
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Provides access to partition records in a GUID partition table.
     /// </summary>

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System.Collections.Generic;
+    using System.IO;
+
     internal class ClusterBitmap
     {
         private File _file;

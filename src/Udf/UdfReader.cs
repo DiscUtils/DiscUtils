@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-using DiscUtils.Iso9660;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Udf
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using DiscUtils.Iso9660;
+    using DiscUtils.Vfs;
+
     /// <summary>
     /// Class for accessing OSTA Universal Disk Format file systems.
     /// </summary>

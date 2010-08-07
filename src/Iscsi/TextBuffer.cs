@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.Text;
-
 namespace DiscUtils.Iscsi
 {
+    using System.Collections.Generic;
+    using System.Text;
+
     internal class TextBuffer
     {
         private List<KeyValuePair<string, string>> _records;

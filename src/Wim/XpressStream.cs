@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Wim
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Implements the XPRESS decompression algorithm.
     /// </summary>

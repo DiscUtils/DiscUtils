@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Globalization;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System.Globalization;
+    using System.IO;
+
     internal class DataRun
     {
         private long _runLength;

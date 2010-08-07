@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils.Nfs
 {
+    using System.Collections.Generic;
+
     internal sealed class Nfs3MountResult
     {
         public Nfs3FileHandle FileHandle { get; set; }

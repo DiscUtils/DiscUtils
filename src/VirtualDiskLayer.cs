@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Represents the base layer, or a differencing layer of a VirtualDisk.
     /// </summary>

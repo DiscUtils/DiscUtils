@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Vhd
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     internal sealed class DynamicDiskBuilder : StreamBuilder
     {
         private SparseStream _content;

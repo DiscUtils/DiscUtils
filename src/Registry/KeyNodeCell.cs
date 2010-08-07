@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Registry
 {
+    using System;
+
     internal sealed class KeyNodeCell : Cell
     {
         public RegistryKeyFlags Flags;

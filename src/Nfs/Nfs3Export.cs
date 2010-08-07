@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils.Nfs
 {
+    using System.Collections.Generic;
+
     internal sealed class Nfs3Export
     {
         public string DirPath { get; set; }

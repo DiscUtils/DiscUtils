@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Security.AccessControl;
-using System.Text.RegularExpressions;
-
 namespace DiscUtils.Wim
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Security.AccessControl;
+    using System.Text.RegularExpressions;
+
     /// <summary>
     /// Provides access to the file system within a WIM file image.
     /// </summary>

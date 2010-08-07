@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.Reflection;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Globalization;
+    using System.Reflection;
+
     [Flags]
     internal enum KeyUsagePhase
     {

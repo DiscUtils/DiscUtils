@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+
     internal class ScsiReadCapacityCommand : ScsiCommand
     {
         public const int ResponseDataLength = 32;

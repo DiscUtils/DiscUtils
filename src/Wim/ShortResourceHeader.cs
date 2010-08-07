@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Wim
 {
+    using System;
+
     [Flags]
     internal enum ResourceFlags : byte
     {

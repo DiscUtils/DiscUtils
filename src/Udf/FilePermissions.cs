@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Udf
 {
+    using System;
+
     /// <summary>
     /// Standard Unix-style file system permissions.
     /// </summary>

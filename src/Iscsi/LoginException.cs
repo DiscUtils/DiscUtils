@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Runtime.Serialization;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Exception thrown when an authentication exception occurs.
     /// </summary>

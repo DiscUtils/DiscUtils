@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Vhd
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     internal class DynamicStream : SparseStream
     {
         private Stream _fileStream;

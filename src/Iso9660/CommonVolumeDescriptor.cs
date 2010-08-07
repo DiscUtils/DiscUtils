@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Text;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.Text;
+
     internal class CommonVolumeDescriptor : BaseVolumeDescriptor
     {
         public Encoding CharacterEncoding;

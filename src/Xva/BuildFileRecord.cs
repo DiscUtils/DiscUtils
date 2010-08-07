@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Xva
 {
+    using System.IO;
+
     internal class BuildFileRecord
     {
         private string _name;

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils
 {
+    using System.IO;
+
     /// <summary>
     /// Interface exposed by objects that can provide a structured trace of their content.
     /// </summary>

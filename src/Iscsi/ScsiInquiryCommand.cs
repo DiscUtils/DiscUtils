@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+
     internal class ScsiInquiryCommand : ScsiCommand
     {
         public const int InitialResponseDataLength = 36;

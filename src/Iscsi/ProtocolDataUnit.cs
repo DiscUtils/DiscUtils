@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Iscsi
 {
+    using System.IO;
+
     internal class ProtocolDataUnit
     {
         private byte[] _headerData;

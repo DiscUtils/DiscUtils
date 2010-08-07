@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Represents a range of bytes in a stream.
     /// </summary>

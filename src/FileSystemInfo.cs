@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils
 {
+    using System.IO;
+
     /// <summary>
     /// Base class holding information about a file system.
     /// </summary>

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Sdi
 {
+    using System;
+    using System.IO;
+
     internal class FileHeader
     {
         public string Tag;

@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.BootConfig
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+
     internal abstract class DeviceRecord
     {
         public int Type { get; set; }

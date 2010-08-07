@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Provides the base class for all file systems.
     /// </summary>

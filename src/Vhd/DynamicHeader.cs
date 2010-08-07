@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Vhd
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     internal class DynamicHeader
     {
         public const string HeaderCookie = "cxsparse";

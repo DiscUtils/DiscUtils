@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Security.Cryptography;
-
 namespace DiscUtils.Xva
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+
     internal class HashStream : Stream
     {
         private Stream _wrapped;

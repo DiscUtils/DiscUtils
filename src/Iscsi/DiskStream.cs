@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     internal class DiskStream : SparseStream
     {
         private Session _session;

@@ -20,13 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.IO;
+
     internal abstract class FileLocator
     {
         internal string MakeRelativePath(FileLocator fileLocator, string path)

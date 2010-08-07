@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using DiscUtils.Partitions;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using DiscUtils.Partitions;
+
     /// <summary>
     /// VolumeManager interprets partitions and other on-disk structures (possibly combining multiple disks).
     /// </summary>

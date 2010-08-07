@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     internal enum AllocationType
     {
         ShortDescriptors = 0,

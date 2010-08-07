@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Vdi
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Represents a single VirtualBox disk (.vdi file).
     /// </summary>

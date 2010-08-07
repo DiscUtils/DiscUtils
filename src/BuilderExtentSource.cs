@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils
 {
+    using System.IO;
+
     internal abstract class BuilderExtentSource
     {
         public abstract BuilderExtent Fix(long pos);

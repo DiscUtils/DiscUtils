@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-
 namespace DiscUtils.Vmdk
 {
+    using System;
+    using System.Globalization;
+
     internal enum DescriptorFileEntryType
     {
         NoValue = 0,

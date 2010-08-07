@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     internal class DirectoryExtent : BuilderExtent
     {
         private BuildDirectoryInfo _dirInfo;

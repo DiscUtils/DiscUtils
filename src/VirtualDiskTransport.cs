@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     internal sealed class VirtualDiskTransportAttribute : Attribute
     {

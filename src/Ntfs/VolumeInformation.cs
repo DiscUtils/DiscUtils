@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+
     internal sealed class VolumeInformation : IByteArraySerializable, IDiagnosticTraceable
     {
         private byte _majorVersion;

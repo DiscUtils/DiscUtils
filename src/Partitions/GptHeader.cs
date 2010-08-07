@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Partitions
 {
+    using System;
+
     internal class GptHeader
     {
         public const string GptSignature = "EFI PART";

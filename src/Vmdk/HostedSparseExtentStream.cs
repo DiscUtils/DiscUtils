@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.IO.Compression;
-
 namespace DiscUtils.Vmdk
 {
+    using System;
+    using System.IO;
+    using System.IO.Compression;
+
     /// <summary>
     /// Represents and extent from a sparse disk from 'hosted' software (VMWare Workstation, etc).
     /// </summary>

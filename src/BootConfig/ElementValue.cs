@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.Collections.Generic;
-
 namespace DiscUtils.BootConfig
 {
+    using System;
+    using System.Globalization;
+
     /// <summary>
     /// The value of an element.
     /// </summary>

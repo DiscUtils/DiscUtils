@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils
 {
+    using System;
+
     internal class BuilderBufferExtent : BuilderExtent
     {
         private bool _fixedBuffer;

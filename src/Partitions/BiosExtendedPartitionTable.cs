@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Partitions
 {
+    using System.Collections.Generic;
+    using System.IO;
+
     internal class BiosExtendedPartitionTable
     {
         private Stream _disk;

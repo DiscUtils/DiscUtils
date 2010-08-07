@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Nfs
 {
+    using System.IO;
+    using System.Text;
+
     internal sealed class XdrDataReader : BigEndianDataReader
     {
         public XdrDataReader(Stream stream)

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+
     /// <summary>
     /// Fully-qualified reference to an attribute.
     /// </summary>

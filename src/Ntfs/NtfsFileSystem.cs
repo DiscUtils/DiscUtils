@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Security.AccessControl;
-using System.Text.RegularExpressions;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Security.AccessControl;
+    using System.Text.RegularExpressions;
+
     /// <summary>
     /// Class for accessing NTFS file systems.
     /// </summary>

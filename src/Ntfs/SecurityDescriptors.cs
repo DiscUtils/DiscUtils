@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Security.AccessControl;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Security.AccessControl;
+
     internal sealed class SecurityDescriptors : IDiagnosticTraceable
     {
         private File _file;

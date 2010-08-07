@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils
 {
+    using System;
+
     /// <summary>
     /// Common file system options.
     /// </summary>

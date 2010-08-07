@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Vhd
 {
+    using System;
+
     internal class Footer
     {
         public const string FileCookie = "conectix";

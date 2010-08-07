@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Vdi
 {
+    using System;
+
     internal class GeometryRecord
     {
         public int Cylinders;

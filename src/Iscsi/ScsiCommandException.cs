@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Runtime.Serialization;
+    using System.Security.Permissions;
+
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>

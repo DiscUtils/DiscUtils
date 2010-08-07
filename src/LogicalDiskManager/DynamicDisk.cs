@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using DiscUtils.Partitions;
-
 namespace DiscUtils.LogicalDiskManager
 {
+    using System;
+    using System.IO;
+    using DiscUtils.Partitions;
+
     internal class DynamicDisk : IDiagnosticTraceable
     {
         private VirtualDisk _disk;

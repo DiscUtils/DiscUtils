@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Security.AccessControl;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+    using System.Security.AccessControl;
+
     internal class NtfsFormatter
     {
         public string Label { get; set; }

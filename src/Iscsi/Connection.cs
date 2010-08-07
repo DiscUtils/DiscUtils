@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
-using System.Reflection;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net.Sockets;
+    using System.Reflection;
+
     internal enum Digest
     {
         [ProtocolKeyValue("None")]

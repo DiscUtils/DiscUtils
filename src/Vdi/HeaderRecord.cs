@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Vdi
 {
+    using System;
+    using System.IO;
+
     internal class HeaderRecord
     {
         private FileVersion _fileVersion;

@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Security.Principal;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Security.Principal;
+
     internal sealed class Quotas
     {
         private IndexView<OwnerKey, OwnerRecord> _ownerIndex;

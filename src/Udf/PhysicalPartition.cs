@@ -20,11 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
 namespace DiscUtils.Udf
 {
     internal class PhysicalPartition : Partition

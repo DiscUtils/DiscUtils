@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Fat
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     internal class DirectoryEntry
     {
         private string _name;

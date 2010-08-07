@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.IO;
+    using System.Text;
+    using DiscUtils.Vfs;
+
     [Flags()]
     internal enum FileFlags : byte
     {

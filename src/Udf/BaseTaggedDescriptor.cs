@@ -20,15 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using DiscUtils.Iso9660;
-using System.Globalization;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+
     internal abstract class BaseTaggedDescriptor : IByteArraySerializable
     {
         public DescriptorTag Tag;

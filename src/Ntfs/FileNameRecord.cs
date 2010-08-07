@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     [Flags]
     internal enum FileAttributeFlags : uint
     {

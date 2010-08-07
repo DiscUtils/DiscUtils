@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils
 {
+    using System;
+
     /// <summary>
     /// Base class that holds information about a disk volume.
     /// </summary>

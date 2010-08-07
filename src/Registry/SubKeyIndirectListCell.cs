@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.Collections.Generic;
+
     internal sealed class SubKeyIndirectListCell : ListCell
     {
         private RegistryHive _hive;

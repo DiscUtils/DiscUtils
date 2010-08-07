@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+
     internal sealed class Bitmap
     {
         private Stream _stream;

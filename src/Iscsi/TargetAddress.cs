@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Globalization;
+
     /// <summary>
     /// Information about an iSCSI Target.
     /// </summary>

@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     internal static class UdfUtilities
     {
         private static readonly ushort[] CrcTable = new ushort[]

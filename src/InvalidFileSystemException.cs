@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Runtime.Serialization;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.IO;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>

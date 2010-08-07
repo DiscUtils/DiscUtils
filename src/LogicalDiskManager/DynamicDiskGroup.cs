@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using DiscUtils.Partitions;
-
 namespace DiscUtils.LogicalDiskManager
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using DiscUtils.Partitions;
+
     internal class DynamicDiskGroup : IDiagnosticTraceable
     {
         private DiskGroupRecord _record;

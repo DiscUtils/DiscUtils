@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
+    using System.IO;
+
     internal abstract class RpcProgram
     {
         protected RpcClient _client;

@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+
     [VirtualDiskTransport("nfs")]
     internal sealed class DiskTransport : VirtualDiskTransport
     {

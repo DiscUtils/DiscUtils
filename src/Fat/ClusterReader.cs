@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Fat
 {
+    using System;
+    using System.IO;
+
     internal sealed class ClusterReader
     {
         private Stream _stream;

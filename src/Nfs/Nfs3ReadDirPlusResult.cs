@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils.Nfs
 {
+    using System.Collections.Generic;
+
     internal class Nfs3ReadDirPlusResult : Nfs3CallResult
     {
         public Nfs3FileAttributes DirAttributes { get; set; }

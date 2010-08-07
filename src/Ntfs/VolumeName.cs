@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     internal sealed class VolumeName : IByteArraySerializable, IDiagnosticTraceable
     {
         private string _name;

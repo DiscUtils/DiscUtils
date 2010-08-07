@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.Globalization;
+    using System.Security.Cryptography;
+    using System.Text;
+
     internal class ChapAuthenticator : Authenticator
     {
         private State _state;

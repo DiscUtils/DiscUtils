@@ -26,11 +26,11 @@
 //
 //
 
-using System;
-using System.Collections.Generic;
-
 namespace DiscUtils.BootConfig
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Represents a Boot Configuration Database object (application, device or inherited settings).
     /// </summary>

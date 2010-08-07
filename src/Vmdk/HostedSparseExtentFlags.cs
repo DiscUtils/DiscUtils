@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Vmdk
 {
+    using System;
+
     [Flags]
     internal enum HostedSparseExtentFlags : uint
     {

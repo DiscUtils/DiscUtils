@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Partitions
 {
+    using System;
+
     /// <summary>
     /// Convenient access to well known GPT partition types.
     /// </summary>

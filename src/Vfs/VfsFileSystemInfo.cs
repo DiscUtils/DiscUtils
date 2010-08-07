@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Vfs
 {
+    using System.IO;
+
     /// <summary>
     /// Delegate for instantiating a file system.
     /// </summary>
@@ -35,7 +35,7 @@ namespace DiscUtils.Vfs
     /// <summary>
     /// Class holding information about a file system.
     /// </summary>
-    public sealed class VfsFileSystemInfo : FileSystemInfo
+    public sealed class VfsFileSystemInfo : DiscUtils.FileSystemInfo
     {
         private string _name;
         private string _description;

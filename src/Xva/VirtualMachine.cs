@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml.XPath;
-
 namespace DiscUtils.Xva
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Xml.XPath;
+
     /// <summary>
     /// Class representing the virtual machine stored in a Xen Virtual Appliance (XVA)
     /// file.

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-using System;
-
 namespace DiscUtils
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Flags for the amount of detail to include in a report.
     /// </summary>

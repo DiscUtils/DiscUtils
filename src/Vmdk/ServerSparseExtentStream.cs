@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Vmdk
 {
+    using System;
+    using System.IO;
+
     internal sealed class ServerSparseExtentStream : CommonSparseExtentStream
     {
         private ServerSparseExtentHeader _serverHeader;

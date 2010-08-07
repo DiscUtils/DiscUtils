@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Runtime.Serialization;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Exception thrown when some corruption is found in the registry hive.
     /// </summary>

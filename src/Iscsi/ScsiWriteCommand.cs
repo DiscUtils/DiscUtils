@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+
     internal class ScsiWriteCommand : ScsiCommand
     {
         private uint _logicalBlockAddress;

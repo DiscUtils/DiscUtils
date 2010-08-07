@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
-
 namespace DiscUtils.Nfs
 {
+    using System;
+    using System.IO;
+    using System.Runtime.Serialization;
+    using System.Security.Permissions;
+
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>

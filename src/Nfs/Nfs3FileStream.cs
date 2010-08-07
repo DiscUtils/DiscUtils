@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
+    using System;
+    using System.IO;
+
     internal sealed class Nfs3FileStream : Stream
     {
         private Nfs3Client _client;

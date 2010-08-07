@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.Globalization;
+    using System.Text;
+
     internal enum OSClass : byte
     {
         None = 0,

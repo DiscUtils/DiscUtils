@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using DiscUtils.Partitions;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Globalization;
+    using DiscUtils.Partitions;
+
     /// <summary>
     /// Enumeration of possible types of physical volume.
     /// </summary>

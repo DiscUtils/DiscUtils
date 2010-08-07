@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.Text;
-
 namespace DiscUtils.Fat
 {
+    using System;
+    using System.Globalization;
+    using System.Text;
+
     internal class FatUtilities
     {
         private const string SpecialPrivateChars = "$%'-_@~`!(){}^#&";

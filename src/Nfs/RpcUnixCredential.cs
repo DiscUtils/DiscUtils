@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Nfs
 {
+    using System;
+
     /// <summary>
     /// RPC credentials used for accessing an access-controlled server.
     /// </summary>

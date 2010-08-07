@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Vfs
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Base class for the public facade on a file system.
     /// </summary>

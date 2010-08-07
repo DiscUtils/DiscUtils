@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Security.AccessControl;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.Security.AccessControl;
+
     internal sealed class SecurityCell : Cell
     {
         private int _prevIndex;

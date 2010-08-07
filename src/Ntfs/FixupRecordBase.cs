@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+
     internal abstract class FixupRecordBase
     {
         private int _sectorSize;

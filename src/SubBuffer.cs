@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Class representing a portion of an existing buffer.
     /// </summary>

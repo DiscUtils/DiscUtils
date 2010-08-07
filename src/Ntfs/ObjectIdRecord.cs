@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Globalization;
+
     internal sealed class ObjectIdRecord : IByteArraySerializable
     {
         public FileRecordReference MftReference;

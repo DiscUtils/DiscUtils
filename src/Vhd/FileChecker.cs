@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Runtime.Serialization;
-
 namespace DiscUtils.Vhd
 {
+    using System;
+    using System.IO;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// VHD file format verifier, that identifies corrupt VHD files.
     /// </summary>

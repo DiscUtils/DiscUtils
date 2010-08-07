@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using DiscUtils.Vfs;
+
     internal class ReaderDirectory : File, IVfsDirectory<DirectoryRecord, File>
     {
         private List<DirectoryRecord> _records;

@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
-    internal class NonResidentAttributeBuffer : Buffer
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    internal class NonResidentAttributeBuffer : DiscUtils.Buffer
     {
         private File _file;
         private Stream _fsStream;

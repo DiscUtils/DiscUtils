@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Security.AccessControl;
-using System.Text;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Security.AccessControl;
+    using System.Text;
+
     /// <summary>
     /// A key within a registry hive.
     /// </summary>

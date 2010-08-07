@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Fat
 {
+    using System;
+
     [Flags()]
     internal enum FatAttributes : byte
     {

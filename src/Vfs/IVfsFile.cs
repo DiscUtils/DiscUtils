@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Vfs
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Interface implemented by a class representing a file.
     /// </summary>

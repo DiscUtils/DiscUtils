@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     internal sealed class HiveHeader : IByteArraySerializable
     {
         public const int HeaderSize = 512;

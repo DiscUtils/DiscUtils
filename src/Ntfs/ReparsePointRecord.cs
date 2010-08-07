@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+
     internal sealed class ReparsePointRecord : IByteArraySerializable, IDiagnosticTraceable
     {
         public uint Tag;

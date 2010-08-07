@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Vdi
 {
+    using System.IO;
+
     internal class PreHeaderRecord
     {
         public const uint VdiSignature = 0xbeda107f;

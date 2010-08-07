@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.IO;
+
     internal sealed class BinHeader : IByteArraySerializable
     {
         public const int HeaderSize = 0x20;

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Globalization;
-
 namespace DiscUtils.Iscsi
 {
+    using System.Globalization;
+
     /// <summary>
     /// Class representing the capacity of a LUN.
     /// </summary>

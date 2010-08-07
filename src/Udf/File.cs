@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.IO;
+    using DiscUtils.Vfs;
+
     internal class File : IVfsFile
     {
         protected UdfContext _context;

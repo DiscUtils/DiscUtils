@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Text;
-
 namespace DiscUtils.Wim
 {
+    using System.Text;
+
     internal class AlternateStreamEntry
     {
         public long Length;

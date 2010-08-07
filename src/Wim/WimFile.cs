@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-using System;
-
 namespace DiscUtils.Wim
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     /// <summary>
     /// Provides access to the contents of WIM (Windows Imaging) files.
     /// </summary>

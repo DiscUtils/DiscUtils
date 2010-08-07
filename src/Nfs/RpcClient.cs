@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-
 namespace DiscUtils.Nfs
 {
+    using System;
+    using System.Collections.Generic;
+
     internal sealed class RpcClient : IDisposable
     {
         private string _serverAddress;

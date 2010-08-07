@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using DiscUtils.Partitions;
-
 namespace DiscUtils.Optical
 {
+    using System;
+    using System.IO;
+    using DiscUtils.Partitions;
+
     /// <summary>
     /// Represents a single optical disc image file.
     /// </summary>

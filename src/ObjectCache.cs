@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+
     internal class ObjectCache<K, V> : IEnumerable<V>
     {
         private Dictionary<K, WeakReference> _entries;

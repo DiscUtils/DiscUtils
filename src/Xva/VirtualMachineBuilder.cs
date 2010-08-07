@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-
-using DiskRecord = DiscUtils.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
-
 namespace DiscUtils.Xva
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
+    using DiskRecord = DiscUtils.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
+
     /// <summary>
     /// A class that can be used to create Xen Virtual Appliance (XVA) files.
     /// </summary>

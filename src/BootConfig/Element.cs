@@ -26,11 +26,11 @@
 //
 //
 
-using System;
-using System.Globalization;
-
 namespace DiscUtils.BootConfig
 {
+    using System;
+    using System.Globalization;
+
     /// <summary>
     /// Represents an element in a Boot Configuration Database object.
     /// </summary>

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Xva
 {
+    using System.Collections.Generic;
+    using System.IO;
+
     internal class TarFileBuilder : StreamBuilder
     {
         private List<BuildFileRecord> _files;

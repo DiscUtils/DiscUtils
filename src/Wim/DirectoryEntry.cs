@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Text;
-using System.Collections.Generic;
-using System.Globalization;
-
 namespace DiscUtils.Wim
 {
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+
     internal class DirectoryEntry
     {
         public long Length;

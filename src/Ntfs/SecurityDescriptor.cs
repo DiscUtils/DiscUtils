@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Security.AccessControl;
-using System.Security.Principal;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.IO;
+    using System.Security.AccessControl;
+    using System.Security.Principal;
+
     internal sealed class SecurityDescriptor : IByteArraySerializable, IDiagnosticTraceable
     {
         private RawSecurityDescriptor _securityDescriptor;

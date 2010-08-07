@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Udf
 {
+    using System;
+
     internal struct LogicalBlockAddress : IByteArraySerializable
     {
         public uint LogicalBlock;

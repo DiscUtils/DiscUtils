@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
+    using System.Collections.Generic;
+    using System.IO;
+
     internal sealed class Nfs3Mount : RpcProgram
     {
         public const int ProgramIdentifier = 100005;

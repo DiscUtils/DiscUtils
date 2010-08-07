@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using DiscUtils.Vfs;
+
     internal class UdfContext : VfsContext
     {
         public Dictionary<ushort, PhysicalPartition> PhysicalPartitions;

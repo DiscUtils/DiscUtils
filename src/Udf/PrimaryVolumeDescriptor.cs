@@ -20,13 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
 namespace DiscUtils.Udf
 {
+    using System;
+
     internal sealed class PrimaryVolumeDescriptor : BaseTaggedDescriptor<PrimaryVolumeDescriptor>
     {
         public uint VolumeDescriptorSequenceNumber;

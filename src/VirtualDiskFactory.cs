@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     internal sealed class VirtualDiskFactoryAttribute : Attribute
     {

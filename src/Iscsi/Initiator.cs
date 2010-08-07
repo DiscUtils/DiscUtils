@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils.Iscsi
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Class representing an iSCSI initiator.
     /// </summary>

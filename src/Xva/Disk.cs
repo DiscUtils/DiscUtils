@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-
 namespace DiscUtils.Xva
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Class representing a disk containing withing an XVA file.
     /// </summary>

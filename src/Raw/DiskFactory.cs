@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace DiscUtils.Raw
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     [VirtualDiskFactory("RAW", ".img,.ima,.vfd,.flp")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {

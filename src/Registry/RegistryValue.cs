@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.Text;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.Globalization;
+    using System.Text;
+
     /// <summary>
     /// A registry value.
     /// </summary>

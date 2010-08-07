@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System.Collections.Generic;
+
     internal abstract class BuilderExtent
     {
         private long _start;

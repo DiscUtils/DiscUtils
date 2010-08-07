@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Iso9660
 {
+    using System.IO;
+    using DiscUtils.Vfs;
+
     internal class IsoContext : VfsContext
     {
         public CommonVolumeDescriptor VolumeDescriptor { get; set; }

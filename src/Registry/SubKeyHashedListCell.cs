@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-
 namespace DiscUtils.Registry
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+
     internal sealed class SubKeyHashedListCell : ListCell
     {
         private string _hashType;

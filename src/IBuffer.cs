@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Interface shared by all buffers.
     /// </summary>

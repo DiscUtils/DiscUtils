@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.LogicalDiskManager
 {
+    using System;
+
     internal class PrivateHeader
     {
         public string Signature; // PRIVHEAD

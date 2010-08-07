@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System.IO;
+
     internal class StructuredNtfsAttribute<T> : NtfsAttribute
         where T : IByteArraySerializable, IDiagnosticTraceable, new()
     {

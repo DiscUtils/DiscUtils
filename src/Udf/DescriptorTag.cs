@@ -20,13 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
 namespace DiscUtils.Udf
 {
+    using System;
+    using System.IO;
+
     internal enum TagIdentifier : ushort
     {
         None = 0,

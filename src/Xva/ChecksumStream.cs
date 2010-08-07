@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Security.Cryptography;
-
 namespace DiscUtils.Xva
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+
     internal class ChecksumStream : Stream
     {
         private HashAlgorithm _hashGenerator;

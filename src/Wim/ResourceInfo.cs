@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Wim
 {
+    using System;
+
     internal class ResourceInfo
     {
         public const int Size = ShortResourceHeader.Size + 26;

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+
     internal abstract class VolumeDescriptorDiskRegion : BuilderExtent
     {
         private byte[] _readCache;

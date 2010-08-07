@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Text;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.Text;
+
     internal class PrimaryVolumeDescriptor : CommonVolumeDescriptor
     {
         public PrimaryVolumeDescriptor(byte[] src, int offset)

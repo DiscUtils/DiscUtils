@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace DiscUtils
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     internal class BuilderSparseStreamExtent : BuilderExtent
     {
         private SparseStream _stream;

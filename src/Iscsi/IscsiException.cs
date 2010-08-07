@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Runtime.Serialization;
-
 namespace DiscUtils.Iscsi
 {
+    using System;
+    using System.IO;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Base exception for any iSCSI-related failures.
     /// </summary>

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils
 {
+    using System;
+    using System.IO;
+
     /// <summary>
     /// Base class for file systems that are by their nature read-only, causes NotSupportedException to be thrown
     /// from all methods that are always invalid.

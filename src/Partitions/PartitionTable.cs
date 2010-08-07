@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.ObjectModel;
-
 namespace DiscUtils.Partitions
 {
+    using System;
+    using System.Collections.ObjectModel;
+
     /// <summary>
     /// Base class for classes which represent a disk partitioning scheme.
     /// </summary>

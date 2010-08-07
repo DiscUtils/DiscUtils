@@ -20,20 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-using DiscUtils.Iso9660;
-using DiscUtils.Udf;
-using DiscUtils.Vfs;
-
 namespace DiscUtils.Optical
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using DiscUtils.Iso9660;
+    using DiscUtils.Udf;
+    using DiscUtils.Vfs;
+
     [VfsFileSystemFactory]
     internal class FileSystemFactory : VfsFileSystemFactory
     {
-        public override FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
+        public override DiscUtils.FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
         {
-            List<FileSystemInfo> detected = new List<FileSystemInfo>();
+            List<DiscUtils.FileSystemInfo> detected = new List<DiscUtils.FileSystemInfo>();
 
             if (UdfReader.Detect(stream))
             {

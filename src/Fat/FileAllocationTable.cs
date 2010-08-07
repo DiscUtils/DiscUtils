@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Fat
 {
+    using System;
+    using System.IO;
+
     internal class FileAllocationTable
     {
         private Stream _stream;

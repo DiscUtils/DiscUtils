@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Globalization;
-using System.IO;
-using System.Text;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Text;
+
     internal class IsoUtilities
     {
         /// <summary>

@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Security.AccessControl;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
     internal sealed class IndexRoot : IByteArraySerializable, IDiagnosticTraceable
     {
         private uint _attrType;

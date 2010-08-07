@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Text;
-
 namespace DiscUtils.Partitions
 {
+    using System;
+    using System.Text;
+
     internal class GptEntry : IComparable<GptEntry>
     {
         public Guid PartitionType;

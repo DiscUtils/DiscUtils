@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Ntfs
 {
+    using System.IO;
+
     internal delegate File GetFileByIndexFn(long index);
 
     internal delegate File GetFileByRefFn(FileRecordReference reference);

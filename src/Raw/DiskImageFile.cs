@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-using DiscUtils.Partitions;
-
 namespace DiscUtils.Raw
 {
+    using System;
+    using System.IO;
+    using DiscUtils.Partitions;
+
     /// <summary>
     /// Represents a single raw disk image file.
     /// </summary>

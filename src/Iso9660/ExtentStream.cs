@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Iso9660
 {
+    using System;
+    using System.IO;
+
     internal class ExtentStream : Stream
     {
         private long _position;

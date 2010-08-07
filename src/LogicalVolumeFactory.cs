@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-
 namespace DiscUtils
 {
+    using System.Collections.Generic;
+
     internal abstract class LogicalVolumeFactory
     {
         public abstract bool HandlesPhysicalVolume(PhysicalVolumeInfo volume);

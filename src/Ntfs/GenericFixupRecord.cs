@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Ntfs
 {
+    using System;
+
     internal sealed class GenericFixupRecord : FixupRecordBase
     {
         private int _bytesPerSector;
