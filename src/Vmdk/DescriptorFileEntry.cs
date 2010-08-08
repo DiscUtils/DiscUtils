@@ -89,7 +89,7 @@ namespace DiscUtils.Vmdk
 
         public string ToString(bool spaceOut)
         {
-            // VMWare workstation appears to be sensitive to spaces, wants them for 'header' values, not for DiskDataBase...
+            // VMware workstation appears to be sensitive to spaces, wants them for 'header' values, not for DiskDataBase...
             string sep = spaceOut ? " " : "";
 
             switch (_type)

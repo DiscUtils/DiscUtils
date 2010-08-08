@@ -33,7 +33,7 @@ namespace DiscUtils.Vmdk
         None = 0,
 
         /// <summary>
-        /// VMWare Workstation single-file dynamic disk.
+        /// VMware Workstation single-file dynamic disk.
         /// </summary>
         MonolithicSparse = 1,
 
@@ -43,7 +43,7 @@ namespace DiscUtils.Vmdk
         VmfsSparse = 2,
 
         /// <summary>
-        /// VMWare Workstation single-extent pre-allocated disk.
+        /// VMware Workstation single-extent pre-allocated disk.
         /// </summary>
         MonolithicFlat = 3,
 
@@ -53,12 +53,12 @@ namespace DiscUtils.Vmdk
         Vmfs = 4,
 
         /// <summary>
-        /// VMWare Workstation multi-extent dynamic disk.
+        /// VMware Workstation multi-extent dynamic disk.
         /// </summary>
         TwoGbMaxExtentSparse = 5,
 
         /// <summary>
-        /// VMWare Workstation multi-extent pre-allocated disk.
+        /// VMware Workstation multi-extent pre-allocated disk.
         /// </summary>
         TwoGbMaxExtentFlat = 6,
 

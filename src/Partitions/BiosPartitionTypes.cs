@@ -151,8 +151,8 @@ namespace DiscUtils.Partitions
                 case 0xDE: return "Dell OEM";
                 case 0xEE: return "GPT Protective";
                 case 0xEF: return "EFI";
-                case 0xFB: return "VMWare File System";
-                case 0xFC: return "VMWare Swap";
+                case 0xFB: return "VMware File System";
+                case 0xFC: return "VMware Swap";
                 case 0xFE: return "IBM OEM";
                 default: return "Unknown";
             }
