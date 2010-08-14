@@ -106,7 +106,7 @@ namespace DiscUtils.Wim
             }
             set
             {
-                throw new NotSupportedException();
+                _position = value;
             }
         }
 
@@ -132,6 +132,7 @@ namespace DiscUtils.Wim
                     _currentChunk = chunk;
                 }
 
+                _currentChunkStream.Position = chunkOffset;
                 int numRead = _currentChunkStream.Read(buffer, offset + totalRead, numToRead);
                 if (numRead == 0)
                 {

@@ -26,72 +26,124 @@ using System.Collections.Generic;
 
 namespace DiscUtils
 {
-    internal class ObjectCache<K,V> : IEnumerable<V>
+    /// <summary>
+    /// Caches objects.
+    /// </summary>
+    /// <typeparam name="K">The type of the object key</typeparam>
+    /// <typeparam name="V">The type of the objects to cache</typeparam>
+    /// <remarks>
+    /// Can be use for two purposes - to ensure there is only one instance of a given object,
+    /// and to prevent the need to recreate objects that are expensive to create.
+    /// </remarks>
+    internal class ObjectCache<K,V>
     {
+        private const int MostRecentListSize = 20;
+        private const int PruneGap = 500;
+
         private Dictionary<K, WeakReference> _entries;
+        private List<KeyValuePair<K, V>> _recent;
+        private int _nextPruneCount;
 
         public ObjectCache()
         {
             _entries = new Dictionary<K, WeakReference>();
+            _recent = new List<KeyValuePair<K, V>>();
         }
 
         public V this[K key]
         {
             get
             {
+                for(int i = 0; i < _recent.Count; ++i)
+                {
+                    KeyValuePair<K, V> recentEntry = _recent[i];
+                    if (recentEntry.Key.Equals(key))
+                    {
+                        MakeMostRecent(i);
+                        return recentEntry.Value;
+                    }
+                }
+
                 WeakReference wRef;
                 if (_entries.TryGetValue(key, out wRef))
                 {
-                    return (V)wRef.Target;
+                    V val = (V)wRef.Target;
+                    if (val != null)
+                    {
+                        MakeMostRecent(key, val);
+                    }
+                    return val;
                 }
+
                 return default(V);
             }
             set
             {
                 _entries[key] = new WeakReference(value);
+                PruneEntries();
             }
-        }
-
-        internal bool ContainsKey(K key)
-        {
-            return _entries.ContainsKey(key);
         }
 
         internal void Remove(K key)
         {
+            for (int i = 0; i < _recent.Count; ++i)
+            {
+                if (_recent[i].Key.Equals(key))
+                {
+                    _recent.RemoveAt(i);
+                    break;
+                }
+            }
+
             _entries.Remove(key);
         }
 
-        #region IEnumerable<V> Members
-
-        public IEnumerator<V> GetEnumerator()
+        private void PruneEntries()
         {
-            foreach (var wRef in _entries.Values)
+
+            _nextPruneCount++;
+
+            if (_nextPruneCount > PruneGap)
             {
-                V value = (V)wRef.Target;
-                if (value != null)
+                List<K> toPrune = new List<K>();
+                foreach (var entry in _entries)
                 {
-                    yield return value;
+                    if (!entry.Value.IsAlive)
+                    {
+                        toPrune.Add(entry.Key);
+                    }
                 }
+
+                foreach (var key in toPrune)
+                {
+                    _entries.Remove(key);
+                }
+
+                _nextPruneCount = 0;
             }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
+        private void MakeMostRecent(int i)
         {
-            foreach (var wRef in _entries.Values)
+            if (i == 0)
             {
-                V value = (V)wRef.Target;
-                if (value != null)
-                {
-                    yield return value;
-                }
+                return;
             }
+
+            KeyValuePair<K, V> entry = _recent[i];
+            _recent.RemoveAt(i);
+            _recent.Insert(0, entry);
         }
 
-        #endregion
+        private void MakeMostRecent(K key, V val)
+        {
+            while (_recent.Count >= MostRecentListSize)
+            {
+                _recent.RemoveAt(_recent.Count - 1);
+            }
+
+            _recent.Insert(0, new KeyValuePair<K, V>(key, val));
+        }
+
     }
 }
