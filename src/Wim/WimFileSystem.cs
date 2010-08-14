@@ -575,6 +575,33 @@ namespace DiscUtils.Wim
         }
 
         /// <summary>
+        /// Gets the names of the alternate data streams for a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>
+        /// The list of alternate data streams (or empty, if none).  To access the contents
+        /// of the alternate streams, use OpenFile(path + ":" + name, ...).
+        /// </returns>
+        public string[] GetAlternateDataStreams(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+
+            List<string> names = new List<string>();
+            if (dirEntry.AlternateStreams != null)
+            {
+                foreach (var altStream in dirEntry.AlternateStreams)
+                {
+                    if (!string.IsNullOrEmpty(altStream.Key))
+                    {
+                        names.Add(altStream.Key);
+                    }
+                }
+            }
+
+            return names.ToArray();
+        }
+
+        /// <summary>
         /// Gets the file id for a given path.
         /// </summary>
         /// <param name="path">The path to get the id of</param>
