@@ -27,7 +27,7 @@ using System.IO.Compression;
 namespace DiscUtils.Vmdk
 {
     /// <summary>
-    /// Represents and extent from a sparse disk from 'hosted' software (VMWare Workstation, etc).
+    /// Represents and extent from a sparse disk from 'hosted' software (VMware Workstation, etc).
     /// </summary>
     /// <remarks>Hosted disks and server disks (ESX, etc) are subtly different formats.</remarks>
     internal sealed class HostedSparseExtentStream : CommonSparseExtentStream

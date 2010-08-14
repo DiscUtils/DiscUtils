@@ -479,14 +479,14 @@ Creates a new dynamically-sized VHD file.  This kind of disk initially occupies 
 
 VMDK-fixed
 ----------
-Creates a new fixed-size VMDK file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMWare Workstation, VMWare Server, etc).  Disks of this kind are not fully interoperable with VMWare ESX.
+Creates a new fixed-size VMDK file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMware Workstation, VMware Server, etc).  Disks of this kind are not fully interoperable with VMware ESX.
 
 This kind of disk is known in the VMDK file format as &quot;monolithicFlat&quot;.
 
 
 VMDK-dynamic
 ------------
-Creates a new dynamically-sized file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMWare Workstation, VMWare Server, etc).  Disks of this kind are not fully interoperable with VMWare ESX.
+Creates a new dynamically-sized file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMware Workstation, VMware Server, etc).  Disks of this kind are not fully interoperable with VMware ESX.
 
 Unlike the other VMDK disk types, which occupy multiple files, this kind of disk resides in a single file.
 
@@ -495,14 +495,14 @@ This kind of disk is known in the VMDK file format as &quot;monolithicSparse&quo
 
 VMDK-vmfsfixed
 --------------
-Creates a new fixed-size VMDK file.  The file is an ESX style disk, and is interoperable with VMWare workstation.
+Creates a new fixed-size VMDK file.  The file is an ESX style disk, and is interoperable with VMware workstation.
 
 This kind of disk is known in the VMDK file format as &quot;vmfs&quot;.  Although called &quot;vmfs&quot;, this is the kind of disk stored by ESX on NFS storage.
 
 
 VMDK-vmfsdynamic
 ----------------
-Creates a new dynamically-sized VMDK file.  The file is an ESX style disk, and is interoperable with VMWare workstation.
+Creates a new dynamically-sized VMDK file.  The file is an ESX style disk, and is interoperable with VMware workstation.
 
 This kind of disk is known in the VMDK file format as &quot;vmfsSparse&quot;.
 
@@ -617,14 +617,14 @@ Creates a new dynamically-sized VHD file.  This kind of disk initially occupies 
 
 VMDK-fixed
 ----------
-Creates a new fixed-size VMDK file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMWare Workstation, VMWare Server, etc).  Disks of this kind are not fully interoperable with VMWare ESX.
+Creates a new fixed-size VMDK file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMware Workstation, VMware Server, etc).  Disks of this kind are not fully interoperable with VMware ESX.
 
 This kind of disk is known in the VMDK file format as &quot;monolithicFlat&quot;.
 
 
 VMDK-dynamic
 ------------
-Creates a new dynamically-sized file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMWare Workstation, VMWare Server, etc).  Disks of this kind are not fully interoperable with VMWare ESX.
+Creates a new dynamically-sized file.  The file is a 'Hosted' style disk (i.e. this is the kind of disk used by VMware Workstation, VMware Server, etc).  Disks of this kind are not fully interoperable with VMware ESX.
 
 Unlike the other VMDK disk types, which occupy multiple files, this kind of disk resides in a single file.
 
@@ -633,14 +633,14 @@ This kind of disk is known in the VMDK file format as &quot;monolithicSparse&quo
 
 VMDK-vmfsfixed
 --------------
-Creates a new fixed-size VMDK file.  The file is an ESX style disk, and is interoperable with VMWare workstation.
+Creates a new fixed-size VMDK file.  The file is an ESX style disk, and is interoperable with VMware workstation.
 
 This kind of disk is known in the VMDK file format as &quot;vmfs&quot;.  Although called &quot;vmfs&quot;, this is the kind of disk stored by ESX on NFS storage.
 
 
 VMDK-vmfsdynamic
 ----------------
-Creates a new dynamically-sized VMDK file.  The file is an ESX style disk, and is interoperable with VMWare workstation.
+Creates a new dynamically-sized VMDK file.  The file is an ESX style disk, and is interoperable with VMware workstation.
 
 This kind of disk is known in the VMDK file format as &quot;vmfsSparse&quot;.
 
