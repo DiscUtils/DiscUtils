@@ -36,7 +36,9 @@ namespace DiscUtils.Wim
     {
         private WimFile _file;
         private List<RawSecurityDescriptor> _securityDescriptors;
-        private Dictionary<long, List<DirectoryEntry>> _directories;
+        private Stream _metaDataStream;
+        private ObjectCache<long, List<DirectoryEntry>> _dirCache;
+        private long _rootDirPos;
 
         internal WimFileSystem(WimFile file, int index)
         {
@@ -48,9 +50,28 @@ namespace DiscUtils.Wim
                 throw new ArgumentException("No such image: " + index, "index");
             }
 
-            using (Stream metaDataStream = _file.OpenResourceStream(metaDataFileInfo))
+            _metaDataStream = _file.OpenResourceStream(metaDataFileInfo);
+            ReadSecurityDescriptors();
+
+            _dirCache = new ObjectCache<long, List<DirectoryEntry>>();
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if disposing, else <c>false</c></param>
+        protected override void Dispose(bool disposing)
+        {
+            try
             {
-                ReadMetaData(metaDataStream);
+                _metaDataStream.Dispose();
+                _metaDataStream = null;
+
+                _file = null;
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 
@@ -132,7 +153,7 @@ namespace DiscUtils.Wim
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
             }
 
-            List<DirectoryEntry> parentDir = _directories[parentDirEntry.SubdirOffset];
+            List<DirectoryEntry> parentDir = GetDirectory(parentDirEntry.SubdirOffset);
 
             return Utilities.Map<DirectoryEntry, string>(parentDir, (m) => Utilities.CombinePaths(path, m.FileName));
         }
@@ -154,7 +175,7 @@ namespace DiscUtils.Wim
                 throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
             }
 
-            List<DirectoryEntry> parentDir = _directories[parentDirEntry.SubdirOffset];
+            List<DirectoryEntry> parentDir = GetDirectory(parentDirEntry.SubdirOffset);
 
             List<string> result = new List<string>();
             foreach (DirectoryEntry dirEntry in parentDir)
@@ -327,22 +348,15 @@ namespace DiscUtils.Wim
             }
         }
 
-        private void ReadMetaData(Stream stream)
+        private List<DirectoryEntry> GetDirectory(long id)
         {
-            LittleEndianDataReader reader = new LittleEndianDataReader(stream);
-
-            ReadSecurityDescriptors(reader);
-            ReadDirectories(reader);
-        }
-
-        private void ReadDirectories(LittleEndianDataReader reader)
-        {
-            _directories = new Dictionary<long, List<DirectoryEntry>>();
-            long dirId = 0;
-
-            while (reader.Position < reader.Length)
+            List<DirectoryEntry> dir = _dirCache[id];
+            if (dir == null)
             {
-                List<DirectoryEntry> dir = new List<DirectoryEntry>();
+                _metaDataStream.Position = (id == 0) ? _rootDirPos : id;
+                LittleEndianDataReader reader = new LittleEndianDataReader(_metaDataStream);
+
+                dir = new List<DirectoryEntry>();
 
                 DirectoryEntry entry = DirectoryEntry.ReadFrom(reader);
                 while (entry != null)
@@ -351,13 +365,16 @@ namespace DiscUtils.Wim
                     entry = DirectoryEntry.ReadFrom(reader);
                 }
 
-                _directories.Add(dirId, dir);
-                dirId = reader.Position;
+                _dirCache[id] = dir;
             }
+
+            return dir;
         }
 
-        private void ReadSecurityDescriptors(LittleEndianDataReader reader)
+        private void ReadSecurityDescriptors()
         {
+            LittleEndianDataReader reader = new LittleEndianDataReader(_metaDataStream);
+
             long startPos = reader.Position;
 
             uint totalLength = reader.ReadUInt32();
@@ -378,6 +395,8 @@ namespace DiscUtils.Wim
             {
                 reader.Skip((int)(startPos + totalLength - reader.Position));
             }
+
+            _rootDirPos = startPos + totalLength;
         }
 
         private DirectoryEntry GetEntry(string path)
@@ -392,7 +411,7 @@ namespace DiscUtils.Wim
                 path = @"\" + path;
             }
 
-            return GetEntry(_directories[0], path.Split('\\'));
+            return GetEntry(GetDirectory(0), path.Split('\\'));
         }
 
         private DirectoryEntry GetEntry(List<DirectoryEntry> dir, string[] path)
@@ -420,7 +439,7 @@ namespace DiscUtils.Wim
                 }
                 else if (nextEntry.SubdirOffset != 0)
                 {
-                    currentDir = _directories[nextEntry.SubdirOffset];
+                    currentDir = GetDirectory(nextEntry.SubdirOffset);
                 }
             }
 
@@ -436,7 +455,7 @@ namespace DiscUtils.Wim
                 return;
             }
 
-            List<DirectoryEntry> parentDir = _directories[parentDirEntry.SubdirOffset];
+            List<DirectoryEntry> parentDir = GetDirectory(parentDirEntry.SubdirOffset);
 
             foreach (DirectoryEntry de in parentDir)
             {
@@ -560,6 +579,33 @@ namespace DiscUtils.Wim
         public void SetShortName(string path, string shortName)
         {
             throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the names of the alternate data streams for a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>
+        /// The list of alternate data streams (or empty, if none).  To access the contents
+        /// of the alternate streams, use OpenFile(path + ":" + name, ...).
+        /// </returns>
+        public string[] GetAlternateDataStreams(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+
+            List<string> names = new List<string>();
+            if (dirEntry.AlternateStreams != null)
+            {
+                foreach (var altStream in dirEntry.AlternateStreams)
+                {
+                    if (!string.IsNullOrEmpty(altStream.Key))
+                    {
+                        names.Add(altStream.Key);
+                    }
+                }
+            }
+
+            return names.ToArray();
         }
 
         /// <summary>

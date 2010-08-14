@@ -84,6 +84,16 @@ namespace DiscUtils
         void SetShortName(string path, string shortName);
 
         /// <summary>
+        /// Gets the names of the alternate data streams for a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>
+        /// The list of alternate data streams (or empty, if none).  To access the contents
+        /// of the alternate streams, use OpenFile(path + ":" + name, ...).
+        /// </returns>
+        string[] GetAlternateDataStreams(string path);
+
+        /// <summary>
         /// Gets the file id for a given path.
         /// </summary>
         /// <param name="path">The path to get the id of</param>

@@ -68,7 +68,7 @@ namespace DiscUtils.Wim
 
         public override long Length
         {
-            get { throw new NotSupportedException(); }
+            get { return _buffer.Length; }
         }
 
         public override long Position
@@ -80,12 +80,17 @@ namespace DiscUtils.Wim
 
             set
             {
-                throw new NotSupportedException();
+                _position = value;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (_position > Length)
+            {
+                return 0;
+            }
+
             int numToRead = (int)Math.Min(count, _buffer.Length - _position);
             Array.Copy(_buffer, _position, buffer, offset, numToRead);
             _position += numToRead;
