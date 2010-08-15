@@ -38,7 +38,7 @@ namespace DiscUtils
         private int _sector;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the ChsAddress class.
         /// </summary>
         /// <param name="cylinder">The number of cylinders of the disk</param>
         /// <param name="head">The number of heads (aka platters) of the disk</param>

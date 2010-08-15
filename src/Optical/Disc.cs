@@ -34,7 +34,7 @@ namespace DiscUtils.Optical
         private DiscImageFile _file;
 
         /// <summary>
-        /// Creates a new instance from an existing stream.
+        /// Initializes a new instance of the Disc class.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
@@ -44,7 +44,7 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream.
+        /// Initializes a new instance of the Disc class.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
@@ -55,7 +55,7 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file.
+        /// Initializes a new instance of the Disc class.
         /// </summary>
         /// <param name="path">The path to the disc image</param>
         public Disc(string path)
@@ -64,7 +64,7 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file.
+        /// Initializes a new instance of the Disc class.
         /// </summary>
         /// <param name="path">The path to the disc image</param>
         /// <param name="access">The access requested to the disk</param>
@@ -122,7 +122,7 @@ namespace DiscUtils.Optical
         /// </summary>
         /// <param name="fileSystem">The file system to create the disc on</param>
         /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>never</returns>
+        /// <returns>Not Applicable</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");
@@ -132,7 +132,7 @@ namespace DiscUtils.Optical
         /// Not supported for Optical Discs.
         /// </summary>
         /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>never</returns>
+        /// <returns>Not Applicable</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");

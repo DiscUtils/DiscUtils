@@ -35,7 +35,7 @@ namespace DiscUtils
         private Ownership _ownership;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the StreamBuffer class.
         /// </summary>
         /// <param name="stream">The stream to wrap</param>
         /// <param name="ownership">Whether to dispose stream, when this object is disposed</param>

@@ -37,7 +37,7 @@ namespace DiscUtils.Vhd
         private FileType _diskType = FileType.Dynamic;
 
         /// <summary>
-        /// The type of VHD file to build.
+        /// Gets or sets the type of VHD file to build.
         /// </summary>
         public FileType DiskType
         {

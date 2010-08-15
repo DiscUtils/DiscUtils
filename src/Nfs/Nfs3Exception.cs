@@ -36,14 +36,14 @@ namespace DiscUtils.Nfs
         private Nfs3Status _status = Nfs3Status.Unknown;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         public Nfs3Exception()
         {
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         public Nfs3Exception(string message)
@@ -52,7 +52,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="status">The status result of an NFS procedure.</param>
@@ -63,7 +63,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         /// <param name="message">The exception message</param>
         /// <param name="innerException">The inner exception</param>
@@ -73,7 +73,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance for a server-indicated error
+        /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         /// <param name="status">The status result of an NFS procedure.</param>
         internal Nfs3Exception(Nfs3Status status)
@@ -83,7 +83,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Deserializes an instance.
+        /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">The streaming context</param>

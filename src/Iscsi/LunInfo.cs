@@ -181,7 +181,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Gets whether this Lun has removable media.
+        /// Gets a value indicating whether this Lun has removable media.
         /// </summary>
         public bool Removable
         {
@@ -293,7 +293,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the LUN as a string.
         /// </summary>
-        /// <returns>The LUN</returns>
+        /// <returns>The LUN in string form</returns>
         public override string ToString()
         {
             if ((((ulong)_lun) & 0xFF00000000000000) == 0)

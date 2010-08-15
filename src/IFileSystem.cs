@@ -31,7 +31,7 @@ namespace DiscUtils
     public interface IFileSystem
     {
         /// <summary>
-        /// Indicates whether the file system is read-only or read-write.
+        /// Gets a value indicating whether the file system is read-only or read-write.
         /// </summary>
         /// <returns>true if the file system is read-write.</returns>
         bool CanWrite { get; }

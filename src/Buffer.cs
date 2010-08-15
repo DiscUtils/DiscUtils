@@ -30,12 +30,12 @@ namespace DiscUtils
     public abstract class Buffer : IBuffer
     {
         /// <summary>
-        /// Can this buffer be read.
+        /// Gets a value indicating whether this buffer can be read.
         /// </summary>
         public abstract bool CanRead { get; }
 
         /// <summary>
-        /// Can this buffer be modified.
+        /// Gets a value indicating whether this buffer can be modified.
         /// </summary>
         public abstract bool CanWrite { get; }
 

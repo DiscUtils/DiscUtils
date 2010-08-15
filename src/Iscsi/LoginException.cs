@@ -32,14 +32,14 @@ namespace DiscUtils.Iscsi
     public class LoginException : IscsiException
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the LoginException class.
         /// </summary>
         public LoginException()
         {
         }
 
         /// <summary>
-        /// Creates a new instance containing a message.
+        /// Initializes a new instance of the LoginException class.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         public LoginException(string message)
@@ -48,7 +48,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance containing a message and an inner exception.
+        /// Initializes a new instance of the LoginException class.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         /// <param name="innerException">The inner exception</param>
@@ -58,7 +58,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance, containing a status code.
+        /// Initializes a new instance of the LoginException class.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         /// <param name="code">The target-indicated reason for the exception</param>
@@ -68,7 +68,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new deserialized instance.
+        /// Initializes a new instance of the LoginException class.
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">Ther context</param>

@@ -51,7 +51,7 @@ namespace DiscUtils.Vmdk
         private Ownership _ownsMonolithicStream;
 
         /// <summary>
-        /// Creates a new instance from a file on disk.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="path">The path to the disk</param>
         /// <param name="access">The desired access to the disk</param>
@@ -95,9 +95,9 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Creates a new instance from a monolithic file on disk.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream containing the monolithic disk</param>
+        /// <param name="stream">The stream containing a monolithic disk</param>
         /// <param name="ownsStream">Indicates if the created instance should own the stream</param>
         public DiskImageFile(Stream stream, Ownership ownsStream)
         {
@@ -120,7 +120,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Creates a new instance from a file.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="fileLocator">An object to open the file and any extents</param>
         /// <param name="file">The file name</param>
@@ -192,7 +192,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Indicates if this disk is a linked differencing disk.
+        /// Gets a value indicating whether this disk is a linked differencing disk.
         /// </summary>
         internal bool NeedsParent
         {
@@ -519,6 +519,9 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Gets the contents of this disk as a stream.
         /// </summary>
+        /// <param name="parent">The content of the parent disk (needed if this is a differencing disk)</param>
+        /// <param name="ownsParent">A value indicating whether ownership of the parent stream is transfered.</param>
+        /// <returns>The stream containing the disk contents</returns>
         internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (_descriptor.ParentContentId == uint.MaxValue)

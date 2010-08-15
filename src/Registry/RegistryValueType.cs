@@ -33,12 +33,12 @@ namespace DiscUtils.Registry
         None = 0x00,
 
         /// <summary>
-        /// Unicode string.
+        /// A unicode string.
         /// </summary>
         String = 0x01,
 
         /// <summary>
-        /// String containing environment variables.
+        /// A string containing environment variables.
         /// </summary>
         ExpandString = 0x02,
 
@@ -48,17 +48,17 @@ namespace DiscUtils.Registry
         Binary = 0x03,
 
         /// <summary>
-        /// 32-bit integer.
+        /// A 32-bit integer.
         /// </summary>
         Dword = 0x04,
 
         /// <summary>
-        /// 32-bit integer.
+        /// A 32-bit integer.
         /// </summary>
         DwordBigEndian = 0x05,
 
         /// <summary>
-        /// Link.
+        /// A registry link.
         /// </summary>
         Link = 0x06,
 

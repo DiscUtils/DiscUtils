@@ -202,7 +202,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Enumerates through all attributes.
+        /// Gets an enumeration of all the attributes.
         /// </summary>
         internal IEnumerable<NtfsAttribute> AllAttributes
         {
@@ -941,6 +941,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="type">The type of the new attribute</param>
         /// <param name="flags">The flags of the new attribute</param>
+        /// <returns>The new attribute</returns>
         private NtfsAttribute CreateAttribute(AttributeType type, AttributeFlags flags)
         {
             return CreateAttribute(type, null, flags);
@@ -952,6 +953,7 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
         /// <param name="flags">The flags of the new attribute</param>
+        /// <returns>The new attribute</returns>
         private NtfsAttribute CreateAttribute(AttributeType type, string name, AttributeFlags flags)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);
@@ -977,6 +979,7 @@ namespace DiscUtils.Ntfs
         /// <param name="firstCluster">The first cluster to assign to the attribute</param>
         /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
         /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
+        /// <returns>The new attribute</returns>
         private NtfsAttribute CreateAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);

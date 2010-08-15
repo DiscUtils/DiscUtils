@@ -33,8 +33,10 @@ namespace DiscUtils
     public sealed class DiscDirectoryInfo : DiscFileSystemInfo
     {
         /// <summary>
-        /// Construction limited to sub classes.
+        /// Initializes a new instance of the DiscDirectoryInfo class.
         /// </summary>
+        /// <param name="fileSystem">The file system the directory info relates to</param>
+        /// <param name="path">The path within the file system of the directory</param>
         internal DiscDirectoryInfo(DiscFileSystem fileSystem, string path)
             : base(fileSystem, path)
         {
@@ -84,7 +86,7 @@ namespace DiscUtils
         /// <summary>
         /// Moves a directory and it's contents to a new path.
         /// </summary>
-        /// <param name="destinationDirName">The</param>
+        /// <param name="destinationDirName">The destination directory name</param>
         public void MoveTo(string destinationDirName)
         {
             FileSystem.MoveDirectory(Path, destinationDirName);

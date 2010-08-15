@@ -36,7 +36,7 @@ namespace DiscUtils
         private IBuffer _parent;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the SubBuffer class.
         /// </summary>
         /// <param name="parent">The parent buffer</param>
         /// <param name="first">The first byte in <paramref name="parent"/> represented by this sub-buffer</param>

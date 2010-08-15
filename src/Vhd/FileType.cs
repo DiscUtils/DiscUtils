@@ -28,7 +28,7 @@ namespace DiscUtils.Vhd
     public enum FileType : int
     {
         /// <summary>
-        /// None.
+        /// Unknown type.
         /// </summary>
         None = 0,
 

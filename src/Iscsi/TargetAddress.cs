@@ -40,7 +40,7 @@ namespace DiscUtils.Iscsi
         private string _targetGroupTag;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the TargetAddress class.
         /// </summary>
         /// <param name="address">The IP address (or FQDN) of the Target.</param>
         /// <param name="port">The network port of the Target</param>
@@ -53,7 +53,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// The IP address (or FQDN) of the Target.
+        /// Gets the IP address (or FQDN) of the Target.
         /// </summary>
         public string NetworkAddress
         {
@@ -61,7 +61,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// The network port of the Target.
+        /// Gets the network port of the Target.
         /// </summary>
         public int NetworkPort
         {
@@ -69,7 +69,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// The Group Tag of the Target.
+        /// Gets the Group Tag of the Target.
         /// </summary>
         public string TargetGroupTag
         {

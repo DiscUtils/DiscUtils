@@ -36,7 +36,7 @@ namespace DiscUtils
         private int _bytesPerSector;
 
         /// <summary>
-        /// Creates a new instance, assuming the default 512 bytes per sector.
+        /// Initializes a new instance of the Geometry class.  The default 512 bytes per sector is assumed.
         /// </summary>
         /// <param name="cylinders">The number of cylinders of the disk</param>
         /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
@@ -50,7 +50,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Geometry class.
         /// </summary>
         /// <param name="cylinders">The number of cylinders of the disk</param>
         /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
@@ -65,7 +65,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance, based on a known track layout.
+        /// Initializes a new instance of the Geometry class.
         /// </summary>
         /// <param name="capacity">The total capacity of the disk</param>
         /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
@@ -144,7 +144,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets an indication if the Geometry is consistent with the values a BIOS can support.
+        /// Gets a value indicating whether the Geometry is consistent with the values a BIOS can support.
         /// </summary>
         public bool IsBiosSafe
         {
@@ -152,7 +152,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets an indication if the Geometry is consistent with the values IDE can represent.
+        /// Gets a value indicating whether the Geometry is consistent with the values IDE can represent.
         /// </summary>
         public bool IsIdeSafe
         {
@@ -160,7 +160,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets an indication if the Geometry is representable both by the BIOS and by IDE.
+        /// Gets a value indicating whether the Geometry is representable both by the BIOS and by IDE.
         /// </summary>
         public bool IsBiosAndIdeSafe
         {

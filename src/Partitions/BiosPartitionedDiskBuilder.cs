@@ -46,7 +46,7 @@ namespace DiscUtils.Partitions
         private Dictionary<int, BuilderExtent> _partitionContents;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the BiosPartitionedDiskBuilder class.
         /// </summary>
         /// <param name="capacity">The capacity of the disk (in bytes)</param>
         /// <param name="biosGeometry">The BIOS geometry of the disk</param>
@@ -64,7 +64,7 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the BiosPartitionedDiskBuilder class.
         /// </summary>
         /// <param name="capacity">The capacity of the disk (in bytes)</param>
         /// <param name="bootSectors">The boot sector(s) of the disk.</param>

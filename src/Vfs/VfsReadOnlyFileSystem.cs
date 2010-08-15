@@ -39,7 +39,7 @@ namespace DiscUtils.Vfs
         where TContext : VfsContext
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VfsReadOnlyFileSystem class.
         /// </summary>
         /// <param name="defaultOptions">The default file system options</param>
         protected VfsReadOnlyFileSystem(DiscFileSystemOptions defaultOptions)

@@ -33,14 +33,14 @@ namespace DiscUtils
     public class InvalidFileSystemException : IOException
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
         public InvalidFileSystemException()
         {
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         public InvalidFileSystemException(string message)
@@ -49,7 +49,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
         /// <param name="message">The exception message</param>
         /// <param name="innerException">The inner exception</param>
@@ -59,7 +59,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Deserializes an instance.
+        /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">The streaming context</param>

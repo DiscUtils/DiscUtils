@@ -38,7 +38,7 @@ namespace DiscUtils
         private long _capacity;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the SparseMemoryBuffer class.
         /// </summary>
         /// <param name="chunkSize">The size of each allocation chunk</param>
         public SparseMemoryBuffer(int chunkSize)

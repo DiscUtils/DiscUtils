@@ -38,7 +38,7 @@ namespace DiscUtils
         private long _length;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the StreamExtent class.
         /// </summary>
         /// <param name="start">The start of the extent</param>
         /// <param name="length">The length of the extent</param>

@@ -35,12 +35,12 @@ namespace DiscUtils
     public interface IBuffer
     {
         /// <summary>
-        /// Can this buffer be read.
+        /// Gets a value indicating whether this buffer can be read.
         /// </summary>
         bool CanRead { get; }
 
         /// <summary>
-        /// Can this buffer be modified.
+        /// Gets a value indicating whether this buffer can be modified.
         /// </summary>
         bool CanWrite { get; }
 

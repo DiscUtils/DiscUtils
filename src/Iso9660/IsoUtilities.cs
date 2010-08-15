@@ -27,16 +27,9 @@ namespace DiscUtils.Iso9660
     using System.IO;
     using System.Text;
 
-    internal class IsoUtilities
+    internal static class IsoUtilities
     {
         public const int SectorSize = 2048;
-
-        /// <summary>
-        /// Prevent instatiation.
-        /// </summary>
-        private IsoUtilities()
-        {
-        }
 
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {

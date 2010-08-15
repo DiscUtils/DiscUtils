@@ -37,7 +37,7 @@ namespace DiscUtils.Vfs
         private DiscFileSystem _wrapped;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VfsFileSystemFacade class.
         /// </summary>
         /// <param name="toWrap">The actual file system instance</param>
         protected VfsFileSystemFacade(DiscFileSystem toWrap)

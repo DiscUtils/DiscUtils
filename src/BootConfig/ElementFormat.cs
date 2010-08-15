@@ -28,42 +28,42 @@ namespace DiscUtils.BootConfig
     public enum ElementFormat
     {
         /// <summary>
-        /// Unknown.
+        /// Unknown format.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// Block device, or partition.
+        /// A block device, or partition.
         /// </summary>
         Device = 1,
 
         /// <summary>
-        /// String.
+        /// A unicode string.
         /// </summary>
         String = 2,
 
         /// <summary>
-        /// GUID.
+        /// A Globally Unique Identifier (GUID).
         /// </summary>
         Guid = 3,
 
         /// <summary>
-        /// GUID list.
+        /// A GUID list.
         /// </summary>
         GuidList = 4,
 
         /// <summary>
-        /// Integer.
+        /// An integer.
         /// </summary>
         Integer = 5,
 
         /// <summary>
-        /// Boolean.
+        /// A boolean.
         /// </summary>
         Boolean = 6,
 
         /// <summary>
-        /// Integer list.
+        /// An integer list.
         /// </summary>
         IntegerList = 7
     }

@@ -40,7 +40,7 @@ namespace DiscUtils
         private VirtualDiskTransport _transport;
 
         /// <summary>
-        /// Destroys this instance.
+        /// Finalizes an instance of the VirtualDisk class.
         /// </summary>
         ~VirtualDisk()
         {
@@ -115,7 +115,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the Windows disk signature of the disk, which uniquely identifies the disk.
+        /// Gets or sets the Windows disk signature of the disk, which uniquely identifies the disk.
         /// </summary>
         public virtual int Signature
         {
@@ -133,7 +133,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets a best guess as to whether the disk has a valid partition table.
+        /// Gets a value indicating whether the disk appears to have a valid partition table.
         /// </summary>
         /// <remarks>There is no reliable way to determine whether a disk has a valid partition
         /// table.  The 'guess' consists of checking for basic indicators and looking for obviously

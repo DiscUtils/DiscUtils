@@ -54,7 +54,7 @@ namespace DiscUtils
         private long _position;
 
         /// <summary>
-        /// Creates a new instance, wrapping an existing stream.
+        /// Initializes a new instance of the ThreadSafeStream class.
         /// </summary>
         /// <param name="toWrap">The stream to wrap</param>
         /// <remarks>Do not directly modify <c>toWrap</c> after wrapping it, unless the thread-safe views
@@ -65,7 +65,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance, wrapping an existing stream.
+        /// Initializes a new instance of the ThreadSafeStream class.
         /// </summary>
         /// <param name="toWrap">The stream to wrap</param>
         /// <param name="ownership">Whether to transfer ownership of <c>toWrap</c> to the new instance</param>

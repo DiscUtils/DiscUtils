@@ -36,7 +36,7 @@ namespace DiscUtils.Iscsi
         private byte[] _senseData;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         public ScsiCommandException()
         {
@@ -44,7 +44,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="status">The SCSI status code</param>
         public ScsiCommandException(ScsiStatus status)
@@ -53,7 +53,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance containing a message.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         public ScsiCommandException(string message)
@@ -63,7 +63,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance containing a message.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="status">The SCSI status code</param>
         /// <param name="message">The reason for the exception</param>
@@ -74,7 +74,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance containing a message.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="status">The SCSI status code</param>
         /// <param name="message">The reason for the exception</param>
@@ -87,7 +87,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance containing a message and an inner exception.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         /// <param name="innerException">The inner exception</param>
@@ -98,7 +98,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new instance containing a message and an inner exception.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="status">The SCSI status code</param>
         /// <param name="message">The reason for the exception</param>
@@ -110,7 +110,7 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new deserialized instance.
+        /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">Ther context</param>

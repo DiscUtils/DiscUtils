@@ -46,7 +46,7 @@ namespace DiscUtils.Vfs
         private ObjectCache<long, TFile> _fileCache;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VfsFileSystem class.
         /// </summary>
         /// <param name="defaultOptions">The default file system options</param>
         protected VfsFileSystem(DiscFileSystemOptions defaultOptions)
@@ -64,7 +64,7 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Gets the global shared state.
+        /// Gets or sets the global shared state.
         /// </summary>
         protected TContext Context
         {
@@ -73,7 +73,7 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Gets the object representing the root directory.
+        /// Gets or sets the object representing the root directory.
         /// </summary>
         protected TDirectory RootDirectory
         {

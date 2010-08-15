@@ -37,7 +37,7 @@ namespace DiscUtils.Vfs
     public abstract class VfsDirEntry
     {
         /// <summary>
-        /// Indicates if this directory entry represents a directory (rather than a file).
+        /// Gets a value indicating whether this directory entry represents a directory (rather than a file).
         /// </summary>
         public abstract bool IsDirectory { get; }
 
@@ -47,7 +47,7 @@ namespace DiscUtils.Vfs
         public abstract string FileName { get; }
 
         /// <summary>
-        /// Indicates if this directory entry contains time information.
+        /// Gets a value indicating whether this directory entry contains time information.
         /// </summary>
         /// <remarks>
         /// <para>Typically either always returns <c>true</c> or <c>false</c>.</para>
@@ -79,7 +79,7 @@ namespace DiscUtils.Vfs
         public abstract DateTime CreationTimeUtc { get; }
 
         /// <summary>
-        /// Indicates if this directory entry contains file attribute information.
+        /// Gets a value indicating whether this directory entry contains file attribute information.
         /// </summary>
         /// <remarks>
         /// <para>Typically either always returns <c>true</c> or <c>false</c>.</para>

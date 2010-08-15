@@ -126,7 +126,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Reads the records directly from the MFT stream - bypassing the record cache.
+        /// Gets the MFT records directly from the MFT stream - bypassing the record cache.
         /// </summary>
         public IEnumerable<FileRecord> Records
         {

@@ -85,9 +85,12 @@ namespace DiscUtils.Fat
         private ushort _bpbBkBootSec;
 
         /// <summary>
-        /// Creates a new instance, with local time as effective timezone
+        /// Initializes a new instance of the FatFileSystem class.
         /// </summary>
         /// <param name="data">The stream containing the file system.</param>
+        /// <remarks>
+        /// Local time is the effective timezone of the new instance.
+        /// </remarks>
         public FatFileSystem(Stream data)
         {
             _dirCache = new Dictionary<uint, Directory>();
@@ -96,11 +99,14 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Creates a new instance, with local time as effective timezone
+        /// Initializes a new instance of the FatFileSystem class.
         /// </summary>
         /// <param name="data">The stream containing the file system.</param>
         /// <param name="ownsData">Indicates if the new instance should take ownership
         /// of <paramref name="data"/>.</param>
+        /// <remarks>
+        /// Local time is the effective timezone of the new instance.
+        /// </remarks>
         public FatFileSystem(Stream data, Ownership ownsData)
         {
             _dirCache = new Dictionary<uint, Directory>();
@@ -110,7 +116,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Creates a new instance, with a specific timezone
+        /// Initializes a new instance of the FatFileSystem class.
         /// </summary>
         /// <param name="data">The stream containing the file system.</param>
         /// <param name="timeConverter">A delegate to convert to/from the file system's timezone.</param>
@@ -122,7 +128,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Creates a new instance, with a specific timezone
+        /// Initializes a new instance of the FatFileSystem class.
         /// </summary>
         /// <param name="data">The stream containing the file system.</param>
         /// <param name="ownsData">Indicates if the new instance should take ownership
@@ -260,7 +266,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// BIOS drive number for BIOS Int 13h calls.
+        /// Gets the BIOS drive number for BIOS Int 13h calls.
         /// </summary>
         public byte BiosDriveNumber
         {
@@ -268,7 +274,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Indicates if the VolumeId, VolumeLabel and FileSystemType fields are valid.
+        /// Gets a value indicating whether the VolumeId, VolumeLabel and FileSystemType fields are valid.
         /// </summary>
         public bool ExtendedBootSignaturePresent
         {
@@ -319,7 +325,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Gets whether FAT changes are mirrored to all copies of the FAT.
+        /// Gets a value indicating whether FAT changes are mirrored to all copies of the FAT.
         /// </summary>
         public bool MirrorFat
         {
@@ -351,7 +357,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Sector location of the backup boot sector (FAT32 only).
+        /// Gets the Sector location of the backup boot sector (FAT32 only).
         /// </summary>
         public int BackupBootSector
         {

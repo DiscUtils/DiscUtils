@@ -37,7 +37,7 @@ namespace DiscUtils
         private Geometry _geometry;
 
         /// <summary>
-        /// Sets the content for this disk, implying the size of the disk.
+        /// Gets or sets the content for this disk, implying the size of the disk.
         /// </summary>
         public SparseStream Content
         {
@@ -46,7 +46,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Sets the geometry of this disk, will be implied from the content stream if not set.
+        /// Gets or sets the geometry of this disk, will be implied from the content stream if not set.
         /// </summary>
         public Geometry Geometry
         {

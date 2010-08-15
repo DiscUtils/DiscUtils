@@ -33,7 +33,7 @@ namespace DiscUtils.Udf
     public sealed class UdfReader : VfsFileSystemFacade
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the UdfReader class.
         /// </summary>
         /// <param name="data">The stream containing the UDF file system</param>
         public UdfReader(Stream data)
@@ -42,7 +42,7 @@ namespace DiscUtils.Udf
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the UdfReader class.
         /// </summary>
         /// <param name="data">The stream containing the UDF file system</param>
         /// <param name="sectorSize">The sector size of the physical media</param>

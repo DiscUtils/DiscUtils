@@ -31,22 +31,22 @@ namespace DiscUtils
     public class PumpProgressEventArgs : EventArgs
     {
         /// <summary>
-        /// The number of bytes read from <c>InputStream</c>.
+        /// Gets or sets the number of bytes read from <c>InputStream</c>.
         /// </summary>
         public long BytesRead { get; set; }
 
         /// <summary>
-        /// The number of bytes written to <c>OutputStream</c>.
+        /// Gets or sets the number of bytes written to <c>OutputStream</c>.
         /// </summary>
         public long BytesWritten { get; set; }
 
         /// <summary>
-        /// The absolute position in <c>InputStream</c>.
+        /// Gets or sets the absolute position in <c>InputStream</c>.
         /// </summary>
         public long SourcePosition { get; set; }
 
         /// <summary>
-        /// The absolute position in <c>OutputStream</c>.
+        /// Gets or sets the absolute position in <c>OutputStream</c>.
         /// </summary>
         public long DestinationPosition { get; set; }
     }
@@ -62,7 +62,7 @@ namespace DiscUtils
     public sealed class StreamPump
     {
         /// <summary>
-        /// Creates a new instance, with no streams specified.
+        /// Initializes a new instance of the StreamPump class.
         /// </summary>
         public StreamPump()
         {
@@ -72,7 +72,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the StreamPump class.
         /// </summary>
         /// <param name="inStream">The stream to read from</param>
         /// <param name="outStream">The stream to write to</param>
@@ -96,17 +96,17 @@ namespace DiscUtils
         public event EventHandler<PumpProgressEventArgs> ProgressEvent;
 
         /// <summary>
-        /// The stream that will be read from.
+        /// Gets or sets the stream that will be read from.
         /// </summary>
         public Stream InputStream { get; set; }
 
         /// <summary>
-        /// The stream that will be written to.
+        /// Gets or sets the stream that will be written to.
         /// </summary>
         public Stream OutputStream { get; set; }
 
         /// <summary>
-        /// For sparse transfers the size of each chunk.
+        /// Gets or sets, for sparse transfers, the size of each chunk.
         /// </summary>
         /// <remarks>
         /// A chunk is transfered if any byte in the chunk is valid, otherwise it is not.
@@ -116,22 +116,22 @@ namespace DiscUtils
         public int SparseChunkSize { get; set; }
 
         /// <summary>
-        /// The amount of data to read at a time from <c>InputStream</c>.
+        /// Gets or sets the amount of data to read at a time from <c>InputStream</c>.
         /// </summary>
         public int BufferSize { get; set; }
 
         /// <summary>
-        /// Whether to enable the sparse copy behaviour (default true).
+        /// Gets or sets a value indicating whether to enable the sparse copy behaviour (default true).
         /// </summary>
         public bool SparseCopy { get; set; }
 
         /// <summary>
-        /// The number of bytes read from <c>InputStream</c>.
+        /// Gets the number of bytes read from <c>InputStream</c>.
         /// </summary>
         public long BytesRead { get; private set; }
 
         /// <summary>
-        /// The number of bytes written to <c>OutputStream</c>.
+        /// Gets the number of bytes written to <c>OutputStream</c>.
         /// </summary>
         public long BytesWritten { get; private set; }
 

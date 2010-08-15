@@ -31,7 +31,7 @@ namespace DiscUtils.Iso9660
     public class CDReader : VfsFileSystemFacade
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the CDReader class.
         /// </summary>
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>
@@ -41,7 +41,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the CDReader class.
         /// </summary>
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>

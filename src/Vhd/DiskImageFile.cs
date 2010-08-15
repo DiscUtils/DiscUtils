@@ -63,7 +63,7 @@ namespace DiscUtils.Vhd
         private string _fileName;
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         public DiskImageFile(Stream stream)
@@ -76,7 +76,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
@@ -91,7 +91,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from a file.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="path">The file path to open</param>
         /// <param name="access">Controls how the file can be accessed</param>
@@ -170,7 +170,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets a value indicating if the VHD file is a differencing disk.
+        /// Gets a value indicating whether the VHD file is a differencing disk.
         /// </summary>
         public bool NeedsParent
         {

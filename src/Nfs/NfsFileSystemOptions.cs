@@ -28,7 +28,7 @@ namespace DiscUtils.Nfs
     public sealed class NfsFileSystemOptions : DiscFileSystemOptions
     {
         /// <summary>
-        /// Creates a new instance with default settings.
+        /// Initializes a new instance of the NfsFileSystemOptions class.
         /// </summary>
         public NfsFileSystemOptions()
         {
@@ -39,12 +39,12 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// The permission mask to apply to newly created files.
+        /// Gets or sets the permission mask to apply to newly created files.
         /// </summary>
         public UnixFilePermissions NewFilePermissions { get; set; }
 
         /// <summary>
-        /// The permission mask to apply to newly created directories.
+        /// Gets or sets the permission mask to apply to newly created directories.
         /// </summary>
         public UnixFilePermissions NewDirectoryPermissions { get; set; }
     }

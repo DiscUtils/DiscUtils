@@ -33,7 +33,7 @@ namespace DiscUtils
         private Random _rng;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the DiscFileSystemOptions class.
         /// </summary>
         /// <remarks>You shouldn't normally create a new instance.  File systems will provide
         /// an instance of the correct derived type.</remarks>
@@ -42,7 +42,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets and sets the random number generator the file system should use.
+        /// Gets or sets the random number generator the file system should use.
         /// </summary>
         /// <remarks>This option is normally <c>null</c>, which is fine for most purposes.
         /// Use this option when you need to finely control the filesystem for

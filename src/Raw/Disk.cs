@@ -35,7 +35,7 @@ namespace DiscUtils.Raw
         private DiskImageFile _file;
 
         /// <summary>
-        /// Creates a new instance from an existing stream.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
@@ -45,7 +45,7 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
@@ -56,7 +56,7 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="path">The path to the disk image</param>
         public Disk(string path)
@@ -65,7 +65,7 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="path">The path to the disk image</param>
         /// <param name="access">The access requested to the disk</param>
@@ -75,6 +75,10 @@ namespace DiscUtils.Raw
             _file = new DiskImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose, null);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the Disk class.
+        /// </summary>
+        /// <param name="file">The contents of the disk.</param>
         private Disk(DiskImageFile file)
         {
             _file = file;

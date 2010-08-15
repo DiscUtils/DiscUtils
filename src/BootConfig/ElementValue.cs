@@ -66,7 +66,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a string value.
         /// </summary>
-        /// <param name="value">The value</param>
+        /// <param name="value">The value to convert</param>
         /// <returns>The value as an object</returns>
         public static ElementValue ForString(string value)
         {
@@ -76,7 +76,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing an integer value.
         /// </summary>
-        /// <param name="value">The value</param>
+        /// <param name="value">The value to convert</param>
         /// <returns>The value as an object</returns>
         public static ElementValue ForInteger(long value)
         {
@@ -86,7 +86,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing an integer list value.
         /// </summary>
-        /// <param name="values">The value</param>
+        /// <param name="values">The value to convert</param>
         /// <returns>The value as an object</returns>
         public static ElementValue ForIntegerList(long[] values)
         {
@@ -102,7 +102,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a boolean value.
         /// </summary>
-        /// <param name="value">The value</param>
+        /// <param name="value">The value to convert</param>
         /// <returns>The value as an object</returns>
         public static ElementValue ForBoolean(bool value)
         {
@@ -112,7 +112,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a GUID value.
         /// </summary>
-        /// <param name="value">The value</param>
+        /// <param name="value">The value to convert</param>
         /// <returns>The value as an object</returns>
         public static ElementValue ForGuid(Guid value)
         {
@@ -122,7 +122,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a GUID list value.
         /// </summary>
-        /// <param name="values">The value</param>
+        /// <param name="values">The value to convert</param>
         /// <returns>The value as an object</returns>
         public static ElementValue ForGuidList(Guid[] values)
         {

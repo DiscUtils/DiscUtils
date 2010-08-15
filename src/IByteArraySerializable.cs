@@ -28,7 +28,7 @@ namespace DiscUtils
     internal interface IByteArraySerializable
     {
         /// <summary>
-        /// The total number of bytes the structure occupies.
+        /// Gets the total number of bytes the structure occupies.
         /// </summary>
         int Size { get; }
 

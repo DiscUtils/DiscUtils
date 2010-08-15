@@ -40,7 +40,7 @@ namespace DiscUtils
     public abstract class VirtualDiskLayer : IDisposable
     {
         /// <summary>
-        /// Destroys this instance.
+        /// Finalizes an instance of the VirtualDiskLayer class.
         /// </summary>
         ~VirtualDiskLayer()
         {
@@ -48,7 +48,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
+        /// Gets a value indicating whether the layer only stores meaningful sectors.
         /// </summary>
         public abstract bool IsSparse
         {

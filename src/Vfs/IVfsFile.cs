@@ -36,22 +36,22 @@ namespace DiscUtils.Vfs
     public interface IVfsFile
     {
         /// <summary>
-        /// Gets and sets the last access time in UTC.
+        /// Gets or sets the last access time in UTC.
         /// </summary>
         DateTime LastAccessTimeUtc { get; set; }
 
         /// <summary>
-        /// Gets and sets the last write time in UTC.
+        /// Gets or sets the last write time in UTC.
         /// </summary>
         DateTime LastWriteTimeUtc { get; set; }
 
         /// <summary>
-        /// Gets and sets the last creation time in UTC.
+        /// Gets or sets the last creation time in UTC.
         /// </summary>
         DateTime CreationTimeUtc { get; set; }
 
         /// <summary>
-        /// Gets and set the file's attributes.
+        /// Gets or sets the file's attributes.
         /// </summary>
         FileAttributes FileAttributes { get; set; }
 

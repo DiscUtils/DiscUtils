@@ -38,7 +38,7 @@ namespace DiscUtils.Sdi
         private List<SectionRecord> _sections;
 
         /// <summary>
-        /// Creates a new instance from a stream, without taking ownership of the stream.
+        /// Initializes a new instance of the SdiFile class.
         /// </summary>
         /// <param name="stream">The stream formatted as an SDI file.</param>
         public SdiFile(Stream stream)
@@ -47,7 +47,7 @@ namespace DiscUtils.Sdi
         }
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the SdiFile class.
         /// </summary>
         /// <param name="stream">The stream formatted as an SDI file.</param>
         /// <param name="ownership">Whether to pass ownership of <c>stream</c> to the new instance</param>

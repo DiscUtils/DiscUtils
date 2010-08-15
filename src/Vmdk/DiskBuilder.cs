@@ -39,7 +39,7 @@ namespace DiscUtils.Vmdk
         private Geometry _biosGeometry;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the DiskBuilder class.
         /// </summary>
         public DiskBuilder()
         {
@@ -48,7 +48,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Sets the type of VMDK disk file required.
+        /// Gets or sets the type of VMDK disk file required.
         /// </summary>
         public DiskCreateType DiskType
         {
@@ -57,7 +57,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Sets the disk adapter type to embed in the VMDK.
+        /// Gets or sets the disk adapter type to embed in the VMDK.
         /// </summary>
         public DiskAdapterType AdapterType
         {
@@ -66,7 +66,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Sets the disk geometry the BIOS should indicate for this disk.
+        /// Gets or sets the disk geometry the BIOS should indicate for this disk.
         /// </summary>
         public Geometry BiosGeometry
         {

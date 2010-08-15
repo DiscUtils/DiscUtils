@@ -33,7 +33,7 @@ namespace DiscUtils.Iscsi
         private int _blockSize;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the LunCapacity class.
         /// </summary>
         /// <param name="logicalBlockCount">The number of logical blocks</param>
         /// <param name="blockSize">The size of each block</param>
@@ -62,7 +62,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the capacity (in bytes) as a string.
         /// </summary>
-        /// <returns>A string</returns>
+        /// <returns>A string containing an integer</returns>
         public override string ToString()
         {
             return (_blockSize * _logicalBlockCount).ToString(CultureInfo.InvariantCulture);

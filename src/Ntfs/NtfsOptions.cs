@@ -42,7 +42,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets and sets whether to include file system meta-files when enumerating directories.
+        /// Gets or sets a value indicating whether to include file system meta-files when enumerating directories.
         /// </summary>
         /// <remarks>Meta-files are those with an MFT (Master File Table) index less than 24.</remarks>
         public bool HideMetafiles
@@ -52,7 +52,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Get and sets whether to include hidden files when enumerating directories.
+        /// Gets or sets a value indicating whether to include hidden files when enumerating directories.
         /// </summary>
         public bool HideHiddenFiles
         {
@@ -61,7 +61,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets and sets whether to include system files when enumerating directories.
+        /// Gets or sets a value indicating whether to include system files when enumerating directories.
         /// </summary>
         public bool HideSystemFiles
         {
@@ -70,7 +70,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets and sets whether to hide DOS (8.3-style) file names when enumerating directories.
+        /// Gets or sets a value indicating whether to hide DOS (8.3-style) file names when enumerating directories.
         /// </summary>
         public bool HideDosFileNames
         {
@@ -79,7 +79,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets and sets whether short (8.3) file names are created automatically.
+        /// Gets or sets a value indicating whether short (8.3) file names are created automatically.
         /// </summary>
         public ShortFileNameOption ShortNameCreation
         {
@@ -90,7 +90,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Returns a string representation of the file system options.
         /// </summary>
-        /// <returns>A string</returns>
+        /// <returns>A string of the form Show: XX XX XX</returns>
         public override string ToString()
         {
             return "Show: Normal " + (HideMetafiles ? string.Empty : "Meta ") + (HideHiddenFiles ? string.Empty : "Hidden ") + (HideSystemFiles ? string.Empty : "System ") + (HideDosFileNames ? string.Empty : "ShortNames ");

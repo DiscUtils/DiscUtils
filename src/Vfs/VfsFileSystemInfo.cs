@@ -42,7 +42,7 @@ namespace DiscUtils.Vfs
         private VfsFileSystemOpener _openDelegate;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VfsFileSystemInfo class.
         /// </summary>
         /// <param name="name">The name of the file system</param>
         /// <param name="description">A one-line description of the file system</param>

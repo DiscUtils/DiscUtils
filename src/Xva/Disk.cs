@@ -48,7 +48,7 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
-        /// The Unique id of the disk, as known by XenServer.
+        /// Gets the Unique id of the disk, as known by XenServer.
         /// </summary>
         public string Uuid
         {
@@ -56,7 +56,7 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
-        /// The display name of the disk, as shown by XenServer.
+        /// Gets the display name of the disk, as shown by XenServer.
         /// </summary>
         public string DisplayName
         {

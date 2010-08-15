@@ -40,7 +40,7 @@ namespace DiscUtils.Partitions
         private byte[] _entryBuffer;
 
         /// <summary>
-        /// Creates a new instance to access an existing partition table on a disk.
+        /// Initializes a new instance of the GuidPartitionTable class.
         /// </summary>
         /// <param name="disk">The disk containing the partition table</param>
         public GuidPartitionTable(VirtualDisk disk)
@@ -49,7 +49,7 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Creates a new instance to access an existing partition table.
+        /// Initializes a new instance of the GuidPartitionTable class.
         /// </summary>
         /// <param name="disk">The stream containing the disk data</param>
         /// <param name="diskGeometry">The geometry of the disk</param>

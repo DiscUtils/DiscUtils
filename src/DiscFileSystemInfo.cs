@@ -45,7 +45,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The file system the referenced file or directory exists on.
+        /// Gets the file system the referenced file or directory exists on.
         /// </summary>
         public DiscFileSystem FileSystem
         {
@@ -176,7 +176,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The path to the referenced file.
+        /// Gets the path to the referenced file.
         /// </summary>
         protected string Path
         {

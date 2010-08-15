@@ -36,7 +36,7 @@ namespace DiscUtils.Vdi
         private DiskStream _content;
 
         /// <summary>
-        /// Creates a new instance from a file on disk.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="path">The path to the disk</param>
         /// <param name="access">The access requested to the disk</param>
@@ -46,7 +46,7 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Creates a new instance from an existing disk file.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="file">The file containing the disk image.</param>
         public Disk(DiskImageFile file)
@@ -55,7 +55,7 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream, differencing disks not supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         public Disk(Stream stream)
@@ -64,7 +64,7 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream, differencing disks not supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new disk should take ownership of <paramref name="stream"/> lifetime.</param>

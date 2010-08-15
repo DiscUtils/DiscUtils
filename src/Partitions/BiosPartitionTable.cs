@@ -37,7 +37,7 @@ namespace DiscUtils.Partitions
         private Geometry _diskGeometry;
 
         /// <summary>
-        /// Creates a new instance to access an existing partition table on a disk.
+        /// Initializes a new instance of the BiosPartitionTable class.
         /// </summary>
         /// <param name="disk">The disk containing the partition table</param>
         public BiosPartitionTable(VirtualDisk disk)
@@ -46,7 +46,7 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Creates a new instance to access an existing partition table.
+        /// Initializes a new instance of the BiosPartitionTable class.
         /// </summary>
         /// <param name="disk">The stream containing the disk data</param>
         /// <param name="diskGeometry">The geometry of the disk</param>

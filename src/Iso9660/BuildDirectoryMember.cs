@@ -43,7 +43,7 @@ namespace DiscUtils.Iso9660
         private DateTime _creationTime;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the BuildDirectoryMember class.
         /// </summary>
         /// <param name="name">The Joliet compliant name of the file or directory</param>
         /// <param name="shortName">The ISO 9660 compliant name of the file or directory</param>
@@ -55,7 +55,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// The Joliet compliant name of the file or directory.
+        /// Gets the Joliet compliant name of the file or directory.
         /// </summary>
         public string Name
         {
@@ -63,7 +63,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// The ISO 9660 compliant name of the file or directory.
+        /// Gets the ISO 9660 compliant name of the file or directory.
         /// </summary>
         public string ShortName
         {
@@ -71,7 +71,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// The parent directory, or <c>null</c> if this is the root directory.
+        /// Gets the parent directory, or <c>null</c> if this is the root directory.
         /// </summary>
         public abstract BuildDirectoryInfo Parent
         {
@@ -79,7 +79,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// The creation date for the file or directory, in UTC.
+        /// Gets or sets the creation date for the file or directory, in UTC.
         /// </summary>
         public DateTime CreationTime
         {

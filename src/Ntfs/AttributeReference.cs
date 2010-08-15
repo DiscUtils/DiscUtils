@@ -33,7 +33,7 @@ namespace DiscUtils.Ntfs
         private ushort _attributeId;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the AttributeReference class.
         /// </summary>
         /// <param name="fileReference">The file containing the attribute</param>
         /// <param name="attributeId">The identity of the attribute within the file record</param>
@@ -44,7 +44,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// The file containing the attribute.
+        /// Gets the file containing the attribute.
         /// </summary>
         public FileRecordReference File
         {
@@ -52,7 +52,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// The identity of the attribute within the file record.
+        /// Gets the identity of the attribute within the file record.
         /// </summary>
         public ushort AttributeId
         {

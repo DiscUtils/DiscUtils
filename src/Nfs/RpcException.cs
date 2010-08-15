@@ -34,14 +34,14 @@ namespace DiscUtils.Nfs
     public sealed class RpcException : IOException
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RpcException class.
         /// </summary>
         public RpcException()
         {
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RpcException class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         public RpcException(string message)
@@ -50,7 +50,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RpcException class.
         /// </summary>
         /// <param name="message">The exception message</param>
         /// <param name="innerException">The inner exception</param>
@@ -60,7 +60,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance for a server-indicated error
+        /// Initializes a new instance of the RpcException class.
         /// </summary>
         /// <param name="reply">The RPC reply from the server.</param>
         internal RpcException(RpcReplyHeader reply)
@@ -69,7 +69,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Deserializes an instance.
+        /// Initializes a new instance of the RpcException class.
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">The streaming context</param>

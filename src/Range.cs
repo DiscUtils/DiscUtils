@@ -39,7 +39,7 @@ namespace DiscUtils
         private TCount _count;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Range class.
         /// </summary>
         /// <param name="offset">The offset (i.e. start) of the range</param>
         /// <param name="count">The size of the range</param>

@@ -26,16 +26,9 @@ namespace DiscUtils.Fat
     using System.Globalization;
     using System.Text;
 
-    internal class FatUtilities
+    internal static class FatUtilities
     {
         private const string SpecialPrivateChars = "$%'-_@~`!(){}^#&";
-
-        /// <summary>
-        /// Prevent instantiation.
-        /// </summary>
-        private FatUtilities()
-        {
-        }
 
         public static string NormalizedFileNameFromPath(string path)
         {

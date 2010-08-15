@@ -31,7 +31,7 @@ namespace DiscUtils
         private byte[] _content;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the ReparsePoint class.
         /// </summary>
         /// <param name="tag">The defined reparse point tag</param>
         /// <param name="content">The reparse point's content</param>
@@ -42,7 +42,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The defined reparse point tag.
+        /// Gets or sets the defined reparse point tag.
         /// </summary>
         public int Tag
         {
@@ -51,7 +51,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The reparse point's content.
+        /// Gets or sets the reparse point's content.
         /// </summary>
         public byte[] Content
         {

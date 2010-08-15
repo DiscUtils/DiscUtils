@@ -36,7 +36,7 @@ namespace DiscUtils
         private long _position;
 
         /// <summary>
-        /// Creates a new instance using a pre-existing buffer.
+        /// Initializes a new instance of the BufferStream class.
         /// </summary>
         /// <param name="buffer">The buffer to use</param>
         /// <param name="access">The access permitted to clients</param>

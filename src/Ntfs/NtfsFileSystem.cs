@@ -45,7 +45,7 @@ namespace DiscUtils.Ntfs
         private ObjectCache<long, File> _fileCache;
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the NtfsFileSystem class.
         /// </summary>
         /// <param name="stream">The stream containing the NTFS file system</param>
         public NtfsFileSystem(Stream stream)

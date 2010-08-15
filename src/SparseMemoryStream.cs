@@ -31,15 +31,16 @@ namespace DiscUtils
     public sealed class SparseMemoryStream : BufferStream
     {
         /// <summary>
-        /// Creates a new instance with read/write access.
+        /// Initializes a new instance of the SparseMemoryStream class.
         /// </summary>
+        /// <remarks>The created instance permits read and write access</remarks>
         public SparseMemoryStream()
             : base(new SparseMemoryBuffer(16 * 1024), FileAccess.ReadWrite)
         {
         }
 
         /// <summary>
-        /// Creates a new instance using a pre-existing buffer.
+        /// Initializes a new instance of the SparseMemoryStream class.
         /// </summary>
         /// <param name="buffer">The buffer to use</param>
         /// <param name="access">The access permitted to clients</param>

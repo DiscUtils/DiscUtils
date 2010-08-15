@@ -45,7 +45,7 @@ namespace DiscUtils.Ntfs
         private ReportLevels _levelsConsideredFail = ReportLevels.Errors;
 
         /// <summary>
-        /// Creates a new instance to check a particular stream.
+        /// Initializes a new instance of the NtfsFileSystemChecker class.
         /// </summary>
         /// <param name="diskData">The file system to check</param>
         public NtfsFileSystemChecker(Stream diskData)

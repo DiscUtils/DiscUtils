@@ -34,7 +34,7 @@ namespace DiscUtils.Iso9660
         private bool _hideVersions;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VfsCDReader class.
         /// </summary>
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>

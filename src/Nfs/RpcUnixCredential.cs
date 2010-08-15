@@ -46,7 +46,7 @@ namespace DiscUtils.Nfs
         private int[] _gids;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RpcUnixCredential class.
         /// </summary>
         /// <param name="user">The user's unique id (UID)</param>
         /// <param name="primaryGroup">The user's primary group id (GID)</param>
@@ -56,7 +56,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance, allowing a supplementary group specification.
+        /// Initializes a new instance of the RpcUnixCredential class.
         /// </summary>
         /// <param name="user">The user's unique id (UID)</param>
         /// <param name="primaryGroup">The user's primary group id (GID)</param>

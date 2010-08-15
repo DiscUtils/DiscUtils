@@ -28,12 +28,12 @@ namespace DiscUtils.BootConfig
     public enum ObjectType
     {
         /// <summary>
-        /// Unknown.
+        /// An unknown type.
         /// </summary>
         None = 0x0,
 
         /// <summary>
-        /// Application object.
+        /// An application object.
         /// </summary>
         Application = 0x1,
 

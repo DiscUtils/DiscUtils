@@ -165,7 +165,7 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// The friendly name for this object, if known.
+        /// Gets the friendly name for this object, if known.
         /// </summary>
         public string FriendlyName
         {
@@ -182,7 +182,7 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// The object type for this object.
+        /// Gets the object type for this object.
         /// </summary>
         public ObjectType ObjectType
         {
@@ -190,7 +190,7 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// The image type for this application.
+        /// Gets the image type for this application.
         /// </summary>
         public ApplicationImageType ApplicationImageType
         {
@@ -198,7 +198,7 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// The application type for this application.
+        /// Gets the application type for this application.
         /// </summary>
         public ApplicationType ApplicationType
         {
@@ -206,7 +206,7 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// The elements in this object.
+        /// Gets the elements in this object.
         /// </summary>
         public IEnumerable<Element> Elements
         {
@@ -339,7 +339,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Returns the object identity as a GUID string.
         /// </summary>
-        /// <returns>A string.</returns>
+        /// <returns>A string representation, with surrounding curly braces</returns>
         public override string ToString()
         {
             return _id.ToString("B");

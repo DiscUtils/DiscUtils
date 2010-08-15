@@ -223,6 +223,7 @@ namespace DiscUtils.Ntfs
         /// <param name="name">The name of the new attribute</param>
         /// <param name="indexed">Whether the attribute is marked as indexed</param>
         /// <param name="flags">Flags for the new attribute</param>
+        /// <returns>The id of the new attribute</returns>
         public ushort CreateAttribute(AttributeType type, string name, bool indexed, AttributeFlags flags)
         {
             ushort id = _nextAttributeId++;
@@ -243,6 +244,7 @@ namespace DiscUtils.Ntfs
         /// <param name="type">The type of the new attribute</param>
         /// <param name="name">The name of the new attribute</param>
         /// <param name="flags">Flags for the new attribute</param>
+        /// <returns>The id of the new attribute</returns>
         public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags)
         {
             ushort id = _nextAttributeId++;
@@ -266,6 +268,7 @@ namespace DiscUtils.Ntfs
         /// <param name="firstCluster">The first cluster to assign to the attribute</param>
         /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
         /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
+        /// <returns>The id of the new attribute</returns>
         public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             ushort id = _nextAttributeId++;

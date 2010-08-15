@@ -40,7 +40,7 @@ namespace DiscUtils.Registry
         private List<BinHeader> _bins;
 
         /// <summary>
-        /// Creates a new instance from the contents of an existing stream.
+        /// Initializes a new instance of the RegistryHive class.
         /// </summary>
         /// <param name="hive">The stream containing the registry hive</param>
         /// <remarks>
@@ -52,7 +52,7 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Creates a new instance from the contents of an existing stream.
+        /// Initializes a new instance of the RegistryHive class.
         /// </summary>
         /// <param name="hive">The stream containing the registry hive</param>
         /// <param name="ownership">Whether the new object assumes object of the stream</param>

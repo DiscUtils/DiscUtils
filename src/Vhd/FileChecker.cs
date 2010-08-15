@@ -42,7 +42,7 @@ namespace DiscUtils.Vhd
         private ReportLevels _levelsConsideredFail = ReportLevels.Errors;
 
         /// <summary>
-        /// Creates a new instance, from a stream formatted as a VHD.
+        /// Initializes a new instance of the FileChecker class.
         /// </summary>
         /// <param name="stream">The VHD file stream</param>
         public FileChecker(Stream stream)

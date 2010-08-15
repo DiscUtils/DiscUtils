@@ -44,7 +44,7 @@ namespace DiscUtils
         public abstract long Length { get; }
 
         /// <summary>
-        /// The stable volume identity.
+        /// Gets the stable volume identity.
         /// </summary>
         /// <remarks>The stability of the identity depends the disk structure.
         /// In some cases the identity may include a simple index, when no other information

@@ -33,7 +33,7 @@ namespace DiscUtils
         private DiscFileSystemOptions _options;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the DiscFileSystem class.
         /// </summary>
         protected DiscFileSystem()
         {
@@ -41,7 +41,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Create a new instance with a default set of options.
+        /// Initializes a new instance of the DiscFileSystem class.
         /// </summary>
         /// <param name="defaultOptions">The options instance to use for this file system instance.</param>
         protected DiscFileSystem(DiscFileSystemOptions defaultOptions)
@@ -50,7 +50,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Destructor.
+        /// Finalizes an instance of the DiscFileSystem class.
         /// </summary>
         ~DiscFileSystem()
         {
@@ -66,7 +66,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Provides a friendly description of the file system type.
+        /// Gets a friendly description of the file system type.
         /// </summary>
         public abstract string FriendlyName
         {
@@ -74,7 +74,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Indicates whether the file system is read-only or read-write.
+        /// Gets a value indicating whether the file system is read-only or read-write.
         /// </summary>
         /// <returns>true if the file system is read-write.</returns>
         public abstract bool CanWrite { get; }

@@ -59,7 +59,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets or sets a value that determines if the file is read-only.
+        /// Gets or sets a value indicating whether the file is read-only.
         /// </summary>
         public bool IsReadOnly
         {

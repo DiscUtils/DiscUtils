@@ -32,14 +32,14 @@ namespace DiscUtils.Registry
     public class RegistryCorruptException : Exception
     {
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
         public RegistryCorruptException()
         {
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         public RegistryCorruptException(string message)
@@ -48,7 +48,7 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
         /// <param name="message">The exception message</param>
         /// <param name="innerException">The inner exception</param>
@@ -58,7 +58,7 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Deserializes an instance.
+        /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
         /// <param name="info">The serialization info</param>
         /// <param name="context">The streaming context</param>

@@ -43,7 +43,7 @@ namespace DiscUtils.Xva
         private string _vmDisplayName;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VirtualMachineBuilder class.
         /// </summary>
         public VirtualMachineBuilder()
         {
@@ -52,7 +52,7 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
-        /// The display name of the VM.
+        /// Gets or sets the display name of the VM.
         /// </summary>
         public string DisplayName
         {

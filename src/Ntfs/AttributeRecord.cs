@@ -424,7 +424,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Size of a compression unit (in clusters)
+        /// Gets the size of a compression unit (in clusters)
         /// </summary>
         public int CompressionUnitSize
         {

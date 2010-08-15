@@ -28,27 +28,27 @@ namespace DiscUtils.Vmdk
     public sealed class DiskParameters
     {
         /// <summary>
-        /// The capacity of the virtual disk.
+        /// Gets or sets the capacity of the virtual disk.
         /// </summary>
         public long Capacity { get; set; }
 
         /// <summary>
-        /// The Physical Geometry of the virtual disk.
+        /// Gets or sets the Physical Geometry of the virtual disk.
         /// </summary>
         public Geometry Geometry { get; set; }
 
         /// <summary>
-        /// The BIOS Geometry of the virtual disk.
+        /// Gets or sets the BIOS Geometry of the virtual disk.
         /// </summary>
         public Geometry BiosGeometry { get; set; }
 
         /// <summary>
-        /// The type of VMDK file to create.
+        /// Gets or sets the type of VMDK file to create.
         /// </summary>
         public DiskCreateType CreateType { get; set; }
 
         /// <summary>
-        /// The type of emulated disk adapter.
+        /// Gets or sets the type of emulated disk adapter.
         /// </summary>
         public DiskAdapterType AdapterType { get; set; }
     }

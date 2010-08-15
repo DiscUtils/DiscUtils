@@ -46,7 +46,7 @@ namespace DiscUtils
         private Dictionary<string, LogicalVolumeInfo> _logicalVolumes;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the VolumeManager class.
         /// </summary>
         public VolumeManager()
         {
@@ -56,7 +56,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance from the contents of an existing disk.
+        /// Initializes a new instance of the VolumeManager class.
         /// </summary>
         /// <param name="initialDisk">The initial disk to add.</param>
         public VolumeManager(VirtualDisk initialDisk)
@@ -66,7 +66,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates a new instance from the contents of an existing disk.
+        /// Initializes a new instance of the VolumeManager class.
         /// </summary>
         /// <param name="initialDiskContent">Content of the initial disk to add.</param>
         public VolumeManager(Stream initialDiskContent)

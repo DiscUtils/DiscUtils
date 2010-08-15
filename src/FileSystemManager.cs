@@ -43,7 +43,7 @@ namespace DiscUtils
         private List<VfsFileSystemFactory> _factories;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the FileSystemManager class.
         /// </summary>
         public FileSystemManager()
         {

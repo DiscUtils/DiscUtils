@@ -40,7 +40,7 @@ namespace DiscUtils.Optical
         private OpticalFormat _format;
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the DiscImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         public DiscImageFile(Stream stream)
@@ -49,7 +49,7 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the DiscImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>

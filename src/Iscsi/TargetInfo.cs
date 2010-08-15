@@ -36,7 +36,7 @@ namespace DiscUtils.Iscsi
         private TargetAddress[] _addresses;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the TargetInfo class.
         /// </summary>
         /// <param name="name">The name of the Target</param>
         /// <param name="addresses">The network addresses of the Target</param>

@@ -34,7 +34,7 @@ namespace DiscUtils.LogicalDiskManager
         private Dictionary<string, DynamicDiskGroup> _groups;
 
         /// <summary>
-        /// Creates a new instance, with an initial set of disks.
+        /// Initializes a new instance of the DynamicDiskManager class.
         /// </summary>
         /// <param name="disks">The initial set of disks to manage.</param>
         public DynamicDiskManager(params VirtualDisk[] disks)

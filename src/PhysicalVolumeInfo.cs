@@ -64,11 +64,12 @@ namespace DiscUtils
         private PartitionInfo _partitionInfo;
 
         /// <summary>
-        /// Creates an instance representing a (BIOS or GPT) partition.
+        /// Initializes a new instance of the PhysicalVolumeInfo class.
         /// </summary>
         /// <param name="diskId">The containing disk's identity</param>
         /// <param name="disk">The disk containing the partition</param>
         /// <param name="partitionInfo">Information about the partition</param>
+        /// <remarks>Use this constructor to represent a (BIOS or GPT) partition</remarks>
         internal PhysicalVolumeInfo(
             string diskId,
             VirtualDisk disk,
@@ -82,10 +83,11 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Creates an instance representing an entire disk as a single volume.
+        /// Initializes a new instance of the PhysicalVolumeInfo class.
         /// </summary>
         /// <param name="diskId">The identity of the disk</param>
         /// <param name="disk">The disk itself</param>
+        /// <remarks>Use this constructor to represent an entire disk as a single volume.</remarks>
         internal PhysicalVolumeInfo(
             string diskId,
             VirtualDisk disk)
@@ -97,7 +99,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The type of the volume.
+        /// Gets the type of the volume.
         /// </summary>
         public PhysicalVolumeType VolumeType
         {
@@ -105,7 +107,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The signature of the disk containing the volume (only valid for partition-type volumes).
+        /// Gets the signature of the disk containing the volume (only valid for partition-type volumes).
         /// </summary>
         public int DiskSignature
         {
@@ -113,7 +115,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The unique identity of the disk containing the volume, if known.
+        /// Gets the unique identity of the disk containing the volume, if known.
         /// </summary>
         public Guid DiskIdentity
         {
@@ -129,7 +131,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The size of the volume, in bytes.
+        /// Gets the size of the volume, in bytes.
         /// </summary>
         public override long Length
         {
@@ -137,7 +139,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The stable identity for this physical volume.
+        /// Gets the stable identity for this physical volume.
         /// </summary>
         /// <remarks>The stability of the identity depends the disk structure.
         /// In some cases the identity may include a simple index, when no other information
@@ -197,7 +199,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The unique identity of the physical partition, if known.
+        /// Gets the unique identity of the physical partition, if known.
         /// </summary>
         public Guid PartitionIdentity
         {

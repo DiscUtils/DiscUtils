@@ -28,7 +28,7 @@ namespace DiscUtils.BootConfig
     public enum ElementClass
     {
         /// <summary>
-        /// Unknown.
+        /// Unknown class.
         /// </summary>
         None = 0,
 

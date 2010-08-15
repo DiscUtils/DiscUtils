@@ -43,7 +43,7 @@ namespace DiscUtils.Vhd
         private SparseStream _content;
 
         /// <summary>
-        /// Creates a new instance from an existing stream, differencing disks not supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
         /// <param name="stream">The stream to read</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
@@ -59,7 +59,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file, differencing disks are supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
         /// <param name="path">The path to the disk image</param>
         public Disk(string path)
@@ -71,7 +71,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file, differencing disks are supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
         /// <param name="path">The path to the disk image</param>
         /// <param name="access">The access requested to the disk</param>
@@ -84,7 +84,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from a file on a file system.
+        /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
         /// <param name="fileSystem">The file system containing the disk.</param>
         /// <param name="path">The file system relative path to the disk.</param>
@@ -99,7 +99,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from a pre-existing set of image files.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="files">The set of image files</param>
         /// <param name="ownsFiles">Indicates if the new instance controls the lifetime of the image files</param>
@@ -140,7 +140,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from an existing file, differencing disks are supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
         /// <param name="locator">The locator to access relative files</param>
         /// <param name="path">The path to the disk image</param>
@@ -154,7 +154,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream, differencing disks not supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
         /// <param name="file">The file containing the disk</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
@@ -166,7 +166,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream, differencing disks supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
         /// <param name="file">The file containing the disk</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
@@ -187,7 +187,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Creates a new instance from an existing stream, differencing disks supported.
+        /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
         /// <param name="file">The file containing the disk</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
@@ -228,7 +228,7 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets and sets whether the VHD footer is written every time a new block is allocated.
+        /// Gets or sets a value indicating whether the VHD footer is written every time a new block is allocated.
         /// </summary>
         /// <remarks>
         /// This is enabled by default, disabling this can make write activity faster - however,

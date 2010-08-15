@@ -169,8 +169,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Finds a subkey cell, returning it's index in this list.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <param name="name">The name of the key to find</param>
+        /// <returns>The index of the found key, or <c>-1</c>.</returns>
         internal int IndexOf(string name)
         {
             foreach (var index in Find(name, 0))

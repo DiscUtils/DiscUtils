@@ -62,7 +62,7 @@ namespace DiscUtils
         private long _position;
 
         /// <summary>
-        /// Creates a new instance, wrapping an existing stream.
+        /// Initializes a new instance of the SnapshotStream class.
         /// </summary>
         /// <param name="baseStream">The stream to wrap</param>
         /// <param name="owns">Indicates if this stream should control the lifetime of baseStream</param>

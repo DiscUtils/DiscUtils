@@ -37,7 +37,7 @@ namespace DiscUtils.Sdi
         }
 
         /// <summary>
-        /// The zero-based index of this section.
+        /// Gets the zero-based index of this section.
         /// </summary>
         public int Index
         {
@@ -45,7 +45,7 @@ namespace DiscUtils.Sdi
         }
 
         /// <summary>
-        /// The type of this section.
+        /// Gets the type of this section.
         /// </summary>
         /// <remarks>Sample types are "PART" (disk partition), "WIM" (Windows Imaging Format)</remarks>
         public string SectionType
@@ -54,7 +54,7 @@ namespace DiscUtils.Sdi
         }
 
         /// <summary>
-        /// For "PART" sections, the MBR partition type of the partition.
+        /// Gets the MBR partition type of the partition, for "PART" sections.
         /// </summary>
         public byte PartitionType
         {
@@ -62,7 +62,7 @@ namespace DiscUtils.Sdi
         }
 
         /// <summary>
-        /// The length of the section.
+        /// Gets the length of the section.
         /// </summary>
         public long Length
         {

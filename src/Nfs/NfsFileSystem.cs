@@ -37,10 +37,13 @@ namespace DiscUtils.Nfs
         private Nfs3Client _client;
 
         /// <summary>
-        /// Creates a new instance using default credentials.
+        /// Initializes a new instance of the NfsFileSystem class.
         /// </summary>
         /// <param name="address">The address of the NFS server (IP or DNS address)</param>
         /// <param name="mountPoint">The mount point on the server to root the file system</param>
+        /// <remarks>
+        /// The created instance uses default credentials.
+        /// </remarks>
         public NfsFileSystem(string address, string mountPoint)
             : base(new NfsFileSystemOptions())
         {
@@ -48,7 +51,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the NfsFileSystem class.
         /// </summary>
         /// <param name="address">The address of the NFS server (IP or DNS address)</param>
         /// <param name="credentials">The credentials to use when accessing the NFS server</param>
@@ -60,7 +63,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// The options controlling this instance.
+        /// Gets the options controlling this instance.
         /// </summary>
         public NfsFileSystemOptions NfsOptions
         {
@@ -68,7 +71,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// The friendly name for this file system (NFS).
+        /// Gets the friendly name for this file system (NFS).
         /// </summary>
         public override string FriendlyName
         {

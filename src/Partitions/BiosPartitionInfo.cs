@@ -80,7 +80,7 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets a value indicating if this partition is active (bootable).
+        /// Gets a value indicating whether this partition is active (bootable).
         /// </summary>
         public bool IsActive
         {
@@ -112,7 +112,7 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets value indicating the partition is a primary (rather than extended) partition.
+        /// Gets a value indicating whether the partition is a primary (rather than extended) partition.
         /// </summary>
         public bool IsPrimary
         {

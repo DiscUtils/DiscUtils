@@ -44,7 +44,7 @@ namespace DiscUtils.Vmdk
         private string _path;
 
         /// <summary>
-        /// Creates a new instance from a file on disk.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="path">The path to the disk</param>
         /// <param name="access">The access requested to the disk</param>
@@ -54,7 +54,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Creates a new instance from a file on a file system.
+        /// Initializes a new instance of the Disk class.
         /// </summary>
         /// <param name="fileSystem">The file system containing the disk.</param>
         /// <param name="path">The file system relative path to the disk.</param>
@@ -69,7 +69,7 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Creates a new instance from a stream, only monolithic sparse streams are supported.
+        /// Initializes a new instance of the Disk class.  Only monolithic sparse streams are supported.
         /// </summary>
         /// <param name="stream">The stream containing the VMDK file</param>
         /// <param name="ownsStream">Indicates if the new instances owns the stream.</param>

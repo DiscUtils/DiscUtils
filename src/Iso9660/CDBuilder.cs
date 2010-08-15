@@ -50,7 +50,7 @@ namespace DiscUtils.Iso9660
         private BuildParameters _buildParams;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the CDBuilder class.
         /// </summary>
         public CDBuilder()
         {
@@ -64,7 +64,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// The Volume Identifier for the ISO file.
+        /// Gets or sets the Volume Identifier for the ISO file.
         /// </summary>
         /// <remarks>
         /// Must be a valid identifier, i.e. max 32 characters in the range A-Z, 0-9 or _.
@@ -91,7 +91,7 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// Indicates whether Joliet file-system extensions should be used.
+        /// Gets or sets a value indicating whether Joliet file-system extensions should be used.
         /// </summary>
         public bool UseJoliet
         {

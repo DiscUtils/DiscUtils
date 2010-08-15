@@ -47,7 +47,7 @@ namespace DiscUtils.Vdi
         private Ownership _ownsStream;
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         public DiskImageFile(Stream stream)
@@ -58,7 +58,7 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>

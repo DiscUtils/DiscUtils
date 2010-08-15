@@ -41,7 +41,7 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// The name of the value, or empty string if unnamed.
+        /// Gets the name of the value, or empty string if unnamed.
         /// </summary>
         public string Name
         {
@@ -49,7 +49,7 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// The type of the value.
+        /// Gets the type of the value.
         /// </summary>
         public RegistryValueType DataType
         {
@@ -57,7 +57,7 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// The value data mapped to a .net object.
+        /// Gets the value data mapped to a .net object.
         /// </summary>
         /// <remarks>The mapping from registry type of .NET type is as follows:
         /// <list type="table">

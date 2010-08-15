@@ -34,7 +34,7 @@ namespace DiscUtils.BootConfig
         private BaseStorage _store;
 
         /// <summary>
-        /// Initializes the store from a registry key.
+        /// Initializes a new instance of the Store class.
         /// </summary>
         /// <param name="key">The registry key that is the root of the configuration database</param>
         public Store(RegistryKey key)

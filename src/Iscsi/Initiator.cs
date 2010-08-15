@@ -37,7 +37,7 @@ namespace DiscUtils.Iscsi
         private string _password;
 
         /// <summary>
-        /// Creates a new instance.
+        /// Initializes a new instance of the Initiator class.
         /// </summary>
         public Initiator()
         {

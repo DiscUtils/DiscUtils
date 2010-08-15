@@ -325,6 +325,7 @@ namespace DiscUtils.Ntfs
         /// Only valid on the root node, this method moves all entries into a
         /// single child node.
         /// </summary>
+        /// <returns>Whether any changes were made</returns>
         internal bool Depose()
         {
             if (_parent != null)
@@ -451,7 +452,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Finds the smallest leaf entry in this tree.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The index entry of the smalling leaf</returns>
         private IndexEntry FindSmallestLeaf()
         {
             if ((_entries[0].Flags & IndexEntryFlags.Node) != 0)

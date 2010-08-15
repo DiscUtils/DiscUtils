@@ -47,16 +47,19 @@ namespace DiscUtils.Xva
         private TarFile _archive;
 
         /// <summary>
-        /// Creates a new instance from a stream, without taking ownership of the stream.
+        /// Initializes a new instance of the VirtualMachine class.
         /// </summary>
         /// <param name="fileStream">The stream containing the .XVA file</param>
+        /// <remarks>
+        /// Ownership of the stream is not transfered.
+        /// </remarks>
         public VirtualMachine(Stream fileStream)
             : this(fileStream, Ownership.None)
         {
         }
 
         /// <summary>
-        /// Creates a new instance from a stream.
+        /// Initializes a new instance of the VirtualMachine class.
         /// </summary>
         /// <param name="fileStream">The stream containing the .XVA file</param>
         /// <param name="ownership">Whether to transfer ownership of <c>fileStream</c> to the new instance.</param>
