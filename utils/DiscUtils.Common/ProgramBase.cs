@@ -223,7 +223,7 @@ namespace DiscUtils.Common
             _parser.DisplayHelp(HelpRemarks);
         }
 
-        private void DisplayHeader()
+        protected virtual void DisplayHeader()
         {
             Console.WriteLine("{0} v{1}, available from http://discutils.codeplex.com", ExeName, Version);
             Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2010");
