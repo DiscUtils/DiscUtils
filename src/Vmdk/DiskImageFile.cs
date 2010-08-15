@@ -684,9 +684,9 @@ namespace DiscUtils.Vmdk
         {
             // Figure out grain size and number of grain tables, and adjust actual extent size to be a multiple
             // of grain size
-            const int gtesPerGt = 512;
+            const int GtesPerGt = 512;
             long grainSize = 128;
-            int numGrainTables = (int)Utilities.Ceil(size, grainSize * gtesPerGt * Sizes.Sector);
+            int numGrainTables = (int)Utilities.Ceil(size, grainSize * GtesPerGt * Sizes.Sector);
 
             descriptorLength = Utilities.RoundUp(descriptorLength, Sizes.Sector);
             descriptorStart = 0;
@@ -699,13 +699,13 @@ namespace DiscUtils.Vmdk
             long redundantGrainDirLength = numGrainTables * 4;
 
             long redundantGrainTablesStart = redundantGrainDirStart + Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
-            long redundantGrainTablesLength = numGrainTables * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector);
+            long redundantGrainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
 
             long grainDirStart = redundantGrainTablesStart + Utilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
             long grainDirLength = numGrainTables * 4;
 
             long grainTablesStart = grainDirStart + Utilities.Ceil(grainDirLength, Sizes.Sector);
-            long grainTablesLength = numGrainTables * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector);
+            long grainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
 
             long dataStart = Utilities.RoundUp(grainTablesStart + Utilities.Ceil(grainTablesLength, Sizes.Sector), grainSize);
 
@@ -716,7 +716,7 @@ namespace DiscUtils.Vmdk
             header.GrainSize = grainSize;
             header.DescriptorOffset = descriptorStart;
             header.DescriptorSize = descriptorLength / Sizes.Sector;
-            header.NumGTEsPerGT = gtesPerGt;
+            header.NumGTEsPerGT = GtesPerGt;
             header.RgdOffset = redundantGrainDirStart;
             header.GdOffset = grainDirStart;
             header.Overhead = dataStart;
@@ -736,24 +736,24 @@ namespace DiscUtils.Vmdk
             byte[] grainDir = new byte[numGrainTables * 4];
             for (int i = 0; i < numGrainTables; ++i)
             {
-                Utilities.WriteBytesLittleEndian((uint)(redundantGrainTablesStart + (i * Utilities.Ceil(gtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
+                Utilities.WriteBytesLittleEndian((uint)(redundantGrainTablesStart + (i * Utilities.Ceil(GtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
             }
 
             extentStream.Position = redundantGrainDirStart * Sizes.Sector;
             extentStream.Write(grainDir, 0, grainDir.Length);
 
             // Write out the blank grain tables
-            byte[] grainTable = new byte[gtesPerGt * 4];
+            byte[] grainTable = new byte[GtesPerGt * 4];
             for (int i = 0; i < numGrainTables; ++i)
             {
-                extentStream.Position = (redundantGrainTablesStart * Sizes.Sector) + (i * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector));
+                extentStream.Position = (redundantGrainTablesStart * Sizes.Sector) + (i * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector));
                 extentStream.Write(grainTable, 0, grainTable.Length);
             }
 
             // Generate the main grain dir, and write it
             for (int i = 0; i < numGrainTables; ++i)
             {
-                Utilities.WriteBytesLittleEndian((uint)(grainTablesStart + (i * Utilities.Ceil(gtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
+                Utilities.WriteBytesLittleEndian((uint)(grainTablesStart + (i * Utilities.Ceil(GtesPerGt * 4, Sizes.Sector))), grainDir, i * 4);
             }
 
             extentStream.Position = grainDirStart * Sizes.Sector;
@@ -762,7 +762,7 @@ namespace DiscUtils.Vmdk
             // Write out the blank grain tables
             for (int i = 0; i < numGrainTables; ++i)
             {
-                extentStream.Position = (grainTablesStart * Sizes.Sector) + (i * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector));
+                extentStream.Position = (grainTablesStart * Sizes.Sector) + (i * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector));
                 extentStream.Write(grainTable, 0, grainTable.Length);
             }
 

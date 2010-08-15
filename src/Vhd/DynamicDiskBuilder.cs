@@ -41,16 +41,16 @@ namespace DiscUtils.Vhd
 
         internal override List<BuilderExtent> FixExtents(out long totalLength)
         {
-            const int footerSize = 512;
-            const int dynHeaderSize = 1024;
+            const int FooterSize = 512;
+            const int DynHeaderSize = 1024;
 
             List<BuilderExtent> extents = new List<BuilderExtent>();
 
-            _footer.DataOffset = footerSize;
+            _footer.DataOffset = FooterSize;
 
-            DynamicHeader dynHeader = new DynamicHeader(-1, footerSize + dynHeaderSize, _blockSize, _footer.CurrentSize);
+            DynamicHeader dynHeader = new DynamicHeader(-1, FooterSize + DynHeaderSize, _blockSize, _footer.CurrentSize);
 
-            BlockAllocationTableExtent batExtent = new BlockAllocationTableExtent(footerSize + dynHeaderSize, dynHeader.MaxTableEntries);
+            BlockAllocationTableExtent batExtent = new BlockAllocationTableExtent(FooterSize + DynHeaderSize, dynHeader.MaxTableEntries);
 
             long streamPos = batExtent.Start + batExtent.Length;
 
@@ -72,18 +72,18 @@ namespace DiscUtils.Vhd
             _footer.UpdateChecksum();
             dynHeader.UpdateChecksum();
 
-            byte[] footerBuffer = new byte[footerSize];
+            byte[] footerBuffer = new byte[FooterSize];
             _footer.ToBytes(footerBuffer, 0);
 
-            byte[] dynHeaderBuffer = new byte[dynHeaderSize];
+            byte[] dynHeaderBuffer = new byte[DynHeaderSize];
             dynHeader.ToBytes(dynHeaderBuffer, 0);
 
             // Add footer (to end)
             extents.Add(new BuilderBufferExtent(streamPos, footerBuffer));
-            totalLength = streamPos + footerSize;
+            totalLength = streamPos + FooterSize;
 
             extents.Insert(0, batExtent);
-            extents.Insert(0, new BuilderBufferExtent(footerSize, dynHeaderBuffer));
+            extents.Insert(0, new BuilderBufferExtent(FooterSize, dynHeaderBuffer));
             extents.Insert(0, new BuilderBufferExtent(0, footerBuffer));
 
             return extents;

@@ -66,7 +66,7 @@ namespace DiscUtils.Iso9660
         internal static void WriteAChars(byte[] buffer, int offset, int numBytes, string str)
         {
             // Validate string
-            if (!isValidAString(str))
+            if (!IsValidAString(str))
             {
                 throw new IOException("Attempt to write string with invalid a-characters");
             }
@@ -78,7 +78,7 @@ namespace DiscUtils.Iso9660
         internal static void WriteDChars(byte[] buffer, int offset, int numBytes, string str)
         {
             // Validate string
-            if (!isValidDString(str))
+            if (!IsValidDString(str))
             {
                 throw new IOException("Attempt to write string with invalid d-characters");
             }
@@ -90,7 +90,7 @@ namespace DiscUtils.Iso9660
         internal static void WriteA1Chars(byte[] buffer, int offset, int numBytes, string str, Encoding enc)
         {
             // Validate string
-            if (!isValidAString(str))
+            if (!IsValidAString(str))
             {
                 throw new IOException("Attempt to write string with invalid a-characters");
             }
@@ -101,7 +101,7 @@ namespace DiscUtils.Iso9660
         internal static void WriteD1Chars(byte[] buffer, int offset, int numBytes, string str, Encoding enc)
         {
             // Validate string
-            if (!isValidDString(str))
+            if (!IsValidDString(str))
             {
                 throw new IOException("Attempt to write string with invalid d-characters");
             }
@@ -182,7 +182,7 @@ namespace DiscUtils.Iso9660
             return bytesUsed;
         }
 
-        internal static bool isValidAString(string str)
+        internal static bool IsValidAString(string str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -201,11 +201,11 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        internal static bool isValidDString(string str)
+        internal static bool IsValidDString(string str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
-                if (!isValidDChar(str[i]))
+                if (!IsValidDChar(str[i]))
                 {
                     return false;
                 }
@@ -214,12 +214,12 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        internal static bool isValidDChar(char ch)
+        internal static bool IsValidDChar(char ch)
         {
             return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch == '_');
         }
 
-        internal static bool isValidFileName(string str)
+        internal static bool IsValidFileName(string str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -232,7 +232,7 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        internal static bool isValidDirectoryName(string str)
+        internal static bool IsValidDirectoryName(string str)
         {
             if (str.Length == 1 && (str[0] == 0 || str[0] == 1))
             {
@@ -240,7 +240,7 @@ namespace DiscUtils.Iso9660
             }
             else
             {
-                return isValidDString(str);
+                return IsValidDString(str);
             }
         }
 
