@@ -207,13 +207,13 @@ namespace DiscUtils.Xva
             string srName = "SR";
             int srId = id++;
 
-            string vbdRefs = "";
+            string vbdRefs = string.Empty;
             for (int i = 0; i < _disks.Count; ++i)
             {
                 vbdRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vbdIds[i]);
             }
 
-            string vdiRefs = "";
+            string vdiRefs = string.Empty;
             for (int i = 0; i < _disks.Count; ++i)
             {
                 vdiRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vdiIds[i]);

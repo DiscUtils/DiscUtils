@@ -499,7 +499,7 @@ namespace DiscUtils.Wim
             else
             {
                 filePart = path;
-                altStreamPart = "";
+                altStreamPart = string.Empty;
             }
         }
 

@@ -52,7 +52,7 @@ namespace DiscUtils.Registry
             MajorVersion = 1;
             MinorVersion = 3;
             RootCell = -1;
-            Path = "";
+            Path = string.Empty;
             Guid1 = Guid.NewGuid();
             Guid2 = Guid.NewGuid();
         }

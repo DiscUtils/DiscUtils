@@ -121,7 +121,7 @@ namespace DiscUtils.Fat
                 if (_parent == null)
                 {
                     // If we're the root directory, simulate the parent entry with a dummy record
-                    return new DirectoryEntry("", FatAttributes.Directory);
+                    return new DirectoryEntry(string.Empty, FatAttributes.Directory);
                 }
                 else
                 {

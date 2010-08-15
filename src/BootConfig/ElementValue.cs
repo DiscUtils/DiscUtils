@@ -222,7 +222,7 @@ namespace DiscUtils.BootConfig
                 return "<none>";
             }
 
-            string result = "";
+            string result = string.Empty;
             for (int i = 0; i < _values.Length; ++i)
             {
                 if (i != 0)

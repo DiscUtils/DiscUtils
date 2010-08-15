@@ -414,7 +414,7 @@ namespace DiscUtils.Iscsi
                     if (attr.ShouldTransmit(value, propInfo.PropertyType, phase, SessionType == SessionType.Discovery))
                     {
                         parameters.Add(attr.Name, ProtocolKeyAttribute.GetValueAsString(value, propInfo.PropertyType));
-                        _negotiatedParameters.Add(attr.Name, "");
+                        _negotiatedParameters.Add(attr.Name, string.Empty);
                     }
                 }
             }
@@ -439,7 +439,7 @@ namespace DiscUtils.Iscsi
                         {
                             value = propInfo.GetGetMethod(true).Invoke(this, null);
                             outParameters.Add(attr.Name, ProtocolKeyAttribute.GetValueAsString(value, propInfo.PropertyType));
-                            _negotiatedParameters.Add(attr.Name, "");
+                            _negotiatedParameters.Add(attr.Name, string.Empty);
                         }
                     }
                 }

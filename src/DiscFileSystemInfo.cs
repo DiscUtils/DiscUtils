@@ -82,7 +82,7 @@ namespace DiscUtils
                     return name.Substring(sepIdx + 1);
                 }
 
-                return "";
+                return string.Empty;
             }
         }
 

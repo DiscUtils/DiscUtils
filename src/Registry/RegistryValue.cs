@@ -45,7 +45,7 @@ namespace DiscUtils.Registry
         /// </summary>
         public string Name
         {
-            get { return _cell.Name ?? ""; }
+            get { return _cell.Name ?? string.Empty; }
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace DiscUtils.Registry
                     return multiString.Split('\0');
 
                 case RegistryValueType.QWord:
-                    return "" + Utilities.ToUInt64LittleEndian(data, 0);
+                    return string.Empty + Utilities.ToUInt64LittleEndian(data, 0);
 
                 default:
                     return data;
@@ -291,7 +291,7 @@ namespace DiscUtils.Registry
 
                 default:
                     byte[] data = GetData();
-                    string result = "";
+                    string result = string.Empty;
                     for (int i = 0; i < Math.Min(data.Length, 8); ++i)
                     {
                         result += string.Format(CultureInfo.InvariantCulture, "{0:X2} ", (int)data[i]);

@@ -38,7 +38,7 @@ namespace DiscUtils.Partitions
         {
             PartitionType = Guid.Empty;
             Identity = Guid.Empty;
-            Name = "";
+            Name = string.Empty;
         }
 
         public string FriendlyPartitionType
@@ -101,7 +101,7 @@ namespace DiscUtils.Partitions
             Utilities.WriteBytesLittleEndian(FirstUsedLogicalBlock, buffer, offset + 32);
             Utilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
             Utilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
-            Encoding.Unicode.GetBytes(Name + new String('\0', 36), 0, 36, buffer, offset + 56);
+            Encoding.Unicode.GetBytes(Name + new string('\0', 36), 0, 36, buffer, offset + 56);
         }
 
         public int CompareTo(GptEntry other)

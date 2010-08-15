@@ -61,7 +61,7 @@ namespace DiscUtils.Vmdk
             _header.Add(new DescriptorFileEntry(HeaderVersion, "1", DescriptorFileEntryType.Plain));
             _header.Add(new DescriptorFileEntry(HeaderContentId, "ffffffff", DescriptorFileEntryType.Plain));
             _header.Add(new DescriptorFileEntry(HeaderParentContentId, "ffffffff", DescriptorFileEntryType.Plain));
-            _header.Add(new DescriptorFileEntry(HeaderCreateType, "", DescriptorFileEntryType.Quoted));
+            _header.Add(new DescriptorFileEntry(HeaderCreateType, string.Empty, DescriptorFileEntryType.Quoted));
         }
 
         public DescriptorFile(Stream source)
@@ -324,8 +324,22 @@ namespace DiscUtils.Vmdk
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "{0:x2} {1:x2} {2:x2} {3:x2} {4:x2} {5:x2} {6:x2} {7:x2}-{8:x2} {9:x2} {10:x2} {11:x2} {12:x2} {13:x2} {14:x2} {15:x2}",
-                data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
-                data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15]);
+                data[0],
+                data[1],
+                data[2],
+                data[3],
+                data[4],
+                data[5],
+                data[6],
+                data[7],
+                data[8],
+                data[9],
+                data[10],
+                data[11],
+                data[12],
+                data[13],
+                data[14],
+                data[15]);
         }
 
         private string GetHeader(string key)

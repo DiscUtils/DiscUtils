@@ -242,8 +242,8 @@ namespace DiscUtils.Iscsi
         {
             string address;
             int port;
-            string targetGroupTag = "";
-            string targetName = "";
+            string targetGroupTag = string.Empty;
+            string targetName = string.Empty;
             ulong lun = 0;
 
             if (uri.Scheme != "iscsi")
@@ -261,12 +261,12 @@ namespace DiscUtils.Iscsi
             string[] uriSegments = uri.Segments;
             if (uriSegments.Length == 2)
             {
-                targetName = uriSegments[1].Replace("/", "");
+                targetName = uriSegments[1].Replace("/", string.Empty);
             }
             else if (uriSegments.Length == 3)
             {
-                targetGroupTag = uriSegments[1].Replace("/", "");
-                targetName = uriSegments[2].Replace("/", "");
+                targetGroupTag = uriSegments[1].Replace("/", string.Empty);
+                targetName = uriSegments[2].Replace("/", string.Empty);
             }
             else
             {
@@ -287,7 +287,7 @@ namespace DiscUtils.Iscsi
                 }
             }
 
-            return new LunInfo(targetInfo, (long)lun, LunClass.Unknown, false, "", "", "");
+            return new LunInfo(targetInfo, (long)lun, LunClass.Unknown, false, string.Empty, string.Empty, string.Empty);
         }
 
         /// <summary>

@@ -52,7 +52,7 @@ namespace DiscUtils.Wim
             }
             else
             {
-                result.Name = "";
+                result.Name = string.Empty;
             }
 
             if (startPos + length > reader.Position)

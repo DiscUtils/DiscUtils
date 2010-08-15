@@ -29,8 +29,8 @@ namespace DiscUtils.Iso9660
     {
         public Encoding CharacterEncoding;
 
-        public String SystemIdentifier;
-        public String VolumeIdentifier;
+        public string SystemIdentifier;
+        public string VolumeIdentifier;
         public uint VolumeSpaceSize;
         public ushort VolumeSetSize;
         public ushort VolumeSequenceNumber;
@@ -41,13 +41,13 @@ namespace DiscUtils.Iso9660
         public uint TypeMPathTableLocation;
         public uint OptionalTypeMPathTableLocation;
         public DirectoryRecord RootDirectory;
-        public String VolumeSetIdentifier;
-        public String PublisherIdentifier;
-        public String DataPreparerIdentifier;
-        public String ApplicationIdentifier;
-        public String CopyrightFileIdentifier;
-        public String AbstractFileIdentifier;
-        public String BibliographicFileIdentifier;
+        public string VolumeSetIdentifier;
+        public string PublisherIdentifier;
+        public string DataPreparerIdentifier;
+        public string ApplicationIdentifier;
+        public string CopyrightFileIdentifier;
+        public string AbstractFileIdentifier;
+        public string BibliographicFileIdentifier;
         public DateTime CreationDateAndTime;
         public DateTime ModificationDateAndTime;
         public DateTime ExpirationDateAndTime;
@@ -100,8 +100,8 @@ namespace DiscUtils.Iso9660
         {
             CharacterEncoding = enc;
 
-            SystemIdentifier = "";
-            VolumeIdentifier = "";
+            SystemIdentifier = string.Empty;
+            VolumeIdentifier = string.Empty;
             VolumeSpaceSize = volumeSpaceSize;
             VolumeSetSize = 1;
             VolumeSequenceNumber = 1;
@@ -121,13 +121,13 @@ namespace DiscUtils.Iso9660
             RootDirectory.InterleaveGapSize = 0;
             RootDirectory.VolumeSequenceNumber = 1;
             RootDirectory.FileIdentifier = "\0";
-            VolumeSetIdentifier = "";
-            PublisherIdentifier = "";
-            DataPreparerIdentifier = "";
-            ApplicationIdentifier = "";
-            CopyrightFileIdentifier = "";
-            AbstractFileIdentifier = "";
-            BibliographicFileIdentifier = "";
+            VolumeSetIdentifier = string.Empty;
+            PublisherIdentifier = string.Empty;
+            DataPreparerIdentifier = string.Empty;
+            ApplicationIdentifier = string.Empty;
+            CopyrightFileIdentifier = string.Empty;
+            AbstractFileIdentifier = string.Empty;
+            BibliographicFileIdentifier = string.Empty;
             CreationDateAndTime = buildTime;
             ModificationDateAndTime = buildTime;
             ExpirationDateAndTime = DateTime.MinValue;

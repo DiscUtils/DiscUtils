@@ -34,7 +34,7 @@ namespace DiscUtils.Vhd
 
         public ParentLocator()
         {
-            PlatformCode = "";
+            PlatformCode = string.Empty;
         }
 
         public ParentLocator(ParentLocator toCopy)

@@ -118,8 +118,8 @@ namespace DiscUtils.Iso9660
 
                 for (int i = 0; i < 2; ++i)
                 {
-                    xPart = (xParts.Length > i) ? xParts[i] : "";
-                    yPart = (yParts.Length > i) ? yParts[i] : "";
+                    xPart = (xParts.Length > i) ? xParts[i] : string.Empty;
+                    yPart = (yParts.Length > i) ? yParts[i] : string.Empty;
                     int val = ComparePart(xPart, yPart, ' ');
                     if (val != 0)
                     {
@@ -127,8 +127,8 @@ namespace DiscUtils.Iso9660
                     }
                 }
 
-                xPart = (xParts.Length > 2) ? xParts[2] : "";
-                yPart = (yParts.Length > 2) ? yParts[2] : "";
+                xPart = (xParts.Length > 2) ? xParts[2] : string.Empty;
+                yPart = (yParts.Length > 2) ? yParts[2] : string.Empty;
                 return ComparePartBackwards(xPart, yPart, '0');
             }
 

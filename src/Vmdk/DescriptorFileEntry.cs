@@ -78,7 +78,7 @@ namespace DiscUtils.Vmdk
             }
             else
             {
-                return new DescriptorFileEntry(parts[0], "", DescriptorFileEntryType.NoValue);
+                return new DescriptorFileEntry(parts[0], string.Empty, DescriptorFileEntryType.NoValue);
             }
         }
 
@@ -90,7 +90,7 @@ namespace DiscUtils.Vmdk
         public string ToString(bool spaceOut)
         {
             // VMware workstation appears to be sensitive to spaces, wants them for 'header' values, not for DiskDataBase...
-            string sep = spaceOut ? " " : "";
+            string sep = spaceOut ? " " : string.Empty;
 
             switch (_type)
             {

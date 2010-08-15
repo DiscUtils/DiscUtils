@@ -93,7 +93,7 @@ namespace DiscUtils.Ntfs
         /// <returns>A string</returns>
         public override string ToString()
         {
-            return "Show: Normal " + (HideMetafiles ? "" : "Meta ") + (HideHiddenFiles ? "" : "Hidden ") + (HideSystemFiles ? "" : "System ") + (HideDosFileNames ? "" : "ShortNames ");
+            return "Show: Normal " + (HideMetafiles ? string.Empty : "Meta ") + (HideHiddenFiles ? string.Empty : "Hidden ") + (HideSystemFiles ? string.Empty : "System ") + (HideDosFileNames ? string.Empty : "ShortNames ");
         }
     }
 }

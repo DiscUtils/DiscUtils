@@ -124,8 +124,9 @@ namespace DiscUtils.Fat
             {
                 return Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
             }
-            else // FAT12
+            else
             {
+                // FAT12
                 if ((cluster & 1) != 0)
                 {
                     return (uint)((Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + (cluster / 2))) >> 4) & 0x0FFF);

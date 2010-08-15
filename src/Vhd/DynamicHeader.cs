@@ -57,7 +57,7 @@ namespace DiscUtils.Vhd
             BlockSize = blockSize;
             MaxTableEntries = (int)((diskSize + blockSize - 1) / blockSize);
             ParentTimestamp = Footer.EpochUtc;
-            ParentUnicodeName = "";
+            ParentUnicodeName = string.Empty;
             ParentLocators = new ParentLocator[8];
             for (int i = 0; i < 8; ++i)
             {

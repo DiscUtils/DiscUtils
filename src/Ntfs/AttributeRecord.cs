@@ -198,7 +198,7 @@ namespace DiscUtils.Ntfs
         public ResidentAttributeRecord(AttributeType type, string name, ushort id, bool indexed, AttributeFlags flags)
             : base(type, name, id, flags)
         {
-            base._nonResidentFlag = 0;
+            _nonResidentFlag = 0;
             _indexedFlag = (byte)(indexed ? 1 : 0);
             _memoryBuffer = new SparseMemoryBuffer(1024);
         }
@@ -361,7 +361,7 @@ namespace DiscUtils.Ntfs
         public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
             : base(type, name, id, flags)
         {
-            base._nonResidentFlag = 1;
+            _nonResidentFlag = 1;
             _cookedDataRuns = new List<CookedDataRun>();
             _cookedDataRuns.Add(new CookedDataRun(new DataRun(firstCluster, (long)numClusters), 0, 0));
             _lastVCN = numClusters - 1;
@@ -373,7 +373,7 @@ namespace DiscUtils.Ntfs
         public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, List<CookedDataRun> dataRuns)
             : base(type, name, id, flags)
         {
-            base._nonResidentFlag = 1;
+            _nonResidentFlag = 1;
             _cookedDataRuns = dataRuns;
 
             if (dataRuns != null && dataRuns.Count != 0)
@@ -618,7 +618,7 @@ namespace DiscUtils.Ntfs
                 writer.WriteLine(indent + "  Compressed Size: " + _compressedSize);
             }
 
-            string runStr = "";
+            string runStr = string.Empty;
 
             foreach (CookedDataRun run in _cookedDataRuns)
             {

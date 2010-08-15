@@ -431,12 +431,13 @@ namespace DiscUtils.Partitions
             switch (type)
             {
                 case WellKnownPartitionType.WindowsFat:
-                    if (size < 512 * 1024 * 1024) // 512MB
+                    if (size < 512 * Sizes.OneMiB)
                     {
                         return BiosPartitionTypes.Fat16;
                     }
-                    else if (size < 1023 * (long)254 * 63 * 512) // Max BIOS size
+                    else if (size < 1023 * (long)254 * 63 * 512)
                     {
+                        // Max BIOS size
                         return BiosPartitionTypes.Fat32;
                     }
                     else

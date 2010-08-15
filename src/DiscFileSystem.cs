@@ -84,7 +84,7 @@ namespace DiscUtils
         /// </summary>
         public virtual DiscDirectoryInfo Root
         {
-            get { return new DiscDirectoryInfo(this, @""); }
+            get { return new DiscDirectoryInfo(this, string.Empty); }
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace DiscUtils
         /// </summary>
         public virtual string VolumeLabel
         {
-            get { return ""; }
+            get { return string.Empty; }
         }
 
         /// <summary>

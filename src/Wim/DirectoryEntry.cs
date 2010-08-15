@@ -92,7 +92,7 @@ namespace DiscUtils.Wim
             }
             else
             {
-                result.FileName = "";
+                result.FileName = string.Empty;
             }
 
             if (shortNameLength > 0)

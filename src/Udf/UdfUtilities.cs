@@ -134,7 +134,7 @@ namespace DiscUtils.Udf
         {
             if (count == 0)
             {
-                return "";
+                return string.Empty;
             }
 
             byte alg = buffer[offset];

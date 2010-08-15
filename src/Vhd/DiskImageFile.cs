@@ -157,7 +157,7 @@ namespace DiscUtils.Vhd
                     return _fileLocator.GetFullPath(_fileName);
                 }
 
-                return "";
+                return string.Empty;
             }
         }
 
@@ -294,8 +294,12 @@ namespace DiscUtils.Vhd
         /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static DiskImageFile InitializeDifferencing(
-            Stream stream, Ownership ownsStream, DiskImageFile parent,
-            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+            Stream stream,
+            Ownership ownsStream,
+            DiskImageFile parent,
+            string parentAbsolutePath,
+            string parentRelativePath,
+            DateTime parentModificationTimeUtc)
         {
             InitializeDifferencingInternal(stream, parent, parentAbsolutePath, parentRelativePath, parentModificationTimeUtc);
 
@@ -557,7 +561,7 @@ namespace DiscUtils.Vhd
             if (fileLocator == null)
             {
                 // Use working directory by default
-                fileLocator = new LocalFileLocator("");
+                fileLocator = new LocalFileLocator(string.Empty);
             }
 
             List<string> absPaths = new List<string>(8);
@@ -575,7 +579,7 @@ namespace DiscUtils.Vhd
                     {
                         absPaths.Add(locationVal);
                     }
-                    else // Relative
+                    else
                     {
                         relPaths.Add(fileLocator.ResolveRelativePath(locationVal));
                     }

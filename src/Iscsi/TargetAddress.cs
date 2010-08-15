@@ -86,12 +86,12 @@ namespace DiscUtils.Iscsi
             int addrEnd = address.IndexOfAny(new char[] { ':', ',' });
             if (addrEnd == -1)
             {
-                return new TargetAddress(address, DefaultPort, "");
+                return new TargetAddress(address, DefaultPort, string.Empty);
             }
 
             string addr = address.Substring(0, addrEnd);
             int port = DefaultPort;
-            string targetGroupTag = "";
+            string targetGroupTag = string.Empty;
 
             int focus = addrEnd;
             if (address[focus] == ':')
@@ -149,7 +149,7 @@ namespace DiscUtils.Iscsi
             builder.Scheme = "iscsi";
             builder.Host = NetworkAddress;
             builder.Port = (_networkPort != DefaultPort) ? _networkPort : -1;
-            builder.Path = string.IsNullOrEmpty(_targetGroupTag) ? "" : _targetGroupTag;
+            builder.Path = string.IsNullOrEmpty(_targetGroupTag) ? string.Empty : _targetGroupTag;
             return builder.Uri;
         }
     }

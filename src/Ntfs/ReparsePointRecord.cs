@@ -57,13 +57,13 @@ namespace DiscUtils.Ntfs
         {
             writer.WriteLine(linePrefix + "                Tag: " + Tag.ToString("x", CultureInfo.InvariantCulture));
 
-            string hex = "";
+            string hex = string.Empty;
             for (int i = 0; i < Math.Min(Content.Length, 32); ++i)
             {
                 hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", Content[i]);
             }
 
-            writer.WriteLine(linePrefix + "               Data:" + hex + (Content.Length > 32 ? "..." : ""));
+            writer.WriteLine(linePrefix + "               Data:" + hex + (Content.Length > 32 ? "..." : string.Empty));
         }
     }
 }

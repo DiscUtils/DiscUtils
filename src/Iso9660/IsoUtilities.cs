@@ -70,7 +70,7 @@ namespace DiscUtils.Iso9660
             Utilities.WriteBytesLittleEndian(value, buffer, offset);
         }
 
-        internal static void WriteAChars(byte[] buffer, int offset, int numBytes, String str)
+        internal static void WriteAChars(byte[] buffer, int offset, int numBytes, string str)
         {
             // Validate string
             if (!isValidAString(str))
@@ -82,7 +82,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, Encoding.ASCII);
         }
 
-        internal static void WriteDChars(byte[] buffer, int offset, int numBytes, String str)
+        internal static void WriteDChars(byte[] buffer, int offset, int numBytes, string str)
         {
             // Validate string
             if (!isValidDString(str))
@@ -94,7 +94,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, Encoding.ASCII);
         }
 
-        internal static void WriteA1Chars(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
+        internal static void WriteA1Chars(byte[] buffer, int offset, int numBytes, string str, Encoding enc)
         {
             // Validate string
             if (!isValidAString(str))
@@ -105,7 +105,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, enc);
         }
 
-        internal static void WriteD1Chars(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
+        internal static void WriteD1Chars(byte[] buffer, int offset, int numBytes, string str, Encoding enc)
         {
             // Validate string
             if (!isValidDString(str))
@@ -137,7 +137,7 @@ namespace DiscUtils.Iso9660
         }
 
 #if false
-        public static byte WriteFileName(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
+        public static byte WriteFileName(byte[] buffer, int offset, int numBytes, string str, Encoding enc)
         {
             if (numBytes > 255 || numBytes < 0)
             {
@@ -153,7 +153,7 @@ namespace DiscUtils.Iso9660
             return (byte)WriteString(buffer, offset, numBytes, false, str, enc);
         }
 
-        public static byte WriteDirectoryName(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
+        public static byte WriteDirectoryName(byte[] buffer, int offset, int numBytes, string str, Encoding enc)
         {
             if (numBytes > 255 || numBytes < 0)
             {
@@ -170,7 +170,7 @@ namespace DiscUtils.Iso9660
         }
 #endif
 
-        internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, String str, Encoding enc)
+        internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, string str, Encoding enc)
         {
             Encoder encoder = enc.GetEncoder();
 
@@ -189,7 +189,7 @@ namespace DiscUtils.Iso9660
             return bytesUsed;
         }
 
-        internal static bool isValidAString(String str)
+        internal static bool isValidAString(string str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -208,7 +208,7 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        internal static bool isValidDString(String str)
+        internal static bool isValidDString(string str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -226,7 +226,7 @@ namespace DiscUtils.Iso9660
             return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch == '_');
         }
 
-        internal static bool isValidFileName(String str)
+        internal static bool isValidFileName(string str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -239,7 +239,7 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        internal static bool isValidDirectoryName(String str)
+        internal static bool isValidDirectoryName(string str)
         {
             if (str.Length == 1 && (str[0] == 0 || str[0] == 1))
             {
@@ -259,7 +259,7 @@ namespace DiscUtils.Iso9660
 
         internal static string[] SplitFileName(string name)
         {
-            string[] parts = new string[] { name, "", "1" };
+            string[] parts = new string[] { name, string.Empty, "1" };
 
             if (name.Contains("."))
             {
@@ -292,7 +292,7 @@ namespace DiscUtils.Iso9660
                 ver = 1;
             }
 
-            parts[2] = String.Format(CultureInfo.InvariantCulture, "{0}", ver);
+            parts[2] = string.Format(CultureInfo.InvariantCulture, "{0}", ver);
 
             return parts;
         }

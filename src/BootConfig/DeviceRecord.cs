@@ -143,7 +143,10 @@ namespace DiscUtils.BootConfig
                     return string.Format(
                         CultureInfo.InvariantCulture,
                         "(disk:{0:X2}{1:X2}{2:X2}{3:X2} part-offset:{4})",
-                        DiskIdentity[0], DiskIdentity[1], DiskIdentity[2], DiskIdentity[3],
+                        DiskIdentity[0],
+                        DiskIdentity[1],
+                        DiskIdentity[2],
+                        DiskIdentity[3],
                         Utilities.ToUInt64LittleEndian(PartitionIdentity, 0));
                 }
                 else

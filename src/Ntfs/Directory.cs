@@ -222,7 +222,7 @@ namespace DiscUtils.Ntfs
             do
             {
                 string suffix = string.Format(CultureInfo.InvariantCulture, "~{0}", i);
-                candidate = baseName.Substring(0, Math.Min(8 - suffix.Length, baseName.Length)) + suffix + (ext.Length > 0 ? "." + ext : "");
+                candidate = baseName.Substring(0, Math.Min(8 - suffix.Length, baseName.Length)) + suffix + (ext.Length > 0 ? "." + ext : string.Empty);
                 i++;
             }
             while (GetEntryByName(candidate) != null);

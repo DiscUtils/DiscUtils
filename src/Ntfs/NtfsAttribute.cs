@@ -267,7 +267,7 @@ namespace DiscUtils.Ntfs
             {
                 using (Stream s = Open(FileAccess.Read))
                 {
-                    string hex = "";
+                    string hex = string.Empty;
                     byte[] buffer = new byte[32];
                     int numBytes = s.Read(buffer, 0, buffer.Length);
                     for (int i = 0; i < numBytes; ++i)
@@ -275,7 +275,7 @@ namespace DiscUtils.Ntfs
                         hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
                     }
 
-                    writer.WriteLine(indent + "    Data: " + hex + ((numBytes < s.Length) ? "..." : ""));
+                    writer.WriteLine(indent + "    Data: " + hex + ((numBytes < s.Length) ? "..." : string.Empty));
                 }
             }
 

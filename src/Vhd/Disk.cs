@@ -392,8 +392,13 @@ namespace DiscUtils.Vhd
         /// <param name="parentModificationTime">The time the parent disk's file was last modified (from file system).</param>
         /// <returns>An object that accesses the stream as a VHD file</returns>
         public static Disk InitializeDifferencing(
-            Stream stream, Ownership ownsStream, DiskImageFile parent, Ownership ownsParent,
-            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTime)
+            Stream stream,
+            Ownership ownsStream,
+            DiskImageFile parent,
+            Ownership ownsParent,
+            string parentAbsolutePath,
+            string parentRelativePath,
+            DateTime parentModificationTime)
         {
             DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath, parentRelativePath, parentModificationTime);
             return new Disk(file, Ownership.Dispose, parent, ownsParent);

@@ -37,7 +37,7 @@ namespace DiscUtils.Iso9660
     internal class BaseVolumeDescriptor
     {
         public VolumeDescriptorType VolumeDescriptorType;
-        public String StandardIdentifier;
+        public string StandardIdentifier;
         public byte VolumeDescriptorVersion;
 
         public BaseVolumeDescriptor(VolumeDescriptorType type, byte version)

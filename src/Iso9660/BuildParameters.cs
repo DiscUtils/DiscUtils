@@ -26,7 +26,7 @@ namespace DiscUtils.Iso9660
     {
         public BuildParameters()
         {
-            VolumeIdentifier = "";
+            VolumeIdentifier = string.Empty;
             UseJoliet = true;
         }
 

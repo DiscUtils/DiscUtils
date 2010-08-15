@@ -49,7 +49,7 @@ namespace DiscUtils.Iso9660
         public byte FileUnitSize;
         public byte InterleaveGapSize;
         public ushort VolumeSequenceNumber;
-        public String FileIdentifier;
+        public string FileIdentifier;
 
         public override bool IsDirectory
         {

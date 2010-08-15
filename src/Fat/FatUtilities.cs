@@ -59,7 +59,7 @@ namespace DiscUtils.Fat
             }
 
             string namePart = parts[0];
-            string extPart = parts.Length == 2 ? parts[1] : "";
+            string extPart = parts.Length == 2 ? parts[1] : string.Empty;
 
             // Check lengths
             if (namePart.Length > 8 || extPart.Length > 3)

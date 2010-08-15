@@ -60,7 +60,7 @@ namespace DiscUtils
         /// </summary>
         public virtual string FullPath
         {
-            get { return ""; }
+            get { return string.Empty; }
         }
 
         /// <summary>

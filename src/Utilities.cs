@@ -490,7 +490,7 @@ namespace DiscUtils
                 result[i] = (char)data[i + offset];
             }
 
-            return new String(result);
+            return new string(result);
         }
 
         #endregion
@@ -508,7 +508,7 @@ namespace DiscUtils
             int index = trimmed.LastIndexOf('\\');
             if (index < 0)
             {
-                return ""; // No directory, just a file name
+                return string.Empty; // No directory, just a file name
             }
 
             return trimmed.Substring(0, index);

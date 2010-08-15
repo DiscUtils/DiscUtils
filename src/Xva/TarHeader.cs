@@ -83,7 +83,7 @@ namespace DiscUtils.Xva
 
         private static string LongToOctal(long value, int length)
         {
-            string result = "";
+            string result = string.Empty;
 
             while (value > 0)
             {

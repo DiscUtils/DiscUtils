@@ -212,7 +212,7 @@ namespace DiscUtils.Ntfs
             return false;
         }
 
-        internal static String EntryAsString(IndexEntry entry, string fileName, string indexName)
+        internal static string EntryAsString(IndexEntry entry, string fileName, string indexName)
         {
             IByteArraySerializable keyValue = null;
             IByteArraySerializable dataValue = null;

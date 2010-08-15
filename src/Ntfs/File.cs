@@ -72,7 +72,7 @@ namespace DiscUtils.Ntfs
 
                 if (IndexInMft == MasterFileTable.RootDirIndex)
                 {
-                    result.Add("");
+                    result.Add(string.Empty);
                 }
                 else
                 {
