@@ -32,6 +32,11 @@ namespace DiscUtils.Udf
         public DateTime CreationTime;
         public LongAllocationDescriptor StreamDirectoryIcb;
 
+        public override int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
@@ -66,11 +71,6 @@ namespace DiscUtils.Udf
         public override void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public override int Size
-        {
-            get { throw new NotImplementedException(); }
         }
     }
 }

@@ -24,16 +24,6 @@ namespace DiscUtils.Nfs
 {
     internal class Nfs3DirectoryEntry
     {
-        public ulong FileId { get; set; }
-
-        public string Name { get; set; }
-
-        public ulong Cookie { get; set; }
-
-        public Nfs3FileAttributes FileAttributes { get; set; }
-
-        public Nfs3FileHandle FileHandle { get; set; }
-
         public Nfs3DirectoryEntry(XdrDataReader reader)
         {
             FileId = reader.ReadUInt64();
@@ -49,5 +39,15 @@ namespace DiscUtils.Nfs
                 FileHandle = new Nfs3FileHandle(reader);
             }
         }
+
+        public ulong FileId { get; set; }
+
+        public string Name { get; set; }
+
+        public ulong Cookie { get; set; }
+
+        public Nfs3FileAttributes FileAttributes { get; set; }
+
+        public Nfs3FileHandle FileHandle { get; set; }
     }
 }

@@ -70,18 +70,6 @@ namespace DiscUtils.Wim
         }
 
         /// <summary>
-        /// Gets a particular image within the file (zero-based index).
-        /// </summary>
-        /// <param name="index">The index of the image to retrieve</param>
-        /// <returns>The image</returns>
-        /// <remarks>The XML manifest file uses a one-based index, whereas this
-        /// method is zero-based.</remarks>
-        public WimFileSystem GetImage(int index)
-        {
-            return new WimFileSystem(this, index);
-        }
-
-        /// <summary>
         /// Gets the (zero-based) index of the bootable image.
         /// </summary>
         public int BootImage
@@ -120,6 +108,18 @@ namespace DiscUtils.Wim
         public Guid Guid
         {
             get { return _fileHeader.WimGuid; }
+        }
+
+        /// <summary>
+        /// Gets a particular image within the file (zero-based index).
+        /// </summary>
+        /// <param name="index">The index of the image to retrieve</param>
+        /// <returns>The image</returns>
+        /// <remarks>The XML manifest file uses a one-based index, whereas this
+        /// method is zero-based.</remarks>
+        public WimFileSystem GetImage(int index)
+        {
+            return new WimFileSystem(this, index);
         }
 
         internal ShortResourceHeader LocateImage(int index)

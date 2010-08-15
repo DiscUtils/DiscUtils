@@ -29,19 +29,6 @@ namespace DiscUtils.Udf
     {
         public byte Type;
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            Type = buffer[offset];
-            return Parse(buffer, offset);
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected abstract int Parse(byte[] buffer, int offset);
-
         public abstract int Size { get; }
 
         public static PartitionMap CreateFrom(byte[] buffer, int offset)
@@ -79,6 +66,19 @@ namespace DiscUtils.Udf
 
             return result;
         }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            Type = buffer[offset];
+            return Parse(buffer, offset);
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected abstract int Parse(byte[] buffer, int offset);
     }
 
     internal sealed class Type1PartitionMap : PartitionMap
@@ -86,16 +86,16 @@ namespace DiscUtils.Udf
         public ushort VolumeSequenceNumber;
         public ushort PartitionNumber;
 
+        public override int Size
+        {
+            get { return 6; }
+        }
+
         protected override int Parse(byte[] buffer, int offset)
         {
             VolumeSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
             PartitionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             return 6;
-        }
-
-        public override int Size
-        {
-            get { return 6; }
         }
     }
 
@@ -104,16 +104,16 @@ namespace DiscUtils.Udf
         public ushort VolumeSequenceNumber;
         public ushort PartitionNumber;
 
+        public override int Size
+        {
+            get { return 64; }
+        }
+
         protected override int Parse(byte[] buffer, int offset)
         {
             VolumeSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
             PartitionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 38);
             return 64;
-        }
-
-        public override int Size
-        {
-            get { return 64; }
         }
     }
 
@@ -125,6 +125,11 @@ namespace DiscUtils.Udf
         public byte NumSparingTables;
         public uint SparingTableSize;
         public uint[] LocationsOfSparingTables;
+
+        public override int Size
+        {
+            get { return 64; }
+        }
 
         protected override int Parse(byte[] buffer, int offset)
         {
@@ -141,11 +146,6 @@ namespace DiscUtils.Udf
 
             return 64;
         }
-
-        public override int Size
-        {
-            get { return 64; }
-        }
     }
 
     internal sealed class MetadataPartitionMap : PartitionMap
@@ -159,6 +159,11 @@ namespace DiscUtils.Udf
         public ushort AlignmentUnitSize;
         public byte Flags;
 
+        public override int Size
+        {
+            get { return 64; }
+        }
+
         protected override int Parse(byte[] buffer, int offset)
         {
             VolumeSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
@@ -171,11 +176,6 @@ namespace DiscUtils.Udf
             Flags = buffer[offset + 58];
 
             return 64;
-        }
-
-        public override int Size
-        {
-            get { return 64; }
         }
     }
 }

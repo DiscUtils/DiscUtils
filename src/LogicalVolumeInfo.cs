@@ -68,15 +68,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Opens a stream with access to the content of the logical volume.
-        /// </summary>
-        /// <returns>The volume's content as a stream.</returns>
-        public override SparseStream Open()
-        {
-            return _opener();
-        }
-
-        /// <summary>
         /// Gets the one-byte BIOS type for this volume, which indicates the content.
         /// </summary>
         public override byte BiosType
@@ -144,6 +135,15 @@ namespace DiscUtils
         public override long PhysicalStartSector
         {
             get { return (_physicalVol == null) ? 0 : _physicalVol.PhysicalStartSector; }
+        }
+
+        /// <summary>
+        /// Opens a stream with access to the content of the logical volume.
+        /// </summary>
+        /// <returns>The volume's content as a stream.</returns>
+        public override SparseStream Open()
+        {
+            return _opener();
         }
     }
 }

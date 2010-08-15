@@ -39,6 +39,16 @@ namespace DiscUtils.Iscsi
             get { return _logicalBlockSize; }
         }
 
+        public override bool Truncated
+        {
+            get { return _truncated; }
+        }
+
+        public override uint NeededDataLength
+        {
+            get { return 8; }
+        }
+
         public override void ReadFrom(byte[] buffer, int offset, int count)
         {
             if (count < 8)
@@ -49,16 +59,6 @@ namespace DiscUtils.Iscsi
 
             _numLogicalBlocks = Utilities.ToUInt32BigEndian(buffer, offset);
             _logicalBlockSize = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-        }
-
-        public override bool Truncated
-        {
-            get { return _truncated; }
-        }
-
-        public override uint NeededDataLength
-        {
-            get { return 8; }
         }
     }
 }

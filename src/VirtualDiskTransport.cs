@@ -44,13 +44,9 @@ namespace DiscUtils
 
     internal abstract class VirtualDiskTransport : IDisposable
     {
-        public abstract void Connect(Uri uri, string username, string password);
-
-        public virtual void Dispose(bool disposing)
-        {
-        }
-
         public abstract bool IsRawDisk { get; }
+
+        public abstract void Connect(Uri uri, string username, string password);
 
         public abstract VirtualDisk OpenDisk(FileAccess access);
 
@@ -58,21 +54,26 @@ namespace DiscUtils
 
         public abstract string GetFileName();
 
-        #region IDisposable Members
-
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        #endregion
+        protected virtual void Dispose(bool disposing)
+        {
+        }
     }
 
     [VirtualDiskTransport("file")]
     internal sealed class FileTransport : VirtualDiskTransport
     {
         private string _path;
+
+        public override bool IsRawDisk
+        {
+            get { return false; }
+        }
 
         public override void Connect(Uri uri, string username, string password)
         {
@@ -81,11 +82,6 @@ namespace DiscUtils
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such file '{0}'", uri.OriginalString), _path);
             }
-        }
-
-        public override bool IsRawDisk
-        {
-            get { return false; }
         }
 
         public override VirtualDisk OpenDisk(FileAccess access)

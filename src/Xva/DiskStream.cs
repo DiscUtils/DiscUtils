@@ -68,10 +68,6 @@ namespace DiscUtils.Xva
             get { return false; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _length; }
@@ -93,6 +89,45 @@ namespace DiscUtils.Xva
 
                 _position = value;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long chunkSize = Sizes.OneMiB;
+                int i = 0;
+                int numChunks = (int)((_length + chunkSize - 1) / chunkSize);
+                while (i < numChunks)
+                {
+                    // Find next stored block
+                    while (i < numChunks && !ChunkExists(i))
+                    {
+                        ++i;
+                    }
+
+                    int start = i;
+
+                    // Find next absent block
+                    while (i < numChunks && ChunkExists(i))
+                    {
+                        ++i;
+                    }
+
+                    if (start != i)
+                    {
+                        extents.Add(new StreamExtent(start * chunkSize, (i - start) * chunkSize));
+                    }
+                }
+
+                return extents;
+            }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -166,41 +201,6 @@ namespace DiscUtils.Xva
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                List<StreamExtent> extents = new List<StreamExtent>();
-
-                long chunkSize = Sizes.OneMiB;
-                int i = 0;
-                int numChunks = (int)((_length + chunkSize - 1) / chunkSize);
-                while (i < numChunks)
-                {
-                    // Find next stored block
-                    while (i < numChunks && !ChunkExists(i))
-                    {
-                        ++i;
-                    }
-
-                    int start = i;
-
-                    // Find next absent block
-                    while (i < numChunks && ChunkExists(i))
-                    {
-                        ++i;
-                    }
-
-                    if (start != i)
-                    {
-                        extents.Add(new StreamExtent(start * chunkSize, (i - start) * chunkSize));
-                    }
-                }
-
-                return extents;
-            }
         }
 
         private bool ChunkExists(int i)

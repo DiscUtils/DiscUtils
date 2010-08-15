@@ -53,11 +53,6 @@ namespace DiscUtils.Xva
             get { return false; }
         }
 
-        public override void Flush()
-        {
-            throw new NotSupportedException();
-        }
-
         public override long Length
         {
             get
@@ -78,6 +73,11 @@ namespace DiscUtils.Xva
             {
                 _position = value;
             }
+        }
+
+        public override void Flush()
+        {
+            throw new NotSupportedException();
         }
 
         public override int Read(byte[] buffer, int offset, int count)

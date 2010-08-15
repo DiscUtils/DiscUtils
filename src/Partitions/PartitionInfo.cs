@@ -35,12 +35,6 @@ namespace DiscUtils.Partitions
     public abstract class PartitionInfo
     {
         /// <summary>
-        /// Opens a stream that accesses the partition's contents.
-        /// </summary>
-        /// <returns>The new stream.</returns>
-        public abstract SparseStream Open();
-
-        /// <summary>
         /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
         /// </summary>
         public abstract long FirstSector { get; }
@@ -74,6 +68,12 @@ namespace DiscUtils.Partitions
         /// Gets the partition type as a 'friendly' string.
         /// </summary>
         public abstract string TypeAsString { get; }
+
+        /// <summary>
+        /// Opens a stream that accesses the partition's contents.
+        /// </summary>
+        /// <returns>The new stream.</returns>
+        public abstract SparseStream Open();
 
         /// <summary>
         /// Gets a summary of the partition information as 'first - last (type)'.

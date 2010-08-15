@@ -599,7 +599,7 @@ namespace DiscUtils
             return merged;
         }
 
-        internal static string MakeRelativePath(string path, string basePath)
+        public static string MakeRelativePath(string path, string basePath)
         {
             List<string> pathElements = new List<string>(path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
             List<string> basePathElements = new List<string>(basePath.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
@@ -663,7 +663,7 @@ namespace DiscUtils
         /// <param name="offset">Offset in the buffer to start</param>
         /// <param name="length">The number of bytes to read</param>
         /// <returns>The number of bytes actually read.</returns>
-        internal static int ReadFully(Stream stream, byte[] buffer, int offset, int length)
+        public static int ReadFully(Stream stream, byte[] buffer, int offset, int length)
         {
             int totalRead = 0;
             int numRead = stream.Read(buffer, offset, length);
@@ -709,7 +709,7 @@ namespace DiscUtils
         /// <param name="offset">Offset in the buffer to start</param>
         /// <param name="length">The number of bytes to read</param>
         /// <returns>The number of bytes actually read.</returns>
-        internal static int ReadFully(IBuffer buffer, long pos, byte[] data, int offset, int length)
+        public static int ReadFully(IBuffer buffer, long pos, byte[] data, int offset, int length)
         {
             int totalRead = 0;
             int numRead = buffer.Read(pos, data, offset, length);
@@ -784,7 +784,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="name">The name to test</param>
         /// <returns><c>true</c> if the name is 8.3, otherwise <c>false</c>.</returns>
-        internal static bool Is8Dot3(string name)
+        public static bool Is8Dot3(string name)
         {
             if (name.Length > 12)
             {
@@ -830,7 +830,7 @@ namespace DiscUtils
             return true;
         }
 
-        internal static bool Is8Dot3Char(char ch)
+        public static bool Is8Dot3Char(char ch)
         {
             return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || "_^$~!#%£-{}()@'`".IndexOf(ch) != -1;
         }
@@ -844,7 +844,7 @@ namespace DiscUtils
         /// The wildcard * (star) matches zero or more characters (including '.'), and ?
         /// (question mark) matches precisely one character (except '.').
         /// </remarks>
-        internal static Regex ConvertWildcardsToRegEx(string pattern)
+        public static Regex ConvertWildcardsToRegEx(string pattern)
         {
             if (!pattern.Contains("."))
             {

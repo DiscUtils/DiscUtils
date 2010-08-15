@@ -61,24 +61,6 @@ namespace DiscUtils.Udf
         public ushort DescriptorCrcLength;
         public uint TagLocation;
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            TagIdentifier = (TagIdentifier)Utilities.ToUInt16LittleEndian(buffer, offset);
-            DescriptorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            TagChecksum = buffer[offset + 4];
-            TagSerialNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            DescriptorCrc = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
-            DescriptorCrcLength = Utilities.ToUInt16LittleEndian(buffer, offset + 10);
-            TagLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
-
-            return 16;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
         public int Size
         {
             get { return 16; }
@@ -120,6 +102,24 @@ namespace DiscUtils.Udf
 
             result = dt;
             return true;
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            TagIdentifier = (TagIdentifier)Utilities.ToUInt16LittleEndian(buffer, offset);
+            DescriptorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
+            TagChecksum = buffer[offset + 4];
+            TagSerialNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
+            DescriptorCrc = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
+            DescriptorCrcLength = Utilities.ToUInt16LittleEndian(buffer, offset + 10);
+            TagLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
+
+            return 16;
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
         }
     }
 }

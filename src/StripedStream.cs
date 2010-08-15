@@ -63,26 +63,6 @@ namespace DiscUtils
             _length = subStreamLength * wrapped.Length;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
-                {
-                    foreach (var stream in _wrapped)
-                    {
-                        stream.Dispose();
-                    }
-
-                    _wrapped = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get { return _canRead; }
@@ -96,14 +76,6 @@ namespace DiscUtils
         public override bool CanWrite
         {
             get { return _canWrite; }
-        }
-
-        public override void Flush()
-        {
-            foreach (var stream in _wrapped)
-            {
-                stream.Flush();
-            }
         }
 
         public override long Length
@@ -121,6 +93,24 @@ namespace DiscUtils
             set
             {
                 _position = value;
+            }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                // Temporary, indicate there are no 'unstored' extents.
+                // Consider combining extent information from all wrapped streams in future.
+                yield return new StreamExtent(0, _length);
+            }
+        }
+
+        public override void Flush()
+        {
+            foreach (var stream in _wrapped)
+            {
+                stream.Flush();
             }
         }
 
@@ -216,13 +206,23 @@ namespace DiscUtils
             }
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get
+            try
             {
-                // Temporary, indicate there are no 'unstored' extents.
-                // Consider combining extent information from all wrapped streams in future.
-                yield return new StreamExtent(0, _length);
+                if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
+                {
+                    foreach (var stream in _wrapped)
+                    {
+                        stream.Dispose();
+                    }
+
+                    _wrapped = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
     }

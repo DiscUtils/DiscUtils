@@ -53,15 +53,15 @@ namespace DiscUtils.Nfs
             _body = ms.ToArray();
         }
 
+        public static RpcAuthentication Null()
+        {
+            return new RpcAuthentication(new RpcNullCredentials());
+        }
+
         public void Write(XdrDataWriter writer)
         {
             writer.Write((int)_flavour);
             writer.WriteBuffer(_body);
-        }
-
-        public static RpcAuthentication Null()
-        {
-            return new RpcAuthentication(new RpcNullCredentials());
         }
     }
 }

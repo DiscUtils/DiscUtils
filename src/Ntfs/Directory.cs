@@ -38,6 +38,75 @@ namespace DiscUtils.Ntfs
         {
         }
 
+        public bool IsEmpty
+        {
+            get { return Index.Count == 0; }
+        }
+
+        private IndexView<FileNameRecord, FileRecordReference> Index
+        {
+            get
+            {
+                if (_index == null && StreamExists(AttributeType.IndexRoot, "$I30"))
+                {
+                    _index = new IndexView<FileNameRecord, FileRecordReference>(GetIndex("$I30"));
+                }
+
+                return _index;
+            }
+        }
+
+        public IEnumerable<DirectoryEntry> GetAllEntries(bool filter)
+        {
+            IEnumerable<DirectoryIndexEntry> entries = filter ? FilterEntries(Index.Entries) : Index.Entries;
+
+            foreach (var entry in entries)
+            {
+                yield return new DirectoryEntry(this, entry.Value, entry.Key);
+            }
+        }
+
+        public void UpdateEntry(DirectoryEntry entry)
+        {
+            Index[entry.Details] = entry.Reference;
+            UpdateRecordInMft();
+        }
+
+        public override void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "DIRECTORY (" + base.ToString() + ")");
+            writer.WriteLine(indent + "  File Number: " + IndexInMft);
+
+            if (Index != null)
+            {
+                foreach (var entry in Index.Entries)
+                {
+                    writer.WriteLine(indent + "  DIRECTORY ENTRY (" + entry.Key.FileName + ")");
+                    writer.WriteLine(indent + "    MFT Ref: " + entry.Value);
+                    entry.Key.Dump(writer, indent + "    ");
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + @"\";
+        }
+
+        internal static new Directory CreateNew(INtfsContext context)
+        {
+            Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
+
+            StandardInformation.InitializeNewFile(dir, FileAttributeFlags.Archive);
+
+            // Create the index root attribute by instantiating a new index
+            dir.CreateIndex("$I30", AttributeType.FileName, AttributeCollationRule.Filename);
+
+            dir.UpdateRecordInMft();
+
+            return dir;
+        }
+
         internal DirectoryEntry GetEntryByName(string name)
         {
             string searchName = name;
@@ -57,27 +126,6 @@ namespace DiscUtils.Ntfs
             {
                 return null;
             }
-        }
-
-        public bool IsEmpty
-        {
-            get { return Index.Count == 0; }
-        }
-
-        public IEnumerable<DirectoryEntry> GetAllEntries(bool filter)
-        {
-            IEnumerable<DirectoryIndexEntry> entries = filter ? FilterEntries(Index.Entries) : Index.Entries;
-
-            foreach (var entry in entries)
-            {
-                yield return new DirectoryEntry(this, entry.Value, entry.Key);
-            }
-        }
-
-        public void UpdateEntry(DirectoryEntry entry)
-        {
-            Index[entry.Details] = entry.Reference;
-            UpdateRecordInMft();
         }
 
         internal DirectoryEntry AddEntry(File file, string name, FileNameNamespace nameNamespace)
@@ -180,54 +228,6 @@ namespace DiscUtils.Ntfs
             while (GetEntryByName(candidate) != null);
 
             return candidate;
-        }
-
-        internal new static Directory CreateNew(INtfsContext context)
-        {
-            Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
-
-            StandardInformation.InitializeNewFile(dir, FileAttributeFlags.Archive);
-
-            // Create the index root attribute by instantiating a new index
-            dir.CreateIndex("$I30", AttributeType.FileName, AttributeCollationRule.Filename);
-
-            dir.UpdateRecordInMft();
-
-            return dir;
-        }
-
-        public override void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + "DIRECTORY (" + base.ToString() + ")");
-            writer.WriteLine(indent + "  File Number: " + IndexInMft);
-
-            if (Index != null)
-            {
-                foreach (var entry in Index.Entries)
-                {
-                    writer.WriteLine(indent + "  DIRECTORY ENTRY (" + entry.Key.FileName + ")");
-                    writer.WriteLine(indent + "    MFT Ref: " + entry.Value);
-                    entry.Key.Dump(writer, indent + "    ");
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return base.ToString() + @"\";
-        }
-
-        private IndexView<FileNameRecord, FileRecordReference> Index
-        {
-            get
-            {
-                if (_index == null && StreamExists(AttributeType.IndexRoot, "$I30"))
-                {
-                    _index = new IndexView<FileNameRecord, FileRecordReference>(GetIndex("$I30"));
-                }
-
-                return _index;
-            }
         }
 
         private List<DirectoryIndexEntry> FilterEntries(IEnumerable<DirectoryIndexEntry> entriesIter)

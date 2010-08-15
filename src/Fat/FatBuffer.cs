@@ -66,6 +66,27 @@ namespace DiscUtils.Fat
             _dirtySectors = new Dictionary<uint, uint>();
         }
 
+        internal int NumEntries
+        {
+            get
+            {
+                switch (_type)
+                {
+                    case FatType.Fat12:
+                        return (_buffer.Length / 3) * 2;
+                    case FatType.Fat16:
+                        return _buffer.Length / 2;
+                    default: // FAT32
+                        return _buffer.Length / 4;
+                }
+            }
+        }
+
+        internal int Size
+        {
+            get { return _buffer.Length; }
+        }
+
         internal bool IsFree(uint val)
         {
             return val == 0;
@@ -174,22 +195,6 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal int NumEntries
-        {
-            get
-            {
-                switch (_type)
-                {
-                    case FatType.Fat12:
-                        return (_buffer.Length / 3) * 2;
-                    case FatType.Fat16:
-                        return _buffer.Length / 2;
-                    default: // FAT32
-                        return _buffer.Length / 4;
-                }
-            }
-        }
-
         internal bool TryGetFreeCluster(out uint cluster)
         {
             // Simple scan - don't hold a free list...
@@ -232,11 +237,6 @@ namespace DiscUtils.Fat
             }
 
             return result;
-        }
-
-        internal int Size
-        {
-            get { return _buffer.Length; }
         }
 
         internal void MarkDirty(uint offset)

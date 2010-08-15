@@ -40,15 +40,6 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Opens a stream to access the content of the partition.
-        /// </summary>
-        /// <returns>The new stream</returns>
-        public override SparseStream Open()
-        {
-            return _table.Open(_entry);
-        }
-
-        /// <summary>
         /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
         /// </summary>
         public override long FirstSector
@@ -110,6 +101,15 @@ namespace DiscUtils.Partitions
         public Guid Identity
         {
             get { return _entry.Identity; }
+        }
+
+        /// <summary>
+        /// Opens a stream to access the content of the partition.
+        /// </summary>
+        /// <returns>The new stream</returns>
+        public override SparseStream Open()
+        {
+            return _table.Open(_entry);
         }
     }
 }

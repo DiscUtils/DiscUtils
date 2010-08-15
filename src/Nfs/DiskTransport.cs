@@ -32,6 +32,11 @@ namespace DiscUtils.Nfs
         private NfsFileSystem _fileSystem;
         private string _path;
 
+        public override bool IsRawDisk
+        {
+            get { return false; }
+        }
+
         public override void Connect(Uri uri, string username, string password)
         {
             string fsPath = uri.AbsolutePath;
@@ -70,25 +75,6 @@ namespace DiscUtils.Nfs
             _path = fsPath.Substring(bestRoot.Length).Replace('/', '\\');
         }
 
-        public override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_fileSystem != null)
-                {
-                    _fileSystem.Dispose();
-                    _fileSystem = null;
-                }
-            }
-
-            base.Dispose(disposing);
-        }
-
-        public override bool IsRawDisk
-        {
-            get { return false; }
-        }
-
         public override VirtualDisk OpenDisk(FileAccess access)
         {
             throw new NotSupportedException();
@@ -102,6 +88,20 @@ namespace DiscUtils.Nfs
         public override string GetFileName()
         {
             return Utilities.GetFileFromPath(_path);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_fileSystem != null)
+                {
+                    _fileSystem.Dispose();
+                    _fileSystem = null;
+                }
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

@@ -24,6 +24,10 @@ namespace DiscUtils.Nfs
 {
     internal class RpcCallHeader
     {
+        public RpcCallHeader()
+        {
+        }
+
         public uint RpcVersion { get; set; }
 
         public uint Program { get; set; }
@@ -35,10 +39,6 @@ namespace DiscUtils.Nfs
         public RpcAuthentication Credentials { get; set; }
 
         public RpcAuthentication Verifier { get; set; }
-
-        public RpcCallHeader()
-        {
-        }
 
         public void Write(XdrDataWriter writer)
         {

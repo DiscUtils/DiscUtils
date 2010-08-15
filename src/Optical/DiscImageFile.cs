@@ -95,6 +95,43 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
+        /// Gets a value indicating if the layer only stores meaningful sectors.
+        /// </summary>
+        public override bool IsSparse
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Gets the Geometry of the disc.
+        /// </summary>
+        /// <remarks>
+        /// Optical discs don't fit the CHS model, so dummy CHS data provided, but
+        /// sector size is accurate.
+        /// </remarks>
+        internal static Geometry Geometry
+        {
+            // Note external sector size is always 2048 - 2352 just has extra header
+            // & error-correction info
+            get { return new Geometry(1, 1, 1, Mode1SectorSize); }
+        }
+
+        internal override long Capacity
+        {
+            get { return _content.Length; }
+        }
+
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return null; }
+        }
+
+        internal SparseStream Content
+        {
+            get { return _content; }
+        }
+
+        /// <summary>
         /// Disposes of underlying resources.
         /// </summary>
         /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
@@ -117,43 +154,6 @@ namespace DiscUtils.Optical
             {
                 base.Dispose(disposing);
             }
-        }
-
-        /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
-        /// </summary>
-        public override bool IsSparse
-        {
-            get { return false; }
-        }
-
-        internal override long Capacity
-        {
-            get { return _content.Length; }
-        }
-
-        internal override FileLocator RelativeFileLocator
-        {
-            get { return null; }
-        }
-
-        internal SparseStream Content
-        {
-            get { return _content; }
-        }
-
-        /// <summary>
-        /// Gets the Geometry of the disc.
-        /// </summary>
-        /// <remarks>
-        /// Optical discs don't fit the CHS model, so dummy CHS data provided, but
-        /// sector size is accurate.
-        /// </remarks>
-        internal static Geometry Geometry
-        {
-            // Note external sector size is always 2048 - 2352 just has extra header
-            // & error-correction info
-            get { return new Geometry(1, 1, 1, Mode1SectorSize); }
         }
     }
 }

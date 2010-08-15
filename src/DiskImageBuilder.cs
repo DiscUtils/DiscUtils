@@ -54,17 +54,18 @@ namespace DiscUtils
             set { _geometry = value; }
         }
 
-        /// <summary>
-        /// Initiates the construction of the disk image.
-        /// </summary>
-        /// <param name="baseName">The base name for the disk images.</param>
-        /// <returns>A set of one or more logical files that constitute the
-        /// disk image.  The first file is the 'primary' file that is normally attached to VMs.</returns>
-        /// <remarks>The supplied <c>baseName</c> is the start of the file name, with no file
-        /// extension.  The set of file specifications will indicate the actual name corresponding
-        /// to each logical file that comprises the disk image.  For example, given a base name
-        /// 'foo', the files 'foo.vmdk' and 'foo-flat.vmdk' could be returned.</remarks>
-        public abstract DiskImageFileSpecification[] Build(string baseName);
+        private static Dictionary<string, VirtualDiskFactory> TypeMap
+        {
+            get
+            {
+                if (s_typeMap == null)
+                {
+                    InitializeMaps();
+                }
+
+                return s_typeMap;
+            }
+        }
 
         /// <summary>
         /// Gets an instance that constructs the specified type (and variant) of virtual disk image.
@@ -83,18 +84,17 @@ namespace DiscUtils
             return factory.GetImageBuilder(variant);
         }
 
-        private static Dictionary<string, VirtualDiskFactory> TypeMap
-        {
-            get
-            {
-                if (s_typeMap == null)
-                {
-                    InitializeMaps();
-                }
-
-                return s_typeMap;
-            }
-        }
+        /// <summary>
+        /// Initiates the construction of the disk image.
+        /// </summary>
+        /// <param name="baseName">The base name for the disk images.</param>
+        /// <returns>A set of one or more logical files that constitute the
+        /// disk image.  The first file is the 'primary' file that is normally attached to VMs.</returns>
+        /// <remarks>The supplied <c>baseName</c> is the start of the file name, with no file
+        /// extension.  The set of file specifications will indicate the actual name corresponding
+        /// to each logical file that comprises the disk image.  For example, given a base name
+        /// 'foo', the files 'foo.vmdk' and 'foo-flat.vmdk' could be returned.</remarks>
+        public abstract DiskImageFileSpecification[] Build(string baseName);
 
         private static void InitializeMaps()
         {

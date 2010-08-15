@@ -41,26 +41,6 @@ namespace DiscUtils.Partitions
             Name = "";
         }
 
-        public void ReadFrom(byte[] buffer, int offset)
-        {
-            PartitionType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
-            Identity = Utilities.ToGuidLittleEndian(buffer, offset + 16);
-            FirstUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 32);
-            LastUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 40);
-            Attributes = Utilities.ToUInt64LittleEndian(buffer, offset + 48);
-            Name = Encoding.Unicode.GetString(buffer, offset + 56, 72).TrimEnd(new char[] { '\0' });
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            Utilities.WriteBytesLittleEndian(PartitionType, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Identity, buffer, offset + 16);
-            Utilities.WriteBytesLittleEndian(FirstUsedLogicalBlock, buffer, offset + 32);
-            Utilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
-            Utilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
-            Encoding.Unicode.GetBytes(Name + new String('\0', 36), 0, 36, buffer, offset + 56);
-        }
-
         public string FriendlyPartitionType
         {
             get
@@ -104,13 +84,29 @@ namespace DiscUtils.Partitions
             }
         }
 
-        #region IComparable<GptEntry> Members
+        public void ReadFrom(byte[] buffer, int offset)
+        {
+            PartitionType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
+            Identity = Utilities.ToGuidLittleEndian(buffer, offset + 16);
+            FirstUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 32);
+            LastUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 40);
+            Attributes = Utilities.ToUInt64LittleEndian(buffer, offset + 48);
+            Name = Encoding.Unicode.GetString(buffer, offset + 56, 72).TrimEnd(new char[] { '\0' });
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(PartitionType, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Identity, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(FirstUsedLogicalBlock, buffer, offset + 32);
+            Utilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
+            Utilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
+            Encoding.Unicode.GetBytes(Name + new String('\0', 36), 0, 36, buffer, offset + 56);
+        }
 
         public int CompareTo(GptEntry other)
         {
             return FirstUsedLogicalBlock.CompareTo(other.FirstUsedLogicalBlock);
         }
-
-        #endregion
     }
 }

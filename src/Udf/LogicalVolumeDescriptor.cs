@@ -46,6 +46,16 @@ namespace DiscUtils.Udf
         {
         }
 
+        public LongAllocationDescriptor FileSetDescriptorLocation
+        {
+            get
+            {
+                LongAllocationDescriptor lad = new LongAllocationDescriptor();
+                lad.ReadFrom(LogicalVolumeContentsUse, 0);
+                return lad;
+            }
+        }
+
         public override int Parse(byte[] buffer, int offset)
         {
             VolumeDescriptorSequenceNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
@@ -70,16 +80,6 @@ namespace DiscUtils.Udf
             }
 
             return 440 + (int)MapTableLength;
-        }
-
-        public LongAllocationDescriptor FileSetDescriptorLocation
-        {
-            get
-            {
-                LongAllocationDescriptor lad = new LongAllocationDescriptor();
-                lad.ReadFrom(LogicalVolumeContentsUse, 0);
-                return lad;
-            }
         }
     }
 }

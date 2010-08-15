@@ -50,7 +50,10 @@ namespace DiscUtils.Ntfs
             get { return s_instance; }
         }
 
-        #region IDisposable Members
+        public DateTime Timestamp
+        {
+            get { return _timestamp; }
+        }
 
         public void Dispose()
         {
@@ -58,13 +61,6 @@ namespace DiscUtils.Ntfs
             {
                 s_instance = null;
             }
-        }
-
-        #endregion
-
-        public DateTime Timestamp
-        {
-            get { return _timestamp; }
         }
     }
 }

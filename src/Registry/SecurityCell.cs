@@ -68,6 +68,15 @@ namespace DiscUtils.Registry
             get { return _secDesc; }
         }
 
+        public override int Size
+        {
+            get
+            {
+                int sdLen = _secDesc.GetSecurityDescriptorBinaryForm().Length;
+                return 0x14 + sdLen;
+            }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             _prevIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
@@ -93,15 +102,6 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(_usageCount, buffer, offset + 0x0C);
             Utilities.WriteBytesLittleEndian(sd.Length, buffer, offset + 0x10);
             Array.Copy(sd, 0, buffer, offset + 0x14, sd.Length);
-        }
-
-        public override int Size
-        {
-            get
-            {
-                int sdLen = _secDesc.GetSecurityDescriptorBinaryForm().Length;
-                return 0x14 + sdLen;
-            }
         }
 
         public override string ToString()

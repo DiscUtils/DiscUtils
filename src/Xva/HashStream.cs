@@ -42,22 +42,6 @@ namespace DiscUtils.Xva
             _hashAlg = hashAlg;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing && _ownWrapped == Ownership.Dispose && _wrapped != null)
-                {
-                    _wrapped.Dispose();
-                    _wrapped = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get { return _wrapped.CanRead; }
@@ -71,11 +55,6 @@ namespace DiscUtils.Xva
         public override bool CanWrite
         {
             get { return _wrapped.CanWrite; }
-        }
-
-        public override void Flush()
-        {
-            _wrapped.Flush();
         }
 
         public override long Length
@@ -94,6 +73,11 @@ namespace DiscUtils.Xva
             {
                 _wrapped.Position = value;
             }
+        }
+
+        public override void Flush()
+        {
+            _wrapped.Flush();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -124,6 +108,22 @@ namespace DiscUtils.Xva
         public override void Write(byte[] buffer, int offset, int count)
         {
             _wrapped.Write(buffer, offset, count);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing && _ownWrapped == Ownership.Dispose && _wrapped != null)
+                {
+                    _wrapped.Dispose();
+                    _wrapped = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

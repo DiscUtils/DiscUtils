@@ -56,6 +56,137 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
+        /// </summary>
+        public override Guid DiskGuid
+        {
+            get { return Guid.Empty; }
+        }
+
+        /// <summary>
+        /// Gets a collection of the partitions for storing Operating System file-systems.
+        /// </summary>
+        public ReadOnlyCollection<BiosPartitionInfo> BiosUserPartitions
+        {
+            get
+            {
+                List<BiosPartitionInfo> result = new List<BiosPartitionInfo>();
+                foreach (BiosPartitionRecord r in GetAllRecords())
+                {
+                    if (r.IsValid)
+                    {
+                        result.Add(new BiosPartitionInfo(this, r));
+                    }
+                }
+
+                return new ReadOnlyCollection<BiosPartitionInfo>(result);
+            }
+        }
+
+        /// <summary>
+        /// Gets a collection of the partitions for storing Operating System file-systems.
+        /// </summary>
+        public override ReadOnlyCollection<PartitionInfo> Partitions
+        {
+            get
+            {
+                List<PartitionInfo> result = new List<PartitionInfo>();
+                foreach (BiosPartitionRecord r in GetAllRecords())
+                {
+                    if (r.IsValid)
+                    {
+                        result.Add(new BiosPartitionInfo(this, r));
+                    }
+                }
+
+                return new ReadOnlyCollection<PartitionInfo>(result);
+            }
+        }
+
+        /// <summary>
+        /// Makes a best guess at the geometry of a disk.
+        /// </summary>
+        /// <param name="disk">String containing the disk image to detect the geometry from</param>
+        /// <returns>The detected geometry</returns>
+        public static Geometry DetectGeometry(Stream disk)
+        {
+            if (disk.Length >= Utilities.SectorSize)
+            {
+                disk.Position = 0;
+                byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+                if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
+                {
+                    byte maxHead = 0;
+                    byte maxSector = 0;
+                    foreach (var record in ReadPrimaryRecords(bootSector))
+                    {
+                        maxHead = Math.Max(maxHead, record.EndHead);
+                        maxSector = Math.Max(maxSector, record.EndSector);
+                    }
+
+                    if (maxHead > 0 && maxSector > 0)
+                    {
+                        int cylSize = (maxHead + 1) * maxSector * 512;
+                        return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
+                    }
+                }
+            }
+
+            return Geometry.FromCapacity(disk.Length);
+        }
+
+        /// <summary>
+        /// Indicates if a stream contains a valid partition table.
+        /// </summary>
+        /// <param name="disk">The stream to inspect</param>
+        /// <returns><c>true</c> if the partition table is valid, else <c>false</c>.</returns>
+        public static bool IsValid(Stream disk)
+        {
+            if (disk.Length < Utilities.SectorSize)
+            {
+                return false;
+            }
+
+            disk.Position = 0;
+            byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+
+            // Check for the 'bootable sector' marker
+            if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
+            {
+                return false;
+            }
+
+            bool foundPartition = false;
+
+            List<StreamExtent> knownPartitions = new List<StreamExtent>();
+            foreach (var record in ReadPrimaryRecords(bootSector))
+            {
+                // If the partition extends beyond the end of the disk, this is probably an invalid partition table
+                if ((record.LBAStart + record.LBALength) * Sizes.Sector > disk.Length)
+                {
+                    return false;
+                }
+
+                if (record.LBALength > 0)
+                {
+                    foundPartition = true;
+                }
+
+                StreamExtent[] thisPartitionExtents = new StreamExtent[] { new StreamExtent(record.LBAStart, record.LBALength) };
+
+                // If the partition intersects another partition, this is probably an invalid partition table
+                foreach (var overlap in StreamExtent.Intersect(knownPartitions, thisPartitionExtents))
+                {
+                    return false;
+                }
+
+                knownPartitions = new List<StreamExtent>(StreamExtent.Union(knownPartitions, thisPartitionExtents));
+            }
+
+            return foundPartition;
+        }
+
+        /// <summary>
         /// Creates a new partition table on a disk.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>
@@ -110,14 +241,6 @@ namespace DiscUtils.Partitions
             data.Write(bootSector, 0, bootSector.Length);
 
             return new BiosPartitionTable(disk, diskGeometry);
-        }
-
-        /// <summary>
-        /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
-        /// </summary>
-        public override Guid DiskGuid
-        {
-            get { return Guid.Empty; }
         }
 
         /// <summary>
@@ -267,46 +390,6 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets a collection of the partitions for storing Operating System file-systems.
-        /// </summary>
-        public ReadOnlyCollection<BiosPartitionInfo> BiosUserPartitions
-        {
-            get
-            {
-                List<BiosPartitionInfo> result = new List<BiosPartitionInfo>();
-                foreach (BiosPartitionRecord r in GetAllRecords())
-                {
-                    if (r.IsValid)
-                    {
-                        result.Add(new BiosPartitionInfo(this, r));
-                    }
-                }
-
-                return new ReadOnlyCollection<BiosPartitionInfo>(result);
-            }
-        }
-
-        /// <summary>
-        /// Gets a collection of the partitions for storing Operating System file-systems.
-        /// </summary>
-        public override ReadOnlyCollection<PartitionInfo> Partitions
-        {
-            get
-            {
-                List<PartitionInfo> result = new List<PartitionInfo>();
-                foreach (BiosPartitionRecord r in GetAllRecords())
-                {
-                    if (r.IsValid)
-                    {
-                        result.Add(new BiosPartitionInfo(this, r));
-                    }
-                }
-
-                return new ReadOnlyCollection<PartitionInfo>(result);
-            }
-        }
-
-        /// <summary>
         /// Sets the active partition.
         /// </summary>
         /// <param name="index">The index of the primary partition to mark bootable, or <c>-1</c> for none</param>
@@ -322,117 +405,9 @@ namespace DiscUtils.Partitions
             }
         }
 
-        /// <summary>
-        /// Makes a best guess at the geometry of a disk.
-        /// </summary>
-        /// <param name="disk">String containing the disk image to detect the geometry from</param>
-        /// <returns>The detected geometry</returns>
-        public static Geometry DetectGeometry(Stream disk)
+        internal SparseStream Open(BiosPartitionRecord record)
         {
-            if (disk.Length >= Utilities.SectorSize)
-            {
-                disk.Position = 0;
-                byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
-                if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
-                {
-                    byte maxHead = 0;
-                    byte maxSector = 0;
-                    foreach (var record in ReadPrimaryRecords(bootSector))
-                    {
-                        maxHead = Math.Max(maxHead, record.EndHead);
-                        maxSector = Math.Max(maxSector, record.EndSector);
-                    }
-
-                    if (maxHead > 0 && maxSector > 0)
-                    {
-                        int cylSize = (maxHead + 1) * maxSector * 512;
-                        return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
-                    }
-                }
-            }
-
-            return Geometry.FromCapacity(disk.Length);
-        }
-
-        /// <summary>
-        /// Indicates if a stream contains a valid partition table.
-        /// </summary>
-        /// <param name="disk">The stream to inspect</param>
-        /// <returns><c>true</c> if the partition table is valid, else <c>false</c>.</returns>
-        public static bool IsValid(Stream disk)
-        {
-            if (disk.Length < Utilities.SectorSize)
-            {
-                return false;
-            }
-
-            disk.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
-
-            // Check for the 'bootable sector' marker
-            if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
-            {
-                return false;
-            }
-
-            bool foundPartition = false;
-
-            List<StreamExtent> knownPartitions = new List<StreamExtent>();
-            foreach (var record in ReadPrimaryRecords(bootSector))
-            {
-                // If the partition extends beyond the end of the disk, this is probably an invalid partition table
-                if ((record.LBAStart + record.LBALength) * Sizes.Sector > disk.Length)
-                {
-                    return false;
-                }
-
-                if (record.LBALength > 0)
-                {
-                    foundPartition = true;
-                }
-
-                StreamExtent[] thisPartitionExtents = new StreamExtent[] { new StreamExtent(record.LBAStart, record.LBALength) };
-
-                // If the partition intersects another partition, this is probably an invalid partition table
-                foreach (var overlap in StreamExtent.Intersect(knownPartitions, thisPartitionExtents))
-                {
-                    return false;
-                }
-
-                knownPartitions = new List<StreamExtent>(StreamExtent.Union(knownPartitions, thisPartitionExtents));
-            }
-
-            return foundPartition;
-        }
-
-        private BiosPartitionRecord[] GetAllRecords()
-        {
-            List<BiosPartitionRecord> newList = new List<BiosPartitionRecord>();
-
-            foreach (BiosPartitionRecord primaryRecord in GetPrimaryRecords())
-            {
-                if (primaryRecord.IsValid)
-                {
-                    if (IsExtendedPartition(primaryRecord))
-                    {
-                        newList.AddRange(GetExtendedRecords(primaryRecord));
-                    }
-                    else
-                    {
-                        newList.Add(primaryRecord);
-                    }
-                }
-            }
-
-            return newList.ToArray();
-        }
-
-        private BiosPartitionRecord[] GetPrimaryRecords()
-        {
-            _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
-
-            return ReadPrimaryRecords(bootSector);
+            return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);
         }
 
         private static BiosPartitionRecord[] ReadPrimaryRecords(byte[] bootSector)
@@ -444,20 +419,6 @@ namespace DiscUtils.Partitions
             }
 
             return records;
-        }
-
-        private BiosPartitionRecord[] GetExtendedRecords(BiosPartitionRecord r)
-        {
-            return new BiosExtendedPartitionTable(_diskData, r.LBAStart).GetPartitions();
-        }
-
-        private void WriteRecord(int i, BiosPartitionRecord newRecord)
-        {
-            _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
-            newRecord.WriteTo(bootSector, 0x01BE + (i * 16));
-            _diskData.Position = 0;
-            _diskData.Write(bootSector, 0, bootSector.Length);
         }
 
         private static bool IsExtendedPartition(BiosPartitionRecord r)
@@ -494,6 +455,50 @@ namespace DiscUtils.Partitions
                 default:
                     throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Unrecognized partition type: '{0}'", type), "type");
             }
+        }
+
+        private BiosPartitionRecord[] GetAllRecords()
+        {
+            List<BiosPartitionRecord> newList = new List<BiosPartitionRecord>();
+
+            foreach (BiosPartitionRecord primaryRecord in GetPrimaryRecords())
+            {
+                if (primaryRecord.IsValid)
+                {
+                    if (IsExtendedPartition(primaryRecord))
+                    {
+                        newList.AddRange(GetExtendedRecords(primaryRecord));
+                    }
+                    else
+                    {
+                        newList.Add(primaryRecord);
+                    }
+                }
+            }
+
+            return newList.ToArray();
+        }
+
+        private BiosPartitionRecord[] GetPrimaryRecords()
+        {
+            _diskData.Position = 0;
+            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+
+            return ReadPrimaryRecords(bootSector);
+        }
+
+        private BiosPartitionRecord[] GetExtendedRecords(BiosPartitionRecord r)
+        {
+            return new BiosExtendedPartitionTable(_diskData, r.LBAStart).GetPartitions();
+        }
+
+        private void WriteRecord(int i, BiosPartitionRecord newRecord)
+        {
+            _diskData.Position = 0;
+            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+            newRecord.WriteTo(bootSector, 0x01BE + (i * 16));
+            _diskData.Position = 0;
+            _diskData.Write(bootSector, 0, bootSector.Length);
         }
 
         private int FindCylinderGap(int numCylinders)
@@ -543,11 +548,6 @@ namespace DiscUtils.Partitions
             {
                 throw new IOException("Invalid boot sector - no magic number 0xAA55");
             }
-        }
-
-        internal SparseStream Open(BiosPartitionRecord record)
-        {
-            return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);
         }
     }
 }

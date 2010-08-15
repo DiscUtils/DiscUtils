@@ -59,6 +59,16 @@ namespace DiscUtils.Ntfs
             get { return _isSparse; }
         }
 
+        internal int Size
+        {
+            get
+            {
+                int runLengthSize = VarLongSize(_runLength);
+                int runOffsetSize = VarLongSize(_runOffset);
+                return 1 + runLengthSize + runOffsetSize;
+            }
+        }
+
         public int Read(byte[] buffer, int offset)
         {
             int runOffsetSize = (buffer[offset] >> 4) & 0x0F;
@@ -71,6 +81,11 @@ namespace DiscUtils.Ntfs
             return 1 + runLengthSize + runOffsetSize;
         }
 
+        public override string ToString()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0:+##;-##;0}[+{1}]", _runOffset, _runLength);
+        }
+
         internal int Write(byte[] buffer, int offset)
         {
             int runLengthSize = WriteVarLong(buffer, offset + 1, _runLength);
@@ -79,16 +94,6 @@ namespace DiscUtils.Ntfs
             buffer[offset] = (byte)((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
 
             return 1 + runLengthSize + runOffsetSize;
-        }
-
-        internal int Size
-        {
-            get
-            {
-                int runLengthSize = VarLongSize(_runLength);
-                int runOffsetSize = VarLongSize(_runOffset);
-                return 1 + runLengthSize + runOffsetSize;
-            }
         }
 
         private static long ReadVarLong(byte[] buffer, int offset, int size)
@@ -163,11 +168,6 @@ namespace DiscUtils.Ntfs
             }
 
             return len;
-        }
-
-        public override string ToString()
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{0:+##;-##;0}[+{1}]", _runOffset, _runLength);
         }
     }
 }

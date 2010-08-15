@@ -50,6 +50,82 @@ namespace DiscUtils.LogicalDiskManager
             _disks.Add(dynDisk.Id, dynDisk);
         }
 
+        #region IDiagnosticTraceable Members
+
+        public void Dump(TextWriter writer, string linePrefix)
+        {
+            writer.WriteLine(linePrefix + "DISK GROUP (" + _record.Name + ")");
+            writer.WriteLine(linePrefix + "  Name: " + _record.Name);
+            writer.WriteLine(linePrefix + "  Flags: 0x" + (_record.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+            writer.WriteLine(linePrefix + "  Database Id: " + _record.Id);
+            writer.WriteLine(linePrefix + "  Guid: " + _record.GroupGuidString);
+            writer.WriteLine();
+
+            writer.WriteLine(linePrefix + "  DISKS");
+            foreach (var disk in _database.Disks)
+            {
+                writer.WriteLine(linePrefix + "    DISK (" + disk.Name + ")");
+                writer.WriteLine(linePrefix + "      Name: " + disk.Name);
+                writer.WriteLine(linePrefix + "      Flags: 0x" + (disk.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                writer.WriteLine(linePrefix + "      Database Id: " + disk.Id);
+                writer.WriteLine(linePrefix + "      Guid: " + disk.DiskGuidString);
+
+                DynamicDisk dynDisk;
+                if (_disks.TryGetValue(new Guid(disk.DiskGuidString), out dynDisk))
+                {
+                    writer.WriteLine(linePrefix + "      PRIVATE HEADER");
+                    dynDisk.Dump(writer, linePrefix + "        ");
+                }
+            }
+
+            writer.WriteLine(linePrefix + "  VOLUMES");
+            foreach (var vol in _database.Volumes)
+            {
+                writer.WriteLine(linePrefix + "    VOLUME (" + vol.Name + ")");
+                writer.WriteLine(linePrefix + "      Name: " + vol.Name);
+                writer.WriteLine(linePrefix + "      BIOS Type: " + vol.BiosType.ToString("X2", CultureInfo.InvariantCulture) + " [" + BiosPartitionTypes.ToString(vol.BiosType) + "]");
+                writer.WriteLine(linePrefix + "      Flags: 0x" + (vol.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                writer.WriteLine(linePrefix + "      Database Id: " + vol.Id);
+                writer.WriteLine(linePrefix + "      Guid: " + vol.VolumeGuid);
+                writer.WriteLine(linePrefix + "      State: " + vol.ActiveString);
+                writer.WriteLine(linePrefix + "      Drive Hint: " + vol.MountHint);
+                writer.WriteLine(linePrefix + "      Num Components: " + vol.ComponentCount);
+                writer.WriteLine(linePrefix + "      Link Id: " + vol.PartitionComponentLink);
+
+                writer.WriteLine(linePrefix + "      COMPONENTS");
+                foreach (var cmpnt in _database.GetVolumeComponents(vol.Id))
+                {
+                    writer.WriteLine(linePrefix + "        COMPONENT (" + cmpnt.Name + ")");
+                    writer.WriteLine(linePrefix + "          Name: " + cmpnt.Name);
+                    writer.WriteLine(linePrefix + "          Flags: 0x" + (cmpnt.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                    writer.WriteLine(linePrefix + "          Database Id: " + cmpnt.Id);
+                    writer.WriteLine(linePrefix + "          State: " + cmpnt.StatusString);
+                    writer.WriteLine(linePrefix + "          Mode: " + cmpnt.MergeType);
+                    writer.WriteLine(linePrefix + "          Num Extents: " + cmpnt.NumExtents);
+                    writer.WriteLine(linePrefix + "          Link Id: " + cmpnt.LinkId);
+                    writer.WriteLine(linePrefix + "          Stripe Size: " + cmpnt.StripeSizeSectors + " (Sectors)");
+                    writer.WriteLine(linePrefix + "          Stripe Stride: " + cmpnt.StripeStride);
+
+                    writer.WriteLine(linePrefix + "          EXTENTS");
+                    foreach (var extent in _database.GetComponentExtents(cmpnt.Id))
+                    {
+                        writer.WriteLine(linePrefix + "            EXTENT (" + extent.Name + ")");
+                        writer.WriteLine(linePrefix + "              Name: " + extent.Name);
+                        writer.WriteLine(linePrefix + "              Flags: 0x" + (extent.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                        writer.WriteLine(linePrefix + "              Database Id: " + extent.Id);
+                        writer.WriteLine(linePrefix + "              Disk Offset: " + extent.DiskOffsetLba + " (Sectors)");
+                        writer.WriteLine(linePrefix + "              Volume Offset: " + extent.OffsetInVolumeLba + " (Sectors)");
+                        writer.WriteLine(linePrefix + "              Size: " + extent.SizeLba + " (Sectors)");
+                        writer.WriteLine(linePrefix + "              Component Id: " + extent.ComponentId);
+                        writer.WriteLine(linePrefix + "              Disk Id: " + extent.DiskId);
+                        writer.WriteLine(linePrefix + "              Link Id: " + extent.PartitionComponentLink);
+                        writer.WriteLine(linePrefix + "              Interleave Order: " + extent.InterleaveOrder);
+                    }
+                }
+            }
+        }
+        #endregion
+
         internal DynamicVolume[] GetVolumes()
         {
             List<DynamicVolume> vols = new List<DynamicVolume>();
@@ -69,6 +145,44 @@ namespace DiscUtils.LogicalDiskManager
         internal LogicalVolumeStatus GetVolumeStatus(ulong volumeId)
         {
             return GetVolumeStatus(_database.GetVolume(volumeId));
+        }
+
+        internal SparseStream OpenVolume(ulong volumeId)
+        {
+            return OpenVolume(_database.GetVolume(volumeId));
+        }
+
+        private static int CompareExtentOffsets(ExtentRecord x, ExtentRecord y)
+        {
+            if (x.OffsetInVolumeLba > y.OffsetInVolumeLba)
+            {
+                return 1;
+            }
+            else if (x.OffsetInVolumeLba < y.OffsetInVolumeLba)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+
+        private static int CompareExtentInterleaveOrder(ExtentRecord x, ExtentRecord y)
+        {
+            if (x.InterleaveOrder > y.InterleaveOrder)
+            {
+                return 1;
+            }
+            else if (x.InterleaveOrder < y.InterleaveOrder)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+
+        private static LogicalVolumeStatus WorstOf(LogicalVolumeStatus x, LogicalVolumeStatus y)
+        {
+            return (LogicalVolumeStatus)Math.Max((int)x, (int)y);
         }
 
         private LogicalVolumeStatus GetVolumeStatus(VolumeRecord volume)
@@ -120,11 +234,6 @@ namespace DiscUtils.LogicalDiskManager
             }
 
             return status;
-        }
-
-        internal SparseStream OpenVolume(ulong volumeId)
-        {
-            return OpenVolume(_database.GetVolume(volumeId));
         }
 
         private SparseStream OpenExtent(ExtentRecord extent)
@@ -203,115 +312,5 @@ namespace DiscUtils.LogicalDiskManager
                 return new MirrorStream(Ownership.Dispose, cmpntStreams.ToArray());
             }
         }
-
-        private static int CompareExtentOffsets(ExtentRecord x, ExtentRecord y)
-        {
-            if (x.OffsetInVolumeLba > y.OffsetInVolumeLba)
-            {
-                return 1;
-            }
-            else if (x.OffsetInVolumeLba < y.OffsetInVolumeLba)
-            {
-                return -1;
-            }
-
-            return 0;
-        }
-
-        private static int CompareExtentInterleaveOrder(ExtentRecord x, ExtentRecord y)
-        {
-            if (x.InterleaveOrder > y.InterleaveOrder)
-            {
-                return 1;
-            }
-            else if (x.InterleaveOrder < y.InterleaveOrder)
-            {
-                return -1;
-            }
-
-            return 0;
-        }
-
-        private static LogicalVolumeStatus WorstOf(LogicalVolumeStatus x, LogicalVolumeStatus y)
-        {
-            return (LogicalVolumeStatus)Math.Max((int)x, (int)y);
-        }
-
-        #region IDiagnosticTraceable Members
-
-        public void Dump(TextWriter writer, string linePrefix)
-        {
-            writer.WriteLine(linePrefix + "DISK GROUP (" + _record.Name + ")");
-            writer.WriteLine(linePrefix + "  Name: " + _record.Name);
-            writer.WriteLine(linePrefix + "  Flags: 0x" + (_record.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
-            writer.WriteLine(linePrefix + "  Database Id: " + _record.Id);
-            writer.WriteLine(linePrefix + "  Guid: " + _record.GroupGuidString);
-            writer.WriteLine();
-
-            writer.WriteLine(linePrefix + "  DISKS");
-            foreach (var disk in _database.Disks)
-            {
-                writer.WriteLine(linePrefix + "    DISK (" + disk.Name + ")");
-                writer.WriteLine(linePrefix + "      Name: " + disk.Name);
-                writer.WriteLine(linePrefix + "      Flags: 0x" + (disk.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
-                writer.WriteLine(linePrefix + "      Database Id: " + disk.Id);
-                writer.WriteLine(linePrefix + "      Guid: " + disk.DiskGuidString);
-
-                DynamicDisk dynDisk;
-                if (_disks.TryGetValue(new Guid(disk.DiskGuidString), out dynDisk))
-                {
-                    writer.WriteLine(linePrefix + "      PRIVATE HEADER");
-                    dynDisk.Dump(writer, linePrefix + "        ");
-                }
-            }
-
-            writer.WriteLine(linePrefix + "  VOLUMES");
-            foreach (var vol in _database.Volumes)
-            {
-                writer.WriteLine(linePrefix + "    VOLUME (" + vol.Name + ")");
-                writer.WriteLine(linePrefix + "      Name: " + vol.Name);
-                writer.WriteLine(linePrefix + "      BIOS Type: " + vol.BiosType.ToString("X2", CultureInfo.InvariantCulture) + " [" + BiosPartitionTypes.ToString(vol.BiosType) + "]");
-                writer.WriteLine(linePrefix + "      Flags: 0x" + (vol.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
-                writer.WriteLine(linePrefix + "      Database Id: " + vol.Id);
-                writer.WriteLine(linePrefix + "      Guid: " + vol.VolumeGuid);
-                writer.WriteLine(linePrefix + "      State: " + vol.ActiveString);
-                writer.WriteLine(linePrefix + "      Drive Hint: " + vol.MountHint);
-                writer.WriteLine(linePrefix + "      Num Components: " + vol.ComponentCount);
-                writer.WriteLine(linePrefix + "      Link Id: " + vol.PartitionComponentLink);
-
-                writer.WriteLine(linePrefix + "      COMPONENTS");
-                foreach (var cmpnt in _database.GetVolumeComponents(vol.Id))
-                {
-                    writer.WriteLine(linePrefix + "        COMPONENT (" + cmpnt.Name + ")");
-                    writer.WriteLine(linePrefix + "          Name: " + cmpnt.Name);
-                    writer.WriteLine(linePrefix + "          Flags: 0x" + (cmpnt.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
-                    writer.WriteLine(linePrefix + "          Database Id: " + cmpnt.Id);
-                    writer.WriteLine(linePrefix + "          State: " + cmpnt.StatusString);
-                    writer.WriteLine(linePrefix + "          Mode: " + cmpnt.MergeType);
-                    writer.WriteLine(linePrefix + "          Num Extents: " + cmpnt.NumExtents);
-                    writer.WriteLine(linePrefix + "          Link Id: " + cmpnt.LinkId);
-                    writer.WriteLine(linePrefix + "          Stripe Size: " + cmpnt.StripeSizeSectors + " (Sectors)");
-                    writer.WriteLine(linePrefix + "          Stripe Stride: " + cmpnt.StripeStride);
-
-                    writer.WriteLine(linePrefix + "          EXTENTS");
-                    foreach (var extent in _database.GetComponentExtents(cmpnt.Id))
-                    {
-                        writer.WriteLine(linePrefix + "            EXTENT (" + extent.Name + ")");
-                        writer.WriteLine(linePrefix + "              Name: " + extent.Name);
-                        writer.WriteLine(linePrefix + "              Flags: 0x" + (extent.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
-                        writer.WriteLine(linePrefix + "              Database Id: " + extent.Id);
-                        writer.WriteLine(linePrefix + "              Disk Offset: " + extent.DiskOffsetLba + " (Sectors)");
-                        writer.WriteLine(linePrefix + "              Volume Offset: " + extent.OffsetInVolumeLba + " (Sectors)");
-                        writer.WriteLine(linePrefix + "              Size: " + extent.SizeLba + " (Sectors)");
-                        writer.WriteLine(linePrefix + "              Component Id: " + extent.ComponentId);
-                        writer.WriteLine(linePrefix + "              Disk Id: " + extent.DiskId);
-                        writer.WriteLine(linePrefix + "              Link Id: " + extent.PartitionComponentLink);
-                        writer.WriteLine(linePrefix + "              Interleave Order: " + extent.InterleaveOrder);
-                    }
-                }
-            }
-        }
-
-        #endregion
     }
 }

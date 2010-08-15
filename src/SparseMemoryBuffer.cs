@@ -64,6 +64,39 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the current capacity of the sparse buffer (number of logical bytes stored).
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _capacity; }
+        }
+
+        /// <summary>
+        /// Gets the size of each allocation chunk.
+        /// </summary>
+        public int ChunkSize
+        {
+            get { return _chunkSize; }
+        }
+
+        /// <summary>
+        /// Gets the (sorted) list of allocated chunks, as chunk indexes.
+        /// </summary>
+        /// <returns>An enumeration of chunk indexes</returns>
+        /// <remarks>This method returns chunks as an index rather than absolute stream position.
+        /// For example, if ChunkSize is 16KB, and the first 32KB of the buffer is actually stored,
+        /// this method will return 0 and 1.  This indicates the first and second chunks are stored.</remarks>
+        public IEnumerable<int> AllocatedChunks
+        {
+            get
+            {
+                List<int> keys = new List<int>(_buffers.Keys);
+                keys.Sort();
+                return keys;
+            }
+        }
+
+        /// <summary>
         /// Accesses this memory buffer as an infinite byte array.
         /// </summary>
         /// <param name="pos">The buffer position to read.</param>
@@ -160,14 +193,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the current capacity of the sparse buffer (number of logical bytes stored).
-        /// </summary>
-        public override long Capacity
-        {
-            get { return _capacity; }
-        }
-
-        /// <summary>
         /// Sets the capacity of the sparse buffer, truncating if appropriate.
         /// </summary>
         /// <param name="value">The desired capacity of the buffer.</param>
@@ -177,31 +202,6 @@ namespace DiscUtils
         public override void SetCapacity(long value)
         {
             _capacity = value;
-        }
-
-        /// <summary>
-        /// Gets the size of each allocation chunk.
-        /// </summary>
-        public int ChunkSize
-        {
-            get { return _chunkSize; }
-        }
-
-        /// <summary>
-        /// Gets the (sorted) list of allocated chunks, as chunk indexes.
-        /// </summary>
-        /// <returns>An enumeration of chunk indexes</returns>
-        /// <remarks>This method returns chunks as an index rather than absolute stream position.
-        /// For example, if ChunkSize is 16KB, and the first 32KB of the buffer is actually stored,
-        /// this method will return 0 and 1.  This indicates the first and second chunks are stored.</remarks>
-        public IEnumerable<int> AllocatedChunks
-        {
-            get
-            {
-                List<int> keys = new List<int>(_buffers.Keys);
-                keys.Sort();
-                return keys;
-            }
         }
 
         /// <summary>

@@ -43,16 +43,6 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Creates a new instance for a server-indicated error
-        /// </summary>
-        /// <param name="status">The status result of an NFS procedure.</param>
-        internal Nfs3Exception(Nfs3Status status)
-            : base(GenerateMessage(status))
-        {
-            _status = status;
-        }
-
-        /// <summary>
         /// Creates a new instance.
         /// </summary>
         /// <param name="message">The exception message.</param>
@@ -80,6 +70,16 @@ namespace DiscUtils.Nfs
         public Nfs3Exception(string message, Exception innerException)
             : base(message, innerException)
         {
+        }
+
+        /// <summary>
+        /// Creates a new instance for a server-indicated error
+        /// </summary>
+        /// <param name="status">The status result of an NFS procedure.</param>
+        internal Nfs3Exception(Nfs3Status status)
+            : base(GenerateMessage(status))
+        {
+            _status = status;
         }
 
         /// <summary>

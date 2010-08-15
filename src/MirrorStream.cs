@@ -59,26 +59,6 @@ namespace DiscUtils
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
-                {
-                    foreach (var stream in _wrapped)
-                    {
-                        stream.Dispose();
-                    }
-
-                    _wrapped = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get { return _canRead; }
@@ -92,11 +72,6 @@ namespace DiscUtils
         public override bool CanWrite
         {
             get { return _canWrite; }
-        }
-
-        public override void Flush()
-        {
-            _wrapped[0].Flush();
         }
 
         public override long Length
@@ -115,6 +90,16 @@ namespace DiscUtils
             {
                 _wrapped[0].Position = value;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _wrapped[0].Extents; }
+        }
+
+        public override void Flush()
+        {
+            _wrapped[0].Flush();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -151,9 +136,24 @@ namespace DiscUtils
             }
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get { return _wrapped[0].Extents; }
+            try
+            {
+                if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
+                {
+                    foreach (var stream in _wrapped)
+                    {
+                        stream.Dispose();
+                    }
+
+                    _wrapped = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

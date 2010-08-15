@@ -30,10 +30,6 @@ namespace DiscUtils.Vmdk
 
     internal class DescriptorFile
     {
-        private List<DescriptorFileEntry> _header;
-        private List<ExtentDescriptor> _descriptors;
-        private List<DescriptorFileEntry> _diskDataBase;
-
         private const string HeaderVersion = "version";
         private const string HeaderContentId = "CID";
         private const string HeaderParentContentId = "parentCID";
@@ -51,6 +47,10 @@ namespace DiscUtils.Vmdk
         private const string DiskDbUuid = "ddb.uuid";
 
         private const long MaxSize = 20 * Sizes.OneKiB;
+
+        private List<DescriptorFileEntry> _header;
+        private List<ExtentDescriptor> _descriptors;
+        private List<DescriptorFileEntry> _diskDataBase;
 
         public DescriptorFile()
         {
@@ -170,6 +170,35 @@ namespace DiscUtils.Vmdk
         {
             get { return GetDiskDatabase(DiskDbHardwareVersion); }
             set { SetDiskDatabase(DiskDbHardwareVersion, value); }
+        }
+
+        internal void Write(Stream stream)
+        {
+            StringBuilder content = new StringBuilder();
+
+            content.Append("# Disk DescriptorFile\n");
+            for (int i = 0; i < _header.Count; ++i)
+            {
+                content.Append(_header[i].ToString(false) + "\n");
+            }
+
+            content.Append("\n");
+            content.Append("# Extent description\n");
+            for (int i = 0; i < _descriptors.Count; ++i)
+            {
+                content.Append(_descriptors[i].ToString() + "\n");
+            }
+
+            content.Append("\n");
+            content.Append("# The Disk Data Base\n");
+            content.Append("#DDB\n");
+            for (int i = 0; i < _diskDataBase.Count; ++i)
+            {
+                content.Append(_diskDataBase[i].ToString(true) + "\n");
+            }
+
+            byte[] contentBytes = Encoding.ASCII.GetBytes(content.ToString());
+            stream.Write(contentBytes, 0, contentBytes.Length);
         }
 
         private static DiskAdapterType ParseAdapterType(string value)
@@ -396,35 +425,6 @@ namespace DiscUtils.Vmdk
 
                 line = reader.ReadLine();
             }
-        }
-
-        internal void Write(Stream stream)
-        {
-            StringBuilder content = new StringBuilder();
-
-            content.Append("# Disk DescriptorFile\n");
-            for (int i = 0; i < _header.Count; ++i)
-            {
-                content.Append(_header[i].ToString(false) + "\n");
-            }
-
-            content.Append("\n");
-            content.Append("# Extent description\n");
-            for (int i = 0; i < _descriptors.Count; ++i)
-            {
-                content.Append(_descriptors[i].ToString() + "\n");
-            }
-
-            content.Append("\n");
-            content.Append("# The Disk Data Base\n");
-            content.Append("#DDB\n");
-            for (int i = 0; i < _diskDataBase.Count; ++i)
-            {
-                content.Append(_diskDataBase[i].ToString(true) + "\n");
-            }
-
-            byte[] contentBytes = Encoding.ASCII.GetBytes(content.ToString());
-            stream.Write(contentBytes, 0, contentBytes.Length);
         }
     }
 }

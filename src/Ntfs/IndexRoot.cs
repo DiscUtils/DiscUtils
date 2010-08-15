@@ -28,12 +28,12 @@ namespace DiscUtils.Ntfs
 
     internal sealed class IndexRoot : IByteArraySerializable, IDiagnosticTraceable
     {
+        public const int HeaderOffset = 0x10;
+
         private uint _attrType;
         private AttributeCollationRule _collationRule;
         private uint _indexAllocationEntrySize;
         private byte _rawClustersPerIndexRecord;
-
-        public const int HeaderOffset = 0x10;
 
         public uint AttributeType
         {
@@ -59,6 +59,11 @@ namespace DiscUtils.Ntfs
             set { _rawClustersPerIndexRecord = value; }
         }
 
+        public int Size
+        {
+            get { return 16; }
+        }
+
         public IComparer<byte[]> GetCollator(UpperCase upCase)
         {
             switch (_collationRule)
@@ -78,8 +83,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        #region IByteArraySerializable Members
-
         public int ReadFrom(byte[] buffer, int offset)
         {
             _attrType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
@@ -97,15 +100,6 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(_rawClustersPerIndexRecord, buffer, 0x0C);
         }
 
-        public int Size
-        {
-            get { return 16; }
-        }
-
-        #endregion
-
-        #region IDiagnosticTracer Members
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "                Attr Type: " + _attrType);
@@ -114,9 +108,6 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "  Raw Clusters Per Record: " + _rawClustersPerIndexRecord);
         }
 
-        #endregion
-
-        #region Collators
         private sealed class SecurityHashComparer : IComparer<byte[]>
         {
             public int Compare(byte[] x, byte[] y)
@@ -302,7 +293,5 @@ namespace DiscUtils.Ntfs
                 return 0;
             }
         }
-
-        #endregion
     }
 }

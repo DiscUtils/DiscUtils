@@ -50,6 +50,21 @@ namespace DiscUtils.Ntfs
         public byte RawIndexBufferSize;
         public ulong VolumeSerialNumber;
 
+        public int MftRecordSize
+        {
+            get { return CalcRecordSize(RawMftRecordSize); }
+        }
+
+        public int IndexBufferSize
+        {
+            get { return CalcRecordSize(RawIndexBufferSize); }
+        }
+
+        public int BytesPerCluster
+        {
+            get { return ((int)BytesPerSector) * ((int)SectorsPerCluster); }
+        }
+
         internal static BiosParameterBlock Initialized(Geometry diskGeometry, int clusterSize, uint partitionStartLba, long partitionSizeLba, int mftRecordSize, int indexBufferSize)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
@@ -135,21 +150,6 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(VolumeSerialNumber, buffer, offset + 0x48);
         }
 
-        public int MftRecordSize
-        {
-            get { return CalcRecordSize(RawMftRecordSize); }
-        }
-
-        public int IndexBufferSize
-        {
-            get { return CalcRecordSize(RawIndexBufferSize); }
-        }
-
-        public int BytesPerCluster
-        {
-            get { return ((int)BytesPerSector) * ((int)SectorsPerCluster); }
-        }
-
         internal int CalcRecordSize(byte rawSize)
         {
             if ((rawSize & 0x80) != 0)
@@ -160,6 +160,14 @@ namespace DiscUtils.Ntfs
             {
                 return rawSize * SectorsPerCluster * BytesPerSector;
             }
+        }
+
+        private static ulong GenSerialNumber()
+        {
+            byte[] buffer = new byte[8];
+            Random rng = new Random();
+            rng.NextBytes(buffer);
+            return Utilities.ToUInt64LittleEndian(buffer, 0);
         }
 
         private byte CodeRecordSize(int size)
@@ -179,14 +187,6 @@ namespace DiscUtils.Ntfs
 
                 return (byte)-val;
             }
-        }
-
-        private static ulong GenSerialNumber()
-        {
-            byte[] buffer = new byte[8];
-            Random rng = new Random();
-            rng.NextBytes(buffer);
-            return Utilities.ToUInt64LittleEndian(buffer, 0);
         }
     }
 }

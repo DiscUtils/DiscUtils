@@ -93,6 +93,14 @@ namespace DiscUtils.Ntfs
             get { return ConvertFlags(Flags); }
         }
 
+        public int Size
+        {
+            get
+            {
+                return 0x42 + (FileName.Length * 2);
+            }
+        }
+
         public override string ToString()
         {
             return FileName;
@@ -122,8 +130,6 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "          Namespace: " + FileNameNamespace);
             writer.WriteLine(indent + "          File Name: " + FileName);
         }
-
-        #region IByteArraySerializable Members
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -159,15 +165,23 @@ namespace DiscUtils.Ntfs
             Encoding.Unicode.GetBytes(FileName, 0, FileName.Length, buffer, offset + 0x42);
         }
 
-        public int Size
+        public bool Equals(FileNameRecord other)
         {
-            get
+            if (other == null)
             {
-                return 0x42 + (FileName.Length * 2);
+                return false;
             }
+
+            return ParentDirectory == other.ParentDirectory
+                && FileNameNamespace == other.FileNameNamespace
+                && FileName == other.FileName;
         }
 
-        #endregion
+        internal static FileAttributeFlags SetAttributes(FileAttributes attrs, FileAttributeFlags flags)
+        {
+            FileAttributes attrMask = ((FileAttributes)0xFFFF) & ~FileAttributes.Directory;
+            return (FileAttributeFlags)(((uint)flags & 0xFFFF0000) | (uint)(attrs & attrMask));
+        }
 
         private static DateTime ReadDateTime(byte[] buffer, int offset)
         {
@@ -181,7 +195,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal static FileAttributes ConvertFlags(FileAttributeFlags flags)
+        private static FileAttributes ConvertFlags(FileAttributeFlags flags)
         {
             FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
 
@@ -192,27 +206,5 @@ namespace DiscUtils.Ntfs
 
             return result;
         }
-
-        internal static FileAttributeFlags SetAttributes(FileAttributes attrs, FileAttributeFlags flags)
-        {
-            FileAttributes attrMask = ((FileAttributes)0xFFFF) & ~FileAttributes.Directory;
-            return (FileAttributeFlags)(((uint)flags & 0xFFFF0000) | (uint)(attrs & attrMask));
-        }
-
-        #region IEquatable<FileNameRecord> Members
-
-        public bool Equals(FileNameRecord other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return ParentDirectory == other.ParentDirectory
-                && FileNameNamespace == other.FileNameNamespace
-                && FileName == other.FileName;
-        }
-
-        #endregion
     }
 }

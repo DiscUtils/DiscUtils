@@ -32,6 +32,8 @@ namespace DiscUtils.Vmdk
     /// </summary>
     public sealed class DiskImageFile : VirtualDiskLayer
     {
+        private static Random _rng = new Random();
+
         private DescriptorFile _descriptor;
         private SparseStream _contentStream;
         private FileLocator _fileLocator;
@@ -47,8 +49,6 @@ namespace DiscUtils.Vmdk
         /// Indicates if this instance controls lifetime of _monolithicStream.
         /// </summary>
         private Ownership _ownsMonolithicStream;
-
-        private static Random _rng = new Random();
 
         /// <summary>
         /// Creates a new instance from a file on disk.
@@ -165,32 +165,103 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Disposes of this instance.
+        /// Gets an indication as to whether the disk file is sparse.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, <c>false</c> if in destructor</param>
-        protected override void Dispose(bool disposing)
+        public override bool IsSparse
         {
-            try
+            get
             {
-                if (disposing)
-                {
-                    if (_contentStream != null)
-                    {
-                        _contentStream.Dispose();
-                        _contentStream = null;
-                    }
+                return _descriptor.CreateType == DiskCreateType.MonolithicSparse
+                    || _descriptor.CreateType == DiskCreateType.TwoGbMaxExtentSparse
+                    || _descriptor.CreateType == DiskCreateType.VmfsSparse;
+            }
+        }
 
-                    if (_ownsMonolithicStream == Ownership.Dispose && _monolithicStream != null)
-                    {
-                        _monolithicStream.Dispose();
-                        _monolithicStream = null;
-                    }
+        /// <summary>
+        /// Gets the relative paths to all of the disk's extents.
+        /// </summary>
+        public IEnumerable<string> ExtentPaths
+        {
+            get
+            {
+                foreach (var path in _descriptor.Extents)
+                {
+                    yield return path.FileName;
                 }
             }
-            finally
+        }
+
+        /// <summary>
+        /// Indicates if this disk is a linked differencing disk.
+        /// </summary>
+        internal bool NeedsParent
+        {
+            get { return _descriptor.ParentContentId != uint.MaxValue; }
+        }
+
+        /// <summary>
+        /// Gets the location of the parent.
+        /// </summary>
+        internal string ParentLocation
+        {
+            get { return _descriptor.ParentFileNameHint; }
+        }
+
+        internal uint ContentId
+        {
+            get { return _descriptor.ContentId; }
+        }
+
+        /// <summary>
+        /// Gets the capacity of this disk (in bytes).
+        /// </summary>
+        internal override long Capacity
+        {
+            get
             {
-                base.Dispose(disposing);
+                long result = 0;
+                foreach (var extent in _descriptor.Extents)
+                {
+                    result += extent.SizeInSectors * Sizes.Sector;
+                }
+
+                return result;
             }
+        }
+
+        /// <summary>
+        /// Gets a <c>FileLocator</c> that can resolve relative paths, or <c>null</c>.
+        /// </summary>
+        /// <remarks>
+        /// Typically used to locate parent disks.
+        /// </remarks>
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return _fileLocator; }
+        }
+
+        /// <summary>
+        /// Gets the Geometry of this disk.
+        /// </summary>
+        internal Geometry Geometry
+        {
+            get { return _descriptor.DiskGeometry; }
+        }
+
+        /// <summary>
+        /// Gets the BIOS geometry of this disk.
+        /// </summary>
+        internal Geometry BiosGeometry
+        {
+            get { return _descriptor.BiosGeometry; }
+        }
+
+        /// <summary>
+        /// Gets the 'CreateType' of this disk.
+        /// </summary>
+        internal DiskCreateType CreateType
+        {
+            get { return _descriptor.CreateType; }
         }
 
         /// <summary>
@@ -309,40 +380,6 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Creates a new virtual disk at the specified path.
-        /// </summary>
-        /// <param name="fileLocator">The object used to locate / create the component files.</param>
-        /// <param name="path">The name of the VMDK to create.</param>
-        /// <param name="parameters">The desired parameters for the new disk.</param>
-        /// <returns>The newly created disk image</returns>
-        internal static DiskImageFile Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
-        {
-            if (parameters.Capacity <= 0)
-            {
-                throw new ArgumentException("Capacity must be greater than zero", "parameters");
-            }
-
-            Geometry geometry = parameters.Geometry ?? DefaultGeometry(parameters.Capacity);
-
-            Geometry biosGeometry;
-            if (parameters.BiosGeometry != null)
-            {
-                biosGeometry = parameters.BiosGeometry;
-            }
-            else
-            {
-                biosGeometry = Geometry.MakeBiosSafe(geometry, parameters.Capacity);
-            }
-
-            DiskAdapterType adapterType = (parameters.AdapterType == DiskAdapterType.None) ? DiskAdapterType.LsiLogicScsi : parameters.AdapterType;
-            DiskCreateType createType = (parameters.CreateType == DiskCreateType.None) ? DiskCreateType.MonolithicSparse : parameters.CreateType;
-
-            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry, biosGeometry, createType, adapterType);
-
-            return DoInitialize(fileLocator, path, parameters.Capacity, createType, baseDescriptor);
-        }
-
-        /// <summary>
         /// Creates a new virtual disk that is a linked clone of an existing disk.
         /// </summary>
         /// <param name="path">The path to the new disk</param>
@@ -393,103 +430,90 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Gets an indication as to whether the disk file is sparse.
+        /// Creates a new virtual disk at the specified path.
         /// </summary>
-        public override bool IsSparse
+        /// <param name="fileLocator">The object used to locate / create the component files.</param>
+        /// <param name="path">The name of the VMDK to create.</param>
+        /// <param name="parameters">The desired parameters for the new disk.</param>
+        /// <returns>The newly created disk image</returns>
+        internal static DiskImageFile Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
         {
-            get
+            if (parameters.Capacity <= 0)
             {
-                return _descriptor.CreateType == DiskCreateType.MonolithicSparse
-                    || _descriptor.CreateType == DiskCreateType.TwoGbMaxExtentSparse
-                    || _descriptor.CreateType == DiskCreateType.VmfsSparse;
+                throw new ArgumentException("Capacity must be greater than zero", "parameters");
             }
-        }
 
-        /// <summary>
-        /// Gets the relative paths to all of the disk's extents.
-        /// </summary>
-        public IEnumerable<string> ExtentPaths
-        {
-            get
+            Geometry geometry = parameters.Geometry ?? DefaultGeometry(parameters.Capacity);
+
+            Geometry biosGeometry;
+            if (parameters.BiosGeometry != null)
             {
-                foreach (var path in _descriptor.Extents)
-                {
-                    yield return path.FileName;
-                }
+                biosGeometry = parameters.BiosGeometry;
             }
-        }
-
-        /// <summary>
-        /// Indicates if this disk is a linked differencing disk.
-        /// </summary>
-        internal bool NeedsParent
-        {
-            get { return _descriptor.ParentContentId != uint.MaxValue; }
-        }
-
-        /// <summary>
-        /// Gets the location of the parent.
-        /// </summary>
-        internal string ParentLocation
-        {
-            get { return _descriptor.ParentFileNameHint; }
-        }
-
-        internal uint ContentId
-        {
-            get { return _descriptor.ContentId; }
-        }
-
-        /// <summary>
-        /// Gets the capacity of this disk (in bytes).
-        /// </summary>
-        internal override long Capacity
-        {
-            get
+            else
             {
-                long result = 0;
-                foreach (var extent in _descriptor.Extents)
-                {
-                    result += extent.SizeInSectors * Sizes.Sector;
-                }
-
-                return result;
+                biosGeometry = Geometry.MakeBiosSafe(geometry, parameters.Capacity);
             }
+
+            DiskAdapterType adapterType = (parameters.AdapterType == DiskAdapterType.None) ? DiskAdapterType.LsiLogicScsi : parameters.AdapterType;
+            DiskCreateType createType = (parameters.CreateType == DiskCreateType.None) ? DiskCreateType.MonolithicSparse : parameters.CreateType;
+
+            DescriptorFile baseDescriptor = CreateSimpleDiskDescriptor(geometry, biosGeometry, createType, adapterType);
+
+            return DoInitialize(fileLocator, path, parameters.Capacity, createType, baseDescriptor);
         }
 
-        /// <summary>
-        /// Gets a <c>FileLocator</c> that can resolve relative paths, or <c>null</c>.
-        /// </summary>
-        /// <remarks>
-        /// Typically used to locate parent disks.
-        /// </remarks>
-        internal override FileLocator RelativeFileLocator
+        internal static Geometry DefaultGeometry(long diskSize)
         {
-            get { return _fileLocator; }
+            int heads;
+            int sectors;
+
+            if (diskSize < Sizes.OneGiB)
+            {
+                heads = 64;
+                sectors = 32;
+            }
+            else if (diskSize < 2 * Sizes.OneGiB)
+            {
+                heads = 128;
+                sectors = 32;
+            }
+            else
+            {
+                heads = 255;
+                sectors = 63;
+            }
+
+            int cylinders = (int)(diskSize / (heads * sectors * Sizes.Sector));
+
+            return new Geometry(cylinders, heads, sectors);
         }
 
-        /// <summary>
-        /// Gets the Geometry of this disk.
-        /// </summary>
-        internal Geometry Geometry
+        internal static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, Geometry biosGeometery, DiskCreateType createType, DiskAdapterType adapterType)
         {
-            get { return _descriptor.DiskGeometry; }
+            DescriptorFile baseDescriptor = new DescriptorFile();
+            baseDescriptor.DiskGeometry = geometry;
+            baseDescriptor.BiosGeometry = biosGeometery;
+            baseDescriptor.ContentId = (uint)_rng.Next();
+            baseDescriptor.CreateType = createType;
+            baseDescriptor.UniqueId = Guid.NewGuid();
+            baseDescriptor.HardwareVersion = "4";
+            baseDescriptor.AdapterType = adapterType;
+            return baseDescriptor;
         }
 
-        /// <summary>
-        /// Gets the BIOS geometry of this disk.
-        /// </summary>
-        internal Geometry BiosGeometry
+        internal static ServerSparseExtentHeader CreateServerSparseExtentHeader(long size)
         {
-            get { return _descriptor.BiosGeometry; }
-        }
+            uint numSectors = (uint)Utilities.Ceil(size, Sizes.Sector);
+            uint numGDEntries = (uint)Utilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
 
-        /// <summary>
-        /// Gets the 'CreateType' of this disk.
-        /// </summary>
-        internal DiskCreateType CreateType
-        {
-            get { return _descriptor.CreateType; }
+            ServerSparseExtentHeader header = new ServerSparseExtentHeader();
+            header.Capacity = numSectors;
+            header.GrainSize = 1;
+            header.GdOffset = 4;
+            header.NumGdEntries = numGDEntries;
+            header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
+            return header;
         }
 
         /// <summary>
@@ -540,6 +564,35 @@ namespace DiscUtils.Vmdk
                 }
 
                 return new ConcatStream(Ownership.Dispose, streams);
+            }
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if disposing, <c>false</c> if in destructor</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_contentStream != null)
+                    {
+                        _contentStream.Dispose();
+                        _contentStream = null;
+                    }
+
+                    if (_ownsMonolithicStream == Ownership.Dispose && _monolithicStream != null)
+                    {
+                        _monolithicStream.Dispose();
+                        _monolithicStream = null;
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 
@@ -622,109 +675,6 @@ namespace DiscUtils.Vmdk
             }
 
             return new DiskImageFile(fileLocator, file, FileAccess.ReadWrite);
-        }
-
-        private SparseStream OpenExtent(ExtentDescriptor extent, long extentStart, SparseStream parent, Ownership ownsParent)
-        {
-            FileAccess access = FileAccess.Read;
-            FileShare share = FileShare.Read;
-            if (extent.Access == ExtentAccess.ReadWrite && _access != FileAccess.Read)
-            {
-                access = FileAccess.ReadWrite;
-                share = FileShare.None;
-            }
-
-            if (extent.Type != ExtentType.Sparse && extent.Type != ExtentType.VmfsSparse)
-            {
-                if (ownsParent == Ownership.Dispose && parent != null)
-                {
-                    parent.Dispose();
-                }
-            }
-
-            switch (extent.Type)
-            {
-                case ExtentType.Flat:
-                case ExtentType.Vmfs:
-                    return SparseStream.FromStream(
-                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
-                        Ownership.Dispose);
-
-                case ExtentType.Zero:
-                    return new ZeroStream(extent.SizeInSectors * Utilities.SectorSize);
-
-                case ExtentType.Sparse:
-                    return new HostedSparseExtentStream(
-                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
-                        Ownership.Dispose,
-                        extentStart,
-                        parent,
-                        ownsParent);
-
-                case ExtentType.VmfsSparse:
-                    return new ServerSparseExtentStream(
-                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
-                        Ownership.Dispose,
-                        extentStart,
-                        parent,
-                        ownsParent);
-
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
-        private static void CreateExtent(Stream extentStream, long size, ExtentType type)
-        {
-            long descriptorStart;
-            CreateExtent(extentStream, size, type, 0, out descriptorStart);
-        }
-
-        private static void CreateExtent(Stream extentStream, long size, ExtentType type, long descriptorLength, out long descriptorStart)
-        {
-            if (type == ExtentType.Flat || type == ExtentType.Vmfs)
-            {
-                extentStream.SetLength(size);
-                descriptorStart = 0;
-                return;
-            }
-
-            if (type == ExtentType.Sparse)
-            {
-                CreateSparseExtent(extentStream, size, descriptorLength, out descriptorStart);
-                return;
-            }
-            else if (type == ExtentType.VmfsSparse)
-            {
-                ServerSparseExtentHeader header = CreateServerSparseExtentHeader(size);
-
-                extentStream.Position = 0;
-                extentStream.Write(header.GetBytes(), 0, 4 * Sizes.Sector);
-
-                byte[] blankGlobalDirectory = new byte[header.NumGdEntries * 4];
-                extentStream.Write(blankGlobalDirectory, 0, blankGlobalDirectory.Length);
-
-                descriptorStart = 0;
-                return;
-            }
-            else
-            {
-                throw new NotImplementedException("Extent type not implemented");
-            }
-        }
-
-        internal static ServerSparseExtentHeader CreateServerSparseExtentHeader(long size)
-        {
-            uint numSectors = (uint)Utilities.Ceil(size, Sizes.Sector);
-            uint numGDEntries = (uint)Utilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
-
-            ServerSparseExtentHeader header = new ServerSparseExtentHeader();
-            header.Capacity = numSectors;
-            header.GrainSize = 1;
-            header.GdOffset = 4;
-            header.NumGdEntries = numGDEntries;
-            header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
-            return header;
         }
 
         private static void CreateSparseExtent(Stream extentStream, long size, long descriptorLength, out long descriptorStart)
@@ -820,39 +770,42 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        private void LoadDescriptor(Stream s)
+        private static void CreateExtent(Stream extentStream, long size, ExtentType type)
         {
-            s.Position = 0;
-            byte[] header = Utilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
-            if (header.Length < Sizes.Sector || Utilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
+            long descriptorStart;
+            CreateExtent(extentStream, size, type, 0, out descriptorStart);
+        }
+
+        private static void CreateExtent(Stream extentStream, long size, ExtentType type, long descriptorLength, out long descriptorStart)
+        {
+            if (type == ExtentType.Flat || type == ExtentType.Vmfs)
             {
-                s.Position = 0;
-                _descriptor = new DescriptorFile(s);
-                if (_access != FileAccess.Read)
-                {
-                    _descriptor.ContentId = (uint)_rng.Next();
-                    s.Position = 0;
-                    _descriptor.Write(s);
-                    s.SetLength(s.Position);
-                }
+                extentStream.SetLength(size);
+                descriptorStart = 0;
+                return;
+            }
+
+            if (type == ExtentType.Sparse)
+            {
+                CreateSparseExtent(extentStream, size, descriptorLength, out descriptorStart);
+                return;
+            }
+            else if (type == ExtentType.VmfsSparse)
+            {
+                ServerSparseExtentHeader header = CreateServerSparseExtentHeader(size);
+
+                extentStream.Position = 0;
+                extentStream.Write(header.GetBytes(), 0, 4 * Sizes.Sector);
+
+                byte[] blankGlobalDirectory = new byte[header.NumGdEntries * 4];
+                extentStream.Write(blankGlobalDirectory, 0, blankGlobalDirectory.Length);
+
+                descriptorStart = 0;
+                return;
             }
             else
             {
-                // This is a sparse disk extent, hopefully with embedded descriptor...
-                HostedSparseExtentHeader hdr = HostedSparseExtentHeader.Read(header, 0);
-                if (hdr.DescriptorOffset != 0)
-                {
-                    Stream descriptorStream = new SubStream(s, hdr.DescriptorOffset * Sizes.Sector, hdr.DescriptorSize * Sizes.Sector);
-                    _descriptor = new DescriptorFile(descriptorStream);
-                    if (_access != FileAccess.Read)
-                    {
-                        _descriptor.ContentId = (uint)_rng.Next();
-                        descriptorStream.Position = 0;
-                        _descriptor.Write(descriptorStream);
-                        byte[] blank = new byte[descriptorStream.Length - descriptorStream.Position];
-                        descriptorStream.Write(blank, 0, blank.Length);
-                    }
-                }
+                throw new NotImplementedException("Extent type not implemented");
             }
         }
 
@@ -899,45 +852,6 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        internal static Geometry DefaultGeometry(long diskSize)
-        {
-            int heads;
-            int sectors;
-
-            if (diskSize < Sizes.OneGiB)
-            {
-                heads = 64;
-                sectors = 32;
-            }
-            else if (diskSize < 2 * Sizes.OneGiB)
-            {
-                heads = 128;
-                sectors = 32;
-            }
-            else
-            {
-                heads = 255;
-                sectors = 63;
-            }
-
-            int cylinders = (int)(diskSize / (heads * sectors * Sizes.Sector));
-
-            return new Geometry(cylinders, heads, sectors);
-        }
-
-        internal static DescriptorFile CreateSimpleDiskDescriptor(Geometry geometry, Geometry biosGeometery, DiskCreateType createType, DiskAdapterType adapterType)
-        {
-            DescriptorFile baseDescriptor = new DescriptorFile();
-            baseDescriptor.DiskGeometry = geometry;
-            baseDescriptor.BiosGeometry = biosGeometery;
-            baseDescriptor.ContentId = (uint)_rng.Next();
-            baseDescriptor.CreateType = createType;
-            baseDescriptor.UniqueId = Guid.NewGuid();
-            baseDescriptor.HardwareVersion = "4";
-            baseDescriptor.AdapterType = adapterType;
-            return baseDescriptor;
-        }
-
         private static DescriptorFile CreateDifferencingDiskDescriptor(DiskCreateType type, DiskImageFile parent, string parentPath)
         {
             DescriptorFile baseDescriptor = new DescriptorFile();
@@ -946,6 +860,92 @@ namespace DiscUtils.Vmdk
             baseDescriptor.ParentFileNameHint = parentPath;
             baseDescriptor.CreateType = type;
             return baseDescriptor;
+        }
+
+        private SparseStream OpenExtent(ExtentDescriptor extent, long extentStart, SparseStream parent, Ownership ownsParent)
+        {
+            FileAccess access = FileAccess.Read;
+            FileShare share = FileShare.Read;
+            if (extent.Access == ExtentAccess.ReadWrite && _access != FileAccess.Read)
+            {
+                access = FileAccess.ReadWrite;
+                share = FileShare.None;
+            }
+
+            if (extent.Type != ExtentType.Sparse && extent.Type != ExtentType.VmfsSparse)
+            {
+                if (ownsParent == Ownership.Dispose && parent != null)
+                {
+                    parent.Dispose();
+                }
+            }
+
+            switch (extent.Type)
+            {
+                case ExtentType.Flat:
+                case ExtentType.Vmfs:
+                    return SparseStream.FromStream(
+                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        Ownership.Dispose);
+
+                case ExtentType.Zero:
+                    return new ZeroStream(extent.SizeInSectors * Utilities.SectorSize);
+
+                case ExtentType.Sparse:
+                    return new HostedSparseExtentStream(
+                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        Ownership.Dispose,
+                        extentStart,
+                        parent,
+                        ownsParent);
+
+                case ExtentType.VmfsSparse:
+                    return new ServerSparseExtentStream(
+                        _fileLocator.Open(extent.FileName, FileMode.Open, access, share),
+                        Ownership.Dispose,
+                        extentStart,
+                        parent,
+                        ownsParent);
+
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private void LoadDescriptor(Stream s)
+        {
+            s.Position = 0;
+            byte[] header = Utilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
+            if (header.Length < Sizes.Sector || Utilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
+            {
+                s.Position = 0;
+                _descriptor = new DescriptorFile(s);
+                if (_access != FileAccess.Read)
+                {
+                    _descriptor.ContentId = (uint)_rng.Next();
+                    s.Position = 0;
+                    _descriptor.Write(s);
+                    s.SetLength(s.Position);
+                }
+            }
+            else
+            {
+                // This is a sparse disk extent, hopefully with embedded descriptor...
+                HostedSparseExtentHeader hdr = HostedSparseExtentHeader.Read(header, 0);
+                if (hdr.DescriptorOffset != 0)
+                {
+                    Stream descriptorStream = new SubStream(s, hdr.DescriptorOffset * Sizes.Sector, hdr.DescriptorSize * Sizes.Sector);
+                    _descriptor = new DescriptorFile(descriptorStream);
+                    if (_access != FileAccess.Read)
+                    {
+                        _descriptor.ContentId = (uint)_rng.Next();
+                        descriptorStream.Position = 0;
+                        _descriptor.Write(descriptorStream);
+                        byte[] blank = new byte[descriptorStream.Length - descriptorStream.Position];
+                        descriptorStream.Write(blank, 0, blank.Length);
+                    }
+                }
+            }
         }
     }
 }

@@ -34,9 +34,32 @@ namespace DiscUtils.Iscsi
             _records = new List<KeyValuePair<string, string>>();
         }
 
-        public void Add(string key, string value)
+        public IEnumerable<KeyValuePair<string, string>> Lines
         {
-            _records.Add(new KeyValuePair<string, string>(key, value));
+            get
+            {
+                return _records;
+            }
+        }
+
+        public int Size
+        {
+            get
+            {
+                int i = 0;
+
+                foreach (var entry in _records)
+                {
+                    i += entry.Key.Length + entry.Value.Length + 2;
+                }
+
+                return i;
+            }
+        }
+
+        internal int Count
+        {
+            get { return _records.Count; }
         }
 
         public string this[string key]
@@ -69,29 +92,9 @@ namespace DiscUtils.Iscsi
             }
         }
 
-        internal void Remove(string key)
+        public void Add(string key, string value)
         {
-            for (int i = 0; i < _records.Count; ++i)
-            {
-                if (_records[i].Key == key)
-                {
-                    _records.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        internal int Count
-        {
-            get { return _records.Count; }
-        }
-
-        public IEnumerable<KeyValuePair<string, string>> Lines
-        {
-            get
-            {
-                return _records;
-            }
+            _records.Add(new KeyValuePair<string, string>(key, value));
         }
 
         public void ReadFrom(byte[] buffer, int offset, int length)
@@ -147,18 +150,15 @@ namespace DiscUtils.Iscsi
             return i - offset;
         }
 
-        public int Size
+        internal void Remove(string key)
         {
-            get
+            for (int i = 0; i < _records.Count; ++i)
             {
-                int i = 0;
-
-                foreach (var entry in _records)
+                if (_records[i].Key == key)
                 {
-                    i += entry.Key.Length + entry.Value.Length + 2;
+                    _records.RemoveAt(i);
+                    return;
                 }
-
-                return i;
             }
         }
     }

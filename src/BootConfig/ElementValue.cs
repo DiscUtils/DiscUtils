@@ -389,16 +389,6 @@ namespace DiscUtils.BootConfig
             _record = DeviceRecord.Parse(value, 0x10);
         }
 
-        internal byte[] GetBytes()
-        {
-            byte[] buffer = new byte[_record.Size + 0x10];
-
-            Utilities.WriteBytesLittleEndian(_parentObject, buffer, 0);
-            _record.GetBytes(buffer, 0x10);
-
-            return buffer;
-        }
-
         public override Guid ParentObject
         {
             get { return _parentObject; }
@@ -423,6 +413,16 @@ namespace DiscUtils.BootConfig
             {
                 return "<unknown>";
             }
+        }
+
+        internal byte[] GetBytes()
+        {
+            byte[] buffer = new byte[_record.Size + 0x10];
+
+            Utilities.WriteBytesLittleEndian(_parentObject, buffer, 0);
+            _record.GetBytes(buffer, 0x10);
+
+            return buffer;
         }
     }
 }

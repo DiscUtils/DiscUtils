@@ -32,6 +32,8 @@ namespace DiscUtils.Iso9660
     /// </summary>
     public sealed class BuildDirectoryInfo : BuildDirectoryMember
     {
+        internal static readonly Comparer<BuildDirectoryInfo> PathTableSortComparison = new PathTableComparison();
+
         private BuildDirectoryInfo _parent;
         private Dictionary<string, BuildDirectoryMember> _members;
         private int _hierarchyDepth;
@@ -43,12 +45,6 @@ namespace DiscUtils.Iso9660
             _parent = (parent == null) ? this : parent;
             _hierarchyDepth = (parent == null) ? 0 : parent._hierarchyDepth + 1;
             _members = new Dictionary<string, BuildDirectoryMember>();
-        }
-
-        internal void Add(BuildDirectoryMember member)
-        {
-            _members.Add(member.Name, member);
-            _sortedMembers = null;
         }
 
         /// <summary>
@@ -70,9 +66,15 @@ namespace DiscUtils.Iso9660
         /// <param name="name">The name of the file or directory to get.</param>
         /// <param name="member">The member found (or <c>null</c>).</param>
         /// <returns><c>true</c> if the specified member was found.</returns>
-        public bool TryGetMember(string name, out BuildDirectoryMember member)
+        internal bool TryGetMember(string name, out BuildDirectoryMember member)
         {
             return _members.TryGetValue(name, out member);
+        }
+
+        internal void Add(BuildDirectoryMember member)
+        {
+            _members.Add(member.Name, member);
+            _sortedMembers = null;
         }
 
         internal override long GetDataSize(Encoding enc)
@@ -209,7 +211,5 @@ namespace DiscUtils.Iso9660
                 return 0;
             }
         }
-
-        internal static readonly Comparer<BuildDirectoryInfo> PathTableSortComparison = new PathTableComparison();
     }
 }

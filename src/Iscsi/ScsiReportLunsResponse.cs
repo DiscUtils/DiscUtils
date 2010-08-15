@@ -34,6 +34,16 @@ namespace DiscUtils.Iscsi
             get { return _luns; }
         }
 
+        public override bool Truncated
+        {
+            get { return _availableLuns != _luns.Count; }
+        }
+
+        public override uint NeededDataLength
+        {
+            get { return (_availableLuns * 8) + 8; }
+        }
+
         public override void ReadFrom(byte[] buffer, int offset, int count)
         {
             _luns = new List<ulong>();
@@ -55,16 +65,6 @@ namespace DiscUtils.Iscsi
                 _luns.Add(Utilities.ToUInt64BigEndian(buffer, offset + pos));
                 pos += 8;
             }
-        }
-
-        public override bool Truncated
-        {
-            get { return _availableLuns != _luns.Count; }
-        }
-
-        public override uint NeededDataLength
-        {
-            get { return (_availableLuns * 8) + 8; }
         }
     }
 }

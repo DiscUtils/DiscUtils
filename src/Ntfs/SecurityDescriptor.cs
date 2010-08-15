@@ -46,6 +46,14 @@ namespace DiscUtils.Ntfs
             set { _securityDescriptor = value; }
         }
 
+        public int Size
+        {
+            get
+            {
+                return _securityDescriptor.BinaryLength;
+            }
+        }
+
         public uint CalcHash()
         {
             byte[] buffer = new byte[Size];
@@ -58,8 +66,6 @@ namespace DiscUtils.Ntfs
 
             return hash;
         }
-
-        #region IByteArraySerializable Members
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -123,26 +129,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public int Size
-        {
-            get
-            {
-                return _securityDescriptor.BinaryLength;
-            }
-        }
-
-        #endregion
-
-        #region IDiagnosticTracer Members
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "Descriptor: " + _securityDescriptor.GetSddlForm(AccessControlSections.All));
         }
 
-        #endregion
-
-        #region SID inheritance calculation
         internal static RawSecurityDescriptor CalcNewObjectDescriptor(RawSecurityDescriptor parent, bool isContainer)
         {
             RawAcl sacl = InheritAcl(parent.SystemAcl, isContainer);
@@ -182,7 +173,5 @@ namespace DiscUtils.Ntfs
 
             return newAcl;
         }
-
-        #endregion
     }
 }

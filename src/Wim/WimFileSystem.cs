@@ -57,31 +57,168 @@ namespace DiscUtils.Wim
         }
 
         /// <summary>
-        /// Disposes of this instance.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, else <c>false</c></param>
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                _metaDataStream.Dispose();
-                _metaDataStream = null;
-
-                _file = null;
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
-        #region Public interface
-        /// <summary>
         /// Provides a friendly description of the file system type.
         /// </summary>
         public override string FriendlyName
         {
             get { return "Microsoft WIM"; }
+        }
+
+        /// <summary>
+        /// Gets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The security descriptor.</returns>
+        public RawSecurityDescriptor GetSecurity(string path)
+        {
+            uint id = GetEntry(path).SecurityId;
+
+            if (id == uint.MaxValue)
+            {
+                return null;
+            }
+            else if (id >= 0 && id < _securityDescriptors.Count)
+            {
+                return _securityDescriptors[(int)id];
+            }
+            else
+            {
+                // What if there is no descriptor?
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Sets the security descriptor associated with the file or directory.
+        /// </summary>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="securityDescriptor">The new security descriptor.</param>
+        public void SetSecurity(string path, RawSecurityDescriptor securityDescriptor)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the reparse point data associated with a file or directory.
+        /// </summary>
+        /// <param name="path">The file to query</param>
+        /// <returns>The reparse point information</returns>
+        public ReparsePoint GetReparsePoint(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+
+            ShortResourceHeader hdr = _file.LocateResource(dirEntry.Hash);
+            if (hdr == null)
+            {
+                throw new IOException("No reparse point");
+            }
+
+            using (Stream s = _file.OpenResourceStream(hdr))
+            {
+                byte[] buffer = new byte[s.Length];
+                s.Read(buffer, 0, buffer.Length);
+                return new ReparsePoint((int)dirEntry.ReparseTag, buffer);
+            }
+        }
+
+        /// <summary>
+        /// Sets the reparse point data on a file or directory.
+        /// </summary>
+        /// <param name="path">The file to set the reparse point on.</param>
+        /// <param name="reparsePoint">The new reparse point.</param>
+        public void SetReparsePoint(string path, ReparsePoint reparsePoint)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Removes a reparse point from a file or directory, without deleting the file or directory.
+        /// </summary>
+        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
+        public void RemoveReparsePoint(string path)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the short name for a given path.
+        /// </summary>
+        /// <param name="path">The path to convert</param>
+        /// <returns>The short name</returns>
+        /// <remarks>
+        /// This method only gets the short name for the final part of the path, to
+        /// convert a complete path, call this method repeatedly, once for each path
+        /// segment.  If there is no short name for the given path,<c>null</c> is
+        /// returned.
+        /// </remarks>
+        public string GetShortName(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+            return dirEntry.ShortName;
+        }
+
+        /// <summary>
+        /// Sets the short name for a given file or directory.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to change.</param>
+        /// <param name="shortName">The shortName, which should not include a path.</param>
+        public void SetShortName(string path, string shortName)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Gets the names of the alternate data streams for a file.
+        /// </summary>
+        /// <param name="path">The path to the file</param>
+        /// <returns>
+        /// The list of alternate data streams (or empty, if none).  To access the contents
+        /// of the alternate streams, use OpenFile(path + ":" + name, ...).
+        /// </returns>
+        public string[] GetAlternateDataStreams(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+
+            List<string> names = new List<string>();
+            if (dirEntry.AlternateStreams != null)
+            {
+                foreach (var altStream in dirEntry.AlternateStreams)
+                {
+                    if (!string.IsNullOrEmpty(altStream.Key))
+                    {
+                        names.Add(altStream.Key);
+                    }
+                }
+            }
+
+            return names.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the file id for a given path.
+        /// </summary>
+        /// <param name="path">The path to get the id of</param>
+        /// <returns>The file id, or -1</returns>
+        /// <remarks>
+        /// The returned file id uniquely identifies the file, and is shared by all hard
+        /// links to the same file.  The value -1 indicates no unique identifier is
+        /// available, and so it can be assumed the file has no hard links.
+        /// </remarks>
+        public long GetFileId(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+            return dirEntry.HardLink == 0 ? -1 : (long)dirEntry.HardLink;
+        }
+
+        /// <summary>
+        /// Indicates whether the file is known by other names.
+        /// </summary>
+        /// <param name="path">The file to inspect</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        public bool HasHardLinks(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+            return dirEntry.HardLink != 0;
         }
 
         /// <summary>
@@ -306,7 +443,6 @@ namespace DiscUtils.Wim
 
             return dirEntry.GetLength(altStreamPart);
         }
-        #endregion
 
         /// <summary>
         /// Gets the SHA-1 hash of a file's contents.
@@ -330,6 +466,25 @@ namespace DiscUtils.Wim
             }
 
             return dirEntry.GetStreamHash(altStreamPart);
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if disposing, else <c>false</c></param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                _metaDataStream.Dispose();
+                _metaDataStream = null;
+
+                _file = null;
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         private static void SplitFileName(string path, out string filePart, out string altStreamPart)
@@ -475,166 +630,5 @@ namespace DiscUtils.Wim
                 }
             }
         }
-
-        #region IWindowsFileSystem Members
-
-        /// <summary>
-        /// Gets the security descriptor associated with the file or directory.
-        /// </summary>
-        /// <param name="path">The file or directory to inspect.</param>
-        /// <returns>The security descriptor.</returns>
-        public RawSecurityDescriptor GetSecurity(string path)
-        {
-            uint id = GetEntry(path).SecurityId;
-
-            if (id == uint.MaxValue)
-            {
-                return null;
-            }
-            else if (id >= 0 && id < _securityDescriptors.Count)
-            {
-                return _securityDescriptors[(int)id];
-            }
-            else
-            {
-                // What if there is no descriptor?
-                throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
-        /// Sets the security descriptor associated with the file or directory.
-        /// </summary>
-        /// <param name="path">The file or directory to change.</param>
-        /// <param name="securityDescriptor">The new security descriptor.</param>
-        public void SetSecurity(string path, RawSecurityDescriptor securityDescriptor)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Gets the reparse point data associated with a file or directory.
-        /// </summary>
-        /// <param name="path">The file to query</param>
-        /// <returns>The reparse point information</returns>
-        public ReparsePoint GetReparsePoint(string path)
-        {
-            DirectoryEntry dirEntry = GetEntry(path);
-
-            ShortResourceHeader hdr = _file.LocateResource(dirEntry.Hash);
-            if (hdr == null)
-            {
-                throw new IOException("No reparse point");
-            }
-
-            using (Stream s = _file.OpenResourceStream(hdr))
-            {
-                byte[] buffer = new byte[s.Length];
-                s.Read(buffer, 0, buffer.Length);
-                return new ReparsePoint((int)dirEntry.ReparseTag, buffer);
-            }
-        }
-
-        /// <summary>
-        /// Sets the reparse point data on a file or directory.
-        /// </summary>
-        /// <param name="path">The file to set the reparse point on.</param>
-        /// <param name="reparsePoint">The new reparse point.</param>
-        public void SetReparsePoint(string path, ReparsePoint reparsePoint)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Removes a reparse point from a file or directory, without deleting the file or directory.
-        /// </summary>
-        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
-        public void RemoveReparsePoint(string path)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Gets the short name for a given path.
-        /// </summary>
-        /// <param name="path">The path to convert</param>
-        /// <returns>The short name</returns>
-        /// <remarks>
-        /// This method only gets the short name for the final part of the path, to
-        /// convert a complete path, call this method repeatedly, once for each path
-        /// segment.  If there is no short name for the given path,<c>null</c> is
-        /// returned.
-        /// </remarks>
-        public string GetShortName(string path)
-        {
-            DirectoryEntry dirEntry = GetEntry(path);
-            return dirEntry.ShortName;
-        }
-
-        /// <summary>
-        /// Sets the short name for a given file or directory.
-        /// </summary>
-        /// <param name="path">The full path to the file or directory to change.</param>
-        /// <param name="shortName">The shortName, which should not include a path.</param>
-        public void SetShortName(string path, string shortName)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Gets the names of the alternate data streams for a file.
-        /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>
-        /// The list of alternate data streams (or empty, if none).  To access the contents
-        /// of the alternate streams, use OpenFile(path + ":" + name, ...).
-        /// </returns>
-        public string[] GetAlternateDataStreams(string path)
-        {
-            DirectoryEntry dirEntry = GetEntry(path);
-
-            List<string> names = new List<string>();
-            if (dirEntry.AlternateStreams != null)
-            {
-                foreach (var altStream in dirEntry.AlternateStreams)
-                {
-                    if (!string.IsNullOrEmpty(altStream.Key))
-                    {
-                        names.Add(altStream.Key);
-                    }
-                }
-            }
-
-            return names.ToArray();
-        }
-
-        /// <summary>
-        /// Gets the file id for a given path.
-        /// </summary>
-        /// <param name="path">The path to get the id of</param>
-        /// <returns>The file id, or -1</returns>
-        /// <remarks>
-        /// The returned file id uniquely identifies the file, and is shared by all hard
-        /// links to the same file.  The value -1 indicates no unique identifier is
-        /// available, and so it can be assumed the file has no hard links.
-        /// </remarks>
-        public long GetFileId(string path)
-        {
-            DirectoryEntry dirEntry = GetEntry(path);
-            return dirEntry.HardLink == 0 ? -1 : (long)dirEntry.HardLink;
-        }
-
-        /// <summary>
-        /// Indicates whether the file is known by other names.
-        /// </summary>
-        /// <param name="path">The file to inspect</param>
-        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
-        public bool HasHardLinks(string path)
-        {
-            DirectoryEntry dirEntry = GetEntry(path);
-            return dirEntry.HardLink != 0;
-        }
-
-        #endregion
     }
 }

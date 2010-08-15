@@ -33,8 +33,8 @@ namespace DiscUtils.Ntfs
         /// </summary>
         private const int FieldSize = 0x18;
 
-        public ulong LogSequenceNumber;
-        public ulong IndexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
+        private ulong LogSequenceNumber;
+        private ulong IndexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
 
         private IndexNode _node;
 
@@ -75,6 +75,22 @@ namespace DiscUtils.Ntfs
             get { return _node; }
         }
 
+        internal static IndexBlock Initialize(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb)
+        {
+            return new IndexBlock(index, parentNode, parentEntry.ChildrenVirtualCluster, bpb);
+        }
+
+        internal void WriteToDisk()
+        {
+            byte[] buffer = new byte[_index.IndexBufferSize];
+            ToBytes(buffer, 0);
+
+            Stream stream = _index.AllocationStream;
+            stream.Position = _streamPosition;
+            stream.Write(buffer, 0, buffer.Length);
+            stream.Flush();
+        }
+
         protected override void Read(byte[] buffer, int offset)
         {
             // Skip FixupRecord fields...
@@ -93,22 +109,6 @@ namespace DiscUtils.Ntfs
         protected override int CalcSize()
         {
             throw new NotImplementedException();
-        }
-
-        internal void WriteToDisk()
-        {
-            byte[] buffer = new byte[_index.IndexBufferSize];
-            ToBytes(buffer, 0);
-
-            Stream stream = _index.AllocationStream;
-            stream.Position = _streamPosition;
-            stream.Write(buffer, 0, buffer.Length);
-            stream.Flush();
-        }
-
-        internal static IndexBlock Initialize(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb)
-        {
-            return new IndexBlock(index, parentNode, parentEntry.ChildrenVirtualCluster, bpb);
         }
     }
 }

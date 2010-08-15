@@ -36,22 +36,6 @@ namespace DiscUtils.Vdi
             SectorSize = 512;
         }
 
-        public void Read(byte[] buffer, int offset)
-        {
-            Cylinders = Utilities.ToInt32LittleEndian(buffer, offset + 0);
-            Heads = Utilities.ToInt32LittleEndian(buffer, offset + 4);
-            Sectors = Utilities.ToInt32LittleEndian(buffer, offset + 8);
-            SectorSize = Utilities.ToInt32LittleEndian(buffer, offset + 12);
-        }
-
-        public void Write(byte[] buffer, int offset)
-        {
-            Utilities.WriteBytesLittleEndian(Cylinders, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Heads, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian(Sectors, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(SectorSize, buffer, offset + 12);
-        }
-
         public static GeometryRecord FromCapacity(long capacity)
         {
             GeometryRecord result = new GeometryRecord();
@@ -86,6 +70,22 @@ namespace DiscUtils.Vdi
             result.Sectors = 63;
 
             return result;
+        }
+
+        public void Read(byte[] buffer, int offset)
+        {
+            Cylinders = Utilities.ToInt32LittleEndian(buffer, offset + 0);
+            Heads = Utilities.ToInt32LittleEndian(buffer, offset + 4);
+            Sectors = Utilities.ToInt32LittleEndian(buffer, offset + 8);
+            SectorSize = Utilities.ToInt32LittleEndian(buffer, offset + 12);
+        }
+
+        public void Write(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(Cylinders, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Heads, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian(Sectors, buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(SectorSize, buffer, offset + 12);
         }
 
         public Geometry ToGeometry(long actualCapacity)

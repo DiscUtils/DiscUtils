@@ -48,31 +48,19 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Disposes of this instance, freeing underlying resources.
+        /// Gets the set of disk formats supported as an array of file extensions.
         /// </summary>
-        public void Dispose()
+        public static ICollection<string> SupportedDiskFormats
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            get { return ExtensionMap.Keys; }
         }
 
         /// <summary>
-        /// Disposes of underlying resources.
+        /// Gets the set of disk types supported, as an array of identifiers.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
-        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
-        /// if running inside destructor.</param>
-        protected virtual void Dispose(bool disposing)
+        public static ICollection<string> SupportedDiskTypes
         {
-            if (disposing)
-            {
-                if (_transport != null)
-                {
-                    _transport.Dispose();
-                }
-
-                _transport = null;
-            }
+            get { return TypeMap.Keys; }
         }
 
         /// <summary>
@@ -127,43 +115,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Reads the first sector of the disk, known as the Master Boot Record.
-        /// </summary>
-        /// <returns>The MBR as a byte array</returns>
-        public virtual byte[] GetMasterBootRecord()
-        {
-            byte[] sector = new byte[Sizes.Sector];
-
-            long oldPos = Content.Position;
-            Content.Position = 0;
-            Utilities.ReadFully(Content, sector, 0, Sizes.Sector);
-            Content.Position = oldPos;
-
-            return sector;
-        }
-
-        /// <summary>
-        /// Overwrites the first sector of the disk, known as the Master Boot Record.
-        /// </summary>
-        /// <param name="data">The master boot record, must be 512 bytes in length.</param>
-        public virtual void SetMasterBootRecord(byte[] data)
-        {
-            if (data == null)
-            {
-                throw new ArgumentNullException("data");
-            }
-            else if (data.Length != Sizes.Sector)
-            {
-                throw new ArgumentException("The Master Boot Record must be exactly 512 bytes in length", "data");
-            }
-
-            long oldPos = Content.Position;
-            Content.Position = 0;
-            Content.Write(data, 0, Sizes.Sector);
-            Content.Position = oldPos;
-        }
-
-        /// <summary>
         /// Gets the Windows disk signature of the disk, which uniquely identifies the disk.
         /// </summary>
         public virtual int Signature
@@ -211,35 +162,53 @@ namespace DiscUtils
             }
         }
 
-        /// <summary>
-        /// Create a new differencing disk, possibly within an existing disk.
-        /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
-        public abstract VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path);
-
-        /// <summary>
-        /// Create a new differencing disk.
-        /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
-        public abstract VirtualDisk CreateDifferencingDisk(string path);
-
-        /// <summary>
-        /// Gets the set of disk formats supported as an array of file extensions.
-        /// </summary>
-        public static ICollection<string> SupportedDiskFormats
+        private static Dictionary<string, VirtualDiskFactory> ExtensionMap
         {
-            get { return ExtensionMap.Keys; }
+            get
+            {
+                if (s_extensionMap == null)
+                {
+                    InitializeMaps();
+                }
+
+                return s_extensionMap;
+            }
         }
 
-        /// <summary>
-        /// Gets the set of disk types supported, as an array of identifiers.
-        /// </summary>
-        public static ICollection<string> SupportedDiskTypes
+        private static Dictionary<string, VirtualDiskFactory> TypeMap
         {
-            get { return TypeMap.Keys; }
+            get
+            {
+                if (s_typeMap == null)
+                {
+                    InitializeMaps();
+                }
+
+                return s_typeMap;
+            }
+        }
+
+        private static Dictionary<string, VirtualDiskTransport> DiskTransports
+        {
+            get
+            {
+                if (s_diskTransports == null)
+                {
+                    Dictionary<string, VirtualDiskTransport> transports = new Dictionary<string, VirtualDiskTransport>();
+
+                    foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+                    {
+                        foreach (VirtualDiskTransportAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
+                        {
+                            transports.Add(attr.Scheme.ToUpperInvariant(), (VirtualDiskTransport)Activator.CreateInstance(type));
+                        }
+                    }
+
+                    s_diskTransports = transports;
+                }
+
+                return s_diskTransports;
+            }
         }
 
         /// <summary>
@@ -438,6 +407,86 @@ namespace DiscUtils
             return null;
         }
 
+        /// <summary>
+        /// Disposes of this instance, freeing underlying resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Reads the first sector of the disk, known as the Master Boot Record.
+        /// </summary>
+        /// <returns>The MBR as a byte array</returns>
+        public virtual byte[] GetMasterBootRecord()
+        {
+            byte[] sector = new byte[Sizes.Sector];
+
+            long oldPos = Content.Position;
+            Content.Position = 0;
+            Utilities.ReadFully(Content, sector, 0, Sizes.Sector);
+            Content.Position = oldPos;
+
+            return sector;
+        }
+
+        /// <summary>
+        /// Overwrites the first sector of the disk, known as the Master Boot Record.
+        /// </summary>
+        /// <param name="data">The master boot record, must be 512 bytes in length.</param>
+        public virtual void SetMasterBootRecord(byte[] data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+            else if (data.Length != Sizes.Sector)
+            {
+                throw new ArgumentException("The Master Boot Record must be exactly 512 bytes in length", "data");
+            }
+
+            long oldPos = Content.Position;
+            Content.Position = 0;
+            Content.Write(data, 0, Sizes.Sector);
+            Content.Position = oldPos;
+        }
+
+        /// <summary>
+        /// Create a new differencing disk, possibly within an existing disk.
+        /// </summary>
+        /// <param name="fileSystem">The file system to create the disk on</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public abstract VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path);
+
+        /// <summary>
+        /// Create a new differencing disk.
+        /// </summary>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <returns>The newly created disk</returns>
+        public abstract VirtualDisk CreateDifferencingDisk(string path);
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
+        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
+        /// if running inside destructor.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_transport != null)
+                {
+                    _transport.Dispose();
+                }
+
+                _transport = null;
+            }
+        }
+
         private static Uri PathToUri(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -451,32 +500,6 @@ namespace DiscUtils
             }
 
             return new Uri(path);
-        }
-
-        private static Dictionary<string, VirtualDiskFactory> ExtensionMap
-        {
-            get
-            {
-                if (s_extensionMap == null)
-                {
-                    InitializeMaps();
-                }
-
-                return s_extensionMap;
-            }
-        }
-
-        private static Dictionary<string, VirtualDiskFactory> TypeMap
-        {
-            get
-            {
-                if (s_typeMap == null)
-                {
-                    InitializeMaps();
-                }
-
-                return s_typeMap;
-            }
         }
 
         private static void InitializeMaps()
@@ -500,29 +523,6 @@ namespace DiscUtils
 
             s_typeMap = typeMap;
             s_extensionMap = extensionMap;
-        }
-
-        private static Dictionary<string, VirtualDiskTransport> DiskTransports
-        {
-            get
-            {
-                if (s_diskTransports == null)
-                {
-                    Dictionary<string, VirtualDiskTransport> transports = new Dictionary<string, VirtualDiskTransport>();
-
-                    foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
-                    {
-                        foreach (VirtualDiskTransportAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
-                        {
-                            transports.Add(attr.Scheme.ToUpperInvariant(), (VirtualDiskTransport)Activator.CreateInstance(type));
-                        }
-                    }
-
-                    s_diskTransports = transports;
-                }
-
-                return s_diskTransports;
-            }
         }
     }
 }

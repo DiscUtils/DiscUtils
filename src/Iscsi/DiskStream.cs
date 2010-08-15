@@ -65,10 +65,6 @@ namespace DiscUtils.Iscsi
             get { return _canWrite; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _length; }
@@ -85,6 +81,18 @@ namespace DiscUtils.Iscsi
             {
                 _position = value;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                yield return new StreamExtent(0, _length);
+            }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -189,14 +197,6 @@ namespace DiscUtils.Iscsi
 
                 numWritten += toWrite;
                 _position += toWrite;
-            }
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                yield return new StreamExtent(0, _length);
             }
         }
     }

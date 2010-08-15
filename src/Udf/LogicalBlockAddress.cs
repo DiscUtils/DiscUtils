@@ -29,6 +29,11 @@ namespace DiscUtils.Udf
         public uint LogicalBlock;
         public ushort Partition;
 
+        public int Size
+        {
+            get { return 6; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             LogicalBlock = Utilities.ToUInt32LittleEndian(buffer, offset);
@@ -39,11 +44,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 6; }
         }
 
         public override string ToString()

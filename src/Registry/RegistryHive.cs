@@ -82,15 +82,11 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Disposes of this instance, freeing any underlying stream (if any).
+        /// Gets the root key in the registry hive.
         /// </summary>
-        public void Dispose()
+        public RegistryKey Root
         {
-            if (_fileStream != null && _ownsStream == Ownership.Dispose)
-            {
-                _fileStream.Dispose();
-                _fileStream = null;
-            }
+            get { return new RegistryKey(this, GetCell<KeyNodeCell>(_header.RootCell)); }
         }
 
         /// <summary>
@@ -185,11 +181,15 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Gets the root key in the registry hive.
+        /// Disposes of this instance, freeing any underlying stream (if any).
         /// </summary>
-        public RegistryKey Root
+        public void Dispose()
         {
-            get { return new RegistryKey(this, GetCell<KeyNodeCell>(_header.RootCell)); }
+            if (_fileStream != null && _ownsStream == Ownership.Dispose)
+            {
+                _fileStream.Dispose();
+                _fileStream = null;
+            }
         }
 
         internal K GetCell<K>(int index)

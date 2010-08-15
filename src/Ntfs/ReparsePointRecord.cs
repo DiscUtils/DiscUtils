@@ -31,7 +31,10 @@ namespace DiscUtils.Ntfs
         public uint Tag;
         public byte[] Content;
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get { return 8 + Content.Length; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -50,15 +53,6 @@ namespace DiscUtils.Ntfs
             Array.Copy(Content, 0, buffer, offset + 8, Content.Length);
         }
 
-        public int Size
-        {
-            get { return 8 + Content.Length; }
-        }
-
-        #endregion
-
-        #region IDiagnosticTraceable Members
-
         public void Dump(TextWriter writer, string linePrefix)
         {
             writer.WriteLine(linePrefix + "                Tag: " + Tag.ToString("x", CultureInfo.InvariantCulture));
@@ -71,7 +65,5 @@ namespace DiscUtils.Ntfs
 
             writer.WriteLine(linePrefix + "               Data:" + hex + (Content.Length > 32 ? "..." : ""));
         }
-
-        #endregion
     }
 }

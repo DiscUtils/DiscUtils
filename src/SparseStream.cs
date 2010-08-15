@@ -36,17 +36,6 @@ namespace DiscUtils
     public abstract class SparseStream : Stream
     {
         /// <summary>
-        /// Gets the parts of a stream that are stored, within a specified range.
-        /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
-        public virtual IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
-        {
-            return StreamExtent.Intersect(Extents, new StreamExtent[] { new StreamExtent(start, count) });
-        }
-
-        /// <summary>
         /// Gets the parts of the stream that are stored.
         /// </summary>
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
@@ -119,6 +108,17 @@ namespace DiscUtils
             return new SparseReadOnlyWrapperStream(toWrap, ownership);
         }
 
+        /// <summary>
+        /// Gets the parts of a stream that are stored, within a specified range.
+        /// </summary>
+        /// <param name="start">The offset of the first byte of interest</param>
+        /// <param name="count">The number of bytes of interest</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        public virtual IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            return StreamExtent.Intersect(Extents, new StreamExtent[] { new StreamExtent(start, count) });
+        }
+
         private class SparseReadOnlyWrapperStream : SparseStream
         {
             private SparseStream _wrapped;
@@ -128,22 +128,6 @@ namespace DiscUtils
             {
                 _wrapped = wrapped;
                 _ownsWrapped = ownsWrapped;
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                try
-                {
-                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
-                    {
-                        _wrapped.Dispose();
-                        _wrapped = null;
-                    }
-                }
-                finally
-                {
-                    base.Dispose(disposing);
-                }
             }
 
             public override bool CanRead
@@ -159,10 +143,6 @@ namespace DiscUtils
             public override bool CanWrite
             {
                 get { return false; }
-            }
-
-            public override void Flush()
-            {
             }
 
             public override long Length
@@ -181,6 +161,15 @@ namespace DiscUtils
                 {
                     _wrapped.Position = value;
                 }
+            }
+
+            public override IEnumerable<StreamExtent> Extents
+            {
+                get { return _wrapped.Extents; }
+            }
+
+            public override void Flush()
+            {
             }
 
             public override int Read(byte[] buffer, int offset, int count)
@@ -203,9 +192,20 @@ namespace DiscUtils
                 throw new InvalidOperationException("Attempt to write to read-only stream");
             }
 
-            public override IEnumerable<StreamExtent> Extents
+            protected override void Dispose(bool disposing)
             {
-                get { return _wrapped.Extents; }
+                try
+                {
+                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
+                    {
+                        _wrapped.Dispose();
+                        _wrapped = null;
+                    }
+                }
+                finally
+                {
+                    base.Dispose(disposing);
+                }
             }
         }
 
@@ -225,22 +225,6 @@ namespace DiscUtils
                 }
             }
 
-            protected override void Dispose(bool disposing)
-            {
-                try
-                {
-                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
-                    {
-                        _wrapped.Dispose();
-                        _wrapped = null;
-                    }
-                }
-                finally
-                {
-                    base.Dispose(disposing);
-                }
-            }
-
             public override bool CanRead
             {
                 get { return _wrapped.CanRead; }
@@ -254,11 +238,6 @@ namespace DiscUtils
             public override bool CanWrite
             {
                 get { return _wrapped.CanWrite; }
-            }
-
-            public override void Flush()
-            {
-                _wrapped.Flush();
             }
 
             public override long Length
@@ -277,6 +256,26 @@ namespace DiscUtils
                 {
                     _wrapped.Position = value;
                 }
+            }
+
+            public override IEnumerable<StreamExtent> Extents
+            {
+                get
+                {
+                    if (_extents != null)
+                    {
+                        return _extents;
+                    }
+                    else
+                    {
+                        return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
+                    }
+                }
+            }
+
+            public override void Flush()
+            {
+                _wrapped.Flush();
             }
 
             public override int Read(byte[] buffer, int offset, int count)
@@ -304,18 +303,19 @@ namespace DiscUtils
                 _wrapped.Write(buffer, offset, count);
             }
 
-            public override IEnumerable<StreamExtent> Extents
+            protected override void Dispose(bool disposing)
             {
-                get
+                try
                 {
-                    if (_extents != null)
+                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
                     {
-                        return _extents;
+                        _wrapped.Dispose();
+                        _wrapped = null;
                     }
-                    else
-                    {
-                        return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
-                    }
+                }
+                finally
+                {
+                    base.Dispose(disposing);
                 }
             }
         }

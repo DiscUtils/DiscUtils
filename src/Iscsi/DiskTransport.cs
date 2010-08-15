@@ -31,6 +31,11 @@ namespace DiscUtils.Iscsi
         private LunInfo _lunInfo;
         private Session _session;
 
+        public override bool IsRawDisk
+        {
+            get { return true; }
+        }
+
         public override void Connect(Uri uri, string username, string password)
         {
             _lunInfo = LunInfo.ParseUri(uri.OriginalString);
@@ -38,26 +43,6 @@ namespace DiscUtils.Iscsi
             Initiator initiator = new Initiator();
             initiator.SetCredentials(username, password);
             _session = initiator.ConnectTo(_lunInfo.Target);
-        }
-
-        public override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_session != null)
-                {
-                    _session.Dispose();
-                }
-
-                _session = null;
-            }
-
-            base.Dispose(disposing);
-        }
-
-        public override bool IsRawDisk
-        {
-            get { return true; }
         }
 
         public override VirtualDisk OpenDisk(FileAccess access)
@@ -73,6 +58,21 @@ namespace DiscUtils.Iscsi
         public override string GetFileName()
         {
             throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_session != null)
+                {
+                    _session.Dispose();
+                }
+
+                _session = null;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

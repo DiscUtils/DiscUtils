@@ -31,13 +31,13 @@ namespace DiscUtils.Nfs
 
     internal sealed class RpcTcpTransport : IDisposable
     {
+        private const int RetryLimit = 20;
+
         private string _address;
         private int _port;
         private int _localPort;
         private Socket _socket;
         private NetworkStream _tcpStream;
-
-        private const int RetryLimit = 20;
 
         public RpcTcpTransport(string address, int port)
             : this(address, port, 0)

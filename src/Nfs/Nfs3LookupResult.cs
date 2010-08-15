@@ -24,12 +24,6 @@ namespace DiscUtils.Nfs
 {
     internal class Nfs3LookupResult : Nfs3CallResult
     {
-        public Nfs3FileHandle ObjectHandle { get; set; }
-
-        public Nfs3FileAttributes ObjectAttributes { get; set; }
-
-        public Nfs3FileAttributes DirAttributes { get; set; }
-
         public Nfs3LookupResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
@@ -47,5 +41,11 @@ namespace DiscUtils.Nfs
                 DirAttributes = new Nfs3FileAttributes(reader);
             }
         }
+
+        public Nfs3FileHandle ObjectHandle { get; set; }
+
+        public Nfs3FileAttributes ObjectAttributes { get; set; }
+
+        public Nfs3FileAttributes DirAttributes { get; set; }
     }
 }

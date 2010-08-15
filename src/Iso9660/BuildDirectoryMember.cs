@@ -36,6 +36,8 @@ namespace DiscUtils.Iso9660
     /// which is the strictly compliant ISO 9660 name.</remarks>
     public abstract class BuildDirectoryMember
     {
+        internal static readonly Comparer<BuildDirectoryMember> SortedComparison = new DirectorySortedComparison();
+
         private string _name;
         private string _shortName;
         private DateTime _creationTime;
@@ -169,7 +171,5 @@ namespace DiscUtils.Iso9660
                 return 0;
             }
         }
-
-        internal static readonly Comparer<BuildDirectoryMember> SortedComparison = new DirectorySortedComparison();
     }
 }

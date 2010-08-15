@@ -66,40 +66,6 @@ namespace DiscUtils.Fat
             _fileSize = toCopy._fileSize;
         }
 
-        private void Load(byte[] data, int offset)
-        {
-            _name = Utilities.BytesToString(data, offset, 11);
-            _attr = data[offset + 11];
-            _creationTimeTenth = data[offset + 13];
-            _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);
-            _creationDate = Utilities.ToUInt16LittleEndian(data, offset + 16);
-            _lastAccessDate = Utilities.ToUInt16LittleEndian(data, offset + 18);
-            _firstClusterHi = Utilities.ToUInt16LittleEndian(data, offset + 20);
-            _lastWriteTime = Utilities.ToUInt16LittleEndian(data, offset + 22);
-            _lastWriteDate = Utilities.ToUInt16LittleEndian(data, offset + 24);
-            _firstClusterLo = Utilities.ToUInt16LittleEndian(data, offset + 26);
-            _fileSize = Utilities.ToUInt32LittleEndian(data, offset + 28);
-        }
-
-        internal void WriteTo(Stream stream)
-        {
-            byte[] buffer = new byte[32];
-
-            Utilities.StringToBytes(_name, buffer, 0, 11);
-            buffer[11] = _attr;
-            buffer[13] = _creationTimeTenth;
-            Utilities.WriteBytesLittleEndian((ushort)_creationTime, buffer, 14);
-            Utilities.WriteBytesLittleEndian((ushort)_creationDate, buffer, 16);
-            Utilities.WriteBytesLittleEndian((ushort)_lastAccessDate, buffer, 18);
-            Utilities.WriteBytesLittleEndian((ushort)_firstClusterHi, buffer, 20);
-            Utilities.WriteBytesLittleEndian((ushort)_lastWriteTime, buffer, 22);
-            Utilities.WriteBytesLittleEndian((ushort)_lastWriteDate, buffer, 24);
-            Utilities.WriteBytesLittleEndian((ushort)_firstClusterLo, buffer, 26);
-            Utilities.WriteBytesLittleEndian((uint)_fileSize, buffer, 28);
-
-            stream.Write(buffer, 0, buffer.Length);
-        }
-
         public string Name
         {
             get
@@ -110,14 +76,6 @@ namespace DiscUtils.Fat
             set
             {
                 NormalizedName = FatUtilities.NormalizeFileName(value);
-            }
-        }
-
-        internal string SearchName
-        {
-            get
-            {
-                return _name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ');
             }
         }
 
@@ -185,6 +143,33 @@ namespace DiscUtils.Fat
             }
         }
 
+        internal string SearchName
+        {
+            get
+            {
+                return _name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ');
+            }
+        }
+
+        internal void WriteTo(Stream stream)
+        {
+            byte[] buffer = new byte[32];
+
+            Utilities.StringToBytes(_name, buffer, 0, 11);
+            buffer[11] = _attr;
+            buffer[13] = _creationTimeTenth;
+            Utilities.WriteBytesLittleEndian((ushort)_creationTime, buffer, 14);
+            Utilities.WriteBytesLittleEndian((ushort)_creationDate, buffer, 16);
+            Utilities.WriteBytesLittleEndian((ushort)_lastAccessDate, buffer, 18);
+            Utilities.WriteBytesLittleEndian((ushort)_firstClusterHi, buffer, 20);
+            Utilities.WriteBytesLittleEndian((ushort)_lastWriteTime, buffer, 22);
+            Utilities.WriteBytesLittleEndian((ushort)_lastWriteDate, buffer, 24);
+            Utilities.WriteBytesLittleEndian((ushort)_firstClusterLo, buffer, 26);
+            Utilities.WriteBytesLittleEndian((uint)_fileSize, buffer, 28);
+
+            stream.Write(buffer, 0, buffer.Length);
+        }
+
         private static DateTime FileTimeToDateTime(ushort date, ushort time, byte tenths)
         {
             if (date == 0 || date == 0xFFFF)
@@ -227,6 +212,21 @@ namespace DiscUtils.Fat
             date = (ushort)((((value.Year - 1980) << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
             time = (ushort)(((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second / 2) & 0x001F));
             tenths = (byte)(((value.Second % 2) * 100) + (value.Millisecond / 10));
+        }
+
+        private void Load(byte[] data, int offset)
+        {
+            _name = Utilities.BytesToString(data, offset, 11);
+            _attr = data[offset + 11];
+            _creationTimeTenth = data[offset + 13];
+            _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);
+            _creationDate = Utilities.ToUInt16LittleEndian(data, offset + 16);
+            _lastAccessDate = Utilities.ToUInt16LittleEndian(data, offset + 18);
+            _firstClusterHi = Utilities.ToUInt16LittleEndian(data, offset + 20);
+            _lastWriteTime = Utilities.ToUInt16LittleEndian(data, offset + 22);
+            _lastWriteDate = Utilities.ToUInt16LittleEndian(data, offset + 24);
+            _firstClusterLo = Utilities.ToUInt16LittleEndian(data, offset + 26);
+            _fileSize = Utilities.ToUInt32LittleEndian(data, offset + 28);
         }
     }
 }

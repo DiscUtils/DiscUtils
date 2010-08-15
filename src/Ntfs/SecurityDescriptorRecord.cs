@@ -32,6 +32,11 @@ namespace DiscUtils.Ntfs
         public uint EntrySize;
         public byte[] SecurityDescriptor;
 
+        public int Size
+        {
+            get { return SecurityDescriptor.Length + 0x14; }
+        }
+
         public bool Read(byte[] buffer, int offset)
         {
             Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
@@ -51,8 +56,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        #region IByteArraySerializable Members
-
         public int ReadFrom(byte[] buffer, int offset)
         {
             Read(buffer, offset);
@@ -70,12 +73,5 @@ namespace DiscUtils.Ntfs
 
             Array.Copy(SecurityDescriptor, 0, buffer, offset + 0x14, SecurityDescriptor.Length);
         }
-
-        public int Size
-        {
-            get { return SecurityDescriptor.Length + 0x14; }
-        }
-
-        #endregion
     }
 }

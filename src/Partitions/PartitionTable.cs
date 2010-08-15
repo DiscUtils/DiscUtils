@@ -39,6 +39,29 @@ namespace DiscUtils.Partitions
         public abstract Guid DiskGuid { get; }
 
         /// <summary>
+        /// Gets the list of partitions that contain user data (i.e. non-system / empty).
+        /// </summary>
+        public abstract ReadOnlyCollection<PartitionInfo> Partitions { get; }
+
+        /// <summary>
+        /// Gets the number of User partitions on the disk.
+        /// </summary>
+        public int Count
+        {
+            get { return Partitions.Count; }
+        }
+
+        /// <summary>
+        /// Gets information about a particular User partition.
+        /// </summary>
+        /// <param name="index">The index of the partition</param>
+        /// <returns>Information about the partition</returns>
+        public PartitionInfo this[int index]
+        {
+            get { return Partitions[index]; }
+        }
+
+        /// <summary>
         /// Creates a new partition that encompasses the entire disk.
         /// </summary>
         /// <param name="type">The partition type</param>
@@ -62,28 +85,5 @@ namespace DiscUtils.Partitions
         /// </summary>
         /// <param name="index">The index of the partition</param>
         public abstract void Delete(int index);
-
-        /// <summary>
-        /// Gets the list of partitions that contain user data (i.e. non-system / empty).
-        /// </summary>
-        public abstract ReadOnlyCollection<PartitionInfo> Partitions { get; }
-
-        /// <summary>
-        /// Gets information about a particular User partition.
-        /// </summary>
-        /// <param name="index">The index of the partition</param>
-        /// <returns>Information about the partition</returns>
-        public PartitionInfo this[int index]
-        {
-            get { return Partitions[index]; }
-        }
-
-        /// <summary>
-        /// Gets the number of User partitions on the disk.
-        /// </summary>
-        public int Count
-        {
-            get { return Partitions.Count; }
-        }
     }
 }

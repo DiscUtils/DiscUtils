@@ -43,6 +43,53 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets an instance of the parent directory.
+        /// </summary>
+        public DiscDirectoryInfo Directory
+        {
+            get { return Parent; }
+        }
+
+        /// <summary>
+        /// Gets a string representing the directory's full path.
+        /// </summary>
+        public string DirectoryName
+        {
+            get { return Directory.FullName; }
+        }
+
+        /// <summary>
+        /// Gets or sets a value that determines if the file is read-only.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get
+            {
+                return (Attributes & FileAttributes.ReadOnly) != 0;
+            }
+
+            set
+            {
+                if (value)
+                {
+                    Attributes = Attributes | FileAttributes.ReadOnly;
+                }
+                else
+                {
+                    Attributes = Attributes & ~FileAttributes.ReadOnly;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the length of the current file in bytes.
+        /// </summary>
+        public long Length
+        {
+            get { return FileSystem.GetFileLength(Path); }
+        }
+
+        /// <summary>
         /// Deletes a file.
         /// </summary>
         public override void Delete()
@@ -94,53 +141,6 @@ namespace DiscUtils
         public StreamWriter CreateText()
         {
             return new StreamWriter(Open(FileMode.Create));
-        }
-
-        /// <summary>
-        /// Gets an instance of the parent directory.
-        /// </summary>
-        public DiscDirectoryInfo Directory
-        {
-            get { return Parent; }
-        }
-
-        /// <summary>
-        /// Gets a string representing the directory's full path.
-        /// </summary>
-        public string DirectoryName
-        {
-            get { return Directory.FullName; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value that determines if the file is read-only.
-        /// </summary>
-        public bool IsReadOnly
-        {
-            get
-            {
-                return (Attributes & FileAttributes.ReadOnly) != 0;
-            }
-
-            set
-            {
-                if (value)
-                {
-                    Attributes = Attributes | FileAttributes.ReadOnly;
-                }
-                else
-                {
-                    Attributes = Attributes & ~FileAttributes.ReadOnly;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the length of the current file in bytes.
-        /// </summary>
-        public long Length
-        {
-            get { return FileSystem.GetFileLength(Path); }
         }
 
         /// <summary>

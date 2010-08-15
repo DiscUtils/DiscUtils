@@ -85,6 +85,88 @@ namespace DiscUtils.Fat
             get { return _entries.Count == 0; }
         }
 
+        public DirectoryEntry[] Entries
+        {
+            get { return new List<DirectoryEntry>(_entries.Values).ToArray(); }
+        }
+
+        #region Convenient accessors for special entries
+        internal DirectoryEntry ParentsChildEntry
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    return new DirectoryEntry(ParentEntryNormalizedName, FatAttributes.Directory);
+                }
+                else
+                {
+                    return _parent.GetEntry(_parentId);
+                }
+            }
+
+            set
+            {
+                if (_parent != null)
+                {
+                    _parent.UpdateEntry(_parentId, value);
+                }
+            }
+        }
+
+        internal DirectoryEntry SelfEntry
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    // If we're the root directory, simulate the parent entry with a dummy record
+                    return new DirectoryEntry("", FatAttributes.Directory);
+                }
+                else
+                {
+                    return _selfEntry;
+                }
+            }
+
+            set
+            {
+                if (_selfEntryLocation >= 0)
+                {
+                    _dirStream.Position = _selfEntryLocation;
+                    value.WriteTo(_dirStream);
+                    _selfEntry = value;
+                }
+            }
+        }
+
+        internal DirectoryEntry ParentEntry
+        {
+            get
+            {
+                return _parentEntry;
+            }
+
+            set
+            {
+                if (_parentEntryLocation < 0)
+                {
+                    throw new IOException("No parent entry on disk to update");
+                }
+
+                _dirStream.Position = _parentEntryLocation;
+                value.WriteTo(_dirStream);
+                _parentEntry = value;
+            }
+        }
+        #endregion
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public DirectoryEntry[] GetDirectories()
         {
             List<DirectoryEntry> dirs = new List<DirectoryEntry>(_entries.Count);
@@ -111,11 +193,6 @@ namespace DiscUtils.Fat
             }
 
             return files.ToArray();
-        }
-
-        public DirectoryEntry[] Entries
-        {
-            get { return new List<DirectoryEntry>(_entries.Values).ToArray(); }
         }
 
         public DirectoryEntry GetEntry(long id)
@@ -201,126 +278,6 @@ namespace DiscUtils.Fat
             DirectoryEntry newParentEntry = new DirectoryEntry(SelfEntry);
             newParentEntry.NormalizedName = ParentEntryNormalizedName;
             newChild.ParentEntry = newParentEntry;
-        }
-
-        #region Convenient accessors for special entries
-        internal DirectoryEntry ParentsChildEntry
-        {
-            get
-            {
-                if (_parent == null)
-                {
-                    return new DirectoryEntry(ParentEntryNormalizedName, FatAttributes.Directory);
-                }
-                else
-                {
-                    return _parent.GetEntry(_parentId);
-                }
-            }
-
-            set
-            {
-                if (_parent != null)
-                {
-                    _parent.UpdateEntry(_parentId, value);
-                }
-            }
-        }
-
-        internal DirectoryEntry SelfEntry
-        {
-            get
-            {
-                if (_parent == null)
-                {
-                    // If we're the root directory, simulate the parent entry with a dummy record
-                    return new DirectoryEntry("", FatAttributes.Directory);
-                }
-                else
-                {
-                    return _selfEntry;
-                }
-            }
-
-            set
-            {
-                if (_selfEntryLocation >= 0)
-                {
-                    _dirStream.Position = _selfEntryLocation;
-                    value.WriteTo(_dirStream);
-                    _selfEntry = value;
-                }
-            }
-        }
-
-        internal DirectoryEntry ParentEntry
-        {
-            get
-            {
-                return _parentEntry;
-            }
-
-            set
-            {
-                if (_parentEntryLocation < 0)
-                {
-                    throw new IOException("No parent entry on disk to update");
-                }
-
-                _dirStream.Position = _parentEntryLocation;
-                value.WriteTo(_dirStream);
-                _parentEntry = value;
-            }
-        }
-        #endregion
-
-        private void LoadEntries()
-        {
-            _entries = new Dictionary<long, DirectoryEntry>();
-            _freeEntries = new List<long>();
-
-            _selfEntryLocation = -1;
-            _parentEntryLocation = -1;
-
-            while (_dirStream.Position < _dirStream.Length)
-            {
-                long streamPos = _dirStream.Position;
-                DirectoryEntry entry = new DirectoryEntry(_dirStream);
-
-                if (entry.Attributes == (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
-                {
-                    // Long File Name entry
-                }
-                else if (entry.NormalizedName[0] == 0xE5)
-                {
-                    // E5 = Free Entry
-                    _freeEntries.Add(streamPos);
-                }
-                else if (entry.NormalizedName[0] == '.')
-                {
-                    // Special folders
-                    if (entry.NormalizedName == SelfEntryNormalizedName)
-                    {
-                        _selfEntry = entry;
-                        _selfEntryLocation = streamPos;
-                    }
-                    else if (entry.NormalizedName == ParentEntryNormalizedName)
-                    {
-                        _parentEntry = entry;
-                        _parentEntryLocation = streamPos;
-                    }
-                }
-                else if (entry.NormalizedName[0] == 0x00)
-                {
-                    // 00 = Free Entry, no more entries available
-                    _endOfEntries = streamPos;
-                    break;
-                }
-                else
-                {
-                    _entries.Add(streamPos, entry);
-                }
-            }
         }
 
         internal long FindVolumeId()
@@ -471,6 +428,55 @@ namespace DiscUtils.Fat
             _entries[id] = entry;
         }
 
+        private void LoadEntries()
+        {
+            _entries = new Dictionary<long, DirectoryEntry>();
+            _freeEntries = new List<long>();
+
+            _selfEntryLocation = -1;
+            _parentEntryLocation = -1;
+
+            while (_dirStream.Position < _dirStream.Length)
+            {
+                long streamPos = _dirStream.Position;
+                DirectoryEntry entry = new DirectoryEntry(_dirStream);
+
+                if (entry.Attributes == (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
+                {
+                    // Long File Name entry
+                }
+                else if (entry.NormalizedName[0] == 0xE5)
+                {
+                    // E5 = Free Entry
+                    _freeEntries.Add(streamPos);
+                }
+                else if (entry.NormalizedName[0] == '.')
+                {
+                    // Special folders
+                    if (entry.NormalizedName == SelfEntryNormalizedName)
+                    {
+                        _selfEntry = entry;
+                        _selfEntryLocation = streamPos;
+                    }
+                    else if (entry.NormalizedName == ParentEntryNormalizedName)
+                    {
+                        _parentEntry = entry;
+                        _parentEntryLocation = streamPos;
+                    }
+                }
+                else if (entry.NormalizedName[0] == 0x00)
+                {
+                    // 00 = Free Entry, no more entries available
+                    _endOfEntries = streamPos;
+                    break;
+                }
+                else
+                {
+                    _entries.Add(streamPos, entry);
+                }
+            }
+        }
+
         private void HandleAccessed(bool forWrite)
         {
             if (_fileSystem.CanWrite && _parent != null)
@@ -518,14 +524,6 @@ namespace DiscUtils.Fat
             }
         }
 
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         private void Dispose(bool disposing)
         {
             if (disposing)
@@ -533,7 +531,5 @@ namespace DiscUtils.Fat
                 _dirStream.Dispose();
             }
         }
-
-        #endregion
     }
 }

@@ -93,33 +93,6 @@ namespace DiscUtils.Vmdk
         /// </summary>
         protected bool _atEof;
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    if (_ownsFileStream == Ownership.Dispose && _fileStream != null)
-                    {
-                        _fileStream.Dispose();
-                    }
-
-                    _fileStream = null;
-
-                    if (_ownsParentDiskStream == Ownership.Dispose && _parentDiskStream != null)
-                    {
-                        _parentDiskStream.Dispose();
-                    }
-
-                    _parentDiskStream = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get
@@ -147,11 +120,6 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        public override void Flush()
-        {
-            CheckDisposed();
-        }
-
         public override long Length
         {
             get
@@ -175,6 +143,16 @@ namespace DiscUtils.Vmdk
                 _position = value;
                 _atEof = false;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return GetExtentsInRange(0, Length); }
+        }
+
+        public override void Flush()
+        {
+            CheckDisposed();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -245,16 +223,6 @@ namespace DiscUtils.Vmdk
             return totalRead;
         }
 
-        protected uint GetGrainTableEntry(int grain)
-        {
-            return Utilities.ToUInt32LittleEndian(_grainTable, grain * 4);
-        }
-
-        protected void SetGrainTableEntry(int grain, uint value)
-        {
-            Utilities.WriteBytesLittleEndian(value, _grainTable, grain * 4);
-        }
-
         public override void SetLength(long value)
         {
             CheckDisposed();
@@ -307,9 +275,96 @@ namespace DiscUtils.Vmdk
             return result;
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get { return GetExtentsInRange(0, Length); }
+            try
+            {
+                if (disposing)
+                {
+                    if (_ownsFileStream == Ownership.Dispose && _fileStream != null)
+                    {
+                        _fileStream.Dispose();
+                    }
+
+                    _fileStream = null;
+
+                    if (_ownsParentDiskStream == Ownership.Dispose && _parentDiskStream != null)
+                    {
+                        _parentDiskStream.Dispose();
+                    }
+
+                    _parentDiskStream = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+
+        protected uint GetGrainTableEntry(int grain)
+        {
+            return Utilities.ToUInt32LittleEndian(_grainTable, grain * 4);
+        }
+
+        protected void SetGrainTableEntry(int grain, uint value)
+        {
+            Utilities.WriteBytesLittleEndian(value, _grainTable, grain * 4);
+        }
+
+        protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
+        {
+            _fileStream.Position = grainStart + grainOffset;
+            return _fileStream.Read(buffer, bufferOffset, numToRead);
+        }
+
+        protected virtual void LoadGlobalDirectory()
+        {
+            int numGTs = (int)Utilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
+
+            _globalDirectory = new uint[numGTs];
+            _fileStream.Position = _header.GdOffset * Sizes.Sector;
+            byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
+            for (int i = 0; i < _globalDirectory.Length; ++i)
+            {
+                _globalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
+            }
+        }
+
+        protected bool LoadGrainTable(int index)
+        {
+            if (_grainTable != null && _currentGrainTable == index)
+            {
+                return true;
+            }
+
+            // This grain table not present in grain directory, so can't load it...
+            if (_globalDirectory[index] == 0)
+            {
+                return false;
+            }
+
+            byte[] newGrainTable = _grainTable;
+            _grainTable = null;
+            if (newGrainTable == null)
+            {
+                newGrainTable = new byte[_header.NumGTEsPerGT * 4];
+            }
+
+            _fileStream.Position = ((long)_globalDirectory[index]) * Sizes.Sector;
+            Utilities.ReadFully(_fileStream, newGrainTable, 0, newGrainTable.Length);
+
+            _currentGrainTable = index;
+            _grainTable = newGrainTable;
+            return true;
+        }
+
+        protected void CheckDisposed()
+        {
+            if (_fileStream == null)
+            {
+                throw new ObjectDisposedException("CommonSparseExtentStream");
+            }
         }
 
         private IEnumerable<StreamExtent> LayerExtents(long start, long count)
@@ -389,61 +444,6 @@ namespace DiscUtils.Vmdk
             }
 
             return Math.Min(pos, maxPos);
-        }
-
-        protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
-        {
-            _fileStream.Position = grainStart + grainOffset;
-            return _fileStream.Read(buffer, bufferOffset, numToRead);
-        }
-
-        protected virtual void LoadGlobalDirectory()
-        {
-            int numGTs = (int)Utilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
-
-            _globalDirectory = new uint[numGTs];
-            _fileStream.Position = _header.GdOffset * Sizes.Sector;
-            byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
-            for (int i = 0; i < _globalDirectory.Length; ++i)
-            {
-                _globalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
-            }
-        }
-
-        protected bool LoadGrainTable(int index)
-        {
-            if (_grainTable != null && _currentGrainTable == index)
-            {
-                return true;
-            }
-
-            // This grain table not present in grain directory, so can't load it...
-            if (_globalDirectory[index] == 0)
-            {
-                return false;
-            }
-
-            byte[] newGrainTable = _grainTable;
-            _grainTable = null;
-            if (newGrainTable == null)
-            {
-                newGrainTable = new byte[_header.NumGTEsPerGT * 4];
-            }
-
-            _fileStream.Position = ((long)_globalDirectory[index]) * Sizes.Sector;
-            Utilities.ReadFully(_fileStream, newGrainTable, 0, newGrainTable.Length);
-
-            _currentGrainTable = index;
-            _grainTable = newGrainTable;
-            return true;
-        }
-
-        protected void CheckDisposed()
-        {
-            if (_fileStream == null)
-            {
-                throw new ObjectDisposedException("CommonSparseExtentStream");
-            }
         }
     }
 }

@@ -53,14 +53,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// The path to the referenced file.
-        /// </summary>
-        protected string Path
-        {
-            get { return _path; }
-        }
-
-        /// <summary>
         /// Gets the name of the file or directory.
         /// </summary>
         public virtual string Name
@@ -181,6 +173,14 @@ namespace DiscUtils
         {
             get { return FileSystem.GetLastWriteTimeUtc(_path); }
             set { FileSystem.SetLastWriteTimeUtc(_path, value); }
+        }
+
+        /// <summary>
+        /// The path to the referenced file.
+        /// </summary>
+        protected string Path
+        {
+            get { return _path; }
         }
 
         /// <summary>

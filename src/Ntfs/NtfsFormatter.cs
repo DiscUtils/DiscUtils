@@ -28,6 +28,15 @@ namespace DiscUtils.Ntfs
 
     internal class NtfsFormatter
     {
+        private int _clusterSize;
+        private int _mftRecordSize;
+        private int _indexBufferSize;
+        private long _bitmapCluster;
+        private long _mftMirrorCluster;
+        private long _mftCluster;
+
+        private NtfsContext _context;
+
         public string Label { get; set; }
 
         public Geometry DiskGeometry { get; set; }
@@ -37,15 +46,6 @@ namespace DiscUtils.Ntfs
         public long SectorCount { get; set; }
 
         public byte[] BootCode { get; set; }
-
-        private int _clusterSize;
-        private int _mftRecordSize;
-        private int _indexBufferSize;
-        private long _bitmapCluster;
-        private long _mftMirrorCluster;
-        private long _mftCluster;
-
-        private NtfsContext _context;
 
         public NtfsFileSystem Format(Stream stream)
         {

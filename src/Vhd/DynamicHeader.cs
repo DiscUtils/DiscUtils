@@ -84,11 +84,6 @@ namespace DiscUtils.Vhd
             }
         }
 
-        internal static DynamicHeader FromStream(Stream stream)
-        {
-            return FromBytes(Utilities.ReadFully(stream, 1024), 0);
-        }
-
         public static DynamicHeader FromBytes(byte[] data, int offset)
         {
             DynamicHeader result = new DynamicHeader();
@@ -151,6 +146,11 @@ namespace DiscUtils.Vhd
         {
             Checksum = CalculateChecksum();
             return Checksum;
+        }
+
+        internal static DynamicHeader FromStream(Stream stream)
+        {
+            return FromBytes(Utilities.ReadFully(stream, 1024), 0);
         }
 
         private uint CalculateChecksum()

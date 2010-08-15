@@ -24,8 +24,6 @@ namespace DiscUtils.Iscsi
 {
     internal abstract class ScsiResponse
     {
-        public abstract void ReadFrom(byte[] buffer, int offset, int count);
-
         public abstract bool Truncated
         {
             get;
@@ -35,5 +33,7 @@ namespace DiscUtils.Iscsi
         {
             get;
         }
+
+        public abstract void ReadFrom(byte[] buffer, int offset, int count);
     }
 }

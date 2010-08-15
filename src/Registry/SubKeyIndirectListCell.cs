@@ -47,30 +47,6 @@ namespace DiscUtils.Registry
             get { return _listIndexes; }
         }
 
-        public override int ReadFrom(byte[] buffer, int offset)
-        {
-            _listType = Utilities.BytesToString(buffer, offset, 2);
-            int numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
-            _listIndexes = new List<int>(numElements);
-
-            for (int i = 0; i < numElements; ++i)
-            {
-                _listIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x4)));
-            }
-
-            return 4 + (_listIndexes.Count * 4);
-        }
-
-        public override void WriteTo(byte[] buffer, int offset)
-        {
-            Utilities.StringToBytes(_listType, buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian((ushort)_listIndexes.Count, buffer, offset + 2);
-            for (int i = 0; i < _listIndexes.Count; ++i)
-            {
-                Utilities.WriteBytesLittleEndian(_listIndexes[i], buffer, offset + 4 + (i * 4));
-            }
-        }
-
         public override int Size
         {
             get { return 4 + (_listIndexes.Count * 4); }
@@ -96,6 +72,30 @@ namespace DiscUtils.Registry
                 }
 
                 return total;
+            }
+        }
+
+        public override int ReadFrom(byte[] buffer, int offset)
+        {
+            _listType = Utilities.BytesToString(buffer, offset, 2);
+            int numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
+            _listIndexes = new List<int>(numElements);
+
+            for (int i = 0; i < numElements; ++i)
+            {
+                _listIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x4)));
+            }
+
+            return 4 + (_listIndexes.Count * 4);
+        }
+
+        public override void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.StringToBytes(_listType, buffer, offset, 2);
+            Utilities.WriteBytesLittleEndian((ushort)_listIndexes.Count, buffer, offset + 2);
+            for (int i = 0; i < _listIndexes.Count; ++i)
+            {
+                Utilities.WriteBytesLittleEndian(_listIndexes[i], buffer, offset + 4 + (i * 4));
             }
         }
 

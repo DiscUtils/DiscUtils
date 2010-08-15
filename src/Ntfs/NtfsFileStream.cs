@@ -43,17 +43,6 @@ namespace DiscUtils.Ntfs
             _baseStream = _file.OpenStream(attrType, attrName, access);
         }
 
-        public override void Close()
-        {
-            using (new NtfsTransaction())
-            {
-                base.Close();
-                _baseStream.Close();
-
-                UpdateMetadata();
-            }
-        }
-
         public override bool CanRead
         {
             get { return _baseStream.CanRead; }
@@ -67,16 +56,6 @@ namespace DiscUtils.Ntfs
         public override bool CanWrite
         {
             get { return _baseStream.CanWrite; }
-        }
-
-        public override void Flush()
-        {
-            using (new NtfsTransaction())
-            {
-                _baseStream.Flush();
-
-                UpdateMetadata();
-            }
         }
 
         public override long Length
@@ -97,6 +76,32 @@ namespace DiscUtils.Ntfs
                 {
                     _baseStream.Position = value;
                 }
+            }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _baseStream.Extents; }
+        }
+
+        public override void Close()
+        {
+            using (new NtfsTransaction())
+            {
+                base.Close();
+                _baseStream.Close();
+
+                UpdateMetadata();
+            }
+        }
+
+        public override void Flush()
+        {
+            using (new NtfsTransaction())
+            {
+                _baseStream.Flush();
+
+                UpdateMetadata();
             }
         }
 
@@ -135,11 +140,6 @@ namespace DiscUtils.Ntfs
                 _isDirty = true;
                 _baseStream.Write(buffer, offset, count);
             }
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return _baseStream.Extents; }
         }
 
         private void UpdateMetadata()

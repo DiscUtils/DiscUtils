@@ -41,13 +41,13 @@ namespace DiscUtils.Iso9660
     /// </example>
     public sealed class CDBuilder : StreamBuilder
     {
+        private const long DiskStart = 0x8000;
+
         private List<BuildFileInfo> _files;
         private List<BuildDirectoryInfo> _dirs;
         private BuildDirectoryInfo _rootDirectory;
 
         private BuildParameters _buildParams;
-
-        private const long DiskStart = 0x8000;
 
         /// <summary>
         /// Creates a new instance.

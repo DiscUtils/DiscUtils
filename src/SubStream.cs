@@ -61,24 +61,6 @@ namespace DiscUtils
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    if (_ownsParent == Ownership.Dispose)
-                    {
-                        _parent.Dispose();
-                    }
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get { return _parent.CanRead; }
@@ -92,11 +74,6 @@ namespace DiscUtils
         public override bool CanWrite
         {
             get { return _parent.CanWrite; }
-        }
-
-        public override void Flush()
-        {
-            _parent.Flush();
         }
 
         public override long Length
@@ -122,6 +99,27 @@ namespace DiscUtils
                     throw new ArgumentOutOfRangeException("value", "Attempt to move beyond end of stream");
                 }
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                SparseStream parentAsSparse = _parent as SparseStream;
+                if (parentAsSparse != null)
+                {
+                    return OffsetExtents(parentAsSparse.GetExtentsInRange(_first, _length));
+                }
+                else
+                {
+                    return new StreamExtent[] { new StreamExtent(0, _length) };
+                }
+            }
+        }
+
+        public override void Flush()
+        {
+            _parent.Flush();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -180,19 +178,21 @@ namespace DiscUtils
             _position += count;
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get
+            try
             {
-                SparseStream parentAsSparse = _parent as SparseStream;
-                if (parentAsSparse != null)
+                if (disposing)
                 {
-                    return OffsetExtents(parentAsSparse.GetExtentsInRange(_first, _length));
+                    if (_ownsParent == Ownership.Dispose)
+                    {
+                        _parent.Dispose();
+                    }
                 }
-                else
-                {
-                    return new StreamExtent[] { new StreamExtent(0, _length) };
-                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

@@ -102,6 +102,22 @@ namespace DiscUtils.Ntfs
             set { _totalSpaceAvailable = value; }
         }
 
+        private long SpaceFree
+        {
+            get
+            {
+                long entriesTotal = 0;
+                for (int i = 0; i < _entries.Count; ++i)
+                {
+                    entriesTotal += _entries[i].Size;
+                }
+
+                int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+
+                return _totalSpaceAvailable - (entriesTotal + firstEntryOffset);
+            }
+        }
+
         public void AddEntry(byte[] key, byte[] data)
         {
             AddEntry(new IndexEntry(key, data, _index.IsFileIndex), false);
@@ -208,75 +224,6 @@ namespace DiscUtils.Ntfs
             return firstEntryOffset + CalcEntriesSize();
         }
 
-        private long SpaceFree
-        {
-            get
-            {
-                long entriesTotal = 0;
-                for (int i = 0; i < _entries.Count; ++i)
-                {
-                    entriesTotal += _entries[i].Size;
-                }
-
-                int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
-
-                return _totalSpaceAvailable - (entriesTotal + firstEntryOffset);
-            }
-        }
-
-        private void AddEntry(IndexEntry newEntry, bool promoting)
-        {
-            for (int i = 0; i < _entries.Count; ++i)
-            {
-                var focus = _entries[i];
-                int compVal;
-
-                if ((focus.Flags & IndexEntryFlags.End) != 0)
-                {
-                    // No value when End flag is set.  Logically these nodes always
-                    // compare 'bigger', so if there are children we'll visit them.
-                    compVal = -1;
-                }
-                else
-                {
-                    compVal = _index.Compare(newEntry.KeyBuffer, focus.KeyBuffer);
-                }
-
-                if (compVal == 0)
-                {
-                    throw new InvalidOperationException("Entry already exists");
-                }
-                else if (compVal < 0)
-                {
-                    if (!promoting && (focus.Flags & IndexEntryFlags.Node) != 0)
-                    {
-                        _index.GetSubBlock(this, focus).Node.AddEntry(newEntry, false);
-                    }
-                    else
-                    {
-                        _entries.Insert(i, newEntry);
-
-                        if (SpaceFree < 0)
-                        {
-                            // The node is too small to hold the entry, so need to juggle...
-                            if (_parent != null)
-                            {
-                                Divide();
-                            }
-                            else
-                            {
-                                Depose();
-                            }
-                        }
-
-                        _store();
-                    }
-
-                    break;
-                }
-            }
-        }
-
         public int GetEntry(byte[] key, out bool exactMatch)
         {
             for (int i = 0; i < _entries.Count; ++i)
@@ -375,6 +322,101 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Only valid on the root node, this method moves all entries into a
+        /// single child node.
+        /// </summary>
+        internal bool Depose()
+        {
+            if (_parent != null)
+            {
+                throw new InvalidOperationException("Only valid on root node");
+            }
+
+            if (_entries.Count == 1)
+            {
+                return false;
+            }
+
+            IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
+            newRootEntry.Flags = IndexEntryFlags.End;
+
+            IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry);
+            newBlock.Node.SetEntries(_entries, 0, _entries.Count);
+
+            // All of the nodes that used to be one layer beneath us, are now two layers
+            // beneath, they need their parent pointers updating.
+            foreach (var entry in _entries)
+            {
+                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                {
+                    IndexBlock block = _index.GetSubBlockIfCached(entry);
+                    if (block != null)
+                    {
+                        block.Node._parent = newBlock.Node;
+                    }
+                }
+            }
+
+            _entries.Clear();
+            _entries.Add(newRootEntry);
+
+            return true;
+        }
+
+        private void AddEntry(IndexEntry newEntry, bool promoting)
+        {
+            for (int i = 0; i < _entries.Count; ++i)
+            {
+                var focus = _entries[i];
+                int compVal;
+
+                if ((focus.Flags & IndexEntryFlags.End) != 0)
+                {
+                    // No value when End flag is set.  Logically these nodes always
+                    // compare 'bigger', so if there are children we'll visit them.
+                    compVal = -1;
+                }
+                else
+                {
+                    compVal = _index.Compare(newEntry.KeyBuffer, focus.KeyBuffer);
+                }
+
+                if (compVal == 0)
+                {
+                    throw new InvalidOperationException("Entry already exists");
+                }
+                else if (compVal < 0)
+                {
+                    if (!promoting && (focus.Flags & IndexEntryFlags.Node) != 0)
+                    {
+                        _index.GetSubBlock(this, focus).Node.AddEntry(newEntry, false);
+                    }
+                    else
+                    {
+                        _entries.Insert(i, newEntry);
+
+                        if (SpaceFree < 0)
+                        {
+                            // The node is too small to hold the entry, so need to juggle...
+                            if (_parent != null)
+                            {
+                                Divide();
+                            }
+                            else
+                            {
+                                Depose();
+                            }
+                        }
+
+                        _store();
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
         /// Removes redundant nodes (that contain only an 'End' entry).
         /// </summary>
         /// <param name="entryIndex">The index of the entry that may have a redundant child</param>
@@ -420,48 +462,6 @@ namespace DiscUtils.Ntfs
             {
                 return _entries[0];
             }
-        }
-
-        /// <summary>
-        /// Only valid on the root node, this method moves all entries into a
-        /// single child node.
-        /// </summary>
-        internal bool Depose()
-        {
-            if (_parent != null)
-            {
-                throw new InvalidOperationException("Only valid on root node");
-            }
-
-            if (_entries.Count == 1)
-            {
-                return false;
-            }
-
-            IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
-            newRootEntry.Flags = IndexEntryFlags.End;
-
-            IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry);
-            newBlock.Node.SetEntries(_entries, 0, _entries.Count);
-
-            // All of the nodes that used to be one layer beneath us, are now two layers
-            // beneath, they need their parent pointers updating.
-            foreach (var entry in _entries)
-            {
-                if ((entry.Flags & IndexEntryFlags.Node) != 0)
-                {
-                    IndexBlock block = _index.GetSubBlockIfCached(entry);
-                    if (block != null)
-                    {
-                        block.Node._parent = newBlock.Node;
-                    }
-                }
-            }
-
-            _entries.Clear();
-            _entries.Add(newRootEntry);
-
-            return true;
         }
 
         /// <summary>

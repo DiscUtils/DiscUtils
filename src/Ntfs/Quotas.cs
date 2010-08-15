@@ -98,6 +98,11 @@ namespace DiscUtils.Ntfs
                 Sid = sid;
             }
 
+            public int Size
+            {
+                get { return Sid.BinaryLength; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Sid = new SecurityIdentifier(buffer, offset);
@@ -107,11 +112,6 @@ namespace DiscUtils.Ntfs
             public void WriteTo(byte[] buffer, int offset)
             {
                 Sid.GetBinaryForm(buffer, offset);
-            }
-
-            public int Size
-            {
-                get { return Sid.BinaryLength; }
             }
 
             public override string ToString()
@@ -133,6 +133,11 @@ namespace DiscUtils.Ntfs
                 OwnerId = ownerId;
             }
 
+            public int Size
+            {
+                get { return 4; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 OwnerId = Utilities.ToInt32LittleEndian(buffer, offset);
@@ -142,11 +147,6 @@ namespace DiscUtils.Ntfs
             public void WriteTo(byte[] buffer, int offset)
             {
                 Utilities.WriteBytesLittleEndian(OwnerId, buffer, offset);
-            }
-
-            public int Size
-            {
-                get { return 4; }
             }
 
             public override string ToString()
@@ -180,6 +180,11 @@ namespace DiscUtils.Ntfs
                 Sid = sid;
             }
 
+            public int Size
+            {
+                get { return 0x30 + (Sid == null ? 0 : Sid.BinaryLength); }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Version = Utilities.ToInt32LittleEndian(buffer, offset);
@@ -211,11 +216,6 @@ namespace DiscUtils.Ntfs
                 {
                     Sid.GetBinaryForm(buffer, offset + 0x30);
                 }
-            }
-
-            public int Size
-            {
-                get { return 0x30 + (Sid == null ? 0 : Sid.BinaryLength); }
             }
 
             public override string ToString()

@@ -72,7 +72,7 @@ namespace DiscUtils.Iscsi
             return buffer;
         }
 
-        public static byte PackAttrByte(bool isFinalData, bool expectReadFromTarget, bool expectWriteToTarget, TaskAttributes taskAttr)
+        private static byte PackAttrByte(bool isFinalData, bool expectReadFromTarget, bool expectWriteToTarget, TaskAttributes taskAttr)
         {
             byte value = 0;
 

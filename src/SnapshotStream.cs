@@ -74,29 +74,83 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Disposes of this instance.
+        /// Gets an indication as to whether the stream can be read.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if called from Dispose(), else <c>false</c></param>
-        protected override void Dispose(bool disposing)
+        public override bool CanRead
         {
-            if (disposing)
+            get { return _baseStream.CanRead; }
+        }
+
+        /// <summary>
+        /// Gets an indication as to whether the stream position can be changed.
+        /// </summary>
+        public override bool CanSeek
+        {
+            get { return _baseStream.CanSeek; }
+        }
+
+        /// <summary>
+        /// Gets an indication as to whether the stream can be written to.
+        /// </summary>
+        /// <remarks>This property is orthogonal to Freezing/Thawing, it's
+        /// perfectly possible for a stream to be frozen and this method
+        /// return <c>true</c></remarks>
+        public override bool CanWrite
+        {
+            get { return (_diffStream != null) ? true : _baseStream.CanWrite; }
+        }
+
+        /// <summary>
+        /// Gets the length of the stream.
+        /// </summary>
+        public override long Length
+        {
+            get
             {
-                if (_baseStreamOwnership == Ownership.Dispose && _baseStream != null)
-                {
-                    _baseStream.Dispose();
-                }
-
-                _baseStream = null;
-
                 if (_diffStream != null)
                 {
-                    _diffStream.Dispose();
+                    return _diffStream.Length;
                 }
+                else
+                {
+                    return _baseStream.Length;
+                }
+            }
+        }
 
-                _diffStream = null;
+        /// <summary>
+        /// Gets and sets the current stream position.
+        /// </summary>
+        public override long Position
+        {
+            get
+            {
+                return _position;
             }
 
-            base.Dispose(disposing);
+            set
+            {
+                _position = value;
+            }
+        }
+
+        /// <summary>
+        /// Returns an enumeration over the parts of the stream that contain real data.
+        /// </summary>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                SparseStream sparseBase = _baseStream as SparseStream;
+                if (sparseBase == null)
+                {
+                    return new StreamExtent[] { new StreamExtent(0, Length) };
+                }
+                else
+                {
+                    return StreamExtent.Union(sparseBase.Extents, _diffExtents);
+                }
+            }
         }
 
         /// <summary>
@@ -183,33 +237,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets an indication as to whether the stream can be read.
-        /// </summary>
-        public override bool CanRead
-        {
-            get { return _baseStream.CanRead; }
-        }
-
-        /// <summary>
-        /// Gets an indication as to whether the stream position can be changed.
-        /// </summary>
-        public override bool CanSeek
-        {
-            get { return _baseStream.CanSeek; }
-        }
-
-        /// <summary>
-        /// Gets an indication as to whether the stream can be written to.
-        /// </summary>
-        /// <remarks>This property is orthogonal to Freezing/Thawing, it's
-        /// perfectly possible for a stream to be frozen and this method
-        /// return <c>true</c></remarks>
-        public override bool CanWrite
-        {
-            get { return (_diffStream != null) ? true : _baseStream.CanWrite; }
-        }
-
-        /// <summary>
         /// Flushes the stream.
         /// </summary>
         public override void Flush()
@@ -217,40 +244,6 @@ namespace DiscUtils
             CheckFrozen();
 
             _baseStream.Flush();
-        }
-
-        /// <summary>
-        /// Gets the length of the stream.
-        /// </summary>
-        public override long Length
-        {
-            get
-            {
-                if (_diffStream != null)
-                {
-                    return _diffStream.Length;
-                }
-                else
-                {
-                    return _baseStream.Length;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets and sets the current stream position.
-        /// </summary>
-        public override long Position
-        {
-            get
-            {
-                return _position;
-            }
-
-            set
-            {
-                _position = value;
-            }
         }
 
         /// <summary>
@@ -394,22 +387,29 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Returns an enumeration over the parts of the stream that contain real data.
+        /// Disposes of this instance.
         /// </summary>
-        public override IEnumerable<StreamExtent> Extents
+        /// <param name="disposing"><c>true</c> if called from Dispose(), else <c>false</c></param>
+        protected override void Dispose(bool disposing)
         {
-            get
+            if (disposing)
             {
-                SparseStream sparseBase = _baseStream as SparseStream;
-                if (sparseBase == null)
+                if (_baseStreamOwnership == Ownership.Dispose && _baseStream != null)
                 {
-                    return new StreamExtent[] { new StreamExtent(0, Length) };
+                    _baseStream.Dispose();
                 }
-                else
+
+                _baseStream = null;
+
+                if (_diffStream != null)
                 {
-                    return StreamExtent.Union(sparseBase.Extents, _diffExtents);
+                    _diffStream.Dispose();
                 }
+
+                _diffStream = null;
             }
+
+            base.Dispose(disposing);
         }
 
         private void CheckFrozen()

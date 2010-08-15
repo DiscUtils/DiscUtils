@@ -65,10 +65,6 @@ namespace DiscUtils.Iso9660
             get { return false; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _dataLength; }
@@ -78,6 +74,10 @@ namespace DiscUtils.Iso9660
         {
             get { return _position; }
             set { _position = value; }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)

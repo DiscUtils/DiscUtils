@@ -121,15 +121,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Opens the volume, providing access to its contents.
-        /// </summary>
-        /// <returns>A stream that can be used to access the volume.</returns>
-        public override SparseStream Open()
-        {
-            return _streamOpener();
-        }
-
-        /// <summary>
         /// Gets the one-byte BIOS type for this volume, which indicates the content.
         /// </summary>
         public override byte BiosType
@@ -228,6 +219,15 @@ namespace DiscUtils
         internal PartitionInfo Partition
         {
             get { return _partitionInfo; }
+        }
+
+        /// <summary>
+        /// Opens the volume, providing access to its contents.
+        /// </summary>
+        /// <returns>A stream that can be used to access the volume.</returns>
+        public override SparseStream Open()
+        {
+            return _streamOpener();
         }
     }
 }

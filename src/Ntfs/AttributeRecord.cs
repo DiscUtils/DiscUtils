@@ -106,11 +106,7 @@ namespace DiscUtils.Ntfs
             get { return _flags; }
         }
 
-        public abstract Range<long, long>[] GetClusters();
-
-        public abstract IBuffer GetDataBuffer(File file);
-
-        public abstract long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster);
+        public abstract int Size { get; }
 
         public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
@@ -129,6 +125,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public abstract Range<long, long>[] GetClusters();
+
+        public abstract IBuffer GetDataBuffer(File file);
+
+        public abstract long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster);
+
         public int CompareTo(AttributeRecord other)
         {
             int val = ((int)_type) - (int)other._type;
@@ -144,6 +146,20 @@ namespace DiscUtils.Ntfs
             }
 
             return ((int)_attributeId) - (int)other._attributeId;
+        }
+
+        public abstract int Write(byte[] buffer, int offset);
+
+        public abstract AttributeRecord Split(FileRecord fileRecord);
+
+        public virtual void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "ATTRIBUTE RECORD");
+            writer.WriteLine(indent + "            Type: " + _type);
+            writer.WriteLine(indent + "    Non-Resident: " + _nonResidentFlag);
+            writer.WriteLine(indent + "            Name: " + _name);
+            writer.WriteLine(indent + "           Flags: " + _flags);
+            writer.WriteLine(indent + "     AttributeId: " + _attributeId);
         }
 
         protected virtual void Read(byte[] buffer, int offset, out int length)
@@ -166,22 +182,6 @@ namespace DiscUtils.Ntfs
 
                 _name = Encoding.Unicode.GetString(buffer, offset + nameOffset, nameLength * 2);
             }
-        }
-
-        public abstract int Write(byte[] buffer, int offset);
-
-        public abstract int Size { get; }
-
-        public abstract AttributeRecord Split(FileRecord fileRecord);
-
-        public virtual void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + "ATTRIBUTE RECORD");
-            writer.WriteLine(indent + "            Type: " + _type);
-            writer.WriteLine(indent + "    Non-Resident: " + _nonResidentFlag);
-            writer.WriteLine(indent + "            Name: " + _name);
-            writer.WriteLine(indent + "           Flags: " + _flags);
-            writer.WriteLine(indent + "     AttributeId: " + _attributeId);
         }
     }
 
@@ -229,6 +229,36 @@ namespace DiscUtils.Ntfs
             set { throw new NotSupportedException(); }
         }
 
+        public override int Size
+        {
+            get
+            {
+                byte nameLength = 0;
+                ushort nameOffset = 0x18;
+                if (Name != null)
+                {
+                    nameLength = (byte)Name.Length;
+                }
+
+                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
+                return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
+            }
+        }
+
+        public int DataOffset
+        {
+            get
+            {
+                byte nameLength = 0;
+                if (Name != null)
+                {
+                    nameLength = (byte)Name.Length;
+                }
+                
+                return Utilities.RoundUp(0x18 + (nameLength * 2), 8);
+            }
+        }
+
         public override IBuffer GetDataBuffer(File file)
         {
             return _memoryBuffer;
@@ -242,23 +272,6 @@ namespace DiscUtils.Ntfs
         public override Range<long, long>[] GetClusters()
         {
             return new Range<long, long>[0];
-        }
-
-        protected override void Read(byte[] buffer, int offset, out int length)
-        {
-            base.Read(buffer, offset, out length);
-
-            uint dataLength = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
-            ushort dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x14);
-            _indexedFlag = buffer[offset + 0x16];
-
-            if (dataOffset + dataLength > length)
-            {
-                throw new IOException("Corrupt attribute, data outside of attribute");
-            }
-
-            _memoryBuffer = new SparseMemoryBuffer(1024);
-            _memoryBuffer.Write(0, buffer, offset + dataOffset, (int)dataLength);
         }
 
         public override int Write(byte[] buffer, int offset)
@@ -296,36 +309,6 @@ namespace DiscUtils.Ntfs
             return (int)length;
         }
 
-        public override int Size
-        {
-            get
-            {
-                byte nameLength = 0;
-                ushort nameOffset = 0x18;
-                if (Name != null)
-                {
-                    nameLength = (byte)Name.Length;
-                }
-
-                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
-                return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
-            }
-        }
-
-        public int DataOffset
-        {
-            get
-            {
-                byte nameLength = 0;
-                if (Name != null)
-                {
-                    nameLength = (byte)Name.Length;
-                }
-                
-                return Utilities.RoundUp(0x18 + (nameLength * 2), 8);
-            }
-        }
-
         public override AttributeRecord Split(FileRecord fileRecord)
         {
             throw new InvalidOperationException("Attempting to split resident attribute");
@@ -336,6 +319,23 @@ namespace DiscUtils.Ntfs
             base.Dump(writer, indent);
             writer.WriteLine(indent + "     Data Length: " + DataLength);
             writer.WriteLine(indent + "         Indexed: " + _indexedFlag);
+        }
+
+        protected override void Read(byte[] buffer, int offset, out int length)
+        {
+            base.Read(buffer, offset, out length);
+
+            uint dataLength = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
+            ushort dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x14);
+            _indexedFlag = buffer[offset + 0x16];
+
+            if (dataOffset + dataLength > length)
+            {
+                throw new IOException("Corrupt attribute, data outside of attribute");
+            }
+
+            _memoryBuffer = new SparseMemoryBuffer(1024);
+            _memoryBuffer.Write(0, buffer, offset + dataOffset, (int)dataLength);
         }
     }
 
@@ -419,8 +419,8 @@ namespace DiscUtils.Ntfs
 
         public long LastVcn
         {
-            set { _lastVCN = (ulong)value; }
             get { return (long)_lastVCN; }
+            set { _lastVCN = (ulong)value; }
         }
 
         /// <summary>
@@ -434,22 +434,6 @@ namespace DiscUtils.Ntfs
         public List<CookedDataRun> CookedDataRuns
         {
             get { return _cookedDataRuns; }
-        }
-
-        public override Range<long, long>[] GetClusters()
-        {
-            var cookedRuns = CookedDataRuns;
-
-            List<Range<long, long>> result = new List<Range<long, long>>(cookedRuns.Count);
-            foreach (var run in cookedRuns)
-            {
-                if (!run.IsSparse)
-                {
-                    result.Add(new Range<long, long>(run.StartLcn, run.Length));
-                }
-            }
-
-            return result.ToArray();
         }
 
         public long NextCluster
@@ -467,6 +451,48 @@ namespace DiscUtils.Ntfs
                     return -1;
                 }
             }
+        }
+
+        public override int Size
+        {
+            get
+            {
+                byte nameLength = 0;
+                ushort nameOffset = (ushort)(((Flags & AttributeFlags.Compressed) != 0) ? 0x48 : 0x40);
+                if (Name != null)
+                {
+                    nameLength = (byte)Name.Length;
+                }
+
+                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
+
+                // Write out data first, since we know where it goes...
+                int dataLen = 0;
+                foreach (var run in _cookedDataRuns)
+                {
+                    dataLen += run.DataRun.Size;
+                }
+
+                dataLen++; // NULL terminator
+
+                return Utilities.RoundUp(dataOffset + dataLen, 8);
+            }
+        }
+
+        public override Range<long, long>[] GetClusters()
+        {
+            var cookedRuns = CookedDataRuns;
+
+            List<Range<long, long>> result = new List<Range<long, long>>(cookedRuns.Count);
+            foreach (var run in cookedRuns)
+            {
+                if (!run.IsSparse)
+                {
+                    result.Add(new Range<long, long>(run.StartLcn, run.Length));
+                }
+            }
+
+            return result.ToArray();
         }
 
         public override IBuffer GetDataBuffer(File file)
@@ -499,44 +525,6 @@ namespace DiscUtils.Ntfs
             }
 
             return -1;
-        }
-
-        protected override void Read(byte[] buffer, int offset, out int length)
-        {
-            _cookedDataRuns = null;
-
-            base.Read(buffer, offset, out length);
-
-            _startingVCN = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            _lastVCN = Utilities.ToUInt64LittleEndian(buffer, offset + 0x18);
-            _dataRunsOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x20);
-            _compressionUnitSize = Utilities.ToUInt16LittleEndian(buffer, offset + 0x22);
-            _dataAllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
-            _dataRealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
-            _initializedDataSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
-            if ((Flags & AttributeFlags.Compressed) != 0)
-            {
-                _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
-            }
-
-            var dataRuns = new List<DataRun>();
-            int pos = _dataRunsOffset;
-            while (pos < length)
-            {
-                DataRun run = new DataRun();
-                int len = run.Read(buffer, offset + pos);
-
-                // Length 1 means there was only a header byte (i.e. terminator)
-                if (len == 1)
-                {
-                    break;
-                }
-
-                dataRuns.Add(run);
-                pos += len;
-            }
-
-            _cookedDataRuns = CookedDataRun.Cook(dataRuns);
         }
 
         public override int Write(byte[] buffer, int offset)
@@ -597,32 +585,6 @@ namespace DiscUtils.Ntfs
             return length;
         }
 
-        public override int Size
-        {
-            get
-            {
-                byte nameLength = 0;
-                ushort nameOffset = (ushort)(((Flags & AttributeFlags.Compressed) != 0) ? 0x48 : 0x40);
-                if (Name != null)
-                {
-                    nameLength = (byte)Name.Length;
-                }
-
-                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
-
-                // Write out data first, since we know where it goes...
-                int dataLen = 0;
-                foreach (var run in _cookedDataRuns)
-                {
-                    dataLen += run.DataRun.Size;
-                }
-
-                dataLen++; // NULL terminator
-
-                return Utilities.RoundUp(dataOffset + dataLen, 8);
-            }
-        }
-
         public override AttributeRecord Split(FileRecord fileRecord)
         {
             int splitIdx = _cookedDataRuns.Count / 2;
@@ -664,6 +626,44 @@ namespace DiscUtils.Ntfs
             }
 
             writer.WriteLine(indent + "        Data Runs:" + runStr);
+        }
+
+        protected override void Read(byte[] buffer, int offset, out int length)
+        {
+            _cookedDataRuns = null;
+
+            base.Read(buffer, offset, out length);
+
+            _startingVCN = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
+            _lastVCN = Utilities.ToUInt64LittleEndian(buffer, offset + 0x18);
+            _dataRunsOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x20);
+            _compressionUnitSize = Utilities.ToUInt16LittleEndian(buffer, offset + 0x22);
+            _dataAllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
+            _dataRealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
+            _initializedDataSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
+            if ((Flags & AttributeFlags.Compressed) != 0)
+            {
+                _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
+            }
+
+            var dataRuns = new List<DataRun>();
+            int pos = _dataRunsOffset;
+            while (pos < length)
+            {
+                DataRun run = new DataRun();
+                int len = run.Read(buffer, offset + pos);
+
+                // Length 1 means there was only a header byte (i.e. terminator)
+                if (len == 1)
+                {
+                    break;
+                }
+
+                dataRuns.Add(run);
+                pos += len;
+            }
+
+            _cookedDataRuns = CookedDataRun.Cook(dataRuns);
         }
     }
 

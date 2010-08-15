@@ -24,10 +24,10 @@ namespace DiscUtils.Iscsi
 {
     internal class TextResponse : BaseResponse
     {
+        public byte[] TextData;
         public bool Continue;
         private ulong Lun;
         private uint TargetTransferTag = 0xFFFFFFFF;
-        public byte[] TextData;
 
         public override void Parse(ProtocolDataUnit pdu)
         {

@@ -43,6 +43,11 @@ namespace DiscUtils.Iscsi
             get { return TaskAttributes.Simple; }
         }
 
+        public override int Size
+        {
+            get { return _length; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
@@ -51,11 +56,6 @@ namespace DiscUtils.Iscsi
         public override void WriteTo(byte[] buffer, int offset)
         {
             Array.Copy(_buffer, _offset, buffer, offset, _length);
-        }
-
-        public override int Size
-        {
-            get { return _length; }
         }
     }
 }

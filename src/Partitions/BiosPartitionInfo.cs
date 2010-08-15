@@ -40,15 +40,6 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Opens a stream to access the content of the partition.
-        /// </summary>
-        /// <returns>The new stream</returns>
-        public override SparseStream Open()
-        {
-            return _table.Open(_record);
-        }
-
-        /// <summary>
         /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
         /// </summary>
         public override long FirstSector
@@ -126,6 +117,15 @@ namespace DiscUtils.Partitions
         public bool IsPrimary
         {
             get { return PrimaryIndex >= 0; }
+        }
+
+        /// <summary>
+        /// Opens a stream to access the content of the partition.
+        /// </summary>
+        /// <returns>The new stream</returns>
+        public override SparseStream Open()
+        {
+            return _table.Open(_record);
         }
     }
 }

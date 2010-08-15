@@ -44,7 +44,10 @@ namespace DiscUtils.Ntfs
             get { return _name; }
         }
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get { return Encoding.Unicode.GetByteCount(_name); }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -57,20 +60,9 @@ namespace DiscUtils.Ntfs
             Encoding.Unicode.GetBytes(_name, 0, _name.Length, buffer, offset);
         }
 
-        public int Size
-        {
-            get { return Encoding.Unicode.GetByteCount(_name); }
-        }
-
-        #endregion
-
-        #region IDiagnosticTracer Members
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "  Volume Name: " + _name);
         }
-
-        #endregion
     }
 }

@@ -32,6 +32,11 @@ namespace DiscUtils.Ntfs
         public Guid BirthObjectId;
         public Guid BirthDomainId;
 
+        public int Size
+        {
+            get { return 0x38; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             MftReference = new FileRecordReference();
@@ -49,11 +54,6 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(BirthVolumeId, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(BirthObjectId, buffer, offset + 0x18);
             Utilities.WriteBytesLittleEndian(BirthDomainId, buffer, offset + 0x28);
-        }
-
-        public int Size
-        {
-            get { return 0x38; }
         }
 
         public override string ToString()

@@ -25,12 +25,8 @@ namespace DiscUtils.Partitions
     /// <summary>
     /// Convenient access to well-known BIOS (MBR) Partition Types.
     /// </summary>
-    public sealed class BiosPartitionTypes
+    public static class BiosPartitionTypes
     {
-        private BiosPartitionTypes()
-        {
-        }
-
         /// <summary>
         /// Microsoft FAT12 (fewer than 32,680 sectors in the volume).
         /// </summary>

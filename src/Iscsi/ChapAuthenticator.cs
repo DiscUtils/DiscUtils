@@ -45,6 +45,14 @@ namespace DiscUtils.Iscsi
             _state = State.SendAlgorithm;
         }
 
+        private enum State
+        {
+            SendAlgorithm,
+            ReceiveChallenge,
+            SendResponse,
+            Finished
+        }
+
         public override string Identifier
         {
             get { return "CHAP"; }
@@ -89,6 +97,22 @@ namespace DiscUtils.Iscsi
             }
         }
 
+        private static byte[] ParseByteString(string p)
+        {
+            if (!p.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidProtocolException("Invalid value in CHAP exchange");
+            }
+
+            byte[] data = new byte[(p.Length - 2) / 2];
+            for (int i = 0; i < data.Length; ++i)
+            {
+                data[i] = byte.Parse(p.Substring(2 + (i * 2), 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+
+            return data;
+        }
+
         private string CalcResponse()
         {
             MD5 md5 = MD5CryptoServiceProvider.Create();
@@ -107,30 +131,6 @@ namespace DiscUtils.Iscsi
             }
 
             return result.ToString();
-        }
-
-        private static byte[] ParseByteString(string p)
-        {
-            if (!p.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidProtocolException("Invalid value in CHAP exchange");
-            }
-
-            byte[] data = new byte[(p.Length - 2) / 2];
-            for (int i = 0; i < data.Length; ++i)
-            {
-                data[i] = byte.Parse(p.Substring(2 + (i * 2), 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-
-            return data;
-        }
-
-        private enum State
-        {
-            SendAlgorithm,
-            ReceiveChallenge,
-            SendResponse,
-            Finished
         }
     }
 }

@@ -28,16 +28,20 @@ namespace DiscUtils.Registry
     internal sealed class BinHeader : IByteArraySerializable
     {
         public const int HeaderSize = 0x20;
-        private const uint Signature = 0x6E696268;
 
         public int FileOffset;
         public int BinSize;
+
+        private const uint Signature = 0x6E696268;
 
         public BinHeader()
         {
         }
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get { return HeaderSize; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -61,12 +65,5 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 0x04);
             Utilities.WriteBytesLittleEndian(BinSize, buffer, offset + 0x08);
         }
-
-        public int Size
-        {
-            get { return HeaderSize; }
-        }
-
-        #endregion
     }
 }

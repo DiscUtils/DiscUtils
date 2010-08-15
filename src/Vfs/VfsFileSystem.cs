@@ -56,6 +56,14 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public override abstract string VolumeLabel
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the global shared state.
         /// </summary>
         protected TContext Context
@@ -71,14 +79,6 @@ namespace DiscUtils.Vfs
         {
             get { return _rootDir; }
             set { _rootDir = value; }
-        }
-
-        /// <summary>
-        /// Gets the volume label.
-        /// </summary>
-        public override abstract string VolumeLabel
-        {
-            get;
         }
 
         /// <summary>
@@ -522,27 +522,6 @@ namespace DiscUtils.Vfs
             return file.FileLength;
         }
 
-        /// <summary>
-        /// Converts a directory entry to an object representing a file.
-        /// </summary>
-        /// <param name="dirEntry">The directory entry to convert</param>
-        /// <returns>The corresponding file object</returns>
-        protected abstract TFile ConvertDirEntryToFile(TDirEntry dirEntry);
-
-        /// <summary>
-        /// Converts an internal directory entry name into an external one.
-        /// </summary>
-        /// <param name="name">The name to convert</param>
-        /// <returns>The external name</returns>
-        /// <remarks>
-        /// This method is called on a single path element (i.e. name contains no path
-        /// separators).
-        /// </remarks>
-        protected virtual string FormatFileName(string name)
-        {
-            return name;
-        }
-
         internal TFile GetFile(string path)
         {
             if (IsRoot(path))
@@ -596,6 +575,27 @@ namespace DiscUtils.Vfs
         internal TDirEntry GetDirectoryEntry(string path)
         {
             return GetDirectoryEntry(_rootDir, path);
+        }
+
+        /// <summary>
+        /// Converts a directory entry to an object representing a file.
+        /// </summary>
+        /// <param name="dirEntry">The directory entry to convert</param>
+        /// <returns>The corresponding file object</returns>
+        protected abstract TFile ConvertDirEntryToFile(TDirEntry dirEntry);
+
+        /// <summary>
+        /// Converts an internal directory entry name into an external one.
+        /// </summary>
+        /// <param name="name">The name to convert</param>
+        /// <returns>The external name</returns>
+        /// <remarks>
+        /// This method is called on a single path element (i.e. name contains no path
+        /// separators).
+        /// </remarks>
+        protected virtual string FormatFileName(string name)
+        {
+            return name;
         }
 
         private static bool IsRoot(string path)

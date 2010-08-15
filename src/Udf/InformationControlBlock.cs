@@ -61,6 +61,11 @@ namespace DiscUtils.Udf
         public AllocationType AllocationType;
         public InformationControlBlockFlags Flags;
 
+        public int Size
+        {
+            get { return 20; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             PriorDirectEntries = Utilities.ToUInt32LittleEndian(buffer, offset);
@@ -80,11 +85,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 20; }
         }
     }
 }

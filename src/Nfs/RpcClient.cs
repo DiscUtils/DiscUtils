@@ -40,6 +40,11 @@ namespace DiscUtils.Nfs
             _transports[PortMapper.ProgramIdentifier] = new RpcTcpTransport(address, 111);
         }
 
+        internal RpcCredentials Credentials
+        {
+            get { return _credential; }
+        }
+
         public void Dispose()
         {
             if (_transports != null)
@@ -56,11 +61,6 @@ namespace DiscUtils.Nfs
         internal uint NextTransactionId()
         {
             return _nextTransaction++;
-        }
-
-        internal RpcCredentials Credentials
-        {
-            get { return _credential; }
         }
 
         internal RpcTcpTransport GetTransport(int program, int version)

@@ -42,6 +42,11 @@ namespace DiscUtils.Ntfs
 
         private bool _haveExtraFields = true;
 
+        public int Size
+        {
+            get { return _haveExtraFields ? 0x48 : 0x30; }
+        }
+
         public static StandardInformation InitializeNewFile(File file, FileAttributeFlags flags)
         {
             DateTime now = DateTime.UtcNow;
@@ -57,8 +62,6 @@ namespace DiscUtils.Ntfs
 
             return si;
         }
-
-        #region IByteArraySerializable Members
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -87,18 +90,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private static DateTime ReadDateTime(byte[] buffer, int offset)
-        {
-            try
-            {
-                return DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset));
-            }
-            catch (ArgumentException)
-            {
-                return DateTime.MinValue;
-            }
-        }
-
         public void WriteTo(byte[] buffer, int offset)
         {
             Utilities.WriteBytesLittleEndian(CreationTime.ToFileTimeUtc(), buffer, 0x00);
@@ -119,15 +110,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public int Size
-        {
-            get { return _haveExtraFields ? 0x48 : 0x30; }
-        }
-
-        #endregion
-
-        #region IDiagnosticTracer Members
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "      Creation Time: " + CreationTime);
@@ -143,6 +125,16 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     Update Seq Num: " + UpdateSequenceNumber);
         }
 
-        #endregion
+        private static DateTime ReadDateTime(byte[] buffer, int offset)
+        {
+            try
+            {
+                return DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset));
+            }
+            catch (ArgumentException)
+            {
+                return DateTime.MinValue;
+            }
+        }
     }
 }

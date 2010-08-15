@@ -216,38 +216,6 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Gets the LUN as a string.
-        /// </summary>
-        /// <returns>The LUN</returns>
-        public override string ToString()
-        {
-            if ((((ulong)_lun) & 0xFF00000000000000) == 0)
-            {
-                return (_lun >> (6 * 8)).ToString(CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                return _lun.ToString(CultureInfo.InvariantCulture);
-            }
-        }
-
-        /// <summary>
-        /// Gets the URIs corresponding to this LUN.
-        /// </summary>
-        /// <returns>An array of URIs as strings.</returns>
-        /// <remarks>Multiple URIs are returned because multiple targets may serve the same LUN.</remarks>
-        public string[] GetUris()
-        {
-            List<string> results = new List<string>();
-            foreach (var targetAddress in _targetInfo.Addresses)
-            {
-                results.Add(targetAddress.ToUri().ToString() + "/" + _targetInfo.Name + "?LUN=" + ToString());
-            }
-
-            return results.ToArray();
-        }
-
-        /// <summary>
         /// Parses a URI referring to a LUN.
         /// </summary>
         /// <param name="uri">The URI to parse</param>
@@ -320,6 +288,38 @@ namespace DiscUtils.Iscsi
             }
 
             return new LunInfo(targetInfo, (long)lun, LunClass.Unknown, false, "", "", "");
+        }
+
+        /// <summary>
+        /// Gets the LUN as a string.
+        /// </summary>
+        /// <returns>The LUN</returns>
+        public override string ToString()
+        {
+            if ((((ulong)_lun) & 0xFF00000000000000) == 0)
+            {
+                return (_lun >> (6 * 8)).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return _lun.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the URIs corresponding to this LUN.
+        /// </summary>
+        /// <returns>An array of URIs as strings.</returns>
+        /// <remarks>Multiple URIs are returned because multiple targets may serve the same LUN.</remarks>
+        public string[] GetUris()
+        {
+            List<string> results = new List<string>();
+            foreach (var targetAddress in _targetInfo.Addresses)
+            {
+                results.Add(targetAddress.ToUri().ToString() + "/" + _targetInfo.Name + "?LUN=" + ToString());
+            }
+
+            return results.ToArray();
         }
 
         private static void ThrowInvalidURI(string uri)

@@ -207,6 +207,17 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        public override string ToString()
+        {
+            string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" + _fileName + "\"";
+            if (_type != ExtentType.Sparse && _type != ExtentType.VmfsSparse && _type != ExtentType.Zero)
+            {
+                return basic + " " + _offset;
+            }
+
+            return basic;
+        }
+
         private static string[] SplitQuotedString(string source)
         {
             List<string> result = new List<string>();
@@ -249,17 +260,6 @@ namespace DiscUtils.Vmdk
             }
 
             return result.ToArray();
-        }
-
-        public override string ToString()
-        {
-            string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" + _fileName + "\"";
-            if (_type != ExtentType.Sparse && _type != ExtentType.VmfsSparse && _type != ExtentType.Zero)
-            {
-                return basic + " " + _offset;
-            }
-
-            return basic;
         }
     }
 }

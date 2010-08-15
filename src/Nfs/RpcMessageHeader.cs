@@ -32,10 +32,6 @@ namespace DiscUtils.Nfs
 
     internal class RpcMessageHeader
     {
-        public uint TransactionId { get; set; }
-
-        public RpcReplyHeader ReplyHeader { get; set; }
-
         public RpcMessageHeader(XdrDataReader reader)
         {
             TransactionId = reader.ReadUInt32();
@@ -47,6 +43,10 @@ namespace DiscUtils.Nfs
 
             ReplyHeader = new RpcReplyHeader(reader);
         }
+
+        public uint TransactionId { get; set; }
+
+        public RpcReplyHeader ReplyHeader { get; set; }
 
         public bool IsSuccess
         {

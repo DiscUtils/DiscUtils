@@ -55,23 +55,6 @@ namespace DiscUtils.LogicalDiskManager
             }
         }
 
-        internal DiskGroupRecord GetDiskGroup(Guid guid)
-        {
-            foreach (var record in _records.Values)
-            {
-                if (record.RecordType == RecordType.DiskGroup)
-                {
-                    DiskGroupRecord dgRecord = (DiskGroupRecord)record;
-                    if (new Guid(dgRecord.GroupGuidString) == guid)
-                    {
-                        return dgRecord;
-                    }
-                }
-            }
-
-            return null;
-        }
-
         internal IEnumerable<DiskRecord> Disks
         {
             get
@@ -98,6 +81,23 @@ namespace DiscUtils.LogicalDiskManager
                     }
                 }
             }
+        }
+
+        internal DiskGroupRecord GetDiskGroup(Guid guid)
+        {
+            foreach (var record in _records.Values)
+            {
+                if (record.RecordType == RecordType.DiskGroup)
+                {
+                    DiskGroupRecord dgRecord = (DiskGroupRecord)record;
+                    if (new Guid(dgRecord.GroupGuidString) == guid)
+                    {
+                        return dgRecord;
+                    }
+                }
+            }
+
+            return null;
         }
 
         internal IEnumerable<ComponentRecord> GetVolumeComponents(ulong volumeId)

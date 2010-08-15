@@ -47,7 +47,10 @@ namespace DiscUtils.Ntfs
             get { return _flags; }
         }
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get { return 0x0C; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -65,21 +68,10 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0A);
         }
 
-        public int Size
-        {
-            get { return 0x0C; }
-        }
-
-        #endregion
-
-        #region IDiagnosticTracer Members
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "  Version: " + _majorVersion + "." + _minorVersion);
             writer.WriteLine(indent + "    Flags: " + _flags);
         }
-
-        #endregion
     }
 }

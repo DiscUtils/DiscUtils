@@ -52,6 +52,15 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
+        /// The display name of the VM.
+        /// </summary>
+        public string DisplayName
+        {
+            get { return _vmDisplayName; }
+            set { _vmDisplayName = value; }
+        }
+
+        /// <summary>
         /// Disposes this instance, including any underlying resources.
         /// </summary>
         public void Dispose()
@@ -63,15 +72,6 @@ namespace DiscUtils.Xva
                     r.Second.Dispose();
                 }
             }
-        }
-
-        /// <summary>
-        /// The display name of the VM.
-        /// </summary>
-        public string DisplayName
-        {
-            get { return _vmDisplayName; }
-            set { _vmDisplayName = value; }
         }
 
         /// <summary>

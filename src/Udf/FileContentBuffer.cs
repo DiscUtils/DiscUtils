@@ -43,6 +43,65 @@ namespace DiscUtils.Udf
             LoadExtents();
         }
 
+        public bool CanRead
+        {
+            get { return true; }
+        }
+
+        public bool CanWrite
+        {
+            get { return false; }
+        }
+
+        public long Capacity
+        {
+            get { return (long)_fileEntry.InformationLength; }
+        }
+
+        public IEnumerable<StreamExtent> Extents
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public int Read(long pos, byte[] buffer, int offset, int count)
+        {
+            if (_fileEntry.InformationControlBlock.AllocationType == AllocationType.Embedded)
+            {
+                byte[] srcBuffer = _fileEntry.AllocationDescriptors;
+                if (pos > srcBuffer.Length)
+                {
+                    return 0;
+                }
+
+                int toCopy = (int)Math.Min(srcBuffer.Length - pos, count);
+                Array.Copy(srcBuffer, pos, buffer, offset, toCopy);
+                return toCopy;
+            }
+            else
+            {
+                return ReadFromExtents(pos, buffer, offset, count);
+            }
+        }
+
+        public void Write(long pos, byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Flush()
+        {
+        }
+
+        public void SetCapacity(long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            throw new NotImplementedException();
+        }
+
         private void LoadExtents()
         {
             _extents = new List<CookedExtent>();
@@ -116,78 +175,6 @@ namespace DiscUtils.Udf
             }
         }
 
-        public bool CanRead
-        {
-            get { return true; }
-        }
-
-        public bool CanWrite
-        {
-            get { return false; }
-        }
-
-        public int Read(long pos, byte[] buffer, int offset, int count)
-        {
-            if (_fileEntry.InformationControlBlock.AllocationType == AllocationType.Embedded)
-            {
-                byte[] srcBuffer = _fileEntry.AllocationDescriptors;
-                if (pos > srcBuffer.Length)
-                {
-                    return 0;
-                }
-
-                int toCopy = (int)Math.Min(srcBuffer.Length - pos, count);
-                Array.Copy(srcBuffer, pos, buffer, offset, toCopy);
-                return toCopy;
-            }
-            else
-            {
-                return ReadFromExtents(pos, buffer, offset, count);
-            }
-        }
-
-        private CookedExtent FindExtent(long pos)
-        {
-            foreach (var extent in _extents)
-            {
-                if (extent.FileContentOffset + extent.Length > pos)
-                {
-                    return extent;
-                }
-            }
-
-            return null;
-        }
-
-        public void Write(long pos, byte[] buffer, int offset, int count)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Flush()
-        {
-        }
-
-        public long Capacity
-        {
-            get { return (long)_fileEntry.InformationLength; }
-        }
-
-        public void SetCapacity(long value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<StreamExtent> Extents
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         private int ReadFromExtents(long pos, byte[] buffer, int offset, int count)
         {
             int totalToRead = (int)Math.Min(Capacity - pos, count);
@@ -220,6 +207,19 @@ namespace DiscUtils.Udf
             }
 
             return totalRead;
+        }
+
+        private CookedExtent FindExtent(long pos)
+        {
+            foreach (var extent in _extents)
+            {
+                if (extent.FileContentOffset + extent.Length > pos)
+                {
+                    return extent;
+                }
+            }
+
+            return null;
         }
 
         private class CookedExtent

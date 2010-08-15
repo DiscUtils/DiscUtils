@@ -109,6 +109,11 @@ namespace DiscUtils.Ntfs
             return _context.Mft.GetClusterMap();
         }
 
+        private static void Abort()
+        {
+            throw new AbortException();
+        }
+
         private void DoCheck()
         {
             _context.RawStream.Position = 0;
@@ -565,11 +570,6 @@ namespace DiscUtils.Ntfs
             }
 
             return ok;
-        }
-
-        private static void Abort()
-        {
-            throw new AbortException();
         }
 
         private void ReportDump(IDiagnosticTraceable toDump)

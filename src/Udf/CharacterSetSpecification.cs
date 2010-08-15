@@ -44,6 +44,11 @@ namespace DiscUtils.Udf
         public CharacterSetType Type;
         public byte[] Information;
 
+        public int Size
+        {
+            get { return 64; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Type = (CharacterSetType)buffer[offset];
@@ -54,11 +59,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 64; }
         }
     }
 }

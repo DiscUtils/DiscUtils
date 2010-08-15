@@ -60,41 +60,6 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Disposes of this instance, freeing up any resources used.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> if called from Dispose, else <c>false</c></param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_client != null)
-                {
-                    _client.Dispose();
-                    _client = null;
-                }
-            }
-
-            base.Dispose(disposing);
-        }
-
-        /// <summary>
-        /// Gets the folders exported by a server.
-        /// </summary>
-        /// <param name="address">The address of the server</param>
-        /// <returns>An enumeration of exported folders</returns>
-        public static IEnumerable<string> GetExports(string address)
-        {
-            using (RpcClient rpcClient = new RpcClient(address, null))
-            {
-                Nfs3Mount mountClient = new Nfs3Mount(rpcClient);
-                foreach (var export in mountClient.Exports())
-                {
-                    yield return export.DirPath;
-                }
-            }
-        }
-
-        /// <summary>
         /// The options controlling this instance.
         /// </summary>
         public NfsFileSystemOptions NfsOptions
@@ -116,6 +81,23 @@ namespace DiscUtils.Nfs
         public override bool CanWrite
         {
             get { return true; }
+        }
+
+        /// <summary>
+        /// Gets the folders exported by a server.
+        /// </summary>
+        /// <param name="address">The address of the server</param>
+        /// <returns>An enumeration of exported folders</returns>
+        public static IEnumerable<string> GetExports(string address)
+        {
+            using (RpcClient rpcClient = new RpcClient(address, null))
+            {
+                Nfs3Mount mountClient = new Nfs3Mount(rpcClient);
+                foreach (var export in mountClient.Exports())
+                {
+                    yield return export.DirPath;
+                }
+            }
         }
 
         /// <summary>
@@ -703,6 +685,29 @@ namespace DiscUtils.Nfs
             }
         }
 
+        /// <summary>
+        /// Disposes of this instance, freeing up any resources used.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if called from Dispose, else <c>false</c></param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_client != null)
+                {
+                    _client.Dispose();
+                    _client = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private static Exception ConvertNfsException(Nfs3Exception ne)
+        {
+            throw new IOException("NFS Status: " + ne.Message, ne);
+        }
+
         private void DoSearch(List<string> results, Nfs3FileHandle dir, string path, Regex regex, bool subFolders, bool dirs, bool files)
         {
             foreach (Nfs3DirectoryEntry de in _client.ReadDirectory(dir, true))
@@ -771,11 +776,6 @@ namespace DiscUtils.Nfs
             }
 
             return handle;
-        }
-
-        private static Exception ConvertNfsException(Nfs3Exception ne)
-        {
-            throw new IOException("NFS Status: " + ne.Message, ne);
         }
     }
 }

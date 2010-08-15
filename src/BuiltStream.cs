@@ -45,31 +45,6 @@ namespace DiscUtils
             _extents.Sort(new ExtentStartComparer());
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    if (_currentExtent != null)
-                    {
-                        _currentExtent.DisposeReadState();
-                        _currentExtent = null;
-                    }
-
-                    if (_baseStream != null)
-                    {
-                        _baseStream.Dispose();
-                        _baseStream = null;
-                    }
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get { return true; }
@@ -85,11 +60,6 @@ namespace DiscUtils
             get { return false; }
         }
 
-        public override void Flush()
-        {
-            return;
-        }
-
         public override long Length
         {
             get { return _length; }
@@ -99,6 +69,25 @@ namespace DiscUtils
         {
             get { return _position; }
             set { _position = value; }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                foreach (var extent in _extents)
+                {
+                    foreach (var streamExtent in extent.StreamExtents)
+                    {
+                        yield return streamExtent;
+                    }
+                }
+            }
+        }
+
+        public override void Flush()
+        {
+            return;
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -184,17 +173,28 @@ namespace DiscUtils
             throw new NotSupportedException();
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get
+            try
             {
-                foreach (var extent in _extents)
+                if (disposing)
                 {
-                    foreach (var streamExtent in extent.StreamExtents)
+                    if (_currentExtent != null)
                     {
-                        yield return streamExtent;
+                        _currentExtent.DisposeReadState();
+                        _currentExtent = null;
+                    }
+
+                    if (_baseStream != null)
+                    {
+                        _baseStream.Dispose();
+                        _baseStream = null;
                     }
                 }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

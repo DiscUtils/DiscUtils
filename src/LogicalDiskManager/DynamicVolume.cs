@@ -35,11 +35,6 @@ namespace DiscUtils.LogicalDiskManager
             _volumeId = volumeId;
         }
 
-        public SparseStream Open()
-        {
-            return _group.OpenVolume(Record.Id);
-        }
-
         public byte BiosType
         {
             get { return Record.BiosType; }
@@ -63,6 +58,11 @@ namespace DiscUtils.LogicalDiskManager
         private VolumeRecord Record
         {
             get { return _group.GetVolume(_volumeId); }
+        }
+
+        public SparseStream Open()
+        {
+            return _group.OpenVolume(Record.Id);
         }
     }
 }

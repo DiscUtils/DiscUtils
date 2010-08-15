@@ -29,7 +29,10 @@ namespace DiscUtils.Ntfs
     {
         public Guid Id;
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get { return 16; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -42,20 +45,9 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(Id, buffer, offset);
         }
 
-        public int Size
-        {
-            get { return 16; }
-        }
-
-        #endregion
-
-        #region IDiagnosticTracer Members
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "  Object ID: " + Id);
         }
-
-        #endregion
     }
 }

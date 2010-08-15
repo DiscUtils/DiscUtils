@@ -58,17 +58,17 @@ namespace DiscUtils.Udf
             }
         }
 
-        public File CreateNewFile(string name)
-        {
-            throw new NotSupportedException();
-        }
-
         public ICollection<FileIdentifier> AllEntries
         {
             get
             {
                 return _entries;
             }
+        }
+
+        public File CreateNewFile(string name)
+        {
+            throw new NotSupportedException();
         }
 
         public FileIdentifier GetEntryByName(string name)

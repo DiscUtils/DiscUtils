@@ -36,6 +36,22 @@ namespace DiscUtils.Wim
         private static uint[] s_positionSlots;
         private static uint[] s_extraBits;
 
+        private LzxBitStream _bitStream;
+        private int _windowBits;
+        private int _fileSize;
+        private int _numPositionSlots;
+
+        private byte[] _buffer;
+        private int _bufferCount;
+
+        private long _position;
+
+        // Block state
+        private HuffmanTree _mainTree = null;
+        private HuffmanTree _lengthTree = null;
+        private HuffmanTree _alignedOffsetTree = null;
+        private uint[] _repeatedOffsets = new uint[] { 1, 1, 1 };
+
         static LzxStream()
         {
             s_positionSlots = new uint[50];
@@ -57,22 +73,6 @@ namespace DiscUtils.Wim
             }
         }
 
-        private LzxBitStream _bitStream;
-        private int _windowBits;
-        private int _fileSize;
-        private int _numPositionSlots;
-
-        private byte[] _buffer;
-        private int _bufferCount;
-
-        private long _position;
-
-        // Block state
-        private HuffmanTree _mainTree = null;
-        private HuffmanTree _lengthTree = null;
-        private HuffmanTree _alignedOffsetTree = null;
-        private uint[] _repeatedOffsets = new uint[] { 1, 1, 1 };
-
         public LzxStream(Stream stream, int windowBits, int fileSize)
         {
             _bitStream = new LzxBitStream(new BufferedStream(stream, 8192));
@@ -82,6 +82,14 @@ namespace DiscUtils.Wim
             _buffer = new byte[1 << windowBits];
 
             ReadBlocks();
+        }
+
+        private enum BlockType
+        {
+            None = 0,
+            Verbatim = 1,
+            AlignedOffset = 2,
+            Uncompressed = 3
         }
 
         public override bool CanRead
@@ -97,10 +105,6 @@ namespace DiscUtils.Wim
         public override bool CanWrite
         {
             get { return false; }
-        }
-
-        public override void Flush()
-        {
         }
 
         public override long Length
@@ -119,6 +123,10 @@ namespace DiscUtils.Wim
             {
                 _position = value;
             }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -325,7 +333,6 @@ namespace DiscUtils.Wim
             }
         }
 
-        #region Tree Parsing
         private void ReadMainTree()
         {
             uint[] lengths;
@@ -431,15 +438,6 @@ namespace DiscUtils.Wim
                     ++i;
                 }
             }
-        }
-        #endregion
-
-        private enum BlockType
-        {
-            None = 0,
-            Verbatim = 1,
-            AlignedOffset = 2,
-            Uncompressed = 3
         }
     }
 }

@@ -28,6 +28,11 @@ namespace DiscUtils
     internal interface IByteArraySerializable
     {
         /// <summary>
+        /// The total number of bytes the structure occupies.
+        /// </summary>
+        int Size { get; }
+
+        /// <summary>
         /// Reads the structure from a byte array.
         /// </summary>
         /// <param name="buffer">The buffer to read from</param>
@@ -41,10 +46,5 @@ namespace DiscUtils
         /// <param name="buffer">The buffer to write to</param>
         /// <param name="offset">The buffer offste to start writing at</param>
         void WriteTo(byte[] buffer, int offset);
-
-        /// <summary>
-        /// The total number of bytes the structure occupies.
-        /// </summary>
-        int Size { get; }
     }
 }

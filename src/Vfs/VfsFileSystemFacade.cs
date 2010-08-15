@@ -46,23 +46,6 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Provides access to the actual file system implementation
-        /// </summary>
-        /// <typeparam name="TDirEntry">The concrete type representing directory entries</typeparam>
-        /// <typeparam name="TFile">The concrete type representing files</typeparam>
-        /// <typeparam name="TDirectory">The concrete type representing directories</typeparam>
-        /// <typeparam name="TContext">The concrete type holding global state</typeparam>
-        /// <returns>The actual file system instance.</returns>
-        protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem<TDirEntry, TFile, TDirectory, TContext>()
-            where TDirEntry : VfsDirEntry
-            where TFile : IVfsFile
-            where TDirectory : IVfsDirectory<TDirEntry, TFile>, TFile
-            where TContext : VfsContext
-        {
-            return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>)_wrapped;
-        }
-
-        /// <summary>
         /// Gets a friendly name for the file system.
         /// </summary>
         public override string FriendlyName
@@ -77,6 +60,14 @@ namespace DiscUtils.Vfs
         public override bool CanWrite
         {
             get { return _wrapped.CanWrite; }
+        }
+
+        /// <summary>
+        /// Gets the root directory of the file system.
+        /// </summary>
+        public override DiscDirectoryInfo Root
+        {
+            get { return _wrapped.Root; }
         }
 
         /// <summary>
@@ -309,14 +300,6 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Gets the root directory of the file system.
-        /// </summary>
-        public override DiscDirectoryInfo Root
-        {
-            get { return _wrapped.Root; }
-        }
-
-        /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
         /// <param name="sourceFile">The source file</param>
@@ -501,6 +484,23 @@ namespace DiscUtils.Vfs
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return _wrapped.GetFileSystemInfo(path);
+        }
+
+        /// <summary>
+        /// Provides access to the actual file system implementation
+        /// </summary>
+        /// <typeparam name="TDirEntry">The concrete type representing directory entries</typeparam>
+        /// <typeparam name="TFile">The concrete type representing files</typeparam>
+        /// <typeparam name="TDirectory">The concrete type representing directories</typeparam>
+        /// <typeparam name="TContext">The concrete type holding global state</typeparam>
+        /// <returns>The actual file system instance.</returns>
+        protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem<TDirEntry, TFile, TDirectory, TContext>()
+            where TDirEntry : VfsDirEntry
+            where TFile : IVfsFile
+            where TDirectory : IVfsDirectory<TDirEntry, TFile>, TFile
+            where TContext : VfsContext
+        {
+            return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>)_wrapped;
         }
     }
 }

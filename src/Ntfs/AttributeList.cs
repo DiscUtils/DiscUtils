@@ -37,6 +37,30 @@ namespace DiscUtils.Ntfs
             _records = new List<AttributeListRecord>();
         }
 
+        public int Size
+        {
+            get
+            {
+                int total = 0;
+                foreach (var record in _records)
+                {
+                    total += record.Size;
+                }
+
+                return total;
+            }
+        }
+
+        public int Count
+        {
+            get { return _records.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             _records.Clear();
@@ -62,20 +86,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public int Size
-        {
-            get
-            {
-                int total = 0;
-                foreach (var record in _records)
-                {
-                    total += record.Size;
-                }
-
-                return total;
-            }
-        }
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "ATTRIBUTE LIST RECORDS");
@@ -84,8 +94,6 @@ namespace DiscUtils.Ntfs
                 r.Dump(writer, indent + "  ");
             }
         }
-
-        #region ICollection<AttributeListRecord> Members
 
         public void Add(AttributeListRecord item)
         {
@@ -108,22 +116,10 @@ namespace DiscUtils.Ntfs
             _records.CopyTo(array, arrayIndex);
         }
 
-        public int Count
-        {
-            get { return _records.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
         public bool Remove(AttributeListRecord item)
         {
             return _records.Remove(item);
         }
-
-        #endregion
 
         #region IEnumerable<AttributeListRecord> Members
 
@@ -155,7 +151,32 @@ namespace DiscUtils.Ntfs
         public FileRecordReference BaseFileReference;
         public ushort AttributeId;
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get
+            {
+                return 0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name));
+            }
+        }
+
+        public static AttributeListRecord FromAttribute(AttributeRecord attr, FileRecordReference mftRecord)
+        {
+            AttributeListRecord newRecord = new AttributeListRecord()
+            {
+                Type = attr.AttributeType,
+                Name = attr.Name,
+                StartVcn = 0,
+                BaseFileReference = mftRecord,
+                AttributeId = attr.AttributeId
+            };
+
+            if (attr.IsNonResident)
+            {
+                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr).StartVcn;
+            }
+
+            return newRecord;
+        }
 
         public int ReadFrom(byte[] data, int offset)
         {
@@ -207,18 +228,6 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(AttributeId, buffer, offset + 0x18);
         }
 
-        public int Size
-        {
-            get
-            {
-                return 0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name));
-            }
-        }
-
-        #endregion
-
-        #region IComparable<AttributeListRecord> Members
-
         public int CompareTo(AttributeListRecord other)
         {
             int val = ((int)Type) - (int)other.Type;
@@ -234,27 +243,6 @@ namespace DiscUtils.Ntfs
             }
 
             return ((int)StartVcn) - (int)other.StartVcn;
-        }
-
-        #endregion
-
-        public static AttributeListRecord FromAttribute(AttributeRecord attr, FileRecordReference mftRecord)
-        {
-            AttributeListRecord newRecord = new AttributeListRecord()
-            {
-                Type = attr.AttributeType,
-                Name = attr.Name,
-                StartVcn = 0,
-                BaseFileReference = mftRecord,
-                AttributeId = attr.AttributeId
-            };
-
-            if (attr.IsNonResident)
-            {
-                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr).StartVcn;
-            }
-
-            return newRecord;
         }
 
         public void Dump(TextWriter writer, string indent)

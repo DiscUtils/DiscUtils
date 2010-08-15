@@ -39,6 +39,11 @@ namespace DiscUtils.Udf
         public uint ExtentLength;
         public uint ExtentLocation;
 
+        public int Size
+        {
+            get { return 8; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             ExtentLength = Utilities.ToUInt32LittleEndian(buffer, offset);
@@ -49,11 +54,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 8; }
         }
 
         public override string ToString()
@@ -67,6 +67,11 @@ namespace DiscUtils.Udf
         public uint ExtentLength;
         public uint ExtentLocation;
         public ShortAllocationFlags Flags;
+
+        public int Size
+        {
+            get { return 8; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -84,11 +89,6 @@ namespace DiscUtils.Udf
             throw new NotImplementedException();
         }
 
-        public int Size
-        {
-            get { return 8; }
-        }
-
         public override string ToString()
         {
             return ExtentLocation + ":+" + ExtentLength + " [" + Flags + "]";
@@ -100,6 +100,11 @@ namespace DiscUtils.Udf
         public uint ExtentLength;
         public LogicalBlockAddress ExtentLocation;
         public byte[] ImplementationUse;
+
+        public int Size
+        {
+            get { return 16; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -113,11 +118,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 16; }
         }
 
         public override string ToString()

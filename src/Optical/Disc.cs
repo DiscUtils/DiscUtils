@@ -75,31 +75,6 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
-        /// Disposes of underlying resources.
-        /// </summary>
-        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
-        /// else <c>false</c>.</param>
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    if (_file != null)
-                    {
-                        _file.Dispose();
-                    }
-
-                    _file = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
-        /// <summary>
         /// Gets the geometry of the disk.
         /// </summary>
         public override Geometry Geometry
@@ -161,6 +136,31 @@ namespace DiscUtils.Optical
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_file != null)
+                    {
+                        _file.Dispose();
+                    }
+
+                    _file = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

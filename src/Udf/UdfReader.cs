@@ -163,6 +163,21 @@ namespace DiscUtils.Udf
             Initialize();
         }
 
+        public override string FriendlyName
+        {
+            get { return "OSTA Universal Disk Format"; }
+        }
+
+        public override string VolumeLabel
+        {
+            get { return _lvd.LogicalVolumeIdentifier; }
+        }
+
+        protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)
+        {
+            return File.FromDescriptor(Context, dirEntry.FileLocation);
+        }
+
         private void Initialize()
         {
             Context = new UdfContext()
@@ -239,21 +254,6 @@ namespace DiscUtils.Udf
                 FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
                 RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);
             }
-        }
-
-        public override string FriendlyName
-        {
-            get { return "OSTA Universal Disk Format"; }
-        }
-
-        public override string VolumeLabel
-        {
-            get { return _lvd.LogicalVolumeIdentifier; }
-        }
-
-        protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)
-        {
-            return File.FromDescriptor(Context, dirEntry.FileLocation);
         }
 
         private bool ProbeSectorSize(int size)

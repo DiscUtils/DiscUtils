@@ -105,22 +105,70 @@ namespace DiscUtils.Ntfs
 #endif
         }
 
-        /// <summary>
-        /// Disposes of this instance
-        /// </summary>
-        /// <param name="disposing">Whether called from Dispose or from a finalizer</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_context != null && _context.Mft != null)
-                {
-                    _context.Mft.Dispose();
-                    _context.Mft = null;
-                }
-            }
+        private delegate void StandardInformationModifier(StandardInformation si);
 
-            base.Dispose(disposing);
+        /// <summary>
+        /// Gets the options that control how the file system is interpreted.
+        /// </summary>
+        public NtfsOptions NtfsOptions
+        {
+            get { return (NtfsOptions)Options; }
+        }
+
+        /// <summary>
+        /// Gets the friendly name for the file system.
+        /// </summary>
+        public override string FriendlyName
+        {
+            get { return "Microsoft NTFS"; }
+        }
+
+        /// <summary>
+        /// Indicates if the file system supports write operations.
+        /// </summary>
+        public override bool CanWrite
+        {
+            // For now, we don't...
+            get { return !_context.ReadOnly; }
+        }
+
+        /// <summary>
+        /// Gets the size of each cluster (in bytes).
+        /// </summary>
+        public long ClusterSize
+        {
+            get { return _context.BiosParameterBlock.BytesPerCluster; }
+        }
+
+        /// <summary>
+        /// Gets the total number of clusters managed by the file system.
+        /// </summary>
+        public long TotalClusters
+        {
+            get { return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64, _context.BiosParameterBlock.SectorsPerCluster); }
+        }
+
+        /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public override string VolumeLabel
+        {
+            get
+            {
+                File volumeFile = GetFile(MasterFileTable.VolumeIndex);
+                NtfsStream volNameStream = volumeFile.GetStream(AttributeType.VolumeName, null);
+                return volNameStream.GetContent<VolumeName>().Name;
+            }
+        }
+
+        private bool CreateShortNames
+        {
+            get
+            {
+                return _context.Options.ShortNameCreation == ShortFileNameOption.Enabled
+                                || (_context.Options.ShortNameCreation == ShortFileNameOption.UseVolumeFlag
+                                    && (_volumeInfo.Flags & VolumeInformationFlags.DisableShortNameCreation) == 0);
+            }
         }
 
         /// <summary>
@@ -214,29 +262,29 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets the options that control how the file system is interpreted.
+        /// Detects if a stream contains an NTFS file system.
         /// </summary>
-        public NtfsOptions NtfsOptions
+        /// <param name="stream">The stream to inspect</param>
+        /// <returns><c>true</c> if NTFS is detected, else <c>false</c>.</returns>
+        public static bool Detect(Stream stream)
         {
-            get { return (NtfsOptions)Options; }
-        }
+            if (stream.Length < 512)
+            {
+                return false;
+            }
 
-        #region DiscFileSystem Implementation
-        /// <summary>
-        /// Gets the friendly name for the file system.
-        /// </summary>
-        public override string FriendlyName
-        {
-            get { return "Microsoft NTFS"; }
-        }
+            stream.Position = 0;
+            byte[] bytes = Utilities.ReadFully(stream, 512);
+            BiosParameterBlock bpb = BiosParameterBlock.FromBytes(bytes, 0);
 
-        /// <summary>
-        /// Indicates if the file system supports write operations.
-        /// </summary>
-        public override bool CanWrite
-        {
-            // For now, we don't...
-            get { return !_context.ReadOnly; }
+            if (bpb.SignatureByte != 0x80 || bpb.TotalSectors16 != 0 || bpb.TotalSectors32 != 0
+                || bpb.TotalSectors64 == 0 || bpb.MftRecordSize == 0 || bpb.MftCluster == 0 || bpb.BytesPerSector == 0)
+            {
+                return false;
+            }
+
+            long mftPos = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
+            return mftPos < bpb.TotalSectors64 * bpb.BytesPerSector && mftPos < stream.Length;
         }
 
         /// <summary>
@@ -1047,24 +1095,6 @@ namespace DiscUtils.Ntfs
                 return (long)dirEntry.Details.RealSize;
             }
         }
-        #endregion
-
-        #region Cluster Information
-        /// <summary>
-        /// Gets the size of each cluster (in bytes).
-        /// </summary>
-        public long ClusterSize
-        {
-            get { return _context.BiosParameterBlock.BytesPerCluster; }
-        }
-
-        /// <summary>
-        /// Gets the total number of clusters managed by the file system.
-        /// </summary>
-        public long TotalClusters
-        {
-            get { return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64, _context.BiosParameterBlock.SectorsPerCluster); }
-        }
 
         /// <summary>
         /// Converts a cluster (index) into an absolute byte position in the underlying stream.
@@ -1157,9 +1187,6 @@ namespace DiscUtils.Ntfs
         {
             return _context.Mft.GetClusterMap();
         }
-        #endregion
-
-        #region NTFS-specific public methods
 
         /// <summary>
         /// Creates an NTFS hard link to an existing file.
@@ -1631,19 +1658,55 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets the volume label.
+        /// Writes a diagnostic dump of key NTFS structures.
         /// </summary>
-        public override string VolumeLabel
+        /// <param name="writer">The writer to receive the dump.</param>
+        /// <param name="linePrefix">The indent to apply to the start of each line of output.</param>
+        public void Dump(TextWriter writer, string linePrefix)
         {
-            get
-            {
-                File volumeFile = GetFile(MasterFileTable.VolumeIndex);
-                NtfsStream volNameStream = volumeFile.GetStream(AttributeType.VolumeName, null);
-                return volNameStream.GetContent<VolumeName>().Name;
-            }
-        }
+            writer.WriteLine(linePrefix + "NTFS File System Dump");
+            writer.WriteLine(linePrefix + "=====================");
 
-        #endregion
+            ////_context.Mft.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            _context.SecurityDescriptors.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            _context.ObjectIds.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            _context.ReparsePoints.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            _context.Quotas.Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, linePrefix);
+
+            writer.WriteLine(linePrefix);
+            writer.WriteLine(linePrefix + "FULL FILE LISTING");
+            foreach (var record in _context.Mft.Records)
+            {
+                // Don't go through cache - these are short-lived, and this is (just!) diagnostics
+                File f = new File(_context, record);
+                f.Dump(writer, linePrefix);
+
+                foreach (var stream in f.AllStreams)
+                {
+                    if (stream.AttributeType == AttributeType.IndexRoot)
+                    {
+                        writer.WriteLine(linePrefix + "  INDEX (" + stream.Name + ")");
+                        f.GetIndex(stream.Name).Dump(writer, linePrefix + "    ");
+                    }
+                }
+            }
+
+            writer.WriteLine(linePrefix);
+            writer.WriteLine(linePrefix + "DIRECTORY TREE");
+            writer.WriteLine(linePrefix + @"\ (5)");
+            DumpDirectory(GetDirectory(MasterFileTable.RootDirIndex), writer, linePrefix);  // 5 = Root Dir
+        }
 
         #region Internal File access methods (exposed via NtfsContext)
         internal Directory GetDirectory(long index)
@@ -1757,86 +1820,71 @@ namespace DiscUtils.Ntfs
 
         #endregion
 
-        /// <summary>
-        /// Detects if a stream contains an NTFS file system.
-        /// </summary>
-        /// <param name="stream">The stream to inspect</param>
-        /// <returns><c>true</c> if NTFS is detected, else <c>false</c>.</returns>
-        public static bool Detect(Stream stream)
-        {
-            if (stream.Length < 512)
-            {
-                return false;
-            }
-
-            stream.Position = 0;
-            byte[] bytes = Utilities.ReadFully(stream, 512);
-            BiosParameterBlock bpb = BiosParameterBlock.FromBytes(bytes, 0);
-
-            if (bpb.SignatureByte != 0x80 || bpb.TotalSectors16 != 0 || bpb.TotalSectors32 != 0
-                || bpb.TotalSectors64 == 0 || bpb.MftRecordSize == 0 || bpb.MftCluster == 0 || bpb.BytesPerSector == 0)
-            {
-                return false;
-            }
-
-            long mftPos = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
-            return mftPos < bpb.TotalSectors64 * bpb.BytesPerSector && mftPos < stream.Length;
-        }
-
-        /// <summary>
-        /// Writes a diagnostic dump of key NTFS structures.
-        /// </summary>
-        /// <param name="writer">The writer to receive the dump.</param>
-        /// <param name="linePrefix">The indent to apply to the start of each line of output.</param>
-        public void Dump(TextWriter writer, string linePrefix)
-        {
-            writer.WriteLine(linePrefix + "NTFS File System Dump");
-            writer.WriteLine(linePrefix + "=====================");
-
-            ////_context.Mft.Dump(writer, linePrefix);
-
-            writer.WriteLine(linePrefix);
-            _context.SecurityDescriptors.Dump(writer, linePrefix);
-
-            writer.WriteLine(linePrefix);
-            _context.ObjectIds.Dump(writer, linePrefix);
-
-            writer.WriteLine(linePrefix);
-            _context.ReparsePoints.Dump(writer, linePrefix);
-
-            writer.WriteLine(linePrefix);
-            _context.Quotas.Dump(writer, linePrefix);
-
-            writer.WriteLine(linePrefix);
-            GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, linePrefix);
-
-            writer.WriteLine(linePrefix);
-            writer.WriteLine(linePrefix + "FULL FILE LISTING");
-            foreach (var record in _context.Mft.Records)
-            {
-                // Don't go through cache - these are short-lived, and this is (just!) diagnostics
-                File f = new File(_context, record);
-                f.Dump(writer, linePrefix);
-
-                foreach (var stream in f.AllStreams)
-                {
-                    if (stream.AttributeType == AttributeType.IndexRoot)
-                    {
-                        writer.WriteLine(linePrefix + "  INDEX (" + stream.Name + ")");
-                        f.GetIndex(stream.Name).Dump(writer, linePrefix + "    ");
-                    }
-                }
-            }
-
-            writer.WriteLine(linePrefix);
-            writer.WriteLine(linePrefix + "DIRECTORY TREE");
-            writer.WriteLine(linePrefix + @"\ (5)");
-            DumpDirectory(GetDirectory(MasterFileTable.RootDirIndex), writer, linePrefix);  // 5 = Root Dir
-        }
-
         internal DirectoryEntry GetDirectoryEntry(string path)
         {
             return GetDirectoryEntry(GetDirectory(MasterFileTable.RootDirIndex), path);
+        }
+
+        /// <summary>
+        /// Disposes of this instance
+        /// </summary>
+        /// <param name="disposing">Whether called from Dispose or from a finalizer</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_context != null && _context.Mft != null)
+                {
+                    _context.Mft.Dispose();
+                    _context.Mft = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private static void RemoveFileFromDirectory(Directory dir, File file, string name)
+        {
+            List<string> aliases = new List<string>();
+
+            DirectoryEntry dirEntry = dir.GetEntryByName(name);
+            if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Dos
+                || dirEntry.Details.FileNameNamespace == FileNameNamespace.Win32)
+            {
+                foreach (var fnStream in file.GetStreams(AttributeType.FileName, null))
+                {
+                    var fnr = fnStream.GetContent<FileNameRecord>();
+                    if ((fnr.FileNameNamespace == FileNameNamespace.Win32 || fnr.FileNameNamespace == FileNameNamespace.Dos)
+                        && fnr.ParentDirectory.Value == dir.MftReference.Value)
+                    {
+                        aliases.Add(fnr.FileName);
+                    }
+                }
+            }
+            else
+            {
+                aliases.Add(name);
+            }
+
+            foreach (var alias in aliases)
+            {
+                DirectoryEntry de = dir.GetEntryByName(alias);
+                dir.RemoveEntry(de);
+            }
+        }
+
+        private static void SplitPath(string path, out string plainPath, out string attributeName)
+        {
+            plainPath = path;
+            string fileName = Utilities.GetFileFromPath(path);
+            attributeName = null;
+
+            int streamSepPos = fileName.IndexOf(':');
+            if (streamSepPos >= 0)
+            {
+                attributeName = fileName.Substring(streamSepPos + 1);
+                plainPath = plainPath.Substring(0, path.Length - (fileName.Length - streamSepPos));
+            }
         }
 
         private DirectoryEntry GetDirectoryEntry(Directory dir, string path)
@@ -1935,46 +1983,6 @@ namespace DiscUtils.Ntfs
             return entry;
         }
 
-        private bool CreateShortNames
-        {
-            get
-            {
-                return _context.Options.ShortNameCreation == ShortFileNameOption.Enabled
-                                || (_context.Options.ShortNameCreation == ShortFileNameOption.UseVolumeFlag
-                                    && (_volumeInfo.Flags & VolumeInformationFlags.DisableShortNameCreation) == 0);
-            }
-        }
-
-        private static void RemoveFileFromDirectory(Directory dir, File file, string name)
-        {
-            List<string> aliases = new List<string>();
-
-            DirectoryEntry dirEntry = dir.GetEntryByName(name);
-            if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Dos
-                || dirEntry.Details.FileNameNamespace == FileNameNamespace.Win32)
-            {
-                foreach (var fnStream in file.GetStreams(AttributeType.FileName, null))
-                {
-                    var fnr = fnStream.GetContent<FileNameRecord>();
-                    if ((fnr.FileNameNamespace == FileNameNamespace.Win32 || fnr.FileNameNamespace == FileNameNamespace.Dos)
-                        && fnr.ParentDirectory.Value == dir.MftReference.Value)
-                    {
-                        aliases.Add(fnr.FileName);
-                    }
-                }
-            }
-            else
-            {
-                aliases.Add(name);
-            }
-
-            foreach (var alias in aliases)
-            {
-                DirectoryEntry de = dir.GetEntryByName(alias);
-                dir.RemoveEntry(de);
-            }
-        }
-
         private RawSecurityDescriptor DoGetSecurity(File file)
         {
             NtfsStream legacyStream = file.GetStream(AttributeType.SecurityDescriptor, null);
@@ -2027,22 +2035,6 @@ namespace DiscUtils.Ntfs
                 }
             }
         }
-
-        private static void SplitPath(string path, out string plainPath, out string attributeName)
-        {
-            plainPath = path;
-            string fileName = Utilities.GetFileFromPath(path);
-            attributeName = null;
-
-            int streamSepPos = fileName.IndexOf(':');
-            if (streamSepPos >= 0)
-            {
-                attributeName = fileName.Substring(streamSepPos + 1);
-                plainPath = plainPath.Substring(0, path.Length - (fileName.Length - streamSepPos));
-            }
-        }
-
-        private delegate void StandardInformationModifier(StandardInformation si);
 
         private void UpdateStandardInformation(string path, StandardInformationModifier modifier)
         {

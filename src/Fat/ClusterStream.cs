@@ -86,11 +86,6 @@ namespace DiscUtils.Fat
             get { return _access == FileAccess.ReadWrite || _access == FileAccess.Write; }
         }
 
-        public override void Flush()
-        {
-            return;
-        }
-
         public override long Length
         {
             get { return _length; }
@@ -115,6 +110,11 @@ namespace DiscUtils.Fat
                     throw new ArgumentOutOfRangeException("value", "Attempt to move before beginning of stream");
                 }
             }
+        }
+
+        public override void Flush()
+        {
+            return;
         }
 
         public override int Read(byte[] buffer, int offset, int count)

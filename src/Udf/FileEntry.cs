@@ -51,6 +51,11 @@ namespace DiscUtils.Udf
         public byte[] ExtendedAttributes;
         public byte[] AllocationDescriptors;
 
+        public virtual int Size
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
             DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
@@ -82,11 +87,6 @@ namespace DiscUtils.Udf
         public virtual void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public virtual int Size
-        {
-            get { throw new NotImplementedException(); }
         }
     }
 }

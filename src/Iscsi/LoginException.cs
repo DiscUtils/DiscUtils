@@ -58,22 +58,22 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Creates a new deserialized instance.
-        /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">Ther context</param>
-        protected LoginException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        /// <summary>
         /// Creates a new instance, containing a status code.
         /// </summary>
         /// <param name="message">The reason for the exception</param>
         /// <param name="code">The target-indicated reason for the exception</param>
         public LoginException(string message, LoginStatusCode code)
             : base("iSCSI login failure (" + code + "):" + message)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new deserialized instance.
+        /// </summary>
+        /// <param name="info">The serialization info</param>
+        /// <param name="context">Ther context</param>
+        protected LoginException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

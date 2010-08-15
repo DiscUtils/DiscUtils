@@ -45,6 +45,23 @@ namespace DiscUtils
         bool CanWrite { get; }
 
         /// <summary>
+        /// Gets the current capacity of the buffer, in bytes.
+        /// </summary>
+        long Capacity
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the parts of the buffer that are stored.
+        /// </summary>
+        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
+        IEnumerable<StreamExtent> Extents
+        {
+            get;
+        }
+
+        /// <summary>
         /// Reads from the buffer into a byte array.
         /// </summary>
         /// <param name="pos">The offset within the buffer to start reading.</param>
@@ -69,14 +86,6 @@ namespace DiscUtils
         void Flush();
 
         /// <summary>
-        /// Gets the current capacity of the buffer, in bytes.
-        /// </summary>
-        long Capacity
-        {
-            get;
-        }
-
-        /// <summary>
         /// Sets the capacity of the buffer, truncating if appropriate.
         /// </summary>
         /// <param name="value">The desired capacity of the buffer.</param>
@@ -89,14 +98,5 @@ namespace DiscUtils
         /// <param name="count">The number of bytes of interest</param>
         /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
         IEnumerable<StreamExtent> GetExtentsInRange(long start, long count);
-
-        /// <summary>
-        /// Gets the parts of the buffer that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        IEnumerable<StreamExtent> Extents
-        {
-            get;
-        }
     }
 }

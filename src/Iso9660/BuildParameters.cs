@@ -24,6 +24,12 @@ namespace DiscUtils.Iso9660
 {
     internal class BuildParameters
     {
+        public BuildParameters()
+        {
+            VolumeIdentifier = "";
+            UseJoliet = true;
+        }
+
         public bool UseJoliet
         {
             get;
@@ -34,12 +40,6 @@ namespace DiscUtils.Iso9660
         {
             get;
             set;
-        }
-
-        public BuildParameters()
-        {
-            VolumeIdentifier = "";
-            UseJoliet = true;
         }
     }
 }

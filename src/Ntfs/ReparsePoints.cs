@@ -58,7 +58,7 @@ namespace DiscUtils.Ntfs
             _file.UpdateRecordInMft();
         }
 
-        public void Dump(TextWriter writer, string indent)
+        internal void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "REPARSE POINT INDEX");
 
@@ -75,7 +75,10 @@ namespace DiscUtils.Ntfs
             public uint Tag;
             public FileRecordReference File;
 
-            #region IByteArraySerializable Members
+            public int Size
+            {
+                get { return 12; }
+            }
 
             public int ReadFrom(byte[] buffer, int offset)
             {
@@ -91,13 +94,6 @@ namespace DiscUtils.Ntfs
                 ////Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 12);
             }
 
-            public int Size
-            {
-                get { return 12; }
-            }
-
-            #endregion
-
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0:x}:", Tag) + File;
@@ -106,7 +102,10 @@ namespace DiscUtils.Ntfs
 
         internal sealed class Data : IByteArraySerializable
         {
-            #region IByteArraySerializable Members
+            public int Size
+            {
+                get { return 0; }
+            }
 
             public int ReadFrom(byte[] buffer, int offset)
             {
@@ -116,13 +115,6 @@ namespace DiscUtils.Ntfs
             public void WriteTo(byte[] buffer, int offset)
             {
             }
-
-            public int Size
-            {
-                get { return 0; }
-            }
-
-            #endregion
 
             public override string ToString()
             {

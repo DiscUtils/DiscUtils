@@ -101,33 +101,84 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Disposes of this instance.
+        /// Gets the Geometry of this disk.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, <c>false</c> if in destructor</param>
-        protected override void Dispose(bool disposing)
+        public override Geometry Geometry
         {
-            try
+            get { return _files[_files.Count - 1].First.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk as it is anticipated a hypervisor BIOS will represent it.
+        /// </summary>
+        public override Geometry BiosGeometry
+        {
+            get
             {
-                if (disposing)
+                DiskImageFile file = _files[_files.Count - 1].First;
+                Geometry result = file.BiosGeometry;
+                return file.BiosGeometry ?? Geometry.MakeBiosSafe(file.Geometry, Capacity);
+            }
+        }
+
+        /// <summary>
+        /// Gets the capacity of this disk (in bytes).
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _files[_files.Count - 1].First.Capacity; }
+        }
+
+        /// <summary>
+        /// Gets the contents of this disk as a stream.
+        /// </summary>
+        /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
+        /// will depend on the last partition table/file system activity, since all access to the disk contents pass
+        /// through a single stream instance.  Set the stream position before accessing the stream.</remarks>
+        public override SparseStream Content
+        {
+            get
+            {
+                if (_content == null)
                 {
-                    if (_content != null)
+                    SparseStream stream = null;
+                    for (int i = _files.Count - 1; i >= 0; --i)
                     {
-                        _content.Dispose();
-                        _content = null;
+                        stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
                     }
 
-                    foreach (var file in _files)
-                    {
-                        if (file.Second == Ownership.Dispose)
-                        {
-                            file.First.Dispose();
-                        }
-                    }
+                    _content = stream;
+                }
+
+                return _content;
+            }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get
+            {
+                foreach (var file in _files)
+                {
+                    yield return file.First as VirtualDiskLayer;
                 }
             }
-            finally
+        }
+
+        /// <summary>
+        /// Gets the links that make up the disk (type-safe version of Layers).
+        /// </summary>
+        public IEnumerable<DiskImageFile> Links
+        {
+            get
             {
-                base.Dispose(disposing);
+                foreach (var file in _files)
+                {
+                    yield return file.First;
+                }
             }
         }
 
@@ -221,11 +272,6 @@ namespace DiscUtils.Vmdk
             return new Disk(DiskImageFile.Initialize(fileSystem, path, capacity, type, adapterType), Ownership.Dispose);
         }
 
-        internal static Disk Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
-        {
-            return new Disk(DiskImageFile.Initialize(fileLocator, path, parameters), Ownership.Dispose);
-        }
-
         /// <summary>
         /// Creates a new virtual disk as a thin clone of an existing disk.
         /// </summary>
@@ -252,88 +298,6 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Gets the Geometry of this disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _files[_files.Count - 1].First.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the geometry of the disk as it is anticipated a hypervisor BIOS will represent it.
-        /// </summary>
-        public override Geometry BiosGeometry
-        {
-            get
-            {
-                DiskImageFile file = _files[_files.Count - 1].First;
-                Geometry result = file.BiosGeometry;
-                return file.BiosGeometry ?? Geometry.MakeBiosSafe(file.Geometry, Capacity);
-            }
-        }
-
-        /// <summary>
-        /// Gets the capacity of this disk (in bytes).
-        /// </summary>
-        public override long Capacity
-        {
-            get { return _files[_files.Count - 1].First.Capacity; }
-        }
-
-        /// <summary>
-        /// Gets the contents of this disk as a stream.
-        /// </summary>
-        /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
-        /// will depend on the last partition table/file system activity, since all access to the disk contents pass
-        /// through a single stream instance.  Set the stream position before accessing the stream.</remarks>
-        public override SparseStream Content
-        {
-            get
-            {
-                if (_content == null)
-                {
-                    SparseStream stream = null;
-                    for (int i = _files.Count - 1; i >= 0; --i)
-                    {
-                        stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
-                    }
-
-                    _content = stream;
-                }
-
-                return _content;
-            }
-        }
-
-        /// <summary>
-        /// Gets the layers that make up the disk.
-        /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
-        {
-            get
-            {
-                foreach (var file in _files)
-                {
-                    yield return file.First as VirtualDiskLayer;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the links that make up the disk (type-safe version of Layers).
-        /// </summary>
-        public IEnumerable<DiskImageFile> Links
-        {
-            get
-            {
-                foreach (var file in _files)
-                {
-                    yield return file.First;
-                }
-            }
-        }
-
-        /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
         /// <param name="fileSystem">The file system to create the disk on</param>
@@ -353,6 +317,42 @@ namespace DiscUtils.Vmdk
         {
             var firstLayer = _files[0].First;
             return InitializeDifferencing(path, DiffDiskCreateType(firstLayer.CreateType), firstLayer.RelativeFileLocator.GetFullPath(_path));
+        }
+
+        internal static Disk Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
+        {
+            return new Disk(DiskImageFile.Initialize(fileLocator, path, parameters), Ownership.Dispose);
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if disposing, <c>false</c> if in destructor</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_content != null)
+                    {
+                        _content.Dispose();
+                        _content = null;
+                    }
+
+                    foreach (var file in _files)
+                    {
+                        if (file.Second == Ownership.Dispose)
+                        {
+                            file.First.Dispose();
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         private static DiskCreateType DiffDiskCreateType(DiskCreateType diskCreateType)

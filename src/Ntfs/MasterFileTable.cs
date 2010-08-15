@@ -35,14 +35,6 @@ namespace DiscUtils.Ntfs
     /// be used by the NtfsFileSystem and File classes.</remarks>
     internal class MasterFileTable : IDiagnosticTraceable, IDisposable
     {
-        private File _self;
-        private Bitmap _bitmap;
-        private Stream _recordStream;
-        private ObjectCache<long, FileRecord> _recordCache;
-
-        private int _recordLength;
-        private int _bytesPerSector;
-
         /// <summary>
         /// MFT index of the MFT file itself.
         /// </summary>
@@ -108,6 +100,14 @@ namespace DiscUtils.Ntfs
         /// </summary>
         private const uint FirstAvailableMftIndex = 24;
 
+        private File _self;
+        private Bitmap _bitmap;
+        private Stream _recordStream;
+        private ObjectCache<long, FileRecord> _recordCache;
+
+        private int _recordLength;
+        private int _bytesPerSector;
+
         public MasterFileTable(INtfsContext context)
         {
             BiosParameterBlock bpb = context.BiosParameterBlock;
@@ -118,6 +118,37 @@ namespace DiscUtils.Ntfs
 
             // Temporary record stream - until we've bootstrapped the MFT properly
             _recordStream = new SubStream(context.RawStream, bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector, 24 * _recordLength);
+        }
+
+        public int RecordSize
+        {
+            get { return _recordLength; }
+        }
+
+        /// <summary>
+        /// Reads the records directly from the MFT stream - bypassing the record cache.
+        /// </summary>
+        public IEnumerable<FileRecord> Records
+        {
+            get
+            {
+                using (Stream mftStream = _self.OpenStream(AttributeType.Data, null, FileAccess.Read))
+                {
+                    while (mftStream.Position < mftStream.Length)
+                    {
+                        byte[] recordData = Utilities.ReadFully(mftStream, _recordLength);
+
+                        if (Utilities.BytesToString(recordData, 0, 4) != "FILE")
+                        {
+                            continue;
+                        }
+
+                        FileRecord record = new FileRecord(_bytesPerSector);
+                        record.FromBytes(recordData, 0);
+                        yield return record;
+                    }
+                }
+            }
         }
 
         public void Dispose()
@@ -195,37 +226,6 @@ namespace DiscUtils.Ntfs
             _recordStream.Flush();
 
             return _self;
-        }
-
-        public int RecordSize
-        {
-            get { return _recordLength; }
-        }
-
-        /// <summary>
-        /// Reads the records directly from the MFT stream - bypassing the record cache.
-        /// </summary>
-        public IEnumerable<FileRecord> Records
-        {
-            get
-            {
-                using (Stream mftStream = _self.OpenStream(AttributeType.Data, null, FileAccess.Read))
-                {
-                    while (mftStream.Position < mftStream.Length)
-                    {
-                        byte[] recordData = Utilities.ReadFully(mftStream, _recordLength);
-
-                        if (Utilities.BytesToString(recordData, 0, 4) != "FILE")
-                        {
-                            continue;
-                        }
-
-                        FileRecord record = new FileRecord(_bytesPerSector);
-                        record.FromBytes(recordData, 0);
-                        yield return record;
-                    }
-                }
-            }
         }
 
         public FileRecord AllocateRecord(FileRecordFlags flags)

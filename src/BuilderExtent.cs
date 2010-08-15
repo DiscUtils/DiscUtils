@@ -35,16 +35,6 @@ namespace DiscUtils
             _length = length;
         }
 
-        internal long Start
-        {
-            get { return _start; }
-        }
-
-        internal long Length
-        {
-            get { return _length; }
-        }
-
         /// <summary>
         /// Gets the parts of the stream that are stored.
         /// </summary>
@@ -55,6 +45,16 @@ namespace DiscUtils
             {
                 return new StreamExtent[] { new StreamExtent(Start, Length) };
             }
+        }
+
+        internal long Start
+        {
+            get { return _start; }
+        }
+
+        internal long Length
+        {
+            get { return _length; }
         }
 
         internal abstract void PrepareForRead();

@@ -27,8 +27,6 @@ namespace DiscUtils.Vdi
 
     internal class HeaderRecord
     {
-        private FileVersion _fileVersion;
-
         public uint HeaderSize;
         public ImageType ImageType;
         public ImageFlags Flags;
@@ -46,6 +44,8 @@ namespace DiscUtils.Vdi
         public Guid ParentId;
         public Guid ParentModificationId;
         public GeometryRecord LChsGeometry;
+
+        private FileVersion _fileVersion;
 
         public HeaderRecord()
         {

@@ -144,6 +144,11 @@ namespace DiscUtils.Partitions
             get { return _index; }
         }
 
+        public int CompareTo(BiosPartitionRecord other)
+        {
+            return LBAStartAbsolute.CompareTo(other.LBAStartAbsolute);
+        }
+
         internal void WriteTo(byte[] buffer, int offset)
         {
             buffer[offset] = _status;
@@ -157,14 +162,5 @@ namespace DiscUtils.Partitions
             Utilities.WriteBytesLittleEndian((uint)_lbaStart, buffer, offset + 8);
             Utilities.WriteBytesLittleEndian((uint)_lbaLength, buffer, offset + 12);
         }
-
-        #region IComparable<BiosPartitionRecord> Members
-
-        public int CompareTo(BiosPartitionRecord other)
-        {
-            return LBAStartAbsolute.CompareTo(other.LBAStartAbsolute);
-        }
-
-        #endregion
     }
 }

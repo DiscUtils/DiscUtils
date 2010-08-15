@@ -65,6 +65,11 @@ namespace DiscUtils.Registry
             get { return _name; }
         }
 
+        public override int Size
+        {
+            get { return 0x14 + (string.IsNullOrEmpty(_name) ? 0 : _name.Length); }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             int nameLen = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
@@ -106,11 +111,6 @@ namespace DiscUtils.Registry
             {
                 Utilities.StringToBytes(_name, buffer, offset + 0x14, nameLen);
             }
-        }
-
-        public override int Size
-        {
-            get { return 0x14 + (string.IsNullOrEmpty(_name) ? 0 : _name.Length); }
         }
     }
 }

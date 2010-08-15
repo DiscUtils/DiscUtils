@@ -49,15 +49,6 @@ namespace DiscUtils.Nfs
             _cachedAttributes[_rootHandle] = fsiResult.PostOpAttributes;
         }
 
-        public void Dispose()
-        {
-            if (_rpcClient != null)
-            {
-                _rpcClient.Dispose();
-                _rpcClient = null;
-            }
-        }
-
         public Nfs3FileHandle RootHandle
         {
             get { return _rootHandle; }
@@ -66,6 +57,15 @@ namespace DiscUtils.Nfs
         public Nfs3FileSystemInfo FileSystemInfo
         {
             get { return _fsInfo; }
+        }
+
+        public void Dispose()
+        {
+            if (_rpcClient != null)
+            {
+                _rpcClient.Dispose();
+                _rpcClient = null;
+            }
         }
 
         public Nfs3FileAttributes GetAttributes(Nfs3FileHandle handle)

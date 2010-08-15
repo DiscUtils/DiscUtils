@@ -53,12 +53,20 @@ namespace DiscUtils.Ntfs
             get { return (ushort)((_val >> 48) & 0xFFFF); }
         }
 
-        public override string ToString()
+        public int Size
         {
-            return "MFT:" + MftIndex + " (ver: " + SequenceNumber + ")";
+            get { return 8; }
         }
 
-        #region IByteArraySerializable Members
+        public static bool operator ==(FileRecordReference a, FileRecordReference b)
+        {
+            return a._val == b._val;
+        }
+
+        public static bool operator !=(FileRecordReference a, FileRecordReference b)
+        {
+            return a._val != b._val;
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -70,13 +78,6 @@ namespace DiscUtils.Ntfs
         {
             Utilities.WriteBytesLittleEndian(_val, buffer, offset);
         }
-
-        public int Size
-        {
-            get { return 8; }
-        }
-
-        #endregion
 
         public override bool Equals(object obj)
         {
@@ -92,18 +93,6 @@ namespace DiscUtils.Ntfs
         {
             return _val.GetHashCode();
         }
-
-        public static bool operator ==(FileRecordReference a, FileRecordReference b)
-        {
-            return a._val == b._val;
-        }
-
-        public static bool operator !=(FileRecordReference a, FileRecordReference b)
-        {
-            return a._val != b._val;
-        }
-
-        #region IComparable<FileReference> Members
 
         public int CompareTo(FileRecordReference other)
         {
@@ -121,6 +110,9 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        #endregion
+        public override string ToString()
+        {
+            return "MFT:" + MftIndex + " (ver: " + SequenceNumber + ")";
+        }
     }
 }

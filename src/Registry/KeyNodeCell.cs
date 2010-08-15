@@ -73,6 +73,11 @@ namespace DiscUtils.Registry
         {
         }
 
+        public override int Size
+        {
+            get { return 0x4C + Name.Length; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             Flags = (RegistryKeyFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
@@ -111,11 +116,6 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian((ushort)Name.Length, buffer, offset + 0x48);
             Utilities.WriteBytesLittleEndian(ClassNameLength, buffer, offset + 0x4A);
             Utilities.StringToBytes(Name, buffer, offset + 0x4C, Name.Length);
-        }
-
-        public override int Size
-        {
-            get { return 0x4C + Name.Length; }
         }
 
         public override string ToString()

@@ -84,27 +84,6 @@ namespace DiscUtils.Vhd
             _nextBlockStart = _fileStream.Position - (footer.IsValid() ? Utilities.SectorSize : 0);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    UpdateFooter();
-
-                    if (_ownsParentStream == Ownership.Dispose && _parentStream != null)
-                    {
-                        _parentStream.Dispose();
-                        _parentStream = null;
-                    }
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public bool AutoCommitFooter
         {
             get
@@ -149,11 +128,6 @@ namespace DiscUtils.Vhd
             }
         }
 
-        public override void Flush()
-        {
-            CheckDisposed();
-        }
-
         public override long Length
         {
             get
@@ -177,6 +151,16 @@ namespace DiscUtils.Vhd
                 _atEof = false;
                 _position = value;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return GetExtentsInRange(0, Length); }
+        }
+
+        public override void Flush()
+        {
+            CheckDisposed();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -417,9 +401,25 @@ namespace DiscUtils.Vhd
             return result;
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get { return GetExtentsInRange(0, Length); }
+            try
+            {
+                if (disposing)
+                {
+                    UpdateFooter();
+
+                    if (_ownsParentStream == Ownership.Dispose && _parentStream != null)
+                    {
+                        _parentStream.Dispose();
+                        _parentStream = null;
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         private IEnumerable<StreamExtent> LayerExtents(long start, long count)

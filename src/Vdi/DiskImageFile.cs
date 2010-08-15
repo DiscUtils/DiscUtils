@@ -71,33 +71,43 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Disposes of underlying resources.
+        /// Gets a value indicating if the layer only stores meaningful sectors.
         /// </summary>
-        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
-        /// else <c>false</c>.</param>
-        protected override void Dispose(bool disposing)
+        public override bool IsSparse
         {
-            try
-            {
-                if (disposing)
-                {
-                    if (_writeOccurred && _stream != null)
-                    {
-                        _header.ModificationId = Guid.NewGuid();
-                        _stream.Position = PreHeaderRecord.Size;
-                        _header.Write(_stream);
-                    }
+            get { return _header.ImageType != ImageType.Fixed; }
+        }
 
-                    if (_ownsStream == Ownership.Dispose && _stream != null)
-                    {
-                        _stream.Dispose();
-                        _stream = null;
-                    }
-                }
-            }
-            finally
+        internal override long Capacity
+        {
+            get { return _header.DiskSize; }
+        }
+
+        internal override FileLocator RelativeFileLocator
+        {
+            // Differencing disks not yet supported.
+            get { return null; }
+        }
+
+        /// <summary>
+        /// Gets (a guess at) the geometry of the virtual disk.
+        /// </summary>
+        internal Geometry Geometry
+        {
+            get
             {
-                base.Dispose(disposing);
+                if (_header.LChsGeometry != null && _header.LChsGeometry.Cylinders != 0)
+                {
+                    return _header.LChsGeometry.ToGeometry(_header.DiskSize);
+                }
+                else if (_header.LegacyGeometry.Cylinders != 0)
+                {
+                    return _header.LegacyGeometry.ToGeometry(_header.DiskSize);
+                }
+                else
+                {
+                    return GeometryRecord.FromCapacity(_header.DiskSize).ToGeometry(_header.DiskSize);
+                }
             }
         }
 
@@ -167,47 +177,6 @@ namespace DiscUtils.Vdi
             return new DiskImageFile(stream, ownsStream);
         }
 
-        /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
-        /// </summary>
-        public override bool IsSparse
-        {
-            get { return _header.ImageType != ImageType.Fixed; }
-        }
-
-        internal override long Capacity
-        {
-            get { return _header.DiskSize; }
-        }
-
-        internal override FileLocator RelativeFileLocator
-        {
-            // Differencing disks not yet supported.
-            get { return null; }
-        }
-
-        /// <summary>
-        /// Gets (a guess at) the geometry of the virtual disk.
-        /// </summary>
-        internal Geometry Geometry
-        {
-            get
-            {
-                if (_header.LChsGeometry != null && _header.LChsGeometry.Cylinders != 0)
-                {
-                    return _header.LChsGeometry.ToGeometry(_header.DiskSize);
-                }
-                else if (_header.LegacyGeometry.Cylinders != 0)
-                {
-                    return _header.LegacyGeometry.ToGeometry(_header.DiskSize);
-                }
-                else
-                {
-                    return GeometryRecord.FromCapacity(_header.DiskSize).ToGeometry(_header.DiskSize);
-                }
-            }
-        }
-
         internal DiskStream OpenContent(Stream parent, Ownership ownsParent)
         {
             if (parent != null && ownsParent == Ownership.Dispose)
@@ -219,6 +188,37 @@ namespace DiscUtils.Vdi
             DiskStream stream = new DiskStream(_stream, Ownership.None, _header);
             stream.WriteOccurred += OnWriteOccurred;
             return stream;
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_writeOccurred && _stream != null)
+                    {
+                        _header.ModificationId = Guid.NewGuid();
+                        _stream.Position = PreHeaderRecord.Size;
+                        _header.Write(_stream);
+                    }
+
+                    if (_ownsStream == Ownership.Dispose && _stream != null)
+                    {
+                        _stream.Dispose();
+                        _stream = null;
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         private void ReadHeader()

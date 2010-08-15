@@ -38,6 +38,17 @@ namespace DiscUtils.Ntfs
             _index = new IndexView<IndexKey, ObjectIdRecord>(file.GetIndex("$O"));
         }
 
+        internal IEnumerable<KeyValuePair<Guid, ObjectIdRecord>> All
+        {
+            get
+            {
+                foreach (var record in _index.Entries)
+                {
+                    yield return new KeyValuePair<Guid, ObjectIdRecord>(record.Key.Id, record.Value);
+                }
+            }
+        }
+
         internal void Add(Guid objId, FileRecordReference mftRef, Guid birthId, Guid birthVolumeId, Guid birthDomainId)
         {
             IndexKey newKey = new IndexKey();
@@ -70,18 +81,7 @@ namespace DiscUtils.Ntfs
             return _index.TryGetValue(key, out value);
         }
 
-        internal IEnumerable<KeyValuePair<Guid, ObjectIdRecord>> All
-        {
-            get
-            {
-                foreach (var record in _index.Entries)
-                {
-                    yield return new KeyValuePair<Guid, ObjectIdRecord>(record.Key.Id, record.Value);
-                }
-            }
-        }
-
-        public void Dump(TextWriter writer, string indent)
+        internal void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "OBJECT ID INDEX");
 
@@ -100,6 +100,11 @@ namespace DiscUtils.Ntfs
         {
             public Guid Id;
 
+            public int Size
+            {
+                get { return 16; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Id = Utilities.ToGuidLittleEndian(buffer, offset + 0);
@@ -109,11 +114,6 @@ namespace DiscUtils.Ntfs
             public void WriteTo(byte[] buffer, int offset)
             {
                 Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
-            }
-
-            public int Size
-            {
-                get { return 16; }
             }
 
             public override string ToString()

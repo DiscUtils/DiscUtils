@@ -206,25 +206,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Disposes of this instance, freeing up associated resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> if invoked from <c>Dispose</c>, else <c>false</c>.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_wrappedStream != null && _ownWrapped == Ownership.Dispose)
-                {
-                    _wrappedStream.Dispose();
-                }
-
-                _wrappedStream = null;
-            }
-
-            base.Dispose(disposing);
-        }
-
-        /// <summary>
         /// Gets the parts of the stream that are stored.
         /// </summary>
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
@@ -235,18 +216,6 @@ namespace DiscUtils
                 CheckDisposed();
                 return _wrappedStream.Extents;
             }
-        }
-
-        /// <summary>
-        /// Gets the parts of a stream that are stored, within a specified range.
-        /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
-        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
-        {
-            CheckDisposed();
-            return _wrappedStream.GetExtentsInRange(start, count);
         }
 
         /// <summary>
@@ -271,15 +240,6 @@ namespace DiscUtils
         public override bool CanWrite
         {
             get { return _wrappedStream.CanWrite; }
-        }
-
-        /// <summary>
-        /// Flushes the stream.
-        /// </summary>
-        public override void Flush()
-        {
-            CheckDisposed();
-            _wrappedStream.Flush();
         }
 
         /// <summary>
@@ -310,6 +270,26 @@ namespace DiscUtils
                 CheckDisposed();
                 _position = value;
             }
+        }
+
+        /// <summary>
+        /// Gets the performance statistics for this instance.
+        /// </summary>
+        public BlockCacheStatistics Statistics
+        {
+            get { return _stats; }
+        }
+
+        /// <summary>
+        /// Gets the parts of a stream that are stored, within a specified range.
+        /// </summary>
+        /// <param name="start">The offset of the first byte of interest</param>
+        /// <param name="count">The number of bytes of interest</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            CheckDisposed();
+            return _wrappedStream.GetExtentsInRange(start, count);
         }
 
         /// <summary>
@@ -462,6 +442,15 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Flushes the stream.
+        /// </summary>
+        public override void Flush()
+        {
+            CheckDisposed();
+            _wrappedStream.Flush();
+        }
+
+        /// <summary>
         /// Moves the stream position.
         /// </summary>
         /// <param name="offset">The origin-relative location</param>
@@ -561,11 +550,22 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the performance statistics for this instance.
+        /// Disposes of this instance, freeing up associated resources.
         /// </summary>
-        public BlockCacheStatistics Statistics
+        /// <param name="disposing"><c>true</c> if invoked from <c>Dispose</c>, else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
         {
-            get { return _stats; }
+            if (disposing)
+            {
+                if (_wrappedStream != null && _ownWrapped == Ownership.Dispose)
+                {
+                    _wrappedStream.Dispose();
+                }
+
+                _wrappedStream = null;
+            }
+
+            base.Dispose(disposing);
         }
 
         private void CheckDisposed()
@@ -624,14 +624,14 @@ namespace DiscUtils
 
         private sealed class CacheBlock : IEquatable<CacheBlock>
         {
-            public long Block { get; set; }
-
-            public byte[] Data { get; private set; }
-
             public CacheBlock(int size)
             {
                 Data = new byte[size];
             }
+
+            public long Block { get; set; }
+
+            public byte[] Data { get; private set; }
 
             #region IEquatable<CacheBlock> Members
 

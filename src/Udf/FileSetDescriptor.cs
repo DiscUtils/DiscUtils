@@ -47,7 +47,12 @@ namespace DiscUtils.Udf
         public LongAllocationDescriptor NextExtent;
         public LongAllocationDescriptor SystemStreamDirectoryIcb;
 
-        int IByteArraySerializable.ReadFrom(byte[] buffer, int offset)
+        public int Size
+        {
+            get { return 512; }
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
         {
             DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
             RecordingTime = UdfUtilities.ParseTimestamp(buffer, offset + 16);
@@ -71,14 +76,9 @@ namespace DiscUtils.Udf
             return 512;
         }
 
-        void IByteArraySerializable.WriteTo(byte[] buffer, int offset)
+        public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        int IByteArraySerializable.Size
-        {
-            get { return 512; }
         }
     }
 }

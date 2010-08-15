@@ -44,6 +44,21 @@ namespace DiscUtils.Wim
         public string FileName;
         public Dictionary<string, AlternateStreamEntry> AlternateStreams;
 
+        public string SearchName
+        {
+            get
+            {
+                if (FileName.IndexOf('.') == -1)
+                {
+                    return FileName + ".";
+                }
+                else
+                {
+                    return FileName;
+                }
+            }
+        }
+
         public static DirectoryEntry ReadFrom(DataReader reader)
         {
             long startPos = reader.Position;
@@ -141,21 +156,6 @@ namespace DiscUtils.Wim
             }
 
             throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such alternate stream '{1}' in file '{2}'", streamName, FileName), FileName + ":" + streamName);
-        }
-
-        public string SearchName
-        {
-            get
-            {
-                if (FileName.IndexOf('.') == -1)
-                {
-                    return FileName + ".";
-                }
-                else
-                {
-                    return FileName;
-                }
-            }
         }
     }
 }

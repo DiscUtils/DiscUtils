@@ -122,6 +122,14 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
+        /// Gets the SCSI status associated with this exception.
+        /// </summary>
+        public ScsiStatus Status
+        {
+            get { return _status; }
+        }
+
+        /// <summary>
         /// Gets the serialized state of this exception.
         /// </summary>
         /// <param name="info">The serialization info</param>
@@ -132,14 +140,6 @@ namespace DiscUtils.Iscsi
             base.GetObjectData(info, context);
             info.AddValue("status", (byte)_status);
             info.AddValue("senseData", _senseData);
-        }
-
-        /// <summary>
-        /// Gets the SCSI status associated with this exception.
-        /// </summary>
-        public ScsiStatus Status
-        {
-            get { return _status; }
         }
 
         /// <summary>

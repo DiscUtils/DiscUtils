@@ -88,6 +88,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public virtual string VolumeLabel
+        {
+            get { return ""; }
+        }
+
+        /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
         /// <param name="sourceFile">The source file</param>
@@ -448,14 +456,6 @@ namespace DiscUtils
         public virtual DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);
-        }
-
-        /// <summary>
-        /// Gets the volume label.
-        /// </summary>
-        public virtual string VolumeLabel
-        {
-            get { return ""; }
         }
 
         #region IDisposable Members

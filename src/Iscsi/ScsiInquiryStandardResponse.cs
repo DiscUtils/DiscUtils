@@ -63,6 +63,16 @@ namespace DiscUtils.Iscsi
             get { return _productRevision; }
         }
 
+        public override bool Truncated
+        {
+            get { return _truncated; }
+        }
+
+        public override uint NeededDataLength
+        {
+            get { return 36; }
+        }
+
         public override void ReadFrom(byte[] buffer, int offset, int count)
         {
             if (count < 36)
@@ -78,16 +88,6 @@ namespace DiscUtils.Iscsi
             _vendorId = Utilities.BytesToString(buffer, 8, 8);
             _productId = Utilities.BytesToString(buffer, 16, 16);
             _productRevision = Utilities.BytesToString(buffer, 32, 4);
-        }
-
-        public override bool Truncated
-        {
-            get { return _truncated; }
-        }
-
-        public override uint NeededDataLength
-        {
-            get { return 36; }
         }
     }
 }

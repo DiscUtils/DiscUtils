@@ -24,10 +24,6 @@ namespace DiscUtils.Nfs
 {
     internal class Nfs3AccessResult : Nfs3CallResult
     {
-        public Nfs3FileAttributes ObjectAttributes { get; set; }
-
-        public Nfs3AccessPermissions Access { get; set; }
-
         public Nfs3AccessResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
@@ -38,5 +34,9 @@ namespace DiscUtils.Nfs
 
             Access = (Nfs3AccessPermissions)reader.ReadInt32();
         }
+
+        public Nfs3FileAttributes ObjectAttributes { get; set; }
+
+        public Nfs3AccessPermissions Access { get; set; }
     }
 }

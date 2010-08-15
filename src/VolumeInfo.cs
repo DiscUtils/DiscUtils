@@ -34,12 +34,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Opens the volume, providing access to it's contents.
-        /// </summary>
-        /// <returns>Stream that can access the volume's contents.</returns>
-        public abstract SparseStream Open();
-
-        /// <summary>
         /// Gets the one-byte BIOS type for this volume, which indicates the content.
         /// </summary>
         public abstract byte BiosType { get; }
@@ -72,5 +66,11 @@ namespace DiscUtils
         /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
         /// </summary>
         public abstract long PhysicalStartSector { get; }
+
+        /// <summary>
+        /// Opens the volume, providing access to it's contents.
+        /// </summary>
+        /// <returns>Stream that can access the volume's contents.</returns>
+        public abstract SparseStream Open();
     }
 }

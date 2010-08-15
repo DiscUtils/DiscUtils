@@ -57,6 +57,19 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
+        /// Initializes a new Boot Configuration Database
+        /// </summary>
+        /// <param name="root">The registry key at the root of the database</param>
+        /// <returns>The BCD store</returns>
+        public static Store Initialize(RegistryKey root)
+        {
+            RegistryKey descKey = root.CreateSubKey("Description");
+            descKey.SetValue("KeyName", "BCD00000001");
+            root.CreateSubKey("Objects");
+            return new Store(root);
+        }
+
+        /// <summary>
         /// Gets an object from the store.
         /// </summary>
         /// <param name="id">The identity of the object</param>
@@ -150,19 +163,6 @@ namespace DiscUtils.BootConfig
         public void RemoveObject(Guid id)
         {
             _store.DeleteObject(id);
-        }
-
-        /// <summary>
-        /// Initializes a new Boot Configuration Database
-        /// </summary>
-        /// <param name="root">The registry key at the root of the database</param>
-        /// <returns>The BCD store</returns>
-        public static Store Initialize(RegistryKey root)
-        {
-            RegistryKey descKey = root.CreateSubKey("Description");
-            descKey.SetValue("KeyName", "BCD00000001");
-            root.CreateSubKey("Objects");
-            return new Store(root);
         }
     }
 }

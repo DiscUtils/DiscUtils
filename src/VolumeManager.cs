@@ -75,6 +75,56 @@ namespace DiscUtils
             AddDisk(initialDiskContent);
         }
 
+        private static List<LogicalVolumeFactory> LogicalVolumeFactories
+        {
+            get
+            {
+                if (s_logicalVolumeFactories == null)
+                {
+                    List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
+
+                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    {
+                        foreach (LogicalVolumeFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
+                        {
+                            factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
+                        }
+                    }
+
+                    s_logicalVolumeFactories = factories;
+                }
+
+                return s_logicalVolumeFactories;
+            }
+        }
+
+        /// <summary>
+        /// Gets the physical volumes held on a disk.
+        /// </summary>
+        /// <param name="diskContent">The contents of the disk to inspect</param>
+        /// <returns>An array of volumes</returns>
+        /// <remarks>
+        /// <para>By preference, use the form of this method that takes a disk parameter.</para>
+        /// <para>If the disk isn't partitioned, this method returns the entire disk contents
+        /// as a single volume.</para>
+        /// </remarks>
+        public static PhysicalVolumeInfo[] GetPhysicalVolumes(Stream diskContent)
+        {
+            return GetPhysicalVolumes(new Raw.Disk(diskContent, Ownership.None));
+        }
+
+        /// <summary>
+        /// Gets the physical volumes held on a disk.
+        /// </summary>
+        /// <param name="disk">The disk to inspect</param>
+        /// <returns>An array of volumes</returns>
+        /// <remarks>If the disk isn't partitioned, this method returns the entire disk contents
+        /// as a single volume.</remarks>
+        public static PhysicalVolumeInfo[] GetPhysicalVolumes(VirtualDisk disk)
+        {
+            return new VolumeManager(disk).GetPhysicalVolumes();
+        }
+
         /// <summary>
         /// Adds a disk to the volume manager.
         /// </summary>
@@ -153,31 +203,20 @@ namespace DiscUtils
             return null;
         }
 
-        /// <summary>
-        /// Gets the physical volumes held on a disk.
-        /// </summary>
-        /// <param name="diskContent">The contents of the disk to inspect</param>
-        /// <returns>An array of volumes</returns>
-        /// <remarks>
-        /// <para>By preference, use the form of this method that takes a disk parameter.</para>
-        /// <para>If the disk isn't partitioned, this method returns the entire disk contents
-        /// as a single volume.</para>
-        /// </remarks>
-        public static PhysicalVolumeInfo[] GetPhysicalVolumes(Stream diskContent)
+        private static void MapPhysicalVolumes(IEnumerable<PhysicalVolumeInfo> physicalVols, Dictionary<string, LogicalVolumeInfo> result)
         {
-            return GetPhysicalVolumes(new Raw.Disk(diskContent, Ownership.None));
-        }
+            foreach (var physicalVol in physicalVols)
+            {
+                LogicalVolumeInfo lvi = new LogicalVolumeInfo(
+                    physicalVol.PartitionIdentity,
+                    physicalVol,
+                    physicalVol.Open,
+                    physicalVol.Length,
+                    physicalVol.BiosType,
+                    LogicalVolumeStatus.Healthy);
 
-        /// <summary>
-        /// Gets the physical volumes held on a disk.
-        /// </summary>
-        /// <param name="disk">The disk to inspect</param>
-        /// <returns>An array of volumes</returns>
-        /// <remarks>If the disk isn't partitioned, this method returns the entire disk contents
-        /// as a single volume.</remarks>
-        public static PhysicalVolumeInfo[] GetPhysicalVolumes(VirtualDisk disk)
-        {
-            return new VolumeManager(disk).GetPhysicalVolumes();
+                result.Add(lvi.Identity, lvi);
+            }
         }
 
         /// <summary>
@@ -227,22 +266,6 @@ namespace DiscUtils
             return result;
         }
 
-        private static void MapPhysicalVolumes(IEnumerable<PhysicalVolumeInfo> physicalVols, Dictionary<string, LogicalVolumeInfo> result)
-        {
-            foreach (var physicalVol in physicalVols)
-            {
-                LogicalVolumeInfo lvi = new LogicalVolumeInfo(
-                    physicalVol.PartitionIdentity,
-                    physicalVol,
-                    physicalVol.Open,
-                    physicalVol.Length,
-                    physicalVol.BiosType,
-                    LogicalVolumeStatus.Healthy);
-
-                result.Add(lvi.Identity, lvi);
-            }
-        }
-
         private Dictionary<string, PhysicalVolumeInfo> ScanForPhysicalVolumes()
         {
             Dictionary<string, PhysicalVolumeInfo> result = new Dictionary<string, PhysicalVolumeInfo>();
@@ -290,29 +313,6 @@ namespace DiscUtils
             }
 
             return "DO" + ordinal;
-        }
-
-        private static List<LogicalVolumeFactory> LogicalVolumeFactories
-        {
-            get
-            {
-                if (s_logicalVolumeFactories == null)
-                {
-                    List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
-
-                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
-                    {
-                        foreach (LogicalVolumeFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
-                        {
-                            factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
-                        }
-                    }
-
-                    s_logicalVolumeFactories = factories;
-                }
-
-                return s_logicalVolumeFactories;
-            }
         }
     }
 }

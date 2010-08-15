@@ -78,18 +78,6 @@ namespace DiscUtils.Sdi
         }
 
         /// <summary>
-        /// Disposes of this instance.
-        /// </summary>
-        public void Dispose()
-        {
-            if (_ownership == Ownership.Dispose && _stream != null)
-            {
-                _stream.Dispose();
-                _stream = null;
-            }
-        }
-
-        /// <summary>
         /// Gets all of the sections within the file.
         /// </summary>
         public IEnumerable<Section> Sections
@@ -101,6 +89,18 @@ namespace DiscUtils.Sdi
                 {
                     yield return new Section(section, i++);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_ownership == Ownership.Dispose && _stream != null)
+            {
+                _stream.Dispose();
+                _stream = null;
             }
         }
 

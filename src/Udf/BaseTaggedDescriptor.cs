@@ -37,6 +37,11 @@ namespace DiscUtils.Udf
             RequiredTagIdentifier = id;
         }
 
+        public int Size
+        {
+            get { return 512; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             if (!DescriptorTag.IsValid(buffer, offset))
@@ -58,11 +63,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 512; }
         }
 
         public abstract int Parse(byte[] buffer, int offset);

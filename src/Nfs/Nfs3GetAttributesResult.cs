@@ -24,12 +24,12 @@ namespace DiscUtils.Nfs
 {
     internal class Nfs3GetAttributesResult : Nfs3CallResult
     {
-        public Nfs3FileAttributes Attributes { get; set; }
-
         public Nfs3GetAttributesResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             Attributes = new Nfs3FileAttributes(reader);
         }
+
+        public Nfs3FileAttributes Attributes { get; set; }
     }
 }

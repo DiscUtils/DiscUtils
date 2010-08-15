@@ -28,6 +28,11 @@ namespace DiscUtils
     /// <remarks>Instances of this class are immutable.</remarks>
     public sealed class ChsAddress
     {
+        /// <summary>
+        /// The address of the first sector on any disk.
+        /// </summary>
+        public static readonly ChsAddress First = new ChsAddress(0, 0, 1);
+
         private int _cylinder;
         private int _head;
         private int _sector;
@@ -103,10 +108,5 @@ namespace DiscUtils
         {
             return "(" + _cylinder + "/" + _head + "/" + _sector + ")";
         }
-
-        /// <summary>
-        /// The address of the first sector on any disk.
-        /// </summary>
-        public static readonly ChsAddress First = new ChsAddress(0, 0, 1);
     }
 }

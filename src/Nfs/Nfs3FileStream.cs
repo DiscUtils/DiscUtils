@@ -58,10 +58,6 @@ namespace DiscUtils.Nfs
             get { return _access != FileAccess.Read; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _length; }
@@ -71,6 +67,10 @@ namespace DiscUtils.Nfs
         {
             get { return _position; }
             set { _position = value; }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)

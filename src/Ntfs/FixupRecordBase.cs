@@ -47,15 +47,6 @@ namespace DiscUtils.Ntfs
             Initialize(magic, sectorSize, recordLength);
         }
 
-        protected void Initialize(string magic, int sectorSize, int recordLength)
-        {
-            _magic = magic;
-            _sectorSize = sectorSize;
-            _updateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, sectorSize));
-            _updateSequenceNumber = 1;
-            _updateSequenceArray = new ushort[_updateSequenceCount - 1];
-        }
-
         public string Magic
         {
             get { return _magic; }
@@ -76,9 +67,17 @@ namespace DiscUtils.Ntfs
             get { return _updateSequenceNumber; }
         }
 
-        protected int UpdateSequenceSize
+        public int UpdateSequenceSize
         {
             get { return _updateSequenceCount * 2; }
+        }
+
+        public int Size
+        {
+            get
+            {
+                return CalcSize();
+            }
         }
 
         public void FromBytes(byte[] buffer, int offset)
@@ -121,14 +120,6 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset);
         }
 
-        public int Size
-        {
-            get
-            {
-                return CalcSize();
-            }
-        }
-
         public void ToBytes(byte[] buffer, int offset)
         {
             _updateSequenceOffset = Write(buffer, offset);
@@ -144,6 +135,15 @@ namespace DiscUtils.Ntfs
             {
                 Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + _updateSequenceOffset + (2 * (i + 1)));
             }
+        }
+
+        protected void Initialize(string magic, int sectorSize, int recordLength)
+        {
+            _magic = magic;
+            _sectorSize = sectorSize;
+            _updateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, sectorSize));
+            _updateSequenceNumber = 1;
+            _updateSequenceArray = new ushort[_updateSequenceCount - 1];
         }
 
         protected abstract void Read(byte[] buffer, int offset);

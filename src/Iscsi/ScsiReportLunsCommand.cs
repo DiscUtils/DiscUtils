@@ -36,6 +36,11 @@ namespace DiscUtils.Iscsi
             _expected = expected;
         }
 
+        public override int Size
+        {
+            get { return 12; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
@@ -52,11 +57,6 @@ namespace DiscUtils.Iscsi
             Utilities.WriteBytesBigEndian(_expected, buffer, offset + 6);
             buffer[offset + 10] = 0; // Reserved
             buffer[offset + 11] = 0; // Control
-        }
-
-        public override int Size
-        {
-            get { return 12; }
         }
     }
 }

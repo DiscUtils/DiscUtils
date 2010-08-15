@@ -54,26 +54,6 @@ namespace DiscUtils
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing && _ownsStreams == Ownership.Dispose && _streams != null)
-                {
-                    foreach (var stream in _streams)
-                    {
-                        stream.Dispose();
-                    }
-
-                    _streams = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public override bool CanRead
         {
             get
@@ -98,15 +78,6 @@ namespace DiscUtils
             {
                 CheckDisposed();
                 return _canWrite;
-            }
-        }
-
-        public override void Flush()
-        {
-            CheckDisposed();
-            for (int i = 0; i < _streams.Length; ++i)
-            {
-                _streams[i].Flush();
             }
         }
 
@@ -137,6 +108,37 @@ namespace DiscUtils
             {
                 CheckDisposed();
                 _position = value;
+            }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                CheckDisposed();
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long pos = 0;
+                for (int i = 0; i < _streams.Length; ++i)
+                {
+                    foreach (StreamExtent extent in _streams[i].Extents)
+                    {
+                        extents.Add(new StreamExtent(extent.Start + pos, extent.Length));
+                    }
+
+                    pos += _streams[i].Length;
+                }
+
+                return extents;
+            }
+        }
+
+        public override void Flush()
+        {
+            CheckDisposed();
+            for (int i = 0; i < _streams.Length; ++i)
+            {
+                _streams[i].Flush();
             }
         }
 
@@ -237,25 +239,23 @@ namespace DiscUtils
             }
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get
+            try
             {
-                CheckDisposed();
-                List<StreamExtent> extents = new List<StreamExtent>();
-
-                long pos = 0;
-                for (int i = 0; i < _streams.Length; ++i)
+                if (disposing && _ownsStreams == Ownership.Dispose && _streams != null)
                 {
-                    foreach (StreamExtent extent in _streams[i].Extents)
+                    foreach (var stream in _streams)
                     {
-                        extents.Add(new StreamExtent(extent.Start + pos, extent.Length));
+                        stream.Dispose();
                     }
 
-                    pos += _streams[i].Length;
+                    _streams = null;
                 }
-
-                return extents;
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

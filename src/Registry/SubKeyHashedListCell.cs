@@ -49,6 +49,16 @@ namespace DiscUtils.Registry
             _hive = hive;
         }
 
+        public override int Size
+        {
+            get { return 0x4 + (_numElements * 0x8); }
+        }
+
+        internal override int Count
+        {
+            get { return _subKeyIndexes.Count; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             _hashType = Utilities.BytesToString(buffer, offset, 2);
@@ -76,11 +86,6 @@ namespace DiscUtils.Registry
             }
         }
 
-        public override int Size
-        {
-            get { return 0x4 + (_numElements * 0x8); }
-        }
-
         /// <summary>
         /// Adds a new entry.
         /// </summary>
@@ -104,11 +109,6 @@ namespace DiscUtils.Registry
             _subKeyIndexes.Add(cellIndex);
             _nameHashes.Add(CalcHash(name));
             return _numElements++;
-        }
-
-        internal override int Count
-        {
-            get { return _subKeyIndexes.Count; }
         }
 
         internal override int FindKey(string name, out int cellIndex)

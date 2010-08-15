@@ -67,6 +67,15 @@ namespace DiscUtils.Ntfs
             _nextSpace = Utilities.RoundUp(_nextSpace, 16);
         }
 
+        public static SecurityDescriptors Initialize(File file)
+        {
+            file.CreateIndex("$SDH", (AttributeType)0, AttributeCollationRule.SecurityHash);
+            file.CreateIndex("$SII", (AttributeType)0, AttributeCollationRule.UnsignedLong);
+            file.CreateStream(AttributeType.Data, "$SDS");
+
+            return new SecurityDescriptors(file);
+        }
+
         public RawSecurityDescriptor GetDescriptorById(uint id)
         {
             IdIndexData data;
@@ -157,15 +166,6 @@ namespace DiscUtils.Ntfs
             return record.Id;
         }
 
-        public static SecurityDescriptors Initialize(File file)
-        {
-            file.CreateIndex("$SDH", (AttributeType)0, AttributeCollationRule.SecurityHash);
-            file.CreateIndex("$SII", (AttributeType)0, AttributeCollationRule.UnsignedLong);
-            file.CreateStream(AttributeType.Data, "$SDS");
-
-            return new SecurityDescriptors(file);
-        }
-
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "SECURITY DESCRIPTORS");
@@ -201,6 +201,20 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        private SecurityDescriptor ReadDescriptor(IndexData data)
+        {
+            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
+            {
+                s.Position = data.SdsOffset;
+                byte[] buffer = Utilities.ReadFully(s, data.SdsLength);
+
+                SecurityDescriptorRecord record = new SecurityDescriptorRecord();
+                record.Read(buffer, 0);
+
+                return new SecurityDescriptor(new RawSecurityDescriptor(record.SecurityDescriptor, 0));
+            }
+        }
+
         internal abstract class IndexData
         {
             public uint Hash;
@@ -219,6 +233,11 @@ namespace DiscUtils.Ntfs
             public uint Hash;
             public uint Id;
 
+            public int Size
+            {
+                get { return 8; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
@@ -232,11 +251,6 @@ namespace DiscUtils.Ntfs
                 Utilities.WriteBytesLittleEndian(Id, buffer, offset + 4);
             }
 
-            public int Size
-            {
-                get { return 8; }
-            }
-
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Hash:{0},Id:{1}]", Hash, Id);
@@ -245,6 +259,11 @@ namespace DiscUtils.Ntfs
 
         internal sealed class HashIndexData : IndexData, IByteArraySerializable
         {
+            public int Size
+            {
+                get { return 0x14; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
@@ -262,11 +281,6 @@ namespace DiscUtils.Ntfs
                 Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
                 ////Array.Copy(new byte[] { (byte)'I', 0, (byte)'I', 0 }, 0, buffer, offset + 0x14, 4);
             }
-
-            public int Size
-            {
-                get { return 0x14; }
-            }
         }
 
         internal sealed class IdIndexKey : IByteArraySerializable
@@ -282,6 +296,11 @@ namespace DiscUtils.Ntfs
                 Id = id;
             }
 
+            public int Size
+            {
+                get { return 4; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
@@ -293,11 +312,6 @@ namespace DiscUtils.Ntfs
                 Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
             }
 
-            public int Size
-            {
-                get { return 4; }
-            }
-
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "[Key-Id:{0}]", Id);
@@ -306,6 +320,11 @@ namespace DiscUtils.Ntfs
 
         internal sealed class IdIndexData : IndexData, IByteArraySerializable
         {
+            public int Size
+            {
+                get { return 0x14; }
+            }
+
             public int ReadFrom(byte[] buffer, int offset)
             {
                 Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
@@ -321,25 +340,6 @@ namespace DiscUtils.Ntfs
                 Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
                 Utilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
                 Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
-            }
-
-            public int Size
-            {
-                get { return 0x14; }
-            }
-        }
-
-        private SecurityDescriptor ReadDescriptor(IndexData data)
-        {
-            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
-            {
-                s.Position = data.SdsOffset;
-                byte[] buffer = Utilities.ReadFully(s, data.SdsLength);
-
-                SecurityDescriptorRecord record = new SecurityDescriptorRecord();
-                record.Read(buffer, 0);
-
-                return new SecurityDescriptor(new RawSecurityDescriptor(record.SecurityDescriptor, 0));
             }
         }
 

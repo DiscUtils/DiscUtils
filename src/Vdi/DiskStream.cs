@@ -53,23 +53,6 @@ namespace DiscUtils.Vdi
             ReadBlockTable();
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            _isDisposed = true;
-            try
-            {
-                if (_ownsStream == Ownership.Dispose && _fileStream != null)
-                {
-                    _fileStream.Dispose();
-                    _fileStream = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
         public event EventHandler WriteOccurred;
 
         public override bool CanRead
@@ -99,11 +82,6 @@ namespace DiscUtils.Vdi
             }
         }
 
-        public override void Flush()
-        {
-            CheckDisposed();
-        }
-
         public override long Length
         {
             get
@@ -127,6 +105,45 @@ namespace DiscUtils.Vdi
                 _position = value;
                 _atEof = false;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long blockSize = _fileHeader.BlockSize;
+                int i = 0;
+                while (i < _blockTable.Length)
+                {
+                    // Find next stored block
+                    while (i < _blockTable.Length && (_blockTable[i] == BlockZero || _blockTable[i] == BlockFree))
+                    {
+                        ++i;
+                    }
+
+                    int start = i;
+
+                    // Find next absent block
+                    while (i < _blockTable.Length && (_blockTable[i] != BlockZero && _blockTable[i] != BlockFree))
+                    {
+                        ++i;
+                    }
+
+                    if (start != i)
+                    {
+                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
+                    }
+                }
+
+                return extents;
+            }
+        }
+
+        public override void Flush()
+        {
+            CheckDisposed();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -308,37 +325,20 @@ namespace DiscUtils.Vdi
             }
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        protected override void Dispose(bool disposing)
         {
-            get
+            _isDisposed = true;
+            try
             {
-                List<StreamExtent> extents = new List<StreamExtent>();
-
-                long blockSize = _fileHeader.BlockSize;
-                int i = 0;
-                while (i < _blockTable.Length)
+                if (_ownsStream == Ownership.Dispose && _fileStream != null)
                 {
-                    // Find next stored block
-                    while (i < _blockTable.Length && (_blockTable[i] == BlockZero || _blockTable[i] == BlockFree))
-                    {
-                        ++i;
-                    }
-
-                    int start = i;
-
-                    // Find next absent block
-                    while (i < _blockTable.Length && (_blockTable[i] != BlockZero && _blockTable[i] != BlockFree))
-                    {
-                        ++i;
-                    }
-
-                    if (start != i)
-                    {
-                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
-                    }
+                    _fileStream.Dispose();
+                    _fileStream = null;
                 }
-
-                return extents;
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 

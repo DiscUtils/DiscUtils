@@ -38,6 +38,11 @@ namespace DiscUtils.Iscsi
             get { return TaskAttributes.Simple; }
         }
 
+        public override int Size
+        {
+            get { return 10; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
@@ -47,11 +52,6 @@ namespace DiscUtils.Iscsi
         {
             Array.Clear(buffer, offset, 10);
             buffer[offset] = 0x25; // OpCode
-        }
-
-        public override int Size
-        {
-            get { return 10; }
         }
     }
 }

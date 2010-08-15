@@ -29,12 +29,12 @@ namespace DiscUtils.BootConfig
 
     internal class DiscUtilsRegistryStorage : BaseStorage
     {
-        private RegistryKey _rootKey;
-
         private const string ElementsPathTemplate = @"Objects\{0}\Elements";
         private const string ElementPathTemplate = @"Objects\{0}\Elements\{1:X8}";
         private const string ObjectTypePathTemplate = @"Objects\{0}\Description";
         private const string ObjectsPath = @"Objects";
+
+        private RegistryKey _rootKey;
 
         public DiscUtilsRegistryStorage(RegistryKey key)
         {

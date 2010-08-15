@@ -31,6 +31,11 @@ namespace DiscUtils.Udf
         public uint Length;
         public uint Location;
 
+        public int Size
+        {
+            get { return 8; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Length = Utilities.ToUInt32LittleEndian(buffer, offset);
@@ -42,11 +47,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 8; }
         }
     }
 }

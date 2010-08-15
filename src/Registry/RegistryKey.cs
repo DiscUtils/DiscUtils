@@ -42,6 +42,130 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Gets the name of this key.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                RegistryKey parent = Parent;
+                if (parent != null && ((parent.Flags & RegistryKeyFlags.Root) == 0))
+                {
+                    return parent.Name + @"\" + _cell.Name;
+                }
+                else
+                {
+                    return _cell.Name;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of child keys.
+        /// </summary>
+        public int SubKeyCount
+        {
+            get { return _cell.NumSubKeys; }
+        }
+
+        /// <summary>
+        /// Gets the number of values in this key.
+        /// </summary>
+        public int ValueCount
+        {
+            get { return _cell.NumValues; }
+        }
+
+        /// <summary>
+        /// Gets the time the key was last modified.
+        /// </summary>
+        public DateTime Timestamp
+        {
+            get { return _cell.Timestamp; }
+        }
+
+        /// <summary>
+        /// Gets the parent key, or <c>null</c> if this is the root key.
+        /// </summary>
+        public RegistryKey Parent
+        {
+            get
+            {
+                if ((_cell.Flags & RegistryKeyFlags.Root) == 0)
+                {
+                    return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the flags of this registry key.
+        /// </summary>
+        public RegistryKeyFlags Flags
+        {
+            get { return _cell.Flags; }
+        }
+
+        /// <summary>
+        /// Gets the class name of this registry key.
+        /// </summary>
+        /// <remarks>Class name is rarely used.</remarks>
+        public string ClassName
+        {
+            get
+            {
+                if (_cell.ClassNameIndex > 0)
+                {
+                    return Encoding.Unicode.GetString(_hive.RawCellData(_cell.ClassNameIndex, _cell.ClassNameLength));
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerator over all sub child keys.
+        /// </summary>
+        public IEnumerable<RegistryKey> SubKeys
+        {
+            get
+            {
+                if (_cell.NumSubKeys != 0)
+                {
+                    ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
+                    foreach (var key in list.EnumerateKeys())
+                    {
+                        yield return new RegistryKey(_hive, key);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets an enumerator over all values in this key.
+        /// </summary>
+        private IEnumerable<RegistryValue> Values
+        {
+            get
+            {
+                if (_cell.NumValues != 0)
+                {
+                    byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+
+                    for (int i = 0; i < _cell.NumValues; ++i)
+                    {
+                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                        yield return new RegistryValue(_hive, _hive.GetCell<ValueCell>(valueIndex));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the Security Descriptor applied to the registry key.
         /// </summary>
         /// <returns>The security descriptor as a RegistrySecurity instance.</returns>
@@ -348,92 +472,6 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Gets the name of this key.
-        /// </summary>
-        public string Name
-        {
-            get
-            {
-                RegistryKey parent = Parent;
-                if (parent != null && ((parent.Flags & RegistryKeyFlags.Root) == 0))
-                {
-                    return parent.Name + @"\" + _cell.Name;
-                }
-                else
-                {
-                    return _cell.Name;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of child keys.
-        /// </summary>
-        public int SubKeyCount
-        {
-            get { return _cell.NumSubKeys; }
-        }
-
-        /// <summary>
-        /// Gets the number of values in this key.
-        /// </summary>
-        public int ValueCount
-        {
-            get { return _cell.NumValues; }
-        }
-
-        /// <summary>
-        /// Gets the time the key was last modified.
-        /// </summary>
-        public DateTime Timestamp
-        {
-            get { return _cell.Timestamp; }
-        }
-
-        /// <summary>
-        /// Gets the parent key, or <c>null</c> if this is the root key.
-        /// </summary>
-        public RegistryKey Parent
-        {
-            get
-            {
-                if ((_cell.Flags & RegistryKeyFlags.Root) == 0)
-                {
-                    return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the flags of this registry key.
-        /// </summary>
-        public RegistryKeyFlags Flags
-        {
-            get { return _cell.Flags; }
-        }
-
-        /// <summary>
-        /// Gets the class name of this registry key.
-        /// </summary>
-        /// <remarks>Class name is rarely used.</remarks>
-        public string ClassName
-        {
-            get
-            {
-                if (_cell.ClassNameIndex > 0)
-                {
-                    return Encoding.Unicode.GetString(_hive.RawCellData(_cell.ClassNameIndex, _cell.ClassNameLength));
-                }
-
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Creates or opens a subkey.
         /// </summary>
         /// <param name="subkey">The relative path the the subkey</param>
@@ -613,44 +651,6 @@ namespace DiscUtils.Registry
             else
             {
                 new RegistryKey(_hive, subkeyCell).DeleteSubKey(split[1], throwOnMissingSubKey);
-            }
-        }
-
-        /// <summary>
-        /// Gets an enumerator over all sub child keys.
-        /// </summary>
-        public IEnumerable<RegistryKey> SubKeys
-        {
-            get
-            {
-                if (_cell.NumSubKeys != 0)
-                {
-                    ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
-                    foreach (var key in list.EnumerateKeys())
-                    {
-                        yield return new RegistryKey(_hive, key);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets an enumerator over all values in this key.
-        /// </summary>
-        private IEnumerable<RegistryValue> Values
-        {
-            get
-            {
-                if (_cell.NumValues != 0)
-                {
-                    byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
-
-                    for (int i = 0; i < _cell.NumValues; ++i)
-                    {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
-                        yield return new RegistryValue(_hive, _hive.GetCell<ValueCell>(valueIndex));
-                    }
-                }
             }
         }
 

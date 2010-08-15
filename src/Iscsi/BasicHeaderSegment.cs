@@ -33,6 +33,11 @@ namespace DiscUtils.Iscsi
 
         #region IByteArraySerializable Members
 
+        public int Size
+        {
+            get { return 48; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Immediate = (buffer[offset] & 0x40) != 0;
@@ -53,11 +58,6 @@ namespace DiscUtils.Iscsi
             buffer[offset + 6] = (byte)((DataSegmentLength >> 8) & 0xFF);
             buffer[offset + 7] = (byte)(DataSegmentLength & 0xFF);
             Utilities.WriteBytesBigEndian(InitiatorTaskTag, buffer, offset + 16);
-        }
-
-        public int Size
-        {
-            get { return 48; }
         }
 
         #endregion

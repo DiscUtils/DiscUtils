@@ -24,6 +24,20 @@ namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3FileSystemInfo
     {
+        public Nfs3FileSystemInfo(XdrDataReader reader)
+        {
+            ReadMaxBytes = reader.ReadUInt32();
+            ReadPreferredBytes = reader.ReadUInt32();
+            ReadMultipleSize = reader.ReadUInt32();
+            WriteMaxBytes = reader.ReadUInt32();
+            WritePreferredBytes = reader.ReadUInt32();
+            WriteMultipleSize = reader.ReadUInt32();
+            DirectoryPreferredBytes = reader.ReadUInt32();
+            MaxFileSize = reader.ReadInt64();
+            TimePrecision = new Nfs3FileTime(reader);
+            FileSystemProperties = (Nfs3FileSystemProperties)reader.ReadInt32();
+        }
+
         public uint ReadMaxBytes { get; set; }
 
         public uint ReadPreferredBytes { get; set; }
@@ -43,19 +57,5 @@ namespace DiscUtils.Nfs
         public Nfs3FileTime TimePrecision { get; set; }
 
         public Nfs3FileSystemProperties FileSystemProperties { get; set; }
-
-        public Nfs3FileSystemInfo(XdrDataReader reader)
-        {
-            ReadMaxBytes = reader.ReadUInt32();
-            ReadPreferredBytes = reader.ReadUInt32();
-            ReadMultipleSize = reader.ReadUInt32();
-            WriteMaxBytes = reader.ReadUInt32();
-            WritePreferredBytes = reader.ReadUInt32();
-            WriteMultipleSize = reader.ReadUInt32();
-            DirectoryPreferredBytes = reader.ReadUInt32();
-            MaxFileSize = reader.ReadInt64();
-            TimePrecision = new Nfs3FileTime(reader);
-            FileSystemProperties = (Nfs3FileSystemProperties)reader.ReadInt32();
-        }
     }
 }

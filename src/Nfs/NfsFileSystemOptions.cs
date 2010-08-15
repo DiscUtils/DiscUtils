@@ -28,16 +28,6 @@ namespace DiscUtils.Nfs
     public sealed class NfsFileSystemOptions : DiscFileSystemOptions
     {
         /// <summary>
-        /// The permission mask to apply to newly created files.
-        /// </summary>
-        public UnixFilePermissions NewFilePermissions { get; set; }
-
-        /// <summary>
-        /// The permission mask to apply to newly created directories.
-        /// </summary>
-        public UnixFilePermissions NewDirectoryPermissions { get; set; }
-
-        /// <summary>
         /// Creates a new instance with default settings.
         /// </summary>
         public NfsFileSystemOptions()
@@ -47,5 +37,15 @@ namespace DiscUtils.Nfs
             NewDirectoryPermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite | UnixFilePermissions.OwnerExecute
                 | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite | UnixFilePermissions.GroupExecute;
         }
+
+        /// <summary>
+        /// The permission mask to apply to newly created files.
+        /// </summary>
+        public UnixFilePermissions NewFilePermissions { get; set; }
+
+        /// <summary>
+        /// The permission mask to apply to newly created directories.
+        /// </summary>
+        public UnixFilePermissions NewDirectoryPermissions { get; set; }
     }
 }

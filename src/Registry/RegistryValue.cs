@@ -57,6 +57,53 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// The value data mapped to a .net object.
+        /// </summary>
+        /// <remarks>The mapping from registry type of .NET type is as follows:
+        /// <list type="table">
+        ///   <listheader>
+        ///     <term>Value Type</term>
+        ///     <term>.NET type</term>
+        ///   </listheader>
+        ///   <item>
+        ///     <description>String</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>ExpandString</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>Link</description>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWord</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>DWordBigEndian</description>
+        ///     <description>uint</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>MultiString</description>
+        ///     <description>string[]</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>QWord</description>
+        ///     <description>ulong</description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        public object Value
+        {
+            get
+            {
+                return ConvertToObject(GetData(), DataType);
+            }
+        }
+
+        /// <summary>
         /// The raw value data as a byte array.
         /// </summary>
         /// <returns>The value as a raw byte array.</returns>
@@ -120,53 +167,6 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// The value data mapped to a .net object.
-        /// </summary>
-        /// <remarks>The mapping from registry type of .NET type is as follows:
-        /// <list type="table">
-        ///   <listheader>
-        ///     <term>Value Type</term>
-        ///     <term>.NET type</term>
-        ///   </listheader>
-        ///   <item>
-        ///     <description>String</description>
-        ///     <description>string</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>ExpandString</description>
-        ///     <description>string</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>Link</description>
-        ///     <description>string</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>DWord</description>
-        ///     <description>uint</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>DWordBigEndian</description>
-        ///     <description>uint</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>MultiString</description>
-        ///     <description>string[]</description>
-        ///   </item>
-        ///   <item>
-        ///     <description>QWord</description>
-        ///     <description>ulong</description>
-        ///   </item>
-        /// </list>
-        /// </remarks>
-        public object Value
-        {
-            get
-            {
-                return ConvertToObject(GetData(), DataType);
-            }
-        }
-
-        /// <summary>
         /// Sets the value stored.
         /// </summary>
         /// <param name="value">The value to store.</param>
@@ -204,33 +204,6 @@ namespace DiscUtils.Registry
         public override string ToString()
         {
             return Name + ":" + DataType + ":" + DataAsString();
-        }
-
-        private string DataAsString()
-        {
-            switch (DataType)
-            {
-                case RegistryValueType.String:
-                case RegistryValueType.ExpandString:
-                case RegistryValueType.Link:
-                case RegistryValueType.Dword:
-                case RegistryValueType.DwordBigEndian:
-                case RegistryValueType.QWord:
-                    return ConvertToObject(GetData(), DataType).ToString();
-
-                case RegistryValueType.MultiString:
-                    return string.Join(",", (string[])ConvertToObject(GetData(), DataType));
-
-                default:
-                    byte[] data = GetData();
-                    string result = "";
-                    for (int i = 0; i < Math.Min(data.Length, 8); ++i)
-                    {
-                        result += string.Format(CultureInfo.InvariantCulture, "{0:X2} ", (int)data[i]);
-                    }
-
-                    return result + string.Format(CultureInfo.InvariantCulture, " ({0} bytes)", data.Length);
-            }
         }
 
         private static object ConvertToObject(byte[] data, RegistryValueType type)
@@ -299,6 +272,33 @@ namespace DiscUtils.Registry
             }
 
             return data;
+        }
+
+        private string DataAsString()
+        {
+            switch (DataType)
+            {
+                case RegistryValueType.String:
+                case RegistryValueType.ExpandString:
+                case RegistryValueType.Link:
+                case RegistryValueType.Dword:
+                case RegistryValueType.DwordBigEndian:
+                case RegistryValueType.QWord:
+                    return ConvertToObject(GetData(), DataType).ToString();
+
+                case RegistryValueType.MultiString:
+                    return string.Join(",", (string[])ConvertToObject(GetData(), DataType));
+
+                default:
+                    byte[] data = GetData();
+                    string result = "";
+                    for (int i = 0; i < Math.Min(data.Length, 8); ++i)
+                    {
+                        result += string.Format(CultureInfo.InvariantCulture, "{0:X2} ", (int)data[i]);
+                    }
+
+                    return result + string.Format(CultureInfo.InvariantCulture, " ({0} bytes)", data.Length);
+            }
         }
     }
 }

@@ -68,6 +68,11 @@ namespace DiscUtils.Udf
         public string Identifier;
         public byte[] Suffix;
 
+        public int Size
+        {
+            get { return 32; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Flags = buffer[offset];
@@ -80,11 +85,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public int Size
-        {
-            get { return 32; }
         }
     }
 

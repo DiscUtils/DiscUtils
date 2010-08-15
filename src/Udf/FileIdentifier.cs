@@ -47,25 +47,6 @@ namespace DiscUtils.Udf
         public byte[] ImplementationUse;
         public string Name;
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
-            FileVersionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
-            FileCharacteristics = (FileCharacteristic)buffer[offset + 18];
-            NameLength = buffer[offset + 19];
-            FileLocation = Utilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 20);
-            ImplementationUseLength = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
-            ImplementationUse = Utilities.ToByteArray(buffer, offset + 38, ImplementationUseLength);
-            Name = UdfUtilities.ReadDCharacters(buffer, offset + 38 + ImplementationUseLength, NameLength);
-
-            return Utilities.RoundUp(38 + ImplementationUseLength + NameLength, 4);
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
         public int Size
         {
             get { throw new NotImplementedException(); }
@@ -114,6 +95,25 @@ namespace DiscUtils.Udf
         public override long UniqueCacheId
         {
             get { return ((long)FileLocation.ExtentLocation.Partition) << 32 | FileLocation.ExtentLocation.LogicalBlock; }
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
+            FileVersionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
+            FileCharacteristics = (FileCharacteristic)buffer[offset + 18];
+            NameLength = buffer[offset + 19];
+            FileLocation = Utilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 20);
+            ImplementationUseLength = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
+            ImplementationUse = Utilities.ToByteArray(buffer, offset + 38, ImplementationUseLength);
+            Name = UdfUtilities.ReadDCharacters(buffer, offset + 38 + ImplementationUseLength, NameLength);
+
+            return Utilities.RoundUp(38 + ImplementationUseLength + NameLength, 4);
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
         }
     }
 }

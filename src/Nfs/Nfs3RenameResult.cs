@@ -24,15 +24,15 @@ namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3RenameResult : Nfs3CallResult
     {
-        public Nfs3WeakCacheConsistency FromDirCacheConsistency { get; set; }
-
-        public Nfs3WeakCacheConsistency ToDirCacheConsistency { get; set; }
-
         public Nfs3RenameResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             FromDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);
             ToDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);
         }
+
+        public Nfs3WeakCacheConsistency FromDirCacheConsistency { get; set; }
+
+        public Nfs3WeakCacheConsistency ToDirCacheConsistency { get; set; }
     }
 }

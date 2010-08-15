@@ -36,10 +36,6 @@ namespace DiscUtils.BootConfig
     /// </summary>
     public class BcdObject
     {
-        private BaseStorage _storage;
-        private Guid _id;
-        private int _type;
-
         /// <summary>
         /// Well-known object for Emergency Management Services settings.
         /// </summary>
@@ -128,6 +124,10 @@ namespace DiscUtils.BootConfig
         private static Dictionary<string, Guid> s_NameToGuid;
         private static Dictionary<Guid, string> s_GuidToName;
 
+        private BaseStorage _storage;
+        private Guid _id;
+        private int _type;
+
         static BcdObject()
         {
             s_NameToGuid = new Dictionary<string, Guid>();
@@ -206,6 +206,25 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
+        /// The elements in this object.
+        /// </summary>
+        public IEnumerable<Element> Elements
+        {
+            get
+            {
+                foreach (var el in _storage.EnumerateElements(_id))
+                {
+                    yield return new Element(_storage, _id, ApplicationType, el);
+                }
+            }
+        }
+
+        private bool IsApplication
+        {
+            get { return ObjectType == ObjectType.Application; }
+        }
+
+        /// <summary>
         /// Indicates if the settings in this object are inheritable by another object.
         /// </summary>
         /// <param name="type">The type of the object to test for inheritability</param>
@@ -227,20 +246,6 @@ namespace DiscUtils.BootConfig
             return setting == InheritType.AnyObject
                 || (setting == InheritType.ApplicationObjects && type == ObjectType.Application)
                 || (setting == InheritType.DeviceObjects && type == ObjectType.Device);
-        }
-
-        /// <summary>
-        /// The elements in this object.
-        /// </summary>
-        public IEnumerable<Element> Elements
-        {
-            get
-            {
-                foreach (var el in _storage.EnumerateElements(_id))
-                {
-                    yield return new Element(_storage, _id, ApplicationType, el);
-                }
-            }
         }
 
         /// <summary>
@@ -348,11 +353,6 @@ namespace DiscUtils.BootConfig
         internal static int MakeInheritType(InheritType inheritType)
         {
             return 0x20000000 | (((int)inheritType << 20) & 0x00F00000);
-        }
-
-        private bool IsApplication
-        {
-            get { return ObjectType == ObjectType.Application; }
         }
 
         private static void AddMapping(string name, string id)

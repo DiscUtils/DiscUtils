@@ -74,59 +74,6 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Disposes of underlying resources.
-        /// </summary>
-        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
-        /// else <c>false</c>.</param>
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (disposing)
-                {
-                    if (_content != null)
-                    {
-                        _content.Dispose();
-                        _content = null;
-                    }
-
-                    if (_diskImage != null)
-                    {
-                        _diskImage.Dispose();
-                    }
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
-        /// <summary>
-        /// Initializes a stream as a fixed-sized VDI file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
-        {
-            return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity));
-        }
-
-        /// <summary>
-        /// Initializes a stream as a dynamically-sized VDI file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
-        public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
-        {
-            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity));
-        }
-
-        /// <summary>
         /// Gets the geometry of the disk.
         /// </summary>
         public override Geometry Geometry
@@ -170,6 +117,30 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
+        /// Initializes a stream as a fixed-sized VDI file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VDI file</returns>
+        public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
+        {
+            return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity));
+        }
+
+        /// <summary>
+        /// Initializes a stream as a dynamically-sized VDI file.
+        /// </summary>
+        /// <param name="stream">The stream to initialize.</param>
+        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
+        /// <param name="capacity">The desired capacity of the new disk</param>
+        /// <returns>An object that accesses the stream as a VDI file</returns>
+        public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
+        {
+            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity));
+        }
+
+        /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
         /// <param name="fileSystem">The file system to create the disk on</param>
@@ -188,6 +159,35 @@ namespace DiscUtils.Vdi
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotImplementedException("Differencing disks not implemented for the VDI format");
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_content != null)
+                    {
+                        _content.Dispose();
+                        _content = null;
+                    }
+
+                    if (_diskImage != null)
+                    {
+                        _diskImage.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

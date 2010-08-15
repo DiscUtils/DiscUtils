@@ -80,6 +80,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets a null geometry, which has 512-byte sectors but zero sectors, tracks or cylinders.
+        /// </summary>
+        public static Geometry Null
+        {
+            get { return new Geometry(0, 0, 0, 512); }
+        }
+
+        /// <summary>
         /// Gets the number of cylinders.
         /// </summary>
         public int Cylinders
@@ -125,73 +133,6 @@ namespace DiscUtils
         public long Capacity
         {
             get { return ((long)TotalSectors) * ((long)BytesPerSector); }
-        }
-
-        /// <summary>
-        /// Converts a CHS (Cylinder,Head,Sector) address to a LBA (Logical Block Address).
-        /// </summary>
-        /// <param name="chsAddress">The CHS address to convert</param>
-        /// <returns>The Logical Block Address (in sectors)</returns>
-        public long ToLogicalBlockAddress(ChsAddress chsAddress)
-        {
-            return ToLogicalBlockAddress(chsAddress.Cylinder, chsAddress.Head, chsAddress.Sector);
-        }
-
-        /// <summary>
-        /// Converts a CHS (Cylinder,Head,Sector) address to a LBA (Logical Block Address).
-        /// </summary>
-        /// <param name="cylinder">The cylinder of the address</param>
-        /// <param name="head">The head of the address</param>
-        /// <param name="sector">The sector of the address</param>
-        /// <returns>The Logical Block Address (in sectors)</returns>
-        public long ToLogicalBlockAddress(int cylinder, int head, int sector)
-        {
-            if (cylinder < 0)
-            {
-                throw new ArgumentOutOfRangeException("cylinder", cylinder, "cylinder number is negative");
-            }
-
-            if (head >= _headsPerCylinder)
-            {
-                throw new ArgumentOutOfRangeException("head", head, "head number is larger than disk geometry");
-            }
-
-            if (head < 0)
-            {
-                throw new ArgumentOutOfRangeException("head", head, "head number is negative");
-            }
-
-            if (sector > _sectorsPerTrack)
-            {
-                throw new ArgumentOutOfRangeException("sector", sector, "sector number is larger than disk geometry");
-            }
-
-            if (sector < 1)
-            {
-                throw new ArgumentOutOfRangeException("sector", sector, "sector number is less than one (sectors are 1-based)");
-            }
-
-            return (((cylinder * (long)_headsPerCylinder) + head) * _sectorsPerTrack) + sector - 1;
-        }
-
-        /// <summary>
-        /// Converts a LBA (Logical Block Address) to a CHS (Cylinder, Head, Sector) address.
-        /// </summary>
-        /// <param name="logicalBlockAddress">The logical block address (in sectors)</param>
-        /// <returns>The address in CHS form.</returns>
-        public ChsAddress ToChsAddress(long logicalBlockAddress)
-        {
-            if (logicalBlockAddress < 0)
-            {
-                throw new ArgumentOutOfRangeException("logicalBlockAddress", logicalBlockAddress, "Logical Block Address is negative");
-            }
-
-            int cylinder = (int)(logicalBlockAddress / (_headsPerCylinder * _sectorsPerTrack));
-            int temp = (int)(logicalBlockAddress % (_headsPerCylinder * _sectorsPerTrack));
-            int head = temp / _sectorsPerTrack;
-            int sector = (temp % _sectorsPerTrack) + 1;
-
-            return new ChsAddress(cylinder, head, sector);
         }
 
         /// <summary>
@@ -349,11 +290,70 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets a null geometry, which has 512-byte sectors but zero sectors, tracks or cylinders.
+        /// Converts a CHS (Cylinder,Head,Sector) address to a LBA (Logical Block Address).
         /// </summary>
-        public static Geometry Null
+        /// <param name="chsAddress">The CHS address to convert</param>
+        /// <returns>The Logical Block Address (in sectors)</returns>
+        public long ToLogicalBlockAddress(ChsAddress chsAddress)
         {
-            get { return new Geometry(0, 0, 0, 512); }
+            return ToLogicalBlockAddress(chsAddress.Cylinder, chsAddress.Head, chsAddress.Sector);
+        }
+
+        /// <summary>
+        /// Converts a CHS (Cylinder,Head,Sector) address to a LBA (Logical Block Address).
+        /// </summary>
+        /// <param name="cylinder">The cylinder of the address</param>
+        /// <param name="head">The head of the address</param>
+        /// <param name="sector">The sector of the address</param>
+        /// <returns>The Logical Block Address (in sectors)</returns>
+        public long ToLogicalBlockAddress(int cylinder, int head, int sector)
+        {
+            if (cylinder < 0)
+            {
+                throw new ArgumentOutOfRangeException("cylinder", cylinder, "cylinder number is negative");
+            }
+
+            if (head >= _headsPerCylinder)
+            {
+                throw new ArgumentOutOfRangeException("head", head, "head number is larger than disk geometry");
+            }
+
+            if (head < 0)
+            {
+                throw new ArgumentOutOfRangeException("head", head, "head number is negative");
+            }
+
+            if (sector > _sectorsPerTrack)
+            {
+                throw new ArgumentOutOfRangeException("sector", sector, "sector number is larger than disk geometry");
+            }
+
+            if (sector < 1)
+            {
+                throw new ArgumentOutOfRangeException("sector", sector, "sector number is less than one (sectors are 1-based)");
+            }
+
+            return (((cylinder * (long)_headsPerCylinder) + head) * _sectorsPerTrack) + sector - 1;
+        }
+
+        /// <summary>
+        /// Converts a LBA (Logical Block Address) to a CHS (Cylinder, Head, Sector) address.
+        /// </summary>
+        /// <param name="logicalBlockAddress">The logical block address (in sectors)</param>
+        /// <returns>The address in CHS form.</returns>
+        public ChsAddress ToChsAddress(long logicalBlockAddress)
+        {
+            if (logicalBlockAddress < 0)
+            {
+                throw new ArgumentOutOfRangeException("logicalBlockAddress", logicalBlockAddress, "Logical Block Address is negative");
+            }
+
+            int cylinder = (int)(logicalBlockAddress / (_headsPerCylinder * _sectorsPerTrack));
+            int temp = (int)(logicalBlockAddress % (_headsPerCylinder * _sectorsPerTrack));
+            int head = temp / _sectorsPerTrack;
+            int sector = (temp % _sectorsPerTrack) + 1;
+
+            return new ChsAddress(cylinder, head, sector);
         }
 
         /// <summary>

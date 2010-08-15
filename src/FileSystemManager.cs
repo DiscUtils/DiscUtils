@@ -50,6 +50,39 @@ namespace DiscUtils
             _factories = new List<VfsFileSystemFactory>(DetectedFactories);
         }
 
+        private static List<VfsFileSystemFactory> DetectedFactories
+        {
+            get
+            {
+                if (s_DetectedFactories == null)
+                {
+                    s_DetectedFactories = DetectFactories(typeof(FileSystemManager).Assembly);
+                }
+
+                return s_DetectedFactories;
+            }
+        }
+
+        /// <summary>
+        /// Detect which file systems are present on a volume.
+        /// </summary>
+        /// <param name="volume">The volume to inspect</param>
+        /// <returns>The list of file systems detected.</returns>
+        public static FileSystemInfo[] DetectDefaultFileSystems(VolumeInfo volume)
+        {
+            return s_DefaultInstance.DetectFileSystems(volume);
+        }
+
+        /// <summary>
+        /// Detect which file systems are present in a stream.
+        /// </summary>
+        /// <param name="stream">The stream to inspect</param>
+        /// <returns>The list of file systems detected.</returns>
+        public static FileSystemInfo[] DetectDefaultFileSystems(Stream stream)
+        {
+            return s_DefaultInstance.DetectFileSystems(stream);
+        }
+
         /// <summary>
         /// Registers new file systems with an instance of this class.
         /// </summary>
@@ -77,26 +110,6 @@ namespace DiscUtils
         /// </summary>
         /// <param name="volume">The volume to inspect</param>
         /// <returns>The list of file systems detected.</returns>
-        public static FileSystemInfo[] DetectDefaultFileSystems(VolumeInfo volume)
-        {
-            return s_DefaultInstance.DetectFileSystems(volume);
-        }
-
-        /// <summary>
-        /// Detect which file systems are present in a stream.
-        /// </summary>
-        /// <param name="stream">The stream to inspect</param>
-        /// <returns>The list of file systems detected.</returns>
-        public static FileSystemInfo[] DetectDefaultFileSystems(Stream stream)
-        {
-            return s_DefaultInstance.DetectFileSystems(stream);
-        }
-
-        /// <summary>
-        /// Detect which file systems are present on a volume.
-        /// </summary>
-        /// <param name="volume">The volume to inspect</param>
-        /// <returns>The list of file systems detected.</returns>
         public FileSystemInfo[] DetectFileSystems(VolumeInfo volume)
         {
             using (Stream s = volume.Open())
@@ -115,32 +128,6 @@ namespace DiscUtils
             return DoDetect(stream, null);
         }
 
-        private FileSystemInfo[] DoDetect(Stream stream, VolumeInfo volume)
-        {
-            BufferedStream detectStream = new BufferedStream(stream);
-            List<FileSystemInfo> detected = new List<FileSystemInfo>();
-
-            foreach (var factory in _factories)
-            {
-                detected.AddRange(factory.Detect(detectStream, volume));
-            }
-
-            return detected.ToArray();
-        }
-
-        private static List<VfsFileSystemFactory> DetectedFactories
-        {
-            get
-            {
-                if (s_DetectedFactories == null)
-                {
-                    s_DetectedFactories = DetectFactories(typeof(FileSystemManager).Assembly);
-                }
-
-                return s_DetectedFactories;
-            }
-        }
-
         private static List<VfsFileSystemFactory> DetectFactories(Assembly assembly)
         {
             List<VfsFileSystemFactory> factories = new List<VfsFileSystemFactory>();
@@ -154,6 +141,19 @@ namespace DiscUtils
             }
 
             return factories;
+        }
+
+        private FileSystemInfo[] DoDetect(Stream stream, VolumeInfo volume)
+        {
+            BufferedStream detectStream = new BufferedStream(stream);
+            List<FileSystemInfo> detected = new List<FileSystemInfo>();
+
+            foreach (var factory in _factories)
+            {
+                detected.AddRange(factory.Detect(detectStream, volume));
+            }
+
+            return detected.ToArray();
         }
     }
 }

@@ -48,26 +48,6 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
-        /// Disposes of this instance, freeing underlying resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
-        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
-        /// if running inside destructor.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_content != null)
-                {
-                    _content.Dispose();
-                    _content = null;
-                }
-            }
-
-            base.Dispose(disposing);
-        }
-
-        /// <summary>
         /// The Unique id of the disk, as known by XenServer.
         /// </summary>
         public string Uuid
@@ -144,6 +124,26 @@ namespace DiscUtils.Xva
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported by XVA format");
+        }
+
+        /// <summary>
+        /// Disposes of this instance, freeing underlying resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
+        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
+        /// if running inside destructor.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_content != null)
+                {
+                    _content.Dispose();
+                    _content = null;
+                }
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

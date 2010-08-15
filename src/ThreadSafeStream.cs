@@ -96,54 +96,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Disposes of this instance, invalidating any remaining views.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, lese <c>false</c></param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_ownsCommon && _common != null)
-                {
-                    lock (_common)
-                    {
-                        if (_common.WrappedStreamOwnership == Ownership.Dispose)
-                        {
-                            _common.WrappedStream.Dispose();
-                        }
-
-                        _common.Dispose();
-                    }
-                }
-            }
-
-            _common = null;
-        }
-
-        /// <summary>
-        /// Opens a new thread-safe view on the stream.
-        /// </summary>
-        /// <returns>The new view</returns>
-        public SparseStream OpenView()
-        {
-            return new ThreadSafeStream(this);
-        }
-
-        /// <summary>
-        /// Gets the parts of a stream that are stored, within a specified range.
-        /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
-        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
-        {
-            lock (_common)
-            {
-                return Wrapped.GetExtentsInRange(start, count);
-            }
-        }
-
-        /// <summary>
         /// Gets the parts of the stream that are stored.
         /// </summary>
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
@@ -195,17 +147,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Causes the stream to flush all changes.
-        /// </summary>
-        public override void Flush()
-        {
-            lock (_common)
-            {
-                Wrapped.Flush();
-            }
-        }
-
-        /// <summary>
         /// Gets the length of the stream.
         /// </summary>
         public override long Length
@@ -232,6 +173,54 @@ namespace DiscUtils
             set
             {
                 _position = value;
+            }
+        }
+
+        private SparseStream Wrapped
+        {
+            get
+            {
+                SparseStream wrapped = _common.WrappedStream;
+                if (wrapped == null)
+                {
+                    throw new ObjectDisposedException("ThreadSafeStream");
+                }
+
+                return wrapped;
+            }
+        }
+
+        /// <summary>
+        /// Opens a new thread-safe view on the stream.
+        /// </summary>
+        /// <returns>The new view</returns>
+        public SparseStream OpenView()
+        {
+            return new ThreadSafeStream(this);
+        }
+
+        /// <summary>
+        /// Gets the parts of a stream that are stored, within a specified range.
+        /// </summary>
+        /// <param name="start">The offset of the first byte of interest</param>
+        /// <param name="count">The number of bytes of interest</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            lock (_common)
+            {
+                return Wrapped.GetExtentsInRange(start, count);
+            }
+        }
+
+        /// <summary>
+        /// Causes the stream to flush all changes.
+        /// </summary>
+        public override void Flush()
+        {
+            lock (_common)
+            {
+                Wrapped.Flush();
             }
         }
 
@@ -315,18 +304,29 @@ namespace DiscUtils
             }
         }
 
-        private SparseStream Wrapped
+        /// <summary>
+        /// Disposes of this instance, invalidating any remaining views.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if disposing, lese <c>false</c></param>
+        protected override void Dispose(bool disposing)
         {
-            get
+            if (disposing)
             {
-                SparseStream wrapped = _common.WrappedStream;
-                if (wrapped == null)
+                if (_ownsCommon && _common != null)
                 {
-                    throw new ObjectDisposedException("ThreadSafeStream");
-                }
+                    lock (_common)
+                    {
+                        if (_common.WrappedStreamOwnership == Ownership.Dispose)
+                        {
+                            _common.WrappedStream.Dispose();
+                        }
 
-                return wrapped;
+                        _common.Dispose();
+                    }
+                }
             }
+
+            _common = null;
         }
 
         private sealed class CommonState : IDisposable

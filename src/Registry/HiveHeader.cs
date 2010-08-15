@@ -30,8 +30,6 @@ namespace DiscUtils.Registry
     {
         public const int HeaderSize = 512;
 
-        private const uint Signature = 0x66676572;
-
         public int Sequence1;
         public int Sequence2;
         public DateTime Timestamp;
@@ -43,6 +41,8 @@ namespace DiscUtils.Registry
         public string Path;
         public Guid Guid1;
         public Guid Guid2;
+
+        private const uint Signature = 0x66676572;
 
         public HiveHeader()
         {
@@ -57,7 +57,10 @@ namespace DiscUtils.Registry
             Guid2 = Guid.NewGuid();
         }
 
-        #region IByteArraySerializable Members
+        public int Size
+        {
+            get { return HeaderSize; }
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
@@ -122,13 +125,6 @@ namespace DiscUtils.Registry
 
             Utilities.WriteBytesLittleEndian(CalcChecksum(buffer, offset), buffer, offset + 0x01FC);
         }
-
-        public int Size
-        {
-            get { return HeaderSize; }
-        }
-
-        #endregion
 
         private static uint CalcChecksum(byte[] buffer, int offset)
         {

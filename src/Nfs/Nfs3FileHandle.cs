@@ -26,19 +26,12 @@ namespace DiscUtils.Nfs
 
     internal sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
     {
-        public byte[] Value { get; set; }
-
         internal Nfs3FileHandle(XdrDataReader reader)
         {
             Value = reader.ReadBuffer(Nfs3Mount.MaxFileHandleSize);
         }
 
-        internal void Write(XdrDataWriter writer)
-        {
-            writer.WriteBuffer(Value);
-        }
-
-        #region IEquatable<Nfs3FileHandle> Members
+        public byte[] Value { get; set; }
 
         public bool Equals(Nfs3FileHandle other)
         {
@@ -72,10 +65,6 @@ namespace DiscUtils.Nfs
             return true;
         }
 
-        #endregion
-
-        #region IComparable<Nfs3FileHandle> Members
-
         public int CompareTo(Nfs3FileHandle other)
         {
             if (other.Value == null)
@@ -100,8 +89,6 @@ namespace DiscUtils.Nfs
             return Value.Length - other.Value.Length;
         }
 
-        #endregion
-
         public override bool Equals(object obj)
         {
             Nfs3FileHandle other = obj as Nfs3FileHandle;
@@ -120,6 +107,11 @@ namespace DiscUtils.Nfs
             }
 
             return value;
+        }
+
+        internal void Write(XdrDataWriter writer)
+        {
+            writer.WriteBuffer(Value);
         }
     }
 }

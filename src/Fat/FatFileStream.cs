@@ -43,6 +43,32 @@ namespace DiscUtils.Fat
             _stream.FirstClusterChanged += FirstClusterAllocatedHandler;
         }
 
+        public override long Position
+        {
+            get { return _stream.Position; }
+            set { _stream.Position = value; }
+        }
+
+        public override bool CanRead
+        {
+            get { return _stream.CanRead; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return _stream.CanSeek; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return _stream.CanWrite; }
+        }
+
+        public override long Length
+        {
+            get { return _stream.Length; }
+        }
+
         public override void Close()
         {
             if (_dir.FileSystem.CanWrite)
@@ -68,12 +94,6 @@ namespace DiscUtils.Fat
             }
         }
 
-        public override long Position
-        {
-            get { return _stream.Position; }
-            set { _stream.Position = value; }
-        }
-
         public override void SetLength(long value)
         {
             didWrite = true;
@@ -86,29 +106,9 @@ namespace DiscUtils.Fat
             _stream.Write(buffer, offset, count);
         }
 
-        public override bool CanRead
-        {
-            get { return _stream.CanRead; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return _stream.CanSeek; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return _stream.CanWrite; }
-        }
-
         public override void Flush()
         {
             _stream.Flush();
-        }
-
-        public override long Length
-        {
-            get { return _stream.Length; }
         }
 
         public override int Read(byte[] buffer, int offset, int count)

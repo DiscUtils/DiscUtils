@@ -24,14 +24,6 @@ namespace DiscUtils.Nfs
 {
     internal class Nfs3WriteResult : Nfs3CallResult
     {
-        public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
-
-        public int Count { get; set; }
-
-        public int HowCommitted { get; set; }
-
-        public byte[] WriteVerifier { get; set; }
-
         public Nfs3WriteResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
@@ -43,5 +35,13 @@ namespace DiscUtils.Nfs
                 WriteVerifier = reader.ReadBytes(Nfs3.WriteVerifierSize);
             }
         }
+
+        public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
+
+        public int Count { get; set; }
+
+        public int HowCommitted { get; set; }
+
+        public byte[] WriteVerifier { get; set; }
     }
 }

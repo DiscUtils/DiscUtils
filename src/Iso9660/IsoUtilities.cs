@@ -29,14 +29,14 @@ namespace DiscUtils.Iso9660
 
     internal class IsoUtilities
     {
+        public const int SectorSize = 2048;
+
         /// <summary>
         /// Prevent instatiation.
         /// </summary>
         private IsoUtilities()
         {
         }
-
-        public const int SectorSize = 2048;
 
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {
@@ -70,7 +70,7 @@ namespace DiscUtils.Iso9660
             Utilities.WriteBytesLittleEndian(value, buffer, offset);
         }
 
-        public static void WriteAChars(byte[] buffer, int offset, int numBytes, String str)
+        internal static void WriteAChars(byte[] buffer, int offset, int numBytes, String str)
         {
             // Validate string
             if (!isValidAString(str))
@@ -82,7 +82,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, Encoding.ASCII);
         }
 
-        public static void WriteDChars(byte[] buffer, int offset, int numBytes, String str)
+        internal static void WriteDChars(byte[] buffer, int offset, int numBytes, String str)
         {
             // Validate string
             if (!isValidDString(str))
@@ -94,7 +94,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, Encoding.ASCII);
         }
 
-        public static void WriteA1Chars(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
+        internal static void WriteA1Chars(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
         {
             // Validate string
             if (!isValidAString(str))
@@ -105,7 +105,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, enc);
         }
 
-        public static void WriteD1Chars(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
+        internal static void WriteD1Chars(byte[] buffer, int offset, int numBytes, String str, Encoding enc)
         {
             // Validate string
             if (!isValidDString(str))
@@ -116,7 +116,7 @@ namespace DiscUtils.Iso9660
             WriteString(buffer, offset, numBytes, true, str, enc);
         }
 
-        public static string ReadChars(byte[] buffer, int offset, int numBytes, Encoding enc)
+        internal static string ReadChars(byte[] buffer, int offset, int numBytes, Encoding enc)
         {
             char[] chars;
 
@@ -170,7 +170,7 @@ namespace DiscUtils.Iso9660
         }
 #endif
 
-        public static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, String str, Encoding enc)
+        internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, String str, Encoding enc)
         {
             Encoder encoder = enc.GetEncoder();
 
@@ -189,7 +189,7 @@ namespace DiscUtils.Iso9660
             return bytesUsed;
         }
 
-        public static bool isValidAString(String str)
+        internal static bool isValidAString(String str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -208,7 +208,7 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        public static bool isValidDString(String str)
+        internal static bool isValidDString(String str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -221,12 +221,12 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        public static bool isValidDChar(char ch)
+        internal static bool isValidDChar(char ch)
         {
             return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch == '_');
         }
 
-        public static bool isValidFileName(String str)
+        internal static bool isValidFileName(String str)
         {
             for (int i = 0; i < str.Length; ++i)
             {
@@ -239,7 +239,7 @@ namespace DiscUtils.Iso9660
             return true;
         }
 
-        public static bool isValidDirectoryName(String str)
+        internal static bool isValidDirectoryName(String str)
         {
             if (str.Length == 1 && (str[0] == 0 || str[0] == 1))
             {
@@ -251,13 +251,13 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        public static string NormalizeFileName(string name)
+        internal static string NormalizeFileName(string name)
         {
             string[] parts = SplitFileName(name);
             return parts[0] + '.' + parts[1] + ';' + parts[2];
         }
 
-        public static string[] SplitFileName(string name)
+        internal static string[] SplitFileName(string name)
         {
             string[] parts = new string[] { name, "", "1" };
 
@@ -303,7 +303,7 @@ namespace DiscUtils.Iso9660
         /// <param name="data">buffer containing the time data</param>
         /// <param name="offset">offset in buffer of the time data</param>
         /// <returns>The time in UTC</returns>
-        public static DateTime ToUTCDateTimeFromDirectoryTime(byte[] data, int offset)
+        internal static DateTime ToUTCDateTimeFromDirectoryTime(byte[] data, int offset)
         {
             try
             {

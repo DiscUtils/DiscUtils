@@ -27,19 +27,6 @@ namespace DiscUtils
 
     internal abstract class FileLocator
     {
-        internal string MakeRelativePath(FileLocator fileLocator, string path)
-        {
-            if (!HasCommonRoot(fileLocator))
-            {
-                return null;
-            }
-
-            string ourFullPath = GetFullPath("") + @"\";
-            string otherFullPath = fileLocator.GetFullPath(path);
-
-            return Utilities.MakeRelativePath(otherFullPath, ourFullPath);
-        }
-
         public abstract bool Exists(string fileName);
 
         public abstract Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share);
@@ -53,6 +40,19 @@ namespace DiscUtils
         public abstract bool HasCommonRoot(FileLocator other);
 
         public abstract string ResolveRelativePath(string path);
+
+        internal string MakeRelativePath(FileLocator fileLocator, string path)
+        {
+            if (!HasCommonRoot(fileLocator))
+            {
+                return null;
+            }
+
+            string ourFullPath = GetFullPath("") + @"\";
+            string otherFullPath = fileLocator.GetFullPath(path);
+
+            return Utilities.MakeRelativePath(otherFullPath, ourFullPath);
+        }
     }
 
     internal sealed class LocalFileLocator : FileLocator

@@ -59,10 +59,6 @@ namespace DiscUtils.Vhd
         public Guid UniqueId;
         public byte SavedState;
 
-        private Footer()
-        {
-        }
-
         public Footer(Geometry geometry, long capacity, FileType type)
         {
             Cookie = FileCookie;
@@ -98,6 +94,10 @@ namespace DiscUtils.Vhd
             Checksum = toCopy.Checksum;
             UniqueId = toCopy.UniqueId;
             SavedState = toCopy.SavedState;
+        }
+
+        private Footer()
+        {
         }
 
         #region Marshalling

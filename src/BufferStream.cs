@@ -71,13 +71,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Flushes all data to the underlying storage.
-        /// </summary>
-        public override void Flush()
-        {
-        }
-
-        /// <summary>
         /// Gets the length of the stream (the capacity of the underlying buffer).
         /// </summary>
         public override long Length
@@ -92,6 +85,21 @@ namespace DiscUtils
         {
             get { return _position; }
             set { _position = value; }
+        }
+
+        /// <summary>
+        /// Gets the stored extents within the sparse stream.
+        /// </summary>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _buffer.Extents; }
+        }
+
+        /// <summary>
+        /// Flushes all data to the underlying storage.
+        /// </summary>
+        public override void Flush()
+        {
         }
 
         /// <summary>
@@ -166,14 +174,6 @@ namespace DiscUtils
 
             _buffer.Write(_position, buffer, offset, count);
             _position += count;
-        }
-
-        /// <summary>
-        /// Gets the stored extents within the sparse stream.
-        /// </summary>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return _buffer.Extents; }
         }
     }
 }

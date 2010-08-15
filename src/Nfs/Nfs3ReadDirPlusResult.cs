@@ -26,14 +26,6 @@ namespace DiscUtils.Nfs
 
     internal class Nfs3ReadDirPlusResult : Nfs3CallResult
     {
-        public Nfs3FileAttributes DirAttributes { get; set; }
-
-        public byte[] CookieVerifier { get; set; }
-
-        public List<Nfs3DirectoryEntry> DirEntries { get; set; }
-
-        public bool Eof { get; set; }
-
         public Nfs3ReadDirPlusResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
@@ -56,5 +48,13 @@ namespace DiscUtils.Nfs
                 Eof = reader.ReadBool();
             }
         }
+
+        public Nfs3FileAttributes DirAttributes { get; set; }
+
+        public byte[] CookieVerifier { get; set; }
+
+        public List<Nfs3DirectoryEntry> DirEntries { get; set; }
+
+        public bool Eof { get; set; }
     }
 }

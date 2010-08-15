@@ -332,6 +332,35 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// The equality operator.
+        /// </summary>
+        /// <param name="a">The first extent to compare</param>
+        /// <param name="b">The second extent to compare</param>
+        /// <returns>Whether the two extents are equal</returns>
+        public static bool operator ==(StreamExtent a, StreamExtent b)
+        {
+            if (Object.ReferenceEquals(a, null))
+            {
+                return Object.ReferenceEquals(b, null);
+            }
+            else
+            {
+                return a.Equals(b);
+            }
+        }
+
+        /// <summary>
+        /// The inequality operator.
+        /// </summary>
+        /// <param name="a">The first extent to compare</param>
+        /// <param name="b">The second extent to compare</param>
+        /// <returns>Whether the two extents are different</returns>
+        public static bool operator !=(StreamExtent a, StreamExtent b)
+        {
+            return !(a == b);
+        }
+
+        /// <summary>
         /// Indicates if this StreamExtent is equal to another.
         /// </summary>
         /// <param name="other">The extent to compare</param>
@@ -374,35 +403,6 @@ namespace DiscUtils
         public override int GetHashCode()
         {
             return _start.GetHashCode() ^ _length.GetHashCode();
-        }
-
-        /// <summary>
-        /// The equality operator.
-        /// </summary>
-        /// <param name="a">The first extent to compare</param>
-        /// <param name="b">The second extent to compare</param>
-        /// <returns>Whether the two extents are equal</returns>
-        public static bool operator ==(StreamExtent a, StreamExtent b)
-        {
-            if (Object.ReferenceEquals(a, null))
-            {
-                return Object.ReferenceEquals(b, null);
-            }
-            else
-            {
-                return a.Equals(b);
-            }
-        }
-
-        /// <summary>
-        /// The inequality operator.
-        /// </summary>
-        /// <param name="a">The first extent to compare</param>
-        /// <param name="b">The second extent to compare</param>
-        /// <returns>Whether the two extents are different</returns>
-        public static bool operator !=(StreamExtent a, StreamExtent b)
-        {
-            return !(a == b);
         }
     }
 }

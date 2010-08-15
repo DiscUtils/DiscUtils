@@ -69,23 +69,6 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
-        /// Disposes of this object, freeing any owned resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (_ownership == Ownership.Dispose && _fileStream != null)
-            {
-                _fileStream.Dispose();
-                _fileStream = null;
-            }
-        }
-
-        internal TarFile Archive
-        {
-            get { return _archive; }
-        }
-
-        /// <summary>
         /// Gets the disks in this XVA.
         /// </summary>
         /// <returns>An enumeration of disks</returns>
@@ -111,6 +94,23 @@ namespace DiscUtils.Xva
                         }
                     }
                 }
+            }
+        }
+
+        internal TarFile Archive
+        {
+            get { return _archive; }
+        }
+
+        /// <summary>
+        /// Disposes of this object, freeing any owned resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_ownership == Ownership.Dispose && _fileStream != null)
+            {
+                _fileStream.Dispose();
+                _fileStream = null;
             }
         }
     }

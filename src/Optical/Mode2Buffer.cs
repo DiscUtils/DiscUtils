@@ -54,6 +54,16 @@ namespace DiscUtils.Optical
             get { return false; }
         }
 
+        public long Capacity
+        {
+            get { return (_wrapped.Capacity / DiscImageFile.Mode2SectorSize) * DiscImageFile.Mode1SectorSize; }
+        }
+
+        public IEnumerable<StreamExtent> Extents
+        {
+            get { yield return new StreamExtent(0, Capacity); }
+        }
+
         public int Read(long pos, byte[] buffer, int offset, int count)
         {
             int totalToRead = (int)Math.Min(Capacity - pos, count);
@@ -89,11 +99,6 @@ namespace DiscUtils.Optical
             throw new NotSupportedException();
         }
 
-        public long Capacity
-        {
-            get { return (_wrapped.Capacity / DiscImageFile.Mode2SectorSize) * DiscImageFile.Mode1SectorSize; }
-        }
-
         public void SetCapacity(long value)
         {
             throw new NotSupportedException();
@@ -107,11 +112,6 @@ namespace DiscUtils.Optical
                 long end = Math.Min(start + count, capacity);
                 yield return new StreamExtent(start, end - start);
             }
-        }
-
-        public IEnumerable<StreamExtent> Extents
-        {
-            get { yield return new StreamExtent(0, Capacity); }
         }
     }
 }

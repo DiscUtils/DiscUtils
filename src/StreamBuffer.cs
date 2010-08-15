@@ -59,21 +59,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Disposes of this instance.
-        /// </summary>
-        public void Dispose()
-        {
-            if (_ownership == Ownership.Dispose)
-            {
-                if (_stream != null)
-                {
-                    _stream.Dispose();
-                    _stream = null;
-                }
-            }
-        }
-
-        /// <summary>
         /// Can this buffer be read.
         /// </summary>
         public override bool CanRead
@@ -87,6 +72,38 @@ namespace DiscUtils
         public override bool CanWrite
         {
             get { return _stream.CanWrite; }
+        }
+
+        /// <summary>
+        /// Gets the current capacity of the buffer, in bytes.
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _stream.Length; }
+        }
+
+        /// <summary>
+        /// Gets the parts of the stream that are stored.
+        /// </summary>
+        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _stream.Extents; }
+        }
+
+        /// <summary>
+        /// Disposes of this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_ownership == Ownership.Dispose)
+            {
+                if (_stream != null)
+                {
+                    _stream.Dispose();
+                    _stream = null;
+                }
+            }
         }
 
         /// <summary>
@@ -125,14 +142,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the current capacity of the buffer, in bytes.
-        /// </summary>
-        public override long Capacity
-        {
-            get { return _stream.Length; }
-        }
-
-        /// <summary>
         /// Sets the capacity of the buffer, truncating if appropriate.
         /// </summary>
         /// <param name="value">The desired capacity of the buffer.</param>
@@ -150,15 +159,6 @@ namespace DiscUtils
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             return _stream.GetExtentsInRange(start, count);
-        }
-
-        /// <summary>
-        /// Gets the parts of the stream that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return _stream.Extents; }
         }
     }
 }

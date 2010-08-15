@@ -48,25 +48,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Disposes of this instance, freeing underlying resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes of underlying resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
-        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
-        /// if running inside destructor.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-        }
-
-        /// <summary>
         /// Gets a value indicating if the layer only stores meaningful sectors.
         /// </summary>
         public abstract bool IsSparse
@@ -99,6 +80,25 @@ namespace DiscUtils
         internal abstract FileLocator RelativeFileLocator
         {
             get;
+        }
+
+        /// <summary>
+        /// Disposes of this instance, freeing underlying resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
+        /// graceful cleanup of all managed objects should be performed, or <c>false</c>
+        /// if running inside destructor.</param>
+        protected virtual void Dispose(bool disposing)
+        {
         }
     }
 }

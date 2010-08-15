@@ -51,6 +51,11 @@ namespace DiscUtils.Iscsi
             get { return TaskAttributes.Untagged; }
         }
 
+        public override int Size
+        {
+            get { return 6; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
@@ -64,11 +69,6 @@ namespace DiscUtils.Iscsi
             buffer[offset + 2] = _pageCode;
             Utilities.WriteBytesBigEndian((ushort)_expected, buffer, offset + 3);
             buffer[offset + 5] = 0;
-        }
-
-        public override int Size
-        {
-            get { return 6; }
         }
     }
 }

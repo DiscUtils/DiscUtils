@@ -90,10 +90,6 @@ namespace DiscUtils.Wim
             get { return false; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _header.OriginalSize; }
@@ -110,6 +106,10 @@ namespace DiscUtils.Wim
             {
                 _position = value;
             }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -148,6 +148,21 @@ namespace DiscUtils.Wim
             return totalRead;
         }
 
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void SetLength(long value)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            throw new NotSupportedException();
+        }
+
         private Stream OpenChunkStream(int chunk)
         {
             int targetUncompressed = _chunkSize;
@@ -172,21 +187,6 @@ namespace DiscUtils.Wim
             {
                 return rawChunkStream;
             }
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException();
         }
     }
 }

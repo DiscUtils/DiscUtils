@@ -81,28 +81,38 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Disposes of underlying resources.
+        /// Gets the geometry of the disk.
         /// </summary>
-        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
-        /// else <c>false</c>.</param>
-        protected override void Dispose(bool disposing)
+        public override Geometry Geometry
         {
-            try
-            {
-                if (disposing)
-                {
-                    if (_file != null)
-                    {
-                        _file.Dispose();
-                    }
+            get { return _file.Geometry; }
+        }
 
-                    _file = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
+        /// <summary>
+        /// Gets the capacity of the disk (in bytes).
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _file.Capacity; }
+        }
+
+        /// <summary>
+        /// Gets the content of the disk as a stream.
+        /// </summary>
+        /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
+        /// will depend on the last partition table/file system activity, since all access to the disk contents pass
+        /// through a single stream instance.  Set the stream position before accessing the stream.</remarks>
+        public override SparseStream Content
+        {
+            get { return _file.Content; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield return _file; }
         }
 
         /// <summary>
@@ -143,41 +153,6 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _file.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the capacity of the disk (in bytes).
-        /// </summary>
-        public override long Capacity
-        {
-            get { return _file.Capacity; }
-        }
-
-        /// <summary>
-        /// Gets the content of the disk as a stream.
-        /// </summary>
-        /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
-        /// will depend on the last partition table/file system activity, since all access to the disk contents pass
-        /// through a single stream instance.  Set the stream position before accessing the stream.</remarks>
-        public override SparseStream Content
-        {
-            get { return _file.Content; }
-        }
-
-        /// <summary>
-        /// Gets the layers that make up the disk.
-        /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
-        {
-            get { yield return _file; }
-        }
-
-        /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
         /// <param name="fileSystem">The file system to create the disk on</param>
@@ -196,6 +171,31 @@ namespace DiscUtils.Raw
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported for raw disks");
+        }
+
+        /// <summary>
+        /// Disposes of underlying resources.
+        /// </summary>
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    if (_file != null)
+                    {
+                        _file.Dispose();
+                    }
+
+                    _file = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

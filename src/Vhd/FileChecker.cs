@@ -80,6 +80,11 @@ namespace DiscUtils.Vhd
             return (_levelsDetected & _levelsConsideredFail) == 0;
         }
 
+        private static void Abort()
+        {
+            throw new AbortException();
+        }
+
         private void DoCheck()
         {
             CheckFooter();
@@ -380,11 +385,6 @@ namespace DiscUtils.Vhd
             {
                 _footer = header;
             }
-        }
-
-        private static void Abort()
-        {
-            throw new AbortException();
         }
 
         private void ReportInfo(string str, params object[] args)

@@ -29,8 +29,6 @@ namespace DiscUtils
     /// </summary>
     public abstract class Buffer : IBuffer
     {
-        #region IBuffer Members
-
         /// <summary>
         /// Can this buffer be read.
         /// </summary>
@@ -40,6 +38,23 @@ namespace DiscUtils
         /// Can this buffer be modified.
         /// </summary>
         public abstract bool CanWrite { get; }
+
+        /// <summary>
+        /// Gets the current capacity of the buffer, in bytes.
+        /// </summary>
+        public abstract long Capacity { get; }
+
+        /// <summary>
+        /// Gets the parts of the stream that are stored.
+        /// </summary>
+        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
+        public virtual IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                return GetExtentsInRange(0, Capacity);
+            }
+        }
 
         /// <summary>
         /// Reads from the buffer into a byte array.
@@ -69,11 +84,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the current capacity of the buffer, in bytes.
-        /// </summary>
-        public abstract long Capacity { get; }
-
-        /// <summary>
         /// Sets the capacity of the buffer, truncating if appropriate.
         /// </summary>
         /// <param name="value">The desired capacity of the buffer.</param>
@@ -86,19 +96,5 @@ namespace DiscUtils
         /// <param name="count">The number of bytes of interest</param>
         /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
         public abstract IEnumerable<StreamExtent> GetExtentsInRange(long start, long count);
-
-        /// <summary>
-        /// Gets the parts of the stream that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public virtual IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                return GetExtentsInRange(0, Capacity);
-            }
-        }
-
-        #endregion
     }
 }

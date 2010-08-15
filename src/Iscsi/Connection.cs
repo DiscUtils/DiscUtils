@@ -38,6 +38,25 @@ namespace DiscUtils.Iscsi
 
     internal sealed class Connection : IDisposable
     {
+        #region Parameters
+        private const string InitiatorNameParameter = "InitiatorName";
+        private const string SessionTypeParameter = "SessionType";
+        private const string AuthMethodParameter = "AuthMethod";
+
+        private const string HeaderDigestParameter = "HeaderDigest";
+        private const string DataDigestParameter = "DataDigest";
+        private const string MaxRecvDataSegmentLengthParameter = "MaxRecvDataSegmentLength";
+        private const string DefaultTime2WaitParameter = "DefaultTime2Wait";
+        private const string DefaultTime2RetainParameter = "DefaultTime2Retain";
+
+        private const string SendTargetsParameter = "SendTargets";
+        private const string TargetNameParameter = "TargetName";
+        private const string TargetAddressParameter = "TargetAddress";
+
+        private const string NoneValue = "None";
+        private const string ChapValue = "CHAP";
+        #endregion
+
         private Session _session;
 
         private Stream _stream;
@@ -74,11 +93,6 @@ namespace DiscUtils.Iscsi
             NegotiateFeatures();
         }
 
-        public void Dispose()
-        {
-            Close(LogoutReason.CloseConnection);
-        }
-
         #region Protocol Features
         [ProtocolKey("HeaderDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
         public Digest HeaderDigest { get; set; }
@@ -106,6 +120,32 @@ namespace DiscUtils.Iscsi
         internal LoginStages CurrentLoginStage
         {
             get { return _loginStage; }
+        }
+
+        internal LoginStages NextLoginStage
+        {
+            get
+            {
+                switch (_loginStage)
+                {
+                    case LoginStages.SecurityNegotiation:
+                        return LoginStages.LoginOperationalNegotiation;
+                    case LoginStages.LoginOperationalNegotiation:
+                        return LoginStages.FullFeaturePhase;
+                    default:
+                        return LoginStages.FullFeaturePhase;
+                }
+            }
+        }
+
+        internal uint ExpectedStatusSequenceNumber
+        {
+            get { return _expectedStatusSequenceNumber; }
+        }
+
+        public void Dispose()
+        {
+            Close(LogoutReason.CloseConnection);
         }
 
         public void Close(LogoutReason reason)
@@ -288,27 +328,6 @@ namespace DiscUtils.Iscsi
             }
 
             return targets.ToArray();
-        }
-
-        internal LoginStages NextLoginStage
-        {
-            get
-            {
-                switch (_loginStage)
-                {
-                    case LoginStages.SecurityNegotiation:
-                        return LoginStages.LoginOperationalNegotiation;
-                    case LoginStages.LoginOperationalNegotiation:
-                        return LoginStages.FullFeaturePhase;
-                    default:
-                        return LoginStages.FullFeaturePhase;
-                }
-            }
-        }
-
-        internal uint ExpectedStatusSequenceNumber
-        {
-            get { return _expectedStatusSequenceNumber; }
         }
 
         internal void SeenStatusSequenceNumber(uint number)
@@ -699,24 +718,5 @@ namespace DiscUtils.Iscsi
 
             return result;
         }
-
-        #region Parameters
-        private const string InitiatorNameParameter = "InitiatorName";
-        private const string SessionTypeParameter = "SessionType";
-        private const string AuthMethodParameter = "AuthMethod";
-
-        private const string HeaderDigestParameter = "HeaderDigest";
-        private const string DataDigestParameter = "DataDigest";
-        private const string MaxRecvDataSegmentLengthParameter = "MaxRecvDataSegmentLength";
-        private const string DefaultTime2WaitParameter = "DefaultTime2Wait";
-        private const string DefaultTime2RetainParameter = "DefaultTime2Retain";
-
-        private const string SendTargetsParameter = "SendTargets";
-        private const string TargetNameParameter = "TargetName";
-        private const string TargetAddressParameter = "TargetAddress";
-
-        private const string NoneValue = "None";
-        private const string ChapValue = "CHAP";
-        #endregion
     }
 }

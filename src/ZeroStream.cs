@@ -55,10 +55,6 @@ namespace DiscUtils
             get { return false; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _length; }
@@ -76,6 +72,16 @@ namespace DiscUtils
                 _position = value;
                 _atEof = false;
             }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            // The stream is entirely sparse
+            get { return new List<StreamExtent>(0); }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -139,12 +145,6 @@ namespace DiscUtils
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            // The stream is entirely sparse
-            get { return new List<StreamExtent>(0); }
         }
     }
 }

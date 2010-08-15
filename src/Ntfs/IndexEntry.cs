@@ -36,12 +36,13 @@ namespace DiscUtils.Ntfs
     {
         public const int EndNodeSize = 0x18;
 
-        private bool _isFileIndexEntry;
         protected IndexEntryFlags _flags;
         protected long _vcn; // Only valid if Node flag set
 
         protected byte[] _keyBuffer;
         protected byte[] _dataBuffer;
+
+        private bool _isFileIndexEntry;
 
         public IndexEntry(bool isFileIndexEntry)
         {
@@ -65,11 +66,6 @@ namespace DiscUtils.Ntfs
             _dataBuffer = data;
         }
 
-        protected bool IsFileIndexEntry
-        {
-            get { return _isFileIndexEntry; }
-        }
-
         public byte[] KeyBuffer
         {
             get { return _keyBuffer; }
@@ -80,6 +76,46 @@ namespace DiscUtils.Ntfs
         {
             get { return _dataBuffer; }
             set { _dataBuffer = value; }
+        }
+
+        public IndexEntryFlags Flags
+        {
+            get { return _flags; }
+            set { _flags = value; }
+        }
+
+        public long ChildrenVirtualCluster
+        {
+            get { return _vcn; }
+            set { _vcn = value; }
+        }
+
+        public virtual int Size
+        {
+            get
+            {
+                int size = 0x10; // start of variable data
+
+                if ((_flags & IndexEntryFlags.End) == 0)
+                {
+                    size += _keyBuffer.Length;
+                    size += IsFileIndexEntry ? 0 : _dataBuffer.Length;
+                }
+
+                size = Utilities.RoundUp(size, 8);
+
+                if ((_flags & IndexEntryFlags.Node) != 0)
+                {
+                    size += 8;
+                }
+
+                return size;
+            }
+        }
+
+        protected bool IsFileIndexEntry
+        {
+            get { return _isFileIndexEntry; }
         }
 
         public virtual void Read(byte[] buffer, int offset)
@@ -111,29 +147,6 @@ namespace DiscUtils.Ntfs
             if ((_flags & IndexEntryFlags.Node) != 0)
             {
                 _vcn = Utilities.ToInt64LittleEndian(buffer, offset + length - 8);
-            }
-        }
-
-        public virtual int Size
-        {
-            get
-            {
-                int size = 0x10; // start of variable data
-
-                if ((_flags & IndexEntryFlags.End) == 0)
-                {
-                    size += _keyBuffer.Length;
-                    size += IsFileIndexEntry ? 0 : _dataBuffer.Length;
-                }
-
-                size = Utilities.RoundUp(size, 8);
-
-                if ((_flags & IndexEntryFlags.Node) != 0)
-                {
-                    size += 8;
-                }
-
-                return size;
             }
         }
 
@@ -175,18 +188,6 @@ namespace DiscUtils.Ntfs
             {
                 Utilities.WriteBytesLittleEndian(_vcn, buffer, offset + length - 8);
             }
-        }
-
-        public IndexEntryFlags Flags
-        {
-            get { return _flags; }
-            set { _flags = value; }
-        }
-
-        public long ChildrenVirtualCluster
-        {
-            get { return _vcn; }
-            set { _vcn = value; }
         }
     }
 }

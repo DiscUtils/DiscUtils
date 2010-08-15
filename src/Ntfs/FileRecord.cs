@@ -64,21 +64,6 @@ namespace DiscUtils.Ntfs
             ReInitialize(sectorSize, recordLength, index);
         }
 
-        public void ReInitialize(int sectorSize, int recordLength, uint index)
-        {
-            Initialize("FILE", sectorSize, recordLength);
-            _sequenceNumber++;
-            _flags = FileRecordFlags.None;
-            _recordAllocatedSize = (uint)recordLength;
-            _nextAttributeId = 0;
-            _index = index;
-            _hardLinkCount = 0;
-            _baseFile = new FileRecordReference(0);
-
-            _attributes = new List<AttributeRecord>();
-            _haveIndex = true;
-        }
-
         public uint MasterFileTableIndex
         {
             get { return _index; }
@@ -133,100 +118,41 @@ namespace DiscUtils.Ntfs
             get { return new FileRecordReference(MasterFileTableIndex, SequenceNumber); }
         }
 
-        /// <summary>
-        /// Creates a new attribute.
-        /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="indexed">Whether the attribute is marked as indexed</param>
-        /// <param name="flags">Flags for the new attribute</param>
-        internal ushort CreateAttribute(AttributeType type, string name, bool indexed, AttributeFlags flags)
+        public static FileAttributeFlags ConvertFlags(FileRecordFlags source)
         {
-            ushort id = _nextAttributeId++;
-            _attributes.Add(
-                new ResidentAttributeRecord(
-                    type,
-                    name,
-                    id,
-                    indexed,
-                    flags));
-            _attributes.Sort();
-            return id;
-        }
+            FileAttributeFlags result = FileAttributeFlags.None;
 
-        /// <summary>
-        /// Creates a new non-resident attribute.
-        /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="flags">Flags for the new attribute</param>
-        internal ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags)
-        {
-            ushort id = _nextAttributeId++;
-            _attributes.Add(
-                new NonResidentAttributeRecord(
-                    type,
-                    name,
-                    id,
-                    flags,
-                    new List<CookedDataRun>()));
-            _attributes.Sort();
-            return id;
-        }
-
-        /// <summary>
-        /// Creates a new attribute.
-        /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="flags">Flags for the new attribute</param>
-        /// <param name="firstCluster">The first cluster to assign to the attribute</param>
-        /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
-        /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
-        internal ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
-        {
-            ushort id = _nextAttributeId++;
-            _attributes.Add(
-                new NonResidentAttributeRecord(
-                    type,
-                    name,
-                    id,
-                    flags,
-                    firstCluster,
-                    numClusters,
-                    bytesPerCluster));
-            _attributes.Sort();
-            return id;
-        }
-
-        /// <summary>
-        /// Adds an existing attribute.
-        /// </summary>
-        /// <param name="attrRec">The attribute to add</param>
-        /// <returns>The new Id of the attribute</returns>
-        /// <remarks>This method is used to move an attribute between different MFT records</remarks>
-        internal ushort AddAttribute(AttributeRecord attrRec)
-        {
-            attrRec.AttributeId = _nextAttributeId++;
-            _attributes.Add(attrRec);
-            _attributes.Sort();
-            return attrRec.AttributeId;
-        }
-
-        /// <summary>
-        /// Removes an attribute by it's id.
-        /// </summary>
-        /// <param name="id">The attribute's id</param>
-        internal void RemoveAttribute(ushort id)
-        {
-            for (int i = 0; i < _attributes.Count; ++i)
+            if ((source & FileRecordFlags.IsDirectory) != 0)
             {
-                if (_attributes[i].AttributeId == id)
-                {
-                    _attributes.RemoveAt(i);
-                    break;
-                }
+                result |= FileAttributeFlags.Directory;
             }
+
+            if ((source & FileRecordFlags.HasViewIndex) != 0)
+            {
+                result |= FileAttributeFlags.IndexView;
+            }
+
+            if ((source & FileRecordFlags.IsMetaFile) != 0)
+            {
+                result |= FileAttributeFlags.Hidden | FileAttributeFlags.System;
+            }
+
+            return result;
+        }
+
+        public void ReInitialize(int sectorSize, int recordLength, uint index)
+        {
+            Initialize("FILE", sectorSize, recordLength);
+            _sequenceNumber++;
+            _flags = FileRecordFlags.None;
+            _recordAllocatedSize = (uint)recordLength;
+            _nextAttributeId = 0;
+            _index = index;
+            _hardLinkCount = 0;
+            _baseFile = new FileRecordReference(0);
+
+            _attributes = new List<AttributeRecord>();
+            _haveIndex = true;
         }
 
         /// <summary>
@@ -276,13 +202,160 @@ namespace DiscUtils.Ntfs
             return null;
         }
 
-        internal void Reset()
+        public override string ToString()
+        {
+            foreach (AttributeRecord attr in _attributes)
+            {
+                if (attr.AttributeType == AttributeType.FileName)
+                {
+                    StructuredNtfsAttribute<FileNameRecord> fnAttr = (StructuredNtfsAttribute<FileNameRecord>)NtfsAttribute.FromRecord(null, new FileRecordReference(0), attr);
+                    return fnAttr.Content.FileName;
+                }
+            }
+
+            return "No Name";
+        }
+
+        /// <summary>
+        /// Creates a new attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        /// <param name="indexed">Whether the attribute is marked as indexed</param>
+        /// <param name="flags">Flags for the new attribute</param>
+        public ushort CreateAttribute(AttributeType type, string name, bool indexed, AttributeFlags flags)
+        {
+            ushort id = _nextAttributeId++;
+            _attributes.Add(
+                new ResidentAttributeRecord(
+                    type,
+                    name,
+                    id,
+                    indexed,
+                    flags));
+            _attributes.Sort();
+            return id;
+        }
+
+        /// <summary>
+        /// Creates a new non-resident attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        /// <param name="flags">Flags for the new attribute</param>
+        public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags)
+        {
+            ushort id = _nextAttributeId++;
+            _attributes.Add(
+                new NonResidentAttributeRecord(
+                    type,
+                    name,
+                    id,
+                    flags,
+                    new List<CookedDataRun>()));
+            _attributes.Sort();
+            return id;
+        }
+
+        /// <summary>
+        /// Creates a new attribute.
+        /// </summary>
+        /// <param name="type">The type of the new attribute</param>
+        /// <param name="name">The name of the new attribute</param>
+        /// <param name="flags">Flags for the new attribute</param>
+        /// <param name="firstCluster">The first cluster to assign to the attribute</param>
+        /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
+        /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
+        public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        {
+            ushort id = _nextAttributeId++;
+            _attributes.Add(
+                new NonResidentAttributeRecord(
+                    type,
+                    name,
+                    id,
+                    flags,
+                    firstCluster,
+                    numClusters,
+                    bytesPerCluster));
+            _attributes.Sort();
+            return id;
+        }
+
+        /// <summary>
+        /// Adds an existing attribute.
+        /// </summary>
+        /// <param name="attrRec">The attribute to add</param>
+        /// <returns>The new Id of the attribute</returns>
+        /// <remarks>This method is used to move an attribute between different MFT records</remarks>
+        public ushort AddAttribute(AttributeRecord attrRec)
+        {
+            attrRec.AttributeId = _nextAttributeId++;
+            _attributes.Add(attrRec);
+            _attributes.Sort();
+            return attrRec.AttributeId;
+        }
+
+        /// <summary>
+        /// Removes an attribute by it's id.
+        /// </summary>
+        /// <param name="id">The attribute's id</param>
+        public void RemoveAttribute(ushort id)
+        {
+            for (int i = 0; i < _attributes.Count; ++i)
+            {
+                if (_attributes[i].AttributeId == id)
+                {
+                    _attributes.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        public void Reset()
         {
             _attributes.Clear();
             _flags = FileRecordFlags.None;
             _hardLinkCount = 0;
             _nextAttributeId = 0;
             _recordRealSize = 0;
+        }
+
+        internal long GetAttributeOffset(ushort id)
+        {
+            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
+
+            int offset = firstAttrPos;
+            foreach (var attr in _attributes)
+            {
+                if (attr.AttributeId == id)
+                {
+                    return offset;
+                }
+
+                offset += attr.Size;
+            }
+
+            return -1;
+        }
+
+        internal void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "FILE RECORD (" + ToString() + ")");
+            writer.WriteLine(indent + "              Magic: " + Magic);
+            writer.WriteLine(indent + "  Update Seq Offset: " + UpdateSequenceOffset);
+            writer.WriteLine(indent + "   Update Seq Count: " + UpdateSequenceCount);
+            writer.WriteLine(indent + "  Update Seq Number: " + UpdateSequenceNumber);
+            writer.WriteLine(indent + "   Log File Seq Num: " + _logFileSequenceNumber);
+            writer.WriteLine(indent + "    Sequence Number: " + _sequenceNumber);
+            writer.WriteLine(indent + "    Hard Link Count: " + _hardLinkCount);
+            writer.WriteLine(indent + "              Flags: " + _flags);
+            writer.WriteLine(indent + "   Record Real Size: " + _recordRealSize);
+            writer.WriteLine(indent + "  Record Alloc Size: " + _recordAllocatedSize);
+            writer.WriteLine(indent + "          Base File: " + _baseFile);
+            writer.WriteLine(indent + "  Next Attribute Id: " + _nextAttributeId);
+            writer.WriteLine(indent + "    Attribute Count: " + _attributes.Count);
+            writer.WriteLine(indent + "   Index (Self Ref): " + _index);
         }
 
         protected override void Read(byte[] buffer, int offset)
@@ -364,79 +437,6 @@ namespace DiscUtils.Ntfs
             }
 
             return Utilities.RoundUp(size + 4, 8); // 0xFFFFFFFF terminator on attributes
-        }
-
-        internal long GetAttributeOffset(ushort id)
-        {
-            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
-
-            int offset = firstAttrPos;
-            foreach (var attr in _attributes)
-            {
-                if (attr.AttributeId == id)
-                {
-                    return offset;
-                }
-
-                offset += attr.Size;
-            }
-
-            return -1;
-        }
-
-        public override string ToString()
-        {
-            foreach (AttributeRecord attr in _attributes)
-            {
-                if (attr.AttributeType == AttributeType.FileName)
-                {
-                    StructuredNtfsAttribute<FileNameRecord> fnAttr = (StructuredNtfsAttribute<FileNameRecord>)NtfsAttribute.FromRecord(null, new FileRecordReference(0), attr);
-                    return fnAttr.Content.FileName;
-                }
-            }
-
-            return "No Name";
-        }
-
-        internal static FileAttributeFlags ConvertFlags(FileRecordFlags source)
-        {
-            FileAttributeFlags result = FileAttributeFlags.None;
-
-            if ((source & FileRecordFlags.IsDirectory) != 0)
-            {
-                result |= FileAttributeFlags.Directory;
-            }
-
-            if ((source & FileRecordFlags.HasViewIndex) != 0)
-            {
-                result |= FileAttributeFlags.IndexView;
-            }
-
-            if ((source & FileRecordFlags.IsMetaFile) != 0)
-            {
-                result |= FileAttributeFlags.Hidden | FileAttributeFlags.System;
-            }
-
-            return result;
-        }
-
-        internal void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + "FILE RECORD (" + ToString() + ")");
-            writer.WriteLine(indent + "              Magic: " + Magic);
-            writer.WriteLine(indent + "  Update Seq Offset: " + UpdateSequenceOffset);
-            writer.WriteLine(indent + "   Update Seq Count: " + UpdateSequenceCount);
-            writer.WriteLine(indent + "  Update Seq Number: " + UpdateSequenceNumber);
-            writer.WriteLine(indent + "   Log File Seq Num: " + _logFileSequenceNumber);
-            writer.WriteLine(indent + "    Sequence Number: " + _sequenceNumber);
-            writer.WriteLine(indent + "    Hard Link Count: " + _hardLinkCount);
-            writer.WriteLine(indent + "              Flags: " + _flags);
-            writer.WriteLine(indent + "   Record Real Size: " + _recordRealSize);
-            writer.WriteLine(indent + "  Record Alloc Size: " + _recordAllocatedSize);
-            writer.WriteLine(indent + "          Base File: " + _baseFile);
-            writer.WriteLine(indent + "  Next Attribute Id: " + _nextAttributeId);
-            writer.WriteLine(indent + "    Attribute Count: " + _attributes.Count);
-            writer.WriteLine(indent + "   Index (Self Ref): " + _index);
         }
     }
 }

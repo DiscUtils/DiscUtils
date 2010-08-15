@@ -70,6 +70,26 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the current capacity of the buffer, in bytes.
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _length; }
+        }
+
+        /// <summary>
+        /// Gets the parts of the buffer that are stored.
+        /// </summary>
+        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                return OffsetExtents(_parent.GetExtentsInRange(_first, _length));
+            }
+        }
+
+        /// <summary>
         /// Flushes all data to the underlying storage.
         /// </summary>
         public override void Flush()
@@ -123,14 +143,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the current capacity of the buffer, in bytes.
-        /// </summary>
-        public override long Capacity
-        {
-            get { return _length; }
-        }
-
-        /// <summary>
         /// Sets the capacity of the buffer, truncating if appropriate.
         /// </summary>
         /// <param name="value">The desired capacity of the buffer.</param>
@@ -150,18 +162,6 @@ namespace DiscUtils
             long absStart = _first + start;
             long absEnd = Math.Min(absStart + count, _first + _length);
             return OffsetExtents(_parent.GetExtentsInRange(absStart, absEnd - absStart));
-        }
-
-        /// <summary>
-        /// Gets the parts of the buffer that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                return OffsetExtents(_parent.GetExtentsInRange(_first, _length));
-            }
         }
 
         private IEnumerable<StreamExtent> OffsetExtents(IEnumerable<StreamExtent> src)

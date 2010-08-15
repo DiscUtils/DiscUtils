@@ -42,30 +42,6 @@ namespace DiscUtils.Ntfs
 
         private ObjectCache<long, IndexBlock> _blockCache;
 
-        private Index(AttributeType attrType, AttributeCollationRule collationRule, File file, string name, BiosParameterBlock bpb, UpperCase upCase)
-        {
-            _file = file;
-            _name = name;
-            _bpb = bpb;
-            _isFileIndex = name == "$I30";
-
-            _blockCache = new ObjectCache<long, IndexBlock>();
-
-            _file.CreateStream(AttributeType.IndexRoot, _name);
-
-            _root = new IndexRoot()
-            {
-                AttributeType = (uint)attrType,
-                CollationRule = collationRule,
-                IndexAllocationSize = (uint)bpb.IndexBufferSize,
-                RawClustersPerIndexRecord = bpb.RawIndexBufferSize
-            };
-
-            _comparer = _root.GetCollator(upCase);
-
-            _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, 32);
-        }
-
         public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
         {
             _file = file;
@@ -99,14 +75,28 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal Stream AllocationStream
+        private Index(AttributeType attrType, AttributeCollationRule collationRule, File file, string name, BiosParameterBlock bpb, UpperCase upCase)
         {
-            get { return _indexStream; }
-        }
+            _file = file;
+            _name = name;
+            _bpb = bpb;
+            _isFileIndex = name == "$I30";
 
-        internal uint IndexBufferSize
-        {
-            get { return _root.IndexAllocationSize; }
+            _blockCache = new ObjectCache<long, IndexBlock>();
+
+            _file.CreateStream(AttributeType.IndexRoot, _name);
+
+            _root = new IndexRoot()
+            {
+                AttributeType = (uint)attrType,
+                CollationRule = collationRule,
+                IndexAllocationSize = (uint)bpb.IndexBufferSize,
+                RawClustersPerIndexRecord = bpb.RawIndexBufferSize
+            };
+
+            _comparer = _root.GetCollator(upCase);
+
+            _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, 32);
         }
 
         public IEnumerable<KeyValuePair<byte[], byte[]>> Entries
@@ -120,11 +110,63 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query)
+        public int Count
         {
-            foreach (var entry in FindAllIn(query, _rootNode))
+            get
             {
-                yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
+                int i = 0;
+                foreach (var entry in Entries)
+                {
+                    ++i;
+                }
+
+                return i;
+            }
+        }
+
+        internal Stream AllocationStream
+        {
+            get { return _indexStream; }
+        }
+
+        internal uint IndexBufferSize
+        {
+            get { return _root.IndexAllocationSize; }
+        }
+
+        internal bool IsFileIndex
+        {
+            get { return _isFileIndex; }
+        }
+
+        public byte[] this[byte[] key]
+        {
+            get
+            {
+                byte[] value;
+                if (TryGetValue(key, out value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException();
+                }
+            }
+
+            set
+            {
+                IndexEntry oldEntry;
+                IndexNode node;
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
+                if (_rootNode.TryFindEntry(key, out oldEntry, out node))
+                {
+                    node.UpdateEntry(key, value);
+                }
+                else
+                {
+                    _rootNode.AddEntry(key, value);
+                }
             }
         }
 
@@ -133,6 +175,106 @@ namespace DiscUtils.Ntfs
             Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock, file.Context.UpperCase);
 
             idx.WriteRootNodeToDisk();
+        }
+
+        public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query)
+        {
+            foreach (var entry in FindAllIn(query, _rootNode))
+            {
+                yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
+            }
+        }
+
+        public bool ContainsKey(byte[] key)
+        {
+            byte[] value;
+            return TryGetValue(key, out value);
+        }
+
+        public bool Remove(byte[] key)
+        {
+            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
+            return _rootNode.RemoveEntry(key);
+        }
+
+        public bool TryGetValue(byte[] key, out byte[] value)
+        {
+            IndexEntry entry;
+            IndexNode node;
+
+            if (_rootNode.TryFindEntry(key, out entry, out node))
+            {
+                value = entry.DataBuffer;
+                return true;
+            }
+
+            value = default(byte[]);
+            return false;
+        }
+
+        internal static String EntryAsString(IndexEntry entry, string fileName, string indexName)
+        {
+            IByteArraySerializable keyValue = null;
+            IByteArraySerializable dataValue = null;
+
+            // Try to guess the type of data in the key and data fields from the filename and index name
+            if (indexName == "$I30")
+            {
+                keyValue = new FileNameRecord();
+                dataValue = new FileRecordReference();
+            }
+            else if (fileName == "$ObjId" && indexName == "$O")
+            {
+                keyValue = new ObjectIds.IndexKey();
+                dataValue = new ObjectIdRecord();
+            }
+            else if (fileName == "$Reparse" && indexName == "$R")
+            {
+                keyValue = new ReparsePoints.Key();
+                dataValue = new ReparsePoints.Data();
+            }
+            else if (fileName == "$Quota")
+            {
+                if (indexName == "$O")
+                {
+                    keyValue = new Quotas.OwnerKey();
+                    dataValue = new Quotas.OwnerRecord();
+                }
+                else if (indexName == "$Q")
+                {
+                    keyValue = new Quotas.OwnerRecord();
+                    dataValue = new Quotas.QuotaRecord();
+                }
+            }
+            else if (fileName == "$Secure")
+            {
+                if (indexName == "$SII")
+                {
+                    keyValue = new SecurityDescriptors.IdIndexKey();
+                    dataValue = new SecurityDescriptors.IdIndexData();
+                }
+                else if (indexName == "$SDH")
+                {
+                    keyValue = new SecurityDescriptors.HashIndexKey();
+                    dataValue = new SecurityDescriptors.IdIndexData();
+                }
+            }
+
+            try
+            {
+                if (keyValue != null && dataValue != null)
+                {
+                    keyValue.ReadFrom(entry.KeyBuffer, 0);
+                    dataValue.ReadFrom(entry.DataBuffer, 0);
+                    return "{" + keyValue + "-->" + dataValue + "}";
+                }
+            }
+            catch
+            {
+                return "{Parsing-Error}";
+            }
+
+            return "{Unknown-Index-Type}";
         }
 
         internal bool ShrinkRoot()
@@ -145,11 +287,6 @@ namespace DiscUtils.Ntfs
             }
 
             return false;
-        }
-
-        internal bool IsFileIndex
-        {
-            get { return _isFileIndex; }
         }
 
         internal IndexBlock GetSubBlock(IndexNode parentNode, IndexEntry parentEntry)
@@ -204,18 +341,9 @@ namespace DiscUtils.Ntfs
             return _comparer.Compare(x, y);
         }
 
-        private void WriteRootNodeToDisk()
+        internal void Dump(TextWriter writer, string prefix)
         {
-            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize();
-            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries + _root.Size];
-            _root.WriteTo(buffer, 0);
-            _rootNode.WriteTo(buffer, _root.Size);
-            using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Write))
-            {
-                s.Position = 0;
-                s.Write(buffer, 0, buffer.Length);
-                s.SetLength(s.Position);
-            }
+            NodeAsString(writer, prefix, _rootNode, "R");
         }
 
         protected IEnumerable<IndexEntry> Enumerate(IndexNode node)
@@ -284,81 +412,18 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public byte[] this[byte[] key]
+        private void WriteRootNodeToDisk()
         {
-            get
+            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize();
+            byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries + _root.Size];
+            _root.WriteTo(buffer, 0);
+            _rootNode.WriteTo(buffer, _root.Size);
+            using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Write))
             {
-                byte[] value;
-                if (TryGetValue(key, out value))
-                {
-                    return value;
-                }
-                else
-                {
-                    throw new KeyNotFoundException();
-                }
+                s.Position = 0;
+                s.Write(buffer, 0, buffer.Length);
+                s.SetLength(s.Position);
             }
-
-            set
-            {
-                IndexEntry oldEntry;
-                IndexNode node;
-                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
-                if (_rootNode.TryFindEntry(key, out oldEntry, out node))
-                {
-                    node.UpdateEntry(key, value);
-                }
-                else
-                {
-                    _rootNode.AddEntry(key, value);
-                }
-            }
-        }
-
-        public bool ContainsKey(byte[] key)
-        {
-            byte[] value;
-            return TryGetValue(key, out value);
-        }
-
-        public bool Remove(byte[] key)
-        {
-            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
-            return _rootNode.RemoveEntry(key);
-        }
-
-        public bool TryGetValue(byte[] key, out byte[] value)
-        {
-            IndexEntry entry;
-            IndexNode node;
-
-            if (_rootNode.TryFindEntry(key, out entry, out node))
-            {
-                value = entry.DataBuffer;
-                return true;
-            }
-
-            value = default(byte[]);
-            return false;
-        }
-
-        public int Count
-        {
-            get
-            {
-                int i = 0;
-                foreach (var entry in Entries)
-                {
-                    ++i;
-                }
-
-                return i;
-            }
-        }
-
-        internal void Dump(TextWriter writer, string prefix)
-        {
-            NodeAsString(writer, prefix, _rootNode, "R");
         }
 
         private void NodeAsString(TextWriter writer, string prefix, IndexNode node, string id)
@@ -380,71 +445,6 @@ namespace DiscUtils.Ntfs
                     NodeAsString(writer, prefix + "        ", GetSubBlock(node, entry).Node, ":i" + entry.ChildrenVirtualCluster);
                 }
             }
-        }
-
-        internal static String EntryAsString(IndexEntry entry, string fileName, string indexName)
-        {
-            IByteArraySerializable keyValue = null;
-            IByteArraySerializable dataValue = null;
-
-            // Try to guess the type of data in the key and data fields from the filename and index name
-            if (indexName == "$I30")
-            {
-                keyValue = new FileNameRecord();
-                dataValue = new FileRecordReference();
-            }
-            else if (fileName == "$ObjId" && indexName == "$O")
-            {
-                keyValue = new ObjectIds.IndexKey();
-                dataValue = new ObjectIdRecord();
-            }
-            else if (fileName == "$Reparse" && indexName == "$R")
-            {
-                keyValue = new ReparsePoints.Key();
-                dataValue = new ReparsePoints.Data();
-            }
-            else if (fileName == "$Quota")
-            {
-                if (indexName == "$O")
-                {
-                    keyValue = new Quotas.OwnerKey();
-                    dataValue = new Quotas.OwnerRecord();
-                }
-                else if (indexName == "$Q")
-                {
-                    keyValue = new Quotas.OwnerRecord();
-                    dataValue = new Quotas.QuotaRecord();
-                }
-            }
-            else if (fileName == "$Secure")
-            {
-                if (indexName == "$SII")
-                {
-                    keyValue = new SecurityDescriptors.IdIndexKey();
-                    dataValue = new SecurityDescriptors.IdIndexData();
-                }
-                else if (indexName == "$SDH")
-                {
-                    keyValue = new SecurityDescriptors.HashIndexKey();
-                    dataValue = new SecurityDescriptors.IdIndexData();
-                }
-            }
-
-            try
-            {
-                if (keyValue != null && dataValue != null)
-                {
-                    keyValue.ReadFrom(entry.KeyBuffer, 0);
-                    dataValue.ReadFrom(entry.DataBuffer, 0);
-                    return "{" + keyValue + "-->" + dataValue + "}";
-                }
-            }
-            catch
-            {
-                return "{Parsing-Error}";
-            }
-
-            return "{Unknown-Index-Type}";
         }
     }
 
@@ -472,6 +472,19 @@ namespace DiscUtils.Ntfs
                 {
                     yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
                 }
+            }
+        }
+
+        public D this[K key]
+        {
+            get
+            {
+                return Convert<D>(_index[Unconvert(key)]);
+            }
+
+            set
+            {
+                _index[Unconvert(key)] = Unconvert<D>(value);
             }
         }
 
@@ -509,19 +522,6 @@ namespace DiscUtils.Ntfs
             }
 
             return default(KeyValuePair<K, D>);
-        }
-
-        public D this[K key]
-        {
-            get
-            {
-                return Convert<D>(_index[Unconvert(key)]);
-            }
-
-            set
-            {
-                _index[Unconvert(key)] = Unconvert<D>(value);
-            }
         }
 
         public bool TryGetValue(K key, out D data)

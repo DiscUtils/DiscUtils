@@ -65,28 +65,31 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Disposes of underlying resources.
+        /// Gets a value indicating if the layer only stores meaningful sectors.
         /// </summary>
-        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
-        /// else <c>false</c>.</param>
-        protected override void Dispose(bool disposing)
+        public override bool IsSparse
         {
-            try
-            {
-                if (disposing)
-                {
-                    if (_ownsContent == Ownership.Dispose && _content != null)
-                    {
-                        _content.Dispose();
-                    }
+            get { return false; }
+        }
 
-                    _content = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
+        internal override long Capacity
+        {
+            get { return _content.Length; }
+        }
+
+        internal override FileLocator RelativeFileLocator
+        {
+            get { return null; }
+        }
+
+        internal SparseStream Content
+        {
+            get { return _content; }
+        }
+
+        internal Geometry Geometry
+        {
+            get { return _geometry; }
         }
 
         /// <summary>
@@ -122,31 +125,28 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
+        /// Disposes of underlying resources.
         /// </summary>
-        public override bool IsSparse
+        /// <param name="disposing">Set to <c>true</c> if called within Dispose(),
+        /// else <c>false</c>.</param>
+        protected override void Dispose(bool disposing)
         {
-            get { return false; }
-        }
+            try
+            {
+                if (disposing)
+                {
+                    if (_ownsContent == Ownership.Dispose && _content != null)
+                    {
+                        _content.Dispose();
+                    }
 
-        internal override long Capacity
-        {
-            get { return _content.Length; }
-        }
-
-        internal override FileLocator RelativeFileLocator
-        {
-            get { return null; }
-        }
-
-        internal SparseStream Content
-        {
-            get { return _content; }
-        }
-
-        internal Geometry Geometry
-        {
-            get { return _geometry; }
+                    _content = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         /// <summary>

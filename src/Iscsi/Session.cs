@@ -103,26 +103,7 @@ namespace DiscUtils.Iscsi
             }
         }
 
-        /// <summary>
-        /// Disposes of this instance, closing the session with the Target.
-        /// </summary>
-        public void Dispose()
-        {
-            if (_currentConnection != null)
-            {
-                _currentConnection.Close(LogoutReason.CloseSession);
-            }
-
-            _currentConnection = null;
-        }
-
         #region Protocol Features
-        [ProtocolKey("SessionType", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
-        internal SessionType SessionType { get; set; }
-
-        [ProtocolKey("MaxConnections", "1", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int MaxConnections { get; set; }
-
         /// <summary>
         /// Gets the name of the iSCSI target this session is connected to.
         /// </summary>
@@ -143,6 +124,12 @@ namespace DiscUtils.Iscsi
         /// </summary>
         [ProtocolKey("TargetAlias", "", KeyUsagePhase.All, KeySender.Target, KeyType.Declarative)]
         public string TargetAlias { get; internal set; }
+
+        [ProtocolKey("SessionType", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
+        internal SessionType SessionType { get; set; }
+
+        [ProtocolKey("MaxConnections", "1", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int MaxConnections { get; set; }
 
         [ProtocolKey("InitiatorAlias", "", KeyUsagePhase.All, KeySender.Initiator, KeyType.Declarative)]
         internal string InitiatorAlias { get; set; }
@@ -181,6 +168,45 @@ namespace DiscUtils.Iscsi
         internal int ErrorRecoveryLevel { get; set; }
 
         #endregion
+
+        internal Connection ActiveConnection
+        {
+            get { return _currentConnection; }
+        }
+
+        internal uint InitiatorSessionId
+        {
+            get { return _initiatorSessionId; }
+        }
+
+        internal ushort TargetSessionId
+        {
+            get { return _targetSessionId; }
+            set { _targetSessionId = value; }
+        }
+
+        internal uint CommandSequenceNumber
+        {
+            get { return _commandSequenceNumber; }
+        }
+
+        internal uint CurrentTaskTag
+        {
+            get { return _nextInitiaterTaskTag; }
+        }
+
+        /// <summary>
+        /// Disposes of this instance, closing the session with the Target.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_currentConnection != null)
+            {
+                _currentConnection.Close(LogoutReason.CloseSession);
+            }
+
+            _currentConnection = null;
+        }
 
         /// <summary>
         /// Enumerates all of the Targets.
@@ -359,35 +385,9 @@ namespace DiscUtils.Iscsi
             return Send(cmd, outBuffer, outBufferOffset, outBufferLength, inBuffer, inBufferOffset, inBufferLength);
         }
 
-        internal Connection ActiveConnection
-        {
-            get { return _currentConnection; }
-        }
-
-        internal uint InitiatorSessionId
-        {
-            get { return _initiatorSessionId; }
-        }
-
-        internal ushort TargetSessionId
-        {
-            get { return _targetSessionId; }
-            set { _targetSessionId = value; }
-        }
-
-        internal uint CommandSequenceNumber
-        {
-            get { return _commandSequenceNumber; }
-        }
-
         internal uint NextCommandSequenceNumber()
         {
             return ++_commandSequenceNumber;
-        }
-
-        internal uint CurrentTaskTag
-        {
-            get { return _nextInitiaterTaskTag; }
         }
 
         internal uint NextTaskTag()

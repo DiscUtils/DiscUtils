@@ -83,6 +83,17 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Gets a collection of the partitions for storing Operating System file-systems.
+        /// </summary>
+        public override ReadOnlyCollection<PartitionInfo> Partitions
+        {
+            get
+            {
+                return new ReadOnlyCollection<PartitionInfo>(Utilities.Map<GptEntry, GuidPartitionInfo>(GetAllEntries(), (e) => new GuidPartitionInfo(this, e)));
+            }
+        }
+
+        /// <summary>
         /// Creates a new partition table on a disk.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>
@@ -282,20 +293,29 @@ namespace DiscUtils.Partitions
             Write();
         }
 
-        /// <summary>
-        /// Gets a collection of the partitions for storing Operating System file-systems.
-        /// </summary>
-        public override ReadOnlyCollection<PartitionInfo> Partitions
-        {
-            get
-            {
-                return new ReadOnlyCollection<PartitionInfo>(Utilities.Map<GptEntry, GuidPartitionInfo>(GetAllEntries(), (e) => new GuidPartitionInfo(this, e)));
-            }
-        }
-
         internal SparseStream Open(GptEntry entry)
         {
             return new SubStream(_diskData, entry.FirstUsedLogicalBlock * _diskGeometry.BytesPerSector, entry.LastUsedLogicalBlock * _diskGeometry.BytesPerSector);
+        }
+
+        private static uint CalcEntriesCrc(byte[] buffer)
+        {
+            return Crc32.Compute(0xFFFFFFFF, buffer, 0, buffer.Length) ^ 0xFFFFFFFF;
+        }
+
+        private static int CountEntries<T>(ICollection<T> values, Func<T, bool> pred)
+        {
+            int count = 0;
+
+            foreach (var val in values)
+            {
+                if (pred(val))
+                {
+                    ++count;
+                }
+            }
+
+            return count;
         }
 
         private void Init(Stream disk, Geometry diskGeometry)
@@ -472,11 +492,6 @@ namespace DiscUtils.Partitions
             return Crc32.Compute(0xFFFFFFFF, _entryBuffer, 0, _entryBuffer.Length) ^ 0xFFFFFFFF;
         }
 
-        private static uint CalcEntriesCrc(byte[] buffer)
-        {
-            return Crc32.Compute(0xFFFFFFFF, buffer, 0, buffer.Length) ^ 0xFFFFFFFF;
-        }
-
         private IEnumerable<GptEntry> GetAllEntries()
         {
             for (int i = 0; i < _primaryHeader.PartitionEntryCount; ++i)
@@ -560,21 +575,6 @@ namespace DiscUtils.Partitions
             }
 
             throw new IOException("No free partition entries available");
-        }
-
-        private static int CountEntries<T>(ICollection<T> values, Func<T, bool> pred)
-        {
-            int count = 0;
-
-            foreach (var val in values)
-            {
-                if (pred(val))
-                {
-                    ++count;
-                }
-            }
-
-            return count;
         }
     }
 }

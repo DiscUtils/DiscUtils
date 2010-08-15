@@ -62,6 +62,40 @@ namespace DiscUtils
     public sealed class StreamPump
     {
         /// <summary>
+        /// Creates a new instance, with no streams specified.
+        /// </summary>
+        public StreamPump()
+        {
+            SparseChunkSize = 512;
+            BufferSize = (int)(512 * Sizes.OneKiB);
+            SparseCopy = true;
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="inStream">The stream to read from</param>
+        /// <param name="outStream">The stream to write to</param>
+        /// <param name="sparseChunkSize">The size of each sparse chunk</param>
+        public StreamPump(Stream inStream, Stream outStream, int sparseChunkSize)
+        {
+            InputStream = inStream;
+            OutputStream = outStream;
+            SparseChunkSize = sparseChunkSize;
+            BufferSize = (int)(512 * Sizes.OneKiB);
+            SparseCopy = true;
+        }
+
+        /// <summary>
+        /// Event raised periodically through the pump operation.
+        /// </summary>
+        /// <remarks>
+        /// This event is signalled synchronously, so to avoid slowing the pumping activity
+        /// implementations should return quickly.
+        /// </remarks>
+        public event EventHandler<PumpProgressEventArgs> ProgressEvent;
+
+        /// <summary>
         /// The stream that will be read from.
         /// </summary>
         public Stream InputStream { get; set; }
@@ -102,40 +136,6 @@ namespace DiscUtils
         public long BytesWritten { get; private set; }
 
         /// <summary>
-        /// Event raised periodically through the pump operation.
-        /// </summary>
-        /// <remarks>
-        /// This event is signalled synchronously, so to avoid slowing the pumping activity
-        /// implementations should return quickly.
-        /// </remarks>
-        public event EventHandler<PumpProgressEventArgs> ProgressEvent;
-
-        /// <summary>
-        /// Creates a new instance, with no streams specified.
-        /// </summary>
-        public StreamPump()
-        {
-            SparseChunkSize = 512;
-            BufferSize = (int)(512 * Sizes.OneKiB);
-            SparseCopy = true;
-        }
-
-        /// <summary>
-        /// Creates a new instance.
-        /// </summary>
-        /// <param name="inStream">The stream to read from</param>
-        /// <param name="outStream">The stream to write to</param>
-        /// <param name="sparseChunkSize">The size of each sparse chunk</param>
-        public StreamPump(Stream inStream, Stream outStream, int sparseChunkSize)
-        {
-            InputStream = inStream;
-            OutputStream = outStream;
-            SparseChunkSize = sparseChunkSize;
-            BufferSize = (int)(512 * Sizes.OneKiB);
-            SparseCopy = true;
-        }
-
-        /// <summary>
         /// Performs the pump activity, blocking until complete.
         /// </summary>
         public void Run()
@@ -168,6 +168,19 @@ namespace DiscUtils
             {
                 RunNonSparse();
             }
+        }
+
+        private static bool IsAllZeros(byte[] buffer, int offset, int count)
+        {
+            for (int j = 0; j < count; j++)
+            {
+                if (buffer[offset + j] != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private void RunNonSparse()
@@ -278,19 +291,6 @@ namespace DiscUtils
                 args.DestinationPosition = OutputStream.Position;
                 ProgressEvent(this, args);
             }
-        }
-
-        private static bool IsAllZeros(byte[] buffer, int offset, int count)
-        {
-            for (int j = 0; j < count; j++)
-            {
-                if (buffer[offset + j] != 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 }

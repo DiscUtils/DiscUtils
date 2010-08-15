@@ -62,10 +62,6 @@ namespace DiscUtils.Wim
             get { return false; }
         }
 
-        public override void Flush()
-        {
-        }
-
         public override long Length
         {
             get { return _buffer.Length; }
@@ -82,6 +78,10 @@ namespace DiscUtils.Wim
             {
                 _position = value;
             }
+        }
+
+        public override void Flush()
+        {
         }
 
         public override int Read(byte[] buffer, int offset, int count)

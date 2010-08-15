@@ -48,6 +48,43 @@ namespace DiscUtils.LogicalDiskManager
         }
 
         /// <summary>
+        /// Determines if a physical volume contains LDM data.
+        /// </summary>
+        /// <param name="volumeInfo">The volume to inspect</param>
+        /// <returns><c>true</c> if the physical volume contains LDM data, else <c>false</c>.</returns>
+        public static bool HandlesPhysicalVolume(PhysicalVolumeInfo volumeInfo)
+        {
+            PartitionInfo pi = volumeInfo.Partition;
+            if (pi != null)
+            {
+                return IsLdmPartition(pi);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if a disk is 'dynamic' (i.e. contains LDM volumes).
+        /// </summary>
+        /// <param name="disk">The disk to inspect</param>
+        /// <returns><c>true</c> if the disk contains LDM volumes, else <c>false</c>.</returns>
+        public static bool IsDynamicDisk(VirtualDisk disk)
+        {
+            if (disk.IsPartitioned)
+            {
+                foreach (var partition in disk.Partitions.Partitions)
+                {
+                    if (IsLdmPartition(partition))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Adds a new disk to be managed.
         /// </summary>
         /// <param name="disk">The disk to manage</param>
@@ -93,52 +130,6 @@ namespace DiscUtils.LogicalDiskManager
         }
 
         /// <summary>
-        /// Determines if a physical volume contains LDM data.
-        /// </summary>
-        /// <param name="volumeInfo">The volume to inspect</param>
-        /// <returns><c>true</c> if the physical volume contains LDM data, else <c>false</c>.</returns>
-        public static bool HandlesPhysicalVolume(PhysicalVolumeInfo volumeInfo)
-        {
-            PartitionInfo pi = volumeInfo.Partition;
-            if (pi != null)
-            {
-                return IsLdmPartition(pi);
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Determines if a disk is 'dynamic' (i.e. contains LDM volumes).
-        /// </summary>
-        /// <param name="disk">The disk to inspect</param>
-        /// <returns><c>true</c> if the disk contains LDM volumes, else <c>false</c>.</returns>
-        public static bool IsDynamicDisk(VirtualDisk disk)
-        {
-            if (disk.IsPartitioned)
-            {
-                foreach (var partition in disk.Partitions.Partitions)
-                {
-                    if (IsLdmPartition(partition))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsLdmPartition(PartitionInfo partition)
-        {
-            return partition.BiosType == BiosPartitionTypes.WindowsDynamicVolume
-                   || partition.GuidType == GuidPartitionTypes.WindowsLdmMetadata
-                   || partition.GuidType == GuidPartitionTypes.WindowsLdmData;
-        }
-
-        #region IDiagnosticTraceable Members
-
-        /// <summary>
         /// Writes a diagnostic report about the state of the disk manager.
         /// </summary>
         /// <param name="writer">The writer to send the report to</param>
@@ -152,6 +143,11 @@ namespace DiscUtils.LogicalDiskManager
             }
         }
 
-        #endregion
+        private static bool IsLdmPartition(PartitionInfo partition)
+        {
+            return partition.BiosType == BiosPartitionTypes.WindowsDynamicVolume
+                   || partition.GuidType == GuidPartitionTypes.WindowsLdmMetadata
+                   || partition.GuidType == GuidPartitionTypes.WindowsLdmData;
+        }
     }
 }

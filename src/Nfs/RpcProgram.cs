@@ -26,18 +26,18 @@ namespace DiscUtils.Nfs
 
     internal abstract class RpcProgram
     {
-        protected RpcClient _client;
-
         public const uint RpcVersion = 2;
 
-        public abstract int Identifier { get; }
-
-        public abstract int Version { get; }
+        protected RpcClient _client;
 
         protected RpcProgram(RpcClient client)
         {
             _client = client;
         }
+
+        public abstract int Identifier { get; }
+
+        public abstract int Version { get; }
 
         public void NullProc()
         {
