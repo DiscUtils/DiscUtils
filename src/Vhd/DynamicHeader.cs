@@ -160,15 +160,15 @@ namespace DiscUtils.Vhd
 
             byte[] asBytes = new byte[1024];
             copy.ToBytes(asBytes, 0);
-            uint Checksum = 0;
+            uint checksum = 0;
             foreach (uint value in asBytes)
             {
-                Checksum += value;
+                checksum += value;
             }
 
-            Checksum = ~Checksum;
+            checksum = ~checksum;
 
-            return Checksum;
+            return checksum;
         }
     }
 }

@@ -37,8 +37,8 @@ namespace DiscUtils
     /// </remarks>
     public sealed class FileSystemManager
     {
-        private static List<VfsFileSystemFactory> s_DetectedFactories;
-        private static FileSystemManager s_DefaultInstance = new FileSystemManager();
+        private static List<VfsFileSystemFactory> s_detectedFactories;
+        private static FileSystemManager s_defaultInstance = new FileSystemManager();
 
         private List<VfsFileSystemFactory> _factories;
 
@@ -54,12 +54,12 @@ namespace DiscUtils
         {
             get
             {
-                if (s_DetectedFactories == null)
+                if (s_detectedFactories == null)
                 {
-                    s_DetectedFactories = DetectFactories(typeof(FileSystemManager).Assembly);
+                    s_detectedFactories = DetectFactories(typeof(FileSystemManager).Assembly);
                 }
 
-                return s_DetectedFactories;
+                return s_detectedFactories;
             }
         }
 
@@ -70,7 +70,7 @@ namespace DiscUtils
         /// <returns>The list of file systems detected.</returns>
         public static FileSystemInfo[] DetectDefaultFileSystems(VolumeInfo volume)
         {
-            return s_DefaultInstance.DetectFileSystems(volume);
+            return s_defaultInstance.DetectFileSystems(volume);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace DiscUtils
         /// <returns>The list of file systems detected.</returns>
         public static FileSystemInfo[] DetectDefaultFileSystems(Stream stream)
         {
-            return s_DefaultInstance.DetectFileSystems(stream);
+            return s_defaultInstance.DetectFileSystems(stream);
         }
 
         /// <summary>

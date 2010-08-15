@@ -33,8 +33,8 @@ namespace DiscUtils.Ntfs
         /// </summary>
         private const int FieldSize = 0x18;
 
-        private ulong LogSequenceNumber;
-        private ulong IndexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
+        private ulong _logSequenceNumber;
+        private ulong _indexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
 
         private IndexNode _node;
 
@@ -61,7 +61,7 @@ namespace DiscUtils.Ntfs
             _index = index;
             _parentNode = parentNode;
 
-            IndexBlockVcn = (ulong)vcn;
+            _indexBlockVcn = (ulong)vcn;
 
             _streamPosition = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
 
@@ -94,15 +94,15 @@ namespace DiscUtils.Ntfs
         protected override void Read(byte[] buffer, int offset)
         {
             // Skip FixupRecord fields...
-            LogSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
-            IndexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
+            _logSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
+            _indexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
             _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _parentNode, buffer, offset + FieldSize);
         }
 
         protected override ushort Write(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(LogSequenceNumber, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(IndexBlockVcn, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian(_logSequenceNumber, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(_indexBlockVcn, buffer, offset + 0x10);
             return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize));
         }
 

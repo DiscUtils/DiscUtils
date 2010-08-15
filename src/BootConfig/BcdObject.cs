@@ -121,8 +121,8 @@ namespace DiscUtils.BootConfig
         /// </summary>
         public const string CurrentBootEntryId = "{FA926493-6F1C-4193-A414-58F0B2456D1E}";
 
-        private static Dictionary<string, Guid> s_NameToGuid;
-        private static Dictionary<Guid, string> s_GuidToName;
+        private static Dictionary<string, Guid> s_nameToGuid;
+        private static Dictionary<Guid, string> s_guidToName;
 
         private BaseStorage _storage;
         private Guid _id;
@@ -130,8 +130,8 @@ namespace DiscUtils.BootConfig
 
         static BcdObject()
         {
-            s_NameToGuid = new Dictionary<string, Guid>();
-            s_GuidToName = new Dictionary<Guid, string>();
+            s_nameToGuid = new Dictionary<string, Guid>();
+            s_guidToName = new Dictionary<Guid, string>();
 
             AddMapping("{emssettings}", EmsSettingsGroupId);
             AddMapping("{resumeloadersettings}", ResumeLoaderSettingsGroupId);
@@ -172,7 +172,7 @@ namespace DiscUtils.BootConfig
             get
             {
                 string name;
-                if (s_GuidToName.TryGetValue(_id, out name))
+                if (s_guidToName.TryGetValue(_id, out name))
                 {
                     return name;
                 }
@@ -358,8 +358,8 @@ namespace DiscUtils.BootConfig
         private static void AddMapping(string name, string id)
         {
             Guid guid = new Guid(id);
-            s_NameToGuid[name] = guid;
-            s_GuidToName[guid] = name;
+            s_nameToGuid[name] = guid;
+            s_guidToName[guid] = name;
         }
     }
 }

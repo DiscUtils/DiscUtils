@@ -26,8 +26,8 @@ namespace DiscUtils.Iscsi
     {
         public byte[] TextData;
         public bool Continue;
-        private ulong Lun;
-        private uint TargetTransferTag = 0xFFFFFFFF;
+        private ulong _lun;
+        private uint _targetTransferTag = 0xFFFFFFFF;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -45,8 +45,8 @@ namespace DiscUtils.Iscsi
             }
 
             Continue = (headerData[headerOffset + 1] & 0x40) != 0;
-            Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
-            TargetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
+            _lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
+            _targetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
