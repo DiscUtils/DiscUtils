@@ -162,7 +162,7 @@ namespace DiscUtils.Partitions
             foreach (var record in ReadPrimaryRecords(bootSector))
             {
                 // If the partition extends beyond the end of the disk, this is probably an invalid partition table
-                if ((record.LBAStart + record.LBALength) * Sizes.Sector > disk.Length)
+                if ((record.LBAStart + (long)record.LBALength) * Sizes.Sector > disk.Length)
                 {
                     return false;
                 }

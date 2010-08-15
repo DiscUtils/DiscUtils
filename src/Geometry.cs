@@ -73,7 +73,7 @@ namespace DiscUtils
         /// <param name="bytesPerSector">The number of bytes per sector of the disk</param>
         public Geometry(long capacity, int headsPerCylinder, int sectorsPerTrack, int bytesPerSector)
         {
-            _cylinders = (int)(capacity / (headsPerCylinder * sectorsPerTrack * bytesPerSector));
+            _cylinders = (int)(capacity / (headsPerCylinder * (long)sectorsPerTrack * bytesPerSector));
             _headsPerCylinder = headsPerCylinder;
             _sectorsPerTrack = sectorsPerTrack;
             _bytesPerSector = bytesPerSector;
@@ -197,7 +197,7 @@ namespace DiscUtils
             }
 
             int sectors = 63;
-            int cylinders = (int)Math.Min(1024, capacity / (sectors * heads * Sizes.Sector));
+            int cylinders = (int)Math.Min(1024, capacity / (sectors * (long)heads * Sizes.Sector));
             return new Geometry(cylinders, heads, sectors, Sizes.Sector);
         }
 

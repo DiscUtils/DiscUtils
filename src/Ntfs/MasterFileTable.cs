@@ -338,7 +338,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[_recordLength];
             record.ToBytes(buffer, 0);
 
-            _recordStream.Position = record.MasterFileTableIndex * _recordLength;
+            _recordStream.Position = record.MasterFileTableIndex * (long)_recordLength;
             _recordStream.Write(buffer, 0, _recordLength);
             _recordStream.Flush();
 
@@ -364,7 +364,7 @@ namespace DiscUtils.Ntfs
                 {
                     using (Stream s = mftMirror.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))
                     {
-                        s.Position = record.MasterFileTableIndex * _recordLength;
+                        s.Position = record.MasterFileTableIndex * (long)_recordLength;
                         s.Write(buffer, 0, _recordLength);
                     }
                 }

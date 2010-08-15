@@ -43,7 +43,7 @@ namespace DiscUtils.Partitions
             uint partPos = _firstSector;
             while (partPos != 0)
             {
-                _disk.Position = (long)partPos * Utilities.SectorSize;
+                _disk.Position = ((long)partPos) * Utilities.SectorSize;
                 byte[] sector = Utilities.ReadFully(_disk, Utilities.SectorSize);
                 if (sector[510] != 0x55 || sector[511] != 0xAA)
                 {

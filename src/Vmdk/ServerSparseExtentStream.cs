@@ -106,7 +106,7 @@ namespace DiscUtils.Vmdk
 
             // Copy-on-write semantics, read the bytes from parent and write them out to this extent.
             _parentDiskStream.Position = _diskOffset + ((grain + (_header.NumGTEsPerGT * (long)grainTable)) * _header.GrainSize * Sizes.Sector);
-            byte[] content = Utilities.ReadFully(_parentDiskStream, (int)_header.GrainSize * Sizes.Sector * count);
+            byte[] content = Utilities.ReadFully(_parentDiskStream, (int)(_header.GrainSize * Sizes.Sector * count));
             _fileStream.Position = grainStartPos;
             _fileStream.Write(content, 0, content.Length);
 

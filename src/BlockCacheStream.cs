@@ -277,7 +277,7 @@ namespace DiscUtils
 
                     // Allow for the end of the stream not being block-aligned
                     long readPosition = (firstBlock + blocksRead) * (long)blockSize;
-                    int bytesToRead = (int)Math.Min(blocksToRead * blockSize, Length - readPosition);
+                    int bytesToRead = (int)Math.Min(blocksToRead * (long)blockSize, Length - readPosition);
 
                     // Do the read
                     _stats.TotalReadsOut++;

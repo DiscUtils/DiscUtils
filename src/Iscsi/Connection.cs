@@ -202,7 +202,7 @@ namespace DiscUtils.Iscsi
                     toSend = Math.Min(Math.Min(outBufferCount - numSent, numApproved), MaxTargetReceiveDataSegmentLength);
 
                     DataOutPacket pkt = new DataOutPacket(this, cmd.TargetLun);
-                    packet = pkt.GetBytes(outBuffer, outBufferOffset + numSent, toSend, /*numSent + toSend == outBufferCount*/toSend == numApproved, pktsSent++, (uint)numSent, targetTransferTag);
+                    packet = pkt.GetBytes(outBuffer, outBufferOffset + numSent, toSend, toSend == numApproved, pktsSent++, (uint)numSent, targetTransferTag);
                     _stream.Write(packet, 0, packet.Length);
                     _stream.Flush();
 
