@@ -23,44 +23,6 @@
 namespace DiscUtils.Udf
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
-
-    internal enum ShortAllocationFlags
-    {
-        RecordedAndAllocated = 0,
-        AllocatedNotRecorded = 1,
-        NotRecordedNotAllocated = 2,
-        NextExtentOfAllocationDescriptors = 3
-    }
-
-    internal sealed class ExtentAllocationDescriptor : IByteArraySerializable
-    {
-        public uint ExtentLength;
-        public uint ExtentLocation;
-
-        public int Size
-        {
-            get { return 8; }
-        }
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            ExtentLength = Utilities.ToUInt32LittleEndian(buffer, offset);
-            ExtentLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            return 8;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            return ExtentLocation + ":+" + ExtentLength;
-        }
-    }
 
     internal sealed class ShortAllocationDescriptor : IByteArraySerializable
     {
@@ -92,37 +54,6 @@ namespace DiscUtils.Udf
         public override string ToString()
         {
             return ExtentLocation + ":+" + ExtentLength + " [" + Flags + "]";
-        }
-    }
-
-    internal class LongAllocationDescriptor : IByteArraySerializable
-    {
-        public uint ExtentLength;
-        public LogicalBlockAddress ExtentLocation;
-        public byte[] ImplementationUse;
-
-        public int Size
-        {
-            get { return 16; }
-        }
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            ExtentLength = Utilities.ToUInt32LittleEndian(buffer, offset);
-            ExtentLocation = new LogicalBlockAddress();
-            ExtentLocation.ReadFrom(buffer, offset + 4);
-            ImplementationUse = Utilities.ToByteArray(buffer, offset + 10, 6);
-            return 16;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            return ExtentLocation.ToString() + ":+" + ExtentLength;
         }
     }
 }

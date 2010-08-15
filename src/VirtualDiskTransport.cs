@@ -23,24 +23,7 @@
 namespace DiscUtils
 {
     using System;
-    using System.Globalization;
     using System.IO;
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    internal sealed class VirtualDiskTransportAttribute : Attribute
-    {
-        private string _scheme;
-
-        public VirtualDiskTransportAttribute(string scheme)
-        {
-            _scheme = scheme;
-        }
-
-        public string Scheme
-        {
-            get { return _scheme; }
-        }
-    }
 
     internal abstract class VirtualDiskTransport : IDisposable
     {
@@ -62,41 +45,6 @@ namespace DiscUtils
 
         protected virtual void Dispose(bool disposing)
         {
-        }
-    }
-
-    [VirtualDiskTransport("file")]
-    internal sealed class FileTransport : VirtualDiskTransport
-    {
-        private string _path;
-
-        public override bool IsRawDisk
-        {
-            get { return false; }
-        }
-
-        public override void Connect(Uri uri, string username, string password)
-        {
-            _path = uri.LocalPath;
-            if (!Directory.Exists(Utilities.GetDirectoryFromPath(_path)))
-            {
-                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such file '{0}'", uri.OriginalString), _path);
-            }
-        }
-
-        public override VirtualDisk OpenDisk(FileAccess access)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override FileLocator GetFileLocator()
-        {
-            return new LocalFileLocator(Path.GetDirectoryName(_path));
-        }
-
-        public override string GetFileName()
-        {
-            return Path.GetFileName(_path);
         }
     }
 }

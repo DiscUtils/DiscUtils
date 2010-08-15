@@ -23,7 +23,6 @@
 namespace DiscUtils.Udf
 {
     using System;
-    using System.Globalization;
     using System.IO;
 
     internal abstract class BaseTaggedDescriptor : IByteArraySerializable
@@ -66,32 +65,5 @@ namespace DiscUtils.Udf
         }
 
         public abstract int Parse(byte[] buffer, int offset);
-    }
-
-    internal abstract class BaseTaggedDescriptor<T> : BaseTaggedDescriptor
-        where T : BaseTaggedDescriptor, new()
-    {
-        protected BaseTaggedDescriptor(TagIdentifier id)
-            : base(id)
-        {
-        }
-
-        public static T FromStream(Stream stream, uint sector, uint sectorSize)
-        {
-            stream.Position = sector * (long)sectorSize;
-            byte[] buffer = Utilities.ReadFully(stream, 512);
-
-            T result = new T();
-            result.ReadFrom(buffer, 0);
-            if (result.Tag.TagIdentifier != result.RequiredTagIdentifier
-                || result.Tag.TagLocation != sector)
-            {
-                throw new InvalidDataException(string.Format(CultureInfo.InvariantCulture, "Corrupt UDF file system, unable to read {0} tag at sector {1}", result.RequiredTagIdentifier, sector));
-            }
-
-            return result;
-        }
-
-        public override abstract int Parse(byte[] buffer, int offset);
     }
 }

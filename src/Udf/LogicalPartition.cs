@@ -23,7 +23,6 @@
 namespace DiscUtils.Udf
 {
     using System;
-    using System.IO;
 
     internal abstract class LogicalPartition : Partition
     {
@@ -58,61 +57,6 @@ namespace DiscUtils.Udf
             }
 
             throw new NotImplementedException("Unrecognized partition map type");
-        }
-    }
-
-    internal class Type1Partition : LogicalPartition
-    {
-        private Type1PartitionMap _partitionMap;
-        private PhysicalPartition _physical;
-
-        public Type1Partition(UdfContext context, LogicalVolumeDescriptor volumeDescriptor, Type1PartitionMap partitionMap)
-            : base(context, volumeDescriptor)
-        {
-            _partitionMap = partitionMap;
-            _physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
-        }
-
-        public override IBuffer Content
-        {
-            get { return _physical.Content; }
-        }
-    }
-
-    internal class MetadataPartition : LogicalPartition
-    {
-        private MetadataPartitionMap _partitionMap;
-        private File _metadataFile;
-
-        public MetadataPartition(UdfContext context, LogicalVolumeDescriptor volumeDescriptor, MetadataPartitionMap partitionMap)
-            : base(context, volumeDescriptor)
-        {
-            _partitionMap = partitionMap;
-
-            PhysicalPartition physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
-            long fileEntryPos = partitionMap.MetadataFileLocation * (long)volumeDescriptor.LogicalBlockSize;
-
-            byte[] entryData = Utilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
-            if (!DescriptorTag.IsValid(entryData, 0))
-            {
-                throw new IOException("Invalid descriptor tag looking for Metadata file entry");
-            }
-
-            DescriptorTag dt = Utilities.ToStruct<DescriptorTag>(entryData, 0);
-            if (dt.TagIdentifier == TagIdentifier.ExtendedFileEntry)
-            {
-                ExtendedFileEntry efe = Utilities.ToStruct<ExtendedFileEntry>(entryData, 0);
-                _metadataFile = new File(context, physical, efe, _volumeDescriptor.LogicalBlockSize);
-            }
-            else
-            {
-                throw new NotImplementedException("Only EFE implemented for Metadata file entry");
-            }
-        }
-
-        public override IBuffer Content
-        {
-            get { return _metadataFile.FileContent; }
         }
     }
 }

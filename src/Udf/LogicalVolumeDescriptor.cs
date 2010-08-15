@@ -26,7 +26,7 @@ namespace DiscUtils.Udf
     using System.Collections.Generic;
     using System.Text;
 
-    internal sealed class LogicalVolumeDescriptor : BaseTaggedDescriptor<LogicalVolumeDescriptor>
+    internal sealed class LogicalVolumeDescriptor : TaggedDescriptor<LogicalVolumeDescriptor>
     {
         public uint VolumeDescriptorSequenceNumber;
         public byte[] DescriptorCharset;

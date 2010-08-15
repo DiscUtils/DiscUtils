@@ -22,22 +22,6 @@
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3WeakCacheConsistencyAttr
-    {
-        public Nfs3WeakCacheConsistencyAttr(XdrDataReader reader)
-        {
-            Size = reader.ReadInt64();
-            ModifyTime = new Nfs3FileTime(reader);
-            ChangeTime = new Nfs3FileTime(reader);
-        }
-
-        public long Size { get; set; }
-
-        public Nfs3FileTime ModifyTime { get; set; }
-
-        public Nfs3FileTime ChangeTime { get; set; }
-    }
-
     internal sealed class Nfs3WeakCacheConsistency
     {
         public Nfs3WeakCacheConsistency(XdrDataReader reader)

@@ -26,7 +26,7 @@ namespace DiscUtils.Udf
     using System.Collections.Generic;
     using System.Text;
 
-    internal class PartitionDescriptor : BaseTaggedDescriptor<PartitionDescriptor>
+    internal class PartitionDescriptor : TaggedDescriptor<PartitionDescriptor>
     {
         public uint VolumeDescriptorSequenceNumber;
         public ushort PartitionFlags;

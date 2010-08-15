@@ -24,7 +24,7 @@ namespace DiscUtils.Udf
 {
     using System;
 
-    internal sealed class PrimaryVolumeDescriptor : BaseTaggedDescriptor<PrimaryVolumeDescriptor>
+    internal sealed class PrimaryVolumeDescriptor : TaggedDescriptor<PrimaryVolumeDescriptor>
     {
         public uint VolumeDescriptorSequenceNumber;
         public uint PrimaryVolumeDescriptorNumber;

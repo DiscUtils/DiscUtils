@@ -22,40 +22,8 @@
 
 namespace DiscUtils
 {
-    using System.IO;
-
     internal abstract class BuilderExtentSource
     {
         public abstract BuilderExtent Fix(long pos);
-    }
-
-    internal class BuilderBufferExtentSource : BuilderExtentSource
-    {
-        private byte[] _buffer;
-
-        public BuilderBufferExtentSource(byte[] buffer)
-        {
-            _buffer = buffer;
-        }
-
-        public override BuilderExtent Fix(long pos)
-        {
-            return new BuilderBufferExtent(pos, _buffer);
-        }
-    }
-
-    internal class BuilderStreamExtentSource : BuilderExtentSource
-    {
-        private Stream _stream;
-
-        public BuilderStreamExtentSource(Stream stream)
-        {
-            _stream = stream;
-        }
-
-        public override BuilderExtent Fix(long pos)
-        {
-            return new BuilderStreamExtent(pos, _stream);
-        }
     }
 }

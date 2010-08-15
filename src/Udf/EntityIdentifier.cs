@@ -23,7 +23,6 @@
 namespace DiscUtils.Udf
 {
     using System;
-    using System.Globalization;
     using System.Text;
 
     internal enum OSClass : byte
@@ -85,55 +84,6 @@ namespace DiscUtils.Udf
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-    }
-
-    internal class DomainEntityIdentifier : EntityIdentifier
-    {
-        [Flags]
-        private enum DomainFlags : byte
-        {
-            None = 0,
-            HardWriteProtect = 1,
-            SoftWriteProtect = 2
-        }
-
-        public override string ToString()
-        {
-            string major = ((uint)Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
-            string minor = ((uint)Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
-            DomainFlags flags = (DomainFlags)Suffix[2];
-            return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : Flags {3}]", Identifier, major, minor, flags);
-        }
-    }
-
-    internal class UdfEntityIdentifier : EntityIdentifier
-    {
-        public override string ToString()
-        {
-            string major = ((uint)Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
-            string minor = ((uint)Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
-            OSClass osClass = (OSClass)Suffix[2];
-            OSIdentifier osId = (OSIdentifier)Utilities.ToUInt16BigEndian(Suffix, 2);
-            return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : OS {3} {4}]", Identifier, major, minor, osClass, osId);
-        }
-    }
-
-    internal class ImplementationEntityIdentifier : EntityIdentifier
-    {
-        public override string ToString()
-        {
-            OSClass osClass = (OSClass)Suffix[0];
-            OSIdentifier osId = (OSIdentifier)Utilities.ToUInt16BigEndian(Suffix, 0);
-            return string.Format(CultureInfo.InvariantCulture, "{0} [OS {1} {2}]", Identifier, osClass, osId);
-        }
-    }
-
-    internal class ApplicationEntityIdentifier : EntityIdentifier
-    {
-        public override string ToString()
-        {
-            return Identifier;
         }
     }
 }

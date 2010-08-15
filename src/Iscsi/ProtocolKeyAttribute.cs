@@ -55,22 +55,6 @@ namespace DiscUtils.Iscsi
         Negotiated
     }
 
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-    internal sealed class ProtocolKeyValueAttribute : Attribute
-    {
-        private string _name;
-
-        public ProtocolKeyValueAttribute(string name)
-        {
-            _name = name;
-        }
-
-        public string Name
-        {
-            get { return _name; }
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     internal sealed class ProtocolKeyAttribute : Attribute
     {

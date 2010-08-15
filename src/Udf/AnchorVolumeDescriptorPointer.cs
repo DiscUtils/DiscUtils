@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Udf
 {
-    internal class AnchorVolumeDescriptorPointer : BaseTaggedDescriptor<AnchorVolumeDescriptorPointer>
+    internal class AnchorVolumeDescriptorPointer : TaggedDescriptor<AnchorVolumeDescriptorPointer>
     {
         public ExtentDescriptor MainDescriptorSequence;
         public ExtentDescriptor ReserveDescriptorSequence;

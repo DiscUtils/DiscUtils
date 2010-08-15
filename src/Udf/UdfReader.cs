@@ -105,174 +105,174 @@ namespace DiscUtils.Udf
 
             return foundUdfMarker;
         }
-    }
 
-    internal sealed class VfsUdfReader : VfsReadOnlyFileSystem<FileIdentifier, File, Directory, UdfContext>
-    {
-        private Stream _data;
-        private uint _sectorSize;
-        private LogicalVolumeDescriptor _lvd;
-        private PrimaryVolumeDescriptor _pvd;
-
-        public VfsUdfReader(Stream data)
-            : base(null)
+        private sealed class VfsUdfReader : VfsReadOnlyFileSystem<FileIdentifier, File, Directory, UdfContext>
         {
-            _data = data;
+            private Stream _data;
+            private uint _sectorSize;
+            private LogicalVolumeDescriptor _lvd;
+            private PrimaryVolumeDescriptor _pvd;
 
-            if (!UdfReader.Detect(data))
+            public VfsUdfReader(Stream data)
+                : base(null)
             {
-                throw new InvalidDataException("Stream is not a recognized UDF format");
+                _data = data;
+
+                if (!UdfReader.Detect(data))
+                {
+                    throw new InvalidDataException("Stream is not a recognized UDF format");
+                }
+
+                // Try a number of possible sector sizes, from most common.
+                if (ProbeSectorSize(2048))
+                {
+                    _sectorSize = 2048;
+                }
+                else if (ProbeSectorSize(512))
+                {
+                    _sectorSize = 512;
+                }
+                else if (ProbeSectorSize(4096))
+                {
+                    _sectorSize = 4096;
+                }
+                else if (ProbeSectorSize(1024))
+                {
+                    _sectorSize = 1024;
+                }
+                else
+                {
+                    throw new InvalidDataException("Unable to detect physical media sector size");
+                }
+
+                Initialize();
             }
 
-            // Try a number of possible sector sizes, from most common.
-            if (ProbeSectorSize(2048))
+            public VfsUdfReader(Stream data, int sectorSize)
+                : base(null)
             {
-                _sectorSize = 2048;
-            }
-            else if (ProbeSectorSize(512))
-            {
-                _sectorSize = 512;
-            }
-            else if (ProbeSectorSize(4096))
-            {
-                _sectorSize = 4096;
-            }
-            else if (ProbeSectorSize(1024))
-            {
-                _sectorSize = 1024;
-            }
-            else
-            {
-                throw new InvalidDataException("Unable to detect physical media sector size");
+                _data = data;
+                _sectorSize = (uint)sectorSize;
+
+                if (!UdfReader.Detect(data))
+                {
+                    throw new InvalidDataException("Stream is not a recognized UDF format");
+                }
+
+                Initialize();
             }
 
-            Initialize();
-        }
-
-        public VfsUdfReader(Stream data, int sectorSize)
-            : base(null)
-        {
-            _data = data;
-            _sectorSize = (uint)sectorSize;
-
-            if (!UdfReader.Detect(data))
+            public override string FriendlyName
             {
-                throw new InvalidDataException("Stream is not a recognized UDF format");
+                get { return "OSTA Universal Disk Format"; }
             }
 
-            Initialize();
-        }
-
-        public override string FriendlyName
-        {
-            get { return "OSTA Universal Disk Format"; }
-        }
-
-        public override string VolumeLabel
-        {
-            get { return _lvd.LogicalVolumeIdentifier; }
-        }
-
-        protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)
-        {
-            return File.FromDescriptor(Context, dirEntry.FileLocation);
-        }
-
-        private void Initialize()
-        {
-            Context = new UdfContext()
+            public override string VolumeLabel
             {
-                PhysicalPartitions = new Dictionary<ushort, PhysicalPartition>(),
-                PhysicalSectorSize = (int)_sectorSize,
-                LogicalPartitions = new List<LogicalPartition>(),
-            };
+                get { return _lvd.LogicalVolumeIdentifier; }
+            }
 
-            IBuffer dataBuffer = new StreamBuffer(_data, Ownership.None);
-
-            AnchorVolumeDescriptorPointer avdp = AnchorVolumeDescriptorPointer.FromStream(_data, 256, _sectorSize);
-
-            uint sector = avdp.MainDescriptorSequence.Location;
-            bool terminatorFound = false;
-            while (!terminatorFound)
+            protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)
             {
-                _data.Position = sector * (long)_sectorSize;
+                return File.FromDescriptor(Context, dirEntry.FileLocation);
+            }
+
+            private void Initialize()
+            {
+                Context = new UdfContext()
+                {
+                    PhysicalPartitions = new Dictionary<ushort, PhysicalPartition>(),
+                    PhysicalSectorSize = (int)_sectorSize,
+                    LogicalPartitions = new List<LogicalPartition>(),
+                };
+
+                IBuffer dataBuffer = new StreamBuffer(_data, Ownership.None);
+
+                AnchorVolumeDescriptorPointer avdp = AnchorVolumeDescriptorPointer.FromStream(_data, 256, _sectorSize);
+
+                uint sector = avdp.MainDescriptorSequence.Location;
+                bool terminatorFound = false;
+                while (!terminatorFound)
+                {
+                    _data.Position = sector * (long)_sectorSize;
+
+                    DescriptorTag dt;
+                    if (!DescriptorTag.TryFromStream(_data, out dt))
+                    {
+                        break;
+                    }
+
+                    switch (dt.TagIdentifier)
+                    {
+                        case TagIdentifier.PrimaryVolumeDescriptor:
+                            _pvd = PrimaryVolumeDescriptor.FromStream(_data, sector, _sectorSize);
+                            break;
+
+                        case TagIdentifier.ImplementationUseVolumeDescriptor:
+                            // Not used
+                            break;
+
+                        case TagIdentifier.PartitionDescriptor:
+                            PartitionDescriptor pd = PartitionDescriptor.FromStream(_data, sector, _sectorSize);
+                            if (Context.PhysicalPartitions.ContainsKey(pd.PartitionNumber))
+                            {
+                                throw new IOException("Duplicate partition number reading UDF Partition Descriptor");
+                            }
+
+                            Context.PhysicalPartitions[pd.PartitionNumber] = new PhysicalPartition(pd, dataBuffer, _sectorSize);
+                            break;
+
+                        case TagIdentifier.LogicalVolumeDescriptor:
+                            _lvd = LogicalVolumeDescriptor.FromStream(_data, sector, _sectorSize);
+                            break;
+
+                        case TagIdentifier.UnallocatedSpaceDescriptor:
+                            // Not used for reading
+                            break;
+
+                        case TagIdentifier.TerminatingDescriptor:
+                            terminatorFound = true;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    sector++;
+                }
+
+                // Convert logical partition descriptors into actual partition objects
+                for (int i = 0; i < _lvd.PartitionMaps.Length; ++i)
+                {
+                    Context.LogicalPartitions.Add(LogicalPartition.FromDescriptor(Context, _lvd, i));
+                }
+
+                byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, _lvd.FileSetDescriptorLocation);
+                if (DescriptorTag.IsValid(fsdBuffer, 0))
+                {
+                    FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
+                    RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);
+                }
+            }
+
+            private bool ProbeSectorSize(int size)
+            {
+                if (_data.Length < 257 * (long)size)
+                {
+                    return false;
+                }
+
+                _data.Position = 256 * (long)size;
 
                 DescriptorTag dt;
                 if (!DescriptorTag.TryFromStream(_data, out dt))
                 {
-                    break;
+                    return false;
                 }
 
-                switch (dt.TagIdentifier)
-                {
-                    case TagIdentifier.PrimaryVolumeDescriptor:
-                        _pvd = PrimaryVolumeDescriptor.FromStream(_data, sector, _sectorSize);
-                        break;
-
-                    case TagIdentifier.ImplementationUseVolumeDescriptor:
-                        // Not used
-                        break;
-
-                    case TagIdentifier.PartitionDescriptor:
-                        PartitionDescriptor pd = PartitionDescriptor.FromStream(_data, sector, _sectorSize);
-                        if (Context.PhysicalPartitions.ContainsKey(pd.PartitionNumber))
-                        {
-                            throw new IOException("Duplicate partition number reading UDF Partition Descriptor");
-                        }
-
-                        Context.PhysicalPartitions[pd.PartitionNumber] = new PhysicalPartition(pd, dataBuffer, _sectorSize);
-                        break;
-
-                    case TagIdentifier.LogicalVolumeDescriptor:
-                        _lvd = LogicalVolumeDescriptor.FromStream(_data, sector, _sectorSize);
-                        break;
-
-                    case TagIdentifier.UnallocatedSpaceDescriptor:
-                        // Not used for reading
-                        break;
-
-                    case TagIdentifier.TerminatingDescriptor:
-                        terminatorFound = true;
-                        break;
-
-                    default:
-                        break;
-                }
-
-                sector++;
+                return dt.TagIdentifier == TagIdentifier.AnchorVolumeDescriptorPointer
+                    && dt.TagLocation == 256;
             }
-
-            // Convert logical partition descriptors into actual partition objects
-            for (int i = 0; i < _lvd.PartitionMaps.Length; ++i)
-            {
-                Context.LogicalPartitions.Add(LogicalPartition.FromDescriptor(Context, _lvd, i));
-            }
-
-            byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, _lvd.FileSetDescriptorLocation);
-            if (DescriptorTag.IsValid(fsdBuffer, 0))
-            {
-                FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
-                RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);
-            }
-        }
-
-        private bool ProbeSectorSize(int size)
-        {
-            if (_data.Length < 257 * (long)size)
-            {
-                return false;
-            }
-
-            _data.Position = 256 * (long)size;
-
-            DescriptorTag dt;
-            if (!DescriptorTag.TryFromStream(_data, out dt))
-            {
-                return false;
-            }
-
-            return dt.TagIdentifier == TagIdentifier.AnchorVolumeDescriptorPointer
-                && dt.TagLocation == 256;
         }
     }
 }
