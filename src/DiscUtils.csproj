@@ -247,6 +247,7 @@
     <Compile Include="LogicalDiskManager\VolumeRecord.cs" />
     <Compile Include="LogicalVolumeInfo.cs" />
     <Compile Include="MirrorStream.cs" />
+    <Compile Include="NativeFileSystem.cs" />
     <Compile Include="Nfs\DiskTransport.cs" />
     <Compile Include="Nfs\Nfs3AccessPermissions.cs" />
     <Compile Include="Nfs\Nfs3AccessResult.cs" />
