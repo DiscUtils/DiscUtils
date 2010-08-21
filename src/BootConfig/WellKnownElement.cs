@@ -34,6 +34,11 @@ namespace DiscUtils.BootConfig
     public enum WellKnownElement : int
     {
         /// <summary>
+        /// Not specified.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
         /// Device containing the application.
         /// </summary>
         LibraryApplicationDevice = 0x11000001,

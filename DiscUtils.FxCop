@@ -689,6 +689,28 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="DataReader">
+          <Members>
+           <Member Name="#Length">
+            <Accessors>
+             <Accessor Name="#get_Length()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2010-08-21 13:50:26Z">
+                <Issue>
+                 <Item>'DataReader.Length.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="106" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="DiscDirectoryInfo">
           <Members>
            <Member Name="#GetFileSystemInfos()">
@@ -3462,39 +3484,39 @@
          </Type>
          <Type Name="TextResponse">
           <Members>
+           <Member Name="#_lun">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-08-21 13:50:26Z">
+              <Issue>
+               <Item>'TextResponse._lun'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="122" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#_targetTransferTag">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-08-21 13:50:26Z">
+              <Issue>
+               <Item>'TextResponse._targetTransferTag'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="122" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#Continue">
             <Messages>
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
               <Issue>
                <Item>'TextResponse.Continue'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="56" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Lun">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
-              <Issue>
-               <Item>'TextResponse.Lun'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="56" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#TargetTransferTag">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-05-09 08:55:03Z">
-              <Issue>
-               <Item>'TextResponse.TargetTransferTag'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -7544,6 +7566,24 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="UdfReader+VfsUdfReader">
+          <Members>
+           <Member Name="#_pvd">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-08-21 13:50:26Z">
+              <Issue>
+               <Item>'UdfReader.VfsUdfReader._pvd'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="121" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="UnallocatedSpaceDescriptor">
           <Messages>
            <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
@@ -7563,24 +7603,6 @@
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
               <Issue>
                <Item>'UnallocatedSpaceDescriptor.VolumeDescriptorSequenceNumber'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="113" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="VfsUdfReader">
-          <Members>
-           <Member Name="#_pvd">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:41:56Z">
-              <Issue>
-               <Item>'VfsUdfReader._pvd'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -8454,6 +8476,7 @@
     <Note Id="103" Modified="2010-05-29 06:27:27Z">Lun is standard term.</Note>
     <Note Id="104" Modified="2010-05-29 07:14:56Z">Derived from standard</Note>
     <Note Id="105" Modified="2010-05-30 15:18:55Z">Defined by standard</Note>
+    <Note Id="106" Modified="2010-08-21 13:54:40Z">No reason to remove.</Note>
     <Note Id="107" Modified="2010-06-05 14:23:28Z">As designed</Note>
     <Note Id="108" Modified="2010-06-05 14:24:18Z">Extends VfsFileSystem</Note>
     <Note Id="109" Modified="2010-06-05 14:25:41Z">DiscUtils is the project name</Note>
@@ -8468,6 +8491,8 @@
     <Note Id="118" Modified="2010-06-06 16:23:45Z">Follows project guidelines</Note>
     <Note Id="119" Modified="2010-06-06 16:23:55Z">Utils is part of project name.</Note>
     <Note Id="120" Modified="2010-08-07 12:16:37Z">SparseMemoryStream holds no native resources</Note>
+    <Note Id="121" Modified="2010-08-21 13:56:33Z">Not currently used.</Note>
+    <Note Id="122" Modified="2010-08-21 13:57:03Z">Standard data structure.</Note>
    </User>
   </Notes>
   <Rules>
