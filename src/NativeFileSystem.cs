@@ -82,6 +82,15 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets a value indicating whether the file system is thread-safe.
+        /// </summary>
+        /// <remarks>The Native File System is thread safe</remarks>
+        public override bool IsThreadSafe
+        {
+            get { return true; }
+        }
+
+        /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
         /// <param name="sourceFile">The source file</param>

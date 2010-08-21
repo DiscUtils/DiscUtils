@@ -45,6 +45,11 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets a value indicating whether the file system is thread-safe.
+        /// </summary>
+        bool IsThreadSafe { get; }
+
+        /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
         /// <param name="sourceFile">The source file</param>
