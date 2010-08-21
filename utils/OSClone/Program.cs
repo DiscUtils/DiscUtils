@@ -69,6 +69,12 @@ namespace OSClone
 
         protected override void DoRun()
         {
+            if (DiskSize <= 0)
+            {
+                DisplayHelp();
+                return;
+            }
+
             using (VirtualDisk sourceDisk = VirtualDisk.OpenDisk(_sourceFile.Value, FileAccess.Read, UserName, Password))
             using (VirtualDisk destDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _destFile.Value, DiskSize, null, UserName, Password, null))
             {

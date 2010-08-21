@@ -309,6 +309,11 @@ namespace DiscUtils.Vhd
                 throw new IOException("Attempt to write to read-only stream");
             }
 
+            if (_position + count > _length)
+            {
+                throw new IOException("Attempt to write beyond end of the stream");
+            }
+
             int numWritten = 0;
 
             while (numWritten < count)
