@@ -289,6 +289,10 @@ namespace DiscUtils.Ntfs
                         entry.DataBuffer = newData;
 
                         LiftNode(entryIndex + 1);
+
+                        // New entry could be larger than old, so may need
+                        // to divide this node...
+                        EnsureNodeSize();
                     }
                 }
                 else
@@ -342,10 +346,9 @@ namespace DiscUtils.Ntfs
             newRootEntry.Flags = IndexEntryFlags.End;
 
             IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry);
-            newBlock.Node.SetEntries(_entries, 0, _entries.Count);
 
-            // All of the nodes that used to be one layer beneath us, are now two layers
-            // beneath, they need their parent pointers updating.
+            // All of the nodes that are one layer beneath us, will now be two
+            // layers beneath.  They need their parent pointers updating.
             foreach (var entry in _entries)
             {
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
@@ -357,6 +360,11 @@ namespace DiscUtils.Ntfs
                     }
                 }
             }
+
+            // Set the deposed entries into the new node.  Note we updated the parent
+            // pointers first, because it's possible SetEntries may need to further
+            // divide the entries to fit into nodes.  We mustn't overwrite any changes.
+            newBlock.Node.SetEntries(_entries, 0, _entries.Count);
 
             _entries.Clear();
             _entries.Add(newRootEntry);
@@ -396,22 +404,38 @@ namespace DiscUtils.Ntfs
                     {
                         _entries.Insert(i, newEntry);
 
-                        if (SpaceFree < 0)
-                        {
-                            // The node is too small to hold the entry, so need to juggle...
-                            if (_parent != null)
-                            {
-                                Divide();
-                            }
-                            else
-                            {
-                                Depose();
-                            }
-                        }
+                        // If there wasn't enough space, we may need to
+                        // divide this node
+                        EnsureNodeSize();
 
                         _store();
                     }
 
+                    break;
+                }
+            }
+        }
+
+        private void EnsureNodeSize()
+        {
+            // While the node is too small to hold the entries, we need to reduce
+            // the number of entries.
+            while (SpaceFree < 0)
+            {
+                if (_parent != null)
+                {
+                    // If there's just one node entry (plus end node), then we could be
+                    // here forever - the single entry just doesn't fit...
+                    if (_entries.Count <= 2)
+                    {
+                        throw new IOException("Over-sized index entries");
+                    }
+
+                    Divide();
+                }
+                else
+                {
+                    Depose();
                     break;
                 }
             }
@@ -496,11 +520,9 @@ namespace DiscUtils.Ntfs
 
             // Set the new entries into the new node
             IndexBlock newBlock = _index.AllocateBlock(_parent, midEntry);
-            newBlock.Node.SetEntries(newEntries, 0, newEntries.Count);
 
-            // All of the nodes that used to be referenced by an entry that's just gone
-            // into the new block, need to have their parent references updated to point
-            // to the new block.
+            // All of the nodes that are going into then new block need to have
+            // their parent references updated to point to the new block.
             foreach (var entry in newEntries)
             {
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
@@ -512,6 +534,11 @@ namespace DiscUtils.Ntfs
                     }
                 }
             }
+
+            // Set the entries into the new node.  Note we updated the parent
+            // pointers first, because it's possible SetEntries may need to further
+            // divide the entries to fit into nodes.  We mustn't overwrite any changes.
+            newBlock.Node.SetEntries(newEntries, 0, newEntries.Count);
 
             // Forget about the entries moved into the new node, and the entry about
             // to be promoted as the new node's pointer
@@ -536,6 +563,9 @@ namespace DiscUtils.Ntfs
                 end.Flags = IndexEntryFlags.End;
                 _entries.Add(end);
             }
+
+            // Ensure the node isn't over-filled
+            EnsureNodeSize();
 
             // Persist the new entries to disk
             _store();
