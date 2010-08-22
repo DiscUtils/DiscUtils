@@ -21,9 +21,9 @@ $lines | Set-Content "${basedir}\Version.cs";
 
 # Clean up
 Write-Host "Cleaning old build output..."
-if(Test-Path ${basedir}\help)
+if(Test-Path ${basedir}\Help\Output)
 {
-  del ${basedir}\help -recurse -force
+  del ${basedir}\Help\Output -recurse -force
 }
 & ${vcsexpress} "${basedir}\DiscUtils.sln" /clean Debug | out-null
 & ${vcsexpress} "${basedir}\DiscUtils.sln" /clean Release | out-null
@@ -68,6 +68,6 @@ if(Test-Path ${basedir}\FxCopReport.xml)
 
 # Generate help
 Write-Host "Generating help... (takes a long time)"
-& ${msbuild} ${basedir}\Library.shfbproj | out-null
+& ${msbuild} ${basedir}\Help\Library.shfbproj | out-null
 
 Write-Host "Build Complete!"

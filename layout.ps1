@@ -15,7 +15,11 @@ popd
 
 # Create the Doc zip
 New-Item "${basedir}\layout\doc" -type directory | out-null
-Copy-Item "${basedir}\Help\Documentation.chm" "${basedir}\layout\doc\DiscUtils-${ver}.chm"
+Copy-Item "${basedir}\Help\Output\DiscUtilsClassLibrary.chm" "${basedir}\layout\doc\DiscUtils-${ver}.chm"
+Copy-Item "${basedir}\Help\Output\DiscUtilsClassLibrary.msha" "${basedir}\layout\doc\HelpContentSetup.msha"
+Copy-Item "${basedir}\Help\Output\DiscUtilsClassLibrary.mshc" "${basedir}\layout\doc\DiscUtilsClassLibrary.mshc"
+Copy-Item "${basedir}\Help\Output\DiscUtils.xml" "${basedir}\layout\doc\DiscUtils.xml"
+Copy-Item "${basedir}\Help\Install_VS2010_Help.bat" "${basedir}\layout\doc\Install_VS2010_Help.bat"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\doc\LICENSE.TXT"
 pushd layout\doc
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsDoc-${ver}.zip" "*.*"

@@ -8,6 +8,6 @@ glob:DiscUtilsWorking.sln
 glob:src\DiscUtils.dll.xml
 glob:unittests\results.xml
 glob:layout
-glob:Help
+glob:Help\Output
 glob:scratch
 glob:*StyleCop.Cache
