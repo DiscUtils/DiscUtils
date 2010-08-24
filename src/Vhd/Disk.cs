@@ -35,7 +35,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// The list of files that make up the disk.
         /// </summary>
-        private List<Tuple<DiskImageFile, Ownership>> _files;
+        private List<DiscUtils.Tuple<DiskImageFile, Ownership>> _files;
 
         /// <summary>
         /// The stream representing the disk's contents.
@@ -49,8 +49,8 @@ namespace DiscUtils.Vhd
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public Disk(Stream stream, Ownership ownsStream)
         {
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
 
             if (_files[0].First.NeedsParent)
             {
@@ -65,8 +65,8 @@ namespace DiscUtils.Vhd
         public Disk(string path)
         {
             DiskImageFile file = new DiskImageFile(path, FileAccess.ReadWrite);
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -78,8 +78,8 @@ namespace DiscUtils.Vhd
         public Disk(string path, FileAccess access)
         {
             DiskImageFile file = new DiskImageFile(path, access);
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -93,8 +93,8 @@ namespace DiscUtils.Vhd
         {
             FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
             DiskImageFile file = new DiskImageFile(fileLocator, Path.GetFileName(path), access);
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -117,7 +117,7 @@ namespace DiscUtils.Vhd
                 throw new ArgumentException("Final image file needs a parent");
             }
 
-            List<Tuple<DiskImageFile, Ownership>> tempList = new List<Tuple<DiskImageFile, Ownership>>(files.Count);
+            List<DiscUtils.Tuple<DiskImageFile, Ownership>> tempList = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>(files.Count);
             for (int i = 0; i < files.Count - 1; ++i)
             {
                 if (!files[i].NeedsParent)
@@ -131,10 +131,10 @@ namespace DiscUtils.Vhd
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
                 }
 
-                tempList.Add(new Tuple<DiskImageFile, Ownership>(files[i], ownsFiles));
+                tempList.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(files[i], ownsFiles));
             }
 
-            tempList.Add(new Tuple<DiskImageFile, Ownership>(files[files.Count - 1], ownsFiles));
+            tempList.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(files[files.Count - 1], ownsFiles));
 
             _files = tempList;
         }
@@ -148,8 +148,8 @@ namespace DiscUtils.Vhd
         internal Disk(FileLocator locator, string path, FileAccess access)
         {
             DiskImageFile file = new DiskImageFile(locator, path, access);
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -160,8 +160,8 @@ namespace DiscUtils.Vhd
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
         private Disk(DiskImageFile file, Ownership ownsFile)
         {
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsFile));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, ownsFile));
             ResolveFileChain();
         }
 
@@ -174,12 +174,12 @@ namespace DiscUtils.Vhd
         /// <param name="parentPath">Path to the parent disk (if required)</param>
         private Disk(DiskImageFile file, Ownership ownsFile, FileLocator parentLocator, string parentPath)
         {
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsFile));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, ownsFile));
             if (file.NeedsParent)
             {
                 _files.Add(
-                    new Tuple<DiskImageFile, Ownership>(
+                    new DiscUtils.Tuple<DiskImageFile, Ownership>(
                         new DiskImageFile(parentLocator, parentPath, FileAccess.Read),
                         Ownership.Dispose));
                 ResolveFileChain();
@@ -195,11 +195,11 @@ namespace DiscUtils.Vhd
         /// <param name="ownsParent">Indicates if the new instance should control the lifetime of the parentFile</param>
         private Disk(DiskImageFile file, Ownership ownsFile, DiskImageFile parentFile, Ownership ownsParent)
         {
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsFile));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, ownsFile));
             if (file.NeedsParent)
             {
-                _files.Add(new Tuple<DiskImageFile, Ownership>(parentFile, ownsParent));
+                _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(parentFile, ownsParent));
                 ResolveFileChain();
             }
             else
@@ -496,7 +496,7 @@ namespace DiscUtils.Vhd
                         }
 
                         file = newFile;
-                        _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+                        _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
                         found = true;
                         break;
                     }

@@ -133,7 +133,7 @@ namespace DiscUtils.Ntfs
                 if (value > Capacity)
                 {
                     long numToAllocate = numClusters - (_record.CookedDataRuns.Count == 0 ? 0 : (1 + _record.LastVcn - _record.StartVcn));
-                    Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster, _file.IndexInMft == MasterFileTable.MftIndex, numClusters);
+                    DiscUtils.Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, _record.NextCluster, _file.IndexInMft == MasterFileTable.MftIndex, numClusters);
                     foreach (var run in runs)
                     {
                         AddDataRun(run.First, run.Second);
@@ -293,17 +293,17 @@ namespace DiscUtils.Ntfs
             var runs = _record.CookedDataRuns;
             long oldLength = runs[index].Length;
             runs[index].Length = firstClusterToFree;
-            _file.Context.ClusterBitmap.FreeClusters(new Tuple<long, long>(runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
+            _file.Context.ClusterBitmap.FreeClusters(new DiscUtils.Tuple<long, long>(runs[index].StartLcn + firstClusterToFree, oldLength - firstClusterToFree));
         }
 
         private void RemoveAndFreeRuns(int firstRunToDelete)
         {
             var runs = _record.CookedDataRuns;
 
-            Tuple<long, long>[] deadRuns = new Tuple<long, long>[runs.Count - firstRunToDelete];
+            DiscUtils.Tuple<long, long>[] deadRuns = new DiscUtils.Tuple<long, long>[runs.Count - firstRunToDelete];
             for (int i = firstRunToDelete; i < runs.Count; ++i)
             {
-                deadRuns[i - firstRunToDelete] = new Tuple<long, long>(runs[i].StartLcn, runs[i].Length);
+                deadRuns[i - firstRunToDelete] = new DiscUtils.Tuple<long, long>(runs[i].StartLcn, runs[i].Length);
             }
 
             RemoveDataRuns(firstRunToDelete, runs.Count - firstRunToDelete);

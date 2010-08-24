@@ -34,7 +34,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// The list of files that make up the disk.
         /// </summary>
-        private List<Tuple<DiskImageFile, Ownership>> _files;
+        private List<DiscUtils.Tuple<DiskImageFile, Ownership>> _files;
 
         /// <summary>
         /// The stream representing the content of this disk.
@@ -63,8 +63,8 @@ namespace DiscUtils.Vmdk
         {
             _path = path;
             FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(fileLocator, Path.GetFileName(path), access), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(fileLocator, Path.GetFileName(path), access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -81,22 +81,22 @@ namespace DiscUtils.Vmdk
                 _path = fileStream.Name;
             }
 
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
         }
 
         internal Disk(DiskImageFile file, Ownership ownsStream)
         {
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(file, ownsStream));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, ownsStream));
             ResolveFileChain();
         }
 
         internal Disk(FileLocator layerLocator, string path, FileAccess access)
         {
             _path = path;
-            _files = new List<Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new Tuple<DiskImageFile, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -379,7 +379,7 @@ namespace DiscUtils.Vmdk
             while (file.NeedsParent)
             {
                 file = new DiskImageFile(file.RelativeFileLocator, file.ParentLocation, FileAccess.Read);
-                _files.Add(new Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+                _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             }
         }
     }
