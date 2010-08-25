@@ -45,6 +45,11 @@ namespace DiscUtils
             : base()
         {
             _basePath = basePath;
+            if (!_basePath.EndsWith(@"\"))
+            {
+                _basePath += @"\";
+            }
+
             _readOnly = readOnly;
         }
 
@@ -113,6 +118,16 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
+            if (sourceFile.StartsWith(@"\"))
+            {
+                sourceFile = sourceFile.Substring(1);
+            }
+
+            if (destinationFile.StartsWith(@"\"))
+            {
+                destinationFile = destinationFile.Substring(1);
+            }
+
             File.Copy(Path.Combine(_basePath, sourceFile), Path.Combine(_basePath, destinationFile), true);
         }
 
@@ -127,6 +142,11 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
+            if (path.StartsWith(@"\")) 
+            {
+                path = path.Substring(1);
+            }
+
             Directory.CreateDirectory(Path.Combine(_basePath, path));
         }
 
@@ -139,6 +159,11 @@ namespace DiscUtils
             if (_readOnly)
             {
                 throw new UnauthorizedAccessException();
+            }
+
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
             }
 
             Directory.Delete(Path.Combine(_basePath, path));
@@ -178,6 +203,11 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             File.Delete(Path.Combine(_basePath, path));
         }
 
@@ -188,6 +218,11 @@ namespace DiscUtils
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return Directory.Exists(Path.Combine(_basePath, path));
         }
 
@@ -198,6 +233,11 @@ namespace DiscUtils
         /// <returns>true if the file exists</returns>
         public override bool FileExists(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return File.Exists(Path.Combine(_basePath, path));
         }
 
@@ -243,7 +283,12 @@ namespace DiscUtils
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            return Directory.GetDirectories(Path.Combine(_basePath, path), searchPattern, searchOption);
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
+            return CleanItems(Directory.GetDirectories(Path.Combine(_basePath, path), searchPattern, searchOption));
         }
 
         /// <summary>
@@ -277,7 +322,12 @@ namespace DiscUtils
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            return Directory.GetFiles(Path.Combine(_basePath, path), searchPattern, searchOption);
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
+            return CleanItems(Directory.GetFiles(Path.Combine(_basePath, path), searchPattern, searchOption));
         }
 
         /// <summary>
@@ -299,7 +349,12 @@ namespace DiscUtils
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            return Directory.GetFileSystemEntries(Path.Combine(_basePath, path), searchPattern);
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
+            return CleanItems(Directory.GetFileSystemEntries(Path.Combine(_basePath, path), searchPattern));
         }
 
         /// <summary>
@@ -312,6 +367,16 @@ namespace DiscUtils
             if (_readOnly)
             {
                 throw new UnauthorizedAccessException();
+            }
+
+            if (sourceDirectoryName.StartsWith(@"\"))
+            {
+                sourceDirectoryName = sourceDirectoryName.Substring(1);
+            }
+
+            if (destinationDirectoryName.StartsWith(@"\"))
+            {
+                destinationDirectoryName = destinationDirectoryName.Substring(1);
             }
 
             Directory.Move(Path.Combine(_basePath, sourceDirectoryName), Path.Combine(_basePath, destinationDirectoryName));
@@ -340,16 +405,26 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (FileExists(destinationName))
+            if (destinationName.StartsWith(@"\"))
+            {
+                destinationName = destinationName.Substring(1);
+            }
+
+            if (FileExists(Path.Combine(_basePath, destinationName)))
             {
                 if (overwrite)
                 {
-                    DeleteFile(destinationName);
+                    DeleteFile(Path.Combine(_basePath, destinationName));
                 }
                 else
                 {
                     throw new IOException("File already exists");
                 }
+            }
+
+            if (sourceName.StartsWith(@"\"))
+            {
+                sourceName = sourceName.Substring(1);
             }
 
             File.Move(Path.Combine(_basePath, sourceName), Path.Combine(_basePath, destinationName));
@@ -380,6 +455,11 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+            
             return File.Open(Path.Combine(_basePath, path), mode, access);
         }
 
@@ -390,6 +470,11 @@ namespace DiscUtils
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return File.GetAttributes(Path.Combine(_basePath, path));
         }
 
@@ -403,6 +488,11 @@ namespace DiscUtils
             if (_readOnly)
             {
                 throw new UnauthorizedAccessException();
+            }
+
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
             }
 
             File.SetAttributes(Path.Combine(_basePath, path), newValue);
@@ -435,6 +525,11 @@ namespace DiscUtils
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return File.GetCreationTimeUtc(Path.Combine(_basePath, path));
         }
 
@@ -448,6 +543,11 @@ namespace DiscUtils
             if (_readOnly)
             {
                 throw new UnauthorizedAccessException();
+            }
+
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
             }
 
             File.SetCreationTimeUtc(Path.Combine(_basePath, path), newTime);
@@ -480,6 +580,11 @@ namespace DiscUtils
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return File.GetLastAccessTimeUtc(Path.Combine(_basePath, path));
         }
 
@@ -493,6 +598,11 @@ namespace DiscUtils
             if (_readOnly)
             {
                 throw new UnauthorizedAccessException();
+            }
+
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
             }
 
             File.SetLastAccessTimeUtc(Path.Combine(_basePath, path), newTime);
@@ -525,6 +635,11 @@ namespace DiscUtils
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return File.GetLastWriteTimeUtc(Path.Combine(_basePath, path));
         }
 
@@ -540,6 +655,11 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             File.SetLastWriteTimeUtc(Path.Combine(_basePath, path), newTime);
         }
 
@@ -550,6 +670,11 @@ namespace DiscUtils
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Substring(1);
+            }
+
             return new FileInfo(Path.Combine(_basePath, path)).Length;
         }
 
@@ -584,6 +709,17 @@ namespace DiscUtils
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);
+        }
+
+        private string[] CleanItems(string[] dirtyItems)
+        {
+            string[] cleanList = new string[dirtyItems.Length];
+            for (int x = 0; x < dirtyItems.Length; x++)
+            {
+                cleanList[x] = dirtyItems[x].Substring(_basePath.Length - 1);
+            }
+
+            return cleanList;
         }
     }
 }
