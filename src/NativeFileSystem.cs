@@ -45,7 +45,7 @@ namespace DiscUtils
             : base()
         {
             _basePath = basePath;
-            if (!_basePath.EndsWith(@"\"))
+            if (!_basePath.EndsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 _basePath += @"\";
             }
@@ -118,12 +118,12 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (sourceFile.StartsWith(@"\"))
+            if (sourceFile.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 sourceFile = sourceFile.Substring(1);
             }
 
-            if (destinationFile.StartsWith(@"\"))
+            if (destinationFile.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 destinationFile = destinationFile.Substring(1);
             }
@@ -142,7 +142,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\")) 
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase)) 
             {
                 path = path.Substring(1);
             }
@@ -161,7 +161,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -203,7 +203,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -218,7 +218,7 @@ namespace DiscUtils
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -233,7 +233,7 @@ namespace DiscUtils
         /// <returns>true if the file exists</returns>
         public override bool FileExists(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -283,7 +283,7 @@ namespace DiscUtils
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -322,7 +322,7 @@ namespace DiscUtils
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -349,7 +349,7 @@ namespace DiscUtils
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -369,12 +369,12 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (sourceDirectoryName.StartsWith(@"\"))
+            if (sourceDirectoryName.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 sourceDirectoryName = sourceDirectoryName.Substring(1);
             }
 
-            if (destinationDirectoryName.StartsWith(@"\"))
+            if (destinationDirectoryName.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 destinationDirectoryName = destinationDirectoryName.Substring(1);
             }
@@ -405,7 +405,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (destinationName.StartsWith(@"\"))
+            if (destinationName.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 destinationName = destinationName.Substring(1);
             }
@@ -422,7 +422,7 @@ namespace DiscUtils
                 }
             }
 
-            if (sourceName.StartsWith(@"\"))
+            if (sourceName.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 sourceName = sourceName.Substring(1);
             }
@@ -455,7 +455,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -470,7 +470,7 @@ namespace DiscUtils
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -490,7 +490,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -525,7 +525,7 @@ namespace DiscUtils
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -545,7 +545,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -580,7 +580,7 @@ namespace DiscUtils
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -600,7 +600,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -635,7 +635,7 @@ namespace DiscUtils
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -655,7 +655,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -670,7 +670,7 @@ namespace DiscUtils
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            if (path.StartsWith(@"\"))
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }

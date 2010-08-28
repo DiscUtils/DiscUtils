@@ -554,7 +554,7 @@
    </Namespace>
   </Namespaces>
   <Targets>
-   <Target Name="$(ProjectDir)/diag/bin/Release/DiscUtils.Diagnostics.dll">
+   <Target Name="$(ProjectDir)/diag/bin/SignedRelease/DiscUtils.Diagnostics.dll">
     <Modules>
      <Module Name="discutils.diagnostics.dll">
       <Messages>
@@ -638,20 +638,10 @@
      </Module>
     </Modules>
    </Target>
-   <Target Name="$(ProjectDir)/src/bin/Release/DiscUtils.dll">
+   <Target Name="$(ProjectDir)/src/bin/SignedRelease/DiscUtils.dll">
     <Modules>
      <Module Name="discutils.dll">
       <Messages>
-       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Status="Excluded" Created="2008-11-10 13:17:45Z">
-        <Issue Name="NoStrongName">
-         <Item>'DiscUtils.dll'</Item>
-        </Issue>
-        <Notes>
-         <User Name="Kenneth">
-          <Note Id="4" />
-         </User>
-        </Notes>
-       </Message>
        <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-10 13:17:45Z">
         <Issue Name="Assembly">
          <Item>Utils</Item>
@@ -8371,7 +8361,6 @@
     <Note Id="1" Modified="2008-11-22 16:47:22Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="2" Modified="2008-11-22 16:47:50Z">VHD is well-used acronym.</Note>
     <Note Id="3" Modified="2009-09-05 23:32:26Z">Fields represent current understanding of on-disk structure, even if not used yet.</Note>
-    <Note Id="4" Modified="2008-11-10 13:18:19Z">Deliberately not strong named - people using the library should add their own signature.</Note>
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="6" Modified="2009-09-05 23:33:03Z">Follows standard naming scheme.</Note>
     <Note Id="7" Modified="2008-11-22 17:12:07Z">DiscUtils is fixed name of the project</Note>
