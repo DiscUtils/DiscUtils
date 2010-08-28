@@ -195,6 +195,9 @@ namespace OSClone
                             }
                             CopyFiles(sourceNtfs, destNtfs, dir, subs);
                         }
+
+                        // Set standard information last (includes modification timestamps)
+                        destNtfs.SetFileStandardInformation(dir, sourceNtfs.GetFileStandardInformation(dir));
                     }
                 }
             }
@@ -252,8 +255,8 @@ namespace OSClone
                 }
             }
 
-            destNtfs.SetAttributes(path, sourceNtfs.GetAttributes(path));
             destNtfs.SetSecurity(path, sourceNtfs.GetSecurity(path));
+            destNtfs.SetFileStandardInformation(path, sourceNtfs.GetFileStandardInformation(path));
         }
 
 

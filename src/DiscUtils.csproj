@@ -553,6 +553,7 @@
     <Compile Include="Wim\ShortResourceHeader.cs" />
     <Compile Include="Wim\XpressBitStream.cs" />
     <Compile Include="Wim\XpressStream.cs" />
+    <Compile Include="WindowsFileInformation.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

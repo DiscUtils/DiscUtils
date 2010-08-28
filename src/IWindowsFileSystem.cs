@@ -84,6 +84,20 @@ namespace DiscUtils
         void SetShortName(string path, string shortName);
 
         /// <summary>
+        /// Gets the standard file information for a file.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to query.</param>
+        /// <returns>The standard file information</returns>
+        WindowsFileInformation GetFileStandardInformation(string path);
+
+        /// <summary>
+        /// Sets the standard file information for a file.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to query.</param>
+        /// <param name="info">The standard file information</param>
+        void SetFileStandardInformation(string path, WindowsFileInformation info);
+
+        /// <summary>
         /// Gets the names of the alternate data streams for a file.
         /// </summary>
         /// <param name="path">The path to the file</param>

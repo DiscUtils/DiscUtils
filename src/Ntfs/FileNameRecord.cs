@@ -183,6 +183,18 @@ namespace DiscUtils.Ntfs
             return (FileAttributeFlags)(((uint)flags & 0xFFFF0000) | (uint)(attrs & attrMask));
         }
 
+        internal static FileAttributes ConvertFlags(FileAttributeFlags flags)
+        {
+            FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
+
+            if ((flags & FileAttributeFlags.Directory) != 0)
+            {
+                result |= FileAttributes.Directory;
+            }
+
+            return result;
+        }
+
         private static DateTime ReadDateTime(byte[] buffer, int offset)
         {
             try
@@ -193,18 +205,6 @@ namespace DiscUtils.Ntfs
             {
                 return DateTime.MinValue;
             }
-        }
-
-        private static FileAttributes ConvertFlags(FileAttributeFlags flags)
-        {
-            FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
-
-            if ((flags & FileAttributeFlags.Directory) != 0)
-            {
-                result |= FileAttributes.Directory;
-            }
-
-            return result;
         }
     }
 }

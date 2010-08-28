@@ -1602,6 +1602,64 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Gets the standard file information for a file.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to query.</param>
+        /// <returns>The standard file information</returns>
+        public WindowsFileInformation GetFileStandardInformation(string path)
+        {
+            using (new NtfsTransaction())
+            {
+                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                if (dirEntry == null)
+                {
+                    throw new FileNotFoundException("File not found", path);
+                }
+
+                File file = GetFile(dirEntry.Reference);
+                NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+                StandardInformation si = stream.GetContent<StandardInformation>();
+
+                return new WindowsFileInformation
+                {
+                    CreationTime = si.CreationTime,
+                    LastAccessTime = si.LastAccessTime,
+                    ChangeTime = si.MftChangedTime,
+                    LastWriteTime = si.ModificationTime,
+                    FileAttributes = FileNameRecord.ConvertFlags(si.FileAttributes)
+                };
+            }
+        }
+
+        /// <summary>
+        /// Sets the standard file information for a file.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to query.</param>
+        /// <param name="info">The standard file information</param>
+        public void SetFileStandardInformation(string path, WindowsFileInformation info)
+        {
+            using (new NtfsTransaction())
+            {
+                UpdateStandardInformation(
+                    path,
+                    delegate(StandardInformation si)
+                    {
+                        FileAttributes oldAttrs = FileNameRecord.ConvertFlags(si.FileAttributes);
+                        if ((oldAttrs & NonSettableFileAttributes) != (info.FileAttributes & NonSettableFileAttributes))
+                        {
+                            throw new ArgumentException("Attempt to change attributes that are read-only");
+                        }
+
+                        si.CreationTime = info.CreationTime;
+                        si.LastAccessTime = info.LastAccessTime;
+                        si.MftChangedTime = info.ChangeTime;
+                        si.ModificationTime = info.LastWriteTime;
+                        si.FileAttributes = FileNameRecord.SetAttributes(info.FileAttributes, si.FileAttributes);
+                    });
+            }
+        }
+
+        /// <summary>
         /// Gets the file id for a given path.
         /// </summary>
         /// <param name="path">The path to get the id of</param>

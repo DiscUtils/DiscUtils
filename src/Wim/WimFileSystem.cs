@@ -168,6 +168,35 @@ namespace DiscUtils.Wim
         }
 
         /// <summary>
+        /// Gets the standard file information for a file.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to query.</param>
+        /// <returns>The standard file information</returns>
+        public WindowsFileInformation GetFileStandardInformation(string path)
+        {
+            DirectoryEntry dirEntry = GetEntry(path);
+
+            return new WindowsFileInformation
+            {
+                CreationTime = DateTime.FromFileTimeUtc(dirEntry.CreationTime),
+                LastAccessTime = DateTime.FromFileTimeUtc(dirEntry.LastAccessTime),
+                ChangeTime = DateTime.FromFileTimeUtc(Math.Max(dirEntry.LastWriteTime, Math.Max(dirEntry.CreationTime, dirEntry.LastAccessTime))),
+                LastWriteTime = DateTime.FromFileTimeUtc(dirEntry.LastWriteTime),
+                FileAttributes = dirEntry.Attributes
+            };
+        }
+
+        /// <summary>
+        /// Sets the standard file information for a file.
+        /// </summary>
+        /// <param name="path">The full path to the file or directory to query.</param>
+        /// <param name="info">The standard file information</param>
+        public void SetFileStandardInformation(string path, WindowsFileInformation info)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
         /// Gets the names of the alternate data streams for a file.
         /// </summary>
         /// <param name="path">The path to the file</param>
