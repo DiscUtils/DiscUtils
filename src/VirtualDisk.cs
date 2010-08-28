@@ -499,7 +499,22 @@ namespace DiscUtils
                 path = Path.GetFullPath(path);
             }
 
-            return new Uri(path);
+            // Built-in Uri class does cope well with query params on file Uris, so do some
+            // parsing ourselves...
+            if (path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
+            {
+                UriBuilder builder = new UriBuilder("file:" + path.Replace('\\', '/'));
+                return builder.Uri;
+            }
+            else if (path.Length >= 2 && path[1] == ':')
+            {
+                UriBuilder builder = new UriBuilder("file:///" + path.Replace('\\', '/'));
+                return builder.Uri;
+            }
+            else
+            {
+                return new Uri(path);
+            }
         }
 
         private static void InitializeMaps()

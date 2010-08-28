@@ -557,6 +557,7 @@
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />
+    <Compile Include="Xva\DiskFactory.cs" />
     <Compile Include="Xva\DiskLayer.cs" />
     <Compile Include="Xva\DiskStream.cs" />
     <Compile Include="Xva\FileRecord.cs" />

@@ -60,6 +60,11 @@ namespace DiscUtils.Iscsi
             throw new NotImplementedException();
         }
 
+        public override string GetExtraInfo()
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

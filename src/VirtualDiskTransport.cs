@@ -37,6 +37,8 @@ namespace DiscUtils
 
         public abstract string GetFileName();
 
+        public abstract string GetExtraInfo();
+
         public void Dispose()
         {
             Dispose(true);

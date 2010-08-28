@@ -31,6 +31,7 @@ namespace DiscUtils.Nfs
     {
         private NfsFileSystem _fileSystem;
         private string _path;
+        private string _extraInfo;
 
         public override bool IsRawDisk
         {
@@ -73,6 +74,7 @@ namespace DiscUtils.Nfs
 
             _fileSystem = new NfsFileSystem(uri.Host, bestRoot);
             _path = fsPath.Substring(bestRoot.Length).Replace('/', '\\');
+            _extraInfo = uri.Fragment.TrimStart('#');
         }
 
         public override VirtualDisk OpenDisk(FileAccess access)
@@ -88,6 +90,11 @@ namespace DiscUtils.Nfs
         public override string GetFileName()
         {
             return Utilities.GetFileFromPath(_path);
+        }
+
+        public override string GetExtraInfo()
+        {
+            return _extraInfo;
         }
 
         protected override void Dispose(bool disposing)
