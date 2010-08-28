@@ -46,6 +46,14 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Gets the file system options, which can be modified.
+        /// </summary>
+        public override DiscFileSystemOptions Options
+        {
+            get { return _wrapped.Options; }
+        }
+
+        /// <summary>
         /// Gets a friendly name for the file system.
         /// </summary>
         public override string FriendlyName
@@ -68,6 +76,32 @@ namespace DiscUtils.Vfs
         public override DiscDirectoryInfo Root
         {
             get { return _wrapped.Root; }
+        }
+
+        /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public override string VolumeLabel
+        {
+            get { return _wrapped.VolumeLabel; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file system is thread-safe.
+        /// </summary>
+        public override bool IsThreadSafe
+        {
+            get { return _wrapped.IsThreadSafe; }
+        }
+
+        /// <summary>
+        /// Copies an existing file to a new file.
+        /// </summary>
+        /// <param name="sourceFile">The source file</param>
+        /// <param name="destinationFile">The destination file</param>
+        public override void CopyFile(string sourceFile, string destinationFile)
+        {
+            _wrapped.CopyFile(sourceFile, destinationFile);
         }
 
         /// <summary>
@@ -100,6 +134,16 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Deletes a directory, optionally with all descendants.
+        /// </summary>
+        /// <param name="path">The path of the directory to delete.</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        public override void DeleteDirectory(string path, bool recursive)
+        {
+            _wrapped.DeleteDirectory(path, recursive);
+        }
+
+        /// <summary>
         /// Deletes a file.
         /// </summary>
         /// <param name="path">The path of the file to delete.</param>
@@ -129,6 +173,38 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Indicates if a file or directory exists.
+        /// </summary>
+        /// <param name="path">The path to test</param>
+        /// <returns>true if the file or directory exists</returns>
+        public override bool Exists(string path)
+        {
+            return _wrapped.Exists(path);
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of directories.</returns>
+        public override string[] GetDirectories(string path)
+        {
+            return _wrapped.GetDirectories(path);
+        }
+
+        /// <summary>
+        /// Gets the names of subdirectories in a specified directory matching a specified
+        /// search pattern.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of directories matching the search pattern.</returns>
+        public override string[] GetDirectories(string path, string searchPattern)
+        {
+            return _wrapped.GetDirectories(path, searchPattern);
+        }
+
+        /// <summary>
         /// Gets the names of subdirectories in a specified directory matching a specified
         /// search pattern, using a value to determine whether to search subdirectories.
         /// </summary>
@@ -139,6 +215,27 @@ namespace DiscUtils.Vfs
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
             return _wrapped.GetDirectories(path, searchPattern, searchOption);
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <returns>Array of files.</returns>
+        public override string[] GetFiles(string path)
+        {
+            return _wrapped.GetFiles(path);
+        }
+
+        /// <summary>
+        /// Gets the names of files in a specified directory.
+        /// </summary>
+        /// <param name="path">The path to search.</param>
+        /// <param name="searchPattern">The search string to match against.</param>
+        /// <returns>Array of files matching the search pattern.</returns>
+        public override string[] GetFiles(string path, string searchPattern)
+        {
+            return _wrapped.GetFiles(path, searchPattern);
         }
 
         /// <summary>
@@ -187,6 +284,16 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Moves a file.
+        /// </summary>
+        /// <param name="sourceName">The file to move.</param>
+        /// <param name="destinationName">The target file name.</param>
+        public override void MoveFile(string sourceName, string destinationName)
+        {
+            _wrapped.MoveFile(sourceName, destinationName);
+        }
+
+        /// <summary>
         /// Moves a file, allowing an existing file to be overwritten.
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
@@ -195,6 +302,17 @@ namespace DiscUtils.Vfs
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             _wrapped.MoveFile(sourceName, destinationName, overwrite);
+        }
+
+        /// <summary>
+        /// Opens the specified file.
+        /// </summary>
+        /// <param name="path">The full path of the file to open.</param>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <returns>The new stream.</returns>
+        public override Stream OpenFile(string path, FileMode mode)
+        {
+            return _wrapped.OpenFile(path, mode);
         }
 
         /// <summary>
@@ -230,6 +348,26 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Gets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The creation time.</returns>
+        public override DateTime GetCreationTime(string path)
+        {
+            return _wrapped.GetCreationTime(path);
+        }
+
+        /// <summary>
+        /// Sets the creation time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetCreationTime(string path, DateTime newTime)
+        {
+            _wrapped.SetCreationTime(path, newTime);
+        }
+
+        /// <summary>
         /// Gets the creation time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory.</param>
@@ -250,6 +388,26 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Gets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The last access time</returns>
+        public override DateTime GetLastAccessTime(string path)
+        {
+            return _wrapped.GetLastAccessTime(path);
+        }
+
+        /// <summary>
+        /// Sets the last access time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastAccessTime(string path, DateTime newTime)
+        {
+            _wrapped.SetLastAccessTime(path, newTime);
+        }
+
+        /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
         /// <param name="path">The path of the file or directory</param>
@@ -267,6 +425,26 @@ namespace DiscUtils.Vfs
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
             _wrapped.SetLastAccessTimeUtc(path, newTime);
+        }
+
+        /// <summary>
+        /// Gets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory</param>
+        /// <returns>The last write time</returns>
+        public override DateTime GetLastWriteTime(string path)
+        {
+            return _wrapped.GetLastWriteTime(path);
+        }
+
+        /// <summary>
+        /// Sets the last modification time (in local time) of a file or directory.
+        /// </summary>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <param name="newTime">The new time to set.</param>
+        public override void SetLastWriteTime(string path, DateTime newTime)
+        {
+            _wrapped.SetLastWriteTime(path, newTime);
         }
 
         /// <summary>
@@ -297,160 +475,6 @@ namespace DiscUtils.Vfs
         public override long GetFileLength(string path)
         {
             return _wrapped.GetFileLength(path);
-        }
-
-        /// <summary>
-        /// Copies an existing file to a new file.
-        /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
-        public override void CopyFile(string sourceFile, string destinationFile)
-        {
-            _wrapped.CopyFile(sourceFile, destinationFile);
-        }
-
-        /// <summary>
-        /// Deletes a directory, optionally with all descendants.
-        /// </summary>
-        /// <param name="path">The path of the directory to delete.</param>
-        /// <param name="recursive">Determines if the all descendants should be deleted</param>
-        public override void DeleteDirectory(string path, bool recursive)
-        {
-            _wrapped.DeleteDirectory(path, recursive);
-        }
-
-        /// <summary>
-        /// Indicates if a file or directory exists.
-        /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file or directory exists</returns>
-        public override bool Exists(string path)
-        {
-            return _wrapped.Exists(path);
-        }
-
-        /// <summary>
-        /// Gets the names of subdirectories in a specified directory.
-        /// </summary>
-        /// <param name="path">The path to search.</param>
-        /// <returns>Array of directories.</returns>
-        public override string[] GetDirectories(string path)
-        {
-            return _wrapped.GetDirectories(path);
-        }
-
-        /// <summary>
-        /// Gets the names of subdirectories in a specified directory matching a specified
-        /// search pattern.
-        /// </summary>
-        /// <param name="path">The path to search.</param>
-        /// <param name="searchPattern">The search string to match against.</param>
-        /// <returns>Array of directories matching the search pattern.</returns>
-        public override string[] GetDirectories(string path, string searchPattern)
-        {
-            return _wrapped.GetDirectories(path, searchPattern);
-        }
-
-        /// <summary>
-        /// Gets the names of files in a specified directory.
-        /// </summary>
-        /// <param name="path">The path to search.</param>
-        /// <returns>Array of files.</returns>
-        public override string[] GetFiles(string path)
-        {
-            return _wrapped.GetFiles(path);
-        }
-
-        /// <summary>
-        /// Gets the names of files in a specified directory.
-        /// </summary>
-        /// <param name="path">The path to search.</param>
-        /// <param name="searchPattern">The search string to match against.</param>
-        /// <returns>Array of files matching the search pattern.</returns>
-        public override string[] GetFiles(string path, string searchPattern)
-        {
-            return _wrapped.GetFiles(path, searchPattern);
-        }
-
-        /// <summary>
-        /// Moves a file.
-        /// </summary>
-        /// <param name="sourceName">The file to move.</param>
-        /// <param name="destinationName">The target file name.</param>
-        public override void MoveFile(string sourceName, string destinationName)
-        {
-            _wrapped.MoveFile(sourceName, destinationName);
-        }
-
-        /// <summary>
-        /// Opens the specified file.
-        /// </summary>
-        /// <param name="path">The full path of the file to open.</param>
-        /// <param name="mode">The file mode for the created stream.</param>
-        /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode)
-        {
-            return _wrapped.OpenFile(path, mode);
-        }
-
-        /// <summary>
-        /// Gets the creation time (in local time) of a file or directory.
-        /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The creation time.</returns>
-        public override DateTime GetCreationTime(string path)
-        {
-            return _wrapped.GetCreationTime(path);
-        }
-
-        /// <summary>
-        /// Sets the creation time (in local time) of a file or directory.
-        /// </summary>
-        /// <param name="path">The path of the file or directory.</param>
-        /// <param name="newTime">The new time to set.</param>
-        public override void SetCreationTime(string path, DateTime newTime)
-        {
-            _wrapped.SetCreationTime(path, newTime);
-        }
-
-        /// <summary>
-        /// Gets the last access time (in local time) of a file or directory.
-        /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
-        public override DateTime GetLastAccessTime(string path)
-        {
-            return _wrapped.GetLastAccessTime(path);
-        }
-
-        /// <summary>
-        /// Sets the last access time (in local time) of a file or directory.
-        /// </summary>
-        /// <param name="path">The path of the file or directory.</param>
-        /// <param name="newTime">The new time to set.</param>
-        public override void SetLastAccessTime(string path, DateTime newTime)
-        {
-            _wrapped.SetLastAccessTime(path, newTime);
-        }
-
-        /// <summary>
-        /// Gets the last modification time (in local time) of a file or directory.
-        /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
-        public override DateTime GetLastWriteTime(string path)
-        {
-            return _wrapped.GetLastWriteTime(path);
-        }
-
-        /// <summary>
-        /// Sets the last modification time (in local time) of a file or directory.
-        /// </summary>
-        /// <param name="path">The path of the file or directory.</param>
-        /// <param name="newTime">The new time to set.</param>
-        public override void SetLastWriteTime(string path, DateTime newTime)
-        {
-            _wrapped.SetLastWriteTime(path, newTime);
         }
 
         /// <summary>

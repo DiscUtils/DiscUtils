@@ -60,7 +60,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the file system options, which can be modified.
         /// </summary>
-        public DiscFileSystemOptions Options
+        public virtual DiscFileSystemOptions Options
         {
             get { return _options; }
         }
