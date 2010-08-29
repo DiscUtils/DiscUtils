@@ -132,6 +132,9 @@ namespace DiscUtils.Iso9660
                 pos += WriteMember(m, null, enc, buffer, offset + pos, locationTable, enc);
             }
 
+            // Ensure final padding data is zero'd
+            Array.Clear(buffer, offset + pos, IsoUtilities.SectorSize - (pos % IsoUtilities.SectorSize));
+
             return pos;
         }
 
