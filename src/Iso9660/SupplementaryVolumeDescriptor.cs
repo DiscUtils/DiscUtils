@@ -49,7 +49,7 @@ namespace DiscUtils.Iso9660
         {
             base.WriteTo(buffer, offset);
             IsoUtilities.WriteA1Chars(buffer, offset + 8, 32, SystemIdentifier, CharacterEncoding);
-            IsoUtilities.WriteString(buffer, offset + 40, 32, true, VolumeIdentifier, CharacterEncoding);
+            IsoUtilities.WriteString(buffer, offset + 40, 32, true, VolumeIdentifier, CharacterEncoding, true);
             IsoUtilities.ToBothFromUInt32(buffer, offset + 80, VolumeSpaceSize);
             IsoUtilities.EncodingToBytes(CharacterEncoding, buffer, offset + 88);
             IsoUtilities.ToBothFromUInt16(buffer, offset + 120, VolumeSetSize);

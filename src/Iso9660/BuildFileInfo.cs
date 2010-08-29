@@ -52,6 +52,8 @@ namespace DiscUtils.Iso9660
             _parent = parent;
             _contentPath = content;
             _contentSize = new FileInfo(_contentPath).Length;
+
+            CreationTime = new FileInfo(_contentPath).LastWriteTimeUtc;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, Stream source)

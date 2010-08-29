@@ -165,6 +165,11 @@ namespace DiscUtils.Iso9660
 
         internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, string str, Encoding enc)
         {
+            return WriteString(buffer, offset, numBytes, pad, str, enc, false);
+        }
+
+        internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, string str, Encoding enc, bool canTruncate)
+        {
             Encoder encoder = enc.GetEncoder();
 
             string paddedString = pad ? str + new string(' ', numBytes) : str; // Assumption: never less than one byte per character
@@ -174,7 +179,7 @@ namespace DiscUtils.Iso9660
             bool completed;
             encoder.Convert(paddedString.ToCharArray(), 0, paddedString.Length, buffer, offset, numBytes, false, out charsUsed, out bytesUsed, out completed);
 
-            if (charsUsed < str.Length)
+            if (!canTruncate && charsUsed < str.Length)
             {
                 throw new IOException("Failed to write entire string");
             }
