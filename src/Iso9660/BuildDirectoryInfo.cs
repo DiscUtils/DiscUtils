@@ -98,7 +98,7 @@ namespace DiscUtils.Iso9660
                 total += recordSize;
             }
 
-            return total;
+            return Utilities.RoundUp(total, IsoUtilities.SectorSize);
         }
 
         internal uint GetPathTableEntrySize(Encoding enc)
