@@ -302,5 +302,21 @@ namespace DiscUtils.Ntfs
             Assert.AreEqual(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
             Assert.AreEqual("ALTSTREAM", ntfs.GetAlternateDataStreams("AFILE.TXT")[0]);
         }
+
+        [Test]
+        public void DeleteShortNameDir()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            ntfs.CreateDirectory(@"\TestLongName1\TestLongName2");
+            ntfs.SetShortName(@"\TestLongName1\TestLongName2", "TESTLO~1");
+
+            Assert.IsTrue(ntfs.DirectoryExists(@"\TestLongName1\TESTLO~1"));
+            Assert.IsTrue(ntfs.DirectoryExists(@"\TestLongName1\TestLongName2"));
+
+            ntfs.DeleteDirectory(@"\TestLongName1", true);
+
+            Assert.IsFalse(ntfs.DirectoryExists(@"\TestLongName1"));
+        }
     }
 }

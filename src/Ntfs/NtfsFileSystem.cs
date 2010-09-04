@@ -471,8 +471,12 @@ namespace DiscUtils.Ntfs
                     throw new IOException("Unable to delete non-empty directory");
                 }
 
-                parentDir.RemoveEntry(dirEntry);
-                dir.Delete();
+                RemoveFileFromDirectory(parentDir, dir, Path.GetFileName(path));
+
+                if (dir.HardLinkCount == 0)
+                {
+                    dir.Delete();
+                }
             }
         }
 
@@ -502,33 +506,7 @@ namespace DiscUtils.Ntfs
 
                 File file = GetFile(dirEntry.Reference);
 
-                // Remove the main reference
-                parentDir.RemoveEntry(dirEntry);
-
-                // Win32 and Dos names have an alternate alias, remove it as well...
-                FileNameNamespace? aliasNamespace = null;
-                if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Dos)
-                {
-                    aliasNamespace = FileNameNamespace.Win32;
-                }
-
-                if (dirEntry.Details.FileNameNamespace == FileNameNamespace.Win32)
-                {
-                    aliasNamespace = FileNameNamespace.Dos;
-                }
-
-                if (aliasNamespace.HasValue)
-                {
-                    string alias = file.GetFirstName(parentDir.MftReference, aliasNamespace.Value);
-                    if (!string.IsNullOrEmpty(alias))
-                    {
-                        DirectoryEntry aliasEntry = parentDir.GetEntryByName(alias);
-                        if (aliasEntry != null)
-                        {
-                            parentDir.RemoveEntry(aliasEntry);
-                        }
-                    }
-                }
+                RemoveFileFromDirectory(parentDir, file, Path.GetFileName(path));
 
                 if (file.HardLinkCount == 0)
                 {
