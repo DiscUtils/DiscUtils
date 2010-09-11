@@ -105,8 +105,8 @@ namespace DiskDump
                         if (bpi != null)
                         {
                             Console.WriteLine("        {0,-16}  {1}", bpi.Start.ToString(), bpi.End.ToString());
+                            Console.WriteLine();
                         }
-                        Console.WriteLine();
                     }
                 }
                 else
