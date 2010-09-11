@@ -72,6 +72,25 @@ namespace DiscUtils.Partitions
         }
 
         [Test]
+        public void CreateWholeDiskAligned()
+        {
+            long capacity = 3 * 1024 * 1024;
+            SparseMemoryStream ms = new SparseMemoryStream();
+            ms.SetLength(capacity);
+            Geometry geom = Geometry.FromCapacity(capacity);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            int idx = table.CreateAligned(WellKnownPartitionType.WindowsFat, true, 64 * 1024);
+
+            Assert.AreEqual(0, table[idx].FirstSector % 128);
+            Assert.AreEqual(0, (table[idx].LastSector + 1) % 128);
+            Assert.Greater(table[idx].SectorCount * 512, capacity * 0.9);
+
+            // Make sure the partition index is Zero
+            Assert.AreEqual(0, ((BiosPartitionInfo)table[idx]).PrimaryIndex);
+        }
+
+        [Test]
         public void CreateBySize()
         {
             long capacity = 3 * 1024 * 1024;
@@ -101,6 +120,24 @@ namespace DiscUtils.Partitions
             Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
             Assert.AreEqual(1, table.CreatePrimaryByCylinder(10, 14, 33, false));
             table.Create(geom.ToLogicalBlockAddress(new ChsAddress(4, 0, 1)) * 512, WellKnownPartitionType.WindowsFat, true);
+        }
+
+        [Test]
+        public void CreateBySizeInGapAligned()
+        {
+            SparseMemoryStream ms = new SparseMemoryStream();
+            Geometry geom = new Geometry(15, 30, 63);
+            ms.SetLength(geom.Capacity);
+            BiosPartitionTable table = BiosPartitionTable.Initialize(ms, geom);
+
+            Assert.AreEqual(0, table.CreatePrimaryByCylinder(0, 4, 33, false));
+            Assert.AreEqual(1, table.CreatePrimaryByCylinder(10, 14, 33, false));
+
+            int idx = table.CreateAligned(3 * 1024 * 1024, WellKnownPartitionType.WindowsFat, true, 64 * 1024);
+            Assert.AreEqual(2, idx);
+
+            Assert.AreEqual(0, table[idx].FirstSector % 128);
+            Assert.AreEqual(0, (table[idx].LastSector + 1) % 128);
         }
 
         [Test]

@@ -98,6 +98,29 @@ namespace DiscUtils.Partitions
         }
 
         [Test]
+        public void CreateAlignedWholeDisk()
+        {
+            MemoryStream ms = new MemoryStream();
+            using (Disk disk = Disk.InitializeDynamic(ms, Ownership.Dispose, 200 * 1024L * 1024 * 1024))
+            {
+                GuidPartitionTable table = GuidPartitionTable.Initialize(disk);
+
+                int idx = table.CreateAligned(WellKnownPartitionType.WindowsFat, true, 1024 * 1024);
+
+                Assert.AreEqual(2, table.Partitions.Count);
+                Assert.AreEqual(GuidPartitionTypes.MicrosoftReserved, table[0].GuidType);
+                Assert.AreEqual(128 * 1024 * 1024, table[0].SectorCount * 512);
+
+                // Make sure the partition is aligned
+                Assert.AreEqual(0, table[idx].FirstSector % 2048);
+                Assert.AreEqual(0, (table[idx].LastSector + 1) % 2048);
+
+                // Ensure partition fills most of the disk
+                Assert.Greater((table[idx].SectorCount * 512), disk.Capacity * 0.9);
+            }
+        }
+
+        [Test]
         public void CreateBySize()
         {
             MemoryStream ms = new MemoryStream();
@@ -129,6 +152,27 @@ namespace DiscUtils.Partitions
                 table.Create((60 * 1024 * 1024) / 512, ((70 * 1024 * 1024) / 512) - 1, GuidPartitionTypes.WindowsBasicData, 0, "Data Partition");
 
                 int idx = table.Create(20 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+                Assert.AreEqual(((30 * 1024 * 1024) / 512), table[idx].FirstSector);
+                Assert.AreEqual(((50 * 1024 * 1024) / 512) - 1, table[idx].LastSector);
+            }
+        }
+
+        [Test]
+        public void CreateBySizeInGapAligned()
+        {
+            MemoryStream ms = new MemoryStream();
+            using (Disk disk = Disk.InitializeDynamic(ms, Ownership.Dispose, 300 * 1024 * 1024))
+            {
+                GuidPartitionTable table = GuidPartitionTable.Initialize(disk);
+
+                table.Create(10 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false);
+
+                // Note: end is unaligned
+                table.Create((20 * 1024 * 1024) / 512, ((30 * 1024 * 1024) / 512) - 5, GuidPartitionTypes.WindowsBasicData, 0, "Data Partition");
+
+                table.Create((60 * 1024 * 1024) / 512, ((70 * 1024 * 1024) / 512) - 1, GuidPartitionTypes.WindowsBasicData, 0, "Data Partition");
+
+                int idx = table.CreateAligned(20 * 1024 * 1024, WellKnownPartitionType.WindowsFat, false, 64 * 1024);
                 Assert.AreEqual(((30 * 1024 * 1024) / 512), table[idx].FirstSector);
                 Assert.AreEqual(((50 * 1024 * 1024) / 512) - 1, table[idx].LastSector);
             }

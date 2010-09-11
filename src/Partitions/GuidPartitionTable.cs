@@ -181,51 +181,13 @@ namespace DiscUtils.Partitions
         {
             List<GptEntry> allEntries = new List<GptEntry>(GetAllEntries());
 
-            // If no MicrosoftReserved partition, and no Microsoft Data partitions, and the disk
-            // has a 'reasonable' size free, create a Microsoft Reserved partition.
-            if (CountEntries(allEntries, e => e.PartitionType == GuidPartitionTypes.MicrosoftReserved) == 0
-                && CountEntries(allEntries, e => e.PartitionType == GuidPartitionTypes.WindowsBasicData) == 0
-                && _diskGeometry.Capacity > 512 * 1024 * 1024)
-            {
-                long reservedStart = FirstAvailableSector(allEntries);
-                long reservedEnd = FindLastFreeSector(reservedStart, allEntries);
-
-                if ((reservedEnd - reservedStart + 1) * _diskGeometry.BytesPerSector > 512 * 1024 * 1024)
-                {
-                    long size = ((_diskGeometry.Capacity < (16 * 1024L * 1024 * 1024)) ? 32 : 128) * 1024 * 1024;
-                    reservedEnd = reservedStart + (size / _diskGeometry.BytesPerSector) - 1;
-
-                    int reservedOffset = GetFreeEntryOffset();
-                    GptEntry newReservedEntry = new GptEntry();
-                    newReservedEntry.PartitionType = GuidPartitionTypes.MicrosoftReserved;
-                    newReservedEntry.Identity = Guid.NewGuid();
-                    newReservedEntry.FirstUsedLogicalBlock = reservedStart;
-                    newReservedEntry.LastUsedLogicalBlock = reservedEnd;
-                    newReservedEntry.Attributes = 0;
-                    newReservedEntry.Name = "Microsoft reserved partition";
-                    newReservedEntry.WriteTo(_entryBuffer, reservedOffset);
-                    allEntries.Add(newReservedEntry);
-                }
-            }
+            EstablishReservedPartition(allEntries);
 
             // Fill the rest of the disk with the requested partition
             long start = FirstAvailableSector(allEntries);
             long end = FindLastFreeSector(start, allEntries);
 
-            int offset = GetFreeEntryOffset();
-            GptEntry newEntry = new GptEntry();
-            newEntry.PartitionType = GuidPartitionTypes.Convert(type);
-            newEntry.Identity = Guid.NewGuid();
-            newEntry.FirstUsedLogicalBlock = start;
-            newEntry.LastUsedLogicalBlock = end;
-            newEntry.Attributes = 0;
-            newEntry.Name = "Data Partition";
-            newEntry.WriteTo(_entryBuffer, offset);
-
-            // Commit changes to disk
-            Write();
-
-            return GetEntryIndex(newEntry.Identity);
+            return Create(start, end, GuidPartitionTypes.Convert(type), 0, "Data Partition");
         }
 
         /// <summary>
@@ -243,7 +205,80 @@ namespace DiscUtils.Partitions
             }
 
             long sectorLength = size / _diskGeometry.BytesPerSector;
-            long start = FindGap(size / _diskGeometry.BytesPerSector);
+            long start = FindGap(size / _diskGeometry.BytesPerSector, 1);
+
+            return Create(start, start + sectorLength - 1, GuidPartitionTypes.Convert(type), 0, "Data Partition");
+        }
+
+        /// <summary>
+        /// Creates a new aligned partition that encompasses the entire disk.
+        /// </summary>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <param name="alignment">The alignment (in bytes)</param>
+        /// <returns>The index of the partition</returns>
+        /// <remarks>The partition table must be empty before this method is called,
+        /// otherwise IOException is thrown.</remarks>
+        /// <remarks>
+        /// Traditionally partitions were aligned to the physical structure of the underlying disk,
+        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// large values that are a power of two.
+        /// </remarks>
+        public override int CreateAligned(WellKnownPartitionType type, bool active, int alignment)
+        {
+            if (alignment % _diskGeometry.BytesPerSector != 0)
+            {
+                throw new ArgumentException("Alignment is not a multiple of the sector size");
+            }
+
+            List<GptEntry> allEntries = new List<GptEntry>(GetAllEntries());
+
+            EstablishReservedPartition(allEntries);
+
+            // Fill the rest of the disk with the requested partition
+            long start = Utilities.RoundUp(FirstAvailableSector(allEntries), alignment / _diskGeometry.BytesPerSector);
+            long end = Utilities.RoundDown(FindLastFreeSector(start, allEntries) + 1, alignment / _diskGeometry.BytesPerSector);
+
+            if (end <= start)
+            {
+                throw new IOException("No available space");
+            }
+
+            return Create(start, end - 1, GuidPartitionTypes.Convert(type), 0, "Data Partition");
+        }
+
+        /// <summary>
+        /// Creates a new aligned partition with a target size.
+        /// </summary>
+        /// <param name="size">The target size (in bytes)</param>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <param name="alignment">The alignment (in bytes)</param>
+        /// <returns>The index of the new partition</returns>
+        /// <remarks>
+        /// Traditionally partitions were aligned to the physical structure of the underlying disk,
+        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// large values that are a power of two.
+        /// </remarks>
+        public override int CreateAligned(long size, WellKnownPartitionType type, bool active, int alignment)
+        {
+            if (size < _diskGeometry.BytesPerSector)
+            {
+                throw new ArgumentOutOfRangeException("size", size, "size must be at least one sector");
+            }
+
+            if (alignment % _diskGeometry.BytesPerSector != 0)
+            {
+                throw new ArgumentException("Alignment is not a multiple of the sector size");
+            }
+
+            if (size % alignment != 0)
+            {
+                throw new ArgumentException("Size is not a multiple of the alignment");
+            }
+
+            long sectorLength = size / _diskGeometry.BytesPerSector;
+            long start = FindGap(size / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
 
             return Create(start, start + sectorLength - 1, GuidPartitionTypes.Convert(type), 0, "Data Partition");
         }
@@ -261,24 +296,7 @@ namespace DiscUtils.Partitions
         /// responsible for ensuring that the partition does not overlap other partitions.</remarks>
         public int Create(long startSector, long endSector, Guid type, long attributes, string name)
         {
-            if (endSector < startSector)
-            {
-                throw new ArgumentException("The end sector is before the start sector");
-            }
-
-            int offset = GetFreeEntryOffset();
-            GptEntry newEntry = new GptEntry();
-            newEntry.PartitionType = type;
-            newEntry.Identity = Guid.NewGuid();
-            newEntry.FirstUsedLogicalBlock = startSector;
-            newEntry.LastUsedLogicalBlock = endSector;
-            newEntry.Attributes = (ulong)attributes;
-            newEntry.Name = name;
-            newEntry.WriteTo(_entryBuffer, offset);
-
-            // Commit changes to disk
-            Write();
-
+            GptEntry newEntry = CreateEntry(startSector, endSector, type, attributes, name);
             return GetEntryIndex(newEntry.Identity);
         }
 
@@ -391,12 +409,65 @@ namespace DiscUtils.Partitions
             }
         }
 
-        private long FindGap(long numSectors)
+        private void EstablishReservedPartition(List<GptEntry> allEntries)
+        {
+            // If no MicrosoftReserved partition, and no Microsoft Data partitions, and the disk
+            // has a 'reasonable' size free, create a Microsoft Reserved partition.
+            if (CountEntries(allEntries, e => e.PartitionType == GuidPartitionTypes.MicrosoftReserved) == 0
+                && CountEntries(allEntries, e => e.PartitionType == GuidPartitionTypes.WindowsBasicData) == 0
+                && _diskGeometry.Capacity > 512 * 1024 * 1024)
+            {
+                long reservedStart = FirstAvailableSector(allEntries);
+                long reservedEnd = FindLastFreeSector(reservedStart, allEntries);
+
+                if ((reservedEnd - reservedStart + 1) * _diskGeometry.BytesPerSector > 512 * 1024 * 1024)
+                {
+                    long size = ((_diskGeometry.Capacity < (16 * 1024L * 1024 * 1024)) ? 32 : 128) * 1024 * 1024;
+                    reservedEnd = reservedStart + (size / _diskGeometry.BytesPerSector) - 1;
+
+                    int reservedOffset = GetFreeEntryOffset();
+                    GptEntry newReservedEntry = new GptEntry();
+                    newReservedEntry.PartitionType = GuidPartitionTypes.MicrosoftReserved;
+                    newReservedEntry.Identity = Guid.NewGuid();
+                    newReservedEntry.FirstUsedLogicalBlock = reservedStart;
+                    newReservedEntry.LastUsedLogicalBlock = reservedEnd;
+                    newReservedEntry.Attributes = 0;
+                    newReservedEntry.Name = "Microsoft reserved partition";
+                    newReservedEntry.WriteTo(_entryBuffer, reservedOffset);
+                    allEntries.Add(newReservedEntry);
+                }
+            }
+        }
+
+        private GptEntry CreateEntry(long startSector, long endSector, Guid type, long attributes, string name)
+        {
+            if (endSector < startSector)
+            {
+                throw new ArgumentException("The end sector is before the start sector");
+            }
+
+            int offset = GetFreeEntryOffset();
+            GptEntry newEntry = new GptEntry();
+            newEntry.PartitionType = type;
+            newEntry.Identity = Guid.NewGuid();
+            newEntry.FirstUsedLogicalBlock = startSector;
+            newEntry.LastUsedLogicalBlock = endSector;
+            newEntry.Attributes = (ulong)attributes;
+            newEntry.Name = name;
+            newEntry.WriteTo(_entryBuffer, offset);
+
+            // Commit changes to disk
+            Write();
+
+            return newEntry;
+        }
+
+        private long FindGap(long numSectors, long alignmentSectors)
         {
             List<GptEntry> list = new List<GptEntry>(GetAllEntries());
             list.Sort();
 
-            long startSector = _primaryHeader.FirstUsable;
+            long startSector = Utilities.RoundUp(_primaryHeader.FirstUsable, alignmentSectors);
             foreach (var entry in list)
             {
                 if (!Utilities.RangesOverlap(startSector, startSector + numSectors - 1, entry.FirstUsedLogicalBlock, entry.LastUsedLogicalBlock))
@@ -405,7 +476,7 @@ namespace DiscUtils.Partitions
                 }
                 else
                 {
-                    startSector = entry.LastUsedLogicalBlock + 1;
+                    startSector = Utilities.RoundUp(entry.LastUsedLogicalBlock + 1, alignmentSectors);
                 }
             }
 

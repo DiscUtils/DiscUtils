@@ -81,6 +81,37 @@ namespace DiscUtils.Partitions
         public abstract int Create(long size, WellKnownPartitionType type, bool active);
 
         /// <summary>
+        /// Creates a new aligned partition that encompasses the entire disk.
+        /// </summary>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <param name="alignment">The alignment (in byte)</param>
+        /// <returns>The index of the partition</returns>
+        /// <remarks>The partition table must be empty before this method is called,
+        /// otherwise IOException is thrown.</remarks>
+        /// <remarks>
+        /// Traditionally partitions were aligned to the physical structure of the underlying disk,
+        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// large values that are a power of two.
+        /// </remarks>
+        public abstract int CreateAligned(WellKnownPartitionType type, bool active, int alignment);
+
+        /// <summary>
+        /// Creates a new aligned partition with a target size.
+        /// </summary>
+        /// <param name="size">The target size (in bytes)</param>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <param name="alignment">The alignment (in byte)</param>
+        /// <returns>The index of the new partition</returns>
+        /// <remarks>
+        /// Traditionally partitions were aligned to the physical structure of the underlying disk,
+        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// large values that are a power of two.
+        /// </remarks>
+        public abstract int CreateAligned(long size, WellKnownPartitionType type, bool active, int alignment);
+
+        /// <summary>
         /// Deletes a partition at a given index.
         /// </summary>
         /// <param name="index">The index of the partition</param>

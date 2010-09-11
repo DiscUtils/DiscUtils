@@ -282,6 +282,68 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Creates a new aligned partition that encompasses the entire disk.
+        /// </summary>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <param name="alignment">The alignment (in bytes)</param>
+        /// <returns>The index of the partition</returns>
+        /// <remarks>The partition table must be empty before this method is called,
+        /// otherwise IOException is thrown.</remarks>
+        /// <remarks>
+        /// Traditionally partitions were aligned to the physical structure of the underlying disk,
+        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// large values that are a power of two.
+        /// </remarks>
+        public override int CreateAligned(WellKnownPartitionType type, bool active, int alignment)
+        {
+            Geometry allocationGeometry = new Geometry(_diskData.Length, _diskGeometry.HeadsPerCylinder, _diskGeometry.SectorsPerTrack, _diskGeometry.BytesPerSector);
+
+            ChsAddress start = new ChsAddress(0, 1, 1);
+
+            long startLba = Utilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start), alignment / _diskGeometry.BytesPerSector);
+            long lastLba = Utilities.RoundDown((_diskData.Length / _diskGeometry.BytesPerSector), alignment / _diskGeometry.BytesPerSector);
+
+            return CreatePrimaryBySector(startLba, lastLba - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
+        }
+
+        /// <summary>
+        /// Creates a new aligned partition with a target size.
+        /// </summary>
+        /// <param name="size">The target size (in bytes)</param>
+        /// <param name="type">The partition type</param>
+        /// <param name="active">Whether the partition is active (bootable)</param>
+        /// <param name="alignment">The alignment (in bytes)</param>
+        /// <returns>The index of the new partition</returns>
+        /// <remarks>
+        /// Traditionally partitions were aligned to the physical structure of the underlying disk,
+        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// large values that are a power of two.
+        /// </remarks>
+        public override int CreateAligned(long size, WellKnownPartitionType type, bool active, int alignment)
+        {
+            if (size < _diskGeometry.BytesPerSector)
+            {
+                throw new ArgumentOutOfRangeException("size", size, "size must be at least one sector");
+            }
+
+            if (alignment % _diskGeometry.BytesPerSector != 0)
+            {
+                throw new ArgumentException("Alignment is not a multiple of the sector size");
+            }
+
+            if (size % alignment != 0)
+            {
+                throw new ArgumentException("Size is not a multiple of the alignment");
+            }
+
+            long sectorLength = size / _diskGeometry.BytesPerSector;
+            long start = FindGap(size / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
+
+            return CreatePrimaryBySector(start, start + sectorLength - 1, ConvertType(type, sectorLength * Utilities.SectorSize), active);
+        }
+
+        /// <summary>
         /// Deletes a partition at a given index.
         /// </summary>
         /// <param name="index">The index of the partition</param>
@@ -536,6 +598,39 @@ namespace DiscUtils.Partitions
             }
 
             return startCylinder;
+        }
+
+        private long FindGap(long numSectors, long alignmentSectors)
+        {
+            var list = Utilities.Filter<List<BiosPartitionRecord>, BiosPartitionRecord>(GetPrimaryRecords(), (r) => r.IsValid);
+            list.Sort();
+
+            long startSector = Utilities.RoundUp(_diskGeometry.ToLogicalBlockAddress(0, 1, 1), alignmentSectors);
+
+            int idx = 0;
+            while (idx < list.Count)
+            {
+                var entry = list[idx];
+                while (idx < list.Count && startSector >= entry.LBAStartAbsolute + entry.LBALength)
+                {
+                    idx++;
+                    entry = list[idx];
+                }
+
+                if (Utilities.RangesOverlap(startSector, startSector + numSectors, entry.LBAStartAbsolute, entry.LBAStartAbsolute + entry.LBALength))
+                {
+                    startSector = Utilities.RoundUp(entry.LBAStartAbsolute + entry.LBALength, alignmentSectors);
+                }
+
+                idx++;
+            }
+
+            if (_diskGeometry.TotalSectors - startSector < numSectors)
+            {
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to find free space of {0} sectors", numSectors));
+            }
+
+            return startSector;
         }
 
         private void Init(Stream disk, Geometry diskGeometry)
