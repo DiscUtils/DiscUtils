@@ -31,11 +31,8 @@ namespace DiscUtils.Dmg
         internal BlkxResource(Dictionary<string, object> parts)
             : base("blkx", parts)
         {
-            CfName = parts["CFName"] as string;
             _block = Utilities.ToStruct<CompressedBlock>(parts["Data"] as byte[], 0);
         }
-
-        public string CfName { get; set; }
 
         public CompressedBlock Block
         {

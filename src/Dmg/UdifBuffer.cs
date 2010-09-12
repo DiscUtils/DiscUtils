@@ -34,9 +34,9 @@ namespace DiscUtils.Dmg
         private long _sectorCount;
         private List<CompressedBlock> _blocks;
 
-        private byte[] _buffer;
+        private byte[] _decompBuffer;
         private CompressedRun _activeRun;
-        private long _bufferStart;
+        private long _activeRunOffset;
 
         public UdifBuffer(Stream stream, ResourceFork resources, long sectorCount)
         {
@@ -79,7 +79,7 @@ namespace DiscUtils.Dmg
             {
                 LoadRun(currentPos);
 
-                int bufferOffset = (int)(currentPos - _bufferStart);
+                int bufferOffset = (int)(currentPos - (_activeRunOffset + (_activeRun.SectorStart * Sizes.Sector)));
                 int toCopy = (int)Math.Min(((_activeRun.SectorCount * Sizes.Sector) - bufferOffset), count - totalCopied);
 
                 switch (_activeRun.Type)
@@ -88,9 +88,14 @@ namespace DiscUtils.Dmg
                         Array.Clear(buffer, offset + totalCopied, toCopy);
                         break;
 
+                    case RunType.Raw:
+                        _stream.Position = _activeRun.CompOffset + bufferOffset;
+                        Utilities.ReadFully(_stream, buffer, offset + totalCopied, toCopy);
+                        break;
+
                     case RunType.AdcCompressed:
                     case RunType.ZlibCompressed:
-                        Array.Copy(_buffer, bufferOffset, buffer, offset + totalCopied, toCopy);
+                        Array.Copy(_decompBuffer, bufferOffset, buffer, offset + totalCopied, toCopy);
                         break;
 
                     default:
@@ -180,7 +185,9 @@ namespace DiscUtils.Dmg
 
         private void LoadRun(long pos)
         {
-            if (_activeRun != null && pos >= _bufferStart && pos < _bufferStart + (_activeRun.SectorCount * Sizes.Sector))
+            if (_activeRun != null
+                && pos >= _activeRunOffset + (_activeRun.SectorStart * Sizes.Sector)
+                && pos < _activeRunOffset + ((_activeRun.SectorStart + _activeRun.SectorCount) * Sizes.Sector))
             {
                 return;
             }
@@ -191,16 +198,17 @@ namespace DiscUtils.Dmg
                 if (block.FirstSector <= findSector && (block.FirstSector + block.SectorCount) > findSector)
                 {
                     // Make sure the decompression buffer is big enough
-                    if (_buffer == null || _buffer.Length < block.DecompressBufferRequested * Sizes.Sector)
+                    if (_decompBuffer == null || _decompBuffer.Length < block.DecompressBufferRequested * Sizes.Sector)
                     {
-                        _buffer = new byte[block.DecompressBufferRequested * Sizes.Sector];
+                        _decompBuffer = new byte[block.DecompressBufferRequested * Sizes.Sector];
                     }
 
                     foreach (var run in block.Runs)
                     {
                         if ((block.FirstSector + run.SectorStart) <= findSector && ((block.FirstSector + run.SectorStart) + run.SectorCount) > findSector)
                         {
-                            LoadRun(run, block.FirstSector);
+                            LoadRun(run);
+                            _activeRunOffset = block.FirstSector * Sizes.Sector;
                             return;
                         }
                     }
@@ -212,7 +220,7 @@ namespace DiscUtils.Dmg
             throw new IOException("No block for sector " + findSector);
         }
 
-        private void LoadRun(CompressedRun run, long runOffset)
+        private void LoadRun(CompressedRun run)
         {
             switch (run.Type)
             {
@@ -221,7 +229,7 @@ namespace DiscUtils.Dmg
                     int toCopy = (int)(run.SectorCount * Sizes.Sector);
                     using (DeflateStream ds = new DeflateStream(_stream, CompressionMode.Decompress, true))
                     {
-                        Utilities.ReadFully(ds, _buffer, 0, toCopy);
+                        Utilities.ReadFully(ds, _decompBuffer, 0, toCopy);
                     }
 
                     break;
@@ -229,7 +237,7 @@ namespace DiscUtils.Dmg
                 case RunType.AdcCompressed:
                     _stream.Position = run.CompOffset;
                     byte[] compressed = Utilities.ReadFully(_stream, (int)run.CompLength);
-                    if (ADCDecompress(compressed, 0, compressed.Length, _buffer, 0) != run.SectorCount * Sizes.Sector)
+                    if (ADCDecompress(compressed, 0, compressed.Length, _decompBuffer, 0) != run.SectorCount * Sizes.Sector)
                     {
                         throw new InvalidDataException("Run too short when decompressed");
                     }
@@ -237,6 +245,7 @@ namespace DiscUtils.Dmg
                     break;
 
                 case RunType.Zeros:
+                case RunType.Raw:
                     break;
 
                 default:
@@ -244,7 +253,6 @@ namespace DiscUtils.Dmg
             }
 
             _activeRun = run;
-            _bufferStart = (runOffset + run.SectorStart) * Sizes.Sector;
         }
     }
 }
