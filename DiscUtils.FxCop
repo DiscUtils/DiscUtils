@@ -93,6 +93,42 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Dmg">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-09-12 16:03:00Z">
+      <Issue>
+       <Item>DiscUtils.Dmg</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="124" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Dmg" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-09-12 16:03:00Z">
+      <Issue Name="Namespace">
+       <Item>Dmg</Item>
+       <Item>DiscUtils.Dmg</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="123" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-09-12 16:03:00Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Dmg</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="4" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Fat">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-10 13:17:45Z">
@@ -2201,6 +2237,468 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="57" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Dmg">
+        <Types>
+         <Type Name="BlkxResource">
+          <Members>
+           <Member Name="#CfName">
+            <Accessors>
+             <Accessor Name="#get_CfName()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2010-09-12 16:03:00Z">
+                <Issue>
+                 <Item>'BlkxResource.CfName.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="127" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="CompressedBlock">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-09-12 16:03:00Z">
+            <Issue>
+             <Item>'CompressedBlock'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="126" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#BlocksDescriptor">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'CompressedBlock.BlocksDescriptor'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CheckSum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'CompressedBlock.CheckSum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DataStart">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'CompressedBlock.DataStart'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InfoVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'CompressedBlock.InfoVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Signature">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'CompressedBlock.Signature'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="CompressedRun">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-09-12 16:03:00Z">
+            <Issue>
+             <Item>'CompressedRun'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="126" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#CompLength">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'CompressedRun.CompLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="GenericResource">
+          <Members>
+           <Member Name="#Data">
+            <Accessors>
+             <Accessor Name="#get_Data()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2010-09-12 16:03:00Z">
+                <Issue>
+                 <Item>'GenericResource.Data.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="127" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Resource">
+          <Members>
+           <Member Name="#Attributes">
+            <Accessors>
+             <Accessor Name="#get_Attributes()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2010-09-12 16:03:00Z">
+                <Issue>
+                 <Item>'Resource.Attributes.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="127" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#Name">
+            <Accessors>
+             <Accessor Name="#get_Name()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2010-09-12 16:03:00Z">
+                <Issue>
+                 <Item>'Resource.Name.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="127" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="UdifChecksum">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-09-12 16:03:00Z">
+            <Issue>
+             <Item>'UdifChecksum'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="126" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#ChecksumSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifChecksum.ChecksumSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Data">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifChecksum.Data'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Type">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifChecksum.Type'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="UdifResourceFile">
+          <Members>
+           <Member Name="#DataForkChecksum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.DataForkChecksum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DataForkLength">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.DataForkLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DataForkOffset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.DataForkOffset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#HeaderSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.HeaderSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ImageVariant">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.ImageVariant'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MasterChecksum">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.MasterChecksum'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RsrcForkLength">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.RsrcForkLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RsrcForkOffset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.RsrcForkOffset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RunningDataForkOffset">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.RunningDataForkOffset'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SegmentCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.SegmentCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SegmentGuid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.SegmentGuid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#SegmentNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.SegmentNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Version">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
+              <Issue>
+               <Item>'UdifResourceFile.Version'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="125" />
                </User>
               </Notes>
              </Message>
@@ -8361,6 +8859,7 @@
     <Note Id="1" Modified="2008-11-22 16:47:22Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="2" Modified="2008-11-22 16:47:50Z">VHD is well-used acronym.</Note>
     <Note Id="3" Modified="2009-09-05 23:32:26Z">Fields represent current understanding of on-disk structure, even if not used yet.</Note>
+    <Note Id="4" Modified="2010-09-12 16:03:29Z">Part of project name</Note>
     <Note Id="5" Modified="2008-11-10 13:18:35Z">DiscUtils is the fixed name of the project</Note>
     <Note Id="6" Modified="2009-09-05 23:33:03Z">Follows standard naming scheme.</Note>
     <Note Id="7" Modified="2008-11-22 17:12:07Z">DiscUtils is fixed name of the project</Note>
@@ -8479,6 +8978,11 @@
     <Note Id="120" Modified="2010-08-07 12:16:37Z">SparseMemoryStream holds no native resources</Note>
     <Note Id="121" Modified="2010-08-21 13:56:33Z">Not currently used.</Note>
     <Note Id="122" Modified="2010-08-21 13:57:03Z">Standard data structure.</Note>
+    <Note Id="123" Modified="2010-09-12 16:03:42Z">Standard acronym</Note>
+    <Note Id="124" Modified="2010-09-12 16:03:52Z">Distinct file type.</Note>
+    <Note Id="125" Modified="2010-09-12 16:04:44Z">Fields defined in file format.</Note>
+    <Note Id="126" Modified="2010-09-12 16:05:03Z">Instantiated via templates.</Note>
+    <Note Id="127" Modified="2010-09-12 16:06:20Z">Defined part of file format</Note>
    </User>
   </Notes>
   <Rules>
