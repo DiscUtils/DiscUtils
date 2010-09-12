@@ -88,6 +88,7 @@ namespace DiscUtils.Dmg
                         Array.Clear(buffer, offset + totalCopied, toCopy);
                         break;
 
+                    case RunType.AdcCompressed:
                     case RunType.ZlibCompressed:
                         Array.Copy(_buffer, bufferOffset, buffer, offset + totalCopied, toCopy);
                         break;
@@ -125,6 +126,56 @@ namespace DiscUtils.Dmg
                     }
                 }
             }
+        }
+
+        private static int ADCDecompress(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        {
+            int consumed = 0;
+            int written = 0;
+
+            while (consumed < inputCount)
+            {
+                byte focusByte = inputBuffer[inputOffset + consumed];
+                if ((focusByte & 0x80) != 0)
+                {
+                    // Data Run
+                    int chunkSize = (focusByte & 0x7F) + 1;
+                    Array.Copy(inputBuffer, inputOffset + consumed + 1, outputBuffer, outputOffset + written, chunkSize);
+
+                    consumed += chunkSize + 1;
+                    written += chunkSize;
+                }
+                else if ((focusByte & 0x40) != 0)
+                {
+                    // 3 byte code
+                    int chunkSize = (focusByte & 0x3F) + 4;
+                    int offset = Utilities.ToUInt16BigEndian(inputBuffer, inputOffset + consumed + 1);
+
+                    for (int i = 0; i < chunkSize; ++i)
+                    {
+                        outputBuffer[outputOffset + written + i] = outputBuffer[(outputOffset + written + i - offset) - 1];
+                    }
+
+                    consumed += 3;
+                    written += chunkSize;
+                }
+                else
+                {
+                    // 2 byte code
+                    int chunkSize = ((focusByte & 0x3F) >> 2) + 3;
+                    int offset = ((focusByte & 0x3) << 8) + (inputBuffer[inputOffset + consumed + 1] & 0xFF);
+
+                    for (int i = 0; i < chunkSize; ++i)
+                    {
+                        outputBuffer[outputOffset + written + i] = outputBuffer[(outputOffset + written + i - offset) - 1];
+                    }
+
+                    consumed += 2;
+                    written += chunkSize;
+                }
+            }
+
+            return written;
         }
 
         private void LoadRun(long pos)
@@ -171,6 +222,16 @@ namespace DiscUtils.Dmg
                     using (DeflateStream ds = new DeflateStream(_stream, CompressionMode.Decompress, true))
                     {
                         Utilities.ReadFully(ds, _buffer, 0, toCopy);
+                    }
+
+                    break;
+
+                case RunType.AdcCompressed:
+                    _stream.Position = run.CompOffset;
+                    byte[] compressed = Utilities.ReadFully(_stream, (int)run.CompLength);
+                    if (ADCDecompress(compressed, 0, compressed.Length, _buffer, 0) != run.SectorCount * Sizes.Sector)
+                    {
+                        throw new InvalidDataException("Run too short when decompressed");
                     }
 
                     break;
