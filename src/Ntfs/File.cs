@@ -252,20 +252,6 @@ namespace DiscUtils.Ntfs
             throw new IOException("Attempt to determine free space for non-existent attribute");
         }
 
-        public string GetFirstName(FileRecordReference dir, FileNameNamespace aliasNamespace)
-        {
-            foreach (StructuredNtfsAttribute<FileNameRecord> attr in GetAttributes(AttributeType.FileName))
-            {
-                FileNameRecord fnr = attr.Content;
-                if (fnr.ParentDirectory.Equals(dir) && fnr.FileNameNamespace == aliasNamespace)
-                {
-                    return fnr.FileName;
-                }
-            }
-
-            return null;
-        }
-
         public void Modified()
         {
             DateTime now = DateTime.UtcNow;
