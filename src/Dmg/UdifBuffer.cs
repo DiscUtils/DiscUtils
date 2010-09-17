@@ -26,6 +26,7 @@ namespace DiscUtils.Dmg
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
+    using DiscUtils.Compression;
 
     internal class UdifBuffer : DiscUtils.Buffer
     {
@@ -95,6 +96,7 @@ namespace DiscUtils.Dmg
 
                     case RunType.AdcCompressed:
                     case RunType.ZlibCompressed:
+                    case RunType.BZlibCompressed:
                         Array.Copy(_decompBuffer, bufferOffset, buffer, offset + totalCopied, toCopy);
                         break;
 
@@ -222,11 +224,12 @@ namespace DiscUtils.Dmg
 
         private void LoadRun(CompressedRun run)
         {
+            int toCopy = (int)(run.SectorCount * Sizes.Sector);
+
             switch (run.Type)
             {
                 case RunType.ZlibCompressed:
                     _stream.Position = run.CompOffset + 2; // 2 byte zlib header
-                    int toCopy = (int)(run.SectorCount * Sizes.Sector);
                     using (DeflateStream ds = new DeflateStream(_stream, CompressionMode.Decompress, true))
                     {
                         Utilities.ReadFully(ds, _decompBuffer, 0, toCopy);
@@ -237,9 +240,17 @@ namespace DiscUtils.Dmg
                 case RunType.AdcCompressed:
                     _stream.Position = run.CompOffset;
                     byte[] compressed = Utilities.ReadFully(_stream, (int)run.CompLength);
-                    if (ADCDecompress(compressed, 0, compressed.Length, _decompBuffer, 0) != run.SectorCount * Sizes.Sector)
+                    if (ADCDecompress(compressed, 0, compressed.Length, _decompBuffer, 0) != toCopy)
                     {
                         throw new InvalidDataException("Run too short when decompressed");
+                    }
+
+                    break;
+
+                case RunType.BZlibCompressed:
+                    using (BZip2DecoderStream ds = new BZip2DecoderStream(new SubStream(_stream, run.CompOffset, run.CompLength), Ownership.None))
+                    {
+                        Utilities.ReadFully(ds, _decompBuffer, 0, toCopy);
                     }
 
                     break;
