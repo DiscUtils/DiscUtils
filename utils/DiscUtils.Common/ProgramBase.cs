@@ -166,7 +166,7 @@ namespace DiscUtils.Common
                 {
                     string[] typeAndVariant = _outFormatSwitch.Value.Split(new char[] { '-' }, 2);
                     _outputDiskType = typeAndVariant[0];
-                    _outputDiskVariant = typeAndVariant[1];
+                    _outputDiskVariant = (typeAndVariant.Length > 1) ? typeAndVariant[1] : "";
                 }
                 else
                 {
