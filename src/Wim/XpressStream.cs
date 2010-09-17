@@ -24,6 +24,7 @@ namespace DiscUtils.Wim
 {
     using System;
     using System.IO;
+    using DiscUtils.Compression;
 
     /// <summary>
     /// Implements the XPRESS decompression algorithm.

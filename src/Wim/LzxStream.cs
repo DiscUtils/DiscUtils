@@ -24,6 +24,7 @@ namespace DiscUtils.Wim
 {
     using System;
     using System.IO;
+    using DiscUtils.Compression;
 
     /// <summary>
     /// Class to read data compressed using LZX algorithm.

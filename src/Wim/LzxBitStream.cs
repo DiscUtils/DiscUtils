@@ -24,6 +24,7 @@ namespace DiscUtils.Wim
 {
     using System;
     using System.IO;
+    using DiscUtils.Compression;
 
     /// <summary>
     /// Converts a byte stream into a bit stream.
@@ -48,6 +49,11 @@ namespace DiscUtils.Wim
         public LzxBitStream(Stream byteStream)
         {
             _byteStream = byteStream;
+        }
+
+        public override int MaxReadAhead
+        {
+            get { return 16; }
         }
 
         public override uint Read(int count)

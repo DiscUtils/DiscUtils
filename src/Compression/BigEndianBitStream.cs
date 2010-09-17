@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,20 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Wim
+namespace DiscUtils.Compression
 {
-    using System;
     using System.IO;
-    using DiscUtils.Compression;
 
     /// <summary>
     /// Converts a byte stream into a bit stream.
     /// </summary>
-    /// <remarks>Note the precise read-ahead behaviour of this stream is critical.
-    /// Some data is read directly from the underlying stream when decoding an Xpress
-    /// stream - so it's critical the underlying stream position is in the correct
-    /// location.</remarks>
-    internal class XpressBitStream : BitStream
+    internal class BigEndianBitStream : BitStream
     {
         private Stream _byteStream;
 
@@ -42,7 +36,7 @@ namespace DiscUtils.Wim
 
         private byte[] _readBuffer = new byte[2];
 
-        public XpressBitStream(Stream byteStream)
+        public BigEndianBitStream(Stream byteStream)
         {
             _byteStream = byteStream;
         }
@@ -56,7 +50,8 @@ namespace DiscUtils.Wim
         {
             if (count > 16)
             {
-                throw new ArgumentOutOfRangeException("count", count, "Maximum 16 bits can be read");
+                uint result = Read(16) << (count - 16);
+                return result | Read(count - 16);
             }
 
             EnsureBufferFilled();
@@ -92,7 +87,7 @@ namespace DiscUtils.Wim
                 _readBuffer[1] = 0;
                 _byteStream.Read(_readBuffer, 0, 2);
 
-                _buffer = (uint)((uint)(_buffer << 16) | (uint)(_readBuffer[1] << 8) | (uint)_readBuffer[0]);
+                _buffer = (uint)((uint)(_buffer << 16) | (uint)(_readBuffer[0] << 8) | (uint)_readBuffer[1]);
                 _bufferAvailable += 16;
             }
         }

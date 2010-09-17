@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2010, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,34 +20,51 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Wim
+namespace DiscUtils.Compression
 {
-    /// <summary>
-    /// Base class for bit streams.
-    /// </summary>
-    /// <remarks>The rules for conversion of a byte stream to a bit stream vary
-    /// between implementations.</remarks>
-    internal abstract class BitStream
+    internal class MoveToFront
     {
-        /// <summary>
-        /// Reads up to 16 bits of data from the stream.
-        /// </summary>
-        /// <param name="count">The number of bits to read.</param>
-        /// <returns>The bits as a UInt32</returns>
-        public abstract uint Read(int count);
+        private byte[] _buffer;
 
-        /// <summary>
-        /// Queries up to 16 bits of data from the stream.
-        /// </summary>
-        /// <param name="count">The number of bits to query.</param>
-        /// <returns>The bits as a UInt32</returns>
-        /// <remarks>This method does not consume the bits (i.e. move the file pointer)</remarks>
-        public abstract uint Peek(int count);
+        public MoveToFront()
+            : this(256, false)
+        {
+        }
 
-        /// <summary>
-        /// Consumes up to 16 bits of data from the stream.
-        /// </summary>
-        /// <param name="count">The number of bits to consume</param>
-        public abstract void Consume(int count);
+        public MoveToFront(int size, bool autoInit)
+        {
+            _buffer = new byte[size];
+
+            if (autoInit)
+            {
+                for (byte i = 0; i < size; ++i)
+                {
+                    _buffer[i] = i;
+                }
+            }
+        }
+
+        public byte Head
+        {
+            get { return _buffer[0]; }
+        }
+
+        public void Set(int pos, byte val)
+        {
+            _buffer[pos] = val;
+        }
+
+        public byte GetAndMove(int pos)
+        {
+            byte val = _buffer[pos];
+
+            for (int i = pos; i > 0; --i)
+            {
+                _buffer[i] = _buffer[i - 1];
+            }
+
+            _buffer[0] = val;
+            return val;
+        }
     }
 }

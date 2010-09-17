@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Wim
+namespace DiscUtils.Compression
 {
     /// <summary>
     /// A canonical Huffman tree implementation.

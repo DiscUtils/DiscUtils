@@ -78,6 +78,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Compression">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-09-17 21:18:15Z">
+      <Issue>
+       <Item>DiscUtils.Compression</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="130" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-09-17 21:18:15Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Compression</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="128" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Diagnostics">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-03-22 22:16:33Z">
@@ -2246,30 +2271,30 @@
          </Type>
         </Types>
        </Namespace>
-       <Namespace Name="DiscUtils.Dmg">
+       <Namespace Name="DiscUtils.Compression">
         <Types>
-         <Type Name="BlkxResource">
+         <Type Name="BZip2Crc32">
           <Members>
-           <Member Name="#CfName">
-            <Accessors>
-             <Accessor Name="#get_CfName()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2010-09-12 16:03:00Z">
-                <Issue>
-                 <Item>'BlkxResource.CfName.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="127" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
+           <Member Name="#.cctor()">
+            <Messages>
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2010-09-17 21:18:15Z">
+              <Issue>
+               <Item>'BZip2Crc32'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="129" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
            </Member>
           </Members>
          </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Dmg">
+        <Types>
          <Type Name="CompressedBlock">
           <Messages>
            <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-09-12 16:03:00Z">
@@ -2369,22 +2394,6 @@
             </Notes>
            </Message>
           </Messages>
-          <Members>
-           <Member Name="#CompLength">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-09-12 16:03:00Z">
-              <Issue>
-               <Item>'CompressedRun.CompLength'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="125" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
          </Type>
          <Type Name="GenericResource">
           <Members>
@@ -8983,6 +8992,9 @@
     <Note Id="125" Modified="2010-09-12 16:04:44Z">Fields defined in file format.</Note>
     <Note Id="126" Modified="2010-09-12 16:05:03Z">Instantiated via templates.</Note>
     <Note Id="127" Modified="2010-09-12 16:06:20Z">Defined part of file format</Note>
+    <Note Id="128" Modified="2010-09-17 21:18:44Z">Part of Project Name</Note>
+    <Note Id="129" Modified="2010-09-17 21:19:01Z">Calculated static field</Note>
+    <Note Id="130" Modified="2010-09-17 21:20:42Z">Logical separation</Note>
    </User>
   </Notes>
   <Rules>
