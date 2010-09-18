@@ -82,6 +82,7 @@ namespace DiscUtils
             set
             {
                 _entries[key] = new WeakReference(value);
+                MakeMostRecent(key, value);
                 PruneEntries();
             }
         }
