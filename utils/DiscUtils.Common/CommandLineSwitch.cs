@@ -34,6 +34,14 @@ namespace DiscUtils.Common
         private bool _isPresent;
         private string _paramValue;
 
+        public CommandLineSwitch(string fullSwitch, string paramName, string description)
+        {
+            _shortSwitches = new string[0];
+            _fullSwitch = fullSwitch;
+            _paramName = paramName;
+            _description = description;
+        }
+
         public CommandLineSwitch(string shortSwitch, string fullSwitch, string paramName, string description)
         {
             _shortSwitches = new string[] {shortSwitch};

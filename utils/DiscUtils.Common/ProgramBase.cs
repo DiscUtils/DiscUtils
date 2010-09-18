@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 namespace DiscUtils.Common
 {
@@ -38,6 +39,7 @@ namespace DiscUtils.Common
         private CommandLineSwitch _helpSwitch;
         private CommandLineSwitch _quietSwitch;
         private CommandLineSwitch _verboseSwitch;
+        private CommandLineSwitch _timeSwitch;
 
         private string _userName;
         private string _password;
@@ -145,6 +147,8 @@ namespace DiscUtils.Common
             _parser.AddSwitch(_helpSwitch);
             _quietSwitch = new CommandLineSwitch("q", "quiet", null, "Run quietly.");
             _parser.AddSwitch(_quietSwitch);
+            _timeSwitch = new CommandLineSwitch("time", null, "Times how long this program takes to execute.");
+            _parser.AddSwitch(_timeSwitch);
 
 
             bool parseResult = _parser.Parse(args);
@@ -215,7 +219,19 @@ namespace DiscUtils.Common
                 }
             }
 
-            DoRun();
+            if (_timeSwitch.IsPresent)
+            {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                DoRun();
+                stopWatch.Stop();
+
+                Console.WriteLine("Time taken: {0}", stopWatch.Elapsed);
+            }
+            else
+            {
+                DoRun();
+            }
         }
 
         protected void DisplayHelp()
