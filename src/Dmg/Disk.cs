@@ -49,7 +49,7 @@ namespace DiscUtils.Dmg
         /// </summary>
         public override Geometry Geometry
         {
-            get { return Geometry.FromCapacity(Capacity); }
+            get { return _file.Geometry; }
         }
 
         /// <summary>

@@ -48,9 +48,25 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the geometry of the virtual disk layer.
+        /// </summary>
+        public abstract Geometry Geometry
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the layer only stores meaningful sectors.
         /// </summary>
         public abstract bool IsSparse
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this is a differential disk.
+        /// </summary>
+        public abstract bool NeedsParent
         {
             get;
         }
@@ -81,6 +97,20 @@ namespace DiscUtils
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the content of this layer.
+        /// </summary>
+        /// <param name="parent">The parent stream (if any)</param>
+        /// <param name="ownsParent">Controls ownership of the parent stream</param>
+        /// <returns>The content as a stream</returns>
+        public abstract SparseStream OpenContent(SparseStream parent, Ownership ownsParent);
+
+        /// <summary>
+        /// Gets the possible locations of the parent file (if any).
+        /// </summary>
+        /// <returns>Array of strings, empty if no parent</returns>
+        public abstract string[] GetParentLocations();
 
         /// <summary>
         /// Disposes of this instance, freeing underlying resources.

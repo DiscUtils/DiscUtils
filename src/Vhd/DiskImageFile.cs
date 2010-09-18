@@ -132,7 +132,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the geometry of the virtual disk.
         /// </summary>
-        public Geometry Geometry
+        public override Geometry Geometry
         {
             get { return _footer.Geometry; }
         }
@@ -170,9 +170,9 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets a value indicating whether the VHD file is a differencing disk.
+        /// Gets a value indicating whether the file is a differencing disk.
         /// </summary>
-        public bool NeedsParent
+        public override bool NeedsParent
         {
             get { return _footer.DiskType == FileType.Differencing; }
         }
@@ -307,10 +307,42 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Opens the content of the disk image file as a stream.
+        /// </summary>
+        /// <param name="parent">The parent file's content (if any)</param>
+        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream</param>
+        /// <returns>The new content stream</returns>
+        public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
+        {
+            if (_footer.DiskType == FileType.Fixed)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+
+                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
+            }
+            else if (_footer.DiskType == FileType.Dynamic)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
+            }
+            else
+            {
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
+            }
+        }
+
+        /// <summary>
         /// Gets the location of the parent file, given a base path.
         /// </summary>
         /// <returns>Array of candidate file locations</returns>
-        public string[] GetParentLocations()
+        public override string[] GetParentLocations()
         {
             return GetParentLocations(_fileLocator);
         }
@@ -379,32 +411,6 @@ namespace DiscUtils.Vhd
             InitializeDifferencingInternal(stream, this, fullPath, relativePath, lastWriteTime);
 
             return new DiskImageFile(fileLocator, path, stream, Ownership.Dispose);
-        }
-
-        internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
-        {
-            if (_footer.DiskType == FileType.Fixed)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-
-                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
-            }
-            else if (_footer.DiskType == FileType.Dynamic)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
-            }
-            else
-            {
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
-            }
         }
 
         /// <summary>

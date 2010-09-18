@@ -34,7 +34,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// The list of files that make up the disk.
         /// </summary>
-        private List<DiscUtils.Tuple<DiskImageFile, Ownership>> _files;
+        private List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>> _files;
 
         /// <summary>
         /// The stream representing the content of this disk.
@@ -63,8 +63,8 @@ namespace DiscUtils.Vmdk
         {
             _path = path;
             FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(fileLocator, Path.GetFileName(path), access), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(fileLocator, Path.GetFileName(path), access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -81,22 +81,22 @@ namespace DiscUtils.Vmdk
                 _path = fileStream.Name;
             }
 
-            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
         }
 
         internal Disk(DiskImageFile file, Ownership ownsStream)
         {
-            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, ownsStream));
+            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(file, ownsStream));
             ResolveFileChain();
         }
 
         internal Disk(FileLocator layerLocator, string path, FileAccess access)
         {
             _path = path;
-            _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
+            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -115,9 +115,9 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                DiskImageFile file = _files[_files.Count - 1].First;
-                Geometry result = file.BiosGeometry;
-                return file.BiosGeometry ?? Geometry.MakeBiosSafe(file.Geometry, Capacity);
+                DiskImageFile file = _files[_files.Count - 1].First as DiskImageFile;
+                Geometry result = (file != null) ? file.BiosGeometry : null;
+                return result ?? Geometry.MakeBiosSafe(_files[_files.Count - 1].First.Geometry, Capacity);
             }
         }
 
@@ -126,7 +126,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override long Capacity
         {
-            get { return _files[_files.Count - 1].First.Capacity; }
+            get { return _files[0].First.Capacity; }
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace DiscUtils.Vmdk
             {
                 foreach (var file in _files)
                 {
-                    yield return file.First;
+                    yield return (DiskImageFile)file.First;
                 }
             }
         }
@@ -305,7 +305,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
-            return InitializeDifferencing(fileSystem, path, DiffDiskCreateType(_files[0].First.CreateType), _path);
+            return InitializeDifferencing(fileSystem, path, DiffDiskCreateType(_files[0].First), _path);
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace DiscUtils.Vmdk
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             var firstLayer = _files[0].First;
-            return InitializeDifferencing(path, DiffDiskCreateType(firstLayer.CreateType), firstLayer.RelativeFileLocator.GetFullPath(_path));
+            return InitializeDifferencing(path, DiffDiskCreateType(firstLayer), firstLayer.RelativeFileLocator.GetFullPath(_path));
         }
 
         internal static Disk Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
@@ -355,31 +355,55 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        private static DiskCreateType DiffDiskCreateType(DiskCreateType diskCreateType)
+        private static DiskCreateType DiffDiskCreateType(VirtualDiskLayer layer)
         {
-            switch (diskCreateType)
+            DiskImageFile vmdkLayer = layer as DiskImageFile;
+            if (vmdkLayer != null)
             {
-                case DiskCreateType.FullDevice:
-                case DiskCreateType.MonolithicFlat:
-                case DiskCreateType.MonolithicSparse:
-                case DiskCreateType.PartitionedDevice:
-                case DiskCreateType.StreamOptimized:
-                case DiskCreateType.TwoGbMaxExtentFlat:
-                case DiskCreateType.TwoGbMaxExtentSparse:
-                    return DiskCreateType.MonolithicSparse;
-                default:
-                    return DiskCreateType.VmfsSparse;
+                switch (vmdkLayer.CreateType)
+                {
+                    case DiskCreateType.FullDevice:
+                    case DiskCreateType.MonolithicFlat:
+                    case DiskCreateType.MonolithicSparse:
+                    case DiskCreateType.PartitionedDevice:
+                    case DiskCreateType.StreamOptimized:
+                    case DiskCreateType.TwoGbMaxExtentFlat:
+                    case DiskCreateType.TwoGbMaxExtentSparse:
+                        return DiskCreateType.MonolithicSparse;
+                    default:
+                        return DiskCreateType.VmfsSparse;
+                }
+            }
+            else
+            {
+                return DiskCreateType.MonolithicSparse;
             }
         }
 
         private void ResolveFileChain()
         {
-            DiskImageFile file = _files[_files.Count - 1].First;
+            VirtualDiskLayer file = _files[_files.Count - 1].First;
 
             while (file.NeedsParent)
             {
-                file = new DiskImageFile(file.RelativeFileLocator, file.ParentLocation, FileAccess.Read);
-                _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
+                bool foundParent = false;
+                FileLocator locator = file.RelativeFileLocator;
+
+                foreach (string posParent in file.GetParentLocations())
+                {
+                    if (locator.Exists(posParent))
+                    {
+                        file = VirtualDisk.OpenDiskLayer(file.RelativeFileLocator, posParent, FileAccess.Read);
+                        _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(file, Ownership.Dispose));
+                        foundParent = true;
+                        break;
+                    }
+                }
+
+                if (!foundParent)
+                {
+                    throw new IOException("Parent disk not found");
+                }
             }
         }
     }

@@ -28,11 +28,25 @@ namespace DiscUtils.Xva
     /// <remarks>XVA only supports a single layer.</remarks>
     public sealed class DiskLayer : VirtualDiskLayer
     {
+        private VirtualMachine _vm;
         private long _capacity;
+        private string _location;
 
-        internal DiskLayer(long capacity)
+        internal DiskLayer(VirtualMachine vm, long capacity, string location)
         {
+            _vm = vm;
             _capacity = capacity;
+            _location = location;
+        }
+
+        /// <summary>
+        /// Gets the disk's geometry.
+        /// </summary>
+        /// <remarks>The geometry is not stored with the disk, so this is at best
+        /// a guess of the actual geometry.</remarks>
+        public override Geometry Geometry
+        {
+            get { return Geometry.FromCapacity(_capacity); }
         }
 
         /// <summary>
@@ -42,6 +56,14 @@ namespace DiscUtils.Xva
         public override bool IsSparse
         {
             get { return true; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file is a differencing disk.
+        /// </summary>
+        public override bool NeedsParent
+        {
+            get { return false; }
         }
 
         /// <summary>
@@ -55,6 +77,31 @@ namespace DiscUtils.Xva
         internal override FileLocator RelativeFileLocator
         {
             get { return null; }
+        }
+
+        /// <summary>
+        /// Opens the content of the disk layer as a stream.
+        /// </summary>
+        /// <param name="parent">The parent file's content (if any)</param>
+        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream</param>
+        /// <returns>The new content stream</returns>
+        public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
+        {
+            if (ownsParent == Ownership.Dispose && parent != null)
+            {
+                parent.Dispose();
+            }
+
+            return new DiskStream(_vm.Archive, _capacity, _location);
+        }
+
+        /// <summary>
+        /// Gets the possible locations of the parent file (if any).
+        /// </summary>
+        /// <returns>Array of strings, empty if no parent</returns>
+        public override string[] GetParentLocations()
+        {
+            return new string[0];
         }
     }
 }

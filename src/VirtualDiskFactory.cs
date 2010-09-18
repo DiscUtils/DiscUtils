@@ -46,5 +46,7 @@ namespace DiscUtils
         {
             return OpenDisk(new DiscFileLocator(fileSystem, @"\"), path, access);
         }
+
+        public abstract VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access);
     }
 }

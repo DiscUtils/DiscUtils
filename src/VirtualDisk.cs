@@ -468,6 +468,23 @@ namespace DiscUtils
         /// <returns>The newly created disk</returns>
         public abstract VirtualDisk CreateDifferencingDisk(string path);
 
+        internal static VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
+        {
+            string extension = Path.GetExtension(path).ToUpperInvariant();
+            if (extension.StartsWith(".", StringComparison.Ordinal))
+            {
+                extension = extension.Substring(1);
+            }
+
+            VirtualDiskFactory factory;
+            if (ExtensionMap.TryGetValue(extension, out factory))
+            {
+                return factory.OpenDiskLayer(locator, path, access);
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Disposes of underlying resources.
         /// </summary>

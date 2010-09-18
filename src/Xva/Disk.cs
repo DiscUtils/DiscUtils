@@ -102,7 +102,7 @@ namespace DiscUtils.Xva
         /// </summary>
         public override IEnumerable<VirtualDiskLayer> Layers
         {
-            get { yield return new DiskLayer(Capacity); }
+            get { yield return new DiskLayer(_vm, _capacity, _location); }
         }
 
         /// <summary>

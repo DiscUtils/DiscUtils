@@ -268,7 +268,15 @@ namespace DiscUtils
                     }
                     else
                     {
-                        return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
+                        SparseStream wrappedAsSparse = _wrapped as SparseStream;
+                        if (wrappedAsSparse != null)
+                        {
+                            return wrappedAsSparse.Extents;
+                        }
+                        else
+                        {
+                            return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
+                        }
                     }
                 }
             }

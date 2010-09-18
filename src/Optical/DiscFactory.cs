@@ -55,5 +55,10 @@ namespace DiscUtils.Optical
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new Disc(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose, format);
         }
+
+        public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
+        {
+            return null;
+        }
     }
 }

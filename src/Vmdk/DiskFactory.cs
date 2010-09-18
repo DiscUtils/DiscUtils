@@ -96,5 +96,10 @@ namespace DiscUtils.Vmdk
         {
             return new Disk(locator, path, access);
         }
+
+        public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
+        {
+            return new DiskImageFile(locator, path, access);
+        }
     }
 }

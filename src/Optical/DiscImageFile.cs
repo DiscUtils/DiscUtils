@@ -103,13 +103,21 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
+        /// Gets a value indicating whether the file is a differencing disk.
+        /// </summary>
+        public override bool NeedsParent
+        {
+            get { return false; }
+        }
+
+        /// <summary>
         /// Gets the Geometry of the disc.
         /// </summary>
         /// <remarks>
         /// Optical discs don't fit the CHS model, so dummy CHS data provided, but
         /// sector size is accurate.
         /// </remarks>
-        internal static Geometry Geometry
+        public override Geometry Geometry
         {
             // Note external sector size is always 2048 - 2352 just has extra header
             // & error-correction info
@@ -129,6 +137,31 @@ namespace DiscUtils.Optical
         internal SparseStream Content
         {
             get { return _content; }
+        }
+
+        /// <summary>
+        /// Gets the content of this layer.
+        /// </summary>
+        /// <param name="parent">The parent stream (if any)</param>
+        /// <param name="ownsParent">Controls ownership of the parent stream</param>
+        /// <returns>The content as a stream</returns>
+        public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
+        {
+            if (ownsParent == Ownership.Dispose && parent != null)
+            {
+                parent.Dispose();
+            }
+
+            return SparseStream.FromStream(Content, Ownership.None);
+        }
+
+        /// <summary>
+        /// Gets the possible locations of the parent file (if any).
+        /// </summary>
+        /// <returns>Array of strings, empty if no parent</returns>
+        public override string[] GetParentLocations()
+        {
+            return new string[0];
         }
 
         /// <summary>

@@ -78,21 +78,18 @@ namespace DiscUtils.Vdi
             get { return _header.ImageType != ImageType.Fixed; }
         }
 
-        internal override long Capacity
+        /// <summary>
+        /// Gets a value indicating whether the file is a differencing disk.
+        /// </summary>
+        public override bool NeedsParent
         {
-            get { return _header.DiskSize; }
-        }
-
-        internal override FileLocator RelativeFileLocator
-        {
-            // Differencing disks not yet supported.
-            get { return null; }
+            get { return _header.ImageType == ImageType.Differencing || _header.ImageType == ImageType.Undo; }
         }
 
         /// <summary>
         /// Gets (a guess at) the geometry of the virtual disk.
         /// </summary>
-        internal Geometry Geometry
+        public override Geometry Geometry
         {
             get
             {
@@ -109,6 +106,17 @@ namespace DiscUtils.Vdi
                     return GeometryRecord.FromCapacity(_header.DiskSize).ToGeometry(_header.DiskSize);
                 }
             }
+        }
+
+        internal override long Capacity
+        {
+            get { return _header.DiskSize; }
+        }
+
+        internal override FileLocator RelativeFileLocator
+        {
+            // Differencing disks not yet supported.
+            get { return null; }
         }
 
         /// <summary>
@@ -177,7 +185,13 @@ namespace DiscUtils.Vdi
             return new DiskImageFile(stream, ownsStream);
         }
 
-        internal DiskStream OpenContent(Stream parent, Ownership ownsParent)
+        /// <summary>
+        /// Opens the content of the disk image file as a stream.
+        /// </summary>
+        /// <param name="parent">The parent file's content (if any)</param>
+        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream</param>
+        /// <returns>The new content stream</returns>
+        public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (parent != null && ownsParent == Ownership.Dispose)
             {
@@ -188,6 +202,16 @@ namespace DiscUtils.Vdi
             DiskStream stream = new DiskStream(_stream, Ownership.None, _header);
             stream.WriteOccurred += OnWriteOccurred;
             return stream;
+        }
+
+        /// <summary>
+        /// Gets the possible locations of the parent file (if any).
+        /// </summary>
+        /// <returns>Array of strings, empty if no parent</returns>
+        public override string[] GetParentLocations()
+        {
+            // Until diff/undo supported
+            return new string[0];
         }
 
         /// <summary>

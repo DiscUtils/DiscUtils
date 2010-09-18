@@ -54,5 +54,11 @@ namespace DiscUtils.Dmg
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new Disk(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
         }
+
+        public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
+        {
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
+            return new DiskImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
+        }
     }
 }

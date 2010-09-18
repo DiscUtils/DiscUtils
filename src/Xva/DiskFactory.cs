@@ -77,5 +77,10 @@ namespace DiscUtils.Xva
 
             return null;
         }
+
+        public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
+        {
+            return null;
+        }
     }
 }

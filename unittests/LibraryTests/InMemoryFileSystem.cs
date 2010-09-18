@@ -75,7 +75,7 @@ namespace DiscUtils
 
         public override bool FileExists(string path)
         {
-            throw new NotImplementedException();
+            return _files.ContainsKey(path);
         }
 
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)

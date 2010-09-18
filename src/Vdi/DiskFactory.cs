@@ -63,5 +63,12 @@ namespace DiscUtils.Vdi
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new Disk(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
         }
+
+        public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
+        {
+            FileMode mode = (access == FileAccess.Read) ? FileMode.Open : FileMode.OpenOrCreate;
+            FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
+            return new DiskImageFile(locator.Open(path, mode, access, share), Ownership.Dispose);
+        }
     }
 }

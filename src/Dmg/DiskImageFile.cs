@@ -60,9 +60,25 @@ namespace DiscUtils.Dmg
             }
         }
 
+        /// <summary>
+        /// Gets the geometry of the virtual disk layer.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return Geometry.FromCapacity(Capacity); }
+        }
+
         public override bool IsSparse
         {
             get { return _buffer != null; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file is a differencing disk.
+        /// </summary>
+        public override bool NeedsParent
+        {
+            get { return false; }
         }
 
         internal override long Capacity
@@ -75,7 +91,7 @@ namespace DiscUtils.Dmg
             get { throw new NotImplementedException(); }
         }
 
-        public SparseStream OpenContent(SparseStream parentStream, Ownership ownsStream)
+        public override SparseStream OpenContent(SparseStream parentStream, Ownership ownsStream)
         {
             if (parentStream != null && ownsStream == Ownership.Dispose)
             {
@@ -90,6 +106,15 @@ namespace DiscUtils.Dmg
             {
                 return SparseStream.FromStream(_stream, Ownership.None);
             }
+        }
+
+        /// <summary>
+        /// Gets the location of the parent file, given a base path.
+        /// </summary>
+        /// <returns>Array of candidate file locations</returns>
+        public override string[] GetParentLocations()
+        {
+            return new string[0];
         }
 
         protected override void Dispose(bool disposing)

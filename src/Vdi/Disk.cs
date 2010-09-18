@@ -33,7 +33,7 @@ namespace DiscUtils.Vdi
     {
         private DiskImageFile _diskImage;
 
-        private DiskStream _content;
+        private SparseStream _content;
 
         /// <summary>
         /// Initializes a new instance of the Disk class.

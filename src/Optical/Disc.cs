@@ -79,7 +79,7 @@ namespace DiscUtils.Optical
         /// </summary>
         public override Geometry Geometry
         {
-            get { return DiscImageFile.Geometry; }
+            get { return _file.Geometry; }
         }
 
         /// <summary>

@@ -178,6 +178,22 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets a value indicating whether this disk is a linked differencing disk.
+        /// </summary>
+        public override bool NeedsParent
+        {
+            get { return _descriptor.ParentContentId != uint.MaxValue; }
+        }
+
+        /// <summary>
+        /// Gets the Geometry of this disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _descriptor.DiskGeometry; }
+        }
+
+        /// <summary>
         /// Gets the relative paths to all of the disk's extents.
         /// </summary>
         public IEnumerable<string> ExtentPaths
@@ -189,22 +205,6 @@ namespace DiscUtils.Vmdk
                     yield return path.FileName;
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this disk is a linked differencing disk.
-        /// </summary>
-        internal bool NeedsParent
-        {
-            get { return _descriptor.ParentContentId != uint.MaxValue; }
-        }
-
-        /// <summary>
-        /// Gets the location of the parent.
-        /// </summary>
-        internal string ParentLocation
-        {
-            get { return _descriptor.ParentFileNameHint; }
         }
 
         internal uint ContentId
@@ -238,14 +238,6 @@ namespace DiscUtils.Vmdk
         internal override FileLocator RelativeFileLocator
         {
             get { return _fileLocator; }
-        }
-
-        /// <summary>
-        /// Gets the Geometry of this disk.
-        /// </summary>
-        internal Geometry Geometry
-        {
-            get { return _descriptor.DiskGeometry; }
         }
 
         /// <summary>
@@ -430,6 +422,69 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets the contents of this disk as a stream.
+        /// </summary>
+        /// <param name="parent">The content of the parent disk (needed if this is a differencing disk)</param>
+        /// <param name="ownsParent">A value indicating whether ownership of the parent stream is transfered.</param>
+        /// <returns>The stream containing the disk contents</returns>
+        public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
+        {
+            if (_descriptor.ParentContentId == uint.MaxValue)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+
+                parent = null;
+            }
+
+            if (parent == null)
+            {
+                parent = new ZeroStream(Capacity);
+                ownsParent = Ownership.Dispose;
+            }
+
+            if (_descriptor.Extents.Count == 1)
+            {
+                if (_monolithicStream != null)
+                {
+                    return new HostedSparseExtentStream(
+                        _monolithicStream,
+                        Ownership.None,
+                        0,
+                        parent,
+                        ownsParent);
+                }
+                else
+                {
+                    return OpenExtent(_descriptor.Extents[0], 0, parent, ownsParent);
+                }
+            }
+            else
+            {
+                long extentStart = 0;
+                SparseStream[] streams = new SparseStream[_descriptor.Extents.Count];
+                for (int i = 0; i < streams.Length; ++i)
+                {
+                    streams[i] = OpenExtent(_descriptor.Extents[i], extentStart, parent, (i == streams.Length - 1) ? ownsParent : Ownership.None);
+                    extentStart += _descriptor.Extents[i].SizeInSectors * Sizes.Sector;
+                }
+
+                return new ConcatStream(Ownership.Dispose, streams);
+            }
+        }
+
+        /// <summary>
+        /// Gets the location of the parent.
+        /// </summary>
+        /// <returns>The parent locations as an array.</returns>
+        public override string[] GetParentLocations()
+        {
+            return new string[] { _descriptor.ParentFileNameHint };
+        }
+
+        /// <summary>
         /// Creates a new virtual disk at the specified path.
         /// </summary>
         /// <param name="fileLocator">The object used to locate / create the component files.</param>
@@ -514,60 +569,6 @@ namespace DiscUtils.Vmdk
             header.NumGdEntries = numGDEntries;
             header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
             return header;
-        }
-
-        /// <summary>
-        /// Gets the contents of this disk as a stream.
-        /// </summary>
-        /// <param name="parent">The content of the parent disk (needed if this is a differencing disk)</param>
-        /// <param name="ownsParent">A value indicating whether ownership of the parent stream is transfered.</param>
-        /// <returns>The stream containing the disk contents</returns>
-        internal SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
-        {
-            if (_descriptor.ParentContentId == uint.MaxValue)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-
-                parent = null;
-            }
-
-            if (parent == null)
-            {
-                parent = new ZeroStream(Capacity);
-                ownsParent = Ownership.Dispose;
-            }
-
-            if (_descriptor.Extents.Count == 1)
-            {
-                if (_monolithicStream != null)
-                {
-                    return new HostedSparseExtentStream(
-                        _monolithicStream,
-                        Ownership.None,
-                        0,
-                        parent,
-                        ownsParent);
-                }
-                else
-                {
-                    return OpenExtent(_descriptor.Extents[0], 0, parent, ownsParent);
-                }
-            }
-            else
-            {
-                long extentStart = 0;
-                SparseStream[] streams = new SparseStream[_descriptor.Extents.Count];
-                for (int i = 0; i < streams.Length; ++i)
-                {
-                    streams[i] = OpenExtent(_descriptor.Extents[i], extentStart, parent, (i == streams.Length - 1) ? ownsParent : Ownership.None);
-                    extentStart += _descriptor.Extents[i].SizeInSectors * Sizes.Sector;
-                }
-
-                return new ConcatStream(Ownership.Dispose, streams);
-            }
         }
 
         /// <summary>
