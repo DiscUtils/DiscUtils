@@ -129,6 +129,11 @@ namespace DiscUtils
                 throw new ArgumentOutOfRangeException("count", "Attempt to read negative bytes");
             }
 
+            if (_position > _length)
+            {
+                return 0;
+            }
+
             _parent.Position = _first + _position;
             int numRead = _parent.Read(buffer, offset, (int)Math.Min(count, Math.Min(_length - _position, int.MaxValue)));
             _position += numRead;
