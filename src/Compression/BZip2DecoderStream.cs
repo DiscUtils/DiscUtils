@@ -32,7 +32,7 @@ namespace DiscUtils.Compression
     /// <summary>
     /// Implementation of a BZip2 decoder.
     /// </summary>
-    public class BZip2DecoderStream : Stream
+    public sealed class BZip2DecoderStream : Stream
     {
         private long _position;
         private Stream _compressedStream;
