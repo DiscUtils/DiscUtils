@@ -46,6 +46,8 @@ namespace DiscUtils.Iso9660
         private List<BuildFileInfo> _files;
         private List<BuildDirectoryInfo> _dirs;
         private BuildDirectoryInfo _rootDirectory;
+        private BootInitialEntry _bootEntry;
+        private Stream _bootImage;
 
         private BuildParameters _buildParams;
 
@@ -97,6 +99,27 @@ namespace DiscUtils.Iso9660
         {
             get { return _buildParams.UseJoliet; }
             set { _buildParams.UseJoliet = value; }
+        }
+
+        /// <summary>
+        /// Sets the boot image for the ISO image.
+        /// </summary>
+        /// <param name="image">Stream containing the boot image.</param>
+        /// <param name="emulation">The type of emulation requested of the BIOS.</param>
+        /// <param name="loadSegment">The memory segment to load the image to (0 for default).</param>
+        public void SetBootImage(Stream image, BootDeviceEmulation emulation, int loadSegment)
+        {
+            if (_bootEntry != null)
+            {
+                throw new InvalidOperationException("Boot image already set");
+            }
+
+            _bootEntry = new BootInitialEntry();
+            _bootEntry.BootIndicator = 0x88;
+            _bootEntry.BootMediaType = emulation;
+            _bootEntry.LoadSegment = (ushort)loadSegment;
+            _bootEntry.SystemType = 0;
+            _bootImage = image;
         }
 
         /// <summary>
@@ -232,6 +255,32 @@ namespace DiscUtils.Iso9660
             Dictionary<BuildDirectoryMember, uint> supplementaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
 
             long focus = DiskStart + (3 * IsoUtilities.SectorSize); // Primary, Supplementary, End (fixed at end...)
+            if (_bootEntry != null)
+            {
+                focus += IsoUtilities.SectorSize;
+            }
+
+            // ####################################################################
+            // # 0. Fix boot image location
+            // ####################################################################
+            long bootCatalogPos = 0;
+            if (_bootEntry != null)
+            {
+                long bootImagePos = focus;
+                BuilderStreamExtent bootImageExtent = new BuilderStreamExtent(focus, _bootImage);
+                fixedRegions.Add(bootImageExtent);
+                focus += Utilities.RoundUp(bootImageExtent.Length, IsoUtilities.SectorSize);
+
+                bootCatalogPos = focus;
+                byte[] bootCatalog = new byte[IsoUtilities.SectorSize];
+                BootValidationEntry bve = new BootValidationEntry();
+                bve.WriteTo(bootCatalog, 0x00);
+                _bootEntry.ImageStart = (uint)Utilities.Ceil(bootImagePos, IsoUtilities.SectorSize);
+                _bootEntry.SectorCount = (ushort)Utilities.Ceil(_bootImage.Length, Sizes.Sector);
+                _bootEntry.WriteTo(bootCatalog, 0x20);
+                fixedRegions.Add(new BuilderBufferExtent(bootCatalogPos, bootCatalog));
+                focus += IsoUtilities.SectorSize;
+            }
 
             // ####################################################################
             // # 1. Fix file locations
@@ -320,6 +369,8 @@ namespace DiscUtils.Iso9660
             // ####################################################################
             // # 4. Prepare volume descriptors now other structures are fixed
             // ####################################################################
+            int regionIdx = 0;
+            focus = DiskStart;
             PrimaryVolumeDescriptor pvDesc = new PrimaryVolumeDescriptor(
                 (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
                 (uint)primaryPathTableLength,                              // PathTableSize
@@ -329,8 +380,18 @@ namespace DiscUtils.Iso9660
                 (uint)_rootDirectory.GetDataSize(Encoding.ASCII),          // RootDirectory.DataLength
                 buildTime);
             pvDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
-            PrimaryVolumeDescriptorRegion pvdr = new PrimaryVolumeDescriptorRegion(pvDesc, DiskStart);
-            fixedRegions.Insert(0, pvdr);
+            PrimaryVolumeDescriptorRegion pvdr = new PrimaryVolumeDescriptorRegion(pvDesc, focus);
+            fixedRegions.Insert(regionIdx++, pvdr);
+            focus += IsoUtilities.SectorSize;
+
+            if (_bootEntry != null)
+            {
+                BootVolumeDescriptor bvDesc = new BootVolumeDescriptor(
+                    (uint)(bootCatalogPos / IsoUtilities.SectorSize));
+                BootVolumeDescriptorRegion bvdr = new BootVolumeDescriptorRegion(bvDesc, focus);
+                fixedRegions.Insert(regionIdx++, bvdr);
+                focus += IsoUtilities.SectorSize;
+            }
 
             SupplementaryVolumeDescriptor svDesc = new SupplementaryVolumeDescriptor(
                 (uint)(totalLength / IsoUtilities.SectorSize),             // VolumeSpaceSize
@@ -342,12 +403,13 @@ namespace DiscUtils.Iso9660
                 buildTime,
                 suppEncoding);
             svDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
-            SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, DiskStart + IsoUtilities.SectorSize);
-            fixedRegions.Insert(1, svdr);
+            SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, focus);
+            fixedRegions.Insert(regionIdx++, svdr);
+            focus += IsoUtilities.SectorSize;
 
             VolumeDescriptorSetTerminator evDesc = new VolumeDescriptorSetTerminator();
-            VolumeDescriptorSetTerminatorRegion evdr = new VolumeDescriptorSetTerminatorRegion(evDesc, DiskStart + (IsoUtilities.SectorSize * 2));
-            fixedRegions.Insert(2, evdr);
+            VolumeDescriptorSetTerminatorRegion evdr = new VolumeDescriptorSetTerminatorRegion(evDesc, focus);
+            fixedRegions.Insert(regionIdx++, evdr);
 
             return fixedRegions;
         }

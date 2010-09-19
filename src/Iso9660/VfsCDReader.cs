@@ -32,6 +32,8 @@ namespace DiscUtils.Iso9660
     {
         private Stream _data;
         private bool _hideVersions;
+        private BootVolumeDescriptor _bootVolDesc;
+        private byte[] _bootCatalog;
 
         /// <summary>
         /// Initializes a new instance of the VfsCDReader class.
@@ -66,13 +68,22 @@ namespace DiscUtils.Iso9660
                 switch (bvd.VolumeDescriptorType)
                 {
                     case VolumeDescriptorType.Boot:
+                        _bootVolDesc = new BootVolumeDescriptor(buffer, 0);
+                        if (_bootVolDesc.SystemId != BootVolumeDescriptor.ElToritoSystemIdentifier)
+                        {
+                            _bootVolDesc = null;
+                        }
+
                         break;
+
                     case VolumeDescriptorType.Primary: // Primary Vol Descriptor
                         pvdPos = vdpos;
                         break;
+
                     case VolumeDescriptorType.Supplementary: // Supplementary Vol Descriptor
                         svdPos = vdpos;
                         break;
+
                     case VolumeDescriptorType.Partition: // Volume Partition Descriptor
                         break;
                     case VolumeDescriptorType.SetTerminator: // Volume Descriptor Set Terminator
@@ -117,6 +128,67 @@ namespace DiscUtils.Iso9660
             get { return Context.VolumeDescriptor.VolumeIdentifier; }
         }
 
+        public bool HasBootImage
+        {
+            get
+            {
+                if (_bootVolDesc == null)
+                {
+                    return false;
+                }
+
+                byte[] bootCatalog = GetBootCatalog();
+                if (bootCatalog == null)
+                {
+                    return false;
+                }
+
+                BootValidationEntry entry = new BootValidationEntry(bootCatalog, 0);
+                return entry.ChecksumValid;
+            }
+        }
+
+        public BootDeviceEmulation BootEmulation
+        {
+            get
+            {
+                BootInitialEntry initialEntry = GetBootInitialEntry();
+                if (initialEntry != null)
+                {
+                    return initialEntry.BootMediaType;
+                }
+
+                return BootDeviceEmulation.NoEmulation;
+            }
+        }
+
+        public int BootLoadSegment
+        {
+            get
+            {
+                BootInitialEntry initialEntry = GetBootInitialEntry();
+                if (initialEntry != null)
+                {
+                    return initialEntry.LoadSegment;
+                }
+
+                return 0;
+            }
+        }
+
+        public Stream OpenBootImage()
+        {
+            BootInitialEntry initialEntry = GetBootInitialEntry();
+            if (initialEntry != null)
+            {
+                return new SubStream(_data, initialEntry.ImageStart * IsoUtilities.SectorSize, initialEntry.SectorCount * Sizes.Sector);
+            }
+            else
+            {
+                throw new InvalidOperationException("No valid boot image");
+            }
+        }
+
         protected override File ConvertDirEntryToFile(DirectoryRecord dirEntry)
         {
             if (dirEntry.IsDirectory)
@@ -141,6 +213,34 @@ namespace DiscUtils.Iso9660
             }
 
             return name;
+        }
+
+        private BootInitialEntry GetBootInitialEntry()
+        {
+            byte[] bootCatalog = GetBootCatalog();
+            if (bootCatalog == null)
+            {
+                return null;
+            }
+
+            BootValidationEntry validationEntry = new BootValidationEntry(bootCatalog, 0);
+            if (!validationEntry.ChecksumValid)
+            {
+                return null;
+            }
+
+            return new BootInitialEntry(bootCatalog, 0x20);
+        }
+
+        private byte[] GetBootCatalog()
+        {
+            if (_bootCatalog == null && _bootVolDesc != null)
+            {
+                _data.Position = _bootVolDesc.CatalogSector * IsoUtilities.SectorSize;
+                _bootCatalog = Utilities.ReadFully(_data, IsoUtilities.SectorSize);
+            }
+
+            return _bootCatalog;
         }
     }
 }

@@ -47,5 +47,36 @@ namespace DiscUtils.Iso9660
 
             Assert.IsTrue(fs.Exists(@"ADIR\AFILE.TXT"));
         }
+
+        [Test]
+        public void BootImage()
+        {
+            byte[] memoryStream = new byte[33 * 512];
+            for(int i = 0; i < memoryStream.Length; ++i)
+            {
+                memoryStream[i] = (byte)i;
+            }
+
+            CDBuilder builder = new CDBuilder();
+            builder.SetBootImage(new MemoryStream(memoryStream), BootDeviceEmulation.HardDisk, 0x543);
+
+            CDReader fs = new CDReader(builder.Build(), false);
+            Assert.IsTrue(fs.HasBootImage);
+
+            using (Stream bootImg = fs.OpenBootImage())
+            {
+                Assert.AreEqual(memoryStream.Length, bootImg.Length);
+                for (int i = 0; i < bootImg.Length; ++i)
+                {
+                    if (memoryStream[i] != bootImg.ReadByte())
+                    {
+                        Assert.Fail("Boot image corrupted");
+                    }
+                }
+            }
+
+            Assert.AreEqual(BootDeviceEmulation.HardDisk, fs.BootEmulation);
+            Assert.AreEqual(0x543, fs.BootLoadSegment);
+        }
     }
 }

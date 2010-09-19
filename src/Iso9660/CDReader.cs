@@ -52,6 +52,39 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets a value indicating whether a boot image is present.
+        /// </summary>
+        public bool HasBootImage
+        {
+            get
+            {
+                return GetRealFileSystem<VfsCDReader>().HasBootImage;
+            }
+        }
+
+        /// <summary>
+        /// Gets the emulation requested of BIOS when the image is loaded.
+        /// </summary>
+        public BootDeviceEmulation BootEmulation
+        {
+            get
+            {
+                return GetRealFileSystem<VfsCDReader>().BootEmulation;
+            }
+        }
+
+        /// <summary>
+        /// Gets the memory segment the image should be loaded into (0 for default).
+        /// </summary>
+        public int BootLoadSegment
+        {
+            get
+            {
+                return GetRealFileSystem<VfsCDReader>().BootLoadSegment;
+            }
+        }
+
+        /// <summary>
         /// Detects if a stream contains a valid ISO file system.
         /// </summary>
         /// <param name="data">The stream to inspect</param>
@@ -74,6 +107,15 @@ namespace DiscUtils.Iso9660
 
             BaseVolumeDescriptor bvd = new BaseVolumeDescriptor(buffer, 0);
             return bvd.StandardIdentifier == "CD001";
+        }
+
+        /// <summary>
+        /// Opens a stream containing the boot image.
+        /// </summary>
+        /// <returns>The boot image as a stream</returns>
+        public Stream OpenBootImage()
+        {
+            return GetRealFileSystem<VfsCDReader>().OpenBootImage();
         }
     }
 }

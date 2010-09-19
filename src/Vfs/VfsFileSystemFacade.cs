@@ -526,5 +526,16 @@ namespace DiscUtils.Vfs
         {
             return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>)_wrapped;
         }
+
+        /// <summary>
+        /// Provides access to the actual file system implementation
+        /// </summary>
+        /// <typeparam name="T">The concrete type of the actual file system.</typeparam>
+        /// <returns>The actual file system instance.</returns>
+        protected T GetRealFileSystem<T>()
+            where T : DiscFileSystem
+        {
+            return (T)_wrapped;
+        }
     }
 }

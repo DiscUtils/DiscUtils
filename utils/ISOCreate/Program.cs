@@ -31,6 +31,7 @@ namespace ISOCreate
     {
         private CommandLineParameter _isoFileParam;
         private CommandLineParameter _srcDir;
+        private CommandLineParameter _bootImage;
         private CommandLineSwitch _volLabelSwitch;
 
         static void Main(string[] args)
@@ -43,10 +44,12 @@ namespace ISOCreate
         {
             _isoFileParam = new CommandLineParameter("iso_file", "The ISO file to create.", false);
             _srcDir = new CommandLineParameter("sourcedir", "The directory to be added to the ISO", false);
+            _bootImage = new CommandLineParameter("bootimage", "The bootable disk image, to create a bootable ISO", true);
             _volLabelSwitch = new CommandLineSwitch("vl", "vollabel", "label", "Volume Label for the ISO file.");
 
             parser.AddParameter(_isoFileParam);
             parser.AddParameter(_srcDir);
+            parser.AddParameter(_bootImage);
             parser.AddSwitch(_volLabelSwitch);
 
             return StandardSwitches.Default;
@@ -68,6 +71,10 @@ namespace ISOCreate
                 builder.VolumeIdentifier = _volLabelSwitch.Value;
             }
 
+            if (_bootImage.IsPresent)
+            {
+                builder.SetBootImage(new FileStream(_bootImage.Value, FileMode.Open, FileAccess.Read), BootDeviceEmulation.NoEmulation, 0);
+            }
 
             PopulateFromFolder(builder, di, di.FullName);
 

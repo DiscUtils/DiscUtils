@@ -226,6 +226,11 @@
     <Compile Include="Iscsi\TextRequest.cs" />
     <Compile Include="Iscsi\TextResponse.cs" />
     <Compile Include="Iso9660\BaseVolumeDescriptor.cs" />
+    <Compile Include="Iso9660\BootDeviceEmulation.cs" />
+    <Compile Include="Iso9660\BootInitialEntry.cs" />
+    <Compile Include="Iso9660\BootValidationEntry.cs" />
+    <Compile Include="Iso9660\BootVolumeDescriptor.cs" />
+    <Compile Include="Iso9660\BootVolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\BuildDirectoryInfo.cs" />
     <Compile Include="Iso9660\BuildDirectoryMember.cs" />
     <Compile Include="Iso9660\BuildFileInfo.cs" />
