@@ -26,7 +26,7 @@ namespace DiscUtils.Raw
     using System.Collections.Generic;
     using System.IO;
 
-    [VirtualDiskFactory("RAW", ".img,.ima,.vfd,.flp")]
+    [VirtualDiskFactory("RAW", ".img,.ima,.vfd,.flp,.bif")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
