@@ -101,8 +101,7 @@
             <entry>
               <para>Notes:</para>
               <para>
-                <superscript>1</superscript>
-                VMFS and VMFS Sparse only
+                <superscript>1</superscript>VMFS and VMFS Sparse only
               </para>
             </entry>
           </row>
@@ -153,15 +152,42 @@
             <entry>
               <para>Optical disks are essentially a pure file system image.  Notes:</para>
               <para>
-                <superscript>1</superscript>
-                For ISO 9660 file system only, using the ISO 9660 file system support.
+                <superscript>1</superscript>For ISO 9660 file system only, using the ISO 9660 file system support.
               </para>
             </entry>
           </row>
 
           <row>
             <!-- File Format -->
-            <entry>Raw (.img, .ima, .vfd, .flp)</entry>
+            <entry>Apple Disk Image (.dmg)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>
+              Yes<superscript>1</superscript>
+            </entry>
+            <!-- Create -->
+            <entry>Yes</entry>
+            <!-- Build -->
+            <entry>No</entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>No</entry>
+            <!-- Differencing Disks -->
+            <entry>No</entry>
+            <!-- Notes -->
+            <entry>
+              <para>The following variants are currently supported: UDRW (Read/Write), UDCO (ADC Compressed), UDZO (Zlib compressed), UDBZ (BZip2 compressed).  Notes:</para>
+              <para>
+                <superscript>1</superscript>Only for UDRW type.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Raw (.img, .ima, .vfd, .flp, .bif)</entry>
             <!-- Read -->
             <entry>Yes</entry>
             <!-- Modify -->
