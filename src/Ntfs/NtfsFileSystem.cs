@@ -471,6 +471,11 @@ namespace DiscUtils.Ntfs
                     throw new IOException("Unable to delete non-empty directory");
                 }
 
+                if ((dirEntry.Details.FileAttributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    RemoveReparsePoint(dir);
+                }
+
                 RemoveFileFromDirectory(parentDir, dir, Path.GetFileName(path));
 
                 if (dir.HardLinkCount == 0)
@@ -505,6 +510,11 @@ namespace DiscUtils.Ntfs
                 }
 
                 File file = GetFile(dirEntry.Reference);
+
+                if ((dirEntry.Details.FileAttributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    RemoveReparsePoint(file);
+                }
 
                 RemoveFileFromDirectory(parentDir, file, Path.GetFileName(path));
 
@@ -1422,35 +1432,13 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     File file = GetFile(dirEntry.Reference);
+                    RemoveReparsePoint(file);
 
-                    NtfsStream stream = file.GetStream(AttributeType.ReparsePoint, null);
-                    if (stream != null)
-                    {
-                        ReparsePointRecord rp = new ReparsePointRecord();
+                    // Update the directory entry used to open the file, so it's accurate
+                    dirEntry.UpdateFrom(file);
 
-                        using (Stream contentStream = stream.Open(FileAccess.Read))
-                        {
-                            byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
-                            rp.ReadFrom(buffer, 0);
-                        }
-
-                        file.RemoveStream(stream);
-
-                        // Update the standard information attribute - so it reflects the actual file state
-                        NtfsStream stdInfoStream = file.GetStream(AttributeType.StandardInformation, null);
-                        StandardInformation si = stdInfoStream.GetContent<StandardInformation>();
-                        si.FileAttributes = si.FileAttributes & ~FileAttributeFlags.ReparsePoint;
-                        stdInfoStream.SetContent(si);
-
-                        // Update the directory entry used to open the file, so it's accurate
-                        dirEntry.UpdateFrom(file);
-
-                        // Write attribute changes back to the Master File Table
-                        file.UpdateRecordInMft();
-
-                        // Remove the reparse point from the index
-                        _context.ReparsePoints.Remove(rp.Tag, dirEntry.Reference);
-                    }
+                    // Write attribute changes back to the Master File Table
+                    file.UpdateRecordInMft();
                 }
             }
         }
@@ -2017,6 +2005,32 @@ namespace DiscUtils.Ntfs
             }
 
             return entry;
+        }
+
+        private void RemoveReparsePoint(File file)
+        {
+            NtfsStream stream = file.GetStream(AttributeType.ReparsePoint, null);
+            if (stream != null)
+            {
+                ReparsePointRecord rp = new ReparsePointRecord();
+
+                using (Stream contentStream = stream.Open(FileAccess.Read))
+                {
+                    byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                    rp.ReadFrom(buffer, 0);
+                }
+
+                file.RemoveStream(stream);
+
+                // Update the standard information attribute - so it reflects the actual file state
+                NtfsStream stdInfoStream = file.GetStream(AttributeType.StandardInformation, null);
+                StandardInformation si = stdInfoStream.GetContent<StandardInformation>();
+                si.FileAttributes = si.FileAttributes & ~FileAttributeFlags.ReparsePoint;
+                stdInfoStream.SetContent(si);
+
+                // Remove the reparse point from the index
+                _context.ReparsePoints.Remove(rp.Tag, file.MftReference);
+            }
         }
 
         private RawSecurityDescriptor DoGetSecurity(File file)
