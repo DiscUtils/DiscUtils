@@ -24,11 +24,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using DiscUtils;
 using DiscUtils.Common;
-using DiscUtils.Partitions;
 using DiscUtils.Ntfs;
-using System.Security.Principal;
+using DiscUtils.Partitions;
 
 namespace DiskClone
 {
