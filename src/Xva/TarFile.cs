@@ -55,7 +55,7 @@ namespace DiscUtils.Xva
             }
         }
 
-        internal bool TryOpenFile(string path, out Stream stream)
+        public bool TryOpenFile(string path, out Stream stream)
         {
             if (_files.ContainsKey(path))
             {
@@ -68,7 +68,7 @@ namespace DiscUtils.Xva
             return false;
         }
 
-        internal Stream OpenFile(string path)
+        public Stream OpenFile(string path)
         {
             if (_files.ContainsKey(path))
             {
@@ -99,6 +99,21 @@ namespace DiscUtils.Xva
             }
 
             return false;
+        }
+
+        internal IEnumerable<FileRecord> GetFiles(string dir)
+        {
+            string searchStr = dir;
+            searchStr = searchStr.Replace(@"\", "/");
+            searchStr = searchStr.EndsWith(@"/", StringComparison.Ordinal) ? searchStr : searchStr + @"/";
+
+            foreach (var filePath in _files.Keys)
+            {
+                if (filePath.StartsWith(searchStr, StringComparison.Ordinal))
+                {
+                    yield return _files[filePath];
+                }
+            }
         }
     }
 }

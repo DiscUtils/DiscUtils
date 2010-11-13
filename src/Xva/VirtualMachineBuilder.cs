@@ -143,8 +143,8 @@ namespace DiscUtils.Xva
 
                             HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
 
-                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], i), chunkHashStream);
-                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], i), new ChecksumStream(hashAlg));
+                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}", diskIds[diskIdx], i), chunkHashStream);
+                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}.checksum", diskIds[diskIdx], i), new ChecksumStream(hashAlg));
 
                             lastChunkAdded = i;
                         }
@@ -158,8 +158,8 @@ namespace DiscUtils.Xva
                     HashAlgorithm hashAlg = new SHA1Managed();
                     Stream chunkStream = new ZeroStream(Sizes.OneMiB);
                     HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
-                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}", diskIds[diskIdx], lastActualChunk), chunkHashStream);
-                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:X8}.checksum", diskIds[diskIdx], lastActualChunk), new ChecksumStream(hashAlg));
+                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}", diskIds[diskIdx], lastActualChunk), chunkHashStream);
+                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}.checksum", diskIds[diskIdx], lastActualChunk), new ChecksumStream(hashAlg));
                 }
 
                 ++diskIdx;

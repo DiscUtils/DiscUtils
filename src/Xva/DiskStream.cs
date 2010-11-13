@@ -38,6 +38,7 @@ namespace DiscUtils.Xva
 
         private int _currentChunkIndex;
         private Stream _currentChunkData;
+        private int[] _skipChunks;
 
         public DiskStream(TarFile archive, long length, string dir)
         {
@@ -51,6 +52,8 @@ namespace DiscUtils.Xva
             }
 
             int numChunks = (int)((length + Sizes.OneMiB - 1) / Sizes.OneMiB);
+
+            ReadChunkSkipList();
         }
 
         public override bool CanRead
@@ -142,7 +145,7 @@ namespace DiscUtils.Xva
                 throw new IOException("Attempt to read beyond end of stream");
             }
 
-            int chunk = (int)(_position / Sizes.OneMiB);
+            int chunk = CorrectChunkIndex((int)(_position / Sizes.OneMiB));
 
             if (_currentChunkIndex != chunk || _currentChunkData == null)
             {
@@ -152,7 +155,7 @@ namespace DiscUtils.Xva
                     _currentChunkData = null;
                 }
 
-                if (!_archive.TryOpenFile(string.Format(CultureInfo.InvariantCulture, @"{0}/{1:X8}", _dir, chunk), out _currentChunkData))
+                if (!_archive.TryOpenFile(string.Format(CultureInfo.InvariantCulture, @"{0}/{1:D8}", _dir, chunk), out _currentChunkData))
                 {
                     _currentChunkData = new ZeroStream(Sizes.OneMiB);
                 }
@@ -160,7 +163,7 @@ namespace DiscUtils.Xva
                 _currentChunkIndex = chunk;
             }
 
-            long chunkOffset = _position - (chunk * Sizes.OneMiB);
+            long chunkOffset = _position % Sizes.OneMiB;
             int toRead = Math.Min((int)Math.Min(Sizes.OneMiB - chunkOffset, _length - _position), count);
 
             _currentChunkData.Position = chunkOffset;
@@ -205,7 +208,45 @@ namespace DiscUtils.Xva
 
         private bool ChunkExists(int i)
         {
-            return _archive.FileExists(string.Format(CultureInfo.InvariantCulture, @"{0}/{1:X8}", _dir, i));
+            return _archive.FileExists(string.Format(CultureInfo.InvariantCulture, @"{0}/{1:D8}", _dir, CorrectChunkIndex(i)));
+        }
+
+        private void ReadChunkSkipList()
+        {
+            List<int> skipChunks = new List<int>();
+            foreach (var fileInfo in _archive.GetFiles(_dir))
+            {
+                if (fileInfo.Length == 0)
+                {
+                    string path = fileInfo.Name.Replace('/', '\\');
+                    int index;
+                    if (int.TryParse(Utilities.GetFileFromPath(path), NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
+                    {
+                        skipChunks.Add(index);
+                    }
+                }
+            }
+
+            skipChunks.Sort();
+            _skipChunks = skipChunks.ToArray();
+        }
+
+        private int CorrectChunkIndex(int rawIndex)
+        {
+            int index = rawIndex;
+            for (int i = 0; i < _skipChunks.Length; ++i)
+            {
+                if (index >= _skipChunks[i])
+                {
+                    ++index;
+                }
+                else if (index < +_skipChunks[i])
+                {
+                    break;
+                }
+            }
+
+            return index;
         }
     }
 }
