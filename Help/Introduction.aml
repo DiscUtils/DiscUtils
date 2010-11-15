@@ -380,6 +380,14 @@
             <entry>No</entry>
             <entry />
           </row>
+          <row>
+            <entry>ext2</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry />
+          </row>
         </table>
       </content>
 
