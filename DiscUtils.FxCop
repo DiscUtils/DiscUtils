@@ -154,6 +154,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Ext2">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-11-15 00:48:30Z">
+      <Issue>
+       <Item>DiscUtils.Ext2</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="134" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-11-15 00:48:30Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Ext2</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="133" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Fat">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2008-11-10 13:17:45Z">
@@ -919,6 +944,20 @@
             </Messages>
            </Member>
           </Members>
+         </Type>
+         <Type Name="UnixFileType">
+          <Messages>
+           <Message TypeName="MarkEnumsWithFlags" Category="Microsoft.Design" CheckId="CA1027" Status="Excluded" Created="2010-11-15 00:48:30Z">
+            <Issue>
+             <Item>'UnixFileType'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="137" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
          </Type>
          <Type Name="Utilities">
           <Members>
@@ -2708,6 +2747,762 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="125" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Ext2">
+        <Types>
+         <Type Name="BlockGroup">
+          <Members>
+           <Member Name="#BlockBitmapBlock">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'BlockGroup.BlockBitmapBlock'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FreeBlocksCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'BlockGroup.FreeBlocksCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FreeInodesCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'BlockGroup.FreeInodesCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InodeBitmapBlock">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'BlockGroup.InodeBitmapBlock'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UsedDirsCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'BlockGroup.UsedDirsCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Inode">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-11-15 00:48:30Z">
+            <Issue>
+             <Item>'Inode'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="136" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#BlocksCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.BlocksCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeletionTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.DeletionTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DirAcl">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.DirAcl'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileAcl">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.FileAcl'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FileVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.FileVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FragAddress">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.FragAddress'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Fragment">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.Fragment'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FragmentSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.FragmentSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LinksCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.LinksCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#TripleIndirectBlock">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'Inode.TripleIndirectBlock'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="SuperBlock">
+          <Members>
+           <Member Name="#BlockGroupNumber">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.BlockGroupNumber'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CheckInterval">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.CheckInterval'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CompatibleFeatures">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.CompatibleFeatures'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CompressionAlgorithmUsageBitmap">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.CompressionAlgorithmUsageBitmap'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CreatorOS">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.CreatorOS'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DefaultHashVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.DefaultHashVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DefaultMountOptions">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.DefaultMountOptions'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DefaultReservedBlockGid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.DefaultReservedBlockGid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DefaultReservedBlockUid">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.DefaultReservedBlockUid'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DirPreallocateBlockCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.DirPreallocateBlockCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Errors">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.Errors'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FirstInode">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.FirstInode'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FirstMetablockBlockGroup">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.FirstMetablockBlockGroup'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FragsPerGroup">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.FragsPerGroup'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FreeBlocksCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.FreeBlocksCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#FreeInodesCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.FreeInodesCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#IncompatibleFeatures">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.IncompatibleFeatures'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#InodesCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.InodesCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#JournalDevice">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.JournalDevice'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#JournalInode">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.JournalInode'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#JournalSuperBlockUniqueId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.JournalSuperBlockUniqueId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LastCheckTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.LastCheckTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LastMountPoint">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.LastMountPoint'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LastOrphan">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.LastOrphan'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LogFragSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.LogFragSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MaxMountCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.MaxMountCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MinorRevisionLevel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.MinorRevisionLevel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MountCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.MountCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#MountTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.MountTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#PreallocateBlockCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.PreallocateBlockCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ReadOnlyCompatibleFeatures">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.ReadOnlyCompatibleFeatures'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ReservedBlocksCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.ReservedBlocksCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#RevisionLevel">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.RevisionLevel'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#State">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.State'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#UniqueId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.UniqueId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#WriteTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-15 00:48:30Z">
+              <Issue>
+               <Item>'SuperBlock.WriteTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="135" />
                </User>
               </Notes>
              </Message>
@@ -9095,6 +9890,11 @@
     <Note Id="130" Modified="2010-09-17 21:20:42Z">Logical separation</Note>
     <Note Id="131" Modified="2010-09-18 23:13:14Z">Physical storage type is byte</Note>
     <Note Id="132" Modified="2010-09-19 09:33:19Z">Complex names.</Note>
+    <Note Id="133" Modified="2010-11-15 00:48:51Z">Ext2 is the name of the file system</Note>
+    <Note Id="134" Modified="2010-11-15 00:48:59Z">Folder per file system.</Note>
+    <Note Id="135" Modified="2010-11-15 00:49:23Z">Defined part of the file system structure.</Note>
+    <Note Id="136" Modified="2010-11-15 00:49:37Z">Instantiated via templates.</Note>
+    <Note Id="137" Modified="2010-11-15 00:50:26Z">Not flags.</Note>
    </User>
   </Notes>
   <Rules>

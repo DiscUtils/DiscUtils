@@ -11,3 +11,4 @@ glob:layout
 glob:Help\Output
 glob:scratch
 glob:*StyleCop.Cache
+glob:DiscUtilsScratch.sln

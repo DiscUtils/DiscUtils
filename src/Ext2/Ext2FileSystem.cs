@@ -1,0 +1,69 @@
+﻿//
+// Copyright (c) 2008-2010, Kenneth Bell
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+//
+
+namespace DiscUtils.Ext2
+{
+    using System.IO;
+    using DiscUtils.Vfs;
+
+    /// <summary>
+    /// Read-only access to ext2 file systems.
+    /// </summary>
+    public sealed class Ext2FileSystem : VfsFileSystemFacade, IUnixFileSystem
+    {
+        /// <summary>
+        /// Initializes a new instance of the Ext2FileSystem class.
+        /// </summary>
+        /// <param name="stream">The stream containing the ext2 file system.</param>
+        public Ext2FileSystem(Stream stream)
+            : base(new VfsExt2FileSystem(stream))
+        {
+        }
+
+        /// <summary>
+        /// Retrieves Unix-specific information about a file or directory.
+        /// </summary>
+        /// <param name="path">Path to the file or directory</param>
+        /// <returns>Information about the owner, group, permissions and type of the
+        /// file or directory.</returns>
+        public UnixFileSystemInfo GetUnixFileInfo(string path)
+        {
+            return GetRealFileSystem<VfsExt2FileSystem>().GetUnixFileInfo(path);
+        }
+
+        internal static bool Detect(Stream stream)
+        {
+            if (stream.Length < 2048)
+            {
+                return false;
+            }
+
+            stream.Position = 1024;
+            byte[] superblockData = Utilities.ReadFully(stream, 1024);
+
+            SuperBlock superblock = new SuperBlock();
+            superblock.ReadFrom(superblockData, 0);
+
+            return superblock.Magic == SuperBlock.Ext2Magic;
+        }
+    }
+}

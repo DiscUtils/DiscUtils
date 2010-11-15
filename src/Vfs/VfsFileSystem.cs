@@ -522,26 +522,6 @@ namespace DiscUtils.Vfs
             return file.FileLength;
         }
 
-        internal TFile GetFile(string path)
-        {
-            if (IsRoot(path))
-            {
-                return _rootDir;
-            }
-            else if (path == null)
-            {
-                return default(TFile);
-            }
-
-            TDirEntry dirEntry = GetDirectoryEntry(path);
-            if (dirEntry == null)
-            {
-                throw new FileNotFoundException("No such file or directory", path);
-            }
-
-            return GetFile(dirEntry);
-        }
-
         internal TFile GetFile(TDirEntry dirEntry)
         {
             long cacheKey = dirEntry.UniqueCacheId;
@@ -575,6 +555,31 @@ namespace DiscUtils.Vfs
         internal TDirEntry GetDirectoryEntry(string path)
         {
             return GetDirectoryEntry(_rootDir, path);
+        }
+
+        /// <summary>
+        /// Gets the file object for a given path.
+        /// </summary>
+        /// <param name="path">The path to query.</param>
+        /// <returns>The file object corresponding to the path</returns>
+        protected TFile GetFile(string path)
+        {
+            if (IsRoot(path))
+            {
+                return _rootDir;
+            }
+            else if (path == null)
+            {
+                return default(TFile);
+            }
+
+            TDirEntry dirEntry = GetDirectoryEntry(path);
+            if (dirEntry == null)
+            {
+                throw new FileNotFoundException("No such file or directory", path);
+            }
+
+            return GetFile(dirEntry);
         }
 
         /// <summary>

@@ -66,6 +66,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <StyleCopEnabled>true</StyleCopEnabled>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -152,6 +153,18 @@
     <Compile Include="Dmg\UdifChecksum.cs" />
     <Compile Include="Dmg\UdifResourceFile.cs" />
     <Compile Include="Dmg\Disk.cs" />
+    <Compile Include="Ext2\BlockGroup.cs" />
+    <Compile Include="Ext2\Directory.cs" />
+    <Compile Include="Ext2\DirectoryRecord.cs" />
+    <Compile Include="Ext2\DirEntry.cs" />
+    <Compile Include="Ext2\Ext2Context.cs" />
+    <Compile Include="Ext2\Ext2FileSystem.cs" />
+    <Compile Include="Ext2\File.cs" />
+    <Compile Include="Ext2\FileBuffer.cs" />
+    <Compile Include="Ext2\FileSystemFactory.cs" />
+    <Compile Include="Ext2\Inode.cs" />
+    <Compile Include="Ext2\VfsExt2FileSystem.cs" />
+    <Compile Include="Ext2\SuperBlock.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
     <Compile Include="Fat\ClusterStream.cs" />
     <Compile Include="Fat\Directory.cs" />
@@ -256,6 +269,7 @@
     <Compile Include="Iso9660\VolumeDescriptorRegion.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminator.cs" />
     <Compile Include="Iso9660\VolumeDescriptorSetTerminatorRegion.cs" />
+    <Compile Include="IUnixFileSystem.cs" />
     <Compile Include="IWindowsFileSystem.cs" />
     <Compile Include="LittleEndianDataReader.cs" />
     <Compile Include="LocalFileLocator.cs" />
@@ -505,6 +519,8 @@
     <Compile Include="Udf\UnallocatedSpaceDescriptor.cs" />
     <Compile Include="Udf\VirtualPartitionMap.cs" />
     <Compile Include="UnixFilePermissions.cs" />
+    <Compile Include="UnixFileSystemInfo.cs" />
+    <Compile Include="UnixFileType.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Vdi\Disk.cs" />
     <Compile Include="Vdi\DiskFactory.cs" />
