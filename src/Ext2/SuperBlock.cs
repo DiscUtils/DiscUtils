@@ -28,6 +28,11 @@ namespace DiscUtils.Ext2
     {
         public const ushort Ext2Magic = 0xEF53;
 
+        /// <summary>
+        /// Old revision, not supported by DiscUtils.
+        /// </summary>
+        public const uint OldRevision = 0;
+
         public uint InodesCount;
         public uint BlocksCount;
         public uint ReservedBlocksCount;
@@ -57,9 +62,9 @@ namespace DiscUtils.Ext2
         public uint FirstInode;
         public ushort InodeSize;
         public ushort BlockGroupNumber;
-        public uint CompatibleFeatures;
-        public uint IncompatibleFeatures;
-        public uint ReadOnlyCompatibleFeatures;
+        public CompatibleFeatures CompatibleFeatures;
+        public IncompatibleFeatures IncompatibleFeatures;
+        public ReadOnlyCompatibleFeatures ReadOnlyCompatibleFeatures;
         public Guid UniqueId;
         public string VolumeName;
         public string LastMountPoint;
@@ -118,9 +123,9 @@ namespace DiscUtils.Ext2
             FirstInode = Utilities.ToUInt32LittleEndian(buffer, offset + 84);
             InodeSize = Utilities.ToUInt16LittleEndian(buffer, offset + 88);
             BlockGroupNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 90);
-            CompatibleFeatures = Utilities.ToUInt32LittleEndian(buffer, offset + 92);
-            IncompatibleFeatures = Utilities.ToUInt32LittleEndian(buffer, offset + 96);
-            ReadOnlyCompatibleFeatures = Utilities.ToUInt32LittleEndian(buffer, offset + 100);
+            CompatibleFeatures = (CompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 92);
+            IncompatibleFeatures = (IncompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 96);
+            ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 100);
             UniqueId = Utilities.ToGuidLittleEndian(buffer, offset + 104);
             VolumeName = Utilities.BytesToString(buffer, offset + 120, 16).Trim('\0');
             LastMountPoint = Utilities.BytesToString(buffer, offset + 136, 64).Trim('\0');

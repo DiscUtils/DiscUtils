@@ -154,6 +154,7 @@
     <Compile Include="Dmg\UdifResourceFile.cs" />
     <Compile Include="Dmg\Disk.cs" />
     <Compile Include="Ext2\BlockGroup.cs" />
+    <Compile Include="Ext2\CompatibleFeatures.cs" />
     <Compile Include="Ext2\Directory.cs" />
     <Compile Include="Ext2\DirectoryRecord.cs" />
     <Compile Include="Ext2\DirEntry.cs" />
@@ -162,7 +163,9 @@
     <Compile Include="Ext2\File.cs" />
     <Compile Include="Ext2\FileBuffer.cs" />
     <Compile Include="Ext2\FileSystemFactory.cs" />
+    <Compile Include="Ext2\IncompatibleFeatures.cs" />
     <Compile Include="Ext2\Inode.cs" />
+    <Compile Include="Ext2\ReadOnlyCompatibleFeatures.cs" />
     <Compile Include="Ext2\VfsExt2FileSystem.cs" />
     <Compile Include="Ext2\SuperBlock.cs" />
     <Compile Include="Fat\ClusterReader.cs" />
