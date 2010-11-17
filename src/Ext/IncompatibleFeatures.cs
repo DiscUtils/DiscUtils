@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System;
     using System.Collections.Generic;
@@ -30,41 +30,46 @@ namespace DiscUtils.Ext2
     /// Feature flags for features backwards compatible with read-only mounting.
     /// </summary>
     [Flags]
-    internal enum ReadOnlyCompatibleFeatures : ushort
+    internal enum IncompatibleFeatures : ushort
     {
         /// <summary>
-        /// Indicates that not all block groups contain a backup superblock.
+        /// File compression used (not used in mainline?).
         /// </summary>
-        SparseSuperblock = 0x0001,
+        Compression = 0x0001,
 
         /// <summary>
-        /// Indicates file system contains files greater than 0x7FFFFFFF in size (limit of unsigned uints).
+        /// Indicates that directory entries contain a file type field (uses byte of file name length field).
         /// </summary>
-        LargeFiles = 0x0002,
+        FileType = 0x0002,
 
         /// <summary>
-        /// Indicates BTree-style directories present (not used in mainline?).
+        /// Ext3 feature - indicates a dirty journal, that needs to be replayed (safe for read-only access, not for read-write).
         /// </summary>
-        BtreeDirectory = 0x0004,
+        NeedsRecovery = 0x0004,
 
         /// <summary>
-        /// Ext4 feature - support for storing huge files.
+        /// Ext3 feature - indicates the file system is a dedicated EXT3 journal, not an actual file system.
         /// </summary>
-        HugeFile,
+        IsJournalDevice = 0x0008,
 
         /// <summary>
-        /// Ext4 feature - checksum block group structures.
+        /// Indicates the file system saves space by only allocating backup space for the superblock in groups storing it (used with SparseSuperBlock).
         /// </summary>
-        GdtChecksum,
+        MetaBlockGroup = 0x0010,
 
         /// <summary>
-        /// Ext4 feature - Unknown.
+        /// Ext4 feature to store files as extents.
         /// </summary>
-        DirNlink,
+        Extents = 0x0040,
 
         /// <summary>
-        /// Ext4 feature - extra inode size.
+        /// Ext4 feature to support some 64-bit fields.
         /// </summary>
-        ExtraInodeSize,
+        SixtyFourBit = 0x080,
+
+        /// <summary>
+        /// Ext4 feature for storage of block groups.
+        /// </summary>
+        FlexBlockGroups = 0x0200,
     }
 }

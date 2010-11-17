@@ -20,18 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System.IO;
     using DiscUtils.Vfs;
 
-    internal class VfsExt2FileSystem : VfsReadOnlyFileSystem<DirEntry, File, Directory, Ext2Context>, IUnixFileSystem
+    internal class VfsExtFileSystem : VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
         internal const IncompatibleFeatures SupportedIncompatibleFeatures = IncompatibleFeatures.FileType;
 
         private BlockGroup[] _blockGroups;
 
-        public VfsExt2FileSystem(Stream stream)
+        public VfsExtFileSystem(Stream stream)
             : base(new DiscFileSystemOptions())
         {
             stream.Position = 1024;
@@ -42,20 +42,20 @@ namespace DiscUtils.Ext2
 
             if (superblock.Magic != SuperBlock.Ext2Magic)
             {
-                throw new IOException("Invalid superblock magic - probably not an Ext2 file system");
+                throw new IOException("Invalid superblock magic - probably not an Ext file system");
             }
 
             if (superblock.RevisionLevel == SuperBlock.OldRevision)
             {
-                throw new IOException("Old ext2 revision - not supported");
+                throw new IOException("Old ext revision - not supported");
             }
 
             if ((superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures) != 0)
             {
-                throw new IOException("Incompatible ext2 features present: " + (superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures));
+                throw new IOException("Incompatible ext features present: " + (superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures));
             }
 
-            Context = new Ext2Context()
+            Context = new Context()
             {
                 RawStream = stream,
                 SuperBlock = superblock,

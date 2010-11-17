@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System;
 

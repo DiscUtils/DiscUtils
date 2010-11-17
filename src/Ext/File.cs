@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System;
     using System.IO;
@@ -30,12 +30,12 @@ namespace DiscUtils.Ext2
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 
-        private Ext2Context _context;
+        private Context _context;
         private uint _inodeNumber;
         private Inode _inode;
         private FileBuffer _content;
 
-        public File(Ext2Context context, uint inode)
+        public File(Context context, uint inode)
         {
             _context = context;
             _inodeNumber = inode;
@@ -117,7 +117,7 @@ namespace DiscUtils.Ext2
             get { return _inode; }
         }
 
-        protected Ext2Context Context
+        protected Context Context
         {
             get { return _context; }
         }

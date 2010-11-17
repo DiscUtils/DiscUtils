@@ -20,22 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System.IO;
     using DiscUtils.Vfs;
 
     /// <summary>
-    /// Read-only access to ext2 file systems.
+    /// Read-only access to ext file system.
     /// </summary>
-    public sealed class Ext2FileSystem : VfsFileSystemFacade, IUnixFileSystem
+    public sealed class ExtFileSystem : VfsFileSystemFacade, IUnixFileSystem
     {
         /// <summary>
-        /// Initializes a new instance of the Ext2FileSystem class.
+        /// Initializes a new instance of the ExtFileSystem class.
         /// </summary>
-        /// <param name="stream">The stream containing the ext2 file system.</param>
-        public Ext2FileSystem(Stream stream)
-            : base(new VfsExt2FileSystem(stream))
+        /// <param name="stream">The stream containing the ext file system.</param>
+        public ExtFileSystem(Stream stream)
+            : base(new VfsExtFileSystem(stream))
         {
         }
 
@@ -47,7 +47,7 @@ namespace DiscUtils.Ext2
         /// file or directory.</returns>
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
-            return GetRealFileSystem<VfsExt2FileSystem>().GetUnixFileInfo(path);
+            return GetRealFileSystem<VfsExtFileSystem>().GetUnixFileInfo(path);
         }
 
         internal static bool Detect(Stream stream)

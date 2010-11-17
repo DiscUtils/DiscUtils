@@ -20,38 +20,46 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System;
+    using System.Collections.Generic;
+    using System.Text;
 
-    internal class DirectoryRecord : IByteArraySerializable
+    /// <summary>
+    /// Feature flags for backwards compatible features.
+    /// </summary>
+    [Flags]
+    internal enum CompatibleFeatures : ushort
     {
-        public const byte FileTypeRegularFile = 1;
-        public const byte FileTypeDirectory = 2;
+        /// <summary>
+        /// Indicates pre-allocation hints are present.
+        /// </summary>
+        DirectoryPreallocation = 0x0001,
 
-        public uint Inode;
-        public string Name;
-        public byte FileType;
+        /// <summary>
+        /// Unknown.
+        /// </summary>
+        IMagicInodes = 0x0002,
 
-        public int Size
-        {
-            get { return Utilities.RoundUp(8 + Name.Length, 4); }
-        }
+        /// <summary>
+        /// Indicates an EXT3-style journal is present.
+        /// </summary>
+        HasJournal = 0x0004,
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            Inode = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            ushort recordLen = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
-            int nameLen = buffer[offset + 6];
-            FileType = buffer[offset + 7];
-            Name = Utilities.BytesToString(buffer, offset + 8, nameLen);
+        /// <summary>
+        /// Indicates extended attributes (e.g. FileACLs) are present.
+        /// </summary>
+        ExtendedAttributes = 0x0008,
 
-            return recordLen;
-        }
+        /// <summary>
+        /// Indicates space is reserved through a special inode to enable the file system to be resized dynamically.
+        /// </summary>
+        ResizeInode = 0x0010,
 
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
+        /// <summary>
+        /// Indicates that directory indexes are present (not used in mainline?).
+        /// </summary>
+        DirectoryIndex = 0x0020,
     }
 }

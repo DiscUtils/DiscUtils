@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System.IO;
     using DiscUtils.Vfs;
@@ -30,9 +30,9 @@ namespace DiscUtils.Ext2
     {
         public override DiscUtils.FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
         {
-            if (Ext2FileSystem.Detect(stream))
+            if (ExtFileSystem.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("ext2", "Linux ext2 filesystem", Open) };
+                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("ext", "Linux ext family filesystem", Open) };
             }
 
             return new DiscUtils.FileSystemInfo[0];
@@ -40,7 +40,7 @@ namespace DiscUtils.Ext2
 
         private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo)
         {
-            return new Ext2FileSystem(stream);
+            return new ExtFileSystem(stream);
         }
     }
 }

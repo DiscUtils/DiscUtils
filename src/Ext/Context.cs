@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System.IO;
     using DiscUtils.Vfs;
 
     internal delegate Inode GetInodeFn(uint index);
 
-    internal class Ext2Context : VfsContext
+    internal class Context : VfsContext
     {
         public Stream RawStream { get; set; }
 

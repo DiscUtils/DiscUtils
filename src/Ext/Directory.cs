@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System;
     using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace DiscUtils.Ext2
 
     internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
-        public Directory(Ext2Context context, uint inode)
+        public Directory(Context context, uint inode)
             : base(context, inode)
         {
         }

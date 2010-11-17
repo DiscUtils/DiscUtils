@@ -20,17 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Ext2
+namespace DiscUtils.Ext
 {
     using System;
     using System.Collections.Generic;
 
     internal class FileBuffer : DiscUtils.Buffer
     {
-        private Ext2Context _context;
+        private Context _context;
         private Inode _inode;
 
-        public FileBuffer(Ext2Context context, Inode inode)
+        public FileBuffer(Context context, Inode inode)
         {
             _context = context;
             _inode = inode;
