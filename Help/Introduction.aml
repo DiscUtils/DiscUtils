@@ -386,7 +386,7 @@
             <entry>No</entry>
             <entry>No</entry>
             <entry>No</entry>
-            <entry />
+            <entry>The variants ext2, ext3 and ext4 are supported for read only.</entry>
           </row>
         </table>
       </content>

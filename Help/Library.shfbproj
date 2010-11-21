@@ -63,7 +63,8 @@ Common / Utility classes are in the top-level namespace.</ProjectSummary>
 <NamespaceSummaryItem name="DiscUtils.Udf" isDocumented="True">Classes to read OSTA Universal Disk Format (aka UDF) disc images and file system partitions.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Optical" isDocumented="True">Classes to access the contents of optical disk images (ISO and BIN file extensions).</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Dmg" isDocumented="True">Classes to read virtual disks in the Apple DMG (aka UDIF) format.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Compression" isDocumented="True">Classes implementing re-usable compression and decompression functionality implemented in DiscUtils.</NamespaceSummaryItem></NamespaceSummaries>
+<NamespaceSummaryItem name="DiscUtils.Compression" isDocumented="True">Classes implementing re-usable compression and decompression functionality implemented in DiscUtils.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Ext" isDocumented="True">Classes to read the Linux ext family of file systems.  The variants ext2, ext3 and ext4 are supported.</NamespaceSummaryItem></NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
     <SdkLinkType>Msdn</SdkLinkType>
     <IndentHtml>True</IndentHtml>
