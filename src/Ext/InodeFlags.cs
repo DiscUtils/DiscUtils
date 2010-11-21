@@ -23,43 +23,33 @@
 namespace DiscUtils.Ext
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     /// <summary>
-    /// Feature flags for backwards compatible features.
+    /// Inode flags.
     /// </summary>
     [Flags]
-    internal enum CompatibleFeatures : ushort
+    internal enum InodeFlags : uint
     {
-        /// <summary>
-        /// Indicates pre-allocation hints are present.
-        /// </summary>
-        DirectoryPreallocation = 0x0001,
-
-        /// <summary>
-        /// AFS support in inodex.
-        /// </summary>
-        IMagicInodes = 0x0002,
-
-        /// <summary>
-        /// Indicates an EXT3-style journal is present.
-        /// </summary>
-        HasJournal = 0x0004,
-
-        /// <summary>
-        /// Indicates extended attributes (e.g. FileACLs) are present.
-        /// </summary>
-        ExtendedAttributes = 0x0008,
-
-        /// <summary>
-        /// Indicates space is reserved through a special inode to enable the file system to be resized dynamically.
-        /// </summary>
-        ResizeInode = 0x0010,
-
-        /// <summary>
-        /// Indicates that directory indexes are present (not used in mainline?).
-        /// </summary>
-        DirectoryIndex = 0x0020,
+        SecureDelete = 0x00000001,
+        Undelete = 0x00000002,
+        CompressFile = 0x00000004,
+        SynchronousUpdates = 0x00000008,
+        ImmutableFile = 0x00000010,
+        AppendOnly = 0x00000020,
+        NoDump = 0x00000040,
+        NoAccessTime = 0x00000080,
+        CompressionDirty = 0x00000100,
+        CompressionCompressed = 0x00000200,
+        CompressionDintCompress = 0x00000400,
+        CompressionError = 0x00000800,
+        IndexedDirectory = 0x00001000,
+        AfsDirectory = 0x00002000,
+        JournalFileData = 0x00004000,
+        NoTailMerge = 0x00008000,
+        DirSync = 0x00010000,
+        TopDir = 0x00020000,
+        HugeFile = 0x00040000,
+        ExtentsUsed = 0x00080000,
+        Migrating = 0x00100000,
     }
 }

@@ -504,6 +504,33 @@ namespace DiscUtils
             return new string(result);
         }
 
+        /// <summary>
+        /// Primitive conversion from ASCII to Unicode that stops at a null-terminator.
+        /// </summary>
+        /// <param name="data">The data to convert</param>
+        /// <param name="offset">The first byte to convert</param>
+        /// <param name="count">The number of bytes to convert</param>
+        /// <returns>The string</returns>
+        /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
+        /// this preserves those code points.</remarks>
+        public static string BytesToZString(byte[] data, int offset, int count)
+        {
+            char[] result = new char[count];
+
+            for (int i = 0; i < count; ++i)
+            {
+                byte ch = data[i + offset];
+                if (ch == 0)
+                {
+                    return new string(result, 0, i);
+                }
+
+                result[i] = (char)ch;
+            }
+
+            return new string(result);
+        }
+
         #endregion
 
         #region Path Manipulation

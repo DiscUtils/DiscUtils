@@ -33,7 +33,7 @@ namespace DiscUtils.Ext
         private Context _context;
         private uint _inodeNumber;
         private Inode _inode;
-        private FileBuffer _content;
+        private IBuffer _content;
 
         public File(Context context, uint inode)
         {
@@ -105,7 +105,14 @@ namespace DiscUtils.Ext
             {
                 if (_content == null)
                 {
-                    _content = new FileBuffer(_context, _inode);
+                    if ((_inode.Flags & InodeFlags.ExtentsUsed) != 0)
+                    {
+                        _content = new ExtentsFileBuffer(_context, _inode);
+                    }
+                    else
+                    {
+                        _content = new FileBuffer(_context, _inode);
+                    }
                 }
 
                 return _content;

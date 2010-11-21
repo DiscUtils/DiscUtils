@@ -23,43 +23,35 @@
 namespace DiscUtils.Ext
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
-    /// <summary>
-    /// Feature flags for backwards compatible features.
-    /// </summary>
-    [Flags]
-    internal enum CompatibleFeatures : ushort
+    internal class ExtentHeader : IByteArraySerializable
     {
-        /// <summary>
-        /// Indicates pre-allocation hints are present.
-        /// </summary>
-        DirectoryPreallocation = 0x0001,
+        public const ushort HeaderMagic = 0xf30a;
 
-        /// <summary>
-        /// AFS support in inodex.
-        /// </summary>
-        IMagicInodes = 0x0002,
+        public ushort Magic;
+        public ushort Entries;
+        public ushort MaxEntries;
+        public ushort Depth;
+        public uint Generation;
 
-        /// <summary>
-        /// Indicates an EXT3-style journal is present.
-        /// </summary>
-        HasJournal = 0x0004,
+        public int Size
+        {
+            get { return 12; }
+        }
 
-        /// <summary>
-        /// Indicates extended attributes (e.g. FileACLs) are present.
-        /// </summary>
-        ExtendedAttributes = 0x0008,
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            Magic = Utilities.ToUInt16LittleEndian(buffer, offset + 0);
+            Entries = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
+            MaxEntries = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
+            Depth = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
+            Generation = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
+            return 12;
+        }
 
-        /// <summary>
-        /// Indicates space is reserved through a special inode to enable the file system to be resized dynamically.
-        /// </summary>
-        ResizeInode = 0x0010,
-
-        /// <summary>
-        /// Indicates that directory indexes are present (not used in mainline?).
-        /// </summary>
-        DirectoryIndex = 0x0020,
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

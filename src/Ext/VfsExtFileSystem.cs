@@ -27,7 +27,10 @@ namespace DiscUtils.Ext
 
     internal class VfsExtFileSystem : VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
-        internal const IncompatibleFeatures SupportedIncompatibleFeatures = IncompatibleFeatures.FileType;
+        internal const IncompatibleFeatures SupportedIncompatibleFeatures =
+            IncompatibleFeatures.FileType
+            | IncompatibleFeatures.FlexBlockGroups
+            | IncompatibleFeatures.Extents;
 
         private BlockGroup[] _blockGroups;
 

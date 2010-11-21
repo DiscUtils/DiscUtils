@@ -79,8 +79,22 @@ namespace DiscUtils.Ext
         public uint LastOrphan;
         public uint[] HashSeed;
         public byte DefaultHashVersion;
+        public ushort DescriptorSize;
         public uint DefaultMountOptions;
         public uint FirstMetablockBlockGroup;
+        public uint MkfsTime;
+        public uint[] JournalBackup;
+        public uint BlocksCountHigh;
+        public uint ReservedBlocksCountHigh;
+        public uint FreeBlocksCountHigh;
+        public ushort MinimumExtraInodeSize;
+        public ushort WantExtraInodeSize;
+        public uint Flags;
+        public ushort RaidStride;
+        public ushort MultiMountProtectionInterval;
+        public ulong MultiMountProtectionBlock;
+        public uint RaidStripeWidth;
+        public byte LogGroupsPerFlex;
 
         public uint BlockSize
         {
@@ -127,8 +141,8 @@ namespace DiscUtils.Ext
             IncompatibleFeatures = (IncompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 96);
             ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 100);
             UniqueId = Utilities.ToGuidLittleEndian(buffer, offset + 104);
-            VolumeName = Utilities.BytesToString(buffer, offset + 120, 16).Trim('\0');
-            LastMountPoint = Utilities.BytesToString(buffer, offset + 136, 64).Trim('\0');
+            VolumeName = Utilities.BytesToZString(buffer, offset + 120, 16);
+            LastMountPoint = Utilities.BytesToZString(buffer, offset + 136, 64);
             CompressionAlgorithmUsageBitmap = Utilities.ToUInt32LittleEndian(buffer, offset + 200);
 
             PreallocateBlockCount = buffer[offset + 204];
@@ -144,8 +158,28 @@ namespace DiscUtils.Ext
             HashSeed[2] = Utilities.ToUInt32LittleEndian(buffer, offset + 244);
             HashSeed[3] = Utilities.ToUInt32LittleEndian(buffer, offset + 248);
             DefaultHashVersion = buffer[offset + 252];
+            DescriptorSize = Utilities.ToUInt16LittleEndian(buffer, offset + 254);
             DefaultMountOptions = Utilities.ToUInt32LittleEndian(buffer, offset + 256);
             FirstMetablockBlockGroup = Utilities.ToUInt32LittleEndian(buffer, offset + 260);
+            MkfsTime = Utilities.ToUInt32LittleEndian(buffer, offset + 264);
+
+            JournalBackup = new uint[17];
+            for (int i = 0; i < 17; ++i)
+            {
+                JournalBackup[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 268 + (4 * i));
+            }
+
+            BlocksCountHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 336);
+            ReservedBlocksCountHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 340);
+            FreeBlocksCountHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 344);
+            MinimumExtraInodeSize = Utilities.ToUInt16LittleEndian(buffer, offset + 348);
+            WantExtraInodeSize = Utilities.ToUInt16LittleEndian(buffer, offset + 350);
+            Flags = Utilities.ToUInt32LittleEndian(buffer, offset + 352);
+            RaidStride = Utilities.ToUInt16LittleEndian(buffer, offset + 356);
+            MultiMountProtectionInterval = Utilities.ToUInt16LittleEndian(buffer, offset + 258);
+            MultiMountProtectionBlock = Utilities.ToUInt64LittleEndian(buffer, offset + 260);
+            RaidStripeWidth = Utilities.ToUInt32LittleEndian(buffer, offset + 268);
+            LogGroupsPerFlex = buffer[offset + 272];
 
             return 1024;
         }

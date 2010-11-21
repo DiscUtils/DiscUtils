@@ -36,7 +36,7 @@ namespace DiscUtils.Ext
         public ushort GroupIdLow;
         public ushort LinksCount;
         public uint BlocksCount;
-        public uint Flags;
+        public InodeFlags Flags;
         public uint[] DirectBlocks;
         public uint IndirectBlock;
         public uint DoubleIndirectBlock;
@@ -49,6 +49,8 @@ namespace DiscUtils.Ext
         public byte FragmentSize;
         public ushort UserIdHigh;
         public ushort GroupIdHigh;
+
+        public ExtentBlock Extents;
 
         public int Size
         {
@@ -67,17 +69,25 @@ namespace DiscUtils.Ext
             GroupIdLow = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
             LinksCount = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
             BlocksCount = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
-            Flags = Utilities.ToUInt32LittleEndian(buffer, offset + 32);
+            Flags = (InodeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 32);
 
-            DirectBlocks = new uint[12];
-            for (int i = 0; i < 12; ++i)
+            if ((Flags & InodeFlags.ExtentsUsed) != 0)
             {
-                DirectBlocks[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 40 + (i * 4));
+                Extents = Utilities.ToStruct<ExtentBlock>(buffer, offset + 40);
+            }
+            else
+            {
+                DirectBlocks = new uint[12];
+                for (int i = 0; i < 12; ++i)
+                {
+                    DirectBlocks[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 40 + (i * 4));
+                }
+
+                IndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 88);
+                DoubleIndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 92);
+                TripleIndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 96);
             }
 
-            IndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 88);
-            DoubleIndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 92);
-            TripleIndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 96);
             FileVersion = Utilities.ToUInt32LittleEndian(buffer, offset + 100);
             FileAcl = Utilities.ToUInt32LittleEndian(buffer, offset + 104);
             DirAcl = Utilities.ToUInt32LittleEndian(buffer, offset + 108);
