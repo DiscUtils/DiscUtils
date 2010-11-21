@@ -65,35 +65,44 @@ namespace DiscUtils.Ext
 
             while (totalBytesRemaining > 0)
             {
-                uint virtualBlock = (uint)((pos + totalRead) / blockSize);
-                int blockOffset = (int)((pos + totalRead) - (virtualBlock * (long)blockSize));
+                uint logicalBlock = (uint)((pos + totalRead) / blockSize);
+                int blockOffset = (int)((pos + totalRead) - (logicalBlock * (long)blockSize));
 
-                uint logicalBlock = 0;
-                if (virtualBlock < 12)
+                uint physicalBlock = 0;
+                if (logicalBlock < 12)
                 {
-                    logicalBlock = _inode.DirectBlocks[virtualBlock];
+                    physicalBlock = _inode.DirectBlocks[logicalBlock];
                 }
                 else
                 {
-                    virtualBlock -= 12;
-                    if (virtualBlock < blockSize / 4)
+                    logicalBlock -= 12;
+                    if (logicalBlock < blockSize / 4)
                     {
-                        _context.RawStream.Position = (_inode.IndirectBlock * (long)blockSize) + (virtualBlock * 4);
-                        byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
-                        logicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                        if (_inode.IndirectBlock != 0)
+                        {
+                            _context.RawStream.Position = (_inode.IndirectBlock * (long)blockSize) + (logicalBlock * 4);
+                            byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
+                            physicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                        }
                     }
                     else
                     {
-                        virtualBlock -= blockSize / 4;
-                        if (virtualBlock < (blockSize / 4) * (blockSize / 4))
+                        logicalBlock -= blockSize / 4;
+                        if (logicalBlock < (blockSize / 4) * (blockSize / 4))
                         {
-                            _context.RawStream.Position = (_inode.DoubleIndirectBlock * (long)blockSize) + ((virtualBlock / (blockSize / 4)) * 4);
-                            byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
-                            uint indirectBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                            if (_inode.DoubleIndirectBlock != 0)
+                            {
+                                _context.RawStream.Position = (_inode.DoubleIndirectBlock * (long)blockSize) + ((logicalBlock / (blockSize / 4)) * 4);
+                                byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
+                                uint indirectBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
 
-                            _context.RawStream.Position = (indirectBlock * (long)blockSize) + ((virtualBlock % (blockSize / 4)) * 4);
-                            Utilities.ReadFully(_context.RawStream, indirectData, 0, 4);
-                            logicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                                if (indirectBlock != 0)
+                                {
+                                    _context.RawStream.Position = (indirectBlock * (long)blockSize) + ((logicalBlock % (blockSize / 4)) * 4);
+                                    Utilities.ReadFully(_context.RawStream, indirectData, 0, 4);
+                                    physicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                                }
+                            }
                         }
                         else
                         {
@@ -102,15 +111,18 @@ namespace DiscUtils.Ext
                     }
                 }
 
-                if (logicalBlock == 0)
-                {
-                    throw new NotImplementedException();
-                }
-
                 int toRead = (int)Math.Min(totalBytesRemaining, blockSize - blockOffset);
-
-                _context.RawStream.Position = (logicalBlock * (long)blockSize) + blockOffset;
-                int numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
+                int numRead;
+                if (physicalBlock == 0)
+                {
+                    Array.Clear(buffer, offset + totalRead, toRead);
+                    numRead = toRead;
+                }
+                else
+                {
+                    _context.RawStream.Position = (physicalBlock * (long)blockSize) + blockOffset;
+                    numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
+                }
 
                 totalBytesRemaining -= numRead;
                 totalRead += numRead;

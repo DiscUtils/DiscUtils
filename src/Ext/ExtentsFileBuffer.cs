@@ -59,7 +59,7 @@ namespace DiscUtils.Ext
                 return 0;
             }
 
-            uint blockSize = _context.SuperBlock.BlockSize;
+            long blockSize = _context.SuperBlock.BlockSize;
 
             int totalRead = 0;
             int totalBytesRemaining = (int)Math.Min(count, _inode.FileSize - pos);
@@ -69,20 +69,28 @@ namespace DiscUtils.Ext
             while (totalBytesRemaining > 0)
             {
                 uint logicalBlock = (uint)((pos + totalRead) / blockSize);
-                int blockOffset = (int)((pos + totalRead) - (logicalBlock * (long)blockSize));
+                int blockOffset = (int)((pos + totalRead) - (logicalBlock * blockSize));
+
+                int numRead = 0;
 
                 Extent extent = FindExtent(extents, logicalBlock);
                 if (extent == null)
                 {
                     throw new IOException("Unable to find extent for block " + logicalBlock);
                 }
+                else if (extent.FirstLogicalBlock > logicalBlock)
+                {
+                    numRead = (int)Math.Min(totalBytesRemaining, ((extent.FirstLogicalBlock - logicalBlock) * blockSize) - blockOffset);
+                    Array.Clear(buffer, offset + totalRead, numRead);
+                }
+                else
+                {
+                    long physicalBlock = (logicalBlock - extent.FirstLogicalBlock) + (long)extent.FirstPhysicalBlock;
+                    int toRead = (int)Math.Min(totalBytesRemaining, ((extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock)) * blockSize) - blockOffset);
 
-                long physicalBlock = (logicalBlock - extent.FirstLogicalBlock) + (long)extent.FirstPhysicalBlock;
-
-                int toRead = (int)Math.Min(totalBytesRemaining, ((extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock)) * blockSize) - blockOffset);
-
-                _context.RawStream.Position = (physicalBlock * (long)blockSize) + blockOffset;
-                int numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
+                    _context.RawStream.Position = (physicalBlock * blockSize) + blockOffset;
+                    numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
+                }
 
                 totalBytesRemaining -= numRead;
                 totalRead += numRead;
@@ -118,13 +126,19 @@ namespace DiscUtils.Ext
                 {
                     return null;
                 }
-
-                for (int i = 0; i < node.Index.Length; ++i)
+                else if (node.Index[0].FirstLogicalBlock >= logicalBlock)
                 {
-                    if (node.Index[i].FirstLogicalBlock > logicalBlock)
+                    idxEntry = node.Index[0];
+                }
+                else
+                {
+                    for (int i = 0; i < node.Index.Length; ++i)
                     {
-                        idxEntry = node.Index[i - 1];
-                        break;
+                        if (node.Index[i].FirstLogicalBlock > logicalBlock)
+                        {
+                            idxEntry = node.Index[i - 1];
+                            break;
+                        }
                     }
                 }
 
@@ -144,24 +158,25 @@ namespace DiscUtils.Ext
                 {
                     return null;
                 }
-
-                for (int i = 0; i < node.Extents.Length; ++i)
+                else if (node.Extents[0].FirstLogicalBlock >= logicalBlock)
                 {
-                    if (node.Extents[i].FirstLogicalBlock > logicalBlock)
+                    return node.Extents[0];
+                }
+                else
+                {
+                    for (int i = 0; i < node.Extents.Length; ++i)
                     {
-                        entry = node.Extents[i - 1];
-                        break;
+                        if (node.Extents[i].FirstLogicalBlock > logicalBlock)
+                        {
+                            entry = node.Extents[i - 1];
+                            break;
+                        }
                     }
                 }
 
                 if (entry == null)
                 {
                     entry = node.Extents[node.Extents.Length - 1];
-                }
-
-                if (entry.FirstLogicalBlock + entry.NumBlocks <= logicalBlock)
-                {
-                    return null;
                 }
 
                 return entry;
