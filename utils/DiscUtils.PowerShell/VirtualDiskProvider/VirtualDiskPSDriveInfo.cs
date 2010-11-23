@@ -55,9 +55,11 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             DiscFileSystem result;
             if (!_fsCache.TryGetValue(volInfo.Identity, out result))
             {
-                if (volInfo.BiosType == 7)
+                FileSystemManager fsmgr = new FileSystemManager();
+                FileSystemInfo[] fsInfo = fsmgr.DetectFileSystems(volInfo);
+                if (fsInfo != null && fsInfo.Length > 0)
                 {
-                    result = new NtfsFileSystem(volInfo.Open());
+                    result = fsInfo[0].Open(volInfo);
                     _fsCache.Add(volInfo.Identity, result);
                 }
             }

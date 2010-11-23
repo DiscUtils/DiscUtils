@@ -121,9 +121,9 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             {
                 _provider.WriteError(
                     new ErrorRecord(
-                        new IOException("Failure reading from virtual disk", e),
+                        new IOException("Failure reading from virtual disk" + e, e),
                         "ReadFailed",
-                        ErrorCategory.WriteError,
+                        ErrorCategory.ReadError,
                         null));
                 return null;
             }
