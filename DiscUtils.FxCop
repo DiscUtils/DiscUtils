@@ -9294,6 +9294,32 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="IVfsSymlink`2">
+          <Messages>
+           <Message Id="Symlink" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-11-23 00:20:41Z">
+            <Issue Name="Type">
+             <Item>Symlink</Item>
+             <Item>'IVfsSymlink&lt;TDirEntry, TFile&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="133" />
+             </User>
+            </Notes>
+           </Message>
+           <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-11-23 00:20:41Z">
+            <Issue Name="Type">
+             <Item>Vfs</Item>
+             <Item>'IVfsSymlink&lt;TDirEntry, TFile&gt;'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="133" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="VfsContext">
           <Messages>
            <Message Id="Vfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-06-05 14:17:36Z">
@@ -9349,6 +9375,21 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="110" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#IsSymlink">
+            <Messages>
+             <Message Id="Symlink" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-11-23 00:20:41Z">
+              <Issue Name="Member">
+               <Item>Symlink</Item>
+               <Item>'VfsDirEntry.IsSymlink'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="133" />
                </User>
               </Notes>
              </Message>
@@ -10102,6 +10143,7 @@
     <Note Id="130" Modified="2010-09-17 21:20:42Z">Logical separation</Note>
     <Note Id="131" Modified="2010-09-18 23:13:14Z">Physical storage type is byte</Note>
     <Note Id="132" Modified="2010-09-19 09:33:19Z">Complex names.</Note>
+    <Note Id="133" Modified="2010-11-23 00:21:37Z">Symlink is a common name for symbolic links.</Note>
     <Note Id="137" Modified="2010-11-15 00:50:26Z">Not flags.</Note>
     <Note Id="138" Modified="2010-11-21 10:54:50Z">Part of ext2/3/4 defined data structures.</Note>
     <Note Id="139" Modified="2010-11-21 10:55:05Z">Ext is common name for the file system.</Note>

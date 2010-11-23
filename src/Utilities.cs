@@ -637,6 +637,18 @@ namespace DiscUtils
             return merged;
         }
 
+        public static string ResolvePath(string basePath, string path)
+        {
+            if (!path.StartsWith("\\", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResolveRelativePath(basePath, path);
+            }
+            else
+            {
+                return path;
+            }
+        }
+
         public static string MakeRelativePath(string path, string basePath)
         {
             List<string> pathElements = new List<string>(path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));

@@ -56,6 +56,11 @@ namespace DiscUtils.Iso9660
             get { return (Flags & FileFlags.Directory) != 0; }
         }
 
+        public override bool IsSymlink
+        {
+            get { return false; }
+        }
+
         public override string FileName
         {
             get { return FileIdentifier; }

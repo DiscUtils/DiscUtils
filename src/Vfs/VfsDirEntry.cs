@@ -42,6 +42,11 @@ namespace DiscUtils.Vfs
         public abstract bool IsDirectory { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this directory entry represents a symlink (rather than a file or directory).
+        /// </summary>
+        public abstract bool IsSymlink { get; }
+
+        /// <summary>
         /// Gets the name of this directory entry.
         /// </summary>
         public abstract string FileName { get; }

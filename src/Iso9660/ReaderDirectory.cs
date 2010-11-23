@@ -99,7 +99,7 @@ namespace DiscUtils.Iso9660
             return null;
         }
 
-        public File CreateNewFile(string name)
+        public DirectoryRecord CreateNewFile(string name)
         {
             throw new NotSupportedException();
         }

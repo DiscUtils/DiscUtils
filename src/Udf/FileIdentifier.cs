@@ -57,6 +57,11 @@ namespace DiscUtils.Udf
             get { return (FileCharacteristics & FileCharacteristic.Directory) != 0; }
         }
 
+        public override bool IsSymlink
+        {
+            get { return false; }
+        }
+
         public override string FileName
         {
             get { return Name; }

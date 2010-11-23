@@ -82,6 +82,11 @@ namespace ExternalFileSystem
             get { return _isDir; }
         }
 
+        public override bool IsSymlink
+        {
+            get { return false; }
+        }
+
         public override string FileName
         {
             get { return _name; }
@@ -240,7 +245,7 @@ namespace ExternalFileSystem
             return null;
         }
 
-        public MyFile CreateNewFile(string name)
+        public MyDirEntry CreateNewFile(string name)
         {
             throw new NotSupportedException();
         }

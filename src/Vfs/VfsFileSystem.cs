@@ -290,7 +290,8 @@ namespace DiscUtils.Vfs
                 throw new IOException("Invalid path: " + path);
             }
 
-            TDirEntry entry = GetDirectoryEntry(Path.Combine(dirName, fileName));
+            string entryPath = Path.Combine(dirName, fileName);
+            TDirEntry entry = GetDirectoryEntry(entryPath);
             if (entry == null)
             {
                 if (mode == FileMode.Open)
@@ -300,12 +301,17 @@ namespace DiscUtils.Vfs
                 else
                 {
                     TDirectory parentDir = GetDirectory(Path.GetDirectoryName(path));
-                    parentDir.CreateNewFile(Path.GetFileName(path));
+                    entry = parentDir.CreateNewFile(Path.GetFileName(path));
                 }
             }
             else if (mode == FileMode.CreateNew)
             {
                 throw new IOException("File already exists");
+            }
+
+            if (entry.IsSymlink)
+            {
+                entry = ResolveSymlink(entry, entryPath);
             }
 
             if (entry.IsDirectory)
@@ -544,6 +550,12 @@ namespace DiscUtils.Vfs
             }
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
+
+            if (dirEntry.IsSymlink)
+            {
+                dirEntry = ResolveSymlink(dirEntry, path);
+            }
+
             if (dirEntry == null || !dirEntry.IsDirectory)
             {
                 throw new DirectoryNotFoundException("No such directory: " + path);
@@ -678,6 +690,38 @@ namespace DiscUtils.Vfs
                     DoSearch(results, Path.Combine(resultPrefixPath, FormatFileName(de.FileName)), regex, subFolders, dirs, files);
                 }
             }
+        }
+
+        private TDirEntry ResolveSymlink(TDirEntry entry, string path)
+        {
+            TDirEntry currentEntry = entry;
+            string currentPath = path;
+
+            int resolvesLeft = 20;
+            while (currentEntry.IsSymlink && resolvesLeft > 0)
+            {
+                IVfsSymlink<TDirEntry, TFile> symlink = GetFile(currentEntry) as IVfsSymlink<TDirEntry, TFile>;
+                if (symlink == null)
+                {
+                    throw new FileNotFoundException("Unable to resolve symlink", path);
+                }
+
+                currentPath = Utilities.ResolvePath(currentPath.TrimEnd('\\'), symlink.TargetPath);
+                currentEntry = GetDirectoryEntry(currentPath);
+                if (currentEntry == null)
+                {
+                    throw new FileNotFoundException("Unable to resolve symlink", path);
+                }
+
+                --resolvesLeft;
+            }
+
+            if (currentEntry.IsSymlink)
+            {
+                throw new FileNotFoundException("Unable to resolve symlink - too many links", path);
+            }
+
+            return currentEntry;
         }
     }
 }

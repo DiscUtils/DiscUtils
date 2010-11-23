@@ -85,7 +85,7 @@ namespace DiscUtils.Ext
             return null;
         }
 
-        public File CreateNewFile(string name)
+        public DirEntry CreateNewFile(string name)
         {
             throw new NotImplementedException();
         }
