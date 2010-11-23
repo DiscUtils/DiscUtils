@@ -106,7 +106,14 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
                     if (_reader == null)
                     {
-                        _reader = new StreamReader(_contentStream, GetEncoding());
+                        if (_encoding == ContentEncoding.Unknown)
+                        {
+                            _reader = new StreamReader(_contentStream, Encoding.ASCII, true);
+                        }
+                        else
+                        {
+                            _reader = new StreamReader(_contentStream, GetEncoding(Encoding.ASCII));
+                        }
                     }
 
                     while ((result.Count < readCount || readCount <= 0) && !_reader.EndOfStream)
@@ -153,7 +160,17 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                 {
                     if (_writer == null)
                     {
-                        _writer = new StreamWriter(_contentStream, GetEncoding());
+                        string initialContent = (string)content[0];
+                        bool foundExtended = false;
+                        int toInspect = Math.Min(20, initialContent.Length);
+                        for (int i = 0; i < toInspect; ++i)
+                        {
+                            if (((ushort)initialContent[i]) > 127)
+                            {
+                                foundExtended = true;
+                            }
+                        }
+                        _writer = new StreamWriter(_contentStream, GetEncoding(foundExtended ? Encoding.Unicode : Encoding.ASCII));
                     }
 
                     string lastLine = null;
@@ -205,7 +222,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
 
 
-        private Encoding GetEncoding()
+        private Encoding GetEncoding(Encoding defEncoding)
         {
             switch (_encoding)
             {
@@ -215,10 +232,12 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                     return Encoding.UTF8;
                 case ContentEncoding.UTF7:
                     return Encoding.UTF7;
+                case ContentEncoding.Unicode:
+                    return Encoding.Unicode;
                 case ContentEncoding.Ascii:
                     return Encoding.ASCII;
                 default:
-                    return Encoding.Unicode;
+                    return defEncoding;
             }
         }
 
