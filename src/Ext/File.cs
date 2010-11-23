@@ -31,15 +31,13 @@ namespace DiscUtils.Ext
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 
         private Context _context;
-        private uint _inodeNumber;
         private Inode _inode;
         private IBuffer _content;
 
-        public File(Context context, uint inode)
+        public File(Context context, Inode inode)
         {
             _context = context;
-            _inodeNumber = inode;
-            _inode = _context.GetInode(_inodeNumber);
+            _inode = inode;
         }
 
         public DateTime LastAccessTimeUtc
@@ -105,14 +103,7 @@ namespace DiscUtils.Ext
             {
                 if (_content == null)
                 {
-                    if ((_inode.Flags & InodeFlags.ExtentsUsed) != 0)
-                    {
-                        _content = new ExtentsFileBuffer(_context, _inode);
-                    }
-                    else
-                    {
-                        _content = new FileBuffer(_context, _inode);
-                    }
+                    _content = _inode.GetContentBuffer(_context);
                 }
 
                 return _content;

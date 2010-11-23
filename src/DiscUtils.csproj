@@ -172,6 +172,7 @@
     <Compile Include="Ext\Inode.cs" />
     <Compile Include="Ext\InodeFlags.cs" />
     <Compile Include="Ext\ReadOnlyCompatibleFeatures.cs" />
+    <Compile Include="Ext\Symlink.cs" />
     <Compile Include="Ext\VfsExtFileSystem.cs" />
     <Compile Include="Ext\SuperBlock.cs" />
     <Compile Include="Fat\ClusterReader.cs" />

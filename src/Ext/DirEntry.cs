@@ -42,7 +42,7 @@ namespace DiscUtils.Ext
 
         public override bool IsSymlink
         {
-            get { return false; }
+            get { return _record.FileType == DirectoryRecord.FileTypeSymlink; }
         }
 
         public override string FileName

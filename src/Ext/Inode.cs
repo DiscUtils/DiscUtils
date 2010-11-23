@@ -23,6 +23,7 @@
 namespace DiscUtils.Ext
 {
     using System;
+    using System.IO;
 
     internal class Inode : IByteArraySerializable
     {
@@ -51,6 +52,12 @@ namespace DiscUtils.Ext
         public ushort GroupIdHigh;
 
         public ExtentBlock Extents;
+        public byte[] FastSymlink;
+
+        public UnixFileType FileType
+        {
+            get { return (UnixFileType)((Mode >> 12) & 0xff); }
+        }
 
         public int Size
         {
@@ -71,7 +78,15 @@ namespace DiscUtils.Ext
             BlocksCount = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
             Flags = (InodeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 32);
 
-            if ((Flags & InodeFlags.ExtentsUsed) != 0)
+            FastSymlink = null;
+            Extents = null;
+            DirectBlocks = null;
+            if (FileType == UnixFileType.Link && BlocksCount == 0)
+            {
+                FastSymlink = new byte[60];
+                Array.Copy(buffer, offset + 40, FastSymlink, 0, 60);
+            }
+            else if ((Flags & InodeFlags.ExtentsUsed) != 0)
             {
                 Extents = Utilities.ToStruct<ExtentBlock>(buffer, offset + 40);
             }
@@ -103,6 +118,22 @@ namespace DiscUtils.Ext
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
+        }
+
+        public IBuffer GetContentBuffer(Context context)
+        {
+            if (FastSymlink != null)
+            {
+                return new StreamBuffer(new MemoryStream(FastSymlink, false), Ownership.Dispose);
+            }
+            else if ((Flags & InodeFlags.ExtentsUsed) != 0)
+            {
+                return new ExtentsFileBuffer(context, this);
+            }
+            else
+            {
+                return new FileBuffer(context, this);
+            }
         }
     }
 }

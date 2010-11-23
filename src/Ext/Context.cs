@@ -25,14 +25,10 @@ namespace DiscUtils.Ext
     using System.IO;
     using DiscUtils.Vfs;
 
-    internal delegate Inode GetInodeFn(uint index);
-
     internal class Context : VfsContext
     {
         public Stream RawStream { get; set; }
 
         public SuperBlock SuperBlock { get; set; }
-
-        public GetInodeFn GetInode { get; set; }
     }
 }

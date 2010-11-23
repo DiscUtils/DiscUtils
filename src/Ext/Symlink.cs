@@ -22,42 +22,23 @@
 
 namespace DiscUtils.Ext
 {
-    using System;
+    using DiscUtils.Vfs;
 
-    internal class DirectoryRecord : IByteArraySerializable
+    internal class Symlink : File, IVfsSymlink<DirEntry, File>
     {
-        public const byte FileTypeUnknown = 0;
-        public const byte FileTypeRegularFile = 1;
-        public const byte FileTypeDirectory = 2;
-        public const byte FileTypeCharacterDevice = 3;
-        public const byte FileTypeBlockDevice = 4;
-        public const byte FileTypeFifo = 5;
-        public const byte FileTypeSocket = 6;
-        public const byte FileTypeSymlink = 7;
-
-        public uint Inode;
-        public string Name;
-        public byte FileType;
-
-        public int Size
+        public Symlink(Context context, Inode inode)
+            : base(context, inode)
         {
-            get { return Utilities.RoundUp(8 + Name.Length, 4); }
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
+        public string TargetPath
         {
-            Inode = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            ushort recordLen = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
-            int nameLen = buffer[offset + 6];
-            FileType = buffer[offset + 7];
-            Name = Utilities.BytesToString(buffer, offset + 8, nameLen);
-
-            return recordLen;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
+            get
+            {
+                IBuffer content = FileContent;
+                byte[] data = Utilities.ReadFully(content, 0, (int)content.Capacity);
+                return Utilities.BytesToZString(data, 0, data.Length).Replace('/', '\\');
+            }
         }
     }
 }

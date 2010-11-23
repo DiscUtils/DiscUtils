@@ -61,8 +61,7 @@ namespace DiscUtils.Ext
             Context = new Context()
             {
                 RawStream = stream,
-                SuperBlock = superblock,
-                GetInode = GetInode
+                SuperBlock = superblock
             };
 
             uint numGroups = Utilities.Ceil(superblock.BlocksCount, superblock.BlocksPerGroup);
@@ -79,7 +78,7 @@ namespace DiscUtils.Ext
                 _blockGroups[i] = bg;
             }
 
-            RootDirectory = new Directory(Context, 2);
+            RootDirectory = new Directory(Context, GetInode(2));
         }
 
         public override string VolumeLabel
@@ -107,13 +106,18 @@ namespace DiscUtils.Ext
 
         protected override File ConvertDirEntryToFile(DirEntry dirEntry)
         {
+            Inode inode = GetInode(dirEntry.Record.Inode);
             if (dirEntry.Record.FileType == DirectoryRecord.FileTypeDirectory)
             {
-                return new Directory(Context, dirEntry.Record.Inode);
+                return new Directory(Context, inode);
+            }
+            else if(dirEntry.Record.FileType == DirectoryRecord.FileTypeSymlink)
+            {
+                return new Symlink(Context, inode);
             }
             else
             {
-                return new File(Context, dirEntry.Record.Inode);
+                return new File(Context, inode);
             }
         }
 
