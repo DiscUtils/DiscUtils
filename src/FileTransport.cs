@@ -41,7 +41,8 @@ namespace DiscUtils
         {
             _path = uri.LocalPath;
             _extraInfo = uri.Fragment.TrimStart('#');
-            if (!Directory.Exists(Utilities.GetDirectoryFromPath(_path)))
+
+            if (!Directory.Exists(Path.GetDirectoryName(_path)))
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such file '{0}'", uri.OriginalString), _path);
             }

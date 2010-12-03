@@ -12,3 +12,7 @@ glob:Help\Output
 glob:scratch
 glob:*StyleCop.Cache
 glob:DiscUtilsScratch.sln
+glob:*/bin/
+glob:*.pidb
+glob:*.resources
+glob:*.userprefs

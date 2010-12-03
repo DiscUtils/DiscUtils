@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Common
 {
@@ -143,7 +144,7 @@ namespace DiscUtils.Common
 
             while (i < args.Length)
             {
-                if (args[i].StartsWith("-") || args[i].StartsWith("/"))
+                if (args[i].StartsWith("-") || (Path.DirectorySeparatorChar != '/' && args[i].StartsWith("/")))
                 {
                     string switchName = args[i].Substring(1);
                     bool foundMatch = false;
