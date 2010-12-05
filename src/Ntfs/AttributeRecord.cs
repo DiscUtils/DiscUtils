@@ -127,6 +127,7 @@ namespace DiscUtils.Ntfs
         public abstract Range<long, long>[] GetClusters();
 
         public abstract IBuffer GetDataBuffer(File file);
+
         public abstract IBuffer GetReadOnlyDataBuffer(INtfsContext context);
 
         public abstract long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster);

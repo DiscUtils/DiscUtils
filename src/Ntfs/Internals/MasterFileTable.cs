@@ -130,18 +130,18 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         /// <param name="filter">Filter controlling which entries are returned</param>
         /// <returns>An enumeration of entries matching the filter.</returns>
-        public IEnumerable<MasterFileTableEntry> GetRecords(EntryState filter)
+        public IEnumerable<MasterFileTableEntry> GetEntries(EntryStates filter)
         {
             foreach (var record in _mft.Records)
             {
-                EntryState state;
+                EntryStates state;
                 if ((record.Flags & FileRecordFlags.InUse) != 0)
                 {
-                    state = EntryState.InUse;
+                    state = EntryStates.InUse;
                 }
                 else
                 {
-                    state = EntryState.NotInUse;
+                    state = EntryStates.NotInUse;
                 }
 
                 if ((state & filter) != 0)

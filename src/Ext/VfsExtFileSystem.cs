@@ -111,7 +111,7 @@ namespace DiscUtils.Ext
             {
                 return new Directory(Context, inode);
             }
-            else if(dirEntry.Record.FileType == DirectoryRecord.FileTypeSymlink)
+            else if (dirEntry.Record.FileType == DirectoryRecord.FileTypeSymlink)
             {
                 return new Symlink(Context, inode);
             }

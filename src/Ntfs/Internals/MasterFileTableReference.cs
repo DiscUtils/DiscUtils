@@ -35,7 +35,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// The index of the referred entry in the Master File Table.
+        /// Gets the index of the referred entry in the Master File Table.
         /// </summary>
         public long RecordIndex
         {
@@ -43,7 +43,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// The revision number of the entry.
+        /// Gets the revision number of the entry.
         /// </summary>
         /// <remarks>
         /// This value prevents accidental reference to an entry - it will get out
@@ -52,6 +52,52 @@ namespace DiscUtils.Ntfs.Internals
         public int RecordSequenceNumber
         {
             get { return _ref.SequenceNumber; }
+        }
+
+        /// <summary>
+        /// Compares to instances for equality.
+        /// </summary>
+        /// <param name="a">The first instance to compare.</param>
+        /// <param name="b">The second instance to compare.</param>
+        /// <returns><code>true</code> if the instances are equivalent, else <code>false</code>.</returns>
+        public static bool operator ==(MasterFileTableReference a, MasterFileTableReference b)
+        {
+            return a._ref == b._ref;
+        }
+
+        /// <summary>
+        /// Compares to instances for equality.
+        /// </summary>
+        /// <param name="a">The first instance to compare.</param>
+        /// <param name="b">The second instance to compare.</param>
+        /// <returns><code>true</code> if the instances are not equivalent, else <code>false</code>.</returns>
+        public static bool operator !=(MasterFileTableReference a, MasterFileTableReference b)
+        {
+            return a._ref != b._ref;
+        }
+
+        /// <summary>
+        /// Compares another object for equality.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns><code>true</code> if the other object is equivalent, else <code>false</code>.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is MasterFileTableReference))
+            {
+                return false;
+            }
+
+            return _ref == ((MasterFileTableReference)obj)._ref;
+        }
+
+        /// <summary>
+        /// Gets a hash code for this instance.
+        /// </summary>
+        /// <returns>The hash code.</returns>
+        public override int GetHashCode()
+        {
+            return _ref.GetHashCode();
         }
     }
 }

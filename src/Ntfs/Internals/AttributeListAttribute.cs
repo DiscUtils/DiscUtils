@@ -22,35 +22,46 @@
 
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
+    using System.Collections.Generic;
 
     /// <summary>
-    /// The known NTFS namespaces.
+    /// List of attributes for files that are split over multiple Master File Table entries.
     /// </summary>
     /// <remarks>
-    /// NTFS has multiple namespaces, indicating whether a name is the
-    /// long name for a file, the short name for a file, both, or none.
+    /// <para>
+    /// Files with lots of attribute data (for example that have become very fragmented) contain
+    /// this attribute in their 'base' Master File Table entry.  This attribute acts as an index,
+    /// indicating for each attribute in the file, which Master File Table entry contains the
+    /// attribute.
+    /// </para>
     /// </remarks>
-    public enum NtfsNamespace
+    public sealed class AttributeListAttribute : GenericAttribute
     {
-        /// <summary>
-        /// Posix namespace (i.e. long name)
-        /// </summary>
-        Posix = 0,
+        private AttributeList _list;
+
+        internal AttributeListAttribute(INtfsContext context, AttributeRecord record)
+            : base(context, record)
+        {
+            byte[] content = Utilities.ReadAll(Content);
+            _list = new AttributeList();
+            _list.ReadFrom(content, 0);
+        }
 
         /// <summary>
-        /// Windows long file name.
+        /// Gets the entries in this attribute list.
         /// </summary>
-        Win32 = 1,
+        public ICollection<AttributeListEntry> Entries
+        {
+            get
+            {
+                List<AttributeListEntry> entries = new List<AttributeListEntry>();
+                foreach (var record in _list)
+                {
+                    entries.Add(new AttributeListEntry(record));
+                }
 
-        /// <summary>
-        /// DOS (8.3) file name.
-        /// </summary>
-        Dos = 2,
-
-        /// <summary>
-        /// File name that is both the long name and the DOS (8.3) name.
-        /// </summary>
-        Win32AndDos = 3
+                return entries;
+            }
+        }
     }
 }

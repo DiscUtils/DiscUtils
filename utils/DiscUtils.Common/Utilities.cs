@@ -25,9 +25,7 @@ using System.Collections.Generic;
 
 namespace DiscUtils.Common
 {
-
-
-    public class Utilities
+    public static class Utilities
     {
         public static string[] WordWrap(string text, int width)
         {
@@ -69,6 +67,26 @@ namespace DiscUtils.Common
             finally
             {
                 Console.ForegroundColor = restoreColor;
+            }
+        }
+
+        public static string ApproximateDiskSize(long size)
+        {
+            if (size > 10 * (1024 * 1024L * 1024))
+            {
+                return (size / (1024 * 1024 * 1024)) + " GiB";
+            }
+            else if (size > 10 * (1024 * 1024L))
+            {
+                return (size / (1024 * 1024)) + " MiB";
+            }
+            else if (size > 10 * 1024)
+            {
+                return (size / 1024) + " KiB";
+            }
+            else
+            {
+                return size + " B";
             }
         }
 

@@ -93,6 +93,10 @@ namespace DiscUtils.Ntfs
 
             // Limit read to length of attribute
             int toRead = (int)Math.Min(count, Capacity - pos);
+            if (toRead == 0)
+            {
+                return 0;
+            }
 
             int numRead;
             if (_record.Flags == AttributeFlags.None)

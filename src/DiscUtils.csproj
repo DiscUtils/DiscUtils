@@ -382,6 +382,8 @@
     <Compile Include="Ntfs\IndexRoot.cs" />
     <Compile Include="Ntfs\IndexView.cs" />
     <Compile Include="Ntfs\Internals\AttributeFlags.cs" />
+    <Compile Include="Ntfs\Internals\AttributeListAttribute.cs" />
+    <Compile Include="Ntfs\Internals\AttributeListEntry.cs" />
     <Compile Include="Ntfs\Internals\FileNameAttribute.cs" />
     <Compile Include="Ntfs\Internals\MasterFileTable.cs" />
     <Compile Include="Ntfs\Internals\MasterFileTableEntry.cs" />
@@ -390,7 +392,7 @@
     <Compile Include="Ntfs\Internals\MasterFileTableReference.cs" />
     <Compile Include="Ntfs\Internals\NtfsFileAttributes.cs" />
     <Compile Include="Ntfs\Internals\NtfsNamespace.cs" />
-    <Compile Include="Ntfs\Internals\EntryState.cs" />
+    <Compile Include="Ntfs\Internals\EntryStates.cs" />
     <Compile Include="Ntfs\Internals\StandardInformationAttribute.cs" />
     <Compile Include="Ntfs\Internals\UnknownAttribute.cs" />
     <Compile Include="Ntfs\NonResidentAttributeBuffer.cs" />

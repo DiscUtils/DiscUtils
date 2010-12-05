@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Ntfs.Internals
 {
+    using System;
+
     /// <summary>
     /// Representation of an NTFS File Name attribute.
     /// </summary>
@@ -51,7 +51,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// A reference to the parent directory.
+        /// Gets the reference to the parent directory.
         /// </summary>
         /// <remarks>
         /// This attribute stores the name of a file within a directory, this field
@@ -97,17 +97,17 @@ namespace DiscUtils.Ntfs.Internals
         /// <summary>
         /// Gets the amount of disk space allocated for the file.
         /// </summary>
-        public ulong AllocatedSize
+        public long AllocatedSize
         {
-            get { return _fnr.AllocatedSize; }
+            get { return (long)_fnr.AllocatedSize; }
         }
 
         /// <summary>
         /// Gets the amount of data stored in the file.
         /// </summary>
-        public ulong RealSize
+        public long RealSize
         {
-            get { return _fnr.RealSize; }
+            get { return (long)_fnr.RealSize; }
         }
 
         /// <summary>
@@ -119,11 +119,11 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Depending on the nature of the file, either the extended attributes size, or a reparse tag.
+        /// Gets the extended attributes size, or a reparse tag, depending on the nature of the file.
         /// </summary>
-        public uint ExtendedAttributesSizeOrReparsePointTag
+        public long ExtendedAttributesSizeOrReparsePointTag
         {
-            get { return _fnr.EASizeOrReparsePointTag; }
+            get { return (long)_fnr.EASizeOrReparsePointTag; }
         }
 
         /// <summary>

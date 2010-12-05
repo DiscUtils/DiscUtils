@@ -311,6 +311,21 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Ntfs.Internals">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-12-05 19:43:22Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Ntfs.Internals</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="135" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Optical">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-06-06 16:14:24Z">
@@ -6802,6 +6817,24 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="NtfsFileSystem">
+          <Members>
+           <Member Name="#GetMasterFileTable()">
+            <Messages>
+             <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Status="Excluded" Created="2010-12-05 19:43:22Z">
+              <Issue Certainty="50">
+               <Item>'NtfsFileSystem.GetMasterFileTable()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="134" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="NtfsFileSystemChecker">
           <Members>
            <Member Name="#Check(System.IO.TextWriter,DiscUtils.ReportLevels)">
@@ -6854,6 +6887,210 @@
             </Messages>
            </Member>
           </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.Ntfs.Internals">
+        <Types>
+         <Type Name="AttributeFlags">
+          <Messages>
+           <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2010-12-05 19:43:22Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>Flags</Item>
+             <Item>'AttributeFlags'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="147" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="AttributeListAttribute">
+          <Messages>
+           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2010-12-05 19:43:22Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>'AttributeListAttribute'</Item>
+             <Item>Attribute</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="148" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="FileNameAttribute">
+          <Messages>
+           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2010-12-05 19:43:22Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>'FileNameAttribute'</Item>
+             <Item>Attribute</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="148" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="GenericAttribute">
+          <Messages>
+           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2010-12-05 19:43:22Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>'GenericAttribute'</Item>
+             <Item>Attribute</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="144" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Flags">
+            <Messages>
+             <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2010-12-05 19:43:22Z">
+              <Issue Name="MemberNoAlternate">
+               <Item>Flags</Item>
+               <Item>'GenericAttribute.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="145" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MasterFileTableEntry">
+          <Members>
+           <Member Name="#Flags">
+            <Messages>
+             <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2010-12-05 19:43:22Z">
+              <Issue Name="MemberNoAlternate">
+               <Item>Flags</Item>
+               <Item>'MasterFileTableEntry.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="149" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MasterFileTableEntryFlags">
+          <Messages>
+           <Message Id="Flags" TypeName="UsePreferredTerms" Category="Microsoft.Naming" CheckId="CA1726" Status="Excluded" Created="2010-12-05 19:43:22Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>Flags</Item>
+             <Item>'MasterFileTableEntryFlags'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="136" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#IsMetaFile">
+            <Messages>
+             <Message Id="MetaFile" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2010-12-05 19:43:22Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>MetaFile</Item>
+               <Item>'MasterFileTableEntryFlags.IsMetaFile'</Item>
+               <Item>Metafile</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="143" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MasterFileTableReference">
+          <Members>
+           <Member Name="#op_Equality(DiscUtils.Ntfs.Internals.MasterFileTableReference,DiscUtils.Ntfs.Internals.MasterFileTableReference)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-12-05 19:52:33Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'MasterFileTableReference.operator ==(MasterFileTableReference, MasterFileTableReference)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="146" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-12-05 19:52:33Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'MasterFileTableReference.operator ==(MasterFileTableReference, MasterFileTableReference)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="146" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#op_Inequality(DiscUtils.Ntfs.Internals.MasterFileTableReference,DiscUtils.Ntfs.Internals.MasterFileTableReference)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-12-05 19:52:33Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'MasterFileTableReference.operator !=(MasterFileTableReference, MasterFileTableReference)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="146" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-12-05 19:52:33Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'MasterFileTableReference.operator !=(MasterFileTableReference, MasterFileTableReference)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="146" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="StandardInformationAttribute">
+          <Messages>
+           <Message TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711" Status="Excluded" Created="2010-12-05 19:43:22Z">
+            <Issue Name="TypeNoAlternate">
+             <Item>'StandardInformationAttribute'</Item>
+             <Item>Attribute</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="148" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
          </Type>
         </Types>
        </Namespace>
@@ -10144,12 +10381,22 @@
     <Note Id="131" Modified="2010-09-18 23:13:14Z">Physical storage type is byte</Note>
     <Note Id="132" Modified="2010-09-19 09:33:19Z">Complex names.</Note>
     <Note Id="133" Modified="2010-11-23 00:21:37Z">Symlink is a common name for symbolic links.</Note>
+    <Note Id="134" Modified="2010-12-05 19:43:53Z">Access to internal NTFS workings - method seems more appropriate.</Note>
+    <Note Id="135" Modified="2010-12-05 19:44:06Z">Part of project name.</Note>
+    <Note Id="136" Modified="2010-12-05 19:44:39Z">Flags seems appropriate</Note>
     <Note Id="137" Modified="2010-11-15 00:50:26Z">Not flags.</Note>
     <Note Id="138" Modified="2010-11-21 10:54:50Z">Part of ext2/3/4 defined data structures.</Note>
     <Note Id="139" Modified="2010-11-21 10:55:05Z">Ext is common name for the file system.</Note>
     <Note Id="140" Modified="2010-11-21 10:55:55Z">Part of ext2/3/4 structures</Note>
     <Note Id="141" Modified="2010-11-21 10:56:16Z">Instantiated by templates.</Note>
     <Note Id="142" Modified="2010-11-21 10:56:25Z">Namespace for the file system</Note>
+    <Note Id="143" Modified="2010-12-05 19:45:31Z">Name OK.</Note>
+    <Note Id="144" Modified="2010-12-05 19:46:10Z">This is an attribute, just not a .NET 'attribute'.</Note>
+    <Note Id="145" Modified="2010-12-05 19:46:23Z">Using the term flags.</Note>
+    <Note Id="146" Modified="2010-12-05 19:53:03Z">More meaningful names not possible.</Note>
+    <Note Id="147" Modified="2010-12-05 19:53:14Z">Using flags.</Note>
+    <Note Id="148" Modified="2010-12-05 19:53:31Z">NTFS attributes.</Note>
+    <Note Id="149" Modified="2010-12-05 19:53:41Z">Using Flags.</Note>
    </User>
   </Notes>
   <Rules>
@@ -10200,6 +10447,9 @@
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
     <Resolution Name="Namespace">Correct the spelling of '{0}' in namespace name '{1}'.</Resolution>
     <Resolution Name="Type">Correct the spelling of '{0}' in type name {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="IdentifiersShouldNotHaveIncorrectSuffix" Category="Microsoft.Naming" CheckId="CA1711">
+    <Resolution Name="TypeNoAlternate">Rename type name {0} so that it does not end in '{1}'.</Resolution>
    </Rule>
    <Rule TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810">
     <Resolution Name="Default">Initialize all static fields in {0} when those fields are declared and remove the explicit static constructor.</Resolution>

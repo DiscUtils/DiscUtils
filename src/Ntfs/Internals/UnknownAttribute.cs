@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Ntfs.Internals
 {
     internal sealed class UnknownAttribute : GenericAttribute

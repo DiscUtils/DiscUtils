@@ -25,29 +25,32 @@ namespace DiscUtils.Ntfs.Internals
     using System;
 
     /// <summary>
-    /// Flags indicating how an attribute's content is stored on disk.
+    /// Flags indicating the state of a Master File Table entry.
     /// </summary>
+    /// <remarks>
+    /// Used to filter entries in the Master File Table.
+    /// </remarks>
     [Flags]
-    public enum AttributeFlags
+    public enum EntryStates
     {
         /// <summary>
-        /// The data is stored in linear form.
+        /// No entries match.
         /// </summary>
-        None = 0x0000,
+        None = 0,
 
         /// <summary>
-        /// The data is compressed.
+        /// The entry is currently in use.
         /// </summary>
-        Compressed = 0x0001,
+        InUse = 1,
 
         /// <summary>
-        /// The data is encrypted.
+        /// The entry is currently not in use.
         /// </summary>
-        Encrypted = 0x4000,
+        NotInUse = 2,
 
         /// <summary>
-        /// The data is stored in sparse form.
+        /// All entries match.
         /// </summary>
-        Sparse = 0x8000
+        All = 3
     }
 }

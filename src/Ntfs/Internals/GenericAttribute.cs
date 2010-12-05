@@ -31,7 +31,7 @@ namespace DiscUtils.Ntfs.Internals
     public abstract class GenericAttribute
     {
         private INtfsContext _context;
-        internal AttributeRecord _record;
+        private AttributeRecord _record;
 
         internal GenericAttribute(INtfsContext context, AttributeRecord record)
         {
@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Indicates if the attribute content is stored in the MFT record itself.
+        /// Gets a value indicating whether the attribute content is stored in the MFT record itself.
         /// </summary>
         public bool IsResident
         {
@@ -80,17 +80,31 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
+        /// Gets the amount of valid data in the attribute's content.
+        /// </summary>
+        public long ContentLength
+        {
+            get { return _record.DataLength; }
+        }
+
+        /// <summary>
         /// Gets a buffer that can access the content of the attribute.
         /// </summary>
         public IBuffer Content
         {
-            get { return _record.GetReadOnlyDataBuffer(_context); }
+            get
+            {
+                IBuffer rawBuffer = _record.GetReadOnlyDataBuffer(_context);
+                return new SubBuffer(rawBuffer, 0, _record.DataLength);
+            }
         }
 
         internal static GenericAttribute FromAttributeRecord(INtfsContext context, AttributeRecord record)
         {
-            switch(record.AttributeType)
+            switch (record.AttributeType)
             {
+                case AttributeType.AttributeList:
+                    return new AttributeListAttribute(context, record);
                 case AttributeType.FileName:
                     return new FileNameAttribute(context, record);
                 case AttributeType.StandardInformation:

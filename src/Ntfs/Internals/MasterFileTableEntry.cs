@@ -39,7 +39,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// The index of this entry in the Master File Table.
+        /// Gets the index of this entry in the Master File Table.
         /// </summary>
         public long Index
         {
@@ -105,7 +105,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Index of this entry in the Master File Table (as stored in the entry itself).
+        /// Gets the index of this entry in the Master File Table (as stored in the entry itself).
         /// </summary>
         /// <remarks>
         /// Note - older versions of Windows did not store this value, so it may be Zero.
@@ -127,6 +127,7 @@ namespace DiscUtils.Ntfs.Internals
                 {
                     result.Add(GenericAttribute.FromAttributeRecord(_context, attr));
                 }
+
                 return result;
             }
         }

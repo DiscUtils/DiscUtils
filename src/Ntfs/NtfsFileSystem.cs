@@ -294,6 +294,7 @@ namespace DiscUtils.Ntfs
         /// Use the returned object to explore the internals of the file system - most people will
         /// never need to use this.
         /// </remarks>
+        /// <returns>The Master File Table.</returns>
         public Internals.MasterFileTable GetMasterFileTable()
         {
             return new Internals.MasterFileTable(_context, _context.Mft);

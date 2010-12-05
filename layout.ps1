@@ -42,6 +42,7 @@ Copy-Item "${basedir}\utils\OSClone\bin\SignedRelease\OSClone.exe" "${basedir}\l
 Copy-Item "${basedir}\utils\BCDDump\bin\SignedRelease\BCDDump.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\DiskClone\bin\SignedRelease\DiskClone.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\MSBuildTask\bin\SignedRelease\DiscUtils.MSBuild.dll" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\FileRecover\bin\SignedRelease\FileRecover.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\LICENSE.TXT" "${basedir}\layout\bin\LICENSE.TXT"
 pushd layout\bin
 & $zip a -r -tzip "${basedir}\layout\DiscUtilsBin-${ver}.zip" "*.*"

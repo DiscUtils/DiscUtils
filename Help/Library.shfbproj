@@ -46,7 +46,7 @@ Common / Utility classes are in the top-level namespace.</ProjectSummary>
 <NamespaceSummaryItem name="DiscUtils.Fat" isDocumented="True">Classes to access and modify disks formatted with a FAT file system.  FAT12, FAT16 and FAT32 are supported.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Iscsi" isDocumented="True">Provides read/write access to disk images available over iSCSI, supporting CHAP authentication.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Iso9660" isDocumented="True">Classes to create and read ISO 9660 (aka CDROM) disc images.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Ntfs" isDocumented="True">Classes providing read-only access to NTFS file systems.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Ntfs" isDocumented="True">Classes providing access to NTFS file systems.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Partitions" isDocumented="True">Classes to initialize, access and modify hard disk partition tables.  Currently, only legacy BIOS-style partition tables are fully supported (GUID Partition Tables are read-only).</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Registry" isDocumented="True">Provides read/write access to NT-style registry hives.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Sdi" isDocumented="True">Classes to access the contents of Simple Deployment Image (SDI) files.</NamespaceSummaryItem>
@@ -64,7 +64,10 @@ Common / Utility classes are in the top-level namespace.</ProjectSummary>
 <NamespaceSummaryItem name="DiscUtils.Optical" isDocumented="True">Classes to access the contents of optical disk images (ISO and BIN file extensions).</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Dmg" isDocumented="True">Classes to read virtual disks in the Apple DMG (aka UDIF) format.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Compression" isDocumented="True">Classes implementing re-usable compression and decompression functionality implemented in DiscUtils.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.Ext" isDocumented="True">Classes to read the Linux ext family of file systems.  The variants ext2, ext3 and ext4 are supported.</NamespaceSummaryItem></NamespaceSummaries>
+<NamespaceSummaryItem name="DiscUtils.Ext" isDocumented="True">Classes to read the Linux ext family of file systems.  The variants ext2, ext3 and ext4 are supported.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Ntfs.Internals" isDocumented="True">Classes providing access read-only access to the internals of NTFS file systems.
+
+Few people should need to use these classes, they're mostly useful for writing 'undelete' applications / similar that need to bypass the normal NTFS sematics.</NamespaceSummaryItem></NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
     <SdkLinkType>Msdn</SdkLinkType>
     <IndentHtml>True</IndentHtml>

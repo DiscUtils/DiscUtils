@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Ntfs.Internals
 {
+    using System;
+
     /// <summary>
     /// Representation of an NTFS File Name attribute.
     /// </summary>
@@ -101,7 +101,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Unknown.
+        /// Gets the Unknown.
         /// </summary>
         public long ClassId
         {
@@ -109,7 +109,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Owner identity, for the purposes of quota allocation.
+        /// Gets the owner identity, for the purposes of quota allocation.
         /// </summary>
         public long OwnerId
         {
@@ -117,7 +117,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Identifier of the Security Descriptor for this file.
+        /// Gets the identifier of the Security Descriptor for this file.
         /// </summary>
         /// <remarks>
         /// Security Descriptors are stored in the \$Secure meta-data file.
@@ -128,7 +128,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// The amount charged to the owners quota for this file.
+        /// Gets the amount charged to the owners quota for this file.
         /// </summary>
         public long QuotaCharged
         {

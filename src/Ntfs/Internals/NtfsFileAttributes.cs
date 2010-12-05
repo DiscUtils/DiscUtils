@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Ntfs.Internals
 {
+    using System;
+
     /// <summary>
     /// File attributes as stored natively by NTFS.
     /// </summary>
