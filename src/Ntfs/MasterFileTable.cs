@@ -134,6 +134,7 @@ namespace DiscUtils.Ntfs
             {
                 using (Stream mftStream = _self.OpenStream(AttributeType.Data, null, FileAccess.Read))
                 {
+                    uint index = 0;
                     while (mftStream.Position < mftStream.Length)
                     {
                         byte[] recordData = Utilities.ReadFully(mftStream, _recordLength);
@@ -145,7 +146,11 @@ namespace DiscUtils.Ntfs
 
                         FileRecord record = new FileRecord(_bytesPerSector);
                         record.FromBytes(recordData, 0);
+                        record.LoadedIndex = index;
+
                         yield return record;
+
+                        index++;
                     }
                 }
             }
@@ -299,7 +304,12 @@ namespace DiscUtils.Ntfs
 
         public FileRecord GetRecord(long index, bool ignoreMagic)
         {
-            if (_bitmap == null || _bitmap.IsPresent(index))
+            return GetRecord(index, ignoreMagic, false);
+        }
+
+        public FileRecord GetRecord(long index, bool ignoreMagic, bool ignoreBitmap)
+        {
+            if (ignoreBitmap || _bitmap == null || _bitmap.IsPresent(index))
             {
                 FileRecord result = _recordCache[index];
                 if (result != null)
@@ -314,6 +324,7 @@ namespace DiscUtils.Ntfs
 
                     result = new FileRecord(_bytesPerSector);
                     result.FromBytes(recordBuffer, 0, ignoreMagic);
+                    result.LoadedIndex = (uint)index;
                 }
                 else
                 {

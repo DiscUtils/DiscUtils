@@ -44,6 +44,13 @@ namespace DiscUtils.Ntfs
             _record = record;
         }
 
+        internal NonResidentAttributeBuffer(INtfsContext context, NonResidentAttributeRecord record)
+        {
+            _fsStream = context.RawStream;
+            _bytesPerCluster = context.BiosParameterBlock.BytesPerCluster;
+            _record = record;
+        }
+
         public override bool CanRead
         {
             get { return _fsStream.CanRead; }
@@ -51,7 +58,7 @@ namespace DiscUtils.Ntfs
 
         public override bool CanWrite
         {
-            get { return _fsStream.CanWrite; }
+            get { return _fsStream.CanWrite && _file != null; }
         }
 
         public override long Capacity

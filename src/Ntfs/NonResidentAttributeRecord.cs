@@ -193,6 +193,11 @@ namespace DiscUtils.Ntfs
             return _dataBuffer;
         }
 
+        public override IBuffer GetReadOnlyDataBuffer(INtfsContext context)
+        {
+            return new NonResidentAttributeBuffer(context, this);
+        }
+
         public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
         {
             var cookedRuns = CookedDataRuns;

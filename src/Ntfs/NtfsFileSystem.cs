@@ -288,6 +288,18 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Gets the Master File Table for this file system.
+        /// </summary>
+        /// <remarks>
+        /// Use the returned object to explore the internals of the file system - most people will
+        /// never need to use this.
+        /// </remarks>
+        public Internals.MasterFileTable GetMasterFileTable()
+        {
+            return new Internals.MasterFileTable(_context, _context.Mft);
+        }
+
+        /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
         /// <param name="sourceFile">The source file</param>

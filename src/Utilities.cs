@@ -798,6 +798,18 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Read bytes until buffer filled or throw IOException.
+        /// </summary>
+        /// <param name="buffer">The buffer to read</param>
+        /// <param name="pos">The position in buffer to read from</param>
+        /// <param name="count">The number of bytes to read</param>
+        /// <returns>The data read from the stream</returns>
+        public static byte[] ReadAll(IBuffer buffer)
+        {
+            return ReadFully(buffer, 0, (int)buffer.Capacity);
+        }
+
+        /// <summary>
         /// Reads a disk sector (512 bytes).
         /// </summary>
         /// <param name="stream">The stream to read</param>

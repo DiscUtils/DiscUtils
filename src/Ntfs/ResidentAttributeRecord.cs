@@ -105,6 +105,11 @@ namespace DiscUtils.Ntfs
             return _memoryBuffer;
         }
 
+        public override IBuffer GetReadOnlyDataBuffer(INtfsContext context)
+        {
+            return _memoryBuffer;
+        }
+
         public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
         {
             return recordStart + DataOffset + offset;

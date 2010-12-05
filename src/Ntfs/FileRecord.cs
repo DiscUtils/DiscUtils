@@ -52,6 +52,7 @@ namespace DiscUtils.Ntfs
         private List<AttributeRecord> _attributes;
 
         private bool _haveIndex;
+        private uint _loadedIndex;
 
         public FileRecord(int sectorSize)
             : base("FILE", sectorSize)
@@ -67,6 +68,17 @@ namespace DiscUtils.Ntfs
         public uint MasterFileTableIndex
         {
             get { return _index; }
+        }
+
+        public uint LoadedIndex
+        {
+            get { return _loadedIndex; }
+            set { _loadedIndex = value; }
+        }
+
+        public ulong LogFileSequenceNumber
+        {
+            get { return _logFileSequenceNumber; }
         }
 
         public ushort SequenceNumber
@@ -116,6 +128,11 @@ namespace DiscUtils.Ntfs
         public FileRecordReference Reference
         {
             get { return new FileRecordReference(MasterFileTableIndex, SequenceNumber); }
+        }
+
+        public ushort NextAttributeId
+        {
+            get { return _nextAttributeId; }
         }
 
         public static FileAttributeFlags ConvertFlags(FileRecordFlags source)
