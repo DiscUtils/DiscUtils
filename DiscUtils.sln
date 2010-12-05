@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiskClone", "utils\DiskClon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildTask", "utils\MSBuildTask\MSBuildTask.csproj", "{345AC4DE-1BF2-43B7-B703-F1573E1F5026}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileRecover", "utils\FileRecover\FileRecover.csproj", "{07435C07-6D92-4385-B85A-4C8F0A9B9363}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -199,6 +201,14 @@ Global
 		{345AC4DE-1BF2-43B7-B703-F1573E1F5026}.Release|Any CPU.Build.0 = Release|Any CPU
 		{345AC4DE-1BF2-43B7-B703-F1573E1F5026}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
 		{345AC4DE-1BF2-43B7-B703-F1573E1F5026}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.Release (StyleCop)|Any CPU.ActiveCfg = Release (StyleCop)|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.Release (StyleCop)|Any CPU.Build.0 = Release (StyleCop)|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.SignedRelease|Any CPU.ActiveCfg = SignedRelease|Any CPU
+		{07435C07-6D92-4385-B85A-4C8F0A9B9363}.SignedRelease|Any CPU.Build.0 = SignedRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
