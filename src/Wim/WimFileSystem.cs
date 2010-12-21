@@ -348,7 +348,7 @@ namespace DiscUtils.Wim
             {
                 if (re.IsMatch(dirEntry.FileName))
                 {
-                    result.Add(Path.Combine(path, dirEntry.FileName));
+                    result.Add(Utilities.CombinePaths(path, dirEntry.FileName));
                 }
             }
 
@@ -649,13 +649,13 @@ namespace DiscUtils.Wim
                 {
                     if (regex.IsMatch(de.SearchName))
                     {
-                        results.Add(Path.Combine(path, de.FileName));
+                        results.Add(Utilities.CombinePaths(path, de.FileName));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Path.Combine(path, de.FileName), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(path, de.FileName), regex, subFolders, dirs, files);
                 }
             }
         }

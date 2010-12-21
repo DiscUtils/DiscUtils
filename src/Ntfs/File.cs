@@ -85,7 +85,7 @@ namespace DiscUtils.Ntfs
                         {
                             foreach (string dirName in parentDir.Names)
                             {
-                                result.Add(Path.Combine(dirName, name));
+                                result.Add(Utilities.CombinePaths(dirName, name));
                             }
                         }
                     }

@@ -91,8 +91,8 @@ namespace DiscUtils.Vhd
         /// <param name="access">The access requested to the disk.</param>
         public Disk(DiscFileSystem fileSystem, string path, FileAccess access)
         {
-            FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            DiskImageFile file = new DiskImageFile(fileLocator, Path.GetFileName(path), access);
+            FileLocator fileLocator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
+            DiskImageFile file = new DiskImageFile(fileLocator, Utilities.GetFileFromPath(path), access);
             _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
             _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(file, Ownership.Dispose));
             ResolveFileChain();
@@ -412,8 +412,8 @@ namespace DiscUtils.Vhd
         /// <returns>The newly created disk</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
-            FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            DiskImageFile file = _files[0].First.CreateDifferencing(locator, Path.GetFileName(path));
+            FileLocator locator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
+            DiskImageFile file = _files[0].First.CreateDifferencing(locator, Utilities.GetFileFromPath(path));
             return new Disk(file, Ownership.Dispose);
         }
 

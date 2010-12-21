@@ -103,8 +103,8 @@ namespace DiscUtils.Vhd
         internal DiskImageFile(FileLocator locator, string path, Stream stream, Ownership ownsStream)
             : this(stream, ownsStream)
         {
-            _fileLocator = locator.GetRelativeLocator(Path.GetDirectoryName(path));
-            _fileName = Path.GetFileName(path);
+            _fileLocator = locator.GetRelativeLocator(locator.GetDirectoryFromPath(path));
+            _fileName = locator.GetFileFromPath(path);
         }
 
         internal DiskImageFile(FileLocator locator, string path, FileAccess access)
@@ -113,8 +113,8 @@ namespace DiscUtils.Vhd
             _fileStream = locator.Open(path, FileMode.Open, access, share);
             _ownsStream = Ownership.Dispose;
 
-            _fileLocator = locator.GetRelativeLocator(Path.GetDirectoryName(path));
-            _fileName = Path.GetFileName(path);
+            _fileLocator = locator.GetRelativeLocator(locator.GetDirectoryFromPath(path));
+            _fileName = locator.GetFileFromPath(path);
 
             ReadFooter(true);
 

@@ -728,13 +728,13 @@ namespace DiscUtils.Nfs
 
                     if (regex.IsMatch(searchName))
                     {
-                        results.Add(Path.Combine(path, de.Name));
+                        results.Add(Utilities.CombinePaths(path, de.Name));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, de.FileHandle, Path.Combine(path, de.Name), regex, subFolders, dirs, files);
+                    DoSearch(results, de.FileHandle, Utilities.CombinePaths(path, de.Name), regex, subFolders, dirs, files);
                 }
             }
         }

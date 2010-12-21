@@ -511,16 +511,21 @@ namespace DiscUtils
                 throw new ArgumentException("Path must not be null or empty", "path");
             }
 
-            if (path.IndexOf(':') < 0 && !path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
+            if (!Path.IsPathRooted(path))
             {
                 path = Path.GetFullPath(path);
             }
 
             // Built-in Uri class does cope well with query params on file Uris, so do some
             // parsing ourselves...
-            if (path.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
+            if (path.Length >= 1 && path[0] == '\\')
             {
                 UriBuilder builder = new UriBuilder("file:" + path.Replace('\\', '/'));
+                return builder.Uri;
+            }
+            else if (path.StartsWith("//", StringComparison.OrdinalIgnoreCase))
+            {
+                UriBuilder builder = new UriBuilder("file:" + path);
                 return builder.Uri;
             }
             else if (path.Length >= 2 && path[1] == ':')

@@ -199,8 +199,14 @@ namespace DiscUtils.Vfs
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            TDirectory parentDir = GetDirectory(path);
-            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries, (m) => Utilities.CombinePaths(path, FormatFileName(m.FileName)));
+            string fullPath = path;
+            if (!fullPath.StartsWith(@"\\"))
+            {
+                fullPath = @"\" + fullPath;
+            }
+
+            TDirectory parentDir = GetDirectory(fullPath);
+            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries, (m) => Utilities.CombinePaths(fullPath, FormatFileName(m.FileName)));
         }
 
         /// <summary>
@@ -221,7 +227,7 @@ namespace DiscUtils.Vfs
             {
                 if (re.IsMatch(dirEntry.FileName))
                 {
-                    result.Add(Path.Combine(path, dirEntry.FileName));
+                    result.Add(Utilities.CombinePaths(path, dirEntry.FileName));
                 }
             }
 
@@ -283,14 +289,14 @@ namespace DiscUtils.Vfs
             string dirName;
             try
             {
-                dirName = Path.GetDirectoryName(path);
+                dirName = Utilities.GetDirectoryFromPath(path);
             }
             catch (ArgumentException)
             {
                 throw new IOException("Invalid path: " + path);
             }
 
-            string entryPath = Path.Combine(dirName, fileName);
+            string entryPath = Utilities.CombinePaths(dirName, fileName);
             TDirEntry entry = GetDirectoryEntry(entryPath);
             if (entry == null)
             {
@@ -300,8 +306,8 @@ namespace DiscUtils.Vfs
                 }
                 else
                 {
-                    TDirectory parentDir = GetDirectory(Path.GetDirectoryName(path));
-                    entry = parentDir.CreateNewFile(Path.GetFileName(path));
+                    TDirectory parentDir = GetDirectory(Utilities.GetDirectoryFromPath(path));
+                    entry = parentDir.CreateNewFile(Utilities.GetFileFromPath(path));
                 }
             }
             else if (mode == FileMode.CreateNew)
@@ -681,13 +687,13 @@ namespace DiscUtils.Vfs
                 {
                     if (regex.IsMatch(de.SearchName))
                     {
-                        results.Add(Path.Combine(resultPrefixPath, FormatFileName(de.FileName)));
+                        results.Add(Utilities.CombinePaths(resultPrefixPath, FormatFileName(de.FileName)));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Path.Combine(resultPrefixPath, FormatFileName(de.FileName)), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(resultPrefixPath, FormatFileName(de.FileName)), regex, subFolders, dirs, files);
                 }
             }
         }

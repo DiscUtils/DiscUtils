@@ -35,6 +35,10 @@ namespace DiscUtils
 
         public abstract string GetFullPath(string path);
 
+        public abstract string GetDirectoryFromPath(string path);
+
+        public abstract string GetFileFromPath(string path);
+
         public abstract DateTime GetLastWriteTimeUtc(string path);
 
         public abstract bool HasCommonRoot(FileLocator other);

@@ -62,9 +62,9 @@ namespace DiscUtils.Vmdk
         public Disk(DiscFileSystem fileSystem, string path, FileAccess access)
         {
             _path = path;
-            FileLocator fileLocator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
+            FileLocator fileLocator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
             _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(fileLocator, Path.GetFileName(path), access), Ownership.Dispose));
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(fileLocator, Utilities.GetFileFromPath(path), access), Ownership.Dispose));
             ResolveFileChain();
         }
 

@@ -62,6 +62,16 @@ namespace DiscUtils
             }
         }
 
+        public override string GetDirectoryFromPath (string path)
+        {
+            return Path.GetDirectoryName(path);
+        }
+        
+        public override string GetFileFromPath (string path)
+        {
+            return Path.GetFileName(path);
+        }
+
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             return File.GetLastWriteTimeUtc(Path.Combine(_dir, path));

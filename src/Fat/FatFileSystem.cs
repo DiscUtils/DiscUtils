@@ -1229,7 +1229,7 @@ namespace DiscUtils.Fat
             List<string> dirs = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                dirs.Add(Path.Combine(path, dirEntry.Name));
+                dirs.Add(Utilities.CombinePaths(path, dirEntry.Name));
             }
 
             return dirs.ToArray();
@@ -1265,7 +1265,7 @@ namespace DiscUtils.Fat
             List<string> files = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                files.Add(Path.Combine(path, dirEntry.Name));
+                files.Add(Utilities.CombinePaths(path, dirEntry.Name));
             }
 
             return files.ToArray();
@@ -1301,7 +1301,7 @@ namespace DiscUtils.Fat
             List<string> result = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                result.Add(Path.Combine(path, dirEntry.Name));
+                result.Add(Utilities.CombinePaths(path, dirEntry.Name));
             }
 
             return result.ToArray();
@@ -1326,7 +1326,7 @@ namespace DiscUtils.Fat
             {
                 if (re.IsMatch(dirEntry.SearchName))
                 {
-                    result.Add(Path.Combine(path, dirEntry.Name));
+                    result.Add(Utilities.CombinePaths(path, dirEntry.Name));
                 }
             }
 
@@ -1902,13 +1902,13 @@ namespace DiscUtils.Fat
                 {
                     if (regex.IsMatch(de.SearchName))
                     {
-                        results.Add(Path.Combine(path, de.Name));
+                        results.Add(Utilities.CombinePaths(path, de.Name));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Path.Combine(path, de.Name), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(path, de.Name), regex, subFolders, dirs, files);
                 }
             }
         }

@@ -161,7 +161,7 @@ namespace DiscUtils.Vmdk
                 }
             }
 
-            _fileLocator = fileLocator.GetRelativeLocator(Path.GetDirectoryName(file));
+            _fileLocator = fileLocator.GetRelativeLocator(fileLocator.GetDirectoryFromPath(file));
         }
 
         /// <summary>
@@ -277,8 +277,8 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk image</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, DiskParameters parameters)
         {
-            FileLocator locator = new DiscFileLocator(fileSystem, Path.GetDirectoryName(path));
-            return Initialize(locator, Path.GetFileName(path), parameters);
+            FileLocator locator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
+            return Initialize(locator, Utilities.GetFileFromPath(path), parameters);
         }
 
         /// <summary>
@@ -409,15 +409,15 @@ namespace DiscUtils.Vmdk
                 throw new ArgumentException("Differencing disks must be sparse", "type");
             }
 
-            string basePath = Path.GetDirectoryName(path);
+            string basePath = Utilities.GetDirectoryFromPath(path);
             FileLocator locator = new DiscFileLocator(fileSystem, basePath);
-            FileLocator parentLocator = locator.GetRelativeLocator(Path.GetDirectoryName(parent));
+            FileLocator parentLocator = locator.GetRelativeLocator(Utilities.GetDirectoryFromPath(parent));
 
-            using (DiskImageFile parentFile = new DiskImageFile(parentLocator, Path.GetFileName(parent), FileAccess.Read))
+            using (DiskImageFile parentFile = new DiskImageFile(parentLocator, Utilities.GetFileFromPath(parent), FileAccess.Read))
             {
                 DescriptorFile baseDescriptor = CreateDifferencingDiskDescriptor(type, parentFile, parent);
 
-                return DoInitialize(locator, Path.GetFileName(path), parentFile.Capacity, type, baseDescriptor);
+                return DoInitialize(locator, Utilities.GetFileFromPath(path), parentFile.Capacity, type, baseDescriptor);
             }
         }
 
