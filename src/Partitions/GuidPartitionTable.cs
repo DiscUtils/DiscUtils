@@ -111,8 +111,6 @@ namespace DiscUtils.Partitions
         /// <returns>An object to access the newly created partition table</returns>
         public static GuidPartitionTable Initialize(Stream disk, Geometry diskGeometry)
         {
-            Stream data = disk;
-
             // Create the protective MBR partition record.
             BiosPartitionTable pt = BiosPartitionTable.Initialize(disk, diskGeometry);
             pt.CreatePrimaryByCylinder(0, diskGeometry.Cylinders - 1, BiosPartitionTypes.GptProtective, false);

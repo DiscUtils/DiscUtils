@@ -348,8 +348,6 @@ namespace DiscUtils.Vhd
 
         private void CheckFooter()
         {
-            long length = _fileStream.Length;
-
             _fileStream.Position = _fileStream.Length - Utilities.SectorSize;
             byte[] sector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
 
@@ -362,8 +360,6 @@ namespace DiscUtils.Vhd
 
         private void CheckHeader()
         {
-            long length = _fileStream.Length;
-
             _fileStream.Position = 0;
             byte[] headerSector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
 

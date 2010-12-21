@@ -105,7 +105,7 @@ namespace OSClone
                 }
 
                 // Partition the new disk with a single NTFS partition
-                BiosPartitionTable pt = BiosPartitionTable.Initialize(destDisk, WellKnownPartitionType.WindowsNtfs);
+                BiosPartitionTable.Initialize(destDisk, WellKnownPartitionType.WindowsNtfs);
                 VolumeManager volMgr = new VolumeManager(destDisk);
 
                 string label = _labelSwitch.IsPresent ? _labelSwitch.Value : sourceNtfs.VolumeLabel;

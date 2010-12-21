@@ -195,8 +195,6 @@ namespace DiscUtils
         {
             CheckDisposed();
 
-            long readStartPos = _position;
-
             if (_position >= Length)
             {
                 if (_atEof)
@@ -396,8 +394,6 @@ namespace DiscUtils
             CheckDisposed();
 
             _stats.TotalWritesIn++;
-
-            long startPos = _position;
 
             int blockSize = _settings.BlockSize;
             long firstBlock = _position / blockSize;

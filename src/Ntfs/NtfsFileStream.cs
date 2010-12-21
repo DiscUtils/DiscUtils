@@ -146,8 +146,6 @@ namespace DiscUtils.Ntfs
         {
             if (!_file.Context.ReadOnly)
             {
-                DateTime now = DateTime.UtcNow;
-
                 // Update the standard information attribute - so it reflects the actual file state
                 if (_isDirty)
                 {

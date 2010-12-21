@@ -170,26 +170,24 @@ namespace DiscUtils.Ntfs
             {
                 NtfsAttribute[] attrs = GetAttributes(AttributeType.FileName);
 
-                string longName = null;
-                int longest = 0;
+                string bestName = null;
 
                 if (attrs != null && attrs.Length != 0)
                 {
-                    longName = attrs[0].ToString();
+                    bestName = attrs[0].ToString();
 
                     for (int i = 1; i < attrs.Length; ++i)
                     {
                         string name = attrs[i].ToString();
 
-                        if (Utilities.Is8Dot3(longName))
+                        if (Utilities.Is8Dot3(bestName))
                         {
-                            longest = i;
-                            longName = name;
+                            bestName = name;
                         }
                     }
                 }
 
-                return longName;
+                return bestName;
             }
         }
 
@@ -216,8 +214,6 @@ namespace DiscUtils.Ntfs
 
         public static File CreateNew(INtfsContext context, FileRecordFlags flags)
         {
-            DateTime now = DateTime.UtcNow;
-
             File newFile = context.AllocateFile(flags);
 
             StandardInformation.InitializeNewFile(newFile, FileAttributeFlags.Archive | FileRecord.ConvertFlags(flags));

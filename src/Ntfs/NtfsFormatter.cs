@@ -236,7 +236,6 @@ namespace DiscUtils.Ntfs
 
         private File CreateFixedSystemFile(long mftIndex, long firstCluster, ulong numClusters, bool wipe)
         {
-            DateTime now = DateTime.UtcNow;
             BiosParameterBlock bpb = _context.BiosParameterBlock;
 
             if (wipe)
@@ -257,7 +256,7 @@ namespace DiscUtils.Ntfs
 
             StandardInformation.InitializeNewFile(file, FileAttributeFlags.Hidden | FileAttributeFlags.System);
 
-            NtfsStream dataStream = file.CreateStream(AttributeType.Data, null, firstCluster, numClusters, (uint)bpb.BytesPerCluster);
+            file.CreateStream(AttributeType.Data, null, firstCluster, numClusters, (uint)bpb.BytesPerCluster);
 
             file.UpdateRecordInMft();
 
@@ -276,8 +275,6 @@ namespace DiscUtils.Ntfs
 
         private File CreateSystemFile(long mftIndex, FileRecordFlags flags)
         {
-            BiosParameterBlock bpb = _context.BiosParameterBlock;
-
             FileRecord fileRec = _context.Mft.AllocateRecord((uint)mftIndex, flags);
             fileRec.SequenceNumber = (ushort)mftIndex;
 
@@ -285,7 +282,7 @@ namespace DiscUtils.Ntfs
 
             StandardInformation.InitializeNewFile(file, FileAttributeFlags.Hidden | FileAttributeFlags.System | FileRecord.ConvertFlags(flags));
 
-            NtfsStream dataStream = file.CreateStream(AttributeType.Data, null);
+            file.CreateStream(AttributeType.Data, null);
 
             file.UpdateRecordInMft();
 
@@ -294,9 +291,6 @@ namespace DiscUtils.Ntfs
 
         private Directory CreateSystemDirectory(long mftIndex)
         {
-            DateTime now = DateTime.UtcNow;
-            BiosParameterBlock bpb = _context.BiosParameterBlock;
-
             FileRecord fileRec = _context.Mft.AllocateRecord((uint)mftIndex, FileRecordFlags.None);
             fileRec.Flags = FileRecordFlags.InUse | FileRecordFlags.IsDirectory;
             fileRec.SequenceNumber = (ushort)mftIndex;

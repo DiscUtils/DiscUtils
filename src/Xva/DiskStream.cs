@@ -51,8 +51,6 @@ namespace DiscUtils.Xva
                 throw new IOException("No such disk");
             }
 
-            int numChunks = (int)((length + Sizes.OneMiB - 1) / Sizes.OneMiB);
-
             ReadChunkSkipList();
         }
 

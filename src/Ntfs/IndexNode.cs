@@ -455,11 +455,7 @@ namespace DiscUtils.Ntfs
                     long freeBlock = _entries[entryIndex].ChildrenVirtualCluster;
                     _entries[entryIndex].Flags = (_entries[entryIndex].Flags & ~IndexEntryFlags.Node) | (childNode._entries[0].Flags & IndexEntryFlags.Node);
                     _entries[entryIndex].ChildrenVirtualCluster = childNode._entries[0].ChildrenVirtualCluster;
-                    if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) != 0)
-                    {
-                        IndexNode newChildNode = _index.GetSubBlock(this, _entries[entryIndex]).Node;
-                        childNode._parent = this;
-                    }
+                    childNode._parent = this;
 
                     _index.FreeBlock(freeBlock);
                 }

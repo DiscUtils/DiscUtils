@@ -1796,16 +1796,6 @@ namespace DiscUtils.Fat
 
         private void LoadFAT()
         {
-            int fatStart;
-            if (_type == FatType.Fat32)
-            {
-                fatStart = (int)((_bpbRsvdSecCnt + (ActiveFat * FatSize)) * BytesPerSector);
-            }
-            else
-            {
-                fatStart = _bpbRsvdSecCnt * BytesPerSector;
-            }
-
             _fat = new FileAllocationTable(_type, _data, _bpbRsvdSecCnt, (uint)FatSize, (byte)FatCount, ActiveFat);
         }
 

@@ -185,7 +185,6 @@ namespace DiscUtils
             long extentEnd = long.MaxValue;
 
             IEnumerator<StreamExtent>[] enums = new IEnumerator<StreamExtent>[streams.Length];
-            bool[] streamsValid = new bool[streams.Length];
             for (int i = 0; i < streams.Length; ++i)
             {
                 enums[i] = streams[i].GetEnumerator();

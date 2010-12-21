@@ -118,7 +118,7 @@ namespace DiscUtils.Ntfs
             }
 
             DirectoryIndexEntry entry = Index.FindFirst(new FileNameQuery(searchName, _context.UpperCase));
-            if (entry.Key != null && entry.Value != null)
+            if (entry.Key != null)
             {
                 return new DirectoryEntry(this, entry.Value, entry.Key);
             }
