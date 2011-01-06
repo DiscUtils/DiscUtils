@@ -22,12 +22,13 @@
 
 namespace DiscUtils.SquashFs
 {
+    using System;
     using System.IO;
     using System.IO.Compression;
     using DiscUtils.Compression;
     using DiscUtils.Vfs;
 
-    internal class VfsSquashFileSystemReader : VfsReadOnlyFileSystem<DirectoryEntry, File, Directory, Context>
+    internal class VfsSquashFileSystemReader : VfsReadOnlyFileSystem<DirectoryEntry, File, Directory, Context>, IUnixFileSystem
     {
         public const int MetadataBufferSize = 8 * 1024;
 
@@ -43,32 +44,33 @@ namespace DiscUtils.SquashFs
             _context.SuperBlock = new SuperBlock();
             _context.RawStream = stream;
 
+            // Read superblock
             stream.Position = 0;
             byte[] buffer = Utilities.ReadFully(stream, _context.SuperBlock.Size);
             _context.SuperBlock.ReadFrom(buffer, 0);
 
+            // Create block caches, used to reduce the amount of I/O and decompression activity.
             _blockCache = new BlockCache<Block>((int)_context.SuperBlock.BlockSize, 20);
             _metablockCache = new BlockCache<Metablock>(MetadataBufferSize, 20);
-
             _context.ReadBlock = ReadBlock;
             _context.ReadMetaBlock = ReadMetaBlock;
+
             _context.InodeReader = new MetablockReader(_context, _context.SuperBlock.InodeTableStart);
             _context.DirectoryReader = new MetablockReader(_context, _context.SuperBlock.DirectoryTableStart);
 
-            _context.RawStream.Position = _context.SuperBlock.FragmentTableStart;
-            int numFragBlocks = (int)Utilities.Ceil(_context.SuperBlock.FragmentsCount * FragmentRecord.RecordSize, MetadataBufferSize);
+            _context.FragmentTableReaders = LoadIndirectReaders(
+                _context.SuperBlock.FragmentTableStart,
+                (int)_context.SuperBlock.FragmentsCount,
+                FragmentRecord.RecordSize);
 
-            byte[] fragTableBytes = Utilities.ReadFully(_context.RawStream, numFragBlocks * 8);
-            _context.FragmentTableReaders = new MetablockReader[numFragBlocks];
-            for (int i = 0; i < numFragBlocks; ++i)
-            {
-                long block = Utilities.ToInt64LittleEndian(fragTableBytes, i * 8);
-                _context.FragmentTableReaders[i] = new MetablockReader(_context, block);
-            }
+            _context.UidGidTableReaders = LoadIndirectReaders(
+                _context.SuperBlock.UidGidTableStart,
+                _context.SuperBlock.UidGidCount,
+                4);
 
+            // Bootstrap the root directory
             _context.InodeReader.SetPosition(_context.SuperBlock.RootInode);
             DirectoryInode dirInode = (DirectoryInode)Inode.Read(_context.InodeReader);
-
             RootDirectory = new Directory(_context, dirInode, _context.SuperBlock.RootInode);
         }
 
@@ -80,6 +82,50 @@ namespace DiscUtils.SquashFs
         public override string FriendlyName
         {
             get { return "SquashFs"; }
+        }
+
+        public UnixFileSystemInfo GetUnixFileInfo(string path)
+        {
+            File file = GetFile(path);
+            UnixFileSystemInfo info = new UnixFileSystemInfo()
+            {
+                FileType = FileTypeFromInodeType(file.Inode.Type),
+                UserId = GetId(file.Inode.UidKey),
+                GroupId = GetId(file.Inode.GidKey),
+                Permissions = (UnixFilePermissions)file.Inode.Mode
+            };
+
+            return info;
+        }
+
+        internal static UnixFileType FileTypeFromInodeType(InodeType inodeType)
+        {
+            switch (inodeType)
+            {
+                case InodeType.BlockDevice:
+                case InodeType.ExtendedBlockDevice:
+                    return UnixFileType.Block;
+                case InodeType.CharacterDevice:
+                case InodeType.ExtendedCharacterDevice:
+                    return UnixFileType.Character;
+                case InodeType.Directory:
+                case InodeType.ExtendedDirectory:
+                    return UnixFileType.Directory;
+                case InodeType.Fifo:
+                case InodeType.ExtendedFifo:
+                    return UnixFileType.Fifo;
+                case InodeType.File:
+                case InodeType.ExtendedFile:
+                    return UnixFileType.Regular;
+                case InodeType.Socket:
+                case InodeType.ExtendedSocket:
+                    return UnixFileType.Socket;
+                case InodeType.Symlink:
+                case InodeType.ExtendedSymlink:
+                    return UnixFileType.Link;
+                default:
+                    throw new NotSupportedException("Unrecognized inode type: " + inodeType);
+            }
         }
 
         protected override File ConvertDirEntryToFile(DirectoryEntry dirEntry)
@@ -100,6 +146,33 @@ namespace DiscUtils.SquashFs
             {
                 return new File(_context, inode, inodeRef);
             }
+        }
+
+        private MetablockReader[] LoadIndirectReaders(long pos, int count, int recordSize)
+        {
+            _context.RawStream.Position = pos;
+            int numBlocks = (int)Utilities.Ceil(count * recordSize, MetadataBufferSize);
+
+            byte[] tableBytes = Utilities.ReadFully(_context.RawStream, numBlocks * 8);
+            MetablockReader[] result = new MetablockReader[numBlocks];
+            for (int i = 0; i < numBlocks; ++i)
+            {
+                long block = Utilities.ToInt64LittleEndian(tableBytes, i * 8);
+                result[i] = new MetablockReader(_context, block);
+            }
+
+            return result;
+        }
+
+        private int GetId(ushort idKey)
+        {
+            int recordsPerBlock = MetadataBufferSize / 4;
+            int block = idKey / recordsPerBlock;
+            int offset = idKey % recordsPerBlock;
+
+            MetablockReader reader = _context.UidGidTableReaders[block];
+            reader.SetPosition(0, offset);
+            return reader.ReadInt();
         }
 
         private Block ReadBlock(long pos, int diskLen)

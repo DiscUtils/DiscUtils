@@ -79,7 +79,11 @@ namespace DiscUtils.SquashFs
 
         public override FileAttributes FileAttributes
         {
-            get { return Utilities.FileAttributesFromUnixFileType(FileTypeFromInodeType(_record.Type)); }
+            get
+            {
+                UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(_record.Type);
+                return Utilities.FileAttributesFromUnixFileType(fileType); 
+            }
         }
 
         public override long UniqueCacheId
@@ -90,36 +94,6 @@ namespace DiscUtils.SquashFs
         public MetadataRef InodeReference
         {
             get { return new MetadataRef(_header.StartBlock, _record.Offset); }
-        }
-
-        private static UnixFileType FileTypeFromInodeType(InodeType inodeType)
-        {
-            switch (inodeType)
-            {
-                case InodeType.BlockDevice:
-                case InodeType.ExtendedBlockDevice:
-                    return UnixFileType.Block;
-                case InodeType.CharacterDevice:
-                case InodeType.ExtendedCharacterDevice:
-                    return UnixFileType.Character;
-                case InodeType.Directory:
-                case InodeType.ExtendedDirectory:
-                    return UnixFileType.Directory;
-                case InodeType.Fifo:
-                case InodeType.ExtendedFifo:
-                    return UnixFileType.Fifo;
-                case InodeType.File:
-                case InodeType.ExtendedFile:
-                    return UnixFileType.Regular;
-                case InodeType.Socket:
-                case InodeType.ExtendedSocket:
-                    return UnixFileType.Socket;
-                case InodeType.Symlink:
-                case InodeType.ExtendedSymlink:
-                    return UnixFileType.Link;
-                default:
-                    throw new NotSupportedException("Unrecognized inode type: " + inodeType);
-            }
         }
     }
 }

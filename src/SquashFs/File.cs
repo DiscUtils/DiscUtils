@@ -122,6 +122,11 @@ namespace DiscUtils.SquashFs
             }
         }
 
+        internal Inode Inode
+        {
+            get { return _inode; }
+        }
+
         protected Context Context
         {
             get { return _context; }

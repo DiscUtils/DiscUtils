@@ -44,5 +44,7 @@ namespace DiscUtils.SquashFs
         public MetablockReader DirectoryReader { get; set; }
 
         public MetablockReader[] FragmentTableReaders { get; set; }
+
+        public MetablockReader[] UidGidTableReaders { get; set; }
     }
 }

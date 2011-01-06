@@ -73,7 +73,7 @@ namespace DiscUtils.SquashFs
         /// <returns>Unix information about the file or directory</returns>
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
-            throw new NotImplementedException();
+            return GetRealFileSystem<VfsSquashFileSystemReader>().GetUnixFileInfo(path);
         }
     }
 }
