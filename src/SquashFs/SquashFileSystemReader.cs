@@ -26,6 +26,13 @@ namespace DiscUtils.SquashFs
     using System.IO;
     using DiscUtils.Vfs;
 
+    /// <summary>
+    /// Implementation of SquashFs file system reader.
+    /// </summary>
+    /// <remarks>
+    /// SquashFs is a read-only file system, it is not designed to be modified
+    /// after it is created.
+    /// </remarks>
     public class SquashFileSystemReader : VfsFileSystemFacade, IUnixFileSystem
     {
         /// <summary>
@@ -37,6 +44,11 @@ namespace DiscUtils.SquashFs
         {
         }
 
+        /// <summary>
+        /// Detects if the stream contains a SquashFs file system.
+        /// </summary>
+        /// <param name="stream">The stream to inspect</param>
+        /// <returns><c>true</c> if stream appears to be a SquashFs file system.</returns>
         public static bool Detect(Stream stream)
         {
             stream.Position = 0;
@@ -54,6 +66,11 @@ namespace DiscUtils.SquashFs
             return superBlock.Magic == SuperBlock.SquashFsMagic;
         }
 
+        /// <summary>
+        /// Gets Unix file information about a file or directory.
+        /// </summary>
+        /// <param name="path">Path to the file or directory</param>
+        /// <returns>Unix information about the file or directory</returns>
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             throw new NotImplementedException();

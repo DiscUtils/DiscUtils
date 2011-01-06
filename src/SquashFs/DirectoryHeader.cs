@@ -28,11 +28,6 @@ namespace DiscUtils.SquashFs
         public uint StartBlock;
         public uint InodeNumber;
 
-        public int Size
-        {
-            get { return 12; }
-        }
-
         public static DirectoryHeader ReadFrom(MetablockReader reader)
         {
             DirectoryHeader result = new DirectoryHeader();

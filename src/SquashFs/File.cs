@@ -126,10 +126,5 @@ namespace DiscUtils.SquashFs
         {
             get { return _context; }
         }
-
-        protected Inode Inode
-        {
-            get { return _inode; }
-        }
     }
 }

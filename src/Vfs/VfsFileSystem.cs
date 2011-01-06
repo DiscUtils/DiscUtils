@@ -200,7 +200,7 @@ namespace DiscUtils.Vfs
         public override string[] GetFileSystemEntries(string path)
         {
             string fullPath = path;
-            if (!fullPath.StartsWith(@"\"))
+            if (!fullPath.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 fullPath = @"\" + fullPath;
             }

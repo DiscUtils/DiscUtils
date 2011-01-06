@@ -30,7 +30,6 @@ namespace DiscUtils.SquashFs
         private const uint InvalidFragmentKey = 0xFFFFFFFF;
         private Context _context;
         private RegularInode _inode;
-        private MetadataRef _inodeRef;
 
         private int[] _blockLengths;
 
@@ -38,7 +37,6 @@ namespace DiscUtils.SquashFs
         {
             _context = context;
             _inode = inode;
-            _inodeRef = inodeRef;
 
             context.InodeReader.SetPosition(inodeRef);
             context.InodeReader.Skip(_inode.Size);

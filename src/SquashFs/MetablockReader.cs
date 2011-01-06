@@ -38,16 +38,6 @@ namespace DiscUtils.SquashFs
             _start = start;
         }
 
-        public long CurrentBlockStart
-        {
-            get { return _currentBlockStart; }
-        }
-
-        public int CurrentBlockOffset
-        {
-            get { return _currentOffset; }
-        }
-
         public void SetPosition(MetadataRef position)
         {
             SetPosition(position.Block, position.Offset);
