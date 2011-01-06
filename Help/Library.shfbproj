@@ -33,7 +33,7 @@ Common / Utility classes are in the top-level namespace.</ProjectSummary>
     <HelpFileFormat>HtmlHelp1, MSHelpViewer</HelpFileFormat>
     <FrameworkVersion>2.0.50727</FrameworkVersion>
     <HelpTitle>DiscUtils Class Library</HelpTitle>
-    <CopyrightText>Copyright %28c%29 Kenneth Bell, 2008-2010</CopyrightText>
+    <CopyrightText>Copyright %28c%29 Kenneth Bell, 2008-2011</CopyrightText>
     <FooterText>Free software released under the MIT license, see http://discutils.codeplex.com</FooterText>
     <PresentationStyle>vs2005</PresentationStyle>
     <NamingMethod>MemberName</NamingMethod>

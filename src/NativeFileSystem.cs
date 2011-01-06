@@ -1,5 +1,5 @@
-﻿//
-// DiscUtils Copyright (c) 2008-2010, Kenneth Bell
+//
+// DiscUtils Copyright (c) 2008-2011, Kenneth Bell
 //
 // Original NativeFileSystem contributed by bsobel:
 //    http://discutils.codeplex.com/workitem/5190

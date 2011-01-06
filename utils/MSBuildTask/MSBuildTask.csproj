@@ -64,6 +64,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Version.cs">
+      <Link>Version.cs</Link>
+    </Compile>
     <Compile Include="CreateIso.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2010, Kenneth Bell
+// Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -23,7 +23,7 @@
 using System.Reflection;
 
 // General information common to all assemblies
-[assembly: AssemblyCopyright("Copyright © Kenneth Bell, 2008-2010")]
+[assembly: AssemblyCopyright("Copyright © Kenneth Bell, 2008-2011")]
 
 // Version information
 [assembly: AssemblyVersion("0.10.0.0")]

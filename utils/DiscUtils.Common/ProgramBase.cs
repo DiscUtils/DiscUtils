@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2010, Kenneth Bell
+// Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -242,7 +242,7 @@ namespace DiscUtils.Common
         protected virtual void DisplayHeader()
         {
             Console.WriteLine("{0} v{1}, available from http://discutils.codeplex.com", ExeName, Version);
-            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2010");
+            Console.WriteLine("Copyright (c) Kenneth Bell, 2008-2011");
             Console.WriteLine("Free software issued under the MIT License, see LICENSE.TXT for details.");
             Console.WriteLine();
         }

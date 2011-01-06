@@ -1,4 +1,4 @@
-﻿namespace DiscUtils.Ntfs.Internals
+namespace DiscUtils.Ntfs.Internals
 {
     using System;
     using System.Collections.Generic;
