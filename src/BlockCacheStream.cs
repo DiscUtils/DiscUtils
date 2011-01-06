@@ -39,11 +39,7 @@ namespace DiscUtils
         private long _position;
         private bool _atEof;
 
-        private Dictionary<long, CacheBlock> _blocks;
-        private LinkedList<CacheBlock> _lru;
-        private List<CacheBlock> _freeBlocks;
-        private int _blocksCreated;
-        private int _totalBlocks;
+        private BlockCache<Block> _cache;
         private byte[] _readBuffer;
         private int _blocksInReadBuffer;
 
@@ -87,14 +83,11 @@ namespace DiscUtils
             _readBuffer = new byte[_settings.OptimumReadSize];
             _blocksInReadBuffer = _settings.OptimumReadSize / _settings.BlockSize;
 
-            _totalBlocks = (int)(_settings.ReadCacheSize / _settings.BlockSize);
+            int totalBlocks = (int)(_settings.ReadCacheSize / _settings.BlockSize);
 
+            _cache = new BlockCache<Block>(_settings.BlockSize, totalBlocks);
             _stats = new BlockCacheStatistics();
-            _stats.FreeReadBlocks = _totalBlocks;
-
-            _blocks = new Dictionary<long, CacheBlock>();
-            _lru = new LinkedList<CacheBlock>();
-            _freeBlocks = new List<CacheBlock>(_totalBlocks);
+            _stats.FreeReadBlocks = totalBlocks;
         }
 
         /// <summary>
@@ -169,7 +162,11 @@ namespace DiscUtils
         /// </summary>
         public BlockCacheStatistics Statistics
         {
-            get { return _stats; }
+            get
+            {
+                _stats.FreeReadBlocks = _cache.FreeBlockCount;
+                return _stats;
+            }
         }
 
         /// <summary>
@@ -244,11 +241,12 @@ namespace DiscUtils
             int blocksRead = 0;
             while (blocksRead < numBlocks)
             {
+                Block block;
+
                 // Read from the cache as much as possible
-                while (blocksRead < numBlocks && _blocks.ContainsKey(firstBlock + blocksRead))
+                while (blocksRead < numBlocks && _cache.TryGetBlock(firstBlock + blocksRead, out block))
                 {
-                    CacheBlock block = _blocks[firstBlock + blocksRead];
-                    int bytesToRead = Math.Min(count - totalBytesRead, block.Data.Length - offsetInNextBlock);
+                    int bytesToRead = Math.Min(count - totalBytesRead, block.Available - offsetInNextBlock);
 
                     Array.Copy(block.Data, offsetInNextBlock, buffer, offset + totalBytesRead, bytesToRead);
                     offsetInNextBlock = 0;
@@ -260,7 +258,7 @@ namespace DiscUtils
                 }
 
                 // Now handle a sequence of (one or more) blocks that are not cached
-                if (blocksRead < numBlocks && !_blocks.ContainsKey(firstBlock + blocksRead))
+                if (blocksRead < numBlocks && !_cache.ContainsBlock(firstBlock + blocksRead))
                 {
                     servicedOutsideCache = true;
 
@@ -268,7 +266,7 @@ namespace DiscUtils
                     int blocksToRead = 0;
                     while (blocksRead + blocksToRead < numBlocks
                         && blocksToRead < _blocksInReadBuffer
-                        && !_blocks.ContainsKey(firstBlock + blocksRead + blocksToRead))
+                        && !_cache.ContainsBlock(firstBlock + blocksRead + blocksToRead))
                     {
                         ++blocksToRead;
                     }
@@ -290,16 +288,14 @@ namespace DiscUtils
                     for (int i = 0; i < blocksToRead; ++i)
                     {
                         int copyBytes = Math.Min(blockSize, bytesToRead - (i * blockSize));
-                        CacheBlock block = GetFreeBlock();
-                        block.Block = firstBlock + blocksRead + i;
+                        block = _cache.GetBlock(firstBlock + blocksRead + i);
                         Array.Copy(_readBuffer, i * blockSize, block.Data, 0, copyBytes);
+                        block.Available = copyBytes;
 
                         if (copyBytes < blockSize)
                         {
-                            Array.Clear(_readBuffer, copyBytes, blockSize - copyBytes);
+                            Array.Clear(_readBuffer, i * blockSize + copyBytes, blockSize - copyBytes);
                         }
-
-                        StoreBlock(block);
                     }
 
                     blocksRead += blocksToRead;
@@ -424,10 +420,11 @@ namespace DiscUtils
                 int bufferPos = offset + bytesProcessed;
                 int bytesThisBlock = Math.Min(count - bufferPos, blockSize - offsetInNextBlock);
 
-                if (_blocks.ContainsKey(firstBlock + i))
+                Block block;
+                if (_cache.TryGetBlock(firstBlock + i, out block))
                 {
-                    CacheBlock block = _blocks[firstBlock + i];
                     Array.Copy(buffer, bufferPos, block.Data, offsetInNextBlock, bytesThisBlock);
+                    block.Available = Math.Max(block.Available, bytesThisBlock);
                 }
 
                 offsetInNextBlock = 0;
@@ -464,71 +461,12 @@ namespace DiscUtils
             }
         }
 
-        private void StoreBlock(CacheBlock block)
-        {
-            _blocks[block.Block] = block;
-            _lru.AddFirst(block);
-        }
-
-        private CacheBlock GetFreeBlock()
-        {
-            if (_freeBlocks.Count > 0)
-            {
-                int idx = _freeBlocks.Count - 1;
-                CacheBlock block = _freeBlocks[idx];
-                _freeBlocks.RemoveAt(idx);
-                _stats.FreeReadBlocks--;
-                return block;
-            }
-            else if (_blocksCreated < _totalBlocks)
-            {
-                _blocksCreated++;
-                _stats.FreeReadBlocks--;
-                return new CacheBlock(_settings.BlockSize);
-            }
-            else
-            {
-                CacheBlock block = _lru.Last.Value;
-                _lru.RemoveLast();
-                _blocks.Remove(block.Block);
-                return block;
-            }
-        }
-
         private void InvalidateBlocks(long firstBlock, int numBlocks)
         {
             for (long i = firstBlock; i < (firstBlock + numBlocks); ++i)
             {
-                if (_blocks.ContainsKey(i))
-                {
-                    CacheBlock block = _blocks[i];
-                    _blocks.Remove(i);
-                    _lru.Remove(block);
-                    _freeBlocks.Add(block);
-                    _stats.FreeReadBlocks++;
-                }
+                _cache.ReleaseBlock(i);
             }
-        }
-
-        private sealed class CacheBlock : IEquatable<CacheBlock>
-        {
-            public CacheBlock(int size)
-            {
-                Data = new byte[size];
-            }
-
-            public long Block { get; set; }
-
-            public byte[] Data { get; private set; }
-
-            #region IEquatable<CacheBlock> Members
-
-            public bool Equals(CacheBlock other)
-            {
-                return Block == other.Block;
-            }
-
-            #endregion
         }
     }
 }

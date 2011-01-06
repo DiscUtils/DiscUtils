@@ -79,6 +79,8 @@
     </Compile>
     <Compile Include="BigEndianDataReader.cs" />
     <Compile Include="BigEndianDataWriter.cs" />
+    <Compile Include="Block.cs" />
+    <Compile Include="BlockCache.cs" />
     <Compile Include="BlockCacheSettings.cs" />
     <Compile Include="BlockCacheStatistics.cs" />
     <Compile Include="BlockCacheStream.cs" />
