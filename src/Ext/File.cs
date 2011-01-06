@@ -28,8 +28,6 @@ namespace DiscUtils.Ext
 
     internal class File : IVfsFile
     {
-        private static readonly DateTime Epoch = new DateTime(1970, 1, 1);
-
         private Context _context;
         private Inode _inode;
         private IBuffer _content;
@@ -44,7 +42,7 @@ namespace DiscUtils.Ext
         {
             get
             {
-                return FromFileTime(_inode.AccessTime);
+                return Utilities.DateTimeFromUnix(_inode.AccessTime);
             }
 
             set
@@ -57,7 +55,7 @@ namespace DiscUtils.Ext
         {
             get
             {
-                return FromFileTime(_inode.ModificationTime);
+                return Utilities.DateTimeFromUnix(_inode.ModificationTime);
             }
 
             set
@@ -70,7 +68,7 @@ namespace DiscUtils.Ext
         {
             get
             {
-                return FromFileTime(_inode.CreationTime);
+                return Utilities.DateTimeFromUnix(_inode.CreationTime);
             }
 
             set
@@ -120,34 +118,9 @@ namespace DiscUtils.Ext
             get { return _context; }
         }
 
-        private static DateTime FromFileTime(uint fileTime)
-        {
-            long ticks = fileTime * (long)10 * 1000 * 1000;
-            return new DateTime(ticks + Epoch.Ticks);
-        }
-
         private static FileAttributes FromMode(uint mode)
         {
-            UnixFileType fileType = (UnixFileType)((mode >> 12) & 0xF);
-            switch (fileType)
-            {
-                case UnixFileType.Fifo:
-                    return FileAttributes.Device | FileAttributes.System;
-                case UnixFileType.Character:
-                    return FileAttributes.Device | FileAttributes.System;
-                case UnixFileType.Directory:
-                    return FileAttributes.Directory;
-                case UnixFileType.Block:
-                    return FileAttributes.Device | FileAttributes.System;
-                case UnixFileType.Regular:
-                    return FileAttributes.Normal;
-                case UnixFileType.Link:
-                    return FileAttributes.ReparsePoint;
-                case UnixFileType.Socket:
-                    return FileAttributes.Device | FileAttributes.System;
-                default:
-                    return (FileAttributes)0;
-            }
+            return Utilities.FileAttributesFromUnixFileType((UnixFileType)((mode >> 12) & 0xF));
         }
     }
 }

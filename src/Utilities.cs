@@ -38,6 +38,11 @@ namespace DiscUtils
         internal const int SectorSize = Sizes.Sector;
 
         /// <summary>
+        /// The Epoch common to most (all?) Unix systems.
+        /// </summary>
+        internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1);
+
+        /// <summary>
         /// Round up a value to a multiple of a unit size.
         /// </summary>
         /// <param name="value">The value to round up</param>
@@ -924,6 +929,35 @@ namespace DiscUtils
 
             string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", "[^.]") + "$";
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        }
+
+        public static DateTime DateTimeFromUnix(uint fileTime)
+        {
+            long ticks = fileTime * (long)10 * 1000 * 1000;
+            return new DateTime(ticks + UnixEpoch.Ticks);
+        }
+
+        public static FileAttributes FileAttributesFromUnixFileType(UnixFileType fileType)
+        {
+            switch (fileType)
+            {
+                case UnixFileType.Fifo:
+                    return FileAttributes.Device | FileAttributes.System;
+                case UnixFileType.Character:
+                    return FileAttributes.Device | FileAttributes.System;
+                case UnixFileType.Directory:
+                    return FileAttributes.Directory;
+                case UnixFileType.Block:
+                    return FileAttributes.Device | FileAttributes.System;
+                case UnixFileType.Regular:
+                    return FileAttributes.Normal;
+                case UnixFileType.Link:
+                    return FileAttributes.ReparsePoint;
+                case UnixFileType.Socket:
+                    return FileAttributes.Device | FileAttributes.System;
+                default:
+                    return (FileAttributes)0;
+            }
         }
         #endregion
     }
