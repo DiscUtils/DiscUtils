@@ -200,7 +200,7 @@ namespace DiscUtils.Vfs
         public override string[] GetFileSystemEntries(string path)
         {
             string fullPath = path;
-            if (!fullPath.StartsWith(@"\\"))
+            if (!fullPath.StartsWith(@"\"))
             {
                 fullPath = @"\" + fullPath;
             }
@@ -225,7 +225,7 @@ namespace DiscUtils.Vfs
             List<string> result = new List<string>();
             foreach (TDirEntry dirEntry in parentDir.AllEntries)
             {
-                if (re.IsMatch(dirEntry.FileName))
+                if (re.IsMatch(dirEntry.SearchName))
                 {
                     result.Add(Utilities.CombinePaths(path, dirEntry.FileName));
                 }
