@@ -171,7 +171,7 @@ namespace DiscUtils.SquashFs
             int offset = idKey % recordsPerBlock;
 
             MetablockReader reader = _context.UidGidTableReaders[block];
-            reader.SetPosition(0, offset);
+            reader.SetPosition(0, offset * 4);
             return reader.ReadInt();
         }
 
