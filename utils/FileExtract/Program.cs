@@ -24,7 +24,6 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
-using DiscUtils.Ntfs;
 
 namespace FileExtract
 {
@@ -33,6 +32,7 @@ namespace FileExtract
         private CommandLineMultiParameter _diskFiles;
         private CommandLineParameter _inFilePath;
         private CommandLineParameter _outFilePath;
+        private CommandLineSwitch _diskType;
         private CommandLineSwitch _hexDump;
 
         static void Main(string[] args)
@@ -46,11 +46,13 @@ namespace FileExtract
             _diskFiles = FileOrUriMultiParameter("disk", "The disks to inspect.", false);
             _inFilePath = new CommandLineParameter("file_path", "The path of the file to extract.", false);
             _outFilePath = new CommandLineParameter("out_file", "The output file to be written.", false);
+            _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDisk.SupportedDiskTypes) + ")");
             _hexDump = new CommandLineSwitch("hd", "hexdump", null, "Output a HexDump of the NTFS stream to the console, in addition to writing it to the output file.");
 
             parser.AddMultiParameter(_diskFiles);
             parser.AddParameter(_inFilePath);
             parser.AddParameter(_outFilePath);
+            parser.AddSwitch(_diskType);
             parser.AddSwitch(_hexDump);
 
             return StandardSwitches.UserAndPassword | StandardSwitches.PartitionOrVolume;
@@ -61,7 +63,7 @@ namespace FileExtract
             VolumeManager volMgr = new VolumeManager();
             foreach (string disk in _diskFiles.Values)
             {
-                volMgr.AddDisk(VirtualDisk.OpenDisk(disk, FileAccess.Read, UserName, Password));
+                volMgr.AddDisk(VirtualDisk.OpenDisk(disk, _diskType.IsPresent ? _diskType.Value : null, FileAccess.Read, UserName, Password));
             }
 
 

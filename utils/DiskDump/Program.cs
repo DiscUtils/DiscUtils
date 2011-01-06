@@ -36,6 +36,7 @@ namespace DiskDump
         private CommandLineSwitch _showContent;
         private CommandLineSwitch _showVolContent;
         private CommandLineSwitch _showFiles;
+        private CommandLineSwitch _diskType;
 
         static void Main(string[] args)
         {
@@ -49,11 +50,13 @@ namespace DiskDump
             _showContent = new CommandLineSwitch("db", "diskbytes", null, "Includes a hexdump of all disk content in the output");
             _showVolContent = new CommandLineSwitch("vb", "volbytes", null, "Includes a hexdump of all volumes content in the output");
             _showFiles = new CommandLineSwitch("sf", "showfiles", null, "Includes a list of all files found in volumes");
+            _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDisk.SupportedDiskTypes) + ")");
 
             parser.AddMultiParameter(_inFiles);
             parser.AddSwitch(_showContent);
             parser.AddSwitch(_showVolContent);
             parser.AddSwitch(_showFiles);
+            parser.AddSwitch(_diskType);
 
             return StandardSwitches.UserAndPassword;
         }
@@ -63,7 +66,7 @@ namespace DiskDump
             List<VirtualDisk> disks = new List<VirtualDisk>();
             foreach (var path in _inFiles.Values)
             {
-                VirtualDisk disk = VirtualDisk.OpenDisk(path, FileAccess.Read, UserName, Password);
+                VirtualDisk disk = VirtualDisk.OpenDisk(path, _diskType.IsPresent ? _diskType.Value : null, FileAccess.Read, UserName, Password);
                 disks.Add(disk);
 
                 Console.WriteLine();

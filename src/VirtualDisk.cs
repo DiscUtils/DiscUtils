@@ -316,7 +316,7 @@ namespace DiscUtils
         /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
         public static VirtualDisk OpenDisk(string path, FileAccess access)
         {
-            return OpenDisk(path, access, null, null);
+            return OpenDisk(path, null, access, null, null);
         }
 
         /// <summary>
@@ -328,6 +328,24 @@ namespace DiscUtils
         /// <param name="password">The password to use for authentication (if necessary)</param>
         /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
         public static VirtualDisk OpenDisk(string path, FileAccess access, string user, string password)
+        {
+            return OpenDisk(path, null, access, user, password);
+        }
+
+        /// <summary>
+        /// Opens an existing virtual disk.
+        /// </summary>
+        /// <param name="path">The path of the virtual disk to open, can be a URI</param>
+        /// <param name="forceType">Force the detected disk type (<c>null</c> to detect)</param>
+        /// <param name="access">The desired access to the disk</param>
+        /// <param name="user">The user name to use for authentication (if necessary)</param>
+        /// <param name="password">The password to use for authentication (if necessary)</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        /// <remarks>
+        /// The detected disk type can be forced by specifying a known disk type: 
+        /// RAW, VHD, VMDK, etc.
+        /// </remarks>
+        public static VirtualDisk OpenDisk(string path, string forceType, FileAccess access, string user, string password)
         {
             Uri uri = PathToUri(path);
             VirtualDisk result = null;
@@ -348,14 +366,25 @@ namespace DiscUtils
                 }
                 else
                 {
-                    string extension = Path.GetExtension(uri.AbsolutePath).ToUpperInvariant();
-                    if (extension.StartsWith(".", StringComparison.Ordinal))
+                    bool foundFactory;
+                    VirtualDiskFactory factory;
+
+                    if (!string.IsNullOrEmpty(forceType))
                     {
-                        extension = extension.Substring(1);
+                        foundFactory = TypeMap.TryGetValue(forceType, out factory);
+                    }
+                    else
+                    {
+                        string extension = Path.GetExtension(uri.AbsolutePath).ToUpperInvariant();
+                        if (extension.StartsWith(".", StringComparison.Ordinal))
+                        {
+                            extension = extension.Substring(1);
+                        }
+
+                        foundFactory = ExtensionMap.TryGetValue(extension, out factory);
                     }
 
-                    VirtualDiskFactory factory;
-                    if (ExtensionMap.TryGetValue(extension, out factory))
+                    if (foundFactory)
                     {
                         result = factory.OpenDisk(transport.GetFileLocator(), transport.GetFileName(), access);
                     }
