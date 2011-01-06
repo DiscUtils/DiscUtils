@@ -62,12 +62,12 @@ namespace DiscUtils
             }
         }
 
-        public override string GetDirectoryFromPath (string path)
+        public override string GetDirectoryFromPath(string path)
         {
             return Path.GetDirectoryName(path);
         }
-        
-        public override string GetFileFromPath (string path)
+
+        public override string GetFileFromPath(string path)
         {
             return Path.GetFileName(path);
         }

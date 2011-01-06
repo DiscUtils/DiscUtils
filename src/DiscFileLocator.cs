@@ -56,12 +56,12 @@ namespace DiscUtils
             return Utilities.CombinePaths(_basePath, path);
         }
 
-        public override string GetDirectoryFromPath (string path)
+        public override string GetDirectoryFromPath(string path)
         {
             return Utilities.GetDirectoryFromPath(path);
         }
-        
-        public override string GetFileFromPath (string path)
+
+        public override string GetFileFromPath(string path)
         {
             return Utilities.GetFileFromPath(path);
         }
