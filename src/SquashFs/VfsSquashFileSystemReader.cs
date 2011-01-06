@@ -49,6 +49,11 @@ namespace DiscUtils.SquashFs
             byte[] buffer = Utilities.ReadFully(stream, _context.SuperBlock.Size);
             _context.SuperBlock.ReadFrom(buffer, 0);
 
+            if (_context.SuperBlock.Compression != 1)
+            {
+                throw new IOException("Unsupported compression used");
+            }
+
             // Create block caches, used to reduce the amount of I/O and decompression activity.
             _blockCache = new BlockCache<Block>((int)_context.SuperBlock.BlockSize, 20);
             _metablockCache = new BlockCache<Metablock>(MetadataBufferSize, 20);
