@@ -294,7 +294,7 @@ namespace DiscUtils
 
                         if (copyBytes < blockSize)
                         {
-                            Array.Clear(_readBuffer, i * blockSize + copyBytes, blockSize - copyBytes);
+                            Array.Clear(_readBuffer, (i * blockSize) + copyBytes, blockSize - copyBytes);
                         }
                     }
 
