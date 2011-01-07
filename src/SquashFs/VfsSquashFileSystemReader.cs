@@ -108,7 +108,7 @@ namespace DiscUtils.SquashFs
                 Permissions = (UnixFilePermissions)inode.Mode,
                 Inode = inode.InodeNumber,
                 LinkCount = inode.NumLinks,
-                DeviceId = devInod.DeviceId
+                DeviceId = (devInod == null) ? 0 : devInod.DeviceId
             };
 
             return info;
