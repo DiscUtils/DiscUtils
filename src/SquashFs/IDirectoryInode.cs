@@ -24,8 +24,6 @@ namespace DiscUtils.SquashFs
 {
     internal interface IDirectoryInode
     {
-        uint NumLinks { get; }
-
         uint FileSize { get; }
 
         uint StartBlock { get; }

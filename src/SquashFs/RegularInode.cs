@@ -38,6 +38,7 @@ namespace DiscUtils.SquashFs
         {
             base.ReadFrom(buffer, offset);
 
+            NumLinks = 1;
             StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             FragmentKey = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
             Offset = Utilities.ToUInt32LittleEndian(buffer, offset + 24);

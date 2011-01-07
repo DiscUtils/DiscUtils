@@ -24,7 +24,6 @@ namespace DiscUtils.SquashFs
 {
     internal class ExtendedDirectoryInode : Inode, IDirectoryInode
     {
-        private uint _numLinks;
         private uint _fileSize;
         private uint _startBlock;
         private uint _parentInode;
@@ -35,11 +34,6 @@ namespace DiscUtils.SquashFs
         public override int Size
         {
             get { return 40; }
-        }
-
-        public uint NumLinks
-        {
-            get { return _numLinks; }
         }
 
         public uint FileSize
@@ -66,7 +60,7 @@ namespace DiscUtils.SquashFs
         {
             base.ReadFrom(buffer, offset);
 
-            _numLinks = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
+            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 16);
             _fileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
             _startBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
             _parentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);

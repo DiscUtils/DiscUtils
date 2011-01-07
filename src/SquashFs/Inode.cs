@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -33,6 +33,7 @@ namespace DiscUtils.SquashFs
         public ushort GidKey;
         public DateTime ModificationTime;
         public uint InodeNumber;
+        public int NumLinks;
 
         public abstract int Size
         {
@@ -92,6 +93,9 @@ namespace DiscUtils.SquashFs
                     return new RegularInode();
                 case InodeType.Symlink:
                     return new SymlinkInode();
+                case InodeType.CharacterDevice:
+                case InodeType.BlockDevice:
+                    return new DeviceInode();
                 default:
                     throw new NotImplementedException("Inode type not implemented: " + type);
             }

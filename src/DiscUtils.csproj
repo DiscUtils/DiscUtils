@@ -494,6 +494,7 @@
     <Compile Include="SparseMemoryStream.cs" />
     <Compile Include="SparseStream.cs" />
     <Compile Include="SquashFs\Context.cs" />
+    <Compile Include="SquashFs\DeviceInode.cs" />
     <Compile Include="SquashFs\Directory.cs" />
     <Compile Include="SquashFs\DirectoryEntry.cs" />
     <Compile Include="SquashFs\DirectoryHeader.cs" />

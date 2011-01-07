@@ -46,5 +46,20 @@ namespace DiscUtils
         /// Gets or sets the file's type.
         /// </summary>
         public UnixFileType FileType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the file's serial number (unique within file system).
+        /// </summary>
+        public long Inode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of hard links to this file.
+        /// </summary>
+        public int LinkCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the device id of the referenced device (for character and block devices).
+        /// </summary>
+        public long DeviceId { get; set; }
     }
 }

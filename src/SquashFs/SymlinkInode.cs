@@ -24,7 +24,6 @@ namespace DiscUtils.SquashFs
 {
     internal class SymlinkInode : Inode
     {
-        public uint NumLinks;
         public uint SymlinkSize;
 
         public override int Size
@@ -36,7 +35,7 @@ namespace DiscUtils.SquashFs
         {
             base.ReadFrom(buffer, offset);
 
-            NumLinks = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
+            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 16);
             SymlinkSize = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
 
             return 24;

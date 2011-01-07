@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -54,6 +54,11 @@ namespace DiscUtils.SquashFs
                 throw new IOException("Unsupported compression used");
             }
 
+            if (_context.SuperBlock.ExtendedAttrsTableStart != -1)
+            {
+                throw new IOException("Unsupported extended attributes present");
+            }
+
             // Create block caches, used to reduce the amount of I/O and decompression activity.
             _blockCache = new BlockCache<Block>((int)_context.SuperBlock.BlockSize, 20);
             _metablockCache = new BlockCache<Metablock>(MetadataBufferSize, 20);
@@ -92,12 +97,18 @@ namespace DiscUtils.SquashFs
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             File file = GetFile(path);
+            Inode inode = file.Inode;
+            DeviceInode devInod = inode as DeviceInode;
+
             UnixFileSystemInfo info = new UnixFileSystemInfo()
             {
-                FileType = FileTypeFromInodeType(file.Inode.Type),
-                UserId = GetId(file.Inode.UidKey),
-                GroupId = GetId(file.Inode.GidKey),
-                Permissions = (UnixFilePermissions)file.Inode.Mode
+                FileType = FileTypeFromInodeType(inode.Type),
+                UserId = GetId(inode.UidKey),
+                GroupId = GetId(inode.GidKey),
+                Permissions = (UnixFilePermissions)inode.Mode,
+                Inode = inode.InodeNumber,
+                LinkCount = inode.NumLinks,
+                DeviceId = devInod.DeviceId
             };
 
             return info;

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,49 +22,23 @@
 
 namespace DiscUtils.SquashFs
 {
-    internal class DirectoryInode : Inode, IDirectoryInode
+    internal sealed class DeviceInode : Inode
     {
-        private uint _startBlock;
-        private ushort _fileSize;
-        private ushort _offset;
-        private uint _parentInode;
+        public uint DeviceId { get; set; }
 
         public override int Size
         {
-            get { return 32; }
-        }
-
-        public uint FileSize
-        {
-            get { return _fileSize; }
-        }
-
-        public uint StartBlock
-        {
-            get { return _startBlock; }
-        }
-
-        public uint ParentInode
-        {
-            get { return _parentInode; }
-        }
-
-        public ushort Offset
-        {
-            get { return _offset; }
+            get { return 24; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
             base.ReadFrom(buffer, offset);
 
-            _startBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 20);
-            _fileSize = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
-            _offset = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
-            _parentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 16);
+            DeviceId = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
 
-            return 32;
+            return 24;
         }
     }
 }
