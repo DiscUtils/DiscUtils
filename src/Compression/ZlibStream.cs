@@ -33,6 +33,7 @@ namespace DiscUtils.Compression
     public class ZlibStream : Stream
     {
         private Stream _stream;
+        private CompressionMode _mode;
         private DeflateStream _deflateStream;
         private Adler32 _adler32;
 
@@ -44,30 +45,41 @@ namespace DiscUtils.Compression
         /// <param name="leaveOpen">Whether closing this stream should leave <c>stream</c> open.</param>
         public ZlibStream(Stream stream, CompressionMode mode, bool leaveOpen)
         {
-            if (mode != CompressionMode.Decompress)
-            {
-                throw new NotImplementedException("Only Decompression implemented so far");
-            }
-
             _stream = stream;
+            _mode = mode;
 
-            // We just sanity check against expected header values...
-            byte[] headerBuffer = Utilities.ReadFully(stream, 2);
-            ushort header = Utilities.ToUInt16BigEndian(headerBuffer, 0);
-
-            if ((header % 31) != 0)
+            if (mode == CompressionMode.Decompress)
             {
-                throw new IOException("Invalid Zlib header found");
+                // We just sanity check against expected header values...
+                byte[] headerBuffer = Utilities.ReadFully(stream, 2);
+                ushort header = Utilities.ToUInt16BigEndian(headerBuffer, 0);
+
+                if ((header % 31) != 0)
+                {
+                    throw new IOException("Invalid Zlib header found");
+                }
+
+                if ((header & 0x0F00) != (8 << 8))
+                {
+                    throw new NotSupportedException("Zlib compression not using DEFLATE algorithm");
+                }
+
+                if ((header & 0x0020) != 0)
+                {
+                    throw new NotSupportedException("Zlib compression using preset dictionary");
+                }
             }
-
-            if ((header & 0x0F00) != (8 << 8))
+            else
             {
-                throw new NotSupportedException("Zlib compression not using DEFLATE algorithm");
-            }
+                ushort header =
+                    (8 << 8)    // DEFLATE
+                    | (7 << 12) // 32K window size
+                    | 0x80;     // Default algorithm
+                header |= (ushort)(31 - (header % 31));
 
-            if ((header & 0x0020) != 0)
-            {
-                throw new NotSupportedException("Zlib compression using preset dictionary");
+                byte[] headerBuffer = new byte[2];
+                Utilities.WriteBytesBigEndian(header, headerBuffer, 0);
+                stream.Write(headerBuffer, 0, 2);
             }
 
             _deflateStream = new DeflateStream(stream, mode, leaveOpen);
@@ -120,19 +132,30 @@ namespace DiscUtils.Compression
         /// </summary>
         public override void Close()
         {
-            // Can only check Adler checksum on seekable streams.  Since DeflateStream
-            // aggresively caches input, it normally has already consumed the footer.
-            if (_stream.CanSeek)
+            if (_mode == CompressionMode.Decompress)
             {
-                _stream.Seek(-4, SeekOrigin.End);
-                byte[] footerBuffer = Utilities.ReadFully(_stream, 4);
-                if (Utilities.ToInt32BigEndian(footerBuffer, 0) != _adler32.Value)
+                // Can only check Adler checksum on seekable streams.  Since DeflateStream
+                // aggresively caches input, it normally has already consumed the footer.
+                if (_stream.CanSeek)
                 {
-                    throw new IOException("Corrupt decompressed data detected");
+                    _stream.Seek(-4, SeekOrigin.End);
+                    byte[] footerBuffer = Utilities.ReadFully(_stream, 4);
+                    if (Utilities.ToInt32BigEndian(footerBuffer, 0) != _adler32.Value)
+                    {
+                        throw new InvalidDataException("Corrupt decompressed data detected");
+                    }
                 }
-            }
 
-            _deflateStream.Close();
+                _deflateStream.Close();
+            }
+            else
+            {
+                _deflateStream.Close();
+
+                byte[] footerBuffer = new byte[4];
+                Utilities.WriteBytesBigEndian(_adler32.Value, footerBuffer, 0);
+                _stream.Write(footerBuffer, 0, 4);
+            }
         }
 
         /// <summary>
@@ -189,6 +212,7 @@ namespace DiscUtils.Compression
         {
             CheckParams(buffer, offset, count);
 
+            _adler32.Process(buffer, offset, count);
             _deflateStream.Write(buffer, offset, count);
         }
 

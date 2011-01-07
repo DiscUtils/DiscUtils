@@ -86,6 +86,7 @@
     <Compile Include="BootConfig\StoreTest.cs" />
     <Compile Include="ChsAddressTest.cs" />
     <Compile Include="Compression\BZip2DecoderStreamTest.cs" />
+    <Compile Include="Compression\ZlibStreamTest.cs" />
     <Compile Include="FileSystemSource.cs" />
     <Compile Include="Combined\CombinedTest.cs" />
     <Compile Include="DiscFileSystemDirectoryTest.cs" />
