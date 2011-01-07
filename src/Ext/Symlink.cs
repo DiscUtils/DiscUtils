@@ -26,8 +26,8 @@ namespace DiscUtils.Ext
 
     internal class Symlink : File, IVfsSymlink<DirEntry, File>
     {
-        public Symlink(Context context, Inode inode)
-            : base(context, inode)
+        public Symlink(Context context, uint inodeNum, Inode inode)
+            : base(context, inodeNum, inode)
         {
         }
 

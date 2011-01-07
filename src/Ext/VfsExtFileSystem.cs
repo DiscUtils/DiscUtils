@@ -78,7 +78,7 @@ namespace DiscUtils.Ext
                 _blockGroups[i] = bg;
             }
 
-            RootDirectory = new Directory(Context, GetInode(2));
+            RootDirectory = new Directory(Context, 2, GetInode(2));
         }
 
         public override string VolumeLabel
@@ -94,13 +94,32 @@ namespace DiscUtils.Ext
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             File file = GetFile(path);
+            Inode inode = file.Inode;
+
+            UnixFileType fileType = (UnixFileType)((inode.Mode >> 12) & 0xff);
+
+            uint deviceId = 0;
+            if (fileType == UnixFileType.Character || fileType == UnixFileType.Block)
+            {
+                if (inode.DirectBlocks[0] != 0)
+                {
+                    deviceId = inode.DirectBlocks[0];
+                }
+                else
+                {
+                    deviceId = inode.DirectBlocks[1];
+                }
+            }
 
             return new UnixFileSystemInfo()
             {
-                FileType = (UnixFileType)((file.Inode.Mode >> 12) & 0xff),
-                Permissions = (UnixFilePermissions)(file.Inode.Mode & 0xfff),
-                UserId = (((int)file.Inode.UserIdHigh) << 16) | file.Inode.UserIdLow,
-                GroupId = (((int)file.Inode.GroupIdHigh) << 16) | file.Inode.GroupIdLow
+                FileType = fileType,
+                Permissions = (UnixFilePermissions)(inode.Mode & 0xfff),
+                UserId = (((int)inode.UserIdHigh) << 16) | inode.UserIdLow,
+                GroupId = (((int)inode.GroupIdHigh) << 16) | inode.GroupIdLow,
+                Inode = file.InodeNumber,
+                LinkCount = inode.LinksCount,
+                DeviceId = deviceId
             };
         }
 
@@ -109,15 +128,15 @@ namespace DiscUtils.Ext
             Inode inode = GetInode(dirEntry.Record.Inode);
             if (dirEntry.Record.FileType == DirectoryRecord.FileTypeDirectory)
             {
-                return new Directory(Context, inode);
+                return new Directory(Context, dirEntry.Record.Inode, inode);
             }
             else if (dirEntry.Record.FileType == DirectoryRecord.FileTypeSymlink)
             {
-                return new Symlink(Context, inode);
+                return new Symlink(Context, dirEntry.Record.Inode, inode);
             }
             else
             {
-                return new File(Context, inode);
+                return new File(Context, dirEntry.Record.Inode, inode);
             }
         }
 

@@ -29,12 +29,14 @@ namespace DiscUtils.Ext
     internal class File : IVfsFile
     {
         private Context _context;
+        private uint _inodeNum;
         private Inode _inode;
         private IBuffer _content;
 
-        public File(Context context, Inode inode)
+        public File(Context context, uint inodeNum, Inode inode)
         {
             _context = context;
+            _inodeNum = inodeNum;
             _inode = inode;
         }
 
@@ -106,6 +108,11 @@ namespace DiscUtils.Ext
 
                 return _content;
             }
+        }
+
+        internal uint InodeNumber
+        {
+            get { return _inodeNum; }
         }
 
         internal Inode Inode

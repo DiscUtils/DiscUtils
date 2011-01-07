@@ -28,8 +28,8 @@ namespace DiscUtils.Ext
 
     internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
-        public Directory(Context context, Inode inode)
-            : base(context, inode)
+        public Directory(Context context, uint inodeNum, Inode inode)
+            : base(context, inodeNum, inode)
         {
         }
 
