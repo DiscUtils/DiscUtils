@@ -159,8 +159,8 @@ namespace DiscUtils.SquashFs
                 return 0;
             }
 
-            int toCopy = Math.Min(frag.Available - pos, count);
-            Array.Copy(frag.Data, pos, buffer, offset, toCopy);
+            int toCopy = (int)Math.Min(frag.Available - (_inode.FragmentOffset + pos), count);
+            Array.Copy(frag.Data, _inode.FragmentOffset + pos, buffer, offset, toCopy);
             return toCopy;
         }
     }

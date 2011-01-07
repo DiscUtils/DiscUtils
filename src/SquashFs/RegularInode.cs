@@ -26,7 +26,7 @@ namespace DiscUtils.SquashFs
     {
         public uint StartBlock;
         public uint FragmentKey;
-        public uint Offset;
+        public uint FragmentOffset;
         public uint FileSize;
 
         public override int Size
@@ -41,7 +41,7 @@ namespace DiscUtils.SquashFs
             NumLinks = 1;
             StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             FragmentKey = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            Offset = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
+            FragmentOffset = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
             FileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
