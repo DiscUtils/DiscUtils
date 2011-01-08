@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -31,11 +31,11 @@ namespace DiscUtils.SquashFs
 
         public uint Magic;
         public uint InodesCount;
-        public uint CreationTime;
+        public DateTime CreationTime;
         public uint BlockSize;
         public uint FragmentsCount;
         public ushort Compression;
-        public ushort BlockLog;
+        public ushort BlockSizeLog2;
         public ushort Flags;
         public ushort UidGidCount;
         public ushort MajorVersion;
@@ -58,11 +58,11 @@ namespace DiscUtils.SquashFs
         {
             Magic = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             InodesCount = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            CreationTime = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
+            CreationTime = Utilities.DateTimeFromUnix(Utilities.ToUInt32LittleEndian(buffer, offset + 8));
             BlockSize = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
             FragmentsCount = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             Compression = Utilities.ToUInt16LittleEndian(buffer, offset + 20);
-            BlockLog = Utilities.ToUInt16LittleEndian(buffer, offset + 22);
+            BlockSizeLog2 = Utilities.ToUInt16LittleEndian(buffer, offset + 22);
             Flags = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
             UidGidCount = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
             MajorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 28);
@@ -86,7 +86,25 @@ namespace DiscUtils.SquashFs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(Magic, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(InodesCount, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian(Utilities.DateTimeToUnix(CreationTime), buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(BlockSize, buffer, offset + 12);
+            Utilities.WriteBytesLittleEndian(FragmentsCount, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(Compression, buffer, offset + 20);
+            Utilities.WriteBytesLittleEndian(BlockSizeLog2, buffer, offset + 22);
+            Utilities.WriteBytesLittleEndian(Flags, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian(UidGidCount, buffer, offset + 26);
+            Utilities.WriteBytesLittleEndian(MajorVersion, buffer, offset + 28);
+            Utilities.WriteBytesLittleEndian(MinorVersion, buffer, offset + 30);
+            Utilities.WriteBytesLittleEndian(RootInode.Value, buffer, offset + 32);
+            Utilities.WriteBytesLittleEndian(BytesUsed, buffer, offset + 40);
+            Utilities.WriteBytesLittleEndian(UidGidTableStart, buffer, offset + 48);
+            Utilities.WriteBytesLittleEndian(ExtendedAttrsTableStart, buffer, offset + 56);
+            Utilities.WriteBytesLittleEndian(InodeTableStart, buffer, offset + 64);
+            Utilities.WriteBytesLittleEndian(DirectoryTableStart, buffer, offset + 72);
+            Utilities.WriteBytesLittleEndian(FragmentTableStart, buffer, offset + 80);
+            Utilities.WriteBytesLittleEndian(LookupTableStart, buffer, offset + 88);
         }
     }
 }

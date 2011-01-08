@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,32 +22,34 @@
 
 namespace DiscUtils.SquashFs
 {
-    using System;
+    using System.IO;
 
-    internal class FragmentRecord : IByteArraySerializable
+    internal delegate uint AllocateInode();
+
+    internal delegate ushort AllocateId(int id);
+
+    internal delegate uint WriteDataBlock(byte[] buffer, int offset, int count);
+
+    internal delegate uint WriteFragment(int length, out uint offset);
+
+    internal sealed class BuilderContext
     {
-        public const int RecordSize = 16;
+        public Stream RawStream { get; set; }
 
-        public long StartBlock;
-        public int CompressedSize;
+        public int DataBlockSize { get; set; }
 
-        public int Size
-        {
-            get { return RecordSize; }
-        }
+        public byte[] IoBuffer { get; set; }
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            StartBlock = Utilities.ToInt64LittleEndian(buffer, offset + 0);
-            CompressedSize = Utilities.ToInt32LittleEndian(buffer, offset + 8);
-            return RecordSize;
-        }
+        public AllocateInode AllocateInode { get; set; }
 
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(CompressedSize, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 12);
-        }
+        public AllocateId AllocateId { get; set; }
+
+        public WriteDataBlock WriteDataBlock { get; set; }
+
+        public WriteFragment WriteFragment { get; set; }
+
+        public MetablockWriter InodeWriter { get; set; }
+
+        public MetablockWriter DirectoryWriter { get; set; }
     }
 }

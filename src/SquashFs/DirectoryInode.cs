@@ -37,21 +37,25 @@ namespace DiscUtils.SquashFs
         public uint FileSize
         {
             get { return _fileSize; }
+            set { _fileSize = (ushort)value; }
         }
 
         public uint StartBlock
         {
             get { return _startBlock; }
+            set { _startBlock = value; }
         }
 
         public uint ParentInode
         {
             get { return _parentInode; }
+            set { _parentInode = value; }
         }
 
         public ushort Offset
         {
             get { return _offset; }
+            set { _offset = value; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)
@@ -65,6 +69,17 @@ namespace DiscUtils.SquashFs
             _parentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
+        }
+
+        public override void WriteTo(byte[] buffer, int offset)
+        {
+            base.WriteTo(buffer, offset);
+
+            Utilities.WriteBytesLittleEndian(_startBlock, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(NumLinks, buffer, offset + 20);
+            Utilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian(_offset, buffer, offset + 26);
+            Utilities.WriteBytesLittleEndian(_parentInode, buffer, offset + 28);
         }
     }
 }

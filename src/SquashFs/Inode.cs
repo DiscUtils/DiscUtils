@@ -78,7 +78,12 @@ namespace DiscUtils.SquashFs
 
         public virtual void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
+            Utilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);
+            Utilities.WriteBytesLittleEndian(Utilities.DateTimeToUnix(ModificationTime), buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 12);
         }
 
         private static Inode InstantiateType(InodeType type)

@@ -51,6 +51,11 @@ namespace DiscUtils
         OthersRead = 0x004,
 
         /// <summary>
+        /// Any user all permissions.
+        /// </summary>
+        OthersAll = OthersExecute | OthersWrite | OthersRead,
+
+        /// <summary>
         /// Group execute permission.
         /// </summary>
         GroupExecute = 0x008,
@@ -66,6 +71,11 @@ namespace DiscUtils
         GroupRead = 0x020,
 
         /// <summary>
+        /// Group all permissions.
+        /// </summary>
+        GroupAll = GroupExecute | GroupWrite | GroupRead,
+
+        /// <summary>
         /// Owner execute permission.
         /// </summary>
         OwnerExecute = 0x040,
@@ -79,6 +89,11 @@ namespace DiscUtils
         /// Owner read permission.
         /// </summary>
         OwnerRead = 0x100,
+
+        /// <summary>
+        /// Owner all permissions.
+        /// </summary>
+        OwnerAll = OwnerExecute | OwnerWrite | OwnerRead,
 
         /// <summary>
         /// Sticky bit (meaning ill-defined).

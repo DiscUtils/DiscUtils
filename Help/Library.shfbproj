@@ -67,7 +67,8 @@ Common / Utility classes are in the top-level namespace.</ProjectSummary>
 <NamespaceSummaryItem name="DiscUtils.Ext" isDocumented="True">Classes to read the Linux ext family of file systems.  The variants ext2, ext3 and ext4 are supported.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="DiscUtils.Ntfs.Internals" isDocumented="True">Classes providing access read-only access to the internals of NTFS file systems.
 
-Few people should need to use these classes, they're mostly useful for writing 'undelete' applications / similar that need to bypass the normal NTFS sematics.</NamespaceSummaryItem></NamespaceSummaries>
+Few people should need to use these classes, they're mostly useful for writing 'undelete' applications / similar that need to bypass the normal NTFS sematics.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.SquashFs" isDocumented="True">Classes implementing the SquashFS file system.</NamespaceSummaryItem></NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
     <SdkLinkType>Msdn</SdkLinkType>
     <IndentHtml>True</IndentHtml>

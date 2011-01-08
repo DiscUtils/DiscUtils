@@ -493,6 +493,10 @@
     <Compile Include="SparseMemoryBuffer.cs" />
     <Compile Include="SparseMemoryStream.cs" />
     <Compile Include="SparseStream.cs" />
+    <Compile Include="SquashFs\BuilderContext.cs" />
+    <Compile Include="SquashFs\BuilderDirectory.cs" />
+    <Compile Include="SquashFs\BuilderFile.cs" />
+    <Compile Include="SquashFs\BuilderNode.cs" />
     <Compile Include="SquashFs\Context.cs" />
     <Compile Include="SquashFs\DeviceInode.cs" />
     <Compile Include="SquashFs\Directory.cs" />
@@ -502,6 +506,8 @@
     <Compile Include="SquashFs\DirectoryRecord.cs" />
     <Compile Include="SquashFs\ExtendedDirectoryInode.cs" />
     <Compile Include="SquashFs\File.cs" />
+    <Compile Include="SquashFs\FragmentWriter.cs" />
+    <Compile Include="SquashFs\IdTableWriter.cs" />
     <Compile Include="SquashFs\MetablockReader.cs" />
     <Compile Include="SquashFs\FileContentBuffer.cs" />
     <Compile Include="SquashFs\FileSystemFactory.cs" />
@@ -510,8 +516,10 @@
     <Compile Include="SquashFs\Inode.cs" />
     <Compile Include="SquashFs\InodeType.cs" />
     <Compile Include="SquashFs\Metablock.cs" />
+    <Compile Include="SquashFs\MetablockWriter.cs" />
     <Compile Include="SquashFs\MetadataRef.cs" />
     <Compile Include="SquashFs\RegularInode.cs" />
+    <Compile Include="SquashFs\SquashFileSystemBuilder.cs" />
     <Compile Include="SquashFs\SquashFileSystemReader.cs" />
     <Compile Include="SquashFs\SuperBlock.cs" />
     <Compile Include="SquashFs\Symlink.cs" />

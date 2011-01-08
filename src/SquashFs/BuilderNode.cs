@@ -24,42 +24,46 @@ namespace DiscUtils.SquashFs
 {
     using System;
 
-    internal class DirectoryRecord : IByteArraySerializable
+    internal abstract class BuilderNode
     {
-        public ushort Offset;
-        public short InodeNumber;
-        public InodeType Type;
-        public string Name;
+        protected bool _written;
 
-        public int Size
+        public BuilderNode()
         {
-            get { return 8 + Name.Length; }
+            ModificationTime = DateTime.Now;
         }
 
-        public static DirectoryRecord ReadFrom(MetablockReader reader)
-        {
-            DirectoryRecord result = new DirectoryRecord();
-            result.Offset = reader.ReadUShort();
-            result.InodeNumber = reader.ReadShort();
-            result.Type = (InodeType)reader.ReadUShort();
-            ushort size = reader.ReadUShort();
-            result.Name = reader.ReadString(size + 1);
+        public UnixFilePermissions Mode { get; set; }
 
-            return result;
+        public int UserId { get; set; }
+
+        public int GroupId { get; set; }
+
+        public DateTime ModificationTime { get; set; }
+
+        public int InodeNumber { get; set; }
+
+        public int NumLinks { get; set; }
+
+        public MetadataRef InodeRef { get; set; }
+
+        public abstract Inode Inode { get; }
+
+        public virtual void Reset()
+        {
+            _written = false;
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Write(BuilderContext context);
 
-        public void WriteTo(byte[] buffer, int offset)
+        protected void FillCommonInodeData(BuilderContext context)
         {
-            Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 2);
-            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian((ushort)(Name.Length - 1), buffer, offset + 6);
-            Utilities.StringToBytes(Name, buffer, offset + 8, Name.Length);
+            Inode.Mode = (ushort)Mode;
+            Inode.UidKey = context.AllocateId(UserId);
+            Inode.GidKey = context.AllocateId(GroupId);
+            Inode.ModificationTime = ModificationTime;
+            Inode.InodeNumber = context.AllocateInode();
+            Inode.NumLinks = NumLinks;
         }
     }
 }

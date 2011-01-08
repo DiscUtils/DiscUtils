@@ -45,5 +45,10 @@ namespace DiscUtils.SquashFs
         {
             get { return (int)(_value & 0xFFFF); }
         }
+
+        public long Value
+        {
+            get { return _value; }
+        }
     }
 }

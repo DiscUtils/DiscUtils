@@ -22,19 +22,38 @@
 
 namespace DiscUtils.SquashFs
 {
-    internal class DirectoryHeader
+    using System;
+
+    internal class DirectoryHeader : IByteArraySerializable
     {
-        public uint Count;
-        public uint StartBlock;
-        public uint InodeNumber;
+        public int Count;
+        public int StartBlock;
+        public int InodeNumber;
+
+        public int Size
+        {
+            get { return 12; }
+        }
 
         public static DirectoryHeader ReadFrom(MetablockReader reader)
         {
             DirectoryHeader result = new DirectoryHeader();
-            result.Count = reader.ReadUInt();
-            result.StartBlock = reader.ReadUInt();
-            result.InodeNumber = reader.ReadUInt();
+            result.Count = reader.ReadInt();
+            result.StartBlock = reader.ReadInt();
+            result.InodeNumber = reader.ReadInt();
             return result;
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(Count, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 8);
         }
     }
 }

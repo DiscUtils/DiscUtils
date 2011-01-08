@@ -46,5 +46,15 @@ namespace DiscUtils.SquashFs
 
             return 32;
         }
+
+        public override void WriteTo(byte[] buffer, int offset)
+        {
+            base.WriteTo(buffer, offset);
+
+            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(FragmentKey, buffer, offset + 20);
+            Utilities.WriteBytesLittleEndian(FragmentOffset, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian(FileSize, buffer, offset + 28);
+        }
     }
 }

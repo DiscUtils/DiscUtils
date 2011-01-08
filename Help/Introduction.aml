@@ -388,6 +388,14 @@
             <entry>No</entry>
             <entry>The variants ext2, ext3 and ext4 are supported for read only.</entry>
           </row>
+          <row>
+            <entry>SquashFS</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>Yes</entry>
+            <entry>Not all features of SquashFS are supported.</entry>
+          </row>
         </table>
       </content>
 

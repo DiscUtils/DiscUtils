@@ -215,6 +215,30 @@ namespace DiscUtils
             return val == 1;
         }
 
+        public static int Log2(uint val)
+        {
+            if (val == 0)
+            {
+                throw new ArgumentException("Cannot calculate log of Zero", "val");
+            }
+
+            int result = 0;
+            while ((val & 1) != 1)
+            {
+                val >>= 1;
+                ++result;
+            }
+
+            if (val == 1)
+            {
+                return result;
+            }
+            else
+            {
+                throw new ArgumentException("Input is not a power of Two", "val");
+            }
+        }
+
         public static bool AreEqual(byte[] a, byte[] b)
         {
             if (a.Length != b.Length)
@@ -935,6 +959,11 @@ namespace DiscUtils
         {
             long ticks = fileTime * (long)10 * 1000 * 1000;
             return new DateTime(ticks + UnixEpoch.Ticks);
+        }
+
+        public static uint DateTimeToUnix(DateTime time)
+        {
+            return (uint)((time.Ticks - UnixEpoch.Ticks) / (10 * 1000 * 1000));
         }
 
         public static FileAttributes FileAttributesFromUnixFileType(UnixFileType fileType)

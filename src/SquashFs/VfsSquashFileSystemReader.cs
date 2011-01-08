@@ -59,6 +59,11 @@ namespace DiscUtils.SquashFs
                 throw new IOException("Unsupported extended attributes present");
             }
 
+            if (_context.SuperBlock.MajorVersion != 4)
+            {
+                throw new IOException("Unsupported file system version: " + _context.SuperBlock.MajorVersion + "." + _context.SuperBlock.MinorVersion);
+            }
+
             // Create block caches, used to reduce the amount of I/O and decompression activity.
             _blockCache = new BlockCache<Block>((int)_context.SuperBlock.BlockSize, 20);
             _metablockCache = new BlockCache<Metablock>(MetadataBufferSize, 20);
@@ -68,15 +73,21 @@ namespace DiscUtils.SquashFs
             _context.InodeReader = new MetablockReader(_context, _context.SuperBlock.InodeTableStart);
             _context.DirectoryReader = new MetablockReader(_context, _context.SuperBlock.DirectoryTableStart);
 
-            _context.FragmentTableReaders = LoadIndirectReaders(
-                _context.SuperBlock.FragmentTableStart,
-                (int)_context.SuperBlock.FragmentsCount,
-                FragmentRecord.RecordSize);
+            if (_context.SuperBlock.FragmentTableStart != -1)
+            {
+                _context.FragmentTableReaders = LoadIndirectReaders(
+                    _context.SuperBlock.FragmentTableStart,
+                    (int)_context.SuperBlock.FragmentsCount,
+                    FragmentRecord.RecordSize);
+            }
 
-            _context.UidGidTableReaders = LoadIndirectReaders(
-                _context.SuperBlock.UidGidTableStart,
-                _context.SuperBlock.UidGidCount,
-                4);
+            if (_context.SuperBlock.UidGidTableStart != -1)
+            {
+                _context.UidGidTableReaders = LoadIndirectReaders(
+                    _context.SuperBlock.UidGidTableStart,
+                    _context.SuperBlock.UidGidCount,
+                    4);
+            }
 
             // Bootstrap the root directory
             _context.InodeReader.SetPosition(_context.SuperBlock.RootInode);
@@ -202,8 +213,8 @@ namespace DiscUtils.SquashFs
             Stream stream = _context.RawStream;
             stream.Position = pos;
 
-            int readLen = diskLen & 0x007FFFFF;
-            bool isCompressed = (diskLen & 0x00800000) == 0;
+            int readLen = diskLen & 0x00FFFFFF;
+            bool isCompressed = (diskLen & 0x01000000) == 0;
 
             if (isCompressed)
             {
