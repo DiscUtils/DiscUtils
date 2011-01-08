@@ -62,7 +62,8 @@ namespace DiscUtils.SquashFs
             Inode.UidKey = context.AllocateId(UserId);
             Inode.GidKey = context.AllocateId(GroupId);
             Inode.ModificationTime = ModificationTime;
-            Inode.InodeNumber = context.AllocateInode();
+            InodeNumber = (int)context.AllocateInode();
+            Inode.InodeNumber = (uint)InodeNumber;
             Inode.NumLinks = NumLinks;
         }
     }

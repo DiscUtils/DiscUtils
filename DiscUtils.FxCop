@@ -7870,6 +7870,68 @@
        </Namespace>
        <Namespace Name="DiscUtils.SquashFs">
         <Types>
+         <Type Name="BuilderNode">
+          <Members>
+           <Member Name="#GroupId">
+            <Accessors>
+             <Accessor Name="#set_GroupId(System.Int32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-01-08 14:50:58Z">
+                <Issue>
+                 <Item>'BuilderNode.GroupId.set(int)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="159" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#UserId">
+            <Accessors>
+             <Accessor Name="#set_UserId(System.Int32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-01-08 14:50:58Z">
+                <Issue>
+                 <Item>'BuilderNode.UserId.set(int)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="159" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="DirectoryInode">
+          <Members>
+           <Member Name="#ParentInode">
+            <Accessors>
+             <Accessor Name="#set_ParentInode(System.UInt32)">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-01-08 14:50:58Z">
+                <Issue>
+                 <Item>'DirectoryInode.ParentInode.set(uint)'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="159" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="ExtendedDirectoryInode">
           <Members>
            <Member Name="#_extendedAttributes">
@@ -7916,6 +7978,24 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="MetablockReader">
+          <Members>
+           <Member Name="#ReadUInt()">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-01-08 14:50:58Z">
+              <Issue>
+               <Item>'MetablockReader.ReadUInt()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="156" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="MetablockWriter">
           <Messages>
            <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Excluded" Created="2011-01-08 14:41:02Z" FixCategory="NonBreaking">
@@ -7930,6 +8010,24 @@
             </Notes>
            </Message>
           </Messages>
+         </Type>
+         <Type Name="SquashFileSystemBuilder">
+          <Members>
+           <Member Name="#Build()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2011-01-08 14:50:58Z" FixCategory="DependsOnFix">
+              <Issue>
+               <Item>'SquashFileSystemBuilder.Build()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="159" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
          </Type>
          <Type Name="SymlinkInode">
           <Members>
@@ -10575,8 +10673,10 @@
     <Note Id="153" Modified="2011-01-06 12:40:57Z">Follows project naming convention.</Note>
     <Note Id="154" Modified="2011-01-06 12:42:42Z">Defined part of file system structure.</Note>
     <Note Id="155" Modified="2011-01-06 12:44:29Z">SquashFs is it's name.</Note>
+    <Note Id="156" Modified="2011-01-08 14:53:13Z">Completeness.</Note>
     <Note Id="157" Modified="2011-01-08 14:42:02Z">Memory streams do not need to be disposed.</Note>
     <Note Id="158" Modified="2011-01-08 14:44:40Z">Common name.</Note>
+    <Note Id="159" Modified="2011-01-08 14:53:23Z">To be used shortly...</Note>
    </User>
   </Notes>
   <Rules>
