@@ -339,9 +339,17 @@ namespace DiscUtils.SquashFs
 
             superBlock.ExtendedAttrsTableStart = -1;
 
+            superBlock.BytesUsed = output.Position;
+
+            // Pad to 4KB
+            long end = Utilities.RoundUp(output.Position, 4 * Sizes.OneKiB);
+            if (end != output.Position)
+            {
+                byte[] padding = new byte[(int)(end - output.Position)];
+                output.Write(padding, 0, padding.Length);
+            }
+
             // Go back and write the superblock
-            long end = output.Position;
-            superBlock.BytesUsed = end;
             output.Position = 0;
             byte[] buffer = new byte[superBlock.Size];
             superBlock.WriteTo(buffer, 0);
