@@ -5273,6 +5273,25 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="CDBuilder">
+          <Members>
+           <Member Name="#UpdateIsolinuxBootTable">
+            <Messages>
+             <Message Id="Isolinux" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-01-09 13:13:24Z">
+              <Issue Name="Member">
+               <Item>Isolinux</Item>
+               <Item>'CDBuilder.UpdateIsolinuxBootTable'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="160" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="DiscUtils.LogicalDiskManager">
@@ -7870,6 +7889,21 @@
        </Namespace>
        <Namespace Name="DiscUtils.SquashFs">
         <Types>
+         <Type Name="BuilderFile">
+          <Messages>
+           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Excluded" Created="2011-01-09 13:13:24Z" FixCategory="NonBreaking">
+            <Issue Name="NonBreaking">
+             <Item>'BuilderFile'</Item>
+             <Item>'FileStream'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="161" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
          <Type Name="BuilderNode">
           <Members>
            <Member Name="#GroupId">
@@ -10677,6 +10711,8 @@
     <Note Id="157" Modified="2011-01-08 14:42:02Z">Memory streams do not need to be disposed.</Note>
     <Note Id="158" Modified="2011-01-08 14:44:40Z">Common name.</Note>
     <Note Id="159" Modified="2011-01-08 14:53:23Z">To be used shortly...</Note>
+    <Note Id="160" Modified="2011-01-09 13:14:04Z">Well known name.</Note>
+    <Note Id="161" Modified="2011-01-09 13:14:54Z">Bogus warning</Note>
    </User>
   </Notes>
   <Rules>

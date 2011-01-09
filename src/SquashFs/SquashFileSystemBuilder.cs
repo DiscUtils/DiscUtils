@@ -51,7 +51,7 @@ namespace DiscUtils.SquashFs
         }
 
         /// <summary>
-        /// Gets and sets the default permissions used for new files.
+        /// Gets or sets the default permissions used for new files.
         /// </summary>
         public UnixFilePermissions DefaultFilePermissions
         {
@@ -60,7 +60,7 @@ namespace DiscUtils.SquashFs
         }
 
         /// <summary>
-        /// Gets and sets the default permissions used for new directories.
+        /// Gets or sets the default permissions used for new directories.
         /// </summary>
         public UnixFilePermissions DefaultDirectoryPermissions
         {
@@ -69,7 +69,7 @@ namespace DiscUtils.SquashFs
         }
 
         /// <summary>
-        /// Gets and sets the default user id used for new files and directories.
+        /// Gets or sets the default user id used for new files and directories.
         /// </summary>
         public int DefaultUser
         {
@@ -78,7 +78,7 @@ namespace DiscUtils.SquashFs
         }
 
         /// <summary>
-        /// Gets and sets the default group id used for new files and directories.
+        /// Gets or sets the default group id used for new files and directories.
         /// </summary>
         public int DefaultGroup
         {
@@ -457,6 +457,5 @@ namespace DiscUtils.SquashFs
 
             return currentDir;
         }
-
     }
 }

@@ -40,7 +40,11 @@ namespace DiscUtils.SquashFs
 
         public override long FileSize
         {
-            get { return _fileSize; }
+            get
+            {
+                return _fileSize;
+            }
+
             set
             {
                 if (value > uint.MaxValue)
