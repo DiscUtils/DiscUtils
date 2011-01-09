@@ -192,6 +192,10 @@ namespace DiscUtils.SquashFs
         /// Adds a directory to the file system.
         /// </summary>
         /// <param name="path">The full path to the directory.</param>
+        /// <param name="user">The owner of the directory.</param>
+        /// <param name="group">The group of the directory.</param>
+        /// <param name="permissions">The access permission of the directory.</param>
+        /// <param name="modificationTime">The modification time of the directory.</param>
         /// <remarks>
         /// <para>The created directory with have the default owner, group, permissions and the
         /// current time as it's modification time.  Any missing parent directories will be
