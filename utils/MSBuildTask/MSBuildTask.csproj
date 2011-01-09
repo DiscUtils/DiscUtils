@@ -68,6 +68,7 @@
       <Link>Version.cs</Link>
     </Compile>
     <Compile Include="CreateIso.cs" />
+    <Compile Include="CreateSquashFileSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,32 +27,22 @@ namespace MSBuildTask
     using DiscUtils.Iso9660;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Utilities;
+    using DiscUtils.SquashFs;
 
-    public class CreateIso : Task
+    public class CreateSquashFileSystem : Task
     {
-        public CreateIso()
+        public CreateSquashFileSystem()
         {
-            UseJoliet = true;
         }
 
         /// <summary>
-        /// The name of the ISO file to create.
+        /// The name of the file to create, containing the filesystem image.
         /// </summary>
         [Required]
         public ITaskItem FileName { get; set; }
 
         /// <summary>
-        /// Whether to use Joliet encoding for the ISO (default true).
-        /// </summary>
-        public bool UseJoliet { get; set; }
-
-        /// <summary>
-        /// The label for the ISO (may be truncated if too long)
-        /// </summary>
-        public string VolumeLabel { get; set; }
-
-        /// <summary>
-        /// The files to add to the ISO.
+        /// The files to add to the filesystem image.
         /// </summary>
         [Required]
         public ITaskItem[] SourceFiles { get; set; }
@@ -61,24 +51,18 @@ namespace MSBuildTask
         /// Sets the root to remove from the source files.
         /// </summary>
         /// <remarks>
-        /// If the source file is C:\MyDir\MySubDir\file.txt, and RemoveRoot is C:\MyDir, the ISO will
+        /// If the source file is C:\MyDir\MySubDir\file.txt, and RemoveRoot is C:\MyDir, the filesystem will
         /// contain \MySubDir\file.txt.  If not specified, the file would be named \MyDir\MySubDir\file.txt.
         /// </remarks>
         public ITaskItem RemoveRoot { get; set; }
 
         public override bool Execute()
         {
-            Log.LogMessage(MessageImportance.Normal, "Creating ISO file: '{0}'", FileName.ItemSpec);
+            Log.LogMessage(MessageImportance.Normal, "Creating SquashFS file: '{0}'", FileName.ItemSpec);
 
             try
             {
-                CDBuilder builder = new CDBuilder();
-                builder.UseJoliet = UseJoliet;
-
-                if (!string.IsNullOrEmpty(VolumeLabel))
-                {
-                    builder.VolumeIdentifier = VolumeLabel;
-                }
+                SquashFileSystemBuilder builder = new SquashFileSystemBuilder();
 
                 foreach (var sourceFile in SourceFiles)
                 {
@@ -95,7 +79,7 @@ namespace MSBuildTask
 
                 builder.Build(FileName.ItemSpec);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.LogErrorFromException(e, true, true, null);
                 return false;
