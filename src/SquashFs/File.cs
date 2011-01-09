@@ -50,7 +50,7 @@ namespace DiscUtils.SquashFs
 
             set
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 
@@ -63,7 +63,7 @@ namespace DiscUtils.SquashFs
 
             set
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 
@@ -76,7 +76,7 @@ namespace DiscUtils.SquashFs
 
             set
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 
@@ -84,29 +84,19 @@ namespace DiscUtils.SquashFs
         {
             get
             {
-                throw new NotImplementedException();
+                UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(_inode.Type);
+                return Utilities.FileAttributesFromUnixFileType(fileType);
             }
 
             set
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
 
         public long FileLength
         {
-            get
-            {
-                DirectoryInode dirInode = _inode as DirectoryInode;
-                if (dirInode != null)
-                {
-                    return dirInode.FileSize;
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            get { return _inode.FileSize; }
         }
 
         public IBuffer FileContent

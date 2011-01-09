@@ -107,6 +107,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry\RegistryHiveTest.cs" />
     <Compile Include="Registry\RegistryKeyTest.cs" />
+    <Compile Include="SquashFs\SquashFileSystemBuilderTest.cs" />
     <Compile Include="StreamExtentTest.cs" />
     <Compile Include="ThreadSafeStreamTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />

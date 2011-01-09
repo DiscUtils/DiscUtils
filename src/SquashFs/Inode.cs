@@ -40,6 +40,12 @@ namespace DiscUtils.SquashFs
             get;
         }
 
+        public virtual long FileSize
+        {
+            get { return 0; }
+            set { throw new NotImplementedException(); }
+        }
+
         public static Inode Read(MetablockReader inodeReader)
         {
             byte[] typeData = new byte[2];

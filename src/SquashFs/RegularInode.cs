@@ -22,12 +22,28 @@
 
 namespace DiscUtils.SquashFs
 {
+    using System;
+
     internal class RegularInode : Inode
     {
         public uint StartBlock;
         public uint FragmentKey;
         public uint FragmentOffset;
-        public uint FileSize;
+        private uint _fileSize;
+
+        public override long FileSize
+        {
+            get { return _fileSize; }
+            set
+            {
+                if (value > uint.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, "File size greater than " + uint.MaxValue);
+                }
+
+                _fileSize = (uint)value;
+            }
+        }
 
         public override int Size
         {
@@ -42,7 +58,7 @@ namespace DiscUtils.SquashFs
             StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             FragmentKey = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
             FragmentOffset = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            FileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            _fileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
         }
@@ -54,7 +70,7 @@ namespace DiscUtils.SquashFs
             Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(FragmentKey, buffer, offset + 20);
             Utilities.WriteBytesLittleEndian(FragmentOffset, buffer, offset + 24);
-            Utilities.WriteBytesLittleEndian(FileSize, buffer, offset + 28);
+            Utilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 28);
         }
     }
 }

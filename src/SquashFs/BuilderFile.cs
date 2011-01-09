@@ -28,6 +28,7 @@ namespace DiscUtils.SquashFs
     internal sealed class BuilderFile : BuilderNode
     {
         private Stream _source;
+        private string _sourcePath;
 
         private RegularInode _inode;
         private List<uint> _lengths;
@@ -35,6 +36,12 @@ namespace DiscUtils.SquashFs
         public BuilderFile(Stream source)
         {
             _source = source;
+            NumLinks = 1;
+        }
+
+        public BuilderFile(string source)
+        {
+            _sourcePath = source;
             NumLinks = 1;
         }
 
@@ -65,35 +72,52 @@ namespace DiscUtils.SquashFs
         {
             Stream outStream = context.RawStream;
 
-            if (_source.Position != 0)
+            bool disposeSource = false;
+            try
             {
-                _source.Position = 0;
-            }
-
-            long startPos = outStream.Position;
-            int bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
-
-            if (bufferedBytes < context.DataBlockSize)
-            {
-                // Fragment - less than one complete block of data
-                _inode.StartBlock = 0xFFFFFFFF;
-
-                _inode.FragmentKey = context.WriteFragment(bufferedBytes, out _inode.FragmentOffset);
-                _inode.FileSize = (uint)bufferedBytes;
-            }
-            else
-            {
-                // At least one full block, no fragments used
-                _inode.FragmentKey = 0xFFFFFFFF;
-
-                _lengths = new List<uint>();
-                _inode.StartBlock = (uint)startPos;
-                _inode.FileSize = (uint)bufferedBytes;
-                while (bufferedBytes > 0)
+                if (_source == null)
                 {
-                    _lengths.Add(context.WriteDataBlock(context.IoBuffer, 0, bufferedBytes));
-                    bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
-                    _inode.FileSize += (uint)bufferedBytes;
+                    _source = new FileStream(_sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    disposeSource = true;
+                }
+
+                if (_source.Position != 0)
+                {
+                    _source.Position = 0;
+                }
+
+                long startPos = outStream.Position;
+                int bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
+
+                if (bufferedBytes < context.DataBlockSize)
+                {
+                    // Fragment - less than one complete block of data
+                    _inode.StartBlock = 0xFFFFFFFF;
+
+                    _inode.FragmentKey = context.WriteFragment(bufferedBytes, out _inode.FragmentOffset);
+                    _inode.FileSize = (uint)bufferedBytes;
+                }
+                else
+                {
+                    // At least one full block, no fragments used
+                    _inode.FragmentKey = 0xFFFFFFFF;
+
+                    _lengths = new List<uint>();
+                    _inode.StartBlock = (uint)startPos;
+                    _inode.FileSize = bufferedBytes;
+                    while (bufferedBytes > 0)
+                    {
+                        _lengths.Add(context.WriteDataBlock(context.IoBuffer, 0, bufferedBytes));
+                        bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
+                        _inode.FileSize += (uint)bufferedBytes;
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeSource)
+                {
+                    _source.Dispose();
                 }
             }
         }

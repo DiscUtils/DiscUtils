@@ -98,7 +98,7 @@ namespace DiscUtils.SquashFs
                     return totalRead + read;
                 }
 
-                int targetBlock = (int)(pos / _context.SuperBlock.BlockSize);
+                int targetBlock = (int)(currentPos / _context.SuperBlock.BlockSize);
                 while (currentBlock < targetBlock)
                 {
                     currentBlockDiskStart += _blockLengths[currentBlock] & 0x7FFFFF;

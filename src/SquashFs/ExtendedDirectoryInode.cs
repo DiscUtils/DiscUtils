@@ -22,6 +22,8 @@
 
 namespace DiscUtils.SquashFs
 {
+    using System;
+
     internal class ExtendedDirectoryInode : Inode, IDirectoryInode
     {
         private uint _fileSize;
@@ -36,9 +38,18 @@ namespace DiscUtils.SquashFs
             get { return 40; }
         }
 
-        public uint FileSize
+        public override long FileSize
         {
             get { return _fileSize; }
+            set
+            {
+                if (value > uint.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, "File size greater than " + uint.MaxValue);
+                }
+
+                _fileSize = (uint)value;
+            }
         }
 
         public uint StartBlock

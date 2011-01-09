@@ -24,15 +24,18 @@ namespace DiscUtils.SquashFs
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     internal sealed class BuilderDirectory : BuilderNode
     {
         private DirectoryInode _inode;
         private List<Entry> _children;
+        private Dictionary<string, Entry> _index;
 
         public BuilderDirectory()
         {
             _children = new List<Entry>();
+            _index = new Dictionary<string, Entry>();
         }
 
         public override Inode Inode
@@ -40,14 +43,32 @@ namespace DiscUtils.SquashFs
             get { return _inode; }
         }
 
-        public void AddChild(string path, BuilderNode node)
+        public void AddChild(string name, BuilderNode node)
         {
-            if (path.Contains(@"\\"))
+            if (name.Contains(@"\\"))
             {
-                throw new NotImplementedException("Subdirectories");
+                throw new ArgumentException("Single level of path must be provided", "name");
             }
 
-            _children.Add(new Entry() { Name = path, Node = node });
+            if (_index.ContainsKey(name))
+            {
+                throw new IOException("The directory entry '" + name + "' already exists");
+            }
+
+            Entry newEntry = new Entry() { Name = name, Node = node };
+            _children.Add(newEntry);
+            _index.Add(name, newEntry);
+        }
+
+        public BuilderNode GetChild(string name)
+        {
+            Entry result;
+            if (_index.TryGetValue(name, out result))
+            {
+                return result.Node;
+            }
+
+            return null;
         }
 
         public override void Reset()
