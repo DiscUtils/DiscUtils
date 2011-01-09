@@ -31,5 +31,11 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         {
             get; set;
         }
+
+        [Parameter]
+        public string DiskType
+        {
+            get; set;
+        }
     }
 }

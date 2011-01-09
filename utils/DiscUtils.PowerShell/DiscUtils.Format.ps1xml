@@ -334,33 +334,5 @@ Based on the files FileSystem.format.ps1xml and Registry.format.ps1xml:
         </TableRowEntries>
       </TableControl>
     </View>
-
-    <View>
-      <Name>VR-System.Object[]</Name>
-      <ViewSelectedBy>
-        <TypeName>DiscUtils.Registry.RegistryKey</TypeName>
-      </ViewSelectedBy>
-      <ListControl>
-        <ListEntries>
-          <ListEntry>
-            <ListItems>
-              <ListItem>
-                <ScriptBlock>if($_.PSParentPath.IndexOf("!") -lt 0) { $_.PSChildName.TrimEnd("!") } else { $_.PSChildName }</ScriptBlock>
-                <Label>Name</Label>
-              </ListItem>
-              <ListItem>
-                <PropertyName>ValueCount</PropertyName>
-              </ListItem>
-              <ListItem>
-                <PropertyName>Property</PropertyName>
-              </ListItem>
-              <ListItem>
-                <PropertyName>SubKeyCount</PropertyName>
-              </ListItem>
-            </ListItems>
-          </ListEntry>
-        </ListEntries>
-      </ListControl>
-    </View>
   </ViewDefinitions>
 </Configuration>

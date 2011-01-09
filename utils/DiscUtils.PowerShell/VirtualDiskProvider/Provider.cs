@@ -91,7 +91,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                 }
 
                 FileAccess access = dynParams.ReadWrite.IsPresent ? FileAccess.ReadWrite : FileAccess.Read;
-                VirtualDisk disk = VirtualDisk.OpenDisk(fullPath, access, user, password);
+                VirtualDisk disk = VirtualDisk.OpenDisk(fullPath, dynParams.DiskType, access, user, password);
                 return new VirtualDiskPSDriveInfo(drive, MakePath(Utilities.NormalizePath(fullPath) + "!", relPath), disk);
             }
             catch (IOException ioe)
