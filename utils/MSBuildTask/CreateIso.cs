@@ -23,7 +23,7 @@
 namespace MSBuildTask
 {
     using System;
-    using System.Collections.Generic;
+    using System.IO;
     using DiscUtils.Iso9660;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Utilities;
@@ -58,13 +58,26 @@ namespace MSBuildTask
         public ITaskItem[] SourceFiles { get; set; }
 
         /// <summary>
+        /// The boot image to add to the ISO.
+        /// </summary>
+        public ITaskItem BootImage { get; set; }
+
+        /// <summary>
+        /// Whether to patch to boot image (per ISOLINUX requireents).
+        /// </summary>
+        /// <remarks>
+        /// Unless patched, ISOLINUX will indicate a checksum error upon boot.
+        /// </remarks>
+        public bool UpdateIsolinuxBootTable { get; set; }
+
+        /// <summary>
         /// Sets the root to remove from the source files.
         /// </summary>
         /// <remarks>
         /// If the source file is C:\MyDir\MySubDir\file.txt, and RemoveRoot is C:\MyDir, the ISO will
         /// contain \MySubDir\file.txt.  If not specified, the file would be named \MyDir\MySubDir\file.txt.
         /// </remarks>
-        public ITaskItem RemoveRoot { get; set; }
+        public ITaskItem[] RemoveRoots { get; set; }
 
         public override bool Execute()
         {
@@ -80,20 +93,30 @@ namespace MSBuildTask
                     builder.VolumeIdentifier = VolumeLabel;
                 }
 
-                foreach (var sourceFile in SourceFiles)
+                Stream bootImageStream = null;
+                if (BootImage != null)
                 {
-                    if (this.RemoveRoot != null)
-                    {
-                        string location = (sourceFile.GetMetadata("FullPath")).Replace(this.RemoveRoot.GetMetadata("FullPath"), string.Empty);
-                        builder.AddFile(location, sourceFile.GetMetadata("FullPath"));
-                    }
-                    else
-                    {
-                        builder.AddFile(sourceFile.GetMetadata("Directory") + sourceFile.GetMetadata("FileName") + sourceFile.GetMetadata("Extension"), sourceFile.GetMetadata("FullPath"));
-                    }
+                    bootImageStream = new FileStream(BootImage.GetMetadata("FullPath"), FileMode.Open, FileAccess.Read);
+                    builder.SetBootImage(bootImageStream, BootDeviceEmulation.NoEmulation, 0);
+                    builder.UpdateIsolinuxBootTable = UpdateIsolinuxBootTable;
                 }
 
-                builder.Build(FileName.ItemSpec);
+                foreach (var sourceFile in SourceFiles)
+                {
+                    builder.AddFile(GetDestinationPath(sourceFile), sourceFile.GetMetadata("FullPath"));
+                }
+
+                try
+                {
+                    builder.Build(FileName.ItemSpec);
+                }
+                finally
+                {
+                    if (bootImageStream != null)
+                    {
+                        bootImageStream.Dispose();
+                    }
+                }
             }
             catch(Exception e)
             {
@@ -102,6 +125,25 @@ namespace MSBuildTask
             }
 
             return !Log.HasLoggedErrors;
+        }
+
+        private string GetDestinationPath(ITaskItem sourceFile)
+        {
+            string fullPath = sourceFile.GetMetadata("FullPath");
+            if (RemoveRoots != null)
+            {
+                foreach (var root in RemoveRoots)
+                {
+                    string rootPath = root.GetMetadata("FullPath");
+                    if (fullPath.StartsWith(rootPath))
+                    {
+                        return fullPath.Substring(rootPath.Length);
+                    }
+                }
+            }
+
+            // Not under a known root - so full path (minus drive)...
+            return sourceFile.GetMetadata("Directory") + sourceFile.GetMetadata("FileName") + sourceFile.GetMetadata("Extension");
         }
     }
 }

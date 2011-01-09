@@ -102,6 +102,21 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to update the ISOLINUX info table at the
+        /// start of the boot image.  Use with ISOLINUX only!
+        /// </summary>
+        /// <remarks>
+        /// ISOLINUX has an 'information table' at the start of the boot loader that verifies
+        /// the CD has been loaded correctly by the BIOS.  This table needs to be updated
+        /// to match the actual ISO.
+        /// </remarks>
+        public bool UpdateIsolinuxBootTable
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Sets the boot image for the ISO image.
         /// </summary>
         /// <param name="image">Stream containing the boot image.</param>
@@ -267,7 +282,8 @@ namespace DiscUtils.Iso9660
             if (_bootEntry != null)
             {
                 long bootImagePos = focus;
-                BuilderStreamExtent bootImageExtent = new BuilderStreamExtent(focus, _bootImage);
+                Stream realBootImage = PatchBootImage(_bootImage, (uint)(DiskStart / IsoUtilities.SectorSize), (uint)(bootImagePos / IsoUtilities.SectorSize));
+                BuilderStreamExtent bootImageExtent = new BuilderStreamExtent(focus, realBootImage);
                 fixedRegions.Add(bootImageExtent);
                 focus += Utilities.RoundUp(bootImageExtent.Length, IsoUtilities.SectorSize);
 
@@ -412,6 +428,39 @@ namespace DiscUtils.Iso9660
             fixedRegions.Insert(regionIdx++, evdr);
 
             return fixedRegions;
+        }
+
+        /// <summary>
+        /// Patches a boot image (esp. for ISOLINUX) before it is written to the disk.
+        /// </summary>
+        /// <param name="bootImage">The original (master) boot image.</param>
+        /// <param name="pvdLba">The logical block address of the primary volume descriptor.</param>
+        /// <param name="bootImageLba">The logical block address of the boot image itself.</param>
+        /// <returns>A stream containing the patched boot image - does not need to be disposed.</returns>
+        private Stream PatchBootImage(Stream bootImage, uint pvdLba, uint bootImageLba)
+        {
+            // Early-exit if no patching to do...
+            if (!UpdateIsolinuxBootTable)
+            {
+                return bootImage;
+            }
+
+            byte[] bootData = Utilities.ReadFully(bootImage, (int)bootImage.Length);
+
+            Array.Clear(bootData, 8, 56);
+
+            uint checkSum = 0;
+            for (int i = 64; i < bootData.Length; i += 4)
+            {
+                checkSum += Utilities.ToUInt32LittleEndian(bootData, i);
+            }
+
+            Utilities.WriteBytesLittleEndian(pvdLba, bootData, 8);
+            Utilities.WriteBytesLittleEndian(bootImageLba, bootData, 12);
+            Utilities.WriteBytesLittleEndian(bootData.Length, bootData, 16);
+            Utilities.WriteBytesLittleEndian(checkSum, bootData, 20);
+
+            return new MemoryStream(bootData, false);
         }
 
         private BuildDirectoryInfo GetDirectory(string[] path, int pathLength, bool createMissing)
