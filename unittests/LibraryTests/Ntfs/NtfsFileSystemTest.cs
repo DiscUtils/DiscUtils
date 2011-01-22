@@ -318,5 +318,26 @@ namespace DiscUtils.Ntfs
 
             Assert.IsFalse(ntfs.DirectoryExists(@"\TestLongName1"));
         }
+
+        [Test]
+        public void GetFileLength()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            ntfs.OpenFile(@"AFILE.TXT", FileMode.Create).Close();
+            Assert.AreEqual(0, ntfs.GetFileLength("AFILE.TXT"));
+
+            using (var stream = ntfs.OpenFile(@"AFILE.TXT", FileMode.Open))
+            {
+                stream.Write(new byte[14325], 0, 14325);
+            }
+            Assert.AreEqual(14325, ntfs.GetFileLength("AFILE.TXT"));
+
+            using (var attrStream = ntfs.OpenFile(@"AFILE.TXT:altstream", FileMode.Create))
+            {
+                attrStream.Write(new byte[122], 0, 122);
+            }
+            Assert.AreEqual(122, ntfs.GetFileLength("AFILE.TXT:altstream"));
+        }
     }
 }

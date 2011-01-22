@@ -791,53 +791,9 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                string fileName = Utilities.GetFileFromPath(path);
-                string attributeName = null;
-                AttributeType attributeType = AttributeType.Data;
-
-                string[] fileNameElements = fileName.Split(new char[] { ':' }, 3);
-                fileName = fileNameElements[0];
-
-                if (fileNameElements.Length > 1)
-                {
-                    attributeName = fileNameElements[1];
-                    if (string.IsNullOrEmpty(attributeName))
-                    {
-                        attributeName = null;
-                    }
-                }
-
-                if (fileNameElements.Length > 2)
-                {
-                    string typeName = fileNameElements[2];
-                    AttributeDefinitionRecord typeDefn = _context.AttributeDefinitions.Lookup(typeName);
-                    if (typeDefn == null)
-                    {
-                        throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such attribute type '{0}'", typeName), path);
-                    }
-
-                    attributeType = typeDefn.Type;
-                }
-
-                string dirName;
-                try
-                {
-                    dirName = Utilities.GetDirectoryFromPath(path);
-                }
-                catch (ArgumentException)
-                {
-                    throw new IOException("Invalid path: " + path);
-                }
-
-                string dirEntryPath;
-                try
-                {
-                    dirEntryPath = Utilities.CombinePaths(dirName, fileName);
-                }
-                catch (ArgumentException)
-                {
-                    throw new IOException("Invalid path: " + path);
-                }
+                string attributeName;
+                AttributeType attributeType;
+                string dirEntryPath = ParsePath(path, out attributeName, out attributeType);
 
                 DirectoryEntry entry = GetDirectoryEntry(dirEntryPath);
                 if (entry == null)
@@ -1087,13 +1043,31 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                DirectoryEntry dirEntry = GetDirectoryEntry(path);
+                string attributeName;
+                AttributeType attributeType;
+                string dirEntryPath = ParsePath(path, out attributeName, out attributeType);
+
+                DirectoryEntry dirEntry = GetDirectoryEntry(dirEntryPath);
                 if (dirEntry == null)
                 {
                     throw new FileNotFoundException("File not found", path);
                 }
 
-                return (long)dirEntry.Details.RealSize;
+                // Ordinary file length request, use info from directory entry for efficiency
+                if (attributeName == null && attributeType == AttributeType.Data)
+                {
+                    return (long)dirEntry.Details.RealSize;
+                }
+
+                // Alternate stream / attribute, pull info from attribute record
+                File file = GetFile(dirEntry.Reference);
+                var attr = file.GetAttribute(attributeType, attributeName);
+                if (attr == null)
+                {
+                    throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such attribute '{0}({1})'", attributeName, attributeType));
+                }
+
+                return attr.Length;
             }
         }
 
@@ -2121,6 +2095,47 @@ namespace DiscUtils.Ntfs
 
                 // Write attribute changes back to the Master File Table
                 file.UpdateRecordInMft();
+            }
+        }
+
+        private string ParsePath(string path, out string attributeName, out AttributeType attributeType)
+        {
+            string fileName = Utilities.GetFileFromPath(path);
+            attributeName = null;
+            attributeType = AttributeType.Data;
+
+            string[] fileNameElements = fileName.Split(new char[] { ':' }, 3);
+            fileName = fileNameElements[0];
+
+            if (fileNameElements.Length > 1)
+            {
+                attributeName = fileNameElements[1];
+                if (string.IsNullOrEmpty(attributeName))
+                {
+                    attributeName = null;
+                }
+            }
+
+            if (fileNameElements.Length > 2)
+            {
+                string typeName = fileNameElements[2];
+                AttributeDefinitionRecord typeDefn = _context.AttributeDefinitions.Lookup(typeName);
+                if (typeDefn == null)
+                {
+                    throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such attribute type '{0}'", typeName), path);
+                }
+
+                attributeType = typeDefn.Type;
+            }
+
+            try
+            {
+                string dirName = Utilities.GetDirectoryFromPath(path);
+                return Utilities.CombinePaths(dirName, fileName);
+            }
+            catch (ArgumentException)
+            {
+                throw new IOException("Invalid path: " + path);
             }
         }
     }
