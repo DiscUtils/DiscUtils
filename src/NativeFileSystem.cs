@@ -54,6 +54,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Return the base path used to create the file system
+        /// </summary>
+        public string BasePath
+        {
+            get { return _basePath; }
+        }
+
+        /// <summary>
         /// Provides a friendly description of the file system type.
         /// </summary>
         public override string FriendlyName
@@ -142,7 +150,7 @@ namespace DiscUtils
                 throw new UnauthorizedAccessException();
             }
 
-            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase)) 
+            if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
                 path = path.Substring(1);
             }
@@ -288,7 +296,18 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return CleanItems(Directory.GetDirectories(Path.Combine(_basePath, path), searchPattern, searchOption));
+            try
+            {
+                return CleanItems(Directory.GetDirectories(Path.Combine(_basePath, path), searchPattern, searchOption));
+            }
+            catch (System.IO.IOException)
+            {
+                return new string[0];
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                return new string[0];
+            }
         }
 
         /// <summary>
@@ -327,7 +346,18 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return CleanItems(Directory.GetFiles(Path.Combine(_basePath, path), searchPattern, searchOption));
+            try
+            {
+                return CleanItems(Directory.GetFiles(Path.Combine(_basePath, path), searchPattern, searchOption));
+            }
+            catch (System.IO.IOException)
+            {
+                return new string[0];
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                return new string[0];
+            }
         }
 
         /// <summary>
@@ -354,7 +384,18 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return CleanItems(Directory.GetFileSystemEntries(Path.Combine(_basePath, path), searchPattern));
+            try
+            {
+                return CleanItems(Directory.GetFileSystemEntries(Path.Combine(_basePath, path), searchPattern));
+            }
+            catch (System.IO.IOException)
+            {
+                return new string[0];
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                return new string[0];
+            }
         }
 
         /// <summary>
@@ -459,8 +500,13 @@ namespace DiscUtils
             {
                 path = path.Substring(1);
             }
-            
-            return File.Open(Path.Combine(_basePath, path), mode, access);
+
+            FileShare fileShare = FileShare.None;
+            if (access == FileAccess.Read)
+            {
+                fileShare = FileShare.Read;
+            }
+            return File.Open(Path.Combine(_basePath, path), mode, access, fileShare);
         }
 
         /// <summary>
