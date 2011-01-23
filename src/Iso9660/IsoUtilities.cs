@@ -438,14 +438,7 @@ namespace DiscUtils.Iso9660
 
         internal static bool IsSpecialDirectory(DirectoryRecord r)
         {
-            if ((r.Flags & FileFlags.Directory) != 0)
-            {
-                return r.FileIdentifier == "\0" || r.FileIdentifier == "\x01";
-            }
-            else
-            {
-                return false;
-            }
+            return r.FileIdentifier == "\0" || r.FileIdentifier == "\x01";
         }
 
         private static int SafeParseInt(int minVal, int maxVal, string str)
