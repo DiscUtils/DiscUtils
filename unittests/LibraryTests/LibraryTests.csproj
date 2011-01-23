@@ -79,6 +79,7 @@
     <Compile Include="..\..\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
+    <Compile Include="BlockCacheStreamTest.cs" />
     <Compile Include="BlockCacheTest.cs" />
     <Compile Include="BootConfig\BcdObjectTest.cs" />
     <Compile Include="BootConfig\ElementTest.cs" />

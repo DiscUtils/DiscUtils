@@ -424,7 +424,7 @@ namespace DiscUtils
                 if (_cache.TryGetBlock(firstBlock + i, out block))
                 {
                     Array.Copy(buffer, bufferPos, block.Data, offsetInNextBlock, bytesThisBlock);
-                    block.Available = Math.Max(block.Available, bytesThisBlock);
+                    block.Available = Math.Max(block.Available, offsetInNextBlock + bytesThisBlock);
                 }
 
                 offsetInNextBlock = 0;
