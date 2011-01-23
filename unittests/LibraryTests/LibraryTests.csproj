@@ -87,6 +87,7 @@
     <Compile Include="ChsAddressTest.cs" />
     <Compile Include="Compression\BZip2DecoderStreamTest.cs" />
     <Compile Include="Compression\ZlibStreamTest.cs" />
+    <Compile Include="FileSystemManagerTest.cs" />
     <Compile Include="FileSystemSource.cs" />
     <Compile Include="Combined\CombinedTest.cs" />
     <Compile Include="DiscFileSystemDirectoryTest.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="Registry\RegistryHiveTest.cs" />
     <Compile Include="Registry\RegistryKeyTest.cs" />
     <Compile Include="SquashFs\SquashFileSystemBuilderTest.cs" />
+    <Compile Include="SquashFs\SquashFileSystemReaderTest.cs" />
     <Compile Include="StreamExtentTest.cs" />
     <Compile Include="ThreadSafeStreamTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />

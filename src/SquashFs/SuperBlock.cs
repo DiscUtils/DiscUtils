@@ -76,11 +76,6 @@ namespace DiscUtils.SquashFs
             FragmentTableStart = Utilities.ToInt64LittleEndian(buffer, offset + 80);
             LookupTableStart = Utilities.ToInt64LittleEndian(buffer, offset + 88);
 
-            if (Magic != SquashFsMagic)
-            {
-                throw new IOException("Invalid SquashFs superblock - magic mismatch");
-            }
-
             return Size;
         }
 

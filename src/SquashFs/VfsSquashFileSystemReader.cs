@@ -49,6 +49,11 @@ namespace DiscUtils.SquashFs
             byte[] buffer = Utilities.ReadFully(stream, _context.SuperBlock.Size);
             _context.SuperBlock.ReadFrom(buffer, 0);
 
+            if (_context.SuperBlock.Magic != SuperBlock.SquashFsMagic)
+            {
+                throw new IOException("Invalid SquashFS filesystem - magic mismatch");
+            }
+
             if (_context.SuperBlock.Compression != 1)
             {
                 throw new IOException("Unsupported compression used");
