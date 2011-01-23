@@ -54,7 +54,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Return the base path used to create the file system
+        /// Gets the base path used to create the file system
         /// </summary>
         public string BasePath
         {
@@ -506,6 +506,7 @@ namespace DiscUtils
             {
                 fileShare = FileShare.Read;
             }
+
             return File.Open(Path.Combine(_basePath, path), mode, access, fileShare);
         }
 
