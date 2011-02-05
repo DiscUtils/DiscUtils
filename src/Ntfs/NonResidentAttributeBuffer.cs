@@ -365,11 +365,11 @@ namespace DiscUtils.Ntfs
             int dataRunIdx = FindDataRun(startVcn);
             if (runs[dataRunIdx].IsSparse)
             {
-                int numBytes = (int)Math.Min(count, compressionUnitLength);
+                int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
                 Array.Clear(buffer, offset, numBytes);
                 return numBytes;
             }
-            else if (IsBlockCompressed(dataRunIdx, _record.CompressionUnitSize))
+            else if (IsBlockCompressed(startVcn, _record.CompressionUnitSize))
             {
                 byte[] decompBuffer;
                 if (_cachedDecompressedBlock != null && _cachedBlockStartVcn == dataRunIdx)
@@ -379,7 +379,8 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     byte[] compBuffer = new byte[compressionUnitLength];
-                    RawRead(dataRunIdx, 0, compBuffer, 0, (int)compressionUnitLength, false);
+
+                    RawRead(dataRunIdx, (startVcn - runs[dataRunIdx].StartVcn) * _bytesPerCluster, compBuffer, 0, (int)compressionUnitLength, false);
 
                     decompBuffer = Decompress(compBuffer);
 
@@ -492,11 +493,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private bool IsBlockCompressed(int startDataRunIdx, int compressionUnitSize)
+        private bool IsBlockCompressed(long startVcn, int compressionUnitSize)
         {
             var runs = _record.CookedDataRuns;
-            int clustersRemaining = (int)Math.Min(compressionUnitSize, (runs[runs.Count - 1].StartVcn + runs[runs.Count - 1].Length) - runs[startDataRunIdx].StartVcn);
-            int dataRunIdx = startDataRunIdx;
+            int clustersRemaining = compressionUnitSize;
+            int dataRunIdx = FindDataRun(startVcn);
+            long dataRunOffset = startVcn - runs[dataRunIdx].StartVcn;
 
             while (clustersRemaining > 0)
             {
@@ -508,12 +510,15 @@ namespace DiscUtils.Ntfs
                     return true;
                 }
 
-                if (runs[dataRunIdx].Length > clustersRemaining)
+                int vcnContrib = (int)(runs[dataRunIdx].Length - dataRunOffset);
+
+                if (vcnContrib > clustersRemaining)
                 {
                     return false;
                 }
 
-                clustersRemaining -= (int)runs[dataRunIdx].Length;
+                clustersRemaining -= vcnContrib;
+                dataRunOffset = 0;
                 dataRunIdx++;
             }
 
