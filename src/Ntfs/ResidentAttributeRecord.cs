@@ -100,7 +100,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override IBuffer GetDataBuffer(File file)
+        public override IBuffer GetDataBuffer(File file, NtfsAttribute attribute)
         {
             return _memoryBuffer;
         }

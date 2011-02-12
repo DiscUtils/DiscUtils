@@ -84,6 +84,22 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public int CompressionUnitSize
+        {
+            get
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return firstExtent.CompressionUnitSize;
+                }
+            }
+        }
+
         public IDictionary<AttributeReference, AttributeRecord> Extents
         {
             get { return _extents; }
@@ -116,6 +132,31 @@ namespace DiscUtils.Ntfs
                 }
 
                 return last;
+            }
+        }
+
+        public AttributeRecord FirstExtent
+        {
+            get
+            {
+                if (_extents != null)
+                {
+                    foreach (var extent in _extents)
+                    {
+                        NonResidentAttributeRecord nonResident = extent.Value as NonResidentAttributeRecord;
+                        if (nonResident == null)
+                        {
+                            // Resident attribute, so there can only be one...
+                            return extent.Value;
+                        }
+                        else if (nonResident.StartVcn == 0)
+                        {
+                            return extent.Value;
+                        }
+                    }
+                }
+
+                throw new InvalidDataException("Attribute with no initial extent");
             }
         }
 

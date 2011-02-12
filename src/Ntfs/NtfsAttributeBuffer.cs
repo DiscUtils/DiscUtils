@@ -134,7 +134,7 @@ namespace DiscUtils.Ntfs
             {
                 if (extent.Value.StartVcn > lastVcn)
                 {
-                    extent.Value.GetDataBuffer(_file).SetCapacity(0);
+                    extent.Value.GetDataBuffer(_file, _attribute).SetCapacity(0);
                     _file.RemoveAttributeExtent(extent.Key);
                     _attribute.RemoveExtent(extent.Key);
                 }
@@ -142,7 +142,7 @@ namespace DiscUtils.Ntfs
 
             var record = _attribute.Record;
             var lastExtent = _attribute.LastExtent;
-            IBuffer buffer = lastExtent.GetDataBuffer(_file);
+            IBuffer buffer = lastExtent.GetDataBuffer(_file, _attribute);
 
             _file.MarkMftRecordDirty();
 
@@ -186,13 +186,13 @@ namespace DiscUtils.Ntfs
 
             if (!record.IsNonResident)
             {
-                record.GetDataBuffer(_file).Write(pos, buffer, offset, count);
+                record.GetDataBuffer(_file, _attribute).Write(pos, buffer, offset, count);
                 _file.MarkMftRecordDirty();
             }
             else
             {
                 NonResidentAttributeRecord lastExtent = (NonResidentAttributeRecord)_attribute.LastExtent;
-                IBuffer lastExtentBuffer = lastExtent.GetDataBuffer(_file);
+                IBuffer lastExtentBuffer = lastExtent.GetDataBuffer(_file, _attribute);
 
                 long bytesPerCluster = _file.Context.BiosParameterBlock.BytesPerCluster;
 
@@ -282,7 +282,7 @@ namespace DiscUtils.Ntfs
                 rec = nonResident;
             }
 
-            return rec.GetDataBuffer(_file);
+            return rec.GetDataBuffer(_file, _attribute);
         }
     }
 }

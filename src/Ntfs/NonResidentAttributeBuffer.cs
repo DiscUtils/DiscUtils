@@ -29,19 +29,23 @@ namespace DiscUtils.Ntfs
     internal class NonResidentAttributeBuffer : DiscUtils.Buffer
     {
         private File _file;
+        private NtfsAttribute _attribute;
         private Stream _fsStream;
         private long _bytesPerCluster;
         private NonResidentAttributeRecord _record;
 
+        private int _compressionUnitSize;
         private byte[] _cachedDecompressedBlock;
         private long _cachedBlockStartVcn;
 
-        public NonResidentAttributeBuffer(File file, NonResidentAttributeRecord record)
+        public NonResidentAttributeBuffer(File file, NtfsAttribute attribute, NonResidentAttributeRecord record)
         {
             _file = file;
+            _attribute = attribute;
             _fsStream = _file.Context.RawStream;
             _bytesPerCluster = file.Context.BiosParameterBlock.BytesPerCluster;
             _record = record;
+            _compressionUnitSize = _attribute.CompressionUnitSize;
         }
 
         internal NonResidentAttributeBuffer(INtfsContext context, NonResidentAttributeRecord record)
@@ -356,9 +360,9 @@ namespace DiscUtils.Ntfs
         {
             var runs = _record.CookedDataRuns;
 
-            long compressionUnitLength = _record.CompressionUnitSize * _bytesPerCluster;
+            long compressionUnitLength = _compressionUnitSize * _bytesPerCluster;
 
-            long startVcn = (pos / compressionUnitLength) * _record.CompressionUnitSize;
+            long startVcn = (pos / compressionUnitLength) * _compressionUnitSize;
             long targetCluster = pos / _bytesPerCluster;
             long blockOffset = pos - (startVcn * _bytesPerCluster);
 
@@ -369,7 +373,7 @@ namespace DiscUtils.Ntfs
                 Array.Clear(buffer, offset, numBytes);
                 return numBytes;
             }
-            else if (IsBlockCompressed(startVcn, _record.CompressionUnitSize))
+            else if (IsBlockCompressed(startVcn, _compressionUnitSize))
             {
                 byte[] decompBuffer;
                 if (_cachedDecompressedBlock != null && _cachedBlockStartVcn == dataRunIdx)
@@ -511,7 +515,6 @@ namespace DiscUtils.Ntfs
                 }
 
                 int vcnContrib = (int)(runs[dataRunIdx].Length - dataRunOffset);
-
                 if (vcnContrib > clustersRemaining)
                 {
                     return false;

@@ -126,7 +126,7 @@ namespace DiscUtils.Ntfs
 
         public abstract Range<long, long>[] GetClusters();
 
-        public abstract IBuffer GetDataBuffer(File file);
+        public abstract IBuffer GetDataBuffer(File file, NtfsAttribute attribute);
 
         public abstract IBuffer GetReadOnlyDataBuffer(INtfsContext context);
 

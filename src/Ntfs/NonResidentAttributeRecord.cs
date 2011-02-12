@@ -183,11 +183,11 @@ namespace DiscUtils.Ntfs
             return result.ToArray();
         }
 
-        public override IBuffer GetDataBuffer(File file)
+        public override IBuffer GetDataBuffer(File file, NtfsAttribute attribute)
         {
             if (_dataBuffer == null)
             {
-                _dataBuffer = new NonResidentAttributeBuffer(file, this);
+                _dataBuffer = new NonResidentAttributeBuffer(file, attribute, this);
             }
 
             return _dataBuffer;
@@ -334,7 +334,7 @@ namespace DiscUtils.Ntfs
             _dataAllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
             _dataRealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
             _initializedDataSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
-            if ((Flags & AttributeFlags.Compressed) != 0)
+            if ((Flags & AttributeFlags.Compressed) != 0 && _dataRunsOffset > 0x40)
             {
                 _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
             }
