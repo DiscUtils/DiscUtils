@@ -26,7 +26,7 @@ namespace DiscUtils.Vmdk
     using System.Collections.Generic;
     using System.IO;
 
-    internal abstract class CommonSparseExtentStream : SparseStream
+    internal abstract class CommonSparseExtentStream : MappedStream
     {
         /// <summary>
         /// Stream containing the sparse extent.
@@ -275,6 +275,46 @@ namespace DiscUtils.Vmdk
             return result;
         }
 
+        public override IEnumerable<StreamExtent> MapContent(long start, long length)
+        {
+            CheckDisposed();
+
+            if (start < Length)
+            {
+                long end = Math.Min(start + length, Length);
+
+                long pos = start;
+
+                do
+                {
+                    int grainTable = (int)(pos / _gtCoverage);
+                    int grainTableOffset = (int)(pos - (((long)grainTable) * _gtCoverage));
+
+                    if (LoadGrainTable(grainTable))
+                    {
+                        int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+                        int grain = grainTableOffset / grainSize;
+                        int grainOffset = grainTableOffset - (grain * grainSize);
+
+                        int numToRead = (int)Math.Min(end - pos, grainSize - grainOffset);
+
+                        if (GetGrainTableEntry(grain) != 0)
+                        {
+                            long grainStart = ((long)GetGrainTableEntry(grain)) * Sizes.Sector;
+                            yield return MapGrain(grainStart, grainOffset, numToRead);
+                        }
+
+                        pos += numToRead;
+                    }
+                    else
+                    {
+                        pos = (grainTable + 1) * _gtCoverage;
+                    }
+                }
+                while (pos < end);
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             try
@@ -316,6 +356,11 @@ namespace DiscUtils.Vmdk
         {
             _fileStream.Position = grainStart + grainOffset;
             return _fileStream.Read(buffer, bufferOffset, numToRead);
+        }
+
+        protected virtual StreamExtent MapGrain(long grainStart, int grainOffset, int numToRead)
+        {
+            return new StreamExtent(grainStart + grainOffset, numToRead);
         }
 
         protected virtual void LoadGlobalDirectory()

@@ -193,6 +193,19 @@ namespace DiscUtils.Vhd
             get { return _footer.Timestamp; }
         }
 
+        /// <summary>
+        /// Gets the extent that comprises this file.
+        /// </summary>
+        public override List<VirtualDiskExtent> Extents
+        {
+            get
+            {
+                List<VirtualDiskExtent> result = new List<VirtualDiskExtent>();
+                result.Add(new DiskExtent(this));
+                return result;
+            }
+        }
+
         internal override long Capacity
         {
             get { return _footer.CurrentSize; }
@@ -201,6 +214,11 @@ namespace DiscUtils.Vhd
         internal override FileLocator RelativeFileLocator
         {
             get { return _fileLocator; }
+        }
+
+        internal long StoredSize
+        {
+            get { return _fileStream.Length; }
         }
 
         /// <summary>
@@ -314,28 +332,7 @@ namespace DiscUtils.Vhd
         /// <returns>The new content stream</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
-            if (_footer.DiskType == FileType.Fixed)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-
-                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
-            }
-            else if (_footer.DiskType == FileType.Dynamic)
-            {
-                if (parent != null && ownsParent == Ownership.Dispose)
-                {
-                    parent.Dispose();
-                }
-
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
-            }
-            else
-            {
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
-            }
+            return DoOpenContent(parent, ownsParent);
         }
 
         /// <summary>
@@ -411,6 +408,32 @@ namespace DiscUtils.Vhd
             InitializeDifferencingInternal(stream, this, fullPath, relativePath, lastWriteTime);
 
             return new DiskImageFile(fileLocator, path, stream, Ownership.Dispose);
+        }
+
+        internal MappedStream DoOpenContent(SparseStream parent, Ownership ownsParent)
+        {
+            if (_footer.DiskType == FileType.Fixed)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+
+                return new SubStream(_fileStream, 0, _fileStream.Length - 512);
+            }
+            else if (_footer.DiskType == FileType.Dynamic)
+            {
+                if (parent != null && ownsParent == Ownership.Dispose)
+                {
+                    parent.Dispose();
+                }
+
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
+            }
+            else
+            {
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
+            }
         }
 
         /// <summary>

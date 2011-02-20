@@ -607,6 +607,7 @@
     <Compile Include="Vfs\VfsReadOnlyFileSystem.cs" />
     <Compile Include="Vhd\Disk.cs" />
     <Compile Include="Vhd\DiskBuilder.cs" />
+    <Compile Include="Vhd\DiskExtent.cs" />
     <Compile Include="Vhd\DiskFactory.cs" />
     <Compile Include="Vhd\DiskImageFile.cs" />
     <Compile Include="Vhd\DiskImageFileInfo.cs" />
@@ -619,6 +620,7 @@
     <Compile Include="Vhd\Header.cs" />
     <Compile Include="Vhd\ParentLocator.cs" />
     <Compile Include="VirtualDisk.cs" />
+    <Compile Include="VirtualDiskExtent.cs" />
     <Compile Include="VirtualDiskFactory.cs" />
     <Compile Include="VirtualDiskFactoryAttribute.cs" />
     <Compile Include="VirtualDiskLayer.cs" />
@@ -633,6 +635,7 @@
     <Compile Include="Vmdk\DiskAdapterType.cs" />
     <Compile Include="Vmdk\DiskBuilder.cs" />
     <Compile Include="Vmdk\DiskCreateType.cs" />
+    <Compile Include="Vmdk\DiskExtent.cs" />
     <Compile Include="Vmdk\DiskFactory.cs" />
     <Compile Include="Vmdk\DiskImageFile.cs" />
     <Compile Include="Vmdk\DiskParameters.cs" />
@@ -640,6 +643,7 @@
     <Compile Include="Vmdk\HostedSparseExtentFlags.cs" />
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
+    <Compile Include="MappedStream.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Vmdk\VmfsSparseExtentBuilder.cs" />

@@ -23,7 +23,7 @@
 namespace DiscUtils
 {
     using System;
-    using System.IO;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents the base layer, or a differencing layer of a VirtualDisk.
@@ -53,6 +53,17 @@ namespace DiscUtils
         public abstract Geometry Geometry
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets and sets the logical extents that make up this layer.
+        /// </summary>
+        public virtual List<VirtualDiskExtent> Extents
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>

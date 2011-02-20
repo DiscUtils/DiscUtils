@@ -207,6 +207,33 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        /// <summary>
+        /// Gets the extents that comprise this file.
+        /// </summary>
+        public override List<VirtualDiskExtent> Extents
+        {
+            get
+            {
+                List<VirtualDiskExtent> extents = new List<VirtualDiskExtent>(_descriptor.Extents.Count);
+
+                if (_monolithicStream != null)
+                {
+                    extents.Add(new DiskExtent(_descriptor.Extents[0], 0, _monolithicStream));
+                }
+                else
+                {
+                    long pos = 0;
+                    foreach (var record in _descriptor.Extents)
+                    {
+                        extents.Add(new DiskExtent(record, pos, _fileLocator, _access));
+                        pos += record.SizeInSectors * Sizes.Sector;
+                    }
+                }
+
+                return extents;
+            }
+        }
+
         internal uint ContentId
         {
             get { return _descriptor.ContentId; }

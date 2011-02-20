@@ -32,7 +32,7 @@ namespace DiscUtils
     /// are actually stored in the underlying storage medium (rather than implied
     /// zero bytes).  Extents are stored as a zero-based byte offset (from the
     /// beginning of the stream), and a byte length</remarks>
-    public sealed class StreamExtent : IEquatable<StreamExtent>
+    public sealed class StreamExtent : IEquatable<StreamExtent>, IComparable<StreamExtent>
     {
         private long _start;
         private long _length;
@@ -402,6 +402,29 @@ namespace DiscUtils
         public override int GetHashCode()
         {
             return _start.GetHashCode() ^ _length.GetHashCode();
+        }
+
+        /// <summary>
+        /// Compares this stream extent to another.
+        /// </summary>
+        /// <param name="other">The extent to compare.</param>
+        /// <returns>Value greater than zero if this extent starts after
+        /// <c>other</c>, zero if they start at the same position, else
+        /// a value less than zero.</returns>
+        public int CompareTo(StreamExtent other)
+        {
+            if (_start > other._start)
+            {
+                return 1;
+            }
+            else if (_start == other._start)
+            {
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
         }
     }
 }

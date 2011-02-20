@@ -166,6 +166,24 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        protected override StreamExtent MapGrain(long grainStart, int grainOffset, int numToRead)
+        {
+            if ((_hostedHeader.Flags & HostedSparseExtentFlags.CompressedGrains) != 0)
+            {
+                _fileStream.Position = grainStart;
+
+                byte[] readBuffer = Utilities.ReadFully(_fileStream, CompressedGrainHeader.Size);
+                CompressedGrainHeader hdr = new CompressedGrainHeader();
+                hdr.Read(readBuffer, 0);
+
+                return new StreamExtent(grainStart + grainOffset, CompressedGrainHeader.Size + hdr.DataSize);
+            }
+            else
+            {
+                return base.MapGrain(grainStart, grainOffset, numToRead);
+            }
+        }
+
         protected override void LoadGlobalDirectory()
         {
             base.LoadGlobalDirectory();

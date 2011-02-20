@@ -26,7 +26,7 @@ namespace DiscUtils.Vhd
     using System.Collections.Generic;
     using System.IO;
 
-    internal class DynamicStream : SparseStream
+    internal class DynamicStream : MappedStream
     {
         private Stream _fileStream;
         private DynamicHeader _dynamicHeader;
@@ -161,6 +161,76 @@ namespace DiscUtils.Vhd
         public override void Flush()
         {
             CheckDisposed();
+        }
+
+        public override IEnumerable<StreamExtent> MapContent(long start, long length)
+        {
+            long position = start;
+            int maxToRead = (int)Math.Min(length, _length - position);
+            int numRead = 0;
+
+            while (numRead < maxToRead)
+            {
+                long block = position / _dynamicHeader.BlockSize;
+                uint offsetInBlock = (uint)(position % _dynamicHeader.BlockSize);
+
+                if (PopulateBlockBitmap(block))
+                {
+                    int sectorInBlock = (int)(offsetInBlock / Utilities.SectorSize);
+                    int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
+                    int toRead = (int)Math.Min(maxToRead - numRead, _dynamicHeader.BlockSize - offsetInBlock); // 512 - offsetInSector);
+
+                    if (offsetInSector != 0 || toRead < Utilities.SectorSize)
+                    {
+                        byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        if ((_blockBitmaps[block][sectorInBlock / 8] & mask) != 0)
+                        {
+                            long extentStart = ((((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize) + _blockBitmapSize + offsetInSector;
+                            yield return new StreamExtent(extentStart, toRead);
+                        }
+
+                        numRead += toRead;
+                        position += toRead;
+                    }
+                    else
+                    {
+                        // Processing at least one whole sector, read as many as possible
+                        int toReadSectors = toRead / Utilities.SectorSize;
+
+                        byte mask = (byte)(1 << (7 - (sectorInBlock % 8)));
+                        bool readFromParent = (_blockBitmaps[block][sectorInBlock / 8] & mask) == 0;
+
+                        int numSectors = 1;
+                        while (numSectors < toReadSectors)
+                        {
+                            mask = (byte)(1 << (7 - ((sectorInBlock + numSectors) % 8)));
+                            if (((_blockBitmaps[block][(sectorInBlock + numSectors) / 8] & mask) == 0) != readFromParent)
+                            {
+                                break;
+                            }
+
+                            ++numSectors;
+                        }
+
+                        toRead = numSectors * Utilities.SectorSize;
+
+                        if (!readFromParent)
+                        {
+                            long extentStart = ((((long)_blockAllocationTable[block]) + sectorInBlock) * Utilities.SectorSize) + _blockBitmapSize;
+                            yield return new StreamExtent(extentStart, toRead);
+                        }
+
+                        numRead += toRead;
+                        position += toRead;
+                    }
+                }
+                else
+                {
+                    int toRead = Math.Min(maxToRead - numRead, (int)(_dynamicHeader.BlockSize - offsetInBlock));
+                    numRead += toRead;
+                    position += toRead;
+                }
+            }
         }
 
         public override int Read(byte[] buffer, int offset, int count)

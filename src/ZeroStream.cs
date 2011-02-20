@@ -29,7 +29,7 @@ namespace DiscUtils
     /// <summary>
     /// A stream that returns Zero's.
     /// </summary>
-    internal class ZeroStream : SparseStream
+    internal class ZeroStream : MappedStream
     {
         private long _length;
         private long _position;
@@ -78,6 +78,11 @@ namespace DiscUtils
         {
             // The stream is entirely sparse
             get { return new List<StreamExtent>(0); }
+        }
+
+        public override IEnumerable<StreamExtent> MapContent(long start, long length)
+        {
+            return new StreamExtent[0];
         }
 
         public override void Flush()

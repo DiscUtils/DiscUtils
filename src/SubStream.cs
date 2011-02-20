@@ -26,7 +26,7 @@ namespace DiscUtils
     using System.Collections.Generic;
     using System.IO;
 
-    internal class SubStream : SparseStream
+    internal class SubStream : MappedStream
     {
         private long _position;
         private long _first;
@@ -115,6 +115,11 @@ namespace DiscUtils
                     return new StreamExtent[] { new StreamExtent(0, _length) };
                 }
             }
+        }
+
+        public override IEnumerable<StreamExtent> MapContent(long start, long length)
+        {
+            return new StreamExtent[] { new StreamExtent(start + _first, length) };
         }
 
         public override void Flush()
