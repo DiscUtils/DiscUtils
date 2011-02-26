@@ -31,6 +31,7 @@ namespace DiscUtils.Ntfs
         private Bitmap _bitmap;
 
         private long _nextDataCluster;
+        private bool _fragmentedDiskMode;
 
         public ClusterBitmap(File file)
         {
@@ -65,7 +66,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 // The MFT grows sequentially across the disk
-                if (numFound < count)
+                if (numFound < count && !_fragmentedDiskMode)
                 {
                     numFound += FindClusters(count - numFound, result, 0, totalClusters, isMft, true, 0);
                 }
@@ -84,7 +85,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 // Try to find a contiguous range
-                if (numFound < count)
+                if (numFound < count && !_fragmentedDiskMode)
                 {
                     numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, true, total / 4);
                 }
@@ -114,6 +115,14 @@ namespace DiscUtils.Ntfs
             {
                 FreeClusters(result.ToArray());
                 throw new IOException("Out of disk space");
+            }
+
+            // If we found more than two clusters, or we have a fragmented result,
+            // then switch out of trying to allocate contiguous ranges.  Similarly,
+            // switch back if we found a resonable quantity in a single span.
+            if ((numFound > 4 && result.Count == 1) || result.Count > 1)
+            {
+                _fragmentedDiskMode = (numFound / result.Count) < 4;
             }
 
             return result.ToArray();
