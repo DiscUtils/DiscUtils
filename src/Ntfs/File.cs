@@ -1165,9 +1165,11 @@ namespace DiscUtils.Ntfs
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                long newLength = Math.Max(_wrapped.Position + count, Length);
+                if (_wrapped.Position + count > Length)
+                {
+                    ChangeAttributeResidencyByLength(_wrapped.Position + count);
+                }
 
-                ChangeAttributeResidencyByLength(newLength);
                 _wrapped.Write(buffer, offset, count);
             }
 
