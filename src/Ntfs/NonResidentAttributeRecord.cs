@@ -58,18 +58,17 @@ namespace DiscUtils.Ntfs
             _initializedDataSize = bytesPerCluster * numClusters;
         }
 
-        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, List<CookedDataRun> dataRuns)
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long startVcn, List<CookedDataRun> dataRuns)
             : base(type, name, id, flags)
         {
             _nonResidentFlag = 1;
             _cookedDataRuns = dataRuns;
+            _startingVCN = (ulong)startVcn;
 
             if (dataRuns != null && dataRuns.Count != 0)
             {
                 CookedDataRun lastRun = dataRuns[dataRuns.Count - 1];
-
-                _startingVCN = (ulong)dataRuns[0].StartVcn;
-                _lastVCN = (ulong)(lastRun.StartVcn + lastRun.Length - 1);
+                _lastVCN = (ulong)(startVcn + lastRun.StartVcn + lastRun.Length - 1);
             }
         }
 
@@ -282,11 +281,16 @@ namespace DiscUtils.Ntfs
         {
             int splitIdx = _cookedDataRuns.Count / 2;
 
+            long startVcn = _cookedDataRuns[splitIdx].StartVcn;
             List<CookedDataRun> newRecordRuns = new List<CookedDataRun>();
             while (_cookedDataRuns.Count > splitIdx)
             {
-                newRecordRuns.Add(_cookedDataRuns[splitIdx]);
+                CookedDataRun run = _cookedDataRuns[splitIdx];
+
                 _cookedDataRuns.RemoveAt(splitIdx);
+
+                run.StartVcn -= startVcn;
+                newRecordRuns.Add(run);
             }
 
             newRecordRuns[0].DataRun.RunOffset = newRecordRuns[0].StartLcn;
@@ -294,7 +298,7 @@ namespace DiscUtils.Ntfs
             CookedDataRun lastRemRun = _cookedDataRuns[_cookedDataRuns.Count - 1];
             _lastVCN = (ulong)(lastRemRun.StartVcn + lastRemRun.Length - 1);
 
-            return new NonResidentAttributeRecord(_type, _name, 0, _flags, newRecordRuns);
+            return new NonResidentAttributeRecord(_type, _name, 0, _flags, startVcn, newRecordRuns);
         }
 
         public override void Dump(TextWriter writer, string indent)
