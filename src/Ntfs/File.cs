@@ -560,15 +560,15 @@ namespace DiscUtils.Ntfs
 
         internal void RemoveAttributeExtent(AttributeReference extentRef)
         {
-            FileRecord fileRec = _context.Mft.GetRecord(extentRef.File);
+            FileRecord fileRec = GetFileRecord(extentRef.File);
             if (fileRec != null)
             {
                 fileRec.RemoveAttribute(extentRef.AttributeId);
-            }
 
-            if (fileRec.Attributes.Count == 0)
-            {
-                _context.Mft.RemoveRecord(extentRef.File);
+                if (fileRec.Attributes.Count == 0)
+                {
+                    RemoveFileRecord(extentRef.File);
+                }
             }
         }
 
@@ -789,11 +789,6 @@ namespace DiscUtils.Ntfs
             }
 
             AttributeRecord targetAttr = record.FirstAttribute;
-            if (targetAttr.AttributeType != AttributeType.Data)
-            {
-                throw new InvalidOperationException("Attempting to split non-Data attribute");
-            }
-
             AttributeRecord newAttr = targetAttr.Split(record);
 
             // Find a home for the new attribute record
@@ -809,7 +804,7 @@ namespace DiscUtils.Ntfs
 
             if (newAttrHome == null)
             {
-                newAttrHome = _mft.AllocateRecord(FileRecordFlags.None);
+                newAttrHome = _mft.AllocateRecord(_records[0].Flags & (~FileRecordFlags.InUse));
                 newAttrHome.BaseFile = record.BaseFile;
                 _records.Add(newAttrHome);
                 newAttrHome.AddAttribute(newAttr);
@@ -1041,6 +1036,34 @@ namespace DiscUtils.Ntfs
             }
 
             return null;
+        }
+
+        private void RemoveFileRecord(FileRecordReference fileReference)
+        {
+            for(int i = 0; i < _records.Count; ++i)
+            {
+                if (_records[i].MasterFileTableIndex == fileReference.MftIndex)
+                {
+                    FileRecord record = _records[i];
+
+                    if (record.Attributes.Count > 0)
+                    {
+                        throw new IOException("Attempting to remove non-empty MFT record");
+                    }
+
+                    _context.Mft.RemoveRecord(fileReference);
+                    _records.Remove(record);
+
+                    if (_records.Count == 1)
+                    {
+                        NtfsAttribute attrListAttr = GetAttribute(AttributeType.AttributeList, null);
+                        if (attrListAttr != null)
+                        {
+                            RemoveAttribute(attrListAttr);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
