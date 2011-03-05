@@ -380,6 +380,7 @@ namespace DiscUtils.Ntfs
         /// Removes redundant nodes (that contain only an 'End' entry).
         /// </summary>
         /// <param name="entryIndex">The index of the entry that may have a redundant child</param>
+        /// <returns>An entry that needs to be promoted to the parent node (if any)</returns>
         private IndexEntry LiftNode(int entryIndex)
         {
             if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) != 0)
@@ -461,7 +462,7 @@ namespace DiscUtils.Ntfs
         {
             // While the node is too small to hold the entries, we need to reduce
             // the number of entries.
-            if(SpaceFree < 0)
+            if (SpaceFree < 0)
             {
                 if (_isRoot)
                 {
@@ -496,6 +497,7 @@ namespace DiscUtils.Ntfs
         /// Only valid on non-root nodes, this method divides the node in two,
         /// adding the new node to the current parent.
         /// </summary>
+        /// <returns>An entry that needs to be promoted to the parent node (if any)</returns>
         private IndexEntry Divide()
         {
             int midEntryIdx = _entries.Count / 2;

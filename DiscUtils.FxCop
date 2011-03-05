@@ -3022,20 +3022,6 @@
            </Message>
           </Messages>
           <Members>
-           <Member Name="#BlocksCount">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-21 10:53:52Z">
-              <Issue>
-               <Item>'Inode.BlocksCount'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="138" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#DeletionTime">
             <Messages>
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-21 10:53:52Z">
@@ -3125,20 +3111,6 @@
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-21 10:53:52Z">
               <Issue>
                <Item>'Inode.FragmentSize'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="138" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#LinksCount">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-11-21 10:53:52Z">
-              <Issue>
-               <Item>'Inode.LinksCount'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -7904,46 +7876,6 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="BuilderNode">
-          <Members>
-           <Member Name="#GroupId">
-            <Accessors>
-             <Accessor Name="#set_GroupId(System.Int32)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-01-08 14:50:58Z">
-                <Issue>
-                 <Item>'BuilderNode.GroupId.set(int)'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="159" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#UserId">
-            <Accessors>
-             <Accessor Name="#set_UserId(System.Int32)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-01-08 14:50:58Z">
-                <Issue>
-                 <Item>'BuilderNode.UserId.set(int)'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="159" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="DirectoryInode">
           <Members>
            <Member Name="#ParentInode">
@@ -8044,24 +7976,6 @@
             </Notes>
            </Message>
           </Messages>
-         </Type>
-         <Type Name="SquashFileSystemBuilder">
-          <Members>
-           <Member Name="#Build()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Status="Excluded" Created="2011-01-08 14:50:58Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'SquashFileSystemBuilder.Build()'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="159" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
          </Type>
          <Type Name="SymlinkInode">
           <Members>

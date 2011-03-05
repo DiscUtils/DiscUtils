@@ -1040,7 +1040,7 @@ namespace DiscUtils.Ntfs
 
         private void RemoveFileRecord(FileRecordReference fileReference)
         {
-            for(int i = 0; i < _records.Count; ++i)
+            for (int i = 0; i < _records.Count; ++i)
             {
                 if (_records[i].MasterFileTableIndex == fileReference.MftIndex)
                 {
