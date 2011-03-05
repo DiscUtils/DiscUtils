@@ -37,16 +37,16 @@ namespace DiscUtils.Ntfs
         private IndexHeader _header;
 
         private Index _index;
-        private IndexNode _parent;
+        private bool _isRoot;
 
         private List<IndexEntry> _entries;
 
-        public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, IndexNode parent, uint allocatedSize)
+        public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, bool isRoot, uint allocatedSize)
         {
             _store = store;
             _storageOverhead = storeOverhead;
             _index = index;
-            _parent = parent;
+            _isRoot = isRoot;
             _header = new IndexHeader(allocatedSize);
             _totalSpaceAvailable = allocatedSize;
 
@@ -60,12 +60,12 @@ namespace DiscUtils.Ntfs
             _header.TotalSizeOfEntries = (uint)(_header.OffsetToFirstEntry + endEntry.Size);
         }
 
-        public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, IndexNode parent, byte[] buffer, int offset)
+        public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, bool isRoot, byte[] buffer, int offset)
         {
             _store = store;
             _storageOverhead = storeOverhead;
             _index = index;
-            _parent = parent;
+            _isRoot = isRoot;
             _header = new IndexHeader(buffer, offset + 0);
             _totalSpaceAvailable = _header.AllocatedSizeOfEntries;
 
@@ -120,7 +120,11 @@ namespace DiscUtils.Ntfs
 
         public void AddEntry(byte[] key, byte[] data)
         {
-            AddEntry(new IndexEntry(key, data, _index.IsFileIndex), false);
+            IndexEntry overflowEntry = AddEntry(new IndexEntry(key, data, _index.IsFileIndex));
+            if (overflowEntry != null)
+            {
+                throw new Exception("Error adding entry - root overflowed");
+            }
         }
 
         public void UpdateEntry(byte[] key, byte[] data)
@@ -154,7 +158,7 @@ namespace DiscUtils.Ntfs
                 {
                     if ((focus.Flags & IndexEntryFlags.Node) != 0)
                     {
-                        IndexBlock subNode = _index.GetSubBlock(this, focus);
+                        IndexBlock subNode = _index.GetSubBlock(focus);
                         return subNode.Node.TryFindEntry(key, out entry, out node);
                     }
 
@@ -171,7 +175,7 @@ namespace DiscUtils.Ntfs
                     }
                     else if (compVal < 0 && (focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
                     {
-                        IndexBlock subNode = _index.GetSubBlock(this, focus);
+                        IndexBlock subNode = _index.GetSubBlock(focus);
                         return subNode.Node.TryFindEntry(key, out entry, out node);
                     }
                 }
@@ -250,7 +254,7 @@ namespace DiscUtils.Ntfs
             throw new IOException("Corrupt index node - no End entry");
         }
 
-        public bool RemoveEntry(byte[] key)
+        public bool RemoveEntry(byte[] key, out IndexEntry newParentEntry)
         {
             bool exactMatch;
             int entryIndex = GetEntry(key, out exactMatch);
@@ -268,12 +272,13 @@ namespace DiscUtils.Ntfs
                         entry.DataBuffer = null;
                         entry.Flags |= IndexEntryFlags.End;
                         _entries.RemoveAt(entryIndex + 1);
+                        newParentEntry = null;
                     }
                     else
                     {
                         if ((replacementLeaf.Flags & IndexEntryFlags.Node) != 0)
                         {
-                            IndexNode giftingNode = _index.GetSubBlock(this, replacementLeaf).Node;
+                            IndexNode giftingNode = _index.GetSubBlock(replacementLeaf).Node;
                             replacementLeaf = giftingNode.FindSmallestLeaf();
                         }
 
@@ -282,46 +287,59 @@ namespace DiscUtils.Ntfs
                         byte[] newKey = replacementLeaf.KeyBuffer;
                         byte[] newData = replacementLeaf.DataBuffer;
 
-                        RemoveEntry(newKey);
+                        IndexEntry newEntry;
+                        RemoveEntry(newKey, out newEntry);
 
                         // Just over-write our key & data with the replacement
                         entry.KeyBuffer = newKey;
                         entry.DataBuffer = newData;
 
-                        LiftNode(entryIndex + 1);
+                        if (newEntry != null)
+                        {
+                            InsertEntryThisNode(newEntry);
+                        }
 
                         // New entry could be larger than old, so may need
                         // to divide this node...
-                        EnsureNodeSize();
+                        newParentEntry = EnsureNodeSize();
                     }
                 }
                 else
                 {
                     _entries.RemoveAt(entryIndex);
+                    newParentEntry = null;
                 }
 
                 _store();
                 return true;
             }
-            else
+            else if ((entry.Flags & IndexEntryFlags.Node) != 0)
             {
-                if ((entry.Flags & IndexEntryFlags.Node) != 0)
+                IndexNode childNode = _index.GetSubBlock(entry).Node;
+                IndexEntry newEntry;
+                if (childNode.RemoveEntry(key, out newEntry))
                 {
-                    IndexNode childNode = _index.GetSubBlock(this, entry).Node;
-                    if (childNode.RemoveEntry(key))
+                    if (newEntry != null)
                     {
-                        LiftNode(entryIndex);
-
-                        _store();
-                        return true;
+                        InsertEntryThisNode(newEntry);
                     }
-                }
-                else
-                {
-                    return false;
+
+                    newEntry = LiftNode(entryIndex);
+                    if (newEntry != null)
+                    {
+                        InsertEntryThisNode(newEntry);
+                    }
+
+                    // New entry could be larger than old, so may need
+                    // to divide this node...
+                    newParentEntry = EnsureNodeSize();
+
+                    _store();
+                    return true;
                 }
             }
 
+            newParentEntry = null;
             return false;
         }
 
@@ -332,7 +350,7 @@ namespace DiscUtils.Ntfs
         /// <returns>Whether any changes were made</returns>
         internal bool Depose()
         {
-            if (_parent != null)
+            if (!_isRoot)
             {
                 throw new InvalidOperationException("Only valid on root node");
             }
@@ -345,21 +363,7 @@ namespace DiscUtils.Ntfs
             IndexEntry newRootEntry = new IndexEntry(_index.IsFileIndex);
             newRootEntry.Flags = IndexEntryFlags.End;
 
-            IndexBlock newBlock = _index.AllocateBlock(this, newRootEntry);
-
-            // All of the nodes that are one layer beneath us, will now be two
-            // layers beneath.  They need their parent pointers updating.
-            foreach (var entry in _entries)
-            {
-                if ((entry.Flags & IndexEntryFlags.Node) != 0)
-                {
-                    IndexBlock block = _index.GetSubBlockIfCached(entry);
-                    if (block != null)
-                    {
-                        block.Node._parent = newBlock.Node;
-                    }
-                }
-            }
+            IndexBlock newBlock = _index.AllocateBlock(newRootEntry);
 
             // Set the deposed entries into the new node.  Note we updated the parent
             // pointers first, because it's possible SetEntries may need to further
@@ -372,90 +376,20 @@ namespace DiscUtils.Ntfs
             return true;
         }
 
-        private void AddEntry(IndexEntry newEntry, bool promoting)
-        {
-            for (int i = 0; i < _entries.Count; ++i)
-            {
-                var focus = _entries[i];
-                int compVal;
-
-                if ((focus.Flags & IndexEntryFlags.End) != 0)
-                {
-                    // No value when End flag is set.  Logically these nodes always
-                    // compare 'bigger', so if there are children we'll visit them.
-                    compVal = -1;
-                }
-                else
-                {
-                    compVal = _index.Compare(newEntry.KeyBuffer, focus.KeyBuffer);
-                }
-
-                if (compVal == 0)
-                {
-                    throw new InvalidOperationException("Entry already exists");
-                }
-                else if (compVal < 0)
-                {
-                    if (!promoting && (focus.Flags & IndexEntryFlags.Node) != 0)
-                    {
-                        _index.GetSubBlock(this, focus).Node.AddEntry(newEntry, false);
-                    }
-                    else
-                    {
-                        _entries.Insert(i, newEntry);
-
-                        // If there wasn't enough space, we may need to
-                        // divide this node
-                        EnsureNodeSize();
-
-                        _store();
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        private void EnsureNodeSize()
-        {
-            // While the node is too small to hold the entries, we need to reduce
-            // the number of entries.
-            while (SpaceFree < 0)
-            {
-                if (_parent != null)
-                {
-                    // If there's just one node entry (plus end node), then we could be
-                    // here forever - the single entry just doesn't fit...
-                    if (_entries.Count <= 2)
-                    {
-                        throw new IOException("Over-sized index entries");
-                    }
-
-                    Divide();
-                }
-                else
-                {
-                    Depose();
-                    break;
-                }
-            }
-        }
-
         /// <summary>
         /// Removes redundant nodes (that contain only an 'End' entry).
         /// </summary>
         /// <param name="entryIndex">The index of the entry that may have a redundant child</param>
-        private void LiftNode(int entryIndex)
+        private IndexEntry LiftNode(int entryIndex)
         {
             if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) != 0)
             {
-                IndexNode childNode = _index.GetSubBlock(this, _entries[entryIndex]).Node;
+                IndexNode childNode = _index.GetSubBlock(_entries[entryIndex]).Node;
                 if (childNode._entries.Count == 1)
                 {
                     long freeBlock = _entries[entryIndex].ChildrenVirtualCluster;
                     _entries[entryIndex].Flags = (_entries[entryIndex].Flags & ~IndexEntryFlags.Node) | (childNode._entries[0].Flags & IndexEntryFlags.Node);
                     _entries[entryIndex].ChildrenVirtualCluster = childNode._entries[0].ChildrenVirtualCluster;
-                    childNode._parent = this;
 
                     _index.FreeBlock(freeBlock);
                 }
@@ -464,9 +398,82 @@ namespace DiscUtils.Ntfs
                 {
                     IndexEntry entry = _entries[entryIndex];
                     _entries.RemoveAt(entryIndex);
-                    AddEntry(entry, false);
+
+                    IndexNode nextNode = _index.GetSubBlock(_entries[entryIndex]).Node;
+                    return nextNode.AddEntry(entry);
                 }
             }
+
+            return null;
+         }
+
+        private void InsertEntryThisNode(IndexEntry newEntry)
+        {
+            bool exactMatch;
+            int index = GetEntry(newEntry.KeyBuffer, out exactMatch);
+
+            if (exactMatch)
+            {
+                throw new InvalidOperationException("Entry already exists");
+            }
+            else
+            {
+                _entries.Insert(index, newEntry);
+            }
+        }
+
+        private IndexEntry AddEntry(IndexEntry newEntry)
+        {
+            bool exactMatch;
+            int index = GetEntry(newEntry.KeyBuffer, out exactMatch);
+
+            if (exactMatch)
+            {
+                throw new InvalidOperationException("Entry already exists");
+            }
+
+            if ((_entries[index].Flags & IndexEntryFlags.Node) != 0)
+            {
+                IndexEntry ourNewEntry = _index.GetSubBlock(_entries[index]).Node.AddEntry(newEntry);
+                if (ourNewEntry == null)
+                {
+                    // No change to this node
+                    return null;
+                }
+
+                InsertEntryThisNode(ourNewEntry);
+            }
+            else
+            {
+                _entries.Insert(index, newEntry);
+            }
+
+            // If there wasn't enough space, we may need to
+            // divide this node
+            IndexEntry newParentEntry = EnsureNodeSize();
+
+            _store();
+
+            return newParentEntry;
+        }
+
+        private IndexEntry EnsureNodeSize()
+        {
+            // While the node is too small to hold the entries, we need to reduce
+            // the number of entries.
+            if(SpaceFree < 0)
+            {
+                if (_isRoot)
+                {
+                    Depose();
+                }
+                else
+                {
+                    return Divide();
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -477,7 +484,7 @@ namespace DiscUtils.Ntfs
         {
             if ((_entries[0].Flags & IndexEntryFlags.Node) != 0)
             {
-                return _index.GetSubBlock(this, _entries[0]).Node.FindSmallestLeaf();
+                return _index.GetSubBlock(_entries[0]).Node.FindSmallestLeaf();
             }
             else
             {
@@ -489,7 +496,7 @@ namespace DiscUtils.Ntfs
         /// Only valid on non-root nodes, this method divides the node in two,
         /// adding the new node to the current parent.
         /// </summary>
-        private void Divide()
+        private IndexEntry Divide()
         {
             int midEntryIdx = _entries.Count / 2;
             IndexEntry midEntry = _entries[midEntryIdx];
@@ -515,21 +522,7 @@ namespace DiscUtils.Ntfs
             }
 
             // Set the new entries into the new node
-            IndexBlock newBlock = _index.AllocateBlock(_parent, midEntry);
-
-            // All of the nodes that are going into then new block need to have
-            // their parent references updated to point to the new block.
-            foreach (var entry in newEntries)
-            {
-                if ((entry.Flags & IndexEntryFlags.Node) != 0)
-                {
-                    IndexBlock block = _index.GetSubBlockIfCached(entry);
-                    if (block != null)
-                    {
-                        block.Node._parent = newBlock.Node;
-                    }
-                }
-            }
+            IndexBlock newBlock = _index.AllocateBlock(midEntry);
 
             // Set the entries into the new node.  Note we updated the parent
             // pointers first, because it's possible SetEntries may need to further
@@ -541,7 +534,7 @@ namespace DiscUtils.Ntfs
             _entries.RemoveRange(0, midEntryIdx + 1);
 
             // Promote the old mid entry
-            _parent.AddEntry(midEntry, true);
+            return midEntry;
         }
 
         private void SetEntries(IList<IndexEntry> newEntries, int offset, int count)
@@ -561,7 +554,10 @@ namespace DiscUtils.Ntfs
             }
 
             // Ensure the node isn't over-filled
-            EnsureNodeSize();
+            if (SpaceFree < 0)
+            {
+                throw new Exception("Error setting node entries - oversized for node");
+            }
 
             // Persist the new entries to disk
             _store();

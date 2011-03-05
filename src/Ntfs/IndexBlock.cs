@@ -39,14 +39,18 @@ namespace DiscUtils.Ntfs
         private IndexNode _node;
 
         private Index _index;
-        private IndexNode _parentNode;
+        private bool _isRoot;
         private long _streamPosition;
 
-        public IndexBlock(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb)
+        public IndexBlock(Index index, bool isRoot, IndexEntry parentEntry, BiosParameterBlock bpb)
             : base("INDX", bpb.BytesPerSector)
         {
             _index = index;
-            _parentNode = parentNode;
+            _isRoot = isRoot;
+
+            if (parentEntry.ChildrenVirtualCluster == 1253)
+            {
+            }
 
             Stream stream = index.AllocationStream;
             _streamPosition = parentEntry.ChildrenVirtualCluster * bpb.BytesPerSector * bpb.SectorsPerCluster;
@@ -55,17 +59,17 @@ namespace DiscUtils.Ntfs
             FromBytes(buffer, 0);
         }
 
-        private IndexBlock(Index index, IndexNode parentNode, long vcn, BiosParameterBlock bpb)
+        private IndexBlock(Index index, bool isRoot, long vcn, BiosParameterBlock bpb)
             : base("INDX", bpb.BytesPerSector, bpb.IndexBufferSize)
         {
             _index = index;
-            _parentNode = parentNode;
+            _isRoot = isRoot;
 
             _indexBlockVcn = (ulong)vcn;
 
             _streamPosition = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
 
-            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _parentNode, (uint)bpb.IndexBufferSize - FieldSize);
+            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, isRoot, (uint)bpb.IndexBufferSize - FieldSize);
 
             WriteToDisk();
         }
@@ -75,9 +79,9 @@ namespace DiscUtils.Ntfs
             get { return _node; }
         }
 
-        internal static IndexBlock Initialize(Index index, IndexNode parentNode, IndexEntry parentEntry, BiosParameterBlock bpb)
+        internal static IndexBlock Initialize(Index index, bool isRoot, IndexEntry parentEntry, BiosParameterBlock bpb)
         {
-            return new IndexBlock(index, parentNode, parentEntry.ChildrenVirtualCluster, bpb);
+            return new IndexBlock(index, isRoot, parentEntry.ChildrenVirtualCluster, bpb);
         }
 
         internal void WriteToDisk()
@@ -96,7 +100,7 @@ namespace DiscUtils.Ntfs
             // Skip FixupRecord fields...
             _logSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             _indexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _parentNode, buffer, offset + FieldSize);
+            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _isRoot, buffer, offset + FieldSize);
         }
 
         protected override ushort Write(byte[] buffer, int offset)

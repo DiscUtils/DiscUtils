@@ -57,7 +57,7 @@ namespace DiscUtils.Ntfs
             using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
                 byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
-                _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, buffer, IndexRoot.HeaderOffset);
+                _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, buffer, IndexRoot.HeaderOffset);
 
                 // Give the attribute some room to breathe, so long as it doesn't squeeze others out
                 // BROKEN, BROKEN, BROKEN - how to figure this out?  Query at the point of adding entries to the root node?
@@ -96,7 +96,7 @@ namespace DiscUtils.Ntfs
 
             _comparer = _root.GetCollator(upCase);
 
-            _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, null, 32);
+            _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, 32);
         }
 
         public IEnumerable<KeyValuePair<byte[], byte[]>> Entries
@@ -194,7 +194,15 @@ namespace DiscUtils.Ntfs
         public bool Remove(byte[] key)
         {
             _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
-            return _rootNode.RemoveEntry(key);
+
+            IndexEntry overflowEntry;
+            bool found = _rootNode.RemoveEntry(key, out overflowEntry);
+            if (overflowEntry != null)
+            {
+                throw new Exception("Error removing entry, root overflowed");
+            }
+
+            return found;
         }
 
         public bool TryGetValue(byte[] key, out byte[] value)
@@ -289,12 +297,12 @@ namespace DiscUtils.Ntfs
             return false;
         }
 
-        internal IndexBlock GetSubBlock(IndexNode parentNode, IndexEntry parentEntry)
+        internal IndexBlock GetSubBlock(IndexEntry parentEntry)
         {
             IndexBlock block = _blockCache[parentEntry.ChildrenVirtualCluster];
             if (block == null)
             {
-                block = new IndexBlock(this, parentNode, parentEntry, _bpb);
+                block = new IndexBlock(this, false, parentEntry, _bpb);
                 _blockCache[parentEntry.ChildrenVirtualCluster] = block;
             }
 
@@ -306,7 +314,7 @@ namespace DiscUtils.Ntfs
             return _blockCache[parentEntry.ChildrenVirtualCluster];
         }
 
-        internal IndexBlock AllocateBlock(IndexNode parentNode, IndexEntry parentEntry)
+        internal IndexBlock AllocateBlock(IndexEntry parentEntry)
         {
             if (_indexStream == null)
             {
@@ -321,10 +329,11 @@ namespace DiscUtils.Ntfs
             }
 
             long idx = _indexBitmap.AllocateFirstAvailable(0);
+
             parentEntry.ChildrenVirtualCluster = idx * Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             parentEntry.Flags |= IndexEntryFlags.Node;
 
-            IndexBlock block = IndexBlock.Initialize(this, parentNode, parentEntry, _bpb);
+            IndexBlock block = IndexBlock.Initialize(this, false, parentEntry, _bpb);
             _blockCache[parentEntry.ChildrenVirtualCluster] = block;
             return block;
         }
@@ -352,7 +361,7 @@ namespace DiscUtils.Ntfs
             {
                 if ((focus.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock block = GetSubBlock(node, focus);
+                    IndexBlock block = GetSubBlock(focus);
                     foreach (var subEntry in Enumerate(block.Node))
                     {
                         yield return subEntry;
@@ -393,7 +402,7 @@ namespace DiscUtils.Ntfs
 
                 if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    IndexBlock block = GetSubBlock(node, focus);
+                    IndexBlock block = GetSubBlock(focus);
                     foreach (var entry in FindAllIn(query, block.Node))
                     {
                         yield return entry;
@@ -442,7 +451,7 @@ namespace DiscUtils.Ntfs
                 
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    NodeAsString(writer, prefix + "        ", GetSubBlock(node, entry).Node, ":i" + entry.ChildrenVirtualCluster);
+                    NodeAsString(writer, prefix + "        ", GetSubBlock(entry).Node, ":i" + entry.ChildrenVirtualCluster);
                 }
             }
         }
