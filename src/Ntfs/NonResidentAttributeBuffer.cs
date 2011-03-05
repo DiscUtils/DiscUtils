@@ -295,7 +295,7 @@ namespace DiscUtils.Ntfs
 
                 RemoveAndFreeRuns(firstRunToDelete);
 
-                TruncateAndFreeRun(runs.Count - 1, value - runs[runs.Count - 1].StartVcn);
+                TruncateAndFreeRun(runs.Count - 1, value - (runs[runs.Count - 1].StartVcn - _record.StartVcn));
 
                 _record.LastVcn = Utilities.Ceil(value, _bytesPerCluster) - 1;
             }
@@ -329,9 +329,9 @@ namespace DiscUtils.Ntfs
         {
             var runs = _record.CookedDataRuns;
 
-            long vcn = pos / _bytesPerCluster;
-            int dataRunIdx = FindDataRun(vcn);
-            RawRead(dataRunIdx, pos - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, count, true);
+            long relVcn = pos / _bytesPerCluster;
+            int dataRunIdx = FindDataRun(relVcn);
+            RawRead(dataRunIdx, pos - ((runs[dataRunIdx].StartVcn - _record.StartVcn) * _bytesPerCluster), buffer, offset, count, true);
             return count;
         }
 
@@ -339,9 +339,9 @@ namespace DiscUtils.Ntfs
         {
             var runs = _record.CookedDataRuns;
 
-            long vcn = pos / _bytesPerCluster;
-            int dataRunIdx = FindDataRun(vcn);
-            long runOffset = pos - (runs[dataRunIdx].StartVcn * _bytesPerCluster);
+            long relVcn = pos / _bytesPerCluster;
+            int dataRunIdx = FindDataRun(relVcn);
+            long runOffset = pos - ((runs[dataRunIdx].StartVcn - _record.StartVcn) * _bytesPerCluster);
 
             if (runs[dataRunIdx].IsSparse)
             {
@@ -362,18 +362,18 @@ namespace DiscUtils.Ntfs
 
             long compressionUnitLength = _compressionUnitSize * _bytesPerCluster;
 
-            long startVcn = (pos / compressionUnitLength) * _compressionUnitSize;
-            long targetCluster = pos / _bytesPerCluster;
-            long blockOffset = pos - (startVcn * _bytesPerCluster);
+            long startRelVcn = (pos / compressionUnitLength) * _compressionUnitSize;
+            long targetClusterRel = pos / _bytesPerCluster;
+            long blockOffset = pos - (startRelVcn * _bytesPerCluster);
 
-            int dataRunIdx = FindDataRun(startVcn);
+            int dataRunIdx = FindDataRun(startRelVcn);
             if (runs[dataRunIdx].IsSparse)
             {
                 int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
                 Array.Clear(buffer, offset, numBytes);
                 return numBytes;
             }
-            else if (IsBlockCompressed(startVcn, _compressionUnitSize))
+            else if (IsBlockCompressed(startRelVcn, _compressionUnitSize))
             {
                 byte[] decompBuffer;
                 if (_cachedDecompressedBlock != null && _cachedBlockStartVcn == dataRunIdx)
@@ -384,7 +384,7 @@ namespace DiscUtils.Ntfs
                 {
                     byte[] compBuffer = new byte[compressionUnitLength];
 
-                    RawRead(dataRunIdx, (startVcn - runs[dataRunIdx].StartVcn) * _bytesPerCluster, compBuffer, 0, (int)compressionUnitLength, false);
+                    RawRead(dataRunIdx, (startRelVcn - (runs[dataRunIdx].StartVcn - _record.StartVcn)) * _bytesPerCluster, compBuffer, 0, (int)compressionUnitLength, false);
 
                     decompBuffer = Decompress(compBuffer);
 
@@ -401,11 +401,11 @@ namespace DiscUtils.Ntfs
                 // Whole block is uncompressed.
 
                 // Skip forward to the data run containing the first cluster we need to read
-                dataRunIdx = FindDataRun(targetCluster, dataRunIdx);
+                dataRunIdx = FindDataRun(targetClusterRel, dataRunIdx);
 
                 // Read to the end of the compression cluster
                 int numBytes = (int)Math.Min(count, compressionUnitLength - blockOffset);
-                RawRead(dataRunIdx, pos - (runs[dataRunIdx].StartVcn * _bytesPerCluster), buffer, offset, numBytes, true);
+                RawRead(dataRunIdx, pos - ((runs[dataRunIdx].StartVcn - _record.StartVcn) * _bytesPerCluster), buffer, offset, numBytes, true);
                 return numBytes;
             }
         }
@@ -468,9 +468,9 @@ namespace DiscUtils.Ntfs
         private void RawWrite(long position, byte[] data, int dataOffset, int count)
         {
             var runs = _record.CookedDataRuns;
-            long vcn = position / _bytesPerCluster;
-            int runIdx = FindDataRun(vcn);
-            long runOffset = position - (runs[runIdx].StartVcn * _bytesPerCluster);
+            long relVcn = position / _bytesPerCluster;
+            int runIdx = FindDataRun(relVcn);
+            long runOffset = position - ((runs[runIdx].StartVcn - _record.StartVcn) * _bytesPerCluster);
 
             int totalWritten = 0;
             while (totalWritten < count)
@@ -497,12 +497,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private bool IsBlockCompressed(long startVcn, int compressionUnitSize)
+        private bool IsBlockCompressed(long startRelVcn, int compressionUnitSize)
         {
             var runs = _record.CookedDataRuns;
             int clustersRemaining = compressionUnitSize;
-            int dataRunIdx = FindDataRun(startVcn);
-            long dataRunOffset = startVcn - runs[dataRunIdx].StartVcn;
+            int dataRunIdx = FindDataRun(startRelVcn);
+            long dataRunOffset = startRelVcn - (runs[dataRunIdx].StartVcn - _record.StartVcn);
 
             while (clustersRemaining > 0)
             {
@@ -528,18 +528,18 @@ namespace DiscUtils.Ntfs
             return false;
         }
 
-        private int FindDataRun(long targetVcn)
+        private int FindDataRun(long relVcn)
         {
-            return FindDataRun(targetVcn, 0);
+            return FindDataRun(relVcn, 0);
         }
 
-        private int FindDataRun(long targetVcn, int startIdx)
+        private int FindDataRun(long relVcn, int startIdx)
         {
             var runs = _record.CookedDataRuns;
 
             for (int i = startIdx; i < runs.Count; ++i)
             {
-                if (runs[i].StartVcn + runs[i].Length > targetVcn)
+                if (runs[i].StartVcn + runs[i].Length > (relVcn + _record.StartVcn))
                 {
                     return i;
                 }

@@ -68,7 +68,7 @@ namespace DiscUtils.Ntfs
             if (dataRuns != null && dataRuns.Count != 0)
             {
                 CookedDataRun lastRun = dataRuns[dataRuns.Count - 1];
-                _lastVCN = (ulong)(startVcn + lastRun.StartVcn + lastRun.Length - 1);
+                _lastVCN = (ulong)(lastRun.StartVcn + lastRun.Length - 1);
             }
         }
 
@@ -288,8 +288,6 @@ namespace DiscUtils.Ntfs
                 CookedDataRun run = _cookedDataRuns[splitIdx];
 
                 _cookedDataRuns.RemoveAt(splitIdx);
-
-                run.StartVcn -= startVcn;
                 newRecordRuns.Add(run);
             }
 
@@ -360,7 +358,7 @@ namespace DiscUtils.Ntfs
                 pos += len;
             }
 
-            _cookedDataRuns = CookedDataRun.Cook(dataRuns);
+            _cookedDataRuns = CookedDataRun.Cook(dataRuns, (long)_startingVCN);
         }
     }
 }

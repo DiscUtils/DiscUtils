@@ -102,7 +102,7 @@ namespace DiscUtils.Ntfs
                 long extentStart;
                 IBuffer extentBuffer = GetExtentBuffer(pos + numRead, out extentStart);
 
-                int justRead = extentBuffer.Read(pos + numRead - extentStart, buffer, offset + numRead, toRead - numRead);
+                int justRead = extentBuffer.Read((pos - extentStart) + numRead, buffer, offset + numRead, toRead - numRead);
                 if (justRead == 0)
                 {
                     break;

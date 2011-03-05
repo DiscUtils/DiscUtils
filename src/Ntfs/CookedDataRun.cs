@@ -75,11 +75,11 @@ namespace DiscUtils.Ntfs
             get { return _raw; }
         }
 
-        public static List<CookedDataRun> Cook(List<DataRun> runs)
+        public static List<CookedDataRun> Cook(List<DataRun> runs, long startVcn)
         {
             List<CookedDataRun> result = new List<CookedDataRun>(runs.Count);
 
-            long vcn = 0;
+            long vcn = startVcn;
             long lcn = 0;
             for (int i = 0; i < runs.Count; ++i)
             {
