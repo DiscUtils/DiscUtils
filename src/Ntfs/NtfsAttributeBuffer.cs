@@ -156,7 +156,7 @@ namespace DiscUtils.Ntfs
                 if (_file.Context.ClusterBitmap != null)
                 {
                     long clusterLength = lastVcn * bytesPerCluster;
-                    buffer.SetCapacity(clusterLength);
+                    buffer.SetCapacity(clusterLength - (lastExtent.StartVcn * bytesPerCluster));
                     record.AllocatedLength = clusterLength;
                 }
 
