@@ -92,22 +92,22 @@ namespace DiscUtils.Ntfs
 
                 if (numFound < count)
                 {
-                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, false, total / 4);
+                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, isMft, false, total / 4);
+                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, isMft, false, total / 4);
+                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, isMft, false, total / 4);
+                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, isMft, false, 0);
                 }
             }
 
@@ -229,9 +229,13 @@ namespace DiscUtils.Ntfs
                         numFound += focusCluster - runStart;
                     }
                 }
+                else
+                {
+                    ++focusCluster;
+                }
 
-                ++focusCluster;
                 ++numInspected;
+
                 if (focusCluster >= end)
                 {
                     focusCluster = start;
