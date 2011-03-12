@@ -199,7 +199,7 @@ namespace DiscUtils.Ntfs
             bool found = _rootNode.RemoveEntry(key, out overflowEntry);
             if (overflowEntry != null)
             {
-                throw new Exception("Error removing entry, root overflowed");
+                throw new IOException("Error removing entry, root overflowed");
             }
 
             return found;
@@ -307,11 +307,6 @@ namespace DiscUtils.Ntfs
             }
 
             return block;
-        }
-
-        internal IndexBlock GetSubBlockIfCached(IndexEntry parentEntry)
-        {
-            return _blockCache[parentEntry.ChildrenVirtualCluster];
         }
 
         internal IndexBlock AllocateBlock(IndexEntry parentEntry)

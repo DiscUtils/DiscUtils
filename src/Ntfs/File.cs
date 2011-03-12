@@ -861,7 +861,6 @@ namespace DiscUtils.Ntfs
                 for (int i = attrs.Count - 1; i >= 0; --i)
                 {
                     AttributeRecord attr = attrs[i];
-                    //if (attr.AttributeType > AttributeType.AttributeList && attr.IsNonResident)
                     if (attr.AttributeType == AttributeType.Data)
                     {
                         if (SplitAttribute(record, (NonResidentAttributeRecord)attr, true))

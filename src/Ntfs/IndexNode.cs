@@ -123,7 +123,7 @@ namespace DiscUtils.Ntfs
             IndexEntry overflowEntry = AddEntry(new IndexEntry(key, data, _index.IsFileIndex));
             if (overflowEntry != null)
             {
-                throw new Exception("Error adding entry - root overflowed");
+                throw new IOException("Error adding entry - root overflowed");
             }
         }
 
@@ -558,7 +558,7 @@ namespace DiscUtils.Ntfs
             // Ensure the node isn't over-filled
             if (SpaceFree < 0)
             {
-                throw new Exception("Error setting node entries - oversized for node");
+                throw new IOException("Error setting node entries - oversized for node");
             }
 
             // Persist the new entries to disk

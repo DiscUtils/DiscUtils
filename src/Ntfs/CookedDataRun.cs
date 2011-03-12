@@ -51,7 +51,6 @@ namespace DiscUtils.Ntfs
         public long StartVcn
         {
             get { return _startVcn; }
-            set { _startVcn = value; }
         }
 
         public long StartLcn
