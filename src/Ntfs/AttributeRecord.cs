@@ -151,8 +151,6 @@ namespace DiscUtils.Ntfs
 
         public abstract int Write(byte[] buffer, int offset);
 
-        public abstract AttributeRecord Split(FileRecord fileRecord);
-
         public virtual void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "ATTRIBUTE RECORD");

@@ -131,7 +131,7 @@ namespace DiscUtils.Ntfs
                 volumeFile.UpdateRecordInMft();
 
                 _context.GetFileByIndex = delegate(long index) { return new File(_context, _context.Mft.GetRecord(index, false)); };
-                _context.AllocateFile = delegate(FileRecordFlags frf) { return new File(_context, _context.Mft.AllocateRecord(frf)); };
+                _context.AllocateFile = delegate(FileRecordFlags frf) { return new File(_context, _context.Mft.AllocateRecord(frf, false)); };
 
                 File attrDefFile = CreateSystemFile(MasterFileTable.AttrDefIndex);
                 _context.AttributeDefinitions.WriteTo(attrDefFile);

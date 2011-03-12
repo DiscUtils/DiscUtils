@@ -155,11 +155,6 @@ namespace DiscUtils.Ntfs
             return (int)length;
         }
 
-        public override AttributeRecord Split(FileRecord fileRecord)
-        {
-            throw new InvalidOperationException("Attempting to split resident attribute");
-        }
-
         public override void Dump(TextWriter writer, string indent)
         {
             base.Dump(writer, indent);

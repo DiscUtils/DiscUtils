@@ -304,13 +304,13 @@ namespace DiscUtils.Ntfs
                         {
                             fixedAttribute = false;
 
-                            if (!fixedAttribute)
+                            if (!fixedAttribute && !record.IsMftRecord)
                             {
                                 foreach (var attr in record.Attributes)
                                 {
                                     if (!attr.IsNonResident && !_context.AttributeDefinitions.MustBeResident(attr.AttributeType))
                                     {
-                                        MakeAttributeNonResident(new AttributeReference(MftReference, attr.AttributeId), (int)attr.DataLength);
+                                        MakeAttributeNonResident(new AttributeReference(record.Reference, attr.AttributeId), (int)attr.DataLength);
                                         fixedAttribute = true;
                                         break;
                                     }
@@ -788,14 +788,31 @@ namespace DiscUtils.Ntfs
                 throw new InvalidOperationException("Attempting to split attribute in MFT record containing multiple attributes");
             }
 
-            AttributeRecord targetAttr = record.FirstAttribute;
-            AttributeRecord newAttr = targetAttr.Split(record);
+            return SplitAttribute(record, (NonResidentAttributeRecord)record.FirstAttribute, false);
+        }
+        
+        private bool SplitAttribute(FileRecord record, NonResidentAttributeRecord targetAttr, bool atStart)
+        {
+            if (targetAttr.CookedDataRuns.Count <= 1)
+            {
+                return false;
+            }
+
+            int splitIndex = 1;
+            if (!atStart)
+            {
+                // Approximation only - assumes each run is at least one byte saved.  Could calculate the
+                // actual index here.
+                splitIndex = (int)(targetAttr.CookedDataRuns.Count - (record.Size - record.AllocatedSize));
+            }
+
+            AttributeRecord newAttr = targetAttr.Split(splitIndex);
 
             // Find a home for the new attribute record
             FileRecord newAttrHome = null;
             foreach (var targetRecord in _records)
             {
-                if (_mft.RecordSize - targetRecord.Size >= newAttr.Size)
+                if (!targetRecord.IsMftRecord && _mft.RecordSize - targetRecord.Size >= newAttr.Size)
                 {
                     targetRecord.AddAttribute(newAttr);
                     newAttrHome = targetRecord;
@@ -804,8 +821,8 @@ namespace DiscUtils.Ntfs
 
             if (newAttrHome == null)
             {
-                newAttrHome = _mft.AllocateRecord(_records[0].Flags & (~FileRecordFlags.InUse));
-                newAttrHome.BaseFile = record.BaseFile;
+                newAttrHome = _mft.AllocateRecord(_records[0].Flags & (~FileRecordFlags.InUse), record.IsMftRecord);
+                newAttrHome.BaseFile = record.BaseFile.IsNull ? record.Reference : record.BaseFile;
                 _records.Add(newAttrHome);
                 newAttrHome.AddAttribute(newAttr);
             }
@@ -837,26 +854,46 @@ namespace DiscUtils.Ntfs
 
         private bool ExpelAttribute(FileRecord record)
         {
-            List<AttributeRecord> attrs = record.Attributes;
-            for (int i = attrs.Count - 1; i >= 0; --i)
+            if (record.MasterFileTableIndex == MasterFileTable.MftIndex)
             {
-                AttributeRecord attr = attrs[i];
-                if (attr.AttributeType > AttributeType.AttributeList)
+                // Special case for MFT - can't fully expel attributes, instead split most of the data runs off.
+                List<AttributeRecord> attrs = record.Attributes;
+                for (int i = attrs.Count - 1; i >= 0; --i)
                 {
-                    foreach (var targetRecord in _records)
+                    AttributeRecord attr = attrs[i];
+                    //if (attr.AttributeType > AttributeType.AttributeList && attr.IsNonResident)
+                    if (attr.AttributeType == AttributeType.Data)
                     {
-                        if (_mft.RecordSize - targetRecord.Size >= attr.Size)
+                        if (SplitAttribute(record, (NonResidentAttributeRecord)attr, true))
                         {
-                            MoveAttribute(record, attr, targetRecord);
                             return true;
                         }
                     }
+                }
+            }
+            else
+            {
+                List<AttributeRecord> attrs = record.Attributes;
+                for (int i = attrs.Count - 1; i >= 0; --i)
+                {
+                    AttributeRecord attr = attrs[i];
+                    if (attr.AttributeType > AttributeType.AttributeList)
+                    {
+                        foreach (var targetRecord in _records)
+                        {
+                            if (_mft.RecordSize - targetRecord.Size >= attr.Size)
+                            {
+                                MoveAttribute(record, attr, targetRecord);
+                                return true;
+                            }
+                        }
 
-                    FileRecord newFileRecord = _mft.AllocateRecord(FileRecordFlags.None);
-                    newFileRecord.BaseFile = record.Reference;
-                    _records.Add(newFileRecord);
-                    MoveAttribute(record, attr, newFileRecord);
-                    return true;
+                        FileRecord newFileRecord = _mft.AllocateRecord(FileRecordFlags.None, record.IsMftRecord);
+                        newFileRecord.BaseFile = record.Reference;
+                        _records.Add(newFileRecord);
+                        MoveAttribute(record, attr, newFileRecord);
+                        return true;
+                    }
                 }
             }
 

@@ -233,14 +233,38 @@ namespace DiscUtils.Ntfs
             return _self;
         }
 
-        public FileRecord AllocateRecord(FileRecordFlags flags)
+        public FileRecord AllocateRecord(FileRecordFlags flags, bool isMft)
         {
-            long index = _bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
+            long index;
+            if (isMft)
+            {
+                // Have to take a lot of care extending the MFT itself, to ensure we never end up unable to
+                // bootstrap the file system via the MFT itself - hence why special records are reserved
+                // for MFT's own MFT record overflow.
+                for (int i = 15; i > 11; --i)
+                {
+                    FileRecord r = GetRecord(i, false);
+                    if (r.BaseFile.SequenceNumber == 0)
+                    {
+                        r.Reset();
+                        r.Flags |= FileRecordFlags.InUse;
+                        WriteRecord(r);
+                        return r;
+                    }
+                }
+
+                throw new IOException("MFT too fragmented - unable to allocate MFT overflow record");
+            }
+            else
+            {
+                index = _bitmap.AllocateFirstAvailable(FirstAvailableMftIndex);
+            }
 
             if (index * _recordLength >= _recordStream.Length)
             {
                 // Note: 64 is significant, since bitmap extends by 8 bytes (=64 bits) at a time.
                 long newEndIndex = Utilities.RoundUp(index + 1, 64);
+                _recordStream.SetLength(newEndIndex * _recordLength);
                 for (long i = index; i < newEndIndex; ++i)
                 {
                     FileRecord record = new FileRecord(_bytesPerSector, _recordLength, (uint)i);
@@ -257,6 +281,7 @@ namespace DiscUtils.Ntfs
 
             WriteRecord(newRecord);
             _self.UpdateRecordInMft();
+
             return newRecord;
         }
 

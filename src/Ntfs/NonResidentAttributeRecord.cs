@@ -277,9 +277,17 @@ namespace DiscUtils.Ntfs
             return length;
         }
 
-        public override AttributeRecord Split(FileRecord fileRecord)
+        public AttributeRecord Split(int suggestedSplitIdx)
         {
-            int splitIdx = _cookedDataRuns.Count / 2;
+            int splitIdx;
+            if (suggestedSplitIdx < 0 || suggestedSplitIdx >= _cookedDataRuns.Count)
+            {
+                splitIdx = _cookedDataRuns.Count / 2;
+            }
+            else
+            {
+                splitIdx = suggestedSplitIdx;
+            }
 
             long startVcn = _cookedDataRuns[splitIdx].StartVcn;
             List<CookedDataRun> newRecordRuns = new List<CookedDataRun>();

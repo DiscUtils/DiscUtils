@@ -1813,11 +1813,11 @@ namespace DiscUtils.Ntfs
             File result = null;
             if ((flags & FileRecordFlags.IsDirectory) != 0)
             {
-                result = new Directory(_context, _context.Mft.AllocateRecord(flags));
+                result = new Directory(_context, _context.Mft.AllocateRecord(flags, false));
             }
             else
             {
-                result = new File(_context, _context.Mft.AllocateRecord(flags));
+                result = new File(_context, _context.Mft.AllocateRecord(flags, false));
             }
 
             _fileCache[result.MftReference.MftIndex] = result;

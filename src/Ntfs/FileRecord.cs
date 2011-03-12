@@ -135,6 +135,11 @@ namespace DiscUtils.Ntfs
             get { return _nextAttributeId; }
         }
 
+        public bool IsMftRecord
+        {
+            get { return MasterFileTableIndex == MasterFileTable.MftIndex || (_baseFile.MftIndex == MasterFileTable.MftIndex && _baseFile.SequenceNumber != 0); }
+        }
+
         public static FileAttributeFlags ConvertFlags(FileRecordFlags source)
         {
             FileAttributeFlags result = FileAttributeFlags.None;

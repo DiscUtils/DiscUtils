@@ -58,6 +58,11 @@ namespace DiscUtils.Ntfs
             get { return 8; }
         }
 
+        public bool IsNull
+        {
+            get { return SequenceNumber == 0; }
+        }
+
         public static bool operator ==(FileRecordReference a, FileRecordReference b)
         {
             return a._val == b._val;
