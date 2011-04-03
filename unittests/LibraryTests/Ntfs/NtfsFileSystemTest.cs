@@ -130,26 +130,50 @@ namespace DiscUtils.Ntfs
         [Test]
         public void ExtentInfo()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
-            using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
+            using (SparseMemoryStream ms = new SparseMemoryStream())
             {
-                s.Write(new byte[(int)ntfs.ClusterSize], 0, (int)ntfs.ClusterSize);
+                Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
+                NtfsFileSystem ntfs = NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
+
+                // Check non-resident attribute
+                using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
+                {
+                    byte[] data = new byte[(int)ntfs.ClusterSize];
+                    data[0] = 0xAE;
+                    data[1] = 0x3F;
+                    data[2] = 0x8D;
+                    s.Write(data, 0, (int)ntfs.ClusterSize);
+                }
+
+                var extents = ntfs.PathToExtents("file");
+                Assert.AreEqual(1, extents.Length);
+                Assert.AreEqual(ntfs.ClusterSize, extents[0].Length);
+
+                ms.Position = extents[0].Start;
+                Assert.AreEqual(0xAE, ms.ReadByte());
+                Assert.AreEqual(0x3F, ms.ReadByte());
+                Assert.AreEqual(0x8D, ms.ReadByte());
+
+
+                // Check resident attribute
+                using (Stream s = ntfs.OpenFile(@"file2", FileMode.Create, FileAccess.ReadWrite))
+                {
+                    s.WriteByte(0xBA);
+                    s.WriteByte(0x82);
+                    s.WriteByte(0x2C);
+                }
+                extents = ntfs.PathToExtents("file2");
+                Assert.AreEqual(1, extents.Length);
+                Assert.AreEqual(3, extents[0].Length);
+
+                byte[] read = new byte[100];
+                ms.Position = extents[0].Start;
+                ms.Read(read, 0, 100);
+
+                Assert.AreEqual(0xBA, read[0]);
+                Assert.AreEqual(0x82, read[1]);
+                Assert.AreEqual(0x2C, read[2]);
             }
-
-            var extents = ntfs.PathToExtents("file");
-            Assert.AreEqual(1, extents.Length);
-            Assert.AreEqual(ntfs.ClusterSize, extents[0].Length);
-
-
-            using (Stream s = ntfs.OpenFile(@"file2", FileMode.Create, FileAccess.ReadWrite))
-            {
-                s.WriteByte(1);
-                s.WriteByte(2);
-                s.WriteByte(3);
-            }
-            extents = ntfs.PathToExtents("file2");
-            Assert.AreEqual(1, extents.Length);
-            Assert.AreEqual(3, extents[0].Length);
         }
 
         [Test]
@@ -338,6 +362,30 @@ namespace DiscUtils.Ntfs
                 attrStream.Write(new byte[122], 0, 122);
             }
             Assert.AreEqual(122, ntfs.GetFileLength("AFILE.TXT:altstream"));
+        }
+
+        [Test]
+        public void Fragmented()
+        {
+            DiscFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            ntfs.CreateDirectory(@"DIR");
+
+            byte[] buffer = new byte[4096];
+
+            for(int i = 0; i < 2500; ++i)
+            {
+                using(var stream = ntfs.OpenFile(@"DIR\file" + i + ".bin", FileMode.Create, FileAccess.ReadWrite))
+                {
+                    stream.Write(buffer, 0,buffer.Length);
+                }
+
+                using(var stream = ntfs.OpenFile(@"DIR\" + i + ".bin", FileMode.Create, FileAccess.ReadWrite))
+                {
+                    stream.Write(buffer, 0,buffer.Length);
+                }
+            }
+
         }
     }
 }
