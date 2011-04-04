@@ -48,10 +48,6 @@ namespace DiscUtils.Ntfs
             _index = index;
             _isRoot = isRoot;
 
-            if (parentEntry.ChildrenVirtualCluster == 1253)
-            {
-            }
-
             Stream stream = index.AllocationStream;
             _streamPosition = parentEntry.ChildrenVirtualCluster * bpb.BytesPerSector * bpb.SectorsPerCluster;
             stream.Position = _streamPosition;
