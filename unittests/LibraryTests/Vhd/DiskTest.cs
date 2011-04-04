@@ -38,7 +38,6 @@ namespace DiscUtils.Vhd
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity <= 8 * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
             }
 
             // Check the stream is still valid
@@ -65,7 +64,6 @@ namespace DiscUtils.Vhd
             {
                 Assert.IsNotNull(disk);
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
             }
 
             Assert.Greater(1 * 1024 * 1024, ms.Length);
@@ -73,7 +71,6 @@ namespace DiscUtils.Vhd
             using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
                 Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
             }
         }
 
