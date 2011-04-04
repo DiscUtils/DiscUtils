@@ -26,7 +26,7 @@ namespace DiscUtils.Ntfs
     using System.Collections.Generic;
     using System.IO;
 
-    internal class NtfsAttributeBuffer : DiscUtils.Buffer
+    internal class NtfsAttributeBuffer : DiscUtils.Buffer, IMappedBuffer
     {
         private File _file;
         private NtfsAttribute _attribute;
@@ -51,13 +51,31 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return _attribute.Record.DataLength;
+                return _attribute.PrimaryRecord.DataLength;
+            }
+        }
+
+        public long MapPosition(long pos)
+        {
+            if (_attribute.IsNonResident)
+            {
+                return ((IMappedBuffer)_attribute.RawBuffer).MapPosition(pos);
+            }
+            else
+            {
+                AttributeReference attrRef = new AttributeReference(_file.MftReference, _attribute.PrimaryRecord.AttributeId);
+                ResidentAttributeRecord attrRecord = (ResidentAttributeRecord)_file.GetAttribute(attrRef).PrimaryRecord;
+
+                long attrStart = _file.GetAttributeOffset(attrRef);
+                long mftPos = attrStart + attrRecord.DataOffset + pos;
+
+                return _file.Context.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data, null).OffsetToAbsolutePos(mftPos);
             }
         }
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
-            var record = _attribute.Record;
+            var record = _attribute.PrimaryRecord;
 
             if (!CanRead)
             {
@@ -99,10 +117,9 @@ namespace DiscUtils.Ntfs
             int numRead = 0;
             while (numRead < toRead)
             {
-                long extentStart;
-                IBuffer extentBuffer = GetExtentBuffer(pos + numRead, out extentStart);
+                IBuffer extentBuffer = _attribute.RawBuffer;
 
-                int justRead = extentBuffer.Read((pos - extentStart) + numRead, buffer, offset + numRead, toRead - numRead);
+                int justRead = extentBuffer.Read(pos + numRead, buffer, offset + numRead, toRead - numRead);
                 if (justRead == 0)
                 {
                     break;
@@ -126,48 +143,13 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            long bytesPerCluster = _file.Context.BiosParameterBlock.BytesPerCluster;
-            long lastVcn = Utilities.Ceil(value, bytesPerCluster);
-
-            Dictionary<AttributeReference, AttributeRecord> extentCache = new Dictionary<AttributeReference, AttributeRecord>(_attribute.Extents);
-            foreach (var extent in extentCache)
-            {
-                if (extent.Value.StartVcn > lastVcn)
-                {
-                    extent.Value.GetDataBuffer(_file, _attribute).SetCapacity(0);
-                    _file.RemoveAttributeExtent(extent.Key);
-                    _attribute.RemoveExtent(extent.Key);
-                }
-            }
-
-            var record = _attribute.Record;
-            var lastExtent = _attribute.LastExtent;
-            IBuffer buffer = lastExtent.GetDataBuffer(_file, _attribute);
-
+            _attribute.RawBuffer.SetCapacity(value);
             _file.MarkMftRecordDirty();
-
-            if (!record.IsNonResident)
-            {
-                buffer.SetCapacity(value);
-                _file.MarkMftRecordDirty();
-            }
-            else
-            {
-                if (_file.Context.ClusterBitmap != null)
-                {
-                    long clusterLength = lastVcn * bytesPerCluster;
-                    buffer.SetCapacity(clusterLength - (lastExtent.StartVcn * bytesPerCluster));
-                    record.AllocatedLength = clusterLength;
-                }
-
-                record.DataLength = value;
-                record.InitializedDataLength = Math.Min(record.InitializedDataLength, value);
-            }
         }
 
         public override void Write(long pos, byte[] buffer, int offset, int count)
         {
-            var record = _attribute.Record;
+            var record = _attribute.PrimaryRecord;
 
             if (!CanWrite)
             {
@@ -184,74 +166,11 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
+            _attribute.RawBuffer.Write(pos, buffer, offset, count);
+
             if (!record.IsNonResident)
             {
-                record.GetDataBuffer(_file, _attribute).Write(pos, buffer, offset, count);
                 _file.MarkMftRecordDirty();
-            }
-            else
-            {
-                NonResidentAttributeRecord lastExtent = (NonResidentAttributeRecord)_attribute.LastExtent;
-                IBuffer lastExtentBuffer = lastExtent.GetDataBuffer(_file, _attribute);
-
-                long bytesPerCluster = _file.Context.BiosParameterBlock.BytesPerCluster;
-
-                if (pos + count > record.AllocatedLength)
-                {
-                    _file.MarkMftRecordDirty();
-
-                    long clusterLength = Utilities.RoundUp(pos + count, bytesPerCluster);
-                    lastExtentBuffer.SetCapacity(clusterLength - (lastExtent.StartVcn * bytesPerCluster));
-                    record.AllocatedLength = clusterLength;
-                }
-
-                // Write zeros from end of current initialized data to the start of the new write
-                if (pos > record.InitializedDataLength + 1)
-                {
-                    _file.MarkMftRecordDirty();
-
-                    byte[] wipeBuffer = new byte[bytesPerCluster * 4];
-
-                    long wipePos = record.InitializedDataLength;
-                    while (wipePos < pos)
-                    {
-                        long extentStartPos;
-                        IBuffer extentBuffer = GetExtentBuffer(wipePos, out extentStartPos);
-
-                        long writePos = wipePos - extentStartPos;
-                        int numToWrite = (int)Math.Min(Math.Min(extentBuffer.Capacity - writePos, pos - wipePos), wipeBuffer.Length);
-                        extentBuffer.Write(writePos, wipeBuffer, 0, numToWrite);
-                        wipePos += numToWrite;
-                    }
-                }
-
-                long focusPos = pos;
-                int bytesWritten = 0;
-                while (bytesWritten < count)
-                {
-                    long extentStartPos;
-                    IBuffer extentBuffer = GetExtentBuffer(focusPos, out extentStartPos);
-
-                    long writePos = focusPos - extentStartPos;
-                    int numToWrite = (int)Math.Min(extentBuffer.Capacity - writePos, count - bytesWritten);
-                    extentBuffer.Write(writePos, buffer, offset + bytesWritten, numToWrite);
-                    focusPos += numToWrite;
-                    bytesWritten += numToWrite;
-                }
-
-                if (pos + count > record.InitializedDataLength)
-                {
-                    _file.MarkMftRecordDirty();
-
-                    record.InitializedDataLength = pos + count;
-                }
-
-                if (pos + count > record.DataLength)
-                {
-                    _file.MarkMftRecordDirty();
-
-                    record.DataLength = pos + count;
-                }
             }
         }
 
@@ -260,29 +179,6 @@ namespace DiscUtils.Ntfs
             return StreamExtent.Intersect(
                 new StreamExtent[] { new StreamExtent(0, Capacity) },
                 new StreamExtent(start, count));
-        }
-
-        private IBuffer GetExtentBuffer(long targetPos, out long streamStartPos)
-        {
-            AttributeRecord rec = null;
-
-            if (_attribute.Extents.Count == 1)
-            {
-                // Handled as a special case, because sometimes _file can be null (for diagnostics)
-                rec = _attribute.LastExtent;
-                streamStartPos = 0;
-            }
-            else
-            {
-                long bytesPerCluster = _file.Context.BiosParameterBlock.BytesPerCluster;
-                long vcn = targetPos / bytesPerCluster;
-
-                NonResidentAttributeRecord nonResident = _attribute.GetNonResidentExtent(vcn);
-                streamStartPos = nonResident.StartVcn * bytesPerCluster;
-                rec = nonResident;
-            }
-
-            return rec.GetDataBuffer(_file, _attribute);
         }
     }
 }

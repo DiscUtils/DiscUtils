@@ -124,13 +124,25 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public static int CompareStartVcns(AttributeRecord x, AttributeRecord y)
+        {
+            if (x.StartVcn < y.StartVcn)
+            {
+                return -1;
+            }
+            else if (x.StartVcn == y.StartVcn)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
         public abstract Range<long, long>[] GetClusters();
 
-        public abstract IBuffer GetDataBuffer(File file, NtfsAttribute attribute);
-
         public abstract IBuffer GetReadOnlyDataBuffer(INtfsContext context);
-
-        public abstract long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster);
 
         public int CompareTo(AttributeRecord other)
         {

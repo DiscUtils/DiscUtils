@@ -100,19 +100,14 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override IBuffer GetDataBuffer(File file, NtfsAttribute attribute)
+        public IBuffer DataBuffer
         {
-            return _memoryBuffer;
+            get { return _memoryBuffer; }
         }
 
         public override IBuffer GetReadOnlyDataBuffer(INtfsContext context)
         {
             return _memoryBuffer;
-        }
-
-        public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
-        {
-            return recordStart + DataOffset + offset;
         }
 
         public override Range<long, long>[] GetClusters()

@@ -73,21 +73,5 @@ namespace DiscUtils.Ntfs
         {
             get { return _raw; }
         }
-
-        public static List<CookedDataRun> Cook(List<DataRun> runs, long startVcn)
-        {
-            List<CookedDataRun> result = new List<CookedDataRun>(runs.Count);
-
-            long vcn = startVcn;
-            long lcn = 0;
-            for (int i = 0; i < runs.Count; ++i)
-            {
-                result.Add(new CookedDataRun(runs[i], vcn, lcn));
-                vcn += runs[i].RunLength;
-                lcn += runs[i].RunOffset;
-            }
-
-            return result;
-        }
     }
 }

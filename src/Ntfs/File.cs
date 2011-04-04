@@ -600,7 +600,7 @@ namespace DiscUtils.Ntfs
         {
             foreach (var attr in _attributes)
             {
-                if (attr.Record.AttributeType == type && attr.Name == name)
+                if (attr.PrimaryRecord.AttributeType == type && attr.Name == name)
                 {
                     return attr;
                 }
@@ -620,7 +620,7 @@ namespace DiscUtils.Ntfs
 
             foreach (var attr in _attributes)
             {
-                if (attr.Record.AttributeType == type && string.IsNullOrEmpty(attr.Name))
+                if (attr.PrimaryRecord.AttributeType == type && string.IsNullOrEmpty(attr.Name))
                 {
                     matches.Add(attr);
                 }
@@ -678,8 +678,8 @@ namespace DiscUtils.Ntfs
 
             if (anonDataAttr != null)
             {
-                fileName.RealSize = (ulong)anonDataAttr.Record.DataLength;
-                fileName.AllocatedSize = (ulong)anonDataAttr.Record.AllocatedLength;
+                fileName.RealSize = (ulong)anonDataAttr.PrimaryRecord.DataLength;
+                fileName.AllocatedSize = (ulong)anonDataAttr.PrimaryRecord.AllocatedLength;
             }
 
             if (updateMftRecord)
@@ -793,7 +793,7 @@ namespace DiscUtils.Ntfs
         
         private bool SplitAttribute(FileRecord record, NonResidentAttributeRecord targetAttr, bool atStart)
         {
-            if (targetAttr.CookedDataRuns.Count <= 1)
+            if (targetAttr.DataRuns.Count <= 1)
             {
                 return false;
             }
@@ -803,7 +803,7 @@ namespace DiscUtils.Ntfs
             {
                 // Approximation only - assumes each run is at least one byte saved.  Could calculate the
                 // actual index here.
-                splitIndex = (int)(targetAttr.CookedDataRuns.Count - (record.Size - record.AllocatedSize));
+                splitIndex = (int)(targetAttr.DataRuns.Count - (record.Size - record.AllocatedSize));
             }
 
             AttributeRecord newAttr = targetAttr.Split(splitIndex);
@@ -1011,9 +1011,9 @@ namespace DiscUtils.Ntfs
         {
             if (attr != null)
             {
-                if (attr.Record.AttributeType == AttributeType.IndexRoot)
+                if (attr.PrimaryRecord.AttributeType == AttributeType.IndexRoot)
                 {
-                    _indexCache.Remove(attr.Record.Name);
+                    _indexCache.Remove(attr.PrimaryRecord.Name);
                 }
 
                 RemoveAttributeExtents(attr);

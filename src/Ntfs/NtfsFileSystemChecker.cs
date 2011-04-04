@@ -495,12 +495,12 @@ namespace DiscUtils.Ntfs
                     if (ar.IsNonResident)
                     {
                         NonResidentAttributeRecord nrr = (NonResidentAttributeRecord)ar;
-                        if (nrr.CookedDataRuns.Count > 0)
+                        if (nrr.DataRuns.Count > 0)
                         {
                             long totalVcn = 0;
-                            foreach (var run in nrr.CookedDataRuns)
+                            foreach (var run in nrr.DataRuns)
                             {
-                                totalVcn += run.DataRun.RunLength;
+                                totalVcn += run.RunLength;
                             }
 
                             if (totalVcn != nrr.LastVcn - nrr.StartVcn + 1)

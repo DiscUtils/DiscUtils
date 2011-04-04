@@ -38,8 +38,7 @@ namespace DiscUtils.Ntfs
         private ulong _initializedDataSize;
         private ulong _compressedSize;
 
-        private List<CookedDataRun> _cookedDataRuns;
-        private NonResidentAttributeBuffer _dataBuffer;
+        private List<DataRun> _dataRuns;
 
         public NonResidentAttributeRecord(byte[] buffer, int offset, out int length)
         {
@@ -50,25 +49,30 @@ namespace DiscUtils.Ntfs
             : base(type, name, id, flags)
         {
             _nonResidentFlag = 1;
-            _cookedDataRuns = new List<CookedDataRun>();
-            _cookedDataRuns.Add(new CookedDataRun(new DataRun(firstCluster, (long)numClusters), 0, 0));
+            _dataRuns = new List<DataRun>();
+            _dataRuns.Add(new DataRun(firstCluster, (long)numClusters));
             _lastVCN = numClusters - 1;
             _dataAllocatedSize = bytesPerCluster * numClusters;
             _dataRealSize = bytesPerCluster * numClusters;
             _initializedDataSize = bytesPerCluster * numClusters;
         }
 
-        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long startVcn, List<CookedDataRun> dataRuns)
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long startVcn, List<DataRun> dataRuns)
             : base(type, name, id, flags)
         {
             _nonResidentFlag = 1;
-            _cookedDataRuns = dataRuns;
+            _dataRuns = dataRuns;
             _startingVCN = (ulong)startVcn;
 
             if (dataRuns != null && dataRuns.Count != 0)
             {
-                CookedDataRun lastRun = dataRuns[dataRuns.Count - 1];
-                _lastVCN = (ulong)(lastRun.StartVcn + lastRun.Length - 1);
+                _lastVCN = _startingVCN;
+                foreach (var run in dataRuns)
+                {
+                    _lastVCN += (ulong)run.RunLength;
+                }
+
+                _lastVCN -= 1;
             }
         }
 
@@ -118,26 +122,9 @@ namespace DiscUtils.Ntfs
             get { return 1 << _compressionUnitSize; }
         }
 
-        public List<CookedDataRun> CookedDataRuns
+        public List<DataRun> DataRuns
         {
-            get { return _cookedDataRuns; }
-        }
-
-        public long NextCluster
-        {
-            get
-            {
-                var cookedRuns = CookedDataRuns;
-                if (cookedRuns.Count > 0)
-                {
-                    CookedDataRun lastRun = cookedRuns[cookedRuns.Count - 1];
-                    return lastRun.StartLcn + lastRun.Length;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
+            get { return _dataRuns; }
         }
 
         public override int Size
@@ -155,9 +142,9 @@ namespace DiscUtils.Ntfs
 
                 // Write out data first, since we know where it goes...
                 int dataLen = 0;
-                foreach (var run in _cookedDataRuns)
+                foreach (var run in _dataRuns)
                 {
-                    dataLen += run.DataRun.Size;
+                    dataLen += run.Size;
                 }
 
                 dataLen++; // NULL terminator
@@ -168,55 +155,25 @@ namespace DiscUtils.Ntfs
 
         public override Range<long, long>[] GetClusters()
         {
-            var cookedRuns = CookedDataRuns;
+            var cookedRuns = _dataRuns;
 
-            List<Range<long, long>> result = new List<Range<long, long>>(cookedRuns.Count);
+            long start = 0;
+            List<Range<long, long>> result = new List<Range<long, long>>(_dataRuns.Count);
             foreach (var run in cookedRuns)
             {
                 if (!run.IsSparse)
                 {
-                    result.Add(new Range<long, long>(run.StartLcn, run.Length));
+                    start += run.RunOffset;
+                    result.Add(new Range<long, long>(start, run.RunLength));
                 }
             }
 
             return result.ToArray();
         }
 
-        public override IBuffer GetDataBuffer(File file, NtfsAttribute attribute)
-        {
-            if (_dataBuffer == null)
-            {
-                _dataBuffer = new NonResidentAttributeBuffer(file, attribute, this);
-            }
-
-            return _dataBuffer;
-        }
-
         public override IBuffer GetReadOnlyDataBuffer(INtfsContext context)
         {
             return new NonResidentAttributeBuffer(context, this);
-        }
-
-        public override long OffsetToAbsolutePos(long offset, long recordStart, int bytesPerCluster)
-        {
-            var cookedRuns = CookedDataRuns;
-
-            int i = 0;
-            while (i < cookedRuns[i].Length)
-            {
-                if (cookedRuns[i].StartVcn * bytesPerCluster > offset)
-                {
-                    return -1;
-                }
-                else if ((cookedRuns[i].StartVcn + cookedRuns[i].Length) * bytesPerCluster > offset)
-                {
-                    return (offset - (cookedRuns[i].StartVcn * bytesPerCluster)) + (cookedRuns[i].StartLcn * bytesPerCluster);
-                }
-
-                ++i;
-            }
-
-            return -1;
         }
 
         public override int Write(byte[] buffer, int offset)
@@ -238,9 +195,9 @@ namespace DiscUtils.Ntfs
 
             // Write out data first, since we know where it goes...
             int dataLen = 0;
-            foreach (var run in _cookedDataRuns)
+            foreach (var run in _dataRuns)
             {
-                dataLen += run.DataRun.Write(buffer, offset + dataOffset + dataLen);
+                dataLen += run.Write(buffer, offset + dataOffset + dataLen);
             }
 
             buffer[offset + dataOffset + dataLen] = 0; // NULL terminator
@@ -280,31 +237,47 @@ namespace DiscUtils.Ntfs
         public AttributeRecord Split(int suggestedSplitIdx)
         {
             int splitIdx;
-            if (suggestedSplitIdx < 0 || suggestedSplitIdx >= _cookedDataRuns.Count)
+            if (suggestedSplitIdx < 0 || suggestedSplitIdx >= _dataRuns.Count)
             {
-                splitIdx = _cookedDataRuns.Count / 2;
+                splitIdx = _dataRuns.Count / 2;
             }
             else
             {
                 splitIdx = suggestedSplitIdx;
             }
 
-            long startVcn = _cookedDataRuns[splitIdx].StartVcn;
-            List<CookedDataRun> newRecordRuns = new List<CookedDataRun>();
-            while (_cookedDataRuns.Count > splitIdx)
+            long splitVcn = (long)_startingVCN;
+            long splitLcn = 0;
+            for (int i = 0; i < splitIdx; ++i)
             {
-                CookedDataRun run = _cookedDataRuns[splitIdx];
+                splitVcn += _dataRuns[i].RunLength;
+                splitLcn += _dataRuns[i].RunOffset;
+            }
 
-                _cookedDataRuns.RemoveAt(splitIdx);
+            List<DataRun> newRecordRuns = new List<DataRun>();
+            while (_dataRuns.Count > splitIdx)
+            {
+                DataRun run = _dataRuns[splitIdx];
+
+                _dataRuns.RemoveAt(splitIdx);
                 newRecordRuns.Add(run);
             }
 
-            newRecordRuns[0].DataRun.RunOffset = newRecordRuns[0].StartLcn;
+            // Each extent has implicit start LCN=0, so have to make stored runs match reality.
+            // However, take care not to stomp on 'sparse' runs that may be at the start of the
+            // new extent (indicated by Zero run offset).
+            for (int i = 0; i < newRecordRuns.Count; ++i)
+            {
+                if (newRecordRuns[i].RunOffset != 0)
+                {
+                    newRecordRuns[i].RunOffset += splitLcn;
+                    break;
+                }
+            }
 
-            CookedDataRun lastRemRun = _cookedDataRuns[_cookedDataRuns.Count - 1];
-            _lastVCN = (ulong)(lastRemRun.StartVcn + lastRemRun.Length - 1);
+            _lastVCN = (ulong)splitLcn - 1;
 
-            return new NonResidentAttributeRecord(_type, _name, 0, _flags, startVcn, newRecordRuns);
+            return new NonResidentAttributeRecord(_type, _name, 0, _flags, splitVcn, newRecordRuns);
         }
 
         public override void Dump(TextWriter writer, string indent)
@@ -323,9 +296,9 @@ namespace DiscUtils.Ntfs
 
             string runStr = string.Empty;
 
-            foreach (CookedDataRun run in _cookedDataRuns)
+            foreach (DataRun run in _dataRuns)
             {
-                runStr += " " + run.DataRun.ToString();
+                runStr += " " + run.ToString();
             }
 
             writer.WriteLine(indent + "        Data Runs:" + runStr);
@@ -333,7 +306,7 @@ namespace DiscUtils.Ntfs
 
         protected override void Read(byte[] buffer, int offset, out int length)
         {
-            _cookedDataRuns = null;
+            _dataRuns = null;
 
             base.Read(buffer, offset, out length);
 
@@ -349,7 +322,7 @@ namespace DiscUtils.Ntfs
                 _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
             }
 
-            var dataRuns = new List<DataRun>();
+            _dataRuns = new List<DataRun>();
             int pos = _dataRunsOffset;
             while (pos < length)
             {
@@ -362,11 +335,9 @@ namespace DiscUtils.Ntfs
                     break;
                 }
 
-                dataRuns.Add(run);
+                _dataRuns.Add(run);
                 pos += len;
             }
-
-            _cookedDataRuns = CookedDataRun.Cook(dataRuns, (long)_startingVCN);
         }
     }
 }

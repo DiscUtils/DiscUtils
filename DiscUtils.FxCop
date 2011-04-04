@@ -6918,6 +6918,21 @@
          </Type>
          <Type Name="NtfsFileSystem">
           <Members>
+           <Member Name="#Dump(System.IO.TextWriter,System.String)">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2011-04-04 00:07:25Z">
+              <Issue>
+               <Item>'NtfsFileSystem.Dump(TextWriter, string)'</Item>
+               <Item>'Exception'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="163" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#GetMasterFileTable()">
             <Messages>
              <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Status="Excluded" Created="2010-12-05 19:43:22Z">
@@ -10647,6 +10662,7 @@
     <Note Id="160" Modified="2011-01-09 13:14:04Z">Well known name.</Note>
     <Note Id="161" Modified="2011-01-09 13:14:54Z">Bogus warning</Note>
     <Note Id="162" Modified="2011-03-12 18:00:42Z">Diagnostic output - so catching Exception OK</Note>
+    <Note Id="163" Modified="2011-04-04 00:10:20Z">Diagnostic code</Note>
    </User>
   </Notes>
   <Rules>

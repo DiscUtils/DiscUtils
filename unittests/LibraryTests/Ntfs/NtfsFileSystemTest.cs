@@ -367,7 +367,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void Fragmented()
         {
-            DiscFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
 
             ntfs.CreateDirectory(@"DIR");
 
@@ -386,6 +386,18 @@ namespace DiscUtils.Ntfs
                 }
             }
 
+            for (int i = 0; i < 2500; ++i)
+            {
+                ntfs.DeleteFile(@"DIR\file" + i + ".bin");
+            }
+
+            using (var stream = ntfs.OpenFile(@"DIR\fragmented.bin", FileMode.Create, FileAccess.ReadWrite))
+            {
+                for (int i = 0; i < 2500; ++i)
+                {
+                    stream.Write(buffer, 0, buffer.Length);
+                }
+            }
         }
     }
 }

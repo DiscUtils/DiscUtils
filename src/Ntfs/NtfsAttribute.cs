@@ -31,56 +31,57 @@ namespace DiscUtils.Ntfs
     {
         protected File _file;
         protected FileRecordReference _containingFile;
-        protected AttributeRecord _record;
+        protected AttributeRecord _primaryRecord;
         protected Dictionary<AttributeReference, AttributeRecord> _extents;
+        private IBuffer _cachedRawBuffer;
 
         protected NtfsAttribute(File file, FileRecordReference containingFile, AttributeRecord record)
         {
             _file = file;
             _containingFile = containingFile;
-            _record = record;
+            _primaryRecord = record;
             _extents = new Dictionary<AttributeReference, AttributeRecord>();
-            _extents.Add(new AttributeReference(containingFile, record.AttributeId), _record);
+            _extents.Add(new AttributeReference(containingFile, record.AttributeId), _primaryRecord);
         }
 
         public AttributeReference Reference
         {
             get
             {
-                return new AttributeReference(_containingFile, _record.AttributeId);
+                return new AttributeReference(_containingFile, _primaryRecord.AttributeId);
             }
         }
 
         public AttributeType Type
         {
-            get { return _record.AttributeType; }
+            get { return _primaryRecord.AttributeType; }
         }
 
         public string Name
         {
-            get { return _record.Name; }
+            get { return _primaryRecord.Name; }
         }
 
         public AttributeFlags Flags
         {
-            get { return _record.Flags; }
+            get { return _primaryRecord.Flags; }
         }
 
         public ushort Id
         {
-            get { return _record.AttributeId; }
+            get { return _primaryRecord.AttributeId; }
         }
 
         public long Length
         {
-            get { return _record.DataLength; }
+            get { return _primaryRecord.DataLength; }
         }
 
-        public AttributeRecord Record
+        public AttributeRecord PrimaryRecord
         {
             get
             {
-                return _record;
+                return _primaryRecord;
             }
         }
 
@@ -97,6 +98,36 @@ namespace DiscUtils.Ntfs
                 {
                     return firstExtent.CompressionUnitSize;
                 }
+            }
+        }
+
+        public List<AttributeRecord> Records
+        {
+            get
+            {
+                List<AttributeRecord> records = new List<AttributeRecord>(_extents.Values);
+                records.Sort(AttributeRecord.CompareStartVcns);
+                return records;
+            }
+        }
+
+        public IBuffer RawBuffer
+        {
+            get
+            {
+                if (_cachedRawBuffer == null)
+                {
+                    if (_primaryRecord.IsNonResident)
+                    {
+                        _cachedRawBuffer = new NonResidentAttributeBuffer(_file, this);
+                    }
+                    else
+                    {
+                        _cachedRawBuffer = ((ResidentAttributeRecord)_primaryRecord).DataBuffer;
+                    }
+                }
+
+                return _cachedRawBuffer;
             }
         }
 
@@ -162,14 +193,14 @@ namespace DiscUtils.Ntfs
 
         public bool IsNonResident
         {
-            get { return _record.IsNonResident; }
+            get { return _primaryRecord.IsNonResident; }
         }
 
         protected string AttributeTypeName
         {
             get
             {
-                switch (_record.AttributeType)
+                switch (_primaryRecord.AttributeType)
                 {
                     case AttributeType.StandardInformation:
                         return "STANDARD INFORMATION";
@@ -236,24 +267,28 @@ namespace DiscUtils.Ntfs
 
         public void SetExtent(FileRecordReference containingFile, AttributeRecord record)
         {
+            _cachedRawBuffer = null;
             _containingFile = containingFile;
-            _record = record;
+            _primaryRecord = record;
             _extents.Clear();
             _extents.Add(new AttributeReference(containingFile, record.AttributeId), record);
         }
 
         public void AddExtent(FileRecordReference containingFile, AttributeRecord record)
         {
+            _cachedRawBuffer = null;
             _extents.Add(new AttributeReference(containingFile, record.AttributeId), record);
         }
 
-        public void RemoveExtent(AttributeReference reference)
+        public void RemoveExtentCacheSafe(AttributeReference reference)
         {
             _extents.Remove(reference);
         }
 
         public bool ReplaceExtent(AttributeReference oldRef, AttributeReference newRef, AttributeRecord record)
         {
+            _cachedRawBuffer = null;
+
             if (!_extents.Remove(oldRef))
             {
                 return false;
@@ -262,7 +297,7 @@ namespace DiscUtils.Ntfs
             {
                 if (oldRef.Equals(Reference) || _extents.Count == 0)
                 {
-                    _record = record;
+                    _primaryRecord = record;
                     _containingFile = newRef.File;
                 }
 
@@ -271,36 +306,24 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public NonResidentAttributeRecord GetNonResidentExtent(long targetVcn)
-        {
-            foreach (var extent in _extents)
-            {
-                NonResidentAttributeRecord nonResident = extent.Value as NonResidentAttributeRecord;
-                if (nonResident == null)
-                {
-                    throw new IOException("Attempt to get non-resident extent from resident attribute");
-                }
-
-                if (nonResident.StartVcn <= targetVcn && nonResident.LastVcn >= targetVcn)
-                {
-                    return nonResident;
-                }
-            }
-
-            throw new IOException("Attempt to access position outside of a known extent");
-        }
-
         public Range<long, long>[] GetClusters()
         {
-            return _record.GetClusters();
+            List<Range<long, long>> result = new List<Range<long, long>>();
+
+            foreach (var extent in _extents)
+            {
+                result.AddRange(extent.Value.GetClusters());
+            }
+
+            return result.ToArray();
         }
 
         public virtual void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + AttributeTypeName + " ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
 
-            writer.WriteLine(indent + "  Length: " + _record.DataLength + " bytes");
-            if (_record.DataLength == 0)
+            writer.WriteLine(indent + "  Length: " + _primaryRecord.DataLength + " bytes");
+            if (_primaryRecord.DataLength == 0)
             {
                 writer.WriteLine(indent + "    Data: <none>");
             }
@@ -327,7 +350,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            _record.Dump(writer, indent + "  ");
+            _primaryRecord.Dump(writer, indent + "  ");
         }
 
         internal SparseStream Open(FileAccess access)
@@ -335,24 +358,14 @@ namespace DiscUtils.Ntfs
             return new BufferStream(GetDataBuffer(), access);
         }
 
-        internal IBuffer GetDataBuffer()
+        internal IMappedBuffer GetDataBuffer()
         {
             return new NtfsAttributeBuffer(_file, this);
         }
 
         internal long OffsetToAbsolutePos(long offset)
         {
-            if (_record.IsNonResident)
-            {
-                return _record.OffsetToAbsolutePos(offset, 0, _file.Context.BiosParameterBlock.BytesPerCluster);
-            }
-            else
-            {
-                long attrStart = _file.GetAttributeOffset(new AttributeReference(_containingFile, _record.AttributeId));
-                long attrPos = _file.Context.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data, null).OffsetToAbsolutePos(attrStart);
-
-                return _record.OffsetToAbsolutePos(offset, attrPos, 0);
-            }
+            return GetDataBuffer().MapPosition(offset);
         }
     }
 }

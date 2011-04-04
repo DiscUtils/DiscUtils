@@ -277,7 +277,7 @@ namespace DiscUtils.Ntfs
                     id,
                     flags,
                     0,
-                    new List<CookedDataRun>()));
+                    new List<DataRun>()));
             _attributes.Sort();
             return id;
         }

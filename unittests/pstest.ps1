@@ -287,7 +287,7 @@ function TestNtfs
         Set-Content vd:\Volume0\${i}file.bin $ClusterData
     }
 
-    #Checkpoint
+    Checkpoint
 
     "Creating files with short names"
     $RootDir = Get-Item 'vd:\Volume0\$Root'
@@ -296,12 +296,16 @@ function TestNtfs
 
     Checkpoint
 
-    "Creating fragmented file"
+    "Creating space for fragmented file"
     #for($i = 0; $i -lt $NumFiles; $i++)
     for($i = 0; $i -lt 100; $i++)
     {
         Remove-Item "vd:\Volume0\file${i}.bin"
     }
+
+    Checkpoint
+
+    "Creating fragmented file"
     New-Item -type file "vd:\Volume0\fragfile.bin"
     Set-Content "vd:\Volume0\fragfile.bin" $FragFileBigBlock
     Add-Content "vd:\Volume0\fragfile.bin" $ClusterData

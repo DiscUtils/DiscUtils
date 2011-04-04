@@ -84,7 +84,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + AttributeTypeName + " ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
             _structure.Dump(writer, indent + "  ");
 
-            _record.Dump(writer, indent + "  ");
+            _primaryRecord.Dump(writer, indent + "  ");
         }
 
         private void Initialize()

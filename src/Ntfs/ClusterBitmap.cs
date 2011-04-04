@@ -141,6 +141,14 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        internal void FreeClusters(params Range<long, long>[] runs)
+        {
+            foreach (var run in runs)
+            {
+                _bitmap.MarkAbsentRange(run.Offset, run.Count);
+            }
+        }
+
         /// <summary>
         /// Sets the total number of clusters managed in the volume.
         /// </summary>

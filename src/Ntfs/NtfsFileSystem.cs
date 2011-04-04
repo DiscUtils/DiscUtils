@@ -1707,8 +1707,15 @@ namespace DiscUtils.Ntfs
                 {
                     if (stream.AttributeType == AttributeType.IndexRoot)
                     {
-                        writer.WriteLine(linePrefix + "  INDEX (" + stream.Name + ")");
-                        f.GetIndex(stream.Name).Dump(writer, linePrefix + "    ");
+                        try
+                        {
+                            writer.WriteLine(linePrefix + "  INDEX (" + stream.Name + ")");
+                            f.GetIndex(stream.Name).Dump(writer, linePrefix + "    ");
+                        }
+                        catch (Exception e)
+                        {
+                            writer.WriteLine(linePrefix + "!Exception: " + e);
+                        }
                     }
                 }
             }

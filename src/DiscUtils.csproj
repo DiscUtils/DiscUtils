@@ -202,6 +202,7 @@
     <Compile Include="IClusterBasedFileSystem.cs" />
     <Compile Include="IDiagnosticTraceable.cs" />
     <Compile Include="IFileSystem.cs" />
+    <Compile Include="IMappedBuffer.cs" />
     <Compile Include="InvalidFileSystemException.cs" />
     <Compile Include="Iscsi\Authenticator.cs" />
     <Compile Include="Iscsi\BaseResponse.cs" />
@@ -368,6 +369,7 @@
     <Compile Include="Ntfs\Bitmap.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
     <Compile Include="Ntfs\CookedDataRun.cs" />
+    <Compile Include="Ntfs\CookedDataRuns.cs" />
     <Compile Include="Ntfs\DataRun.cs" />
     <Compile Include="Ntfs\Directory.cs" />
     <Compile Include="Ntfs\DirectoryEntry.cs" />
