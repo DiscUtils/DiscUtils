@@ -28,7 +28,7 @@ namespace DiscUtils
     /// <summary>
     /// Provides the base class for all file systems.
     /// </summary>
-    public abstract class DiscFileSystem : IFileSystem, IDisposable
+    public abstract class DiscFileSystem : MarshalByRefObject, IFileSystem, IDisposable
     {
         private DiscFileSystemOptions _options;
 

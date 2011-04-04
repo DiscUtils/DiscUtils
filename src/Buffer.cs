@@ -22,12 +22,13 @@
 
 namespace DiscUtils
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// Abstract base class for implementations of IBuffer.
     /// </summary>
-    public abstract class Buffer : IBuffer
+    public abstract class Buffer : MarshalByRefObject, IBuffer
     {
         /// <summary>
         /// Gets a value indicating whether this buffer can be read.
