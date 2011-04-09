@@ -330,6 +330,8 @@ namespace DiscUtils.Vhd
                 int offsetInSector = (int)(offsetInBlock % Utilities.SectorSize);
                 int toWrite = (int)Math.Min(count - numWritten, _dynamicHeader.BlockSize - offsetInBlock);
 
+                bool blockBitmapDirty = false;
+
                 // Need to read - we're not handling a full sector
                 if (offsetInSector != 0 || toWrite < Utilities.SectorSize)
                 {
@@ -361,7 +363,11 @@ namespace DiscUtils.Vhd
                     _fileStream.Write(sectorBuffer, 0, Utilities.SectorSize);
 
                     // Update the in-memory block bitmap
-                    _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
+                    if ((_blockBitmaps[block][sectorInBlock / 8] & sectorMask) == 0)
+                    {
+                        _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
+                        blockBitmapDirty = true;
+                    }
                 }
                 else
                 {
@@ -375,12 +381,20 @@ namespace DiscUtils.Vhd
                     for (int i = offset; i < offset + toWrite; i += Utilities.SectorSize)
                     {
                         byte sectorMask = (byte)(1 << (7 - (sectorInBlock % 8)));
-                        _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
+                        if ((_blockBitmaps[block][sectorInBlock / 8] & sectorMask) == 0)
+                        {
+                            _blockBitmaps[block][sectorInBlock / 8] |= sectorMask;
+                            blockBitmapDirty = true;
+                        }
+
                         sectorInBlock++;
                     }
                 }
 
-                WriteBlockBitmap(block);
+                if (blockBitmapDirty)
+                {
+                    WriteBlockBitmap(block);
+                }
 
                 numWritten += toWrite;
                 _position += toWrite;
