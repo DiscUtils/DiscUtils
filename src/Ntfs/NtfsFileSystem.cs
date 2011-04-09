@@ -1579,7 +1579,7 @@ namespace DiscUtils.Ntfs
                     LastAccessTime = si.LastAccessTime,
                     ChangeTime = si.MftChangedTime,
                     LastWriteTime = si.ModificationTime,
-                    FileAttributes = FileNameRecord.ConvertFlags(si.FileAttributes)
+                    FileAttributes = StandardInformation.ConvertFlags(si.FileAttributes, file.IsDirectory)
                 };
             }
         }
@@ -1597,17 +1597,11 @@ namespace DiscUtils.Ntfs
                     path,
                     delegate(StandardInformation si)
                     {
-                        FileAttributes oldAttrs = FileNameRecord.ConvertFlags(si.FileAttributes);
-                        if ((oldAttrs & NonSettableFileAttributes) != (info.FileAttributes & NonSettableFileAttributes))
-                        {
-                            throw new ArgumentException("Attempt to change attributes that are read-only");
-                        }
-
                         si.CreationTime = info.CreationTime;
                         si.LastAccessTime = info.LastAccessTime;
                         si.MftChangedTime = info.ChangeTime;
                         si.ModificationTime = info.LastWriteTime;
-                        si.FileAttributes = FileNameRecord.SetAttributes(info.FileAttributes, si.FileAttributes);
+                        si.FileAttributes = StandardInformation.SetFileAttributes(info.FileAttributes, si.FileAttributes);
                     });
             }
         }

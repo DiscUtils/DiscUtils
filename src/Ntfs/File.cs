@@ -191,6 +191,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public bool IsDirectory
+        {
+            get { return (_records[0].Flags & FileRecordFlags.IsDirectory) != 0; }
+        }
+
         internal INtfsContext Context
         {
             get

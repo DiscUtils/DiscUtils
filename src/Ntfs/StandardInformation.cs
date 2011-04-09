@@ -125,6 +125,23 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     Update Seq Num: " + UpdateSequenceNumber);
         }
 
+        internal static FileAttributes ConvertFlags(FileAttributeFlags flags, bool isDirectory)
+        {
+            FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
+
+            if (isDirectory)
+            {
+                result |= System.IO.FileAttributes.Directory;
+            }
+
+            return result;
+        }
+
+        internal static FileAttributeFlags SetFileAttributes(FileAttributes newAttributes, FileAttributeFlags existing)
+        {
+            return (FileAttributeFlags)(((uint)existing & 0xFFFF0000) | ((uint)newAttributes & 0xFFFF));
+        }
+
         private static DateTime ReadDateTime(byte[] buffer, int offset)
         {
             try
@@ -133,7 +150,7 @@ namespace DiscUtils.Ntfs
             }
             catch (ArgumentException)
             {
-                return DateTime.MinValue;
+                return DateTime.FromFileTimeUtc(0);
             }
         }
     }
