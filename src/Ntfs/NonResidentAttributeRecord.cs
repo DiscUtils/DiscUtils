@@ -173,7 +173,7 @@ namespace DiscUtils.Ntfs
 
         public override IBuffer GetReadOnlyDataBuffer(INtfsContext context)
         {
-            return new NonResidentAttributeBuffer(context, this);
+            return new NonResidentDataBuffer(context, this);
         }
 
         public override int Write(byte[] buffer, int offset)

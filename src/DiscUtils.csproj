@@ -418,6 +418,7 @@
     <Compile Include="Ntfs\ObjectIdRecord.cs" />
     <Compile Include="Ntfs\ObjectIds.cs" />
     <Compile Include="Ntfs\Quotas.cs" />
+    <Compile Include="Ntfs\NonResidentDataBuffer.cs" />
     <Compile Include="Ntfs\ReparsePointRecord.cs" />
     <Compile Include="Ntfs\ReparsePoints.cs" />
     <Compile Include="Ntfs\ResidentAttributeRecord.cs" />
