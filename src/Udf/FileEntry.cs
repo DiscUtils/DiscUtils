@@ -48,7 +48,7 @@ namespace DiscUtils.Udf
         public ulong UniqueId;
         public int ExtendedAttributesLength;
         public int AllocationDescriptorsLength;
-        public byte[] ExtendedAttributes;
+        public List<ExtendedAttributeRecord> ExtendedAttributes;
         public byte[] AllocationDescriptors;
 
         public virtual int Size
@@ -78,8 +78,10 @@ namespace DiscUtils.Udf
             UniqueId = Utilities.ToUInt64LittleEndian(buffer, offset + 160);
             ExtendedAttributesLength = Utilities.ToInt32LittleEndian(buffer, offset + 168);
             AllocationDescriptorsLength = Utilities.ToInt32LittleEndian(buffer, offset + 172);
-            ExtendedAttributes = Utilities.ToByteArray(buffer, offset + 176, ExtendedAttributesLength);
             AllocationDescriptors = Utilities.ToByteArray(buffer, offset + 176 + ExtendedAttributesLength, AllocationDescriptorsLength);
+
+            byte[] eaData = Utilities.ToByteArray(buffer, offset + 176, ExtendedAttributesLength);
+            ExtendedAttributes = ReadExtendedAttributes(eaData);
 
             return (int)(176 + ExtendedAttributesLength + AllocationDescriptorsLength);
         }
@@ -87,6 +89,45 @@ namespace DiscUtils.Udf
         public virtual void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
+        }
+
+        protected static List<ExtendedAttributeRecord> ReadExtendedAttributes(byte[] eaData)
+        {
+            if (eaData != null && eaData.Length != 0)
+            {
+                DescriptorTag eaTag = new DescriptorTag();
+                eaTag.ReadFrom(eaData, 0);
+
+                int implAttrLocation = Utilities.ToInt32LittleEndian(eaData, 16);
+                int appAttrLocation = Utilities.ToInt32LittleEndian(eaData, 20);
+
+                List<ExtendedAttributeRecord> extendedAttrs = new List<ExtendedAttributeRecord>();
+                int pos = 24;
+                while (pos < eaData.Length)
+                {
+                    ExtendedAttributeRecord ea;
+
+                    if (pos >= implAttrLocation)
+                    {
+                        ea = new ImplementationUseExtendedAttributeRecord();
+                    }
+                    else
+                    {
+                        ea = new ExtendedAttributeRecord();
+                    }
+
+                    int numRead = ea.ReadFrom(eaData, pos);
+                    extendedAttrs.Add(ea);
+
+                    pos += numRead;
+                }
+
+                return extendedAttrs;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

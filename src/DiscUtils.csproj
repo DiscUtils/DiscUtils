@@ -541,6 +541,8 @@
     <Compile Include="Tuple_3.cs" />
     <Compile Include="Udf\ApplicationEntityIdentifier.cs" />
     <Compile Include="Udf\DomainEntityIdentifier.cs" />
+    <Compile Include="Udf\ExtendedAttribute.cs" />
+    <Compile Include="Udf\ExtendedAttributeRecord.cs" />
     <Compile Include="Udf\ExtentAllocationDescriptor.cs" />
     <Compile Include="Udf\AnchorVolumeDescriptorPointer.cs" />
     <Compile Include="Udf\BaseTaggedDescriptor.cs" />
@@ -556,6 +558,7 @@
     <Compile Include="Udf\FileSetDescriptor.cs" />
     <Compile Include="Udf\FileType.cs" />
     <Compile Include="Udf\ImplementationEntityIdentifier.cs" />
+    <Compile Include="Udf\ImplementationUseExtendedAttributeRecord.cs" />
     <Compile Include="Udf\InformationControlBlock.cs" />
     <Compile Include="Udf\LogicalPartition.cs" />
     <Compile Include="Udf\LongAllocationDescriptor.cs" />

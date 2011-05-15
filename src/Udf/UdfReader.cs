@@ -106,6 +106,18 @@ namespace DiscUtils.Udf
             return foundUdfMarker;
         }
 
+        /// <summary>
+        /// Gets UDF extended attributes for a file or directory.
+        /// </summary>
+        /// <param name="path">Path to the file or directory</param>
+        /// <returns>Array of extended attributes, which may be empty or <c>null</c> if
+        /// there are no extended attributes.</returns>
+        public ExtendedAttribute[] GetExtendedAttributes(string path)
+        {
+            VfsUdfReader realFs = GetRealFileSystem<VfsUdfReader>();
+            return realFs.GetExtendedAttributes(path);
+        }
+
         private sealed class VfsUdfReader : VfsReadOnlyFileSystem<FileIdentifier, File, Directory, UdfContext>
         {
             private Stream _data;
@@ -170,6 +182,23 @@ namespace DiscUtils.Udf
             public override string VolumeLabel
             {
                 get { return _lvd.LogicalVolumeIdentifier; }
+            }
+
+            public ExtendedAttribute[] GetExtendedAttributes(string path)
+            {
+                List<ExtendedAttribute> result = new List<ExtendedAttribute>();
+
+                File file = GetFile(path);
+                foreach (var record in file.ExtendedAttributes)
+                {
+                    ImplementationUseExtendedAttributeRecord implRecord = record as ImplementationUseExtendedAttributeRecord;
+                    if (implRecord != null)
+                    {
+                        result.Add(new ExtendedAttribute(implRecord.ImplementationIdentifier.Identifier, implRecord.ImplementationUseData));
+                    }
+                }
+
+                return result.ToArray();
             }
 
             protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)

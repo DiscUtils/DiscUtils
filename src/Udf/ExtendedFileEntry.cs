@@ -62,8 +62,10 @@ namespace DiscUtils.Udf
             UniqueId = Utilities.ToUInt64LittleEndian(buffer, offset + 200);
             ExtendedAttributesLength = Utilities.ToInt32LittleEndian(buffer, offset + 208);
             AllocationDescriptorsLength = Utilities.ToInt32LittleEndian(buffer, offset + 212);
-            ExtendedAttributes = Utilities.ToByteArray(buffer, offset + 216, ExtendedAttributesLength);
             AllocationDescriptors = Utilities.ToByteArray(buffer, offset + 216 + ExtendedAttributesLength, AllocationDescriptorsLength);
+
+            byte[] eaData = Utilities.ToByteArray(buffer, offset + 216, ExtendedAttributesLength);
+            ExtendedAttributes = ReadExtendedAttributes(eaData);
 
             return (int)(216 + ExtendedAttributesLength + AllocationDescriptorsLength);
         }

@@ -23,6 +23,7 @@
 namespace DiscUtils.Udf
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using DiscUtils.Vfs;
 
@@ -136,6 +137,11 @@ namespace DiscUtils.Udf
         public long FileLength
         {
             get { return (long)_fileEntry.InformationLength; }
+        }
+
+        public List<ExtendedAttributeRecord> ExtendedAttributes
+        {
+            get { return _fileEntry.ExtendedAttributes; }
         }
 
         public static File FromDescriptor(UdfContext context, LongAllocationDescriptor icb)
