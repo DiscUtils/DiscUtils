@@ -477,7 +477,7 @@ namespace DiscUtils
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode)
+        public override SparseStream OpenFile(string path, FileMode mode)
         {
             return OpenFile(path, mode, FileAccess.ReadWrite);
         }
@@ -489,7 +489,7 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             if (_readOnly && access != FileAccess.Read)
             {
@@ -507,7 +507,7 @@ namespace DiscUtils
                 fileShare = FileShare.Read;
             }
 
-            return File.Open(Path.Combine(_basePath, path), mode, access, fileShare);
+            return SparseStream.FromStream(File.Open(Path.Combine(_basePath, path), mode, access, fileShare), Ownership.Dispose);
         }
 
         /// <summary>

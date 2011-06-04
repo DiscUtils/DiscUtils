@@ -205,7 +205,7 @@ namespace DiscUtils
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        Stream OpenFile(string path, FileMode mode);
+        SparseStream OpenFile(string path, FileMode mode);
 
         /// <summary>
         /// Opens the specified file.
@@ -214,7 +214,7 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        Stream OpenFile(string path, FileMode mode, FileAccess access);
+        SparseStream OpenFile(string path, FileMode mode, FileAccess access);
 
         /// <summary>
         /// Gets the attributes of a file or directory.

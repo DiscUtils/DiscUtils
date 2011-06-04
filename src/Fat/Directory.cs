@@ -308,7 +308,7 @@ namespace DiscUtils.Fat
             return -1;
         }
 
-        internal Stream OpenFile(string name, FileMode mode, FileAccess fileAccess)
+        internal SparseStream OpenFile(string name, FileMode mode, FileAccess fileAccess)
         {
             if (mode == FileMode.Append || mode == FileMode.Truncate)
             {
@@ -328,7 +328,7 @@ namespace DiscUtils.Fat
             }
             else if ((mode == FileMode.Open || mode == FileMode.OpenOrCreate || mode == FileMode.Create) && exists)
             {
-                Stream stream = new FatFileStream(_fileSystem, this, fileId, fileAccess);
+                SparseStream stream = new FatFileStream(_fileSystem, this, fileId, fileAccess);
                 if (mode == FileMode.Create)
                 {
                     stream.SetLength(0);

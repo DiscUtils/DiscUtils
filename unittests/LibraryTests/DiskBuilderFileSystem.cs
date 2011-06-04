@@ -113,7 +113,7 @@ namespace DiscUtils
             throw new NotImplementedException();
         }
 
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             if (_files.ContainsKey(path))
             {

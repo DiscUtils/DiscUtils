@@ -23,13 +23,14 @@
 namespace DiscUtils.Wim
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     /// <summary>
     /// Provides access to a (compressed) resource within the WIM file.
     /// </summary>
     /// <remarks>Stream access must be strictly sequential.</remarks>
-    internal class FileResourceStream : Stream
+    internal class FileResourceStream : SparseStream
     {
         private const int E8DecodeFileSize = 12000000;
 
@@ -105,6 +106,14 @@ namespace DiscUtils.Wim
             set
             {
                 _position = value;
+            }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                return new StreamExtent[] { new StreamExtent(0, Length) };
             }
         }
 

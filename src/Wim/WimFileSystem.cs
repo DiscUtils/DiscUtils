@@ -362,7 +362,7 @@ namespace DiscUtils.Wim
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             if (mode != FileMode.Open && mode != FileMode.OpenOrCreate)
             {

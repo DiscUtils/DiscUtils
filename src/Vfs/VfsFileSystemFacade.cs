@@ -310,7 +310,7 @@ namespace DiscUtils.Vfs
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode)
+        public override SparseStream OpenFile(string path, FileMode mode)
         {
             return _wrapped.OpenFile(path, mode);
         }
@@ -322,7 +322,7 @@ namespace DiscUtils.Vfs
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             return _wrapped.OpenFile(path, mode, access);
         }

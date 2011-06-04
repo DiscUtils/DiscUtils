@@ -23,9 +23,10 @@
 namespace DiscUtils.Fat
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
-    internal class FatFileStream : Stream
+    internal class FatFileStream : SparseStream
     {
         private Directory _dir;
         private long _dirId;
@@ -67,6 +68,14 @@ namespace DiscUtils.Fat
         public override long Length
         {
             get { return _stream.Length; }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                return new StreamExtent[] { new StreamExtent(0, Length) };
+            }
         }
 
         public override void Close()

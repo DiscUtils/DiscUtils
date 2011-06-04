@@ -65,7 +65,7 @@ namespace DiscUtils.Diagnostics
         where TFileSystem : DiscFileSystem, IDiagnosticTraceable
         where TChecker : DiscFileSystemChecker
     {
-        internal delegate Stream StreamOpenFn(TFileSystem fs);
+        internal delegate SparseStream StreamOpenFn(TFileSystem fs);
 
         private Stream _baseStream;
 
@@ -994,7 +994,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode)
+        public override SparseStream OpenFile(string path, FileMode mode)
         {
             // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
             StreamOpenFn reopenFn = delegate(TFileSystem fs)
@@ -1006,7 +1006,7 @@ namespace DiscUtils.Diagnostics
 
             Activity<TFileSystem> activity = delegate(TFileSystem fs, Dictionary<string, object> context)
             {
-                Stream s = fs.OpenFile(path, mode);
+                SparseStream s = fs.OpenFile(path, mode);
                 wrapper.SetNativeStream(context, s);
                 return s;
             };
@@ -1023,7 +1023,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
             StreamOpenFn reopenFn = delegate(TFileSystem fs)

@@ -76,7 +76,7 @@ namespace DiscUtils.Vfs
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <returns>An object representing the stream.</returns>
-        Stream CreateStream(string name);
+        SparseStream CreateStream(string name);
 
         /// <summary>
         /// Opens an existing stream.
@@ -85,6 +85,6 @@ namespace DiscUtils.Vfs
         /// <returns>An object representing the stream.</returns>
         /// <remarks>The implementation must not implicitly create the stream if it doesn't already
         /// exist.</remarks>
-        Stream OpenExistingStream(string name);
+        SparseStream OpenExistingStream(string name);
     }
 }

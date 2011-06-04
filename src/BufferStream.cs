@@ -175,5 +175,16 @@ namespace DiscUtils
             _buffer.Write(_position, buffer, offset, count);
             _position += count;
         }
+
+        /// <summary>
+        /// Gets the parts of a stream that are stored, within a specified range.
+        /// </summary>
+        /// <param name="start">The offset of the first byte of interest</param>
+        /// <param name="count">The number of bytes of interest</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            return _buffer.GetExtentsInRange(start, count);
+        }
     }
 }

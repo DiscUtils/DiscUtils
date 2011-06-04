@@ -296,7 +296,7 @@ namespace DiscUtils
         /// <param name="path">The full path of the file to open.</param>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public virtual Stream OpenFile(string path, FileMode mode)
+        public virtual SparseStream OpenFile(string path, FileMode mode)
         {
             return OpenFile(path, mode, FileAccess.ReadWrite);
         }
@@ -308,7 +308,7 @@ namespace DiscUtils
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public abstract Stream OpenFile(string path, FileMode mode, FileAccess access);
+        public abstract SparseStream OpenFile(string path, FileMode mode, FileAccess access);
 
         /// <summary>
         /// Gets the attributes of a file or directory.

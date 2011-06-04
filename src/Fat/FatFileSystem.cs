@@ -668,7 +668,7 @@ namespace DiscUtils.Fat
         /// <param name="mode">The file mode</param>
         /// <param name="access">The desired access</param>
         /// <returns>The stream to the opened file</returns>
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             Directory parent;
             long entryId;

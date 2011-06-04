@@ -172,9 +172,9 @@ namespace DiscUtils.Wim
             return null;
         }
 
-        internal Stream OpenResourceStream(ShortResourceHeader hdr)
+        internal SparseStream OpenResourceStream(ShortResourceHeader hdr)
         {
-            Stream fileSectionStream = new SubStream(_fileStream, Ownership.None, hdr.FileOffset, hdr.CompressedSize);
+            SparseStream fileSectionStream = new SubStream(_fileStream, Ownership.None, hdr.FileOffset, hdr.CompressedSize);
             if ((hdr.Flags & ResourceFlags.Compressed) == 0)
             {
                 return fileSectionStream;

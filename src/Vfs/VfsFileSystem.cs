@@ -262,7 +262,7 @@ namespace DiscUtils.Vfs
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
         /// <returns>The new stream.</returns>
-        public override Stream OpenFile(string path, FileMode mode, FileAccess access)
+        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             if (!CanWrite)
             {
@@ -328,7 +328,7 @@ namespace DiscUtils.Vfs
             {
                 TFile file = GetFile(entry);
 
-                Stream stream = null;
+                SparseStream stream = null;
                 if (string.IsNullOrEmpty(attributeName))
                 {
                     stream = new BufferStream(file.FileContent, access);

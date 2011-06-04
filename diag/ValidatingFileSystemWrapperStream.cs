@@ -27,7 +27,7 @@ using System.Threading;
 
 namespace DiscUtils.Diagnostics
 {
-    internal sealed class ValidatingFileSystemWrapperStream<Tfs, Tc> : Stream
+    internal sealed class ValidatingFileSystemWrapperStream<Tfs, Tc> : SparseStream
         where Tfs : DiscFileSystem, IDiagnosticTraceable
         where Tc : DiscFileSystemChecker
     {
@@ -172,6 +172,21 @@ namespace DiscUtils.Diagnostics
             }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                long pos = _shadowPosition;
+
+                Activity<Tfs> fn = delegate(Tfs fs, Dictionary<string, object> context)
+                {
+                    return GetNativeStream(fs, context, pos).Extents;
+                };
+
+                return (IEnumerable<StreamExtent>)_fileSystem.PerformActivity(fn);
+            }
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             long pos = _shadowPosition;
@@ -247,16 +262,16 @@ namespace DiscUtils.Diagnostics
             context[streamKey] = s;
         }
 
-        private Stream GetNativeStream(Tfs fs, Dictionary<string, object> context, long shadowPosition)
+        private SparseStream GetNativeStream(Tfs fs, Dictionary<string, object> context, long shadowPosition)
         {
             string streamKey = "WrapStream#" + _replayHandle + "_Stream";
 
             Object streamObj;
-            Stream s;
+            SparseStream s;
 
             if (context.TryGetValue(streamKey, out streamObj))
             {
-                s = (Stream)streamObj;
+                s = (SparseStream)streamObj;
             }
             else
             {
