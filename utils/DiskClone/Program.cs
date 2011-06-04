@@ -160,7 +160,7 @@ namespace DiskClone
                 }
 
                 List<StreamExtent> extents = new List<StreamExtent>(BitmapToRanges(volBitmap, clusterSize));
-                SparseStream partSourceStream = SparseStream.FromStream(sourceVol.Content, Ownership.None, extents);
+                SparseStream partSourceStream = SparseStream.FromStream(rawVolStream, Ownership.None, extents);
 
                 for (int i = 0; i < contentBuilder.PartitionTable.Partitions.Count; ++i )
                 {
