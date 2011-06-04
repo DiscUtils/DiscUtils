@@ -87,6 +87,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public int Count
+        {
+            get { return _runs.Count; }
+        }
+
         public CookedDataRun this[int index]
         {
             get { return _runs[index]; }

@@ -79,7 +79,65 @@ namespace DiscUtils.Ntfs
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { return new StreamExtent[] { new StreamExtent(0, Capacity) }; }
+            get
+            {
+                StreamExtent lastExtent = null;
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                if ((_flags & (AttributeFlags.Compressed | AttributeFlags.Encrypted)) == AttributeFlags.Compressed)
+                {
+                    long lastByte = (_cookedRuns.Last.StartVcn + _cookedRuns.Last.Length) * _bytesPerCluster;
+
+                    int runIdx = 0;
+                    int cluster = 0;
+                    while (cluster < _cookedRuns.NextVirtualCluster)
+                    {
+                        runIdx = FindDataRun(cluster, runIdx);
+                        CookedDataRun cookedRun = _cookedRuns[runIdx];
+
+                        if (!cookedRun.IsSparse)
+                        {
+                            long startPos = cookedRun.StartVcn * _bytesPerCluster;
+                            if (lastExtent != null && lastExtent.Start + lastExtent.Length == startPos)
+                            {
+                                lastExtent = new StreamExtent(lastExtent.Start, Math.Min(lastByte - lastExtent.Start, lastExtent.Length + (_compressionUnitSize * _bytesPerCluster)));
+                                extents[extents.Count - 1] = lastExtent;
+                            }
+                            else
+                            {
+                                lastExtent = new StreamExtent(cookedRun.StartVcn * _bytesPerCluster, Math.Min(lastByte - (cookedRun.StartVcn * _bytesPerCluster), _compressionUnitSize * _bytesPerCluster));
+                                extents.Add(lastExtent);
+                            }
+                        }
+
+                        cluster += _compressionUnitSize;
+                    }
+                }
+                else
+                {
+                    int runCount = _cookedRuns.Count;
+                    for (int i = 0; i < runCount; i++)
+                    {
+                        CookedDataRun cookedRun = _cookedRuns[i];
+                        if (!cookedRun.IsSparse)
+                        {
+                            long startPos = cookedRun.StartVcn * _bytesPerCluster;
+                            if (lastExtent != null && lastExtent.Start + lastExtent.Length == startPos)
+                            {
+                                lastExtent = new StreamExtent(lastExtent.Start, lastExtent.Length + (cookedRun.Length * _bytesPerCluster));
+                                extents[extents.Count - 1] = lastExtent;
+                            }
+                            else
+                            {
+                                lastExtent = new StreamExtent(cookedRun.StartVcn * _bytesPerCluster, cookedRun.Length * _bytesPerCluster);
+                                extents.Add(lastExtent);
+                            }
+                        }
+                    }
+                }
+
+                return extents;
+            }
         }
 
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
@@ -121,21 +179,15 @@ namespace DiscUtils.Ntfs
                 return 0;
             }
 
-            int numRead;
-            if (_flags == AttributeFlags.None)
+            switch (_flags & (AttributeFlags.Compressed | AttributeFlags.Encrypted))
             {
-                numRead = DoReadNormal(pos, buffer, offset, toRead);
+                case AttributeFlags.Compressed:
+                    return DoReadCompressed(pos, buffer, offset, toRead);
+                case AttributeFlags.Sparse:
+                    return DoReadSparse(pos, buffer, offset, toRead);
+                default:
+                    return DoReadNormal(pos, buffer, offset, toRead);
             }
-            else if (_flags == AttributeFlags.Compressed)
-            {
-                numRead = DoReadCompressed(pos, buffer, offset, toRead);
-            }
-            else
-            {
-                numRead = DoReadSparse(pos, buffer, offset, toRead);
-            }
-
-            return numRead;
         }
 
         public override void Write(long pos, byte[] buffer, int offset, int count)

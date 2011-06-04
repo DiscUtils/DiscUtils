@@ -176,9 +176,7 @@ namespace DiscUtils.Ntfs
 
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
-            return StreamExtent.Intersect(
-                new StreamExtent[] { new StreamExtent(0, Capacity) },
-                new StreamExtent(start, count));
+            return StreamExtent.Intersect(_attribute.RawBuffer.GetExtentsInRange(start, count), new StreamExtent(0, Capacity));
         }
     }
 }
