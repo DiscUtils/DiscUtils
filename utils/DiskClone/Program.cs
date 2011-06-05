@@ -91,10 +91,18 @@ namespace DiskClone
             List<CloneVolume> cloneVolumes = GatherVolumes(sourceVolume, out diskNumber);
 
 
-            Geometry geom;
-            long capacity;
-            byte[] mbr;
-            GetDiskDetails(diskNumber, out geom, out capacity, out mbr);
+            if (!Quiet)
+            {
+                Console.WriteLine("Inspecting Disk...");
+            }
+
+            // Construct a stream representing the contents of the cloned disk.
+            BiosPartitionedDiskBuilder contentBuilder;
+            using (Disk disk = new Disk(diskNumber))
+            {
+                contentBuilder = new BiosPartitionedDiskBuilder(disk);
+            }
+
 
             IVssBackupComponents backupCmpnts;
             int status = NativeMethods.CreateVssBackupComponents(out backupCmpnts);
@@ -108,8 +116,6 @@ namespace DiskClone
             }
 
 
-            // Construct a stream representing the contents of the cloned disk.
-            BiosPartitionedDiskBuilder contentBuilder = new BiosPartitionedDiskBuilder(capacity, mbr, geom);
             foreach (var sv in cloneVolumes)
             {
                 Volume sourceVol = new Volume(sv.SnapshotProperties.SnapshotDeviceObject, sv.SourceExtent.ExtentLength);
@@ -162,7 +168,7 @@ namespace DiskClone
                 List<StreamExtent> extents = new List<StreamExtent>(BitmapToRanges(volBitmap, clusterSize));
                 SparseStream partSourceStream = SparseStream.FromStream(rawVolStream, Ownership.None, extents);
 
-                for (int i = 0; i < contentBuilder.PartitionTable.Partitions.Count; ++i )
+                for (int i = 0; i < contentBuilder.PartitionTable.Partitions.Count; ++i)
                 {
                     var part = contentBuilder.PartitionTable.Partitions[i];
                     if (part.FirstSector * 512 == sv.SourceExtent.StartingOffset)
@@ -334,28 +340,6 @@ namespace DiskClone
             }
 
             return cloneVolumes;
-        }
-
-        private void GetDiskDetails(uint diskNumber, out Geometry geom, out long capacity, out byte[] mbr)
-        {
-            if (!Quiet)
-            {
-                Console.WriteLine("Inspecting Disk...");
-            }
-
-            using (Disk disk = new Disk(diskNumber))
-            {
-                geom = disk.GetGeometry();
-                capacity = disk.GetLength();
-
-                mbr = new byte[512];
-                disk.Content.Position = 0;
-                if (disk.Content.Read(mbr, 0, mbr.Length) != mbr.Length)
-                {
-                    Console.Error.WriteLine("Failed to read MBR from {0}", @"\\.\PhysicalDrive" + diskNumber);
-                    Environment.Exit(1);
-                }
-            }
         }
 
         private Guid CreateSnapshotSet(List<CloneVolume> cloneVolumes, IVssBackupComponents backupCmpnts)

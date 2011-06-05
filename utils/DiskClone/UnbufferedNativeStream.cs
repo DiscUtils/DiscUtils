@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using DiscUtils;
 using Microsoft.Win32.SafeHandles;
 
 namespace DiskClone
@@ -34,7 +36,7 @@ namespace DiskClone
     /// To support the stream interface, which permits unaligned access, all accesses
     /// are routed through an appropriately aligned buffer.
     /// </remarks>
-    public class UnbufferedNativeStream : Stream
+    public class UnbufferedNativeStream : SparseStream
     {
         private const int BufferSize = 64 * 1024;
         private const int Alignment = 512;
@@ -189,6 +191,14 @@ namespace DiskClone
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                return new StreamExtent[] { new StreamExtent(0, Length) };
+            }
         }
     }
 }

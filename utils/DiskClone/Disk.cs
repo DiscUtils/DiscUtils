@@ -21,17 +21,18 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
 using Microsoft.Win32.SafeHandles;
 
 namespace DiskClone
 {
-    class Disk : IDisposable
+    class Disk : VirtualDisk
     {
         private string _path;
         private SafeFileHandle _handle;
-        private Stream _stream;
+        private SparseStream _stream;
 
         public Disk(uint number)
         {
@@ -39,12 +40,15 @@ namespace DiskClone
             _handle = Win32Wrapper.OpenFileHandle(_path);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (_stream != null)
+            if (disposing)
             {
-                _stream.Dispose();
-                _stream = null;
+                if (_stream != null)
+                {
+                    _stream.Dispose();
+                    _stream = null;
+                }
             }
 
             if (!_handle.IsClosed)
@@ -52,10 +56,10 @@ namespace DiskClone
                 _handle.Dispose();
             }
 
-            GC.SuppressFinalize(this);
+            base.Dispose(disposing);
         }
 
-        public Stream Content
+        public override SparseStream Content
         {
             get
             {
@@ -67,15 +71,36 @@ namespace DiskClone
             }
         }
 
-        public Geometry GetGeometry()
+        public override Geometry Geometry
         {
-            NativeMethods.DiskGeometry diskGeometry = Win32Wrapper.GetDiskGeometry(_handle);
-            return new Geometry((int)diskGeometry.Cylinders, diskGeometry.TracksPerCylinder, diskGeometry.SectorsPerTrack, diskGeometry.BytesPerSector);
+            get
+            {
+                NativeMethods.DiskGeometry diskGeometry = Win32Wrapper.GetDiskGeometry(_handle);
+                return new Geometry((int)diskGeometry.Cylinders, diskGeometry.TracksPerCylinder, diskGeometry.SectorsPerTrack, diskGeometry.BytesPerSector);
+            }
         }
 
-        public long GetLength()
+        public override long Capacity
         {
-            return Win32Wrapper.GetDiskCapacity(_handle);
+            get
+            {
+                return Win32Wrapper.GetDiskCapacity(_handle);
+            }
+        }
+
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override VirtualDisk CreateDifferencingDisk(string path)
+        {
+            throw new NotImplementedException();
         }
     }
 }
