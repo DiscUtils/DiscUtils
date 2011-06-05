@@ -467,6 +467,30 @@ namespace DiscUtils.Partitions
             }
         }
 
+        /// <summary>
+        /// Gets all of the disk ranges containing partition table metadata.
+        /// </summary>
+        /// <returns>Set of stream extents, indicated as byte offset from the start of the disk.</returns>
+        public IEnumerable<StreamExtent> GetMetadataDiskExtents()
+        {
+            List<StreamExtent> extents = new List<StreamExtent>();
+
+            extents.Add(new StreamExtent(0, Sizes.Sector));
+
+            foreach (BiosPartitionRecord primaryRecord in GetPrimaryRecords())
+            {
+                if (primaryRecord.IsValid)
+                {
+                    if (IsExtendedPartition(primaryRecord))
+                    {
+                        extents.AddRange(new BiosExtendedPartitionTable(_diskData, primaryRecord.LBAStart).GetMetadataDiskExtents());
+                    }
+                }
+            }
+
+            return extents;
+        }
+
         internal SparseStream Open(BiosPartitionRecord record)
         {
             return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);

@@ -7249,6 +7249,24 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="BiosPartitionTable">
+          <Members>
+           <Member Name="#GetMetadataDiskExtents()">
+            <Messages>
+             <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Status="Excluded" Created="2011-06-05 07:25:43Z">
+              <Issue Certainty="50">
+               <Item>'BiosPartitionTable.GetMetadataDiskExtents()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="167" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="BiosPartitionTypes">
           <Members>
            <Member Name="#EfiSystem">
@@ -10729,6 +10747,7 @@
     <Note Id="164" Modified="2011-05-15 12:40:38Z">Defined part of UDF.</Note>
     <Note Id="165" Modified="2011-05-15 12:41:03Z">Returning existing byte array, so no perf hit.</Note>
     <Note Id="166" Modified="2011-05-15 12:41:19Z">Name defined by UDF spec.</Note>
+    <Note Id="167" Modified="2011-06-05 07:26:12Z">Relatively expensive operation</Note>
    </User>
   </Notes>
   <Rules>

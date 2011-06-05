@@ -40,7 +40,6 @@ namespace DiscUtils.Partitions
         private long _capacity;
         private BiosPartitionTable _partitionTable;
         private Geometry _biosGeometry;
-        private int _bootSectorsLength;
         private SparseMemoryStream _bootSectors;
 
         private Dictionary<int, BuilderExtent> _partitionContents;
@@ -54,7 +53,6 @@ namespace DiscUtils.Partitions
         {
             _capacity = capacity;
             _biosGeometry = biosGeometry;
-            _bootSectorsLength = Sizes.Sector;
 
             _bootSectors = new SparseMemoryStream();
             _bootSectors.SetLength(capacity);
@@ -69,16 +67,42 @@ namespace DiscUtils.Partitions
         /// <param name="capacity">The capacity of the disk (in bytes)</param>
         /// <param name="bootSectors">The boot sector(s) of the disk.</param>
         /// <param name="biosGeometry">The BIOS geometry of the disk.</param>
+        [Obsolete("Use the variant that takes VirtualDisk, this method breaks for disks with extended partitions", false)]
         public BiosPartitionedDiskBuilder(long capacity, byte[] bootSectors, Geometry biosGeometry)
         {
             _capacity = capacity;
             _biosGeometry = biosGeometry;
-            _bootSectorsLength = bootSectors.Length;
 
             _bootSectors = new SparseMemoryStream();
             _bootSectors.SetLength(capacity);
             _bootSectors.Write(bootSectors, 0, bootSectors.Length);
             _partitionTable = new BiosPartitionTable(_bootSectors, biosGeometry);
+
+            _partitionContents = new Dictionary<int, BuilderExtent>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the BiosPartitionedDiskBuilder class by
+        /// cloning the partition structure of a source disk.
+        /// </summary>
+        /// <param name="sourceDisk">The disk to clone</param>
+        public BiosPartitionedDiskBuilder(VirtualDisk sourceDisk)
+        {
+            _capacity = sourceDisk.Capacity;
+            _biosGeometry = sourceDisk.BiosGeometry;
+
+            _bootSectors = new SparseMemoryStream();
+            _bootSectors.SetLength(_capacity);
+
+            foreach (var extent in new BiosPartitionTable(sourceDisk).GetMetadataDiskExtents())
+            {
+                sourceDisk.Content.Position = extent.Start;
+                byte[] buffer = Utilities.ReadFully(sourceDisk.Content, (int)extent.Length);
+                _bootSectors.Position = extent.Start;
+                _bootSectors.Write(buffer, 0, buffer.Length);
+            }
+
+            _partitionTable = new BiosPartitionTable(_bootSectors, _biosGeometry);
 
             _partitionContents = new Dictionary<int, BuilderExtent>();
         }
@@ -105,12 +129,16 @@ namespace DiscUtils.Partitions
         {
             totalLength = _capacity;
 
-            byte[] bootSectorsData = new byte[_bootSectorsLength];
-            _bootSectors.Position = 0;
-            _bootSectors.Read(bootSectorsData, 0, _bootSectorsLength);
-
             List<BuilderExtent> extents = new List<BuilderExtent>();
-            extents.Add(new BuilderBufferExtent(0, bootSectorsData));
+
+            foreach (var extent in _partitionTable.GetMetadataDiskExtents())
+            {
+                _bootSectors.Position = extent.Start;
+                byte[] buffer = Utilities.ReadFully(_bootSectors, (int)extent.Length);
+
+                extents.Add(new BuilderBufferExtent(extent.Start, buffer));
+            }
+
             extents.AddRange(_partitionContents.Values);
             return extents;
         }
