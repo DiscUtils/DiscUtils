@@ -85,7 +85,7 @@ namespace DiscUtils.Partitions
             uint partPos = _firstSector;
             while (partPos != 0)
             {
-                extents.Add(new StreamExtent(partPos * Utilities.SectorSize, Utilities.SectorSize));
+                extents.Add(new StreamExtent(((long)partPos) * Utilities.SectorSize, Utilities.SectorSize));
 
                 _disk.Position = ((long)partPos) * Utilities.SectorSize;
                 byte[] sector = Utilities.ReadFully(_disk, Utilities.SectorSize);
