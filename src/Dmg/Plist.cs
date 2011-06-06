@@ -32,6 +32,7 @@ namespace DiscUtils.Dmg
         internal static Dictionary<string, object> Parse(Stream stream)
         {
             XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.XmlResolver = null;
             xmlDoc.Load(stream);
 
             var root = xmlDoc.DocumentElement;
