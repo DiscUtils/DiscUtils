@@ -430,6 +430,7 @@ namespace DiscUtils.Iscsi
                 //
                 // Send the request...
                 //
+                parameters = new TextBuffer();
                 authenticator.GetParameters(parameters);
                 paramBuffer = new byte[parameters.Size];
                 parameters.WriteTo(paramBuffer, 0);
