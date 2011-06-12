@@ -25,6 +25,7 @@ namespace DiscUtils.Ntfs
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using DiscUtils.Compression;
 
     internal class NonResidentDataBuffer : DiscUtils.Buffer, IMappedBuffer
     {
@@ -34,22 +35,24 @@ namespace DiscUtils.Ntfs
         protected CookedDataRuns _cookedRuns;
         protected AttributeFlags _flags;
         protected int _compressionUnitSize;
+        protected BlockCompressor _compressor;
 
         protected byte[] _cachedDecompressedBlock;
         protected long _cachedBlockStartVcn;
 
         public NonResidentDataBuffer(INtfsContext context, NonResidentAttributeRecord record)
-            : this(context.RawStream, context.BiosParameterBlock.BytesPerCluster, new CookedDataRuns(record.DataRuns), record.Flags, record.CompressionUnitSize)
+            : this(context.RawStream, context.BiosParameterBlock.BytesPerCluster, new CookedDataRuns(record.DataRuns), record.Flags, record.CompressionUnitSize, context.Options.Compressor)
         {
         }
 
-        public NonResidentDataBuffer(Stream fsStream, long bytesPerCluster, CookedDataRuns cookedRuns, AttributeFlags flags, int compressionUnitSize)
+        public NonResidentDataBuffer(Stream fsStream, long bytesPerCluster, CookedDataRuns cookedRuns, AttributeFlags flags, int compressionUnitSize, BlockCompressor compressor)
         {
             _fsStream = fsStream;
             _bytesPerCluster = bytesPerCluster;
             _cookedRuns = cookedRuns;
             _flags = flags;
             _compressionUnitSize = compressionUnitSize;
+            _compressor = compressor;
         }
 
         public override bool CanRead
@@ -210,102 +213,6 @@ namespace DiscUtils.Ntfs
             return _cookedRuns.FindDataRun(vcn, startIdx);
         }
 
-        private static byte[] Decompress(byte[] compBuffer)
-        {
-            const ushort SubBlockIsCompressedFlag = 0x8000;
-            const ushort SubBlockSizeMask = 0x0fff;
-            const ushort SubBlockSize = 0x1000;
-
-            byte[] resultBuffer = new byte[compBuffer.Length];
-
-            int sourceIdx = 0;
-            int destIdx = 0;
-
-            while (destIdx < resultBuffer.Length)
-            {
-                ushort header = Utilities.ToUInt16LittleEndian(compBuffer, sourceIdx);
-                sourceIdx += 2;
-
-                // Look for null-terminating sub-block header
-                if (header == 0)
-                {
-                    break;
-                }
-
-                if ((header & SubBlockIsCompressedFlag) == 0)
-                {
-                    // not compressed
-                    if ((header & SubBlockSizeMask) + 1 != SubBlockSize)
-                    {
-                        throw new IOException("Found short non-compressed sub-block");
-                    }
-
-                    Array.Copy(compBuffer, sourceIdx, resultBuffer, destIdx, SubBlockSize);
-                    sourceIdx += SubBlockSize;
-                    destIdx += SubBlockSize;
-                }
-                else
-                {
-                    // compressed
-                    int destSubBlockStart = destIdx;
-                    int srcSubBlockEnd = sourceIdx + (header & SubBlockSizeMask) + 1;
-                    while (sourceIdx < srcSubBlockEnd)
-                    {
-                        byte tag = compBuffer[sourceIdx];
-                        ++sourceIdx;
-
-                        for (int token = 0; token < 8; ++token)
-                        {
-                            // We might have hit the end of the sub block whilst still working though
-                            // a tag - abort if we have...
-                            if (sourceIdx >= srcSubBlockEnd)
-                            {
-                                break;
-                            }
-
-                            if ((tag & 1) == 0)
-                            {
-                                resultBuffer[destIdx] = compBuffer[sourceIdx];
-                                ++destIdx;
-                                ++sourceIdx;
-                            }
-                            else
-                            {
-                                ushort lengthMask = 0xFFF;
-                                ushort deltaShift = 12;
-                                for (int i = (destIdx - destSubBlockStart) - 1; i >= 0x10; i >>= 1)
-                                {
-                                    lengthMask >>= 1;
-                                    --deltaShift;
-                                }
-
-                                ushort phraseToken = Utilities.ToUInt16LittleEndian(compBuffer, sourceIdx);
-                                sourceIdx += 2;
-
-                                int destBackAddr = destIdx - (phraseToken >> deltaShift) - 1;
-                                int length = (phraseToken & lengthMask) + 3;
-                                for (int i = 0; i < length; ++i)
-                                {
-                                    resultBuffer[destIdx++] = resultBuffer[destBackAddr++];
-                                }
-                            }
-
-                            tag >>= 1;
-                        }
-                    }
-
-                    if (destIdx < destSubBlockStart + SubBlockSize)
-                    {
-                        // Zero buffer here in future, if not known to be zero's - this handles the case
-                        // of a decompressed sub-block not being full-length
-                        destIdx = destSubBlockStart + SubBlockSize;
-                    }
-                }
-            }
-
-            return resultBuffer;
-        }
-
         private int DoReadNormal(long pos, byte[] buffer, int offset, int count)
         {
             long vcn = pos / _bytesPerCluster;
@@ -361,7 +268,12 @@ namespace DiscUtils.Ntfs
 
                     RawRead(dataRunIdx, (startVcn - _cookedRuns[dataRunIdx].StartVcn) * _bytesPerCluster, compBuffer, 0, (int)compressionUnitLength, false);
 
-                    decompBuffer = Decompress(compBuffer);
+                    decompBuffer = new byte[compressionUnitLength];
+                    int decompSize = _compressor.Decompress(compBuffer, 0, compBuffer.Length, decompBuffer, 0);
+                    if (decompSize != compressionUnitLength)
+                    {
+                        throw new IOException("Short compression unit found decompressing file data");
+                    }
 
                     _cachedDecompressedBlock = decompBuffer;
                     _cachedBlockStartVcn = dataRunIdx;

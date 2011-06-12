@@ -22,6 +22,8 @@
 
 namespace DiscUtils.Ntfs
 {
+    using DiscUtils.Compression;
+
     /// <summary>
     /// Class whose instances hold options controlling how <see cref="NtfsFileSystem"/> works.
     /// </summary>
@@ -32,6 +34,7 @@ namespace DiscUtils.Ntfs
         private bool _hideSystemFiles;
         private bool _hideDosFileNames;
         private ShortFileNameOption _shortNameCreation;
+        private BlockCompressor _compressor;
 
         internal NtfsOptions()
         {
@@ -39,6 +42,7 @@ namespace DiscUtils.Ntfs
             _hideHiddenFiles = true;
             _hideSystemFiles = true;
             _hideDosFileNames = true;
+            _compressor = new LZNT1();
         }
 
         /// <summary>
@@ -85,6 +89,15 @@ namespace DiscUtils.Ntfs
         {
             get { return _shortNameCreation; }
             set { _shortNameCreation = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the compression algorithm used for compressing files.
+        /// </summary>
+        public BlockCompressor Compressor
+        {
+            get { return _compressor; }
+            set { _compressor = value; }
         }
 
         /// <summary>

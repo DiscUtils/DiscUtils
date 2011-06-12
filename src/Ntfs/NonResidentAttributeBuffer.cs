@@ -32,7 +32,7 @@ namespace DiscUtils.Ntfs
         private NtfsAttribute _attribute;
 
         public NonResidentAttributeBuffer(File file, NtfsAttribute attribute)
-            : base(file.Context.RawStream, file.Context.BiosParameterBlock.BytesPerCluster, null, attribute.Flags, attribute.CompressionUnitSize)
+            : base(file.Context.RawStream, file.Context.BiosParameterBlock.BytesPerCluster, null, attribute.Flags, attribute.CompressionUnitSize, file.Context.Options.Compressor)
         {
             _file = file;
             _attribute = attribute;

@@ -66,6 +66,7 @@ namespace DiscUtils.Ntfs
         {
             _context = new NtfsContext();
             _context.RawStream = _target;
+            _context.Options = new NtfsOptions();
 
             _report = reportOutput;
             _reportLevels = levels;
@@ -97,6 +98,7 @@ namespace DiscUtils.Ntfs
         {
             _context = new NtfsContext();
             _context.RawStream = _target;
+            _context.Options = new NtfsOptions();
 
             _context.RawStream.Position = 0;
             byte[] bytes = Utilities.ReadFully(_context.RawStream, 512);
