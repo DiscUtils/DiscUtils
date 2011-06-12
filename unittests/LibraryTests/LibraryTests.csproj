@@ -100,6 +100,7 @@
     <Compile Include="Iso9660\IsoDirectoryInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileInfoTest.cs" />
     <Compile Include="Iso9660\IsoFileSystemTest.cs" />
+    <Compile Include="Ntfs\LZNT1Test.cs" />
     <Compile Include="Ntfs\NtfsFileSystemTest.cs" />
     <Compile Include="Partitions\BiosPartitionedDiskBuilderTest.cs" />
     <Compile Include="Partitions\BiosPartitionTableTest.cs" />

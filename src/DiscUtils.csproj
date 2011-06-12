@@ -120,11 +120,13 @@
     <Compile Include="ChsAddress.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />
+    <Compile Include="Compression\BlockCompressor.cs" />
     <Compile Include="Compression\BZip2Crc.cs" />
     <Compile Include="Compression\BZip2DecoderStream.cs" />
     <Compile Include="Compression\BZip2Randomizer.cs" />
     <Compile Include="Compression\BZip2BlockDecoder.cs" />
     <Compile Include="Compression\BZip2RleStream.cs" />
+    <Compile Include="Compression\CompressionResult.cs" />
     <Compile Include="Compression\DataBlockTransform.cs" />
     <Compile Include="Compression\BigEndianBitStream.cs" />
     <Compile Include="Compression\ZlibStream.cs" />
@@ -401,6 +403,8 @@
     <Compile Include="Ntfs\Internals\EntryStates.cs" />
     <Compile Include="Ntfs\Internals\StandardInformationAttribute.cs" />
     <Compile Include="Ntfs\Internals\UnknownAttribute.cs" />
+    <Compile Include="Ntfs\LZNT1.cs" />
+    <Compile Include="Ntfs\LzWindowDictionary.cs" />
     <Compile Include="Ntfs\NonResidentAttributeBuffer.cs" />
     <Compile Include="Ntfs\NonResidentAttributeRecord.cs" />
     <Compile Include="Ntfs\NtfsContext.cs" />
