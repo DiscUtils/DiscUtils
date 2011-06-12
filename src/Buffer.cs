@@ -77,6 +77,25 @@ namespace DiscUtils
         public abstract void Write(long pos, byte[] buffer, int offset, int count);
 
         /// <summary>
+        /// Erases bytes from the buffer.
+        /// </summary>
+        /// <param name="pos">The start offset within the buffer.</param>
+        /// <param name="count">The number of bytes to erase</param>
+        /// <remarks>
+        /// <para>Logically equivalent to writing <c>count</c> null/zero bytes to the buffer, some
+        /// implementations determine that some (or all) of the range indicated is not actually
+        /// stored.  There is no direct, automatic, correspondance to erasing bytes and them
+        /// not being represented as an 'extent' - for example, the implementation of the underlying
+        /// stream may not permit fine-grained extent storage.</para>
+        /// <para>It is always safe to call this method to 'zero-out' a section of a buffer, regardless of
+        /// the underlying stream implementation.</para>
+        /// </remarks>
+        public virtual void Erase(long pos, int count)
+        {
+            Write(pos, new byte[count], 0, count);
+        }
+
+        /// <summary>
         /// Flushes all data to the underlying storage.
         /// </summary>
         /// <remarks>The default behaviour, implemented by this class, is to take no action.</remarks>

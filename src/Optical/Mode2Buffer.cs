@@ -94,6 +94,11 @@ namespace DiscUtils.Optical
             throw new NotSupportedException();
         }
 
+        public void Erase(long pos, int count)
+        {
+            throw new NotSupportedException();
+        }
+
         public void Flush()
         {
             throw new NotSupportedException();

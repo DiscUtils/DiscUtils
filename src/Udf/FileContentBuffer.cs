@@ -88,6 +88,11 @@ namespace DiscUtils.Udf
             throw new NotImplementedException();
         }
 
+        public void Erase(long pos, int count)
+        {
+            throw new NotSupportedException();
+        }
+
         public void Flush()
         {
         }
