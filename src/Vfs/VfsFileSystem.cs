@@ -595,16 +595,22 @@ namespace DiscUtils.Vfs
             if (self != null)
             {
                 handler(path, self);
-                dir = GetFile(self) as TDirectory;
+                if (self.IsDirectory)
+                {
+                    dir = GetFile(self) as TDirectory;
+                }
             }
             else
             {
-                dir = GetDirectory(path);
+                dir = GetFile(path) as TDirectory;
             }
 
-            foreach (var subentry in dir.AllEntries)
+            if (dir != null)
             {
-                ForAllDirEntries(Utilities.CombinePaths(path, subentry.FileName), handler);
+                foreach (var subentry in dir.AllEntries)
+                {
+                    ForAllDirEntries(Utilities.CombinePaths(path, subentry.FileName), handler);
+                }
             }
         }
 
