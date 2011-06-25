@@ -1850,6 +1850,13 @@ namespace DiscUtils.Ntfs
                     _context.Mft.Dispose();
                     _context.Mft = null;
                 }
+
+                IDisposable disposableCompressor = _context.Options.Compressor as IDisposable;
+                if (disposableCompressor != null)
+                {
+                    disposableCompressor.Dispose();
+                    _context.Options.Compressor = null;
+                }
             }
 
             base.Dispose(disposing);
