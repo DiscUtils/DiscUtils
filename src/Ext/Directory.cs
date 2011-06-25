@@ -72,6 +72,11 @@ namespace DiscUtils.Ext
             }
         }
 
+        public DirEntry Self
+        {
+            get { return null; }
+        }
+
         public DirEntry GetEntryByName(string name)
         {
             foreach (DirEntry entry in AllEntries)

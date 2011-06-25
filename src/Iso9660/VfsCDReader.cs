@@ -28,7 +28,7 @@ namespace DiscUtils.Iso9660
     using System.Text;
     using DiscUtils.Vfs;
 
-    internal class VfsCDReader : VfsReadOnlyFileSystem<DirectoryRecord, File, ReaderDirectory, IsoContext>
+    internal class VfsCDReader : VfsReadOnlyFileSystem<DirectoryRecord, File, ReaderDirectory, IsoContext>, IClusterBasedFileSystem
     {
         private Stream _data;
         private bool _hideVersions;
@@ -176,6 +176,32 @@ namespace DiscUtils.Iso9660
             }
         }
 
+        public long BootImageStart
+        {
+            get
+            {
+                BootInitialEntry initialEntry = GetBootInitialEntry();
+                if (initialEntry != null)
+                {
+                    return initialEntry.ImageStart * IsoUtilities.SectorSize;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
+        public long ClusterSize
+        {
+            get { return IsoUtilities.SectorSize; }
+        }
+
+        public long TotalClusters
+        {
+            get { return Context.VolumeDescriptor.VolumeSpaceSize; }
+        }
+
         public Stream OpenBootImage()
         {
             BootInitialEntry initialEntry = GetBootInitialEntry();
@@ -187,6 +213,93 @@ namespace DiscUtils.Iso9660
             {
                 throw new InvalidOperationException("No valid boot image");
             }
+        }
+
+        public long ClusterToOffset(long cluster)
+        {
+            return cluster * ClusterSize;
+        }
+
+        public long OffsetToCluster(long offset)
+        {
+            return offset / ClusterSize;
+        }
+
+        public Range<long, long>[] PathToClusters(string path)
+        {
+            DirectoryRecord entry = GetDirectoryEntry(path);
+            if (entry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+
+            if (entry.FileUnitSize != 0 || entry.InterleaveGapSize != 0)
+            {
+                throw new NotSupportedException("Non-contiguous extents not supported");
+            }
+
+            return new Range<long, long>[] { new Range<long, long>(entry.LocationOfExtent, Utilities.Ceil(entry.DataLength, IsoUtilities.SectorSize)) };
+        }
+
+        public StreamExtent[] PathToExtents(string path)
+        {
+            DirectoryRecord entry = GetDirectoryEntry(path);
+            if (entry == null)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+
+            if (entry.FileUnitSize != 0 || entry.InterleaveGapSize != 0)
+            {
+                throw new NotSupportedException("Non-contiguous extents not supported");
+            }
+
+            return new StreamExtent[] { new StreamExtent(entry.LocationOfExtent * IsoUtilities.SectorSize, entry.DataLength) };
+        }
+
+        public ClusterMap BuildClusterMap()
+        {
+            long totalClusters = TotalClusters;
+            ClusterRoles[] clusterToRole = new ClusterRoles[totalClusters];
+            object[] clusterToFileId = new object[totalClusters];
+            Dictionary<object, string[]> fileIdToPaths = new Dictionary<object, string[]>();
+
+            ForAllDirEntries(
+                string.Empty,
+                (path, entry) =>
+                {
+                    string[] paths = null;
+                    if (fileIdToPaths.ContainsKey(entry.UniqueCacheId))
+                    {
+                        paths = fileIdToPaths[entry.UniqueCacheId];
+                    }
+
+                    if (paths == null)
+                    {
+                        fileIdToPaths[entry.UniqueCacheId] = new string[] { path };
+                    }
+                    else
+                    {
+                        string[] newPaths = new string[paths.Length + 1];
+                        Array.Copy(paths, newPaths, paths.Length);
+                        newPaths[paths.Length] = path;
+                        fileIdToPaths[entry.UniqueCacheId] = newPaths;
+                    }
+
+                    if (entry.FileUnitSize != 0 || entry.InterleaveGapSize != 0)
+                    {
+                        throw new NotSupportedException("Non-contiguous extents not supported");
+                    }
+
+                    long clusters = Utilities.Ceil(entry.DataLength, IsoUtilities.SectorSize);
+                    for (long i = 0; i < clusters; ++i)
+                    {
+                        clusterToRole[i + entry.LocationOfExtent] = ClusterRoles.DataFile;
+                        clusterToFileId[i + entry.LocationOfExtent] = entry.UniqueCacheId;
+                    }
+                });
+
+            return new ClusterMap(clusterToRole, clusterToFileId, fileIdToPaths);
         }
 
         protected override File ConvertDirEntryToFile(DirectoryRecord dirEntry)

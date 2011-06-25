@@ -521,7 +521,7 @@ namespace DiscUtils.Vfs
         protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem<TDirEntry, TFile, TDirectory, TContext>()
             where TDirEntry : VfsDirEntry
             where TFile : IVfsFile
-            where TDirectory : IVfsDirectory<TDirEntry, TFile>, TFile
+            where TDirectory : class, IVfsDirectory<TDirEntry, TFile>, TFile
             where TContext : VfsContext
         {
             return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>)_wrapped;

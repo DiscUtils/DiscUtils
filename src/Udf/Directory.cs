@@ -66,6 +66,11 @@ namespace DiscUtils.Udf
             }
         }
 
+        public FileIdentifier Self
+        {
+            get { return null; }
+        }
+
         public FileIdentifier CreateNewFile(string name)
         {
             throw new NotSupportedException();

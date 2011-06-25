@@ -232,6 +232,11 @@ namespace ExternalFileSystem
             get { return _entries; }
         }
 
+        public MyDirEntry Self
+        {
+            get { return null; }
+        }
+
         public MyDirEntry GetEntryByName(string name)
         {
             foreach (var entry in _entries)

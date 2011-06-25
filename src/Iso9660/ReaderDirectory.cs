@@ -31,6 +31,7 @@ namespace DiscUtils.Iso9660
     internal class ReaderDirectory : File, IVfsDirectory<DirectoryRecord, File>
     {
         private List<DirectoryRecord> _records;
+        private DirectoryRecord _self;
 
         public ReaderDirectory(IsoContext context, DirectoryRecord dirEntry)
             : base(context, dirEntry)
@@ -63,6 +64,10 @@ namespace DiscUtils.Iso9660
                     {
                         _records.Add(dr);
                     }
+                    else if (dr.FileIdentifier == "\0")
+                    {
+                        _self = dr;
+                    }
 
                     pos += length;
                 }
@@ -72,6 +77,11 @@ namespace DiscUtils.Iso9660
         public ICollection<DirectoryRecord> AllEntries
         {
             get { return _records; }
+        }
+
+        public DirectoryRecord Self
+        {
+            get { return _self; }
         }
 
         public DirectoryRecord GetEntryByName(string name)

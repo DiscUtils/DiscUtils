@@ -65,6 +65,11 @@ namespace DiscUtils.SquashFs
             }
         }
 
+        public DirectoryEntry Self
+        {
+            get { return null; }
+        }
+
         public DirectoryEntry GetEntryByName(string name)
         {
             foreach (var entry in AllEntries)

@@ -38,7 +38,7 @@ namespace DiscUtils.Vfs
     public abstract class VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> : DiscFileSystem
         where TDirEntry : VfsDirEntry
         where TFile : IVfsFile
-        where TDirectory : IVfsDirectory<TDirEntry, TFile>, TFile
+        where TDirectory : class, IVfsDirectory<TDirEntry, TFile>, TFile
         where TContext : VfsContext
     {
         private TContext _context;
@@ -54,6 +54,13 @@ namespace DiscUtils.Vfs
         {
             _fileCache = new ObjectCache<long, TFile>();
         }
+
+        /// <summary>
+        /// Delegate for processing directory entries.
+        /// </summary>
+        /// <param name="path">Full path to the directory entry</param>
+        /// <param name="dirEntry">The directory entry itself</param>
+        protected delegate void DirEntryHandler(string path, TDirEntry dirEntry);
 
         /// <summary>
         /// Gets the volume label.
@@ -576,6 +583,32 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
+        /// Gets all directory entries in the specified directory and sub-directories.
+        /// </summary>
+        /// <param name="path">The path to inspect</param>
+        /// <param name="handler">Delegate invoked for each directory entry</param>
+        protected void ForAllDirEntries(string path, DirEntryHandler handler)
+        {
+            TDirectory dir = null;
+            TDirEntry self = GetDirectoryEntry(path);
+
+            if (self != null)
+            {
+                handler(path, self);
+                dir = GetFile(self) as TDirectory;
+            }
+            else
+            {
+                dir = GetDirectory(path);
+            }
+
+            foreach (var subentry in dir.AllEntries)
+            {
+                ForAllDirEntries(Utilities.CombinePaths(path, subentry.FileName), handler);
+            }
+        }
+
+        /// <summary>
         /// Gets the file object for a given path.
         /// </summary>
         /// <param name="path">The path to query.</param>
@@ -638,7 +671,7 @@ namespace DiscUtils.Vfs
 
             if (pathEntries.Length == 0)
             {
-                return null;
+                return dir.Self;
             }
             else
             {

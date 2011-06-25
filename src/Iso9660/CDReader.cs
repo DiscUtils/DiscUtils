@@ -28,7 +28,7 @@ namespace DiscUtils.Iso9660
     /// <summary>
     /// Class for reading existing ISO images.
     /// </summary>
-    public class CDReader : VfsFileSystemFacade
+    public class CDReader : VfsFileSystemFacade, IClusterBasedFileSystem
     {
         /// <summary>
         /// Initializes a new instance of the CDReader class.
@@ -85,6 +85,33 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets the absolute start position (in bytes) of the boot image, or zero if not found.
+        /// </summary>
+        public long BootImageStart
+        {
+            get
+            {
+                return GetRealFileSystem<VfsCDReader>().BootImageStart;
+            }
+        }
+
+        /// <summary>
+        /// Gets the size (in bytes) of each cluster.
+        /// </summary>
+        public long ClusterSize
+        {
+            get { return GetRealFileSystem<VfsCDReader>().ClusterSize; }
+        }
+
+        /// <summary>
+        /// Gets the total number of clusters managed by the file system.
+        /// </summary>
+        public long TotalClusters
+        {
+            get { return GetRealFileSystem<VfsCDReader>().TotalClusters; }
+        }
+
+        /// <summary>
         /// Detects if a stream contains a valid ISO file system.
         /// </summary>
         /// <param name="data">The stream to inspect</param>
@@ -116,6 +143,60 @@ namespace DiscUtils.Iso9660
         public Stream OpenBootImage()
         {
             return GetRealFileSystem<VfsCDReader>().OpenBootImage();
+        }
+
+        /// <summary>
+        /// Converts a cluster (index) into an absolute byte position in the underlying stream.
+        /// </summary>
+        /// <param name="cluster">The cluster to convert</param>
+        /// <returns>The corresponding absolute byte position.</returns>
+        public long ClusterToOffset(long cluster)
+        {
+            return GetRealFileSystem<VfsCDReader>().ClusterToOffset(cluster);
+        }
+
+        /// <summary>
+        /// Converts an absolute byte position in the underlying stream to a cluster (index).
+        /// </summary>
+        /// <param name="offset">The byte position to convert</param>
+        /// <returns>The cluster containing the specified byte</returns>
+        public long OffsetToCluster(long offset)
+        {
+            return GetRealFileSystem<VfsCDReader>().OffsetToCluster(offset);
+        }
+
+        /// <summary>
+        /// Converts a file name to the list of clusters occupied by the file's data.
+        /// </summary>
+        /// <param name="path">The path to inspect</param>
+        /// <returns>The clusters</returns>
+        /// <remarks>Note that in some file systems, small files may not have dedicated
+        /// clusters.  Only dedicated clusters will be returned.</remarks>
+        public Range<long, long>[] PathToClusters(string path)
+        {
+            return GetRealFileSystem<VfsCDReader>().PathToClusters(path);
+        }
+
+        /// <summary>
+        /// Converts a file name to the extents containing its data.
+        /// </summary>
+        /// <param name="path">The path to inspect</param>
+        /// <returns>The file extents, as absolute byte positions in the underlying stream</returns>
+        /// <remarks>Use this method with caution - not all file systems will store all bytes
+        /// directly in extents.  Files may be compressed, sparse or encrypted.  This method
+        /// merely indicates where file data is stored, not what's stored.</remarks>
+        public StreamExtent[] PathToExtents(string path)
+        {
+            return GetRealFileSystem<VfsCDReader>().PathToExtents(path);
+        }
+
+        /// <summary>
+        /// Gets an object that can convert between clusters and files.
+        /// </summary>
+        /// <returns>The cluster map</returns>
+        public ClusterMap BuildClusterMap()
+        {
+            return GetRealFileSystem<VfsCDReader>().BuildClusterMap();
         }
     }
 }
