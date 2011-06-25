@@ -80,6 +80,14 @@ namespace DiskClone
             }
         }
 
+        public override Geometry BiosGeometry
+        {
+            get
+            {
+                return Geometry;
+            }
+        }
+
         public override long Capacity
         {
             get

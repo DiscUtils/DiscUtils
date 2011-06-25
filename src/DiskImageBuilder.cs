@@ -35,6 +35,7 @@ namespace DiscUtils
 
         private SparseStream _content;
         private Geometry _geometry;
+        private Geometry _biosGeometry;
 
         /// <summary>
         /// Gets or sets the content for this disk, implying the size of the disk.
@@ -52,6 +53,15 @@ namespace DiscUtils
         {
             get { return _geometry; }
             set { _geometry = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the geometry of this disk, as reported by the BIOS, will be implied from the content stream if not set.
+        /// </summary>
+        public Geometry BiosGeometry
+        {
+            get { return _biosGeometry; }
+            set { _biosGeometry = value; }
         }
 
         private static Dictionary<string, VirtualDiskFactory> TypeMap

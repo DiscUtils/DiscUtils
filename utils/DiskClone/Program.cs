@@ -98,11 +98,14 @@ namespace DiskClone
 
             // Construct a stream representing the contents of the cloned disk.
             BiosPartitionedDiskBuilder contentBuilder;
+            Geometry biosGeometry;
+            Geometry realGeometry;
             using (Disk disk = new Disk(diskNumber))
             {
                 contentBuilder = new BiosPartitionedDiskBuilder(disk);
+                biosGeometry = disk.BiosGeometry;
+                realGeometry = disk.Geometry;
             }
-
 
             IVssBackupComponents backupCmpnts;
             int status = NativeMethods.CreateVssBackupComponents(out backupCmpnts);
@@ -186,6 +189,8 @@ namespace DiskClone
 
             DiskImageBuilder builder = DiskImageBuilder.GetBuilder(OutputDiskType, OutputDiskVariant);
             builder.Content = contentStream;
+            builder.Geometry = realGeometry;
+            builder.BiosGeometry = biosGeometry;
             DiskImageFileSpecification[] fileSpecs = builder.Build(file);
 
             for (int i = 0; i < fileSpecs.Length; ++i)

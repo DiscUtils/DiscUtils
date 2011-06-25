@@ -36,7 +36,6 @@ namespace DiscUtils.Vmdk
     {
         private DiskCreateType _diskType;
         private DiskAdapterType _adapterType;
-        private Geometry _biosGeometry;
 
         /// <summary>
         /// Initializes a new instance of the DiskBuilder class.
@@ -63,15 +62,6 @@ namespace DiscUtils.Vmdk
         {
             get { return _adapterType; }
             set { _adapterType = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the disk geometry the BIOS should indicate for this disk.
-        /// </summary>
-        public Geometry BiosGeometry
-        {
-            get { return _biosGeometry; }
-            set { _biosGeometry = value; }
         }
 
         /// <summary>
