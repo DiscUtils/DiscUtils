@@ -103,6 +103,7 @@ namespace DiscUtils.Ntfs
         public AttributeFlags Flags
         {
             get { return _flags; }
+            set { _flags = value; }
         }
 
         public abstract int Size { get; }

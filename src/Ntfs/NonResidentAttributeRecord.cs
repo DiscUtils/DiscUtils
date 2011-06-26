@@ -29,6 +29,8 @@ namespace DiscUtils.Ntfs
 
     internal sealed class NonResidentAttributeRecord : AttributeRecord
     {
+        private const ushort DefaultCompressionUnitSize = 4;
+
         private ulong _startingVCN;
         private ulong _lastVCN;
         private ushort _dataRunsOffset;
@@ -50,11 +52,16 @@ namespace DiscUtils.Ntfs
         {
             _nonResidentFlag = 1;
             _dataRuns = new List<DataRun>();
-            _dataRuns.Add(new DataRun(firstCluster, (long)numClusters));
+            _dataRuns.Add(new DataRun(firstCluster, (long)numClusters, false));
             _lastVCN = numClusters - 1;
             _dataAllocatedSize = bytesPerCluster * numClusters;
             _dataRealSize = bytesPerCluster * numClusters;
             _initializedDataSize = bytesPerCluster * numClusters;
+
+            if ((flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
+            {
+                _compressionUnitSize = DefaultCompressionUnitSize;
+            }
         }
 
         public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long startVcn, List<DataRun> dataRuns)
@@ -63,6 +70,11 @@ namespace DiscUtils.Ntfs
             _nonResidentFlag = 1;
             _dataRuns = dataRuns;
             _startingVCN = (ulong)startVcn;
+
+            if ((flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
+            {
+                _compressionUnitSize = DefaultCompressionUnitSize;
+            }
 
             if (dataRuns != null && dataRuns.Count != 0)
             {
@@ -120,6 +132,7 @@ namespace DiscUtils.Ntfs
         public int CompressionUnitSize
         {
             get { return 1 << _compressionUnitSize; }
+            set { _compressionUnitSize = (ushort)Utilities.Log2(value); }
         }
 
         public List<DataRun> DataRuns
@@ -132,7 +145,7 @@ namespace DiscUtils.Ntfs
             get
             {
                 byte nameLength = 0;
-                ushort nameOffset = (ushort)(((Flags & AttributeFlags.Compressed) != 0) ? 0x48 : 0x40);
+                ushort nameOffset = (ushort)(((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0) ? 0x48 : 0x40);
                 if (Name != null)
                 {
                     nameLength = (byte)Name.Length;
@@ -179,7 +192,7 @@ namespace DiscUtils.Ntfs
         public override int Write(byte[] buffer, int offset)
         {
             ushort headerLength = 0x40;
-            if ((Flags & AttributeFlags.Compressed) != 0)
+            if ((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
                 headerLength += 0x08;
             }
@@ -221,7 +234,7 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(_dataAllocatedSize, buffer, offset + 0x28);
             Utilities.WriteBytesLittleEndian(_dataRealSize, buffer, offset + 0x30);
             Utilities.WriteBytesLittleEndian(_initializedDataSize, buffer, offset + 0x38);
-            if ((Flags & AttributeFlags.Compressed) != 0)
+            if ((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
                 Utilities.WriteBytesLittleEndian(_compressedSize, buffer, offset + 0x40);
             }
@@ -289,7 +302,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "   Allocated Size: " + _dataAllocatedSize);
             writer.WriteLine(indent + "        Real Size: " + _dataRealSize);
             writer.WriteLine(indent + "   Init Data Size: " + _initializedDataSize);
-            if ((Flags & AttributeFlags.Compressed) != 0)
+            if ((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
                 writer.WriteLine(indent + "  Compressed Size: " + _compressedSize);
             }
@@ -317,7 +330,7 @@ namespace DiscUtils.Ntfs
             _dataAllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
             _dataRealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
             _initializedDataSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
-            if ((Flags & AttributeFlags.Compressed) != 0 && _dataRunsOffset > 0x40)
+            if ((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0 && _dataRunsOffset > 0x40)
             {
                 _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
             }

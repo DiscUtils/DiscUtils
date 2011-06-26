@@ -923,12 +923,48 @@ namespace DiscUtils.Ntfs
                 {
                     throw new FileNotFoundException("File not found", path);
                 }
-                else if ((dirEntry.Details.FileAttributes & NonSettableFileAttributes) != (newValue & NonSettableFileAttributes))
+
+                FileAttributes oldValue = dirEntry.Details.FileAttributes;
+                FileAttributes changedAttribs = oldValue ^ newValue;
+
+                if (changedAttribs == 0)
                 {
-                    throw new ArgumentException("Attempt to change attributes that are read-only");
+                    // Abort - nothing changed
+                    return;
                 }
 
-                UpdateStandardInformation(path, delegate(StandardInformation si) { si.FileAttributes = FileNameRecord.SetAttributes(newValue, si.FileAttributes); });
+                if ((changedAttribs & NonSettableFileAttributes) != 0)
+                {
+                    throw new ArgumentException("Attempt to change attributes that are read-only", "newValue");
+                }
+
+                File file = GetFile(dirEntry.Reference);
+
+                if ((changedAttribs & FileAttributes.SparseFile) != 0)
+                {
+                    if(dirEntry.IsDirectory)
+                    {
+                        throw new ArgumentException("Attempt to change sparse attribute on a directory", "newValue");
+                    }
+
+                    if ((newValue & FileAttributes.SparseFile) == 0)
+                    {
+                        throw new ArgumentException("Attempt to remove sparse attribute from file", "newValue");
+                    }
+                    else
+                    {
+                        NtfsAttribute ntfsAttr = file.GetAttribute(AttributeType.Data, null);
+                        if ((ntfsAttr.Flags & AttributeFlags.Compressed) != 0)
+                        {
+                            throw new ArgumentException("Attempt to mark compressed file as sparse", "newValue");
+                        }
+
+                        ntfsAttr.Flags |= AttributeFlags.Sparse;
+                        ntfsAttr.CompressionUnitSize = 16;
+                    }
+                }
+
+                UpdateStandardInformation(dirEntry, file, delegate(StandardInformation si) { si.FileAttributes = FileNameRecord.SetAttributes(newValue, si.FileAttributes); });
             }
         }
 
@@ -2092,19 +2128,25 @@ namespace DiscUtils.Ntfs
             {
                 File file = GetFile(dirEntry.Reference);
 
-                // Update the standard information attribute - so it reflects the actual file state
-                NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
-                StandardInformation si = stream.GetContent<StandardInformation>();
-                modifier(si);
-                stream.SetContent(si);
-
-                // Update the directory entry used to open the file, so it's accurate
-                dirEntry.UpdateFrom(file);
-
-                // Write attribute changes back to the Master File Table
-                file.UpdateRecordInMft();
+                UpdateStandardInformation(dirEntry, file, modifier);
             }
         }
+
+        private static void UpdateStandardInformation(DirectoryEntry dirEntry, File file, StandardInformationModifier modifier)
+        {
+            // Update the standard information attribute - so it reflects the actual file state
+            NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+            StandardInformation si = stream.GetContent<StandardInformation>();
+            modifier(si);
+            stream.SetContent(si);
+
+            // Update the directory entry used to open the file, so it's accurate
+            dirEntry.UpdateFrom(file);
+
+            // Write attribute changes back to the Master File Table
+            file.UpdateRecordInMft();
+        }
+
 
         private string ParsePath(string path, out string attributeName, out AttributeType attributeType)
         {

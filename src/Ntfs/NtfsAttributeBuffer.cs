@@ -156,14 +156,14 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to write to file not opened for write");
             }
 
-            if (record.Flags != AttributeFlags.None)
-            {
-                throw new NotImplementedException("Writing to compressed / sparse attributes");
-            }
-
             if (count == 0)
             {
                 return;
+            }
+
+            if (record.Flags != AttributeFlags.None)
+            {
+                throw new NotImplementedException("Writing to compressed / sparse attributes");
             }
 
             _attribute.RawBuffer.Write(pos, buffer, offset, count);

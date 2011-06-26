@@ -239,6 +239,30 @@ namespace DiscUtils
             }
         }
 
+        public static int Log2(int val)
+        {
+            if (val == 0)
+            {
+                throw new ArgumentException("Cannot calculate log of Zero", "val");
+            }
+
+            int result = 0;
+            while ((val & 1) != 1)
+            {
+                val >>= 1;
+                ++result;
+            }
+
+            if (val == 1)
+            {
+                return result;
+            }
+            else
+            {
+                throw new ArgumentException("Input is not a power of Two", "val");
+            }
+        }
+
         public static bool AreEqual(byte[] a, byte[] b)
         {
             if (a.Length != b.Length)

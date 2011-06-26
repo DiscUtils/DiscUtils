@@ -80,23 +80,24 @@ namespace DiscUtils.Ntfs
 
             long newClusterCount = Utilities.Ceil(value, _bytesPerCluster);
 
-            if (newClusterCount != VirtualClusterCount)
+            if (newClusterCount < VirtualClusterCount)
             {
-                if (newClusterCount < VirtualClusterCount)
+                Truncate(newClusterCount);
+            }
+            else if (newClusterCount > VirtualClusterCount)
+            {
+                if (_flags == AttributeFlags.Sparse)
                 {
-                    Truncate(newClusterCount);
+                    AddSparseDataRun(Utilities.RoundUp(newClusterCount, _compressionUnitSize) - VirtualClusterCount);
                 }
                 else
                 {
-                    if (value > Capacity)
+                    long numToAllocate = newClusterCount - VirtualClusterCount;
+                    long proposedStart = Capacity == 0 ? -1 : LastLogicalCluster + 1;
+                    DiscUtils.Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, proposedStart, _file.IndexInMft == MasterFileTable.MftIndex, newClusterCount);
+                    foreach (var run in runs)
                     {
-                        long numToAllocate = newClusterCount - VirtualClusterCount;
-                        long proposedStart = Capacity == 0 ? -1 : LastLogicalCluster + 1;
-                        DiscUtils.Tuple<long, long>[] runs = _file.Context.ClusterBitmap.AllocateClusters(numToAllocate, proposedStart, _file.IndexInMft == MasterFileTable.MftIndex, newClusterCount);
-                        foreach (var run in runs)
-                        {
-                            AddDataRun(run.First, run.Second);
-                        }
+                        AddDataRun(run.First, run.Second);
                     }
                 }
             }
@@ -118,7 +119,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to write to file not opened for write");
             }
 
-            if (_flags != AttributeFlags.None)
+            if (_flags != AttributeFlags.None && _flags != AttributeFlags.Sparse)
             {
                 throw new NotImplementedException("Writing to compressed / sparse attributes");
             }
@@ -291,14 +292,34 @@ namespace DiscUtils.Ntfs
             CookedDataRun lastRun = _cookedRuns.Last;
             NonResidentAttributeRecord lastExtent = (NonResidentAttributeRecord)_attribute.LastExtent;
 
-            if (lastRun != null && lastRun.StartLcn + lastRun.Length == startLcn)
+            if (lastRun != null && !lastRun.IsSparse && lastRun.StartLcn + lastRun.Length == startLcn)
             {
                 lastRun.Length += length;
             }
             else
             {
                 long lastStartLcn = lastRun != null ? lastRun.StartLcn : 0;
-                DataRun newRun = new DataRun(startLcn - lastStartLcn, length);
+                DataRun newRun = new DataRun(startLcn - lastStartLcn, length, false);
+                lastExtent.DataRuns.Add(newRun);
+                _cookedRuns.Append(newRun);
+            }
+
+            lastExtent.LastVcn = _cookedRuns.NextVirtualCluster - 1;
+            PrimaryAttributeRecord.AllocatedLength += length * _bytesPerCluster;
+        }
+
+        private void AddSparseDataRun(long length)
+        {
+            CookedDataRun lastRun = _cookedRuns.Last;
+            NonResidentAttributeRecord lastExtent = (NonResidentAttributeRecord)_attribute.LastExtent;
+
+            if (lastRun != null && lastRun.IsSparse)
+            {
+                lastRun.Length += length;
+            }
+            else
+            {
+                DataRun newRun = new DataRun(0, length, true);
                 lastExtent.DataRuns.Add(newRun);
                 _cookedRuns.Append(newRun);
             }

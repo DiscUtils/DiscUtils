@@ -65,6 +65,7 @@ namespace DiscUtils.Ntfs
         public AttributeFlags Flags
         {
             get { return _primaryRecord.Flags; }
+            set { _primaryRecord.Flags = value; }
         }
 
         public ushort Id
@@ -97,6 +98,15 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     return firstExtent.CompressionUnitSize;
+                }
+            }
+
+            set
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent != null)
+                {
+                    firstExtent.CompressionUnitSize = value;
                 }
             }
         }

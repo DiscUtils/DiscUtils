@@ -35,11 +35,11 @@ namespace DiscUtils.Ntfs
         {
         }
 
-        public DataRun(long offset, long length)
+        public DataRun(long offset, long length, bool isSparse)
         {
             _runOffset = offset;
             _runLength = length;
-            _isSparse = _runOffset == 0;
+            _isSparse = isSparse;
         }
 
         public long RunLength
@@ -89,7 +89,7 @@ namespace DiscUtils.Ntfs
         internal int Write(byte[] buffer, int offset)
         {
             int runLengthSize = WriteVarLong(buffer, offset + 1, _runLength);
-            int runOffsetSize = WriteVarLong(buffer, offset + 1 + runLengthSize, _runOffset);
+            int runOffsetSize = _isSparse ? 0 : WriteVarLong(buffer, offset + 1 + runLengthSize, _runOffset);
 
             buffer[offset] = (byte)((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
 
