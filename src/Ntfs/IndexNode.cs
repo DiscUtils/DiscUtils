@@ -264,45 +264,37 @@ namespace DiscUtils.Ntfs
             {
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    // Get the next biggest entry in the index, which may be sibling or descendant of sibling
-                    IndexEntry replacementLeaf = _entries[entryIndex + 1];
-                    if ((replacementLeaf.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) == IndexEntryFlags.End)
+                    IndexNode childNode = _index.GetSubBlock(entry).Node;
+                    IndexEntry rLeaf = childNode.FindLargestLeaf();
+
+                    byte[] newKey = rLeaf.KeyBuffer;
+                    byte[] newData = rLeaf.DataBuffer;
+
+                    IndexEntry newEntry;
+                    childNode.RemoveEntry(newKey, out newEntry);
+                    entry.KeyBuffer = newKey;
+                    entry.DataBuffer = newData;
+
+                    if (newEntry != null)
                     {
-                        entry.KeyBuffer = null;
-                        entry.DataBuffer = null;
-                        entry.Flags |= IndexEntryFlags.End;
-                        _entries.RemoveAt(entryIndex + 1);
-                        newParentEntry = null;
+                        InsertEntryThisNode(newEntry);
                     }
-                    else
+
+                    newEntry = LiftNode(entryIndex);
+                    if (newEntry != null)
                     {
-                        if ((replacementLeaf.Flags & IndexEntryFlags.Node) != 0)
-                        {
-                            IndexNode giftingNode = _index.GetSubBlock(replacementLeaf).Node;
-                            replacementLeaf = giftingNode.FindSmallestLeaf();
-                        }
-
-                        // Take a reference to the byte arrays because in the recursive case, these arrays
-                        // may be changed as a new node is promoted.
-                        byte[] newKey = replacementLeaf.KeyBuffer;
-                        byte[] newData = replacementLeaf.DataBuffer;
-
-                        IndexEntry newEntry;
-                        RemoveEntry(newKey, out newEntry);
-
-                        // Just over-write our key & data with the replacement
-                        entry.KeyBuffer = newKey;
-                        entry.DataBuffer = newData;
-
-                        if (newEntry != null)
-                        {
-                            InsertEntryThisNode(newEntry);
-                        }
-
-                        // New entry could be larger than old, so may need
-                        // to divide this node...
-                        newParentEntry = EnsureNodeSize();
+                        InsertEntryThisNode(newEntry);
                     }
+
+                    newEntry = PopulateEnd();
+                    if (newEntry != null)
+                    {
+                        InsertEntryThisNode(newEntry);
+                    }
+
+                    // New entry could be larger than old, so may need
+                    // to divide this node...
+                    newParentEntry = EnsureNodeSize();
                 }
                 else
                 {
@@ -325,6 +317,12 @@ namespace DiscUtils.Ntfs
                     }
 
                     newEntry = LiftNode(entryIndex);
+                    if (newEntry != null)
+                    {
+                        InsertEntryThisNode(newEntry);
+                    }
+
+                    newEntry = PopulateEnd();
                     if (newEntry != null)
                     {
                         InsertEntryThisNode(newEntry);
@@ -408,6 +406,24 @@ namespace DiscUtils.Ntfs
             return null;
          }
 
+        private IndexEntry PopulateEnd()
+        {
+            if (_entries.Count > 1
+                && _entries[_entries.Count - 1].Flags == IndexEntryFlags.End
+                && (_entries[_entries.Count - 2].Flags & IndexEntryFlags.Node) != 0)
+            {
+                IndexEntry old = _entries[_entries.Count - 2];
+                _entries.RemoveAt(_entries.Count - 2);
+                _entries[_entries.Count - 1].ChildrenVirtualCluster = old.ChildrenVirtualCluster;
+                _entries[_entries.Count - 1].Flags |= IndexEntryFlags.Node;
+                old.ChildrenVirtualCluster = 0;
+                old.Flags = IndexEntryFlags.None;
+                return _index.GetSubBlock(_entries[_entries.Count - 1]).Node.AddEntry(old);
+            }
+
+            return null;
+        }
+
         private void InsertEntryThisNode(IndexEntry newEntry)
         {
             bool exactMatch;
@@ -478,18 +494,22 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Finds the smallest leaf entry in this tree.
+        /// Finds the largest leaf entry in this tree.
         /// </summary>
-        /// <returns>The index entry of the smalling leaf</returns>
-        private IndexEntry FindSmallestLeaf()
+        /// <returns>The index entry of the largest leaf</returns>
+        private IndexEntry FindLargestLeaf()
         {
-            if ((_entries[0].Flags & IndexEntryFlags.Node) != 0)
+            if ((_entries[_entries.Count - 1].Flags & IndexEntryFlags.Node) != 0)
             {
-                return _index.GetSubBlock(_entries[0]).Node.FindSmallestLeaf();
+                return _index.GetSubBlock(_entries[_entries.Count - 1]).Node.FindLargestLeaf();
+            }
+            else if (_entries.Count > 1 && (_entries[_entries.Count - 2].Flags & IndexEntryFlags.Node) == 0)
+            {
+                return _entries[_entries.Count - 2];
             }
             else
             {
-                return _entries[0];
+                throw new IOException("Invalid index node found");
             }
         }
 

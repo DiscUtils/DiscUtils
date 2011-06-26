@@ -16,3 +16,4 @@ glob:*/bin/
 glob:*.pidb
 glob:*.resources
 glob:*.userprefs
+glob:unittests/quicktest.ps1
