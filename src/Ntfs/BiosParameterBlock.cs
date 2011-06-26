@@ -23,6 +23,7 @@
 namespace DiscUtils.Ntfs
 {
     using System;
+    using System.IO;
 
     internal class BiosParameterBlock
     {
@@ -63,6 +64,31 @@ namespace DiscUtils.Ntfs
         public int BytesPerCluster
         {
             get { return ((int)BytesPerSector) * ((int)SectorsPerCluster); }
+        }
+
+        public void Dump(TextWriter writer, string linePrefix)
+        {
+            writer.WriteLine(linePrefix + "BIOS PARAMETER BLOCK (BPB)");
+            writer.WriteLine(linePrefix + "                OEM ID: " + OemId);
+            writer.WriteLine(linePrefix + "      Bytes per Sector: " + BytesPerSector);
+            writer.WriteLine(linePrefix + "   Sectors per Cluster: " + SectorsPerCluster);
+            writer.WriteLine(linePrefix + "      Reserved Sectors: " + ReservedSectors);
+            writer.WriteLine(linePrefix + "                # FATs: " + NumFats);
+            writer.WriteLine(linePrefix + "    # FAT Root Entries: " + FatRootEntriesCount);
+            writer.WriteLine(linePrefix + "   Total Sectors (16b): " + TotalSectors16);
+            writer.WriteLine(linePrefix + "                 Media: " + Media.ToString("X") + "h");
+            writer.WriteLine(linePrefix + "        FAT size (16b): " + FatSize16);
+            writer.WriteLine(linePrefix + "     Sectors per Track: " + SectorsPerTrack);
+            writer.WriteLine(linePrefix + "               # Heads: " + NumHeads);
+            writer.WriteLine(linePrefix + "        Hidden Sectors: " + HiddenSectors);
+            writer.WriteLine(linePrefix + "   Total Sectors (32b): " + TotalSectors32);
+            writer.WriteLine(linePrefix + "     BIOS Drive Number: " + BiosDriveNumber);
+            writer.WriteLine(linePrefix + "          Chkdsk Flags: " + ChkDskFlags);
+            writer.WriteLine(linePrefix + "        Signature Byte: " + SignatureByte);
+            writer.WriteLine(linePrefix + "   Total Sectors (64b): " + TotalSectors64);
+            writer.WriteLine(linePrefix + "       MFT Record Size: " + RawMftRecordSize);
+            writer.WriteLine(linePrefix + "     Index Buffer Size: " + RawIndexBufferSize);
+            writer.WriteLine(linePrefix + "  Volume Serial Number: " + VolumeSerialNumber);
         }
 
         internal static BiosParameterBlock Initialized(Geometry diskGeometry, int clusterSize, uint partitionStartLba, long partitionSizeLba, int mftRecordSize, int indexBufferSize)

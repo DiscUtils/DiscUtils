@@ -1714,6 +1714,8 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(linePrefix + "=====================");
 
             ////_context.Mft.Dump(writer, linePrefix);
+            writer.WriteLine(linePrefix);
+            _context.BiosParameterBlock.Dump(writer, linePrefix);
 
             writer.WriteLine(linePrefix);
             _context.SecurityDescriptors.Dump(writer, linePrefix);
