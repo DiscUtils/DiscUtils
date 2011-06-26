@@ -64,8 +64,16 @@ namespace DiscUtils.Ntfs
 
         public AttributeFlags Flags
         {
-            get { return _primaryRecord.Flags; }
-            set { _primaryRecord.Flags = value; }
+            get
+            {
+                return _primaryRecord.Flags;
+            }
+
+            set
+            {
+                _primaryRecord.Flags = value;
+                _cachedRawBuffer = null;
+            }
         }
 
         public ushort Id
@@ -107,6 +115,31 @@ namespace DiscUtils.Ntfs
                 if (firstExtent != null)
                 {
                     firstExtent.CompressionUnitSize = value;
+                }
+            }
+        }
+
+        public long CompressedDataSize
+        {
+            get
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent == null)
+                {
+                    return FirstExtent.AllocatedLength;
+                }
+                else
+                {
+                    return firstExtent.CompressedDataSize;
+                }
+            }
+
+            set
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent != null)
+                {
+                    firstExtent.CompressedDataSize = value;
                 }
             }
         }

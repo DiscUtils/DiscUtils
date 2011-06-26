@@ -142,6 +142,15 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public override void Erase(int count)
+        {
+            using (new NtfsTransaction())
+            {
+                _isDirty = true;
+                _baseStream.Erase(count);
+            }
+        }
+
         private void UpdateMetadata()
         {
             if (!_file.Context.ReadOnly)

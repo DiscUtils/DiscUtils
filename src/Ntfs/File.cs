@@ -1214,6 +1214,16 @@ namespace DiscUtils.Ntfs
                 _wrapped.Write(buffer, offset, count);
             }
 
+            public override void Erase(int count)
+            {
+                if (_wrapped.Position + count > Length)
+                {
+                    ChangeAttributeResidencyByLength(_wrapped.Position + count);
+                }
+
+                _wrapped.Erase(count);
+            }
+
             public override string ToString()
             {
                 return _file.ToString() + ".attr[" + _attr.Id + "]";

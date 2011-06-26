@@ -23,6 +23,7 @@
 using System.IO;
 using System.Security.AccessControl;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace DiscUtils.Ntfs
 {
@@ -397,6 +398,65 @@ namespace DiscUtils.Ntfs
                 {
                     stream.Write(buffer, 0, buffer.Length);
                 }
+            }
+        }
+
+        [Test]
+        public void Sparse()
+        {
+            int fileSize = 1 * 1024 * 1024;
+
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            byte[] data = new byte[fileSize];
+            for (int i = 0; i < fileSize; i++)
+            {
+                data[i] = (byte)i;
+            }
+
+            using (SparseStream s = ntfs.OpenFile("file.bin", FileMode.CreateNew))
+            {
+                s.Write(data, 0, fileSize);
+
+                ntfs.SetAttributes("file.bin", ntfs.GetAttributes("file.bin") | FileAttributes.SparseFile);
+
+                s.Position = 64 * 1024;
+                s.Erase(128 * 1024);
+                s.Position = fileSize - 64 * 1024;
+                s.Erase(128 * 1024);
+            }
+
+            using (SparseStream s = ntfs.OpenFile("file.bin", FileMode.Open))
+            {
+                Assert.AreEqual(fileSize + 64 * 1024, s.Length);
+
+                List<StreamExtent> extents = new List<StreamExtent>(s.Extents);
+
+                Assert.AreEqual(2, extents.Count);
+                Assert.AreEqual(0, extents[0].Start);
+                Assert.AreEqual(64 * 1024, extents[0].Length);
+                Assert.AreEqual((64 + 128) * 1024, extents[1].Start);
+                Assert.AreEqual(fileSize - (64 * 1024) - ((64 + 128) * 1024), extents[1].Length);
+
+
+                s.Position = 72 * 1024;
+                s.WriteByte(99);
+
+                byte[] readBuffer = new byte[fileSize];
+                s.Position = 0;
+                s.Read(readBuffer, 0, fileSize);
+
+                for (int i = 64 * 1024; i < (128 + 64) * 1024; ++i)
+                {
+                    data[i] = 0;
+                }
+                for (int i = fileSize - (64 * 1024); i < fileSize; ++i)
+                {
+                    data[i] = 0;
+                }
+                data[72 * 1024] = 99;
+
+                Assert.AreEqual(data, readBuffer);
             }
         }
     }

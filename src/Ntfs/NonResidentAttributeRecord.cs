@@ -115,6 +115,12 @@ namespace DiscUtils.Ntfs
             set { _initializedDataSize = (ulong)value; }
         }
 
+        public long CompressedDataSize
+        {
+            get { return (long)_compressedSize; }
+            set { _compressedSize = (ulong)value; }
+        }
+
         public override long StartVcn
         {
             get { return (long)_startingVCN; }
@@ -127,7 +133,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets the size of a compression unit (in clusters)
+        /// Gets or sets the size of a compression unit (in clusters)
         /// </summary>
         public int CompressionUnitSize
         {
@@ -164,6 +170,45 @@ namespace DiscUtils.Ntfs
 
                 return Utilities.RoundUp(dataOffset + dataLen, 8);
             }
+        }
+
+        public void ReplaceRun(DataRun oldRun, DataRun newRun)
+        {
+            int idx = _dataRuns.IndexOf(oldRun);
+            if (idx < 0)
+            {
+                throw new ArgumentException("Attempt to replace non-existant run", "oldRun");
+            }
+
+            _dataRuns[idx] = newRun;
+        }
+
+        public int RemoveRun(DataRun run)
+        {
+            int idx = _dataRuns.IndexOf(run);
+            if (idx < 0)
+            {
+                throw new ArgumentException("Attempt to remove non-existant run", "run");
+            }
+
+            _dataRuns.RemoveAt(idx);
+            return idx;
+        }
+
+        public void InsertRun(DataRun existingRun, DataRun newRun)
+        {
+            int idx = _dataRuns.IndexOf(existingRun);
+            if (idx < 0)
+            {
+                throw new ArgumentException("Attempt to replace non-existant run", "oldRun");
+            }
+
+            _dataRuns.Insert(idx + 1, newRun);
+        }
+
+        public void InsertRun(int index, DataRun newRun)
+        {
+            _dataRuns.Insert(index, newRun);
         }
 
         public override Range<long, long>[] GetClusters()

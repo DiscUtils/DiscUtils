@@ -310,12 +310,46 @@ function TestNtfs
     Set-Content "vd:\Volume0\fragfile.bin" $FragFileBigBlock
     Add-Content "vd:\Volume0\fragfile.bin" $ClusterData
 
-
     Checkpoint
 
     "Shrinking fragmented file"
     Set-Content "vd:\Volume0\fragfile.bin" $ClusterData
 
+    Checkpoint
+
+    "Cleaning fragmented file"
+    Remove-Item "vd:\Volume0\fragfile.bin"
+    for($i = 0; $i -lt $NumFiles; $i++)
+    {
+        if(Test-Path "vd:\Volume0\file${i}.bin")
+        {
+            Remove-Item "vd:\Volume0\file${i}.bin"
+        }
+
+        if(Test-Path "vd:\Volume0\${i}file.bin")
+        {
+            Remove-Item "vd:\Volume0\${i}file.bin"
+        }
+    }
+
+    Checkpoint
+
+    "Creating sparse file"
+    New-Item -type file "vd:\Volume0\sparsefile.bin"
+    Set-Content "vd:\Volume0\sparsefile.bin" $FragFileBigBlock
+    $f = Get-Item "vd:\Volume0\sparsefile.bin"
+    $f.Attributes = "SparseFile,Archive"
+    $s = $f.Open( [System.IO.FileMode]::Open )
+    $s.Position = 64 * 1024
+    $s.Erase( 128 * 1024 )
+    $s.Position = (4 * $OneMB) - (64 * 1024)
+    $s.Erase(128 * 1024)
+    $s.Dispose()
+
+    Checkpoint
+
+    "Deleting sparse file"
+    Remove-Item "vd:\Volume0\sparsefile.bin"
 
     # Cleanup
     Remove-PSDrive vd

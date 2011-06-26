@@ -45,7 +45,7 @@ namespace DiscUtils.Ntfs
                     throw new IOException("Invalid NTFS attribute - non-contiguous data runs");
                 }
 
-                _cookedRuns.Append(record.DataRuns);
+                _cookedRuns.Append(record.DataRuns, record);
             }
         }
 
@@ -64,6 +64,16 @@ namespace DiscUtils.Ntfs
             get { return _attribute.PrimaryRecord as NonResidentAttributeRecord; }
         }
 
+        public void AlignVirtualClusterCount()
+        {
+            long desiredCount = Utilities.RoundUp(VirtualClusterCount, _compressionUnitSize);
+            if (desiredCount != VirtualClusterCount)
+            {
+                _file.MarkMftRecordDirty();
+                AddSparseDataRun(desiredCount - VirtualClusterCount);
+            }
+        }
+
         public override void SetCapacity(long value)
         {
             if (!CanWrite)
@@ -78,7 +88,7 @@ namespace DiscUtils.Ntfs
 
             _file.MarkMftRecordDirty();
 
-            long newClusterCount = Utilities.Ceil(value, _bytesPerCluster);
+            long newClusterCount = Utilities.RoundUp(Utilities.Ceil(value, _bytesPerCluster), _compressionUnitSize);
 
             if (newClusterCount < VirtualClusterCount)
             {
@@ -108,8 +118,6 @@ namespace DiscUtils.Ntfs
             {
                 PrimaryAttributeRecord.InitializedDataLength = value;
             }
-
-            _file.MarkMftRecordDirty();
         }
 
         public override void Write(long pos, byte[] buffer, int offset, int count)
@@ -121,7 +129,7 @@ namespace DiscUtils.Ntfs
 
             if (_flags != AttributeFlags.None && _flags != AttributeFlags.Sparse)
             {
-                throw new NotImplementedException("Writing to compressed / sparse attributes");
+                throw new NotImplementedException("Writing to compressed attributes");
             }
 
             if (count == 0)
@@ -139,18 +147,23 @@ namespace DiscUtils.Ntfs
             {
                 _file.MarkMftRecordDirty();
 
-                byte[] wipeBuffer = new byte[_bytesPerCluster * 4];
-
-                long wipePos = PrimaryAttributeRecord.InitializedDataLength;
-                while (wipePos < pos)
-                {
-                    int numToWrite = (int)Math.Min(wipeBuffer.Length, pos - wipePos);
-                    RawWrite(wipePos, wipeBuffer, 0, numToWrite);
-                    wipePos += numToWrite;
-                }
+                RawWriteZeros(PrimaryAttributeRecord.InitializedDataLength, pos - PrimaryAttributeRecord.InitializedDataLength);
+                PrimaryAttributeRecord.InitializedDataLength = pos;
             }
 
-            RawWrite(pos, buffer, offset, count);
+            switch (_flags & (AttributeFlags.Compressed | AttributeFlags.Sparse))
+            {
+                case AttributeFlags.Compressed:
+                    throw new NotImplementedException("Writing to sparse streams");
+                case AttributeFlags.Sparse:
+                    DoWriteSparse(pos, buffer, offset, count);
+                    break;
+                case AttributeFlags.None:
+                    DoWriteNormal(pos, buffer, offset, count);
+                    break;
+                default:
+                    throw new IOException("Unrecognized combination of attribute flags");
+            }
 
             if (pos + count > PrimaryAttributeRecord.InitializedDataLength)
             {
@@ -165,6 +178,121 @@ namespace DiscUtils.Ntfs
 
                 PrimaryAttributeRecord.DataLength = pos + count;
             }
+        }
+
+        public override void Erase(long pos, int count)
+        {
+            if (!CanWrite)
+            {
+                throw new IOException("Attempt to erase bytes from file not opened for write");
+            }
+
+            if ((_flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != AttributeFlags.Sparse)
+            {
+                base.Erase(pos, count);
+            }
+            else
+            {
+                if (count == 0)
+                {
+                    return;
+                }
+
+                if (pos + count > Capacity)
+                {
+                    SetCapacity(pos + count);
+                }
+
+                _file.MarkMftRecordDirty();
+
+                // Write zeros from end of current initialized data to the start of the new write
+                if (pos > PrimaryAttributeRecord.InitializedDataLength)
+                {
+                    RawWriteZeros(PrimaryAttributeRecord.InitializedDataLength, pos - PrimaryAttributeRecord.InitializedDataLength);
+                    PrimaryAttributeRecord.InitializedDataLength = pos;
+                }
+
+                RawWriteZeros(pos, count);
+
+                if (pos + count > PrimaryAttributeRecord.InitializedDataLength)
+                {
+                    PrimaryAttributeRecord.InitializedDataLength = pos + count;
+                }
+
+                if (pos + count > PrimaryAttributeRecord.DataLength)
+                {
+                    PrimaryAttributeRecord.DataLength = pos + count;
+                }
+            }
+        }
+
+        private void DoWriteSparse(long pos, byte[] buffer, int offset, int count)
+        {
+            long vcn = pos / _bytesPerCluster;
+            long endVcn = Utilities.Ceil(pos + count, _bytesPerCluster);
+
+            int runIdx = FindDataRun(vcn);
+            long clustersRemaining = endVcn - vcn;
+            while (clustersRemaining > 0)
+            {
+                if (_cookedRuns[runIdx].IsSparse)
+                {
+                    if (vcn > _cookedRuns[runIdx].StartVcn)
+                    {
+                        _cookedRuns.SplitRun(runIdx, vcn);
+                        runIdx++;
+                    }
+
+                    if (endVcn < _cookedRuns[runIdx].StartVcn + _cookedRuns[runIdx].Length)
+                    {
+                        _cookedRuns.SplitRun(runIdx, endVcn);
+                    }
+
+                    DiscUtils.Tuple<long, long>[] allocs = _file.Context.ClusterBitmap.AllocateClusters(_cookedRuns[runIdx].Length, _cookedRuns[runIdx].StartLcn, false, endVcn);
+                    byte[] clusterBuffer = new byte[_bytesPerCluster];
+
+                    // Wipe the first and last clusters if they correspond to the edges of the write, and the write is unaligned.
+                    long startWipeCluster = -1;
+                    if (clustersRemaining == endVcn - vcn && pos % _bytesPerCluster != 0)
+                    {
+                        startWipeCluster = allocs[0].First;
+                        _fsStream.Position = startWipeCluster * _bytesPerCluster;
+                        _fsStream.Write(clusterBuffer, 0, (int)_bytesPerCluster);
+                    }
+
+                    if (_cookedRuns[runIdx].Length == clustersRemaining && (pos + count) % _bytesPerCluster != 0)
+                    {
+                        long endWipeCluster = allocs[allocs.Length - 1].First + allocs[allocs.Length - 1].Second - 1;
+                        if (startWipeCluster != endWipeCluster)
+                        {
+                            _fsStream.Position = endWipeCluster * _bytesPerCluster;
+                            _fsStream.Write(clusterBuffer, 0, (int)_bytesPerCluster);
+                        }
+                    }
+
+                    List<DataRun> runs = new List<DataRun>();
+
+                    long lcn = runIdx == 0 ? 0 : _cookedRuns[runIdx - 1].StartLcn;
+                    foreach (var allocation in allocs)
+                    {
+                        runs.Add(new DataRun(allocation.First - lcn, allocation.Second, false));
+                    }
+
+                    _cookedRuns.MakeNonSparse(runIdx, runs);
+                }
+
+                clustersRemaining -= _cookedRuns[runIdx].Length;
+                runIdx++;
+            }
+
+            _cookedRuns.CollapseRuns();
+
+            RawWrite(pos, buffer, offset, count);
+        }
+
+        private void DoWriteNormal(long pos, byte[] buffer, int offset, int count)
+        {
+            RawWrite(pos, buffer, offset, count);
         }
 
         private void Truncate(long value)
@@ -287,6 +415,84 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        private void RawWriteZeros(long pos, long count)
+        {
+            byte[] wipeBuffer = new byte[_bytesPerCluster * 4];
+
+            if ((_flags & AttributeFlags.Sparse) != 0)
+            {
+                long vcn = pos / _bytesPerCluster;
+                int runIdx = FindDataRun(vcn);
+                long runOffset = pos - (_cookedRuns[runIdx].StartVcn * _bytesPerCluster);
+
+                long totalWritten = 0;
+                while (totalWritten < count)
+                {
+                    if (_cookedRuns[runIdx].IsSparse)
+                    {
+                        // If we're in a sparse run, then skip it without writing any data
+                        totalWritten += (_cookedRuns[runIdx].Length * _bytesPerCluster) - runOffset;
+                        runOffset = 0;
+                        runIdx++;
+                    }
+                    else if (runOffset % _bytesPerCluster != 0 || count - totalWritten < _bytesPerCluster)
+                    {
+                        // Partial cluster to write
+                        int toWrite = (int)Math.Min(wipeBuffer.Length, Math.Min(count - totalWritten, _bytesPerCluster - (runOffset % _bytesPerCluster)));
+
+                        _fsStream.Position = (_cookedRuns[runIdx].StartLcn * _bytesPerCluster) + runOffset;
+                        _fsStream.Write(wipeBuffer, 0, toWrite);
+                        totalWritten += toWrite;
+                        runOffset += toWrite;
+
+                        if (runOffset >= _cookedRuns[runIdx].Length * _bytesPerCluster)
+                        {
+                            runOffset = 0;
+                            runIdx++;
+                        }
+                    }
+                    else
+                    {
+                        // Convert clusters to sparse
+                        vcn = (pos + totalWritten) / _bytesPerCluster;
+
+                        if (_cookedRuns[runIdx].StartVcn != vcn)
+                        {
+                            _cookedRuns.SplitRun(runIdx, vcn);
+                            runIdx++;
+                        }
+
+                        long clustersToFree = Math.Min(((count - totalWritten) / _bytesPerCluster), _cookedRuns[runIdx].Length);
+
+                        if (clustersToFree != _cookedRuns[runIdx].Length)
+                        {
+                            _cookedRuns.SplitRun(runIdx, vcn + clustersToFree);
+                        }
+
+                        _file.Context.ClusterBitmap.FreeClusters(new Range<long, long>(_cookedRuns[runIdx].StartLcn, _cookedRuns[runIdx].Length));
+                        _cookedRuns.MakeSparse(runIdx);
+                        PrimaryAttributeRecord.CompressedDataSize -= clustersToFree * _bytesPerCluster;
+
+                        totalWritten += clustersToFree * _bytesPerCluster;
+                        runIdx++;
+                        runOffset = 0;
+                    }
+                }
+
+                _cookedRuns.CollapseRuns();
+            }
+            else
+            {
+                long wipePos = pos;
+                while (wipePos < pos + count)
+                {
+                    int numToWrite = (int)Math.Min(wipeBuffer.Length, count - (wipePos - pos));
+                    RawWrite(wipePos, wipeBuffer, 0, numToWrite);
+                    wipePos += numToWrite;
+                }
+            }
+        }
+
         private void AddDataRun(long startLcn, long length)
         {
             CookedDataRun lastRun = _cookedRuns.Last;
@@ -301,7 +507,7 @@ namespace DiscUtils.Ntfs
                 long lastStartLcn = lastRun != null ? lastRun.StartLcn : 0;
                 DataRun newRun = new DataRun(startLcn - lastStartLcn, length, false);
                 lastExtent.DataRuns.Add(newRun);
-                _cookedRuns.Append(newRun);
+                _cookedRuns.Append(newRun, lastExtent);
             }
 
             lastExtent.LastVcn = _cookedRuns.NextVirtualCluster - 1;
@@ -321,7 +527,7 @@ namespace DiscUtils.Ntfs
             {
                 DataRun newRun = new DataRun(0, length, true);
                 lastExtent.DataRuns.Add(newRun);
-                _cookedRuns.Append(newRun);
+                _cookedRuns.Append(newRun, lastExtent);
             }
 
             lastExtent.LastVcn = _cookedRuns.NextVirtualCluster - 1;

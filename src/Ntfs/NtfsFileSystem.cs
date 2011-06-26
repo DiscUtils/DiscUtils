@@ -942,7 +942,7 @@ namespace DiscUtils.Ntfs
 
                 if ((changedAttribs & FileAttributes.SparseFile) != 0)
                 {
-                    if(dirEntry.IsDirectory)
+                    if (dirEntry.IsDirectory)
                     {
                         throw new ArgumentException("Attempt to change sparse attribute on a directory", "newValue");
                     }
@@ -960,7 +960,12 @@ namespace DiscUtils.Ntfs
                         }
 
                         ntfsAttr.Flags |= AttributeFlags.Sparse;
-                        ntfsAttr.CompressionUnitSize = 16;
+                        if (ntfsAttr.IsNonResident)
+                        {
+                            ntfsAttr.CompressedDataSize = ntfsAttr.PrimaryRecord.AllocatedLength;
+                            ntfsAttr.CompressionUnitSize = 16;
+                            ((NonResidentAttributeBuffer)ntfsAttr.RawBuffer).AlignVirtualClusterCount();
+                        }
                     }
                 }
 
@@ -1942,6 +1947,21 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        private static void UpdateStandardInformation(DirectoryEntry dirEntry, File file, StandardInformationModifier modifier)
+        {
+            // Update the standard information attribute - so it reflects the actual file state
+            NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
+            StandardInformation si = stream.GetContent<StandardInformation>();
+            modifier(si);
+            stream.SetContent(si);
+
+            // Update the directory entry used to open the file, so it's accurate
+            dirEntry.UpdateFrom(file);
+
+            // Write attribute changes back to the Master File Table
+            file.UpdateRecordInMft();
+        }
+
         private DirectoryEntry GetDirectoryEntry(Directory dir, string path)
         {
             string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
@@ -2131,22 +2151,6 @@ namespace DiscUtils.Ntfs
                 UpdateStandardInformation(dirEntry, file, modifier);
             }
         }
-
-        private static void UpdateStandardInformation(DirectoryEntry dirEntry, File file, StandardInformationModifier modifier)
-        {
-            // Update the standard information attribute - so it reflects the actual file state
-            NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
-            StandardInformation si = stream.GetContent<StandardInformation>();
-            modifier(si);
-            stream.SetContent(si);
-
-            // Update the directory entry used to open the file, so it's accurate
-            dirEntry.UpdateFrom(file);
-
-            // Write attribute changes back to the Master File Table
-            file.UpdateRecordInMft();
-        }
-
 
         private string ParsePath(string path, out string attributeName, out AttributeType attributeType)
         {

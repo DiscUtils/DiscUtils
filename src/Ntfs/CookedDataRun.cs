@@ -30,12 +30,14 @@ namespace DiscUtils.Ntfs
         private long _startVcn;
         private long _startLcn;
         private DataRun _raw;
+        private NonResidentAttributeRecord _attributeExtent;
 
-        public CookedDataRun(DataRun raw, long startVcn, long prevLcn)
+        public CookedDataRun(DataRun raw, long startVcn, long prevLcn, NonResidentAttributeRecord attributeExtent)
         {
             _raw = raw;
             _startVcn = startVcn;
             _startLcn = prevLcn + raw.RunOffset;
+            _attributeExtent = attributeExtent;
 
             if (startVcn < 0)
             {
@@ -56,6 +58,7 @@ namespace DiscUtils.Ntfs
         public long StartLcn
         {
             get { return _startLcn; }
+            set { _startLcn = value; }
         }
 
         public long Length
@@ -72,6 +75,11 @@ namespace DiscUtils.Ntfs
         public DataRun DataRun
         {
             get { return _raw; }
+        }
+
+        public NonResidentAttributeRecord AttributeExtent
+        {
+            get { return _attributeExtent; }
         }
     }
 }

@@ -22,6 +22,7 @@
 
 namespace DiscUtils.Ntfs
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
@@ -34,10 +35,10 @@ namespace DiscUtils.Ntfs
             _runs = new List<CookedDataRun>();
         }
 
-        public CookedDataRuns(IEnumerable<DataRun> rawRuns)
+        public CookedDataRuns(IEnumerable<DataRun> rawRuns, NonResidentAttributeRecord attributeExtent)
         {
             _runs = new List<CookedDataRun>();
-            Append(rawRuns);
+            Append(rawRuns, attributeExtent);
         }
 
         public long NextVirtualCluster
@@ -110,21 +111,122 @@ namespace DiscUtils.Ntfs
             throw new IOException("Looking for VCN outside of data runs");
         }
 
-        public void Append(DataRun rawRun)
+        public void Append(DataRun rawRun, NonResidentAttributeRecord attributeExtent)
         {
             CookedDataRun last = Last;
-            _runs.Add(new CookedDataRun(rawRun, NextVirtualCluster, last == null ? 0 : last.StartLcn));
+            _runs.Add(new CookedDataRun(rawRun, NextVirtualCluster, last == null ? 0 : last.StartLcn, attributeExtent));
         }
 
-        public void Append(IEnumerable<DataRun> rawRuns)
+        public void Append(IEnumerable<DataRun> rawRuns, NonResidentAttributeRecord attributeExtent)
         {
             long vcn = NextVirtualCluster;
             long lcn = 0;
             foreach (var run in rawRuns)
             {
-                _runs.Add(new CookedDataRun(run, vcn, lcn));
+                _runs.Add(new CookedDataRun(run, vcn, lcn, attributeExtent));
                 vcn += run.RunLength;
                 lcn += run.RunOffset;
+            }
+        }
+
+        public void MakeSparse(int index)
+        {
+            long prevLcn = index == 0 ? 0 : _runs[index - 1].StartLcn;
+            CookedDataRun run = _runs[index];
+
+            if (run.IsSparse)
+            {
+                throw new ArgumentException("Run is already sparse", "index");
+            }
+
+            _runs[index] = new CookedDataRun(new DataRun(0, run.Length, true), run.StartVcn, prevLcn, run.AttributeExtent);
+            run.AttributeExtent.ReplaceRun(run.DataRun, _runs[index].DataRun);
+
+            for (int i = index + 1; i < _runs.Count; ++i)
+            {
+                if (!_runs[i].IsSparse)
+                {
+                    _runs[i].DataRun.RunOffset += run.StartLcn - prevLcn;
+                    break;
+                }
+            }
+        }
+
+        public void MakeNonSparse(int index, IEnumerable<DataRun> rawRuns)
+        {
+            long prevLcn = index == 0 ? 0 : _runs[index - 1].StartLcn;
+            CookedDataRun run = _runs[index];
+
+            if (!run.IsSparse)
+            {
+                throw new ArgumentException("Run is already non-sparse", "index");
+            }
+
+            _runs.RemoveAt(index);
+            int insertIdx = run.AttributeExtent.RemoveRun(run.DataRun);
+
+            CookedDataRun lastNewRun = null;
+            long lcn = prevLcn;
+            long vcn = run.StartVcn;
+            foreach (var rawRun in rawRuns)
+            {
+                CookedDataRun newRun = new CookedDataRun(rawRun, vcn, lcn, run.AttributeExtent);
+
+                _runs.Insert(index, newRun);
+                run.AttributeExtent.InsertRun(insertIdx, rawRun);
+
+                vcn += rawRun.RunLength;
+                lcn += rawRun.RunOffset;
+
+                lastNewRun = newRun;
+                insertIdx++;
+
+                index++;
+            }
+
+            for (int i = index; i < _runs.Count; ++i)
+            {
+                if (_runs[i].IsSparse)
+                {
+                    _runs[i].StartLcn = lastNewRun.StartLcn;
+                }
+                else
+                {
+                    _runs[i].DataRun.RunOffset = _runs[i].StartLcn - lastNewRun.StartLcn;
+                    break;
+                }
+            }
+        }
+
+        public void SplitRun(int runIdx, long vcn)
+        {
+            CookedDataRun run = _runs[runIdx];
+
+            if (run.StartVcn >= vcn || run.StartVcn + run.Length <= vcn)
+            {
+                throw new ArgumentException("Attempt to split run outside of it's range", "vcn");
+            }
+
+            long distance = vcn - run.StartVcn;
+            long offset = run.IsSparse ? 0 : distance;
+            CookedDataRun newRun = new CookedDataRun(new DataRun(offset, run.Length - distance, run.IsSparse), vcn, run.StartLcn, run.AttributeExtent);
+
+            run.Length = distance;
+
+            _runs.Insert(runIdx + 1, newRun);
+            run.AttributeExtent.InsertRun(run.DataRun, newRun.DataRun);
+
+            for (int i = runIdx + 2; i < _runs.Count; ++i)
+            {
+                if (_runs[i].IsSparse)
+                {
+                    _runs[i].StartLcn += offset;
+                }
+                else
+                {
+                    _runs[i].DataRun.RunOffset -= offset;
+                    break;
+                }
             }
         }
 
@@ -149,6 +251,43 @@ namespace DiscUtils.Ntfs
             while (i < _runs.Count)
             {
                 _runs.RemoveAt(i);
+            }
+        }
+
+        internal void CollapseRuns()
+        {
+            int i = 0;
+            while (i < _runs.Count - 1)
+            {
+                if (_runs[i].IsSparse && _runs[i + 1].IsSparse)
+                {
+                    _runs[i].Length += _runs[i + 1].Length;
+                    _runs[i + 1].AttributeExtent.RemoveRun(_runs[i + 1].DataRun);
+                    _runs.RemoveAt(i + 1);
+                }
+                else if (!_runs[i].IsSparse && !_runs[i].IsSparse && _runs[i].StartLcn + _runs[i].Length == _runs[i + 1].StartLcn)
+                {
+                    _runs[i].Length += _runs[i + 1].Length;
+                    _runs[i + 1].AttributeExtent.RemoveRun(_runs[i + 1].DataRun);
+                    _runs.RemoveAt(i + 1);
+
+                    for (int j = i + 1; j < _runs.Count; ++j)
+                    {
+                        if (_runs[j].IsSparse)
+                        {
+                            _runs[j].StartLcn = _runs[i].StartLcn;
+                        }
+                        else
+                        {
+                            _runs[j].DataRun.RunOffset = _runs[j].StartLcn - _runs[i].StartLcn;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    ++i;
+                }
             }
         }
     }

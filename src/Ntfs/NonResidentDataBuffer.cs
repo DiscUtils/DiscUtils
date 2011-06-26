@@ -41,7 +41,7 @@ namespace DiscUtils.Ntfs
         protected long _cachedBlockStartVcn;
 
         public NonResidentDataBuffer(INtfsContext context, NonResidentAttributeRecord record)
-            : this(context.RawStream, context.BiosParameterBlock.BytesPerCluster, new CookedDataRuns(record.DataRuns), record.Flags, record.CompressionUnitSize, context.Options.Compressor)
+            : this(context.RawStream, context.BiosParameterBlock.BytesPerCluster, new CookedDataRuns(record.DataRuns, record), record.Flags, record.CompressionUnitSize, context.Options.Compressor)
         {
         }
 
@@ -182,7 +182,7 @@ namespace DiscUtils.Ntfs
                 return 0;
             }
 
-            switch (_flags & (AttributeFlags.Compressed | AttributeFlags.Encrypted))
+            switch (_flags & (AttributeFlags.Compressed | AttributeFlags.Sparse))
             {
                 case AttributeFlags.Compressed:
                     return DoReadCompressed(pos, buffer, offset, toRead);

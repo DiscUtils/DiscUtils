@@ -161,12 +161,29 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            if (record.Flags != AttributeFlags.None)
+            _attribute.RawBuffer.Write(pos, buffer, offset, count);
+
+            if (!record.IsNonResident)
             {
-                throw new NotImplementedException("Writing to compressed / sparse attributes");
+                _file.MarkMftRecordDirty();
+            }
+        }
+
+        public override void Erase(long pos, int count)
+        {
+            var record = _attribute.PrimaryRecord;
+
+            if (!CanWrite)
+            {
+                throw new IOException("Attempt to write to file not opened for write");
             }
 
-            _attribute.RawBuffer.Write(pos, buffer, offset, count);
+            if (count == 0)
+            {
+                return;
+            }
+
+            _attribute.RawBuffer.Erase(pos, count);
 
             if (!record.IsNonResident)
             {
