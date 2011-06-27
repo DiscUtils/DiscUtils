@@ -344,5 +344,11 @@ namespace DiscUtils
         /// <returns>The representing object</returns>
         /// <remarks>The file system object does not need to exist</remarks>
         DiscFileSystemInfo GetFileSystemInfo(string path);
+
+        /// <summary>
+        /// Reads the boot code of the file system into a byte array.
+        /// </summary>
+        /// <returns>The boot code, or <c>null</c> if not available</returns>
+        byte[] ReadBootCode();
     }
 }

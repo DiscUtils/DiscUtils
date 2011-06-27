@@ -36,6 +36,8 @@ namespace DiskDump
         private CommandLineSwitch _showContent;
         private CommandLineSwitch _showVolContent;
         private CommandLineSwitch _showFiles;
+        private CommandLineSwitch _showBootCode;
+        private CommandLineSwitch _hideExtents;
         private CommandLineSwitch _diskType;
 
         static void Main(string[] args)
@@ -50,12 +52,16 @@ namespace DiskDump
             _showContent = new CommandLineSwitch("db", "diskbytes", null, "Includes a hexdump of all disk content in the output");
             _showVolContent = new CommandLineSwitch("vb", "volbytes", null, "Includes a hexdump of all volumes content in the output");
             _showFiles = new CommandLineSwitch("sf", "showfiles", null, "Includes a list of all files found in volumes");
+            _showBootCode = new CommandLineSwitch("bc", "bootcode", null, "Includes a hexdump of the MBR and OS boot code in the output");
+            _hideExtents = new CommandLineSwitch("he", "hideextents", null, "Suppresses display of the stored extents, which can be slow for large disk images");
             _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDisk.SupportedDiskTypes) + ")");
 
             parser.AddMultiParameter(_inFiles);
             parser.AddSwitch(_showContent);
             parser.AddSwitch(_showVolContent);
             parser.AddSwitch(_showFiles);
+            parser.AddSwitch(_showBootCode);
+            parser.AddSwitch(_hideExtents);
             parser.AddSwitch(_diskType);
 
             return StandardSwitches.UserAndPassword;
@@ -82,15 +88,37 @@ namespace DiskDump
                 }
                 Console.WriteLine();
 
-
-                Console.WriteLine();
-                Console.WriteLine("  Stored Extents");
-                Console.WriteLine();
-                foreach (var extent in disk.Content.Extents)
+                if (!_hideExtents.IsPresent)
                 {
-                    Console.WriteLine("    {0:X16} - {1:X16}", extent.Start, extent.Start + extent.Length);
+                    Console.WriteLine();
+                    Console.WriteLine("  Stored Extents");
+                    Console.WriteLine();
+                    foreach (var extent in disk.Content.Extents)
+                    {
+                        Console.WriteLine("    {0:X16} - {1:X16}", extent.Start, extent.Start + extent.Length);
+                    }
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
+
+
+                if (_showBootCode.IsPresent)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("  Master Boot Record (MBR)");
+                    Console.WriteLine();
+                    try
+                    {
+                        byte[] mbr = new byte[512];
+                        disk.Content.Position = 0;
+                        disk.Content.Read(mbr, 0, 512);
+                        HexDump.Generate(mbr, Console.Out);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
+                    Console.WriteLine();
+                }
 
 
                 Console.WriteLine();
@@ -190,6 +218,34 @@ namespace DiskDump
                             Console.WriteLine(e.ToString());
                         }
                         Console.WriteLine();
+                    }
+
+                    if (_showBootCode.IsPresent)
+                    {
+                        foreach (var fsi in fileSystemInfos)
+                        {
+                            Console.WriteLine("    Boot Code: {0}", fsi.Name);
+                            try
+                            {
+                                using (DiscFileSystem fs = fsi.Open(vol))
+                                {
+                                    byte[] bootCode = fs.ReadBootCode();
+                                    if (bootCode != null)
+                                    {
+                                        HexDump.Generate(bootCode, Console.Out);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("      <file system reports no boot code>");
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("      Unable to show boot code: " + e.Message);
+                            }
+                            Console.WriteLine();
+                        }
                     }
 
                     if (_showFiles.IsPresent)

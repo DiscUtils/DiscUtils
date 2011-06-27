@@ -1704,6 +1704,18 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Reads the boot code of the file system into a byte array.
+        /// </summary>
+        /// <returns>The boot code, or <c>null</c> if not available</returns>
+        public override byte[] ReadBootCode()
+        {
+            using (Stream s = OpenFile(@"\$Boot", FileMode.Open))
+            {
+                return Utilities.ReadFully(s, (int)s.Length);
+            }
+        }
+
+        /// <summary>
         /// Writes a diagnostic dump of key NTFS structures.
         /// </summary>
         /// <param name="writer">The writer to receive the dump.</param>

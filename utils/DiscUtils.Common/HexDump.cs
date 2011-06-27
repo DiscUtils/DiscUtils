@@ -31,6 +31,16 @@ namespace DiscUtils.Common
     public static class HexDump
     {
         /// <summary>
+        /// Creates a hex dump from a byte array.
+        /// </summary>
+        /// <param name="stream">The data to generate the hex dump from.</param>
+        /// <param name="output">The destination for the hex dump.</param>
+        public static void Generate(byte[] data, TextWriter output)
+        {
+            Generate(SparseStream.FromStream(new MemoryStream(data, false), Ownership.None), output);
+        }
+
+        /// <summary>
         /// Creates a hex dump from a stream.
         /// </summary>
         /// <param name="stream">The stream to generate the hex dump from.</param>

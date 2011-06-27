@@ -466,6 +466,15 @@ namespace DiscUtils
             return new DiscFileSystemInfo(this, path);
         }
 
+        /// <summary>
+        /// Reads the boot code of the file system into a byte array.
+        /// </summary>
+        /// <returns>The boot code, or <c>null</c> if not available</returns>
+        public virtual byte[] ReadBootCode()
+        {
+            return null;
+        }
+
         #region IDisposable Members
 
         /// <summary>
