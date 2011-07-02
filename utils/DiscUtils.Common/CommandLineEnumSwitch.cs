@@ -35,18 +35,21 @@ namespace DiscUtils.Common
             : base(fullSwitch, paramName, description)
         {
             _defaultValue = defaultValue;
+            _enumValue = defaultValue;
         }
 
         public CommandLineEnumSwitch(string shortSwitch, string fullSwitch, string paramName, T defaultValue, string description)
             : base(shortSwitch, fullSwitch, paramName, description)
         {
             _defaultValue = defaultValue;
+            _enumValue = defaultValue;
         }
 
         public CommandLineEnumSwitch(string[] shortSwitches, string fullSwitch, string paramName, T defaultValue, string description)
             : base(shortSwitches, fullSwitch, paramName, description)
         {
             _defaultValue = defaultValue;
+            _enumValue = defaultValue;
         }
 
         public override string FullDescription
