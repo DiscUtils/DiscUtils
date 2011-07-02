@@ -44,7 +44,7 @@ namespace DiscUtils.Common
 
         public CommandLineSwitch(string shortSwitch, string fullSwitch, string paramName, string description)
         {
-            _shortSwitches = new string[] {shortSwitch};
+            _shortSwitches = new string[] { shortSwitch };
             _fullSwitch = fullSwitch;
             _paramName = paramName;
             _description = description;
@@ -56,6 +56,21 @@ namespace DiscUtils.Common
             _fullSwitch = fullSwitch;
             _paramName = paramName;
             _description = description;
+        }
+
+        public string ParameterName
+        {
+            get { return _paramName; }
+        }
+
+        public string FullSwitchName
+        {
+            get { return _fullSwitch; }
+        }
+
+        public virtual string FullDescription
+        {
+            get { return _description; }
         }
 
         public bool IsPresent
@@ -74,7 +89,7 @@ namespace DiscUtils.Common
             int ignore;
             switches = BuildSwitchInfo(_shortSwitches, _fullSwitch, _paramName, out ignore);
 
-            string[] text = Utilities.WordWrap(_description, perLineDescWidth);
+            string[] text = Utilities.WordWrap(FullDescription, perLineDescWidth);
 
             for (int i = 0; i < Math.Max(switches.Length, text.Length); ++i)
             {
@@ -137,7 +152,7 @@ namespace DiscUtils.Common
         }
 
 
-        internal int Process(string[] args, int pos)
+        internal virtual int Process(string[] args, int pos)
         {
             _isPresent = true;
 

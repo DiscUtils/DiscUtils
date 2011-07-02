@@ -125,6 +125,18 @@ namespace DiscUtils.Partitions
             _partitionContents[index] = new BuilderSparseStreamExtent(_partitionTable[index].FirstSector * Sizes.Sector, stream);
         }
 
+        /// <summary>
+        /// Updates the CHS fields in partition records to reflect a new BIOS geometry.
+        /// </summary>
+        /// <param name="geometry">The disk's new BIOS geometry</param>
+        /// <remarks>The partitions are not relocated to a cylinder boundary, just the CHS fields are updated on the
+        /// assumption the LBA fields are definitive.</remarks>
+        public void UpdateBiosGeometry(Geometry geometry)
+        {
+            _partitionTable.UpdateBiosGeometry(geometry);
+            _biosGeometry = geometry;
+        }
+
         internal override List<BuilderExtent> FixExtents(out long totalLength)
         {
             totalLength = _capacity;

@@ -36,6 +36,7 @@ namespace DiscUtils
         private SparseStream _content;
         private Geometry _geometry;
         private Geometry _biosGeometry;
+        private GenericDiskAdapterType _adaptorType;
 
         /// <summary>
         /// Gets or sets the content for this disk, implying the size of the disk.
@@ -62,6 +63,23 @@ namespace DiscUtils
         {
             get { return _biosGeometry; }
             set { _biosGeometry = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the adapter type for created virtual disk, for file formats that encode this information.
+        /// </summary>
+        public virtual GenericDiskAdapterType GenericAdapterType
+        {
+            get { return _adaptorType; }
+            set { _adaptorType = value; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this file format preserves BIOS geometry information.
+        /// </summary>
+        public virtual bool PreservesBiosGeometry
+        {
+            get { return false; }
         }
 
         private static Dictionary<string, VirtualDiskFactory> TypeMap

@@ -75,8 +75,7 @@ namespace DiskClone
         {
             get
             {
-                NativeMethods.DiskGeometry diskGeometry = Win32Wrapper.GetDiskGeometry(_handle);
-                return new Geometry((int)diskGeometry.Cylinders, diskGeometry.TracksPerCylinder, diskGeometry.SectorsPerTrack, diskGeometry.BytesPerSector);
+                return Geometry.FromCapacity(Capacity);
             }
         }
 
@@ -84,7 +83,8 @@ namespace DiskClone
         {
             get
             {
-                return Geometry;
+                NativeMethods.DiskGeometry diskGeometry = Win32Wrapper.GetDiskGeometry(_handle);
+                return new Geometry((int)diskGeometry.Cylinders, diskGeometry.TracksPerCylinder, diskGeometry.SectorsPerTrack, diskGeometry.BytesPerSector);
             }
         }
 

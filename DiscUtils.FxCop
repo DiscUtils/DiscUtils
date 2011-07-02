@@ -907,6 +907,25 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="GeometryTranslation">
+          <Members>
+           <Member Name="#Lba">
+            <Messages>
+             <Message Id="Lba" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-07-02 13:18:28Z">
+              <Issue Name="Member">
+               <Item>Lba</Item>
+               <Item>'GeometryTranslation.Lba'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="168" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="PhysicalVolumeType">
           <Members>
            <Member Name="#GptPartition">
@@ -10748,6 +10767,7 @@
     <Note Id="165" Modified="2011-05-15 12:41:03Z">Returning existing byte array, so no perf hit.</Note>
     <Note Id="166" Modified="2011-05-15 12:41:19Z">Name defined by UDF spec.</Note>
     <Note Id="167" Modified="2011-06-05 07:26:12Z">Relatively expensive operation</Note>
+    <Note Id="168" Modified="2011-07-02 13:19:07Z">Following acronym rules for industry standard acronym</Note>
    </User>
   </Notes>
   <Rules>

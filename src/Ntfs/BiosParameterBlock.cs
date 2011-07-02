@@ -23,6 +23,7 @@
 namespace DiscUtils.Ntfs
 {
     using System;
+    using System.Globalization;
     using System.IO;
 
     internal class BiosParameterBlock
@@ -76,7 +77,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(linePrefix + "                # FATs: " + NumFats);
             writer.WriteLine(linePrefix + "    # FAT Root Entries: " + FatRootEntriesCount);
             writer.WriteLine(linePrefix + "   Total Sectors (16b): " + TotalSectors16);
-            writer.WriteLine(linePrefix + "                 Media: " + Media.ToString("X") + "h");
+            writer.WriteLine(linePrefix + "                 Media: " + Media.ToString("X", CultureInfo.InvariantCulture) + "h");
             writer.WriteLine(linePrefix + "        FAT size (16b): " + FatSize16);
             writer.WriteLine(linePrefix + "     Sectors per Track: " + SectorsPerTrack);
             writer.WriteLine(linePrefix + "               # Heads: " + NumHeads);

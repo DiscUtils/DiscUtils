@@ -1716,6 +1716,25 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
+        /// Updates the BIOS Parameter Block (BPB) of the file system to reflect a new disk geometry.
+        /// </summary>
+        /// <param name="geometry">The disk's new BIOS geometry</param>
+        /// <remarks>Having an accurate geometry in the BPB is essential for booting some Operating Systems (e.g. Windows XP)</remarks>
+        public void UpdateBiosGeometry(Geometry geometry)
+        {
+            _context.BiosParameterBlock.SectorsPerTrack = (ushort)geometry.SectorsPerTrack;
+            _context.BiosParameterBlock.NumHeads = (ushort)geometry.HeadsPerCylinder;
+
+            _context.RawStream.Position = 0;
+            byte[] bpbSector = Utilities.ReadFully(_context.RawStream, 512);
+
+            _context.BiosParameterBlock.ToBytes(bpbSector, 0);
+
+            _context.RawStream.Position = 0;
+            _context.RawStream.Write(bpbSector, 0, bpbSector.Length);
+        }
+
+        /// <summary>
         /// Writes a diagnostic dump of key NTFS structures.
         /// </summary>
         /// <param name="writer">The writer to receive the dump.</param>

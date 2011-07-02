@@ -42,6 +42,8 @@ namespace DiskClone
 
     class Program : ProgramBase
     {
+        private CommandLineEnumSwitch<GeometryTranslation> _translation;
+        private CommandLineEnumSwitch<GenericDiskAdapterType> _adaptorType;
         private CommandLineMultiParameter _volumes;
         private CommandLineParameter _destDisk;
 
@@ -53,9 +55,13 @@ namespace DiskClone
 
         protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
         {
+            _translation = new CommandLineEnumSwitch<GeometryTranslation>("t", "translation", "mode", GeometryTranslation.Auto,"Indicates the geometry adjustment to apply.  Set this parameter to match the translation configured in the BIOS of the machine that will boot from the disk - auto should work in most cases for modern BIOS.");
+            _adaptorType = new CommandLineEnumSwitch<GenericDiskAdapterType>("a", "adaptortype", "type", GenericDiskAdapterType.Ide, "Some disk formats encode the disk type (IDE or SCSI) into the disk image, this parameter specifies the type of adaptor to encode.");
             _volumes = new CommandLineMultiParameter("volume", "Volumes to clone.  The volumes should all be on the same disk.", false);
             _destDisk = new CommandLineParameter("out_file", "Path to the output disk image.", false);
 
+            parser.AddSwitch(_translation);
+            parser.AddSwitch(_adaptorType);
             parser.AddMultiParameter(_volumes);
             parser.AddParameter(_destDisk);
 
@@ -83,6 +89,8 @@ namespace DiskClone
                 Environment.Exit(1);
             }
 
+            DiskImageBuilder builder = DiskImageBuilder.GetBuilder(OutputDiskType, OutputDiskVariant);
+            builder.GenericAdapterType = _adaptorType.EnumValue;
 
             string[] sourceVolume = _volumes.Values;
 
@@ -99,13 +107,37 @@ namespace DiskClone
             // Construct a stream representing the contents of the cloned disk.
             BiosPartitionedDiskBuilder contentBuilder;
             Geometry biosGeometry;
-            Geometry realGeometry;
+            Geometry ideGeometry;
+            long capacity;
             using (Disk disk = new Disk(diskNumber))
             {
                 contentBuilder = new BiosPartitionedDiskBuilder(disk);
                 biosGeometry = disk.BiosGeometry;
-                realGeometry = disk.Geometry;
+                ideGeometry = disk.Geometry;
+                capacity = disk.Capacity;
             }
+
+            // Preserve the IDE (aka Physical) geometry
+            builder.Geometry = ideGeometry;
+
+            // Translate the BIOS (aka Logical) geometry
+            GeometryTranslation translation = _translation.EnumValue;
+            if (builder.PreservesBiosGeometry && translation == GeometryTranslation.Auto)
+            {
+                // If the new format preserves BIOS geometry, then take no action if asked for 'auto'
+                builder.BiosGeometry = biosGeometry;
+                translation = GeometryTranslation.None;
+            }
+            else
+            {
+                builder.BiosGeometry = ideGeometry.TranslateToBios(0, translation);
+            }
+
+            if (translation != GeometryTranslation.None)
+            {
+                contentBuilder.UpdateBiosGeometry(builder.BiosGeometry);
+            }
+
 
             IVssBackupComponents backupCmpnts;
             int status = NativeMethods.CreateVssBackupComponents(out backupCmpnts);
@@ -166,6 +198,11 @@ namespace DiskClone
                     }
 
                     clusterSize = (int)ntfs.ClusterSize;
+
+                    if (translation != GeometryTranslation.None)
+                    {
+                        ntfs.UpdateBiosGeometry(builder.BiosGeometry);
+                    }
                 }
 
                 List<StreamExtent> extents = new List<StreamExtent>(BitmapToRanges(volBitmap, clusterSize));
@@ -187,10 +224,7 @@ namespace DiskClone
             string dir = Path.GetDirectoryName(_destDisk.Value);
             string file = Path.GetFileNameWithoutExtension(_destDisk.Value);
 
-            DiskImageBuilder builder = DiskImageBuilder.GetBuilder(OutputDiskType, OutputDiskVariant);
             builder.Content = contentStream;
-            builder.Geometry = realGeometry;
-            builder.BiosGeometry = biosGeometry;
             DiskImageFileSpecification[] fileSpecs = builder.Build(file);
 
             for (int i = 0; i < fileSpecs.Length; ++i)

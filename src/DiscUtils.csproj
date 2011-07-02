@@ -198,7 +198,9 @@
     <Compile Include="FileSystemManager.cs" />
     <Compile Include="FileTransport.cs" />
     <Compile Include="FloppyDiskType.cs" />
+    <Compile Include="GenericDiskAdapterType.cs" />
     <Compile Include="Geometry.cs" />
+    <Compile Include="GeometryTranslation.cs" />
     <Compile Include="IBuffer.cs" />
     <Compile Include="IByteArraySerializable.cs" />
     <Compile Include="IClusterBasedFileSystem.cs" />

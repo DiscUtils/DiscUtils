@@ -67,6 +67,7 @@
     <Compile Include="CommandLineParameter.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandLineSwitch.cs" />
+    <Compile Include="CommandLineEnumSwitch.cs" />
     <Compile Include="HexDump.cs" />
     <Compile Include="ProgramBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -56,7 +56,38 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Gets or sets the disk adapter type to embed in the VMDK.
+        /// Gets or sets the adaptor type for created virtual disk, setting to SCSI implies LSI logic adapter.
+        /// </summary>
+        public override GenericDiskAdapterType GenericAdapterType
+        {
+            get
+            {
+                return AdapterType == DiskAdapterType.Ide ? GenericDiskAdapterType.Ide : GenericDiskAdapterType.Scsi;
+            }
+
+            set
+            {
+                if (value == GenericDiskAdapterType.Ide)
+                {
+                    _adapterType = DiskAdapterType.Ide;
+                }
+                else if (_adapterType == DiskAdapterType.Ide)
+                {
+                    _adapterType = DiskAdapterType.LsiLogicScsi;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether this file format preserves BIOS geometry information.
+        /// </summary>
+        public override bool PreservesBiosGeometry
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Gets or sets the specific VMware disk adapter type to embed in the VMDK.
         /// </summary>
         public DiskAdapterType AdapterType
         {

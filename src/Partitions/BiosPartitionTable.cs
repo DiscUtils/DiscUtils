@@ -491,6 +491,40 @@ namespace DiscUtils.Partitions
             return extents;
         }
 
+        /// <summary>
+        /// Updates the CHS fields in partition records to reflect a new BIOS geometry.
+        /// </summary>
+        /// <param name="geometry">The disk's new BIOS geometry</param>
+        /// <remarks>The partitions are not relocated to a cylinder boundary, just the CHS fields are updated on the
+        /// assumption the LBA fields are definitive.</remarks>
+        public void UpdateBiosGeometry(Geometry geometry)
+        {
+            _diskData.Position = 0;
+            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+
+            BiosPartitionRecord[] records = ReadPrimaryRecords(bootSector);
+            for (int i = 0; i < records.Length; ++i)
+            {
+                BiosPartitionRecord record = records[i];
+                if (record.IsValid)
+                {
+                    ChsAddress newStartAddress = geometry.ToChsAddress(record.LBAStartAbsolute);
+                    ChsAddress newEndAddress = geometry.ToChsAddress(record.LBAStartAbsolute + record.LBALength - 1);
+
+                    record.StartCylinder = (ushort)newStartAddress.Cylinder;
+                    record.StartHead = (byte)newStartAddress.Head;
+                    record.StartSector = (byte)newStartAddress.Sector;
+                    record.EndCylinder = (ushort)newEndAddress.Cylinder;
+                    record.EndHead = (byte)newEndAddress.Head;
+                    record.EndSector = (byte)newEndAddress.Sector;
+
+                    WriteRecord(i, record);
+                }
+            }
+
+            _diskGeometry = geometry;
+        }
+
         internal SparseStream Open(BiosPartitionRecord record)
         {
             return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);

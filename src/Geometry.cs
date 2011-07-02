@@ -23,6 +23,7 @@
 namespace DiscUtils
 {
     using System;
+    using System.Globalization;
 
     /// <summary>
     /// Class whose instances represent disk geometries.
@@ -168,6 +169,26 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the 'Large' BIOS geometry for a disk, given it's physical geometry.
+        /// </summary>
+        /// <param name="ideGeometry">The physical (aka IDE) geometry of the disk</param>
+        /// <returns>The geometry a BIOS using the 'Large' method for calculating disk geometry will indicate for the disk</returns>
+        public static Geometry LargeBiosGeometry(Geometry ideGeometry)
+        {
+            int cylinders = ideGeometry.Cylinders;
+            int heads = ideGeometry.HeadsPerCylinder;
+            int sectors = ideGeometry.SectorsPerTrack;
+
+            while (cylinders > 1024 && heads <= 127)
+            {
+                cylinders >>= 1;
+                heads <<= 1;
+            }
+
+            return new Geometry(cylinders, heads, sectors);
+        }
+
+        /// <summary>
         /// Gets the 'LBA Assisted' BIOS geometry for a disk, given it's capacity.
         /// </summary>
         /// <param name="capacity">The capacity of the disk</param>
@@ -230,7 +251,8 @@ namespace DiscUtils
         /// <param name="capacity">The desired capacity of the disk</param>
         /// <returns>The appropriate disk geometry.</returns>
         /// <remarks>The geometry returned tends to produce a disk with less capacity
-        /// than requested (an exact capacity is not always possible).</remarks>
+        /// than requested (an exact capacity is not always possible).  The geometry returned is the IDE
+        /// (aka Physical) geometry of the disk, not necessarily the geometry used by the BIOS.</remarks>
         public static Geometry FromCapacity(long capacity)
         {
             int totalSectors;
@@ -354,6 +376,55 @@ namespace DiscUtils
             int sector = (temp % _sectorsPerTrack) + 1;
 
             return new ChsAddress(cylinder, head, sector);
+        }
+
+        /// <summary>
+        /// Translates an IDE (aka Physical) geometry to a BIOS (aka Logical) geometry.
+        /// </summary>
+        /// <param name="translation">The translation to perform</param>
+        /// <returns>The translated disk geometry</returns>
+        public Geometry TranslateToBios(GeometryTranslation translation)
+        {
+            return TranslateToBios(0, translation);
+        }
+
+        /// <summary>
+        /// Translates an IDE (aka Physical) geometry to a BIOS (aka Logical) geometry.
+        /// </summary>
+        /// <param name="capacity">The capacity of the disk, required if the geometry is an approximation on the actual disk size</param>
+        /// <param name="translation">The translation to perform</param>
+        /// <returns>The translated disk geometry</returns>
+        public Geometry TranslateToBios(long capacity, GeometryTranslation translation)
+        {
+            if (capacity <= 0)
+            {
+                capacity = TotalSectors * 512L;
+            }
+
+            switch (translation)
+            {
+                case GeometryTranslation.None:
+                    return this;
+
+                case GeometryTranslation.Auto:
+                    if (IsBiosSafe)
+                    {
+                        return this;
+                    }
+                    else
+                    {
+                        return Geometry.LbaAssistedBiosGeometry(capacity);
+                    }
+
+                case GeometryTranslation.Lba:
+                    return Geometry.LbaAssistedBiosGeometry(capacity);
+
+                case GeometryTranslation.Large:
+                    return Geometry.LargeBiosGeometry(this);
+
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Translation mode '{0}' not yet implemented", translation), "translation");
+            }
         }
 
         /// <summary>
