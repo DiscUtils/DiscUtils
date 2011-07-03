@@ -210,7 +210,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Gets the extents that comprise this file.
         /// </summary>
-        public override List<VirtualDiskExtent> Extents
+        public override IList<VirtualDiskExtent> Extents
         {
             get
             {

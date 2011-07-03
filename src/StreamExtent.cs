@@ -360,6 +360,28 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// The less-than operator.
+        /// </summary>
+        /// <param name="a">The first extent to compare</param>
+        /// <param name="b">The second extent to compare</param>
+        /// <returns>Whether a is less than b</returns>
+        public static bool operator <(StreamExtent a, StreamExtent b)
+        {
+            return a.CompareTo(b) < 0;
+        }
+
+        /// <summary>
+        /// The greater-than operator.
+        /// </summary>
+        /// <param name="a">The first extent to compare</param>
+        /// <param name="b">The second extent to compare</param>
+        /// <returns>Whether a is greather than b</returns>
+        public static bool operator >(StreamExtent a, StreamExtent b)
+        {
+            return a.CompareTo(b) > 0;
+        }
+
+        /// <summary>
         /// Indicates if this StreamExtent is equal to another.
         /// </summary>
         /// <param name="other">The extent to compare</param>

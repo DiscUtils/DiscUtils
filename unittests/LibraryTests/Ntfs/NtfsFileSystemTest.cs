@@ -421,9 +421,9 @@ namespace DiscUtils.Ntfs
                 ntfs.SetAttributes("file.bin", ntfs.GetAttributes("file.bin") | FileAttributes.SparseFile);
 
                 s.Position = 64 * 1024;
-                s.Erase(128 * 1024);
+                s.Clear(128 * 1024);
                 s.Position = fileSize - 64 * 1024;
-                s.Erase(128 * 1024);
+                s.Clear(128 * 1024);
             }
 
             using (SparseStream s = ntfs.OpenFile("file.bin", FileMode.Open))

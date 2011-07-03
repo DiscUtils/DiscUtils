@@ -142,12 +142,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void Erase(int count)
+        public override void Clear(int count)
         {
             using (new NtfsTransaction())
             {
                 _isDirty = true;
-                _baseStream.Erase(count);
+                _baseStream.Clear(count);
             }
         }
 

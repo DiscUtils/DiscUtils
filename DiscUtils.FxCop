@@ -1006,6 +1006,32 @@
              </Message>
             </Messages>
            </Member>
+           <Member Name="#op_GreaterThan(DiscUtils.StreamExtent,DiscUtils.StreamExtent)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-07-03 18:47:22Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator &gt;(StreamExtent, StreamExtent)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="171" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-07-03 18:47:22Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator &gt;(StreamExtent, StreamExtent)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="171" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#op_Inequality(DiscUtils.StreamExtent,DiscUtils.StreamExtent)">
             <Messages>
              <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-08 22:31:04Z">
@@ -1027,6 +1053,32 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="37" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#op_LessThan(DiscUtils.StreamExtent,DiscUtils.StreamExtent)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-07-03 18:47:22Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator &lt;(StreamExtent, StreamExtent)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="171" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-07-03 18:47:22Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.operator &lt;(StreamExtent, StreamExtent)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="171" />
                </User>
               </Notes>
              </Message>
@@ -1167,6 +1219,21 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="100" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#CreateDisk(System.String,System.String,System.String,DiscUtils.VirtualDiskParameters,System.String,System.String)">
+            <Messages>
+             <Message TypeName="NormalizeStringsToUppercase" Category="Microsoft.Globalization" CheckId="CA1308" Status="Excluded" Created="2011-07-03 18:15:39Z">
+              <Issue Name="ToUpperInvariant">
+               <Item>'VirtualDisk.CreateDisk(string, string, string, VirtualDiskParameters, string, string)'</Item>
+               <Item>'string.ToLowerInvariant()'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="169" />
                </User>
               </Notes>
              </Message>
@@ -2420,6 +2487,24 @@
        </Namespace>
        <Namespace Name="DiscUtils.Compression">
         <Types>
+         <Type Name="BlockCompressor">
+          <Members>
+           <Member Name="#Compress(System.Byte[],System.Int32,System.Int32,System.Byte[],System.Int32,System.Int32&amp;)">
+            <Messages>
+             <Message Id="5#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Status="Excluded" Created="2011-07-03 18:15:39Z">
+              <Issue Certainty="50">
+               <Item>'compressedLength'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="170" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="BZip2Crc32">
           <Members>
            <Member Name="#.cctor()">
@@ -6918,6 +7003,24 @@
          </Type>
          <Type Name="NtfsAttribute">
           <Members>
+           <Member Name="#CompressedDataSize">
+            <Accessors>
+             <Accessor Name="#get_CompressedDataSize()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-07-03 18:15:39Z">
+                <Issue>
+                 <Item>'NtfsAttribute.CompressedDataSize.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="172" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
            <Member Name="#Dump(System.IO.TextWriter,System.String)">
             <Messages>
              <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2011-03-12 17:59:03Z">
@@ -10768,6 +10871,10 @@
     <Note Id="166" Modified="2011-05-15 12:41:19Z">Name defined by UDF spec.</Note>
     <Note Id="167" Modified="2011-06-05 07:26:12Z">Relatively expensive operation</Note>
     <Note Id="168" Modified="2011-07-02 13:19:07Z">Following acronym rules for industry standard acronym</Note>
+    <Note Id="169" Modified="2011-07-03 18:27:50Z">URL schemes are typically lower-case.</Note>
+    <Note Id="170" Modified="2011-07-03 18:29:19Z">Two out values required, but not worthy of new type.</Note>
+    <Note Id="171" Modified="2011-07-03 18:48:06Z">Comparison operator parameters.</Note>
+    <Note Id="172" Modified="2011-07-03 19:13:07Z">Follows pattern.</Note>
    </User>
   </Notes>
   <Rules>
@@ -10804,6 +10911,9 @@
    </Rule>
    <Rule TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006">
     <Resolution Name="Default">Consider a design where {0} doesn't nest generic type {1}.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045">
+    <Resolution Name="Default">Consider a design that does not require that {0} be a reference parameter.</Resolution>
    </Rule>
    <Rule TypeName="EnumStorageShouldBeInt32" Category="Microsoft.Design" CheckId="CA1028">
     <Resolution Name="NotInt32">If possible, make the underlying type of {0} System.Int32 instead of {1}.</Resolution>

@@ -200,7 +200,7 @@ namespace DiscUtils.Ntfs
             int idx = _dataRuns.IndexOf(existingRun);
             if (idx < 0)
             {
-                throw new ArgumentException("Attempt to replace non-existant run", "oldRun");
+                throw new ArgumentException("Attempt to replace non-existant run", "existingRun");
             }
 
             _dataRuns.Insert(idx + 1, newRun);

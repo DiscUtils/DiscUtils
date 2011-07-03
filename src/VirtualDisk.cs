@@ -291,6 +291,14 @@ namespace DiscUtils
                 Geometry = geometry,
             };
 
+            if (parameters != null)
+            {
+                foreach (var key in parameters.Keys)
+                {
+                    diskParams.ExtendedParameters[key] = parameters[key];
+                }
+            }
+
             return factory.CreateDisk(new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path)), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), diskParams);
         }
 

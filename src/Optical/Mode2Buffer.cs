@@ -94,7 +94,7 @@ namespace DiscUtils.Optical
             throw new NotSupportedException();
         }
 
-        public void Erase(long pos, int count)
+        public void Clear(long pos, int count)
         {
             throw new NotSupportedException();
         }

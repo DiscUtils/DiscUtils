@@ -50,23 +50,7 @@ namespace DiscUtils.Ntfs
         // we assume each block is 4KB on decode also.
         private const int FixedBlockSize = 0x1000;
 
-        private static byte[] s_compressionBits;
-
-        static LZNT1()
-        {
-            s_compressionBits = new byte[4096];
-            byte offsetBits = 0;
-            int y = 0x10;
-            for (int x = 0; x < s_compressionBits.Length; x++)
-            {
-                s_compressionBits[x] = (byte)(4 + offsetBits);
-                if (x == y)
-                {
-                    y <<= 1;
-                    offsetBits++;
-                }
-            }
-        }
+        private static byte[] s_compressionBits = CalcCompressionBits();
 
         public LZNT1()
         {
@@ -306,6 +290,25 @@ namespace DiscUtils.Ntfs
             }
 
             return destIdx;
+        }
+
+        private static byte[] CalcCompressionBits()
+        {
+            byte[] result = new byte[4096];
+            byte offsetBits = 0;
+
+            int y = 0x10;
+            for (int x = 0; x < s_compressionBits.Length; x++)
+            {
+                result[x] = (byte)(4 + offsetBits);
+                if (x == y)
+                {
+                    y <<= 1;
+                    offsetBits++;
+                }
+            }
+
+            return result;
         }
     }
 }

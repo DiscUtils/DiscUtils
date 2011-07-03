@@ -180,7 +180,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void Erase(long pos, int count)
+        public override void Clear(long pos, int count)
         {
             if (!CanWrite)
             {
@@ -189,7 +189,7 @@ namespace DiscUtils.Ntfs
 
             if ((_flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != AttributeFlags.Sparse)
             {
-                base.Erase(pos, count);
+                base.Clear(pos, count);
             }
             else
             {

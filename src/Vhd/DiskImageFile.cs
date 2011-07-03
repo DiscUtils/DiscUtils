@@ -196,7 +196,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the extent that comprises this file.
         /// </summary>
-        public override List<VirtualDiskExtent> Extents
+        public override IList<VirtualDiskExtent> Extents
         {
             get
             {

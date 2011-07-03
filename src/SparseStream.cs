@@ -109,19 +109,19 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Erases bytes from the stream.
+        /// Clears bytes from the stream.
         /// </summary>
-        /// <param name="count">The number of bytes (from the current position) to erase</param>
+        /// <param name="count">The number of bytes (from the current position) to clear</param>
         /// <remarks>
         /// <para>Logically equivalent to writing <c>count</c> null/zero bytes to the stream, some
         /// implementations determine that some (or all) of the range indicated is not actually
-        /// stored.  There is no direct, automatic, correspondance to erasing bytes and them
+        /// stored.  There is no direct, automatic, correspondance to clearing bytes and them
         /// not being represented as an 'extent' - for example, the implementation of the underlying
         /// stream may not permit fine-grained extent storage.</para>
         /// <para>It is always safe to call this method to 'zero-out' a section of a stream, regardless of
         /// the underlying stream implementation.</para>
         /// </remarks>
-        public virtual void Erase(int count)
+        public virtual void Clear(int count)
         {
             Write(new byte[count], 0, count);
         }

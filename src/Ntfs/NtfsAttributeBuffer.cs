@@ -169,7 +169,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void Erase(long pos, int count)
+        public override void Clear(long pos, int count)
         {
             var record = _attribute.PrimaryRecord;
 
@@ -183,7 +183,7 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            _attribute.RawBuffer.Erase(pos, count);
+            _attribute.RawBuffer.Clear(pos, count);
 
             if (!record.IsNonResident)
             {

@@ -23,17 +23,17 @@
 namespace DiscUtils
 {
     /// <summary>
+    /// Delegate for calculating a disk geometry from a capacity.
+    /// </summary>
+    /// <param name="capacity">The disk capacity to convert</param>
+    /// <returns>The appropriate geometry for the disk</returns>
+    public delegate Geometry GeometryCalculation(long capacity);
+
+    /// <summary>
     /// Information about a type of virtual disk.
     /// </summary>
     public sealed class VirtualDiskTypeInfo
     {
-        /// <summary>
-        /// Delegate for calculating a disk geometry from a capacity.
-        /// </summary>
-        /// <param name="capacity">The disk capacity to convert</param>
-        /// <returns>The appropriate geometry from the disk</returns>
-        public delegate Geometry GeometryCalculationDelegate(long capacity);
-
         /// <summary>
         /// Gets or sets the name of the virtual disk type.
         /// </summary>
@@ -62,6 +62,6 @@ namespace DiscUtils
         /// <summary>
         /// Gets or sets the algorithm for determining the geometry for a given disk capacity.
         /// </summary>
-        public GeometryCalculationDelegate CalcGeometry { get; set; }
+        public GeometryCalculation CalcGeometry { get; set; }
     }
 }

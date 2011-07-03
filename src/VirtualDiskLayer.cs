@@ -58,12 +58,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets and sets the logical extents that make up this layer.
         /// </summary>
-        public virtual List<VirtualDiskExtent> Extents
+        public virtual IList<VirtualDiskExtent> Extents
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { return new List<VirtualDiskExtent>(); }
         }
 
         /// <summary>
