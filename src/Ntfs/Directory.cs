@@ -93,11 +93,13 @@ namespace DiscUtils.Ntfs
             return base.ToString() + @"\";
         }
 
-        internal static new Directory CreateNew(INtfsContext context)
+        internal static new Directory CreateNew(INtfsContext context, FileAttributeFlags parentDirFlags)
         {
             Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
 
-            StandardInformation.InitializeNewFile(dir, FileAttributeFlags.Archive);
+            StandardInformation.InitializeNewFile(
+                dir,
+                FileAttributeFlags.Archive | (parentDirFlags & FileAttributeFlags.Compressed));
 
             // Create the index root attribute by instantiating a new index
             dir.CreateIndex("$I30", AttributeType.FileName, AttributeCollationRule.Filename);

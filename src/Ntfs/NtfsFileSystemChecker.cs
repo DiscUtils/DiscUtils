@@ -271,7 +271,7 @@ namespace DiscUtils.Ntfs
                             }
 
                             File referencedFile = new File(_context, refFile);
-                            StandardInformation si = referencedFile.GetStream(AttributeType.StandardInformation, null).GetContent<StandardInformation>();
+                            StandardInformation si = referencedFile.StandardInformation;
                             if (si.CreationTime != entry.Key.CreationTime || si.MftChangedTime != entry.Key.MftChangedTime
                                 || si.ModificationTime != entry.Key.ModificationTime)
                             {

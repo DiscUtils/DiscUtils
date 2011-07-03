@@ -155,16 +155,16 @@ namespace DiscUtils.Ntfs
                 _context.UpperCase = UpperCase.Initialize(upcaseFile);
                 upcaseFile.UpdateRecordInMft();
 
-                File objIdFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex);
+                File objIdFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex, FileAttributeFlags.None);
                 objIdFile.RemoveStream(objIdFile.GetStream(AttributeType.Data, null));
                 objIdFile.CreateIndex("$O", (AttributeType)0, AttributeCollationRule.MultipleUnsignedLongs);
                 objIdFile.UpdateRecordInMft();
 
-                File reparseFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex);
+                File reparseFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex, FileAttributeFlags.None);
                 reparseFile.CreateIndex("$R", (AttributeType)0, AttributeCollationRule.MultipleUnsignedLongs);
                 reparseFile.UpdateRecordInMft();
 
-                File quotaFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex);
+                File quotaFile = File.CreateNew(_context, FileRecordFlags.IsMetaFile | FileRecordFlags.HasViewIndex, FileAttributeFlags.None);
                 Quotas.Initialize(quotaFile);
 
                 Directory extendDir = CreateSystemDirectory(MasterFileTable.ExtendIndex);

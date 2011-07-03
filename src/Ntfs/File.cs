@@ -196,6 +196,11 @@ namespace DiscUtils.Ntfs
             get { return (_records[0].Flags & FileRecordFlags.IsDirectory) != 0; }
         }
 
+        public StandardInformation StandardInformation
+        {
+            get { return GetStream(AttributeType.StandardInformation, null).GetContent<StandardInformation>(); }
+        }
+
         internal INtfsContext Context
         {
             get
@@ -212,16 +217,27 @@ namespace DiscUtils.Ntfs
             get { return _attributes; }
         }
 
-        public static File CreateNew(INtfsContext context)
+        public static File CreateNew(INtfsContext context, FileAttributeFlags dirFlags)
         {
-            return CreateNew(context, FileRecordFlags.None);
+            return CreateNew(context, FileRecordFlags.None, dirFlags);
         }
 
-        public static File CreateNew(INtfsContext context, FileRecordFlags flags)
+        public static File CreateNew(INtfsContext context, FileRecordFlags flags, FileAttributeFlags dirFlags)
         {
             File newFile = context.AllocateFile(flags);
 
-            StandardInformation.InitializeNewFile(newFile, FileAttributeFlags.Archive | FileRecord.ConvertFlags(flags));
+            FileAttributeFlags fileFlags =
+                FileAttributeFlags.Archive
+                | FileRecord.ConvertFlags(flags)
+                | (dirFlags & FileAttributeFlags.Compressed);
+
+            AttributeFlags dataAttrFlags = AttributeFlags.None;
+            if ((dirFlags & FileAttributeFlags.Compressed) != 0)
+            {
+                dataAttrFlags |= AttributeFlags.Compressed;
+            }
+
+            StandardInformation.InitializeNewFile(newFile, fileFlags);
 
             if (context.ObjectIds != null)
             {
@@ -233,7 +249,7 @@ namespace DiscUtils.Ntfs
                 context.ObjectIds.Add(newId, newFile.MftReference, newId, Guid.Empty, Guid.Empty);
             }
 
-            newFile.CreateAttribute(AttributeType.Data, AttributeFlags.None);
+            newFile.CreateAttribute(AttributeType.Data, dataAttrFlags);
 
             newFile.UpdateRecordInMft();
 
@@ -661,7 +677,7 @@ namespace DiscUtils.Ntfs
             //
             // Freshen the record from the definitive info in the other attributes
             //
-            StandardInformation si = GetStream(AttributeType.StandardInformation, null).GetContent<StandardInformation>();
+            StandardInformation si = StandardInformation;
             NtfsAttribute anonDataAttr = GetAttribute(AttributeType.Data, null);
 
             fileName.CreationTime = si.CreationTime;

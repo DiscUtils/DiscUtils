@@ -357,7 +357,7 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-                File newFile = File.CreateNew(_context);
+                File newFile = File.CreateNew(_context, destParentDir.StandardInformation.FileAttributes);
                 foreach (var origStream in origFile.AllStreams)
                 {
                     NtfsStream newStream = newFile.GetStream(origStream.AttributeType, origStream.Name);
@@ -416,7 +416,7 @@ namespace DiscUtils.Ntfs
                     DirectoryEntry childDirEntry = focusDir.GetEntryByName(pathElements[i]);
                     if (childDirEntry == null)
                     {
-                        Directory childDir = Directory.CreateNew(_context);
+                        Directory childDir = Directory.CreateNew(_context, focusDir.StandardInformation.FileAttributes);
                         try
                         {
                             childDirEntry = AddFileToDirectory(childDir, focusDir, pathElements[i]);
@@ -804,11 +804,12 @@ namespace DiscUtils.Ntfs
                     }
                     else
                     {
-                        File file = File.CreateNew(_context);
+                        DirectoryEntry parentDirEntry = GetDirectoryEntry(Utilities.GetDirectoryFromPath(path));
+                        Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+                        File file = File.CreateNew(_context, parentDir.StandardInformation.FileAttributes);
                         try
                         {
-                            DirectoryEntry parentDirEntry = GetDirectoryEntry(Utilities.GetDirectoryFromPath(path));
-                            Directory parentDir = GetDirectory(parentDirEntry.Reference);
                             entry = AddFileToDirectory(file, parentDir, Utilities.GetFileFromPath(path));
 
                             RawSecurityDescriptor sd = DoGetSecurity(parentDir);
@@ -1611,8 +1612,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 File file = GetFile(dirEntry.Reference);
-                NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
-                StandardInformation si = stream.GetContent<StandardInformation>();
+                StandardInformation si = file.StandardInformation;
 
                 return new WindowsFileInformation
                 {
@@ -2125,8 +2125,7 @@ namespace DiscUtils.Ntfs
                 return legacyStream.GetContent<SecurityDescriptor>().Descriptor;
             }
 
-            NtfsStream stream = file.GetStream(AttributeType.StandardInformation, null);
-            StandardInformation si = stream.GetContent<StandardInformation>();
+            StandardInformation si = file.StandardInformation;
             return _context.SecurityDescriptors.GetDescriptorById(si.SecurityId);
         }
 
