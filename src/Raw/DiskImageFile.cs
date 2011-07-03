@@ -91,7 +91,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Gets the type of disk represented by this object.
         /// </summary>
-        public VirtualDiskType DiskType
+        public VirtualDiskClass DiskType
         {
             get { return DetectDiskType(Capacity); }
         }
@@ -226,17 +226,17 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="capacity">The capacity of the disk</param>
         /// <returns>The disk type</returns>
-        private static VirtualDiskType DetectDiskType(long capacity)
+        private static VirtualDiskClass DetectDiskType(long capacity)
         {
             if (capacity == Sizes.Sector * 1440
                 || capacity == Sizes.Sector * 2880
                 || capacity == Sizes.Sector * 5760)
             {
-                return VirtualDiskType.FloppyDisk;
+                return VirtualDiskClass.FloppyDisk;
             }
             else
             {
-                return VirtualDiskType.HardDisk;
+                return VirtualDiskClass.HardDisk;
             }
         }
 

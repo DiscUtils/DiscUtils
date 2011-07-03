@@ -64,9 +64,21 @@ namespace VirtualDiskConvert
                 VirtualDiskParameters diskParams = inDisk.Parameters;
                 diskParams.AdapterType = AdapterType;
 
+                VirtualDiskTypeInfo diskTypeInfo = VirtualDisk.GetDiskType(OutputDiskType, OutputDiskVariant);
+                if (diskTypeInfo.DeterministicGeometry)
+                {
+                    diskParams.Geometry = diskTypeInfo.CalcGeometry(diskParams.Capacity);
+                }
+
                 if (_translation.IsPresent && _translation.EnumValue != GeometryTranslation.None)
                 {
                     diskParams.BiosGeometry = diskParams.Geometry.TranslateToBios(diskParams.Capacity, _translation.EnumValue);
+                }
+                else if (!inDisk.DiskTypeInfo.PreservesBiosGeometry)
+                {
+                    // In case the BIOS geometry was just a default, it's better to override based on the physical geometry
+                    // of the new disk.
+                    diskParams.BiosGeometry = Geometry.MakeBiosSafe(diskParams.Geometry, diskParams.Capacity);
                 }
 
                 using (VirtualDisk outDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _outFile.Value, diskParams, UserName, Password))

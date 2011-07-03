@@ -34,6 +34,11 @@ namespace DiscUtils.Dmg
             get { return new string[] { }; }
         }
 
+        public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
+        {
+            return MakeDiskTypeInfo();
+        }
+
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
             throw new NotSupportedException();
@@ -59,6 +64,19 @@ namespace DiscUtils.Dmg
         {
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new DiskImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
+        }
+
+        internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
+        {
+            return new VirtualDiskTypeInfo()
+            {
+                Name = "DMG",
+                Variant = string.Empty,
+                CanBeHardDisk = true,
+                DeterministicGeometry = true,
+                PreservesBiosGeometry = false,
+                CalcGeometry = c => Geometry.FromCapacity(c),
+            };
         }
     }
 }

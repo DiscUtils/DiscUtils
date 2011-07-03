@@ -29,6 +29,8 @@ namespace DiscUtils
     {
         public abstract string[] Variants { get; }
 
+        public abstract VirtualDiskTypeInfo GetDiskTypeInformation(string variant);
+
         public abstract DiskImageBuilder GetImageBuilder(string variant);
 
         public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters);

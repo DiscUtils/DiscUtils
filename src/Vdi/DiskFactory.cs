@@ -35,6 +35,11 @@ namespace DiscUtils.Vdi
             get { return new string[] { "fixed", "dynamic" }; }
         }
 
+        public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
+        {
+            return MakeDiskTypeInfo(variant);
+        }
+
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
             throw new NotImplementedException();
@@ -69,6 +74,19 @@ namespace DiscUtils.Vdi
             FileMode mode = (access == FileAccess.Read) ? FileMode.Open : FileMode.OpenOrCreate;
             FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
             return new DiskImageFile(locator.Open(path, mode, access, share), Ownership.Dispose);
+        }
+
+        internal static VirtualDiskTypeInfo MakeDiskTypeInfo(string variant)
+        {
+            return new VirtualDiskTypeInfo()
+            {
+                Name = "VDI",
+                Variant = variant,
+                CanBeHardDisk = true,
+                DeterministicGeometry = true,
+                PreservesBiosGeometry = true,
+                CalcGeometry = c => GeometryRecord.FromCapacity(c).ToGeometry(c),
+            };
         }
     }
 }

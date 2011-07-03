@@ -74,13 +74,13 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             }
         }
 
-        public override VirtualDiskType DiskType
+        public override VirtualDiskClass DiskClass
         {
             get
             {
                 using (VirtualDisk disk = OpenDisk())
                 {
-                    return disk.DiskType;
+                    return disk.DiskClass;
                 }
             }
         }
@@ -115,6 +115,16 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         public override IEnumerable<VirtualDiskLayer> Layers
         {
             get { throw new NotSupportedException("Access to virtual disk layers is not implemented for on-demand disks"); }
+        }
+
+        public override VirtualDiskTypeInfo DiskTypeInfo
+        {
+            get {
+                using (VirtualDisk disk = OpenDisk())
+                {
+                    return disk.DiskTypeInfo;
+                }
+            }
         }
 
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)

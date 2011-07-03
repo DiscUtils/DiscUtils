@@ -34,6 +34,11 @@ namespace DiscUtils.Optical
             get { return new string[] { }; }
         }
 
+        public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
+        {
+            return MakeDiskTypeInfo();
+        }
+
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
             throw new NotSupportedException();
@@ -59,6 +64,19 @@ namespace DiscUtils.Optical
         public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
         {
             return null;
+        }
+
+        internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
+        {
+            return new VirtualDiskTypeInfo()
+            {
+                Name = "Optical",
+                Variant = string.Empty,
+                CanBeHardDisk = false,
+                DeterministicGeometry = true,
+                PreservesBiosGeometry = false,
+                CalcGeometry = c => new Geometry(1, 1, 1, 2048),
+            };
         }
     }
 }

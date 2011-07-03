@@ -34,6 +34,11 @@ namespace DiscUtils.Xva
             get { return new string[] { "dynamic" }; }
         }
 
+        public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
+        {
+            return MakeDiskTypeInfo();
+        }
+
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
             throw new NotSupportedException();
@@ -81,6 +86,19 @@ namespace DiscUtils.Xva
         public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
         {
             return null;
+        }
+
+        internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
+        {
+            return new VirtualDiskTypeInfo()
+            {
+                Name = "XVA",
+                Variant = "dynamic",
+                CanBeHardDisk = true,
+                DeterministicGeometry = true,
+                PreservesBiosGeometry = false,
+                CalcGeometry = c => Geometry.FromCapacity(c),
+            };
         }
     }
 }

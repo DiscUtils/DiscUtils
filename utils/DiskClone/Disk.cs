@@ -88,9 +88,9 @@ namespace DiskClone
             }
         }
 
-        public override VirtualDiskType DiskType
+        public override VirtualDiskClass DiskClass
         {
-            get { return VirtualDiskType.HardDisk; }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         public override long Capacity
@@ -104,6 +104,21 @@ namespace DiskClone
         public override IEnumerable<VirtualDiskLayer> Layers
         {
             get { throw new NotImplementedException(); }
+        }
+
+        public override VirtualDiskTypeInfo DiskTypeInfo
+        {
+            get {
+                return new VirtualDiskTypeInfo()
+                {
+                    Name="Physical",
+                    Variant = "",
+                    CanBeHardDisk = true,
+                    DeterministicGeometry = false,
+                    PreservesBiosGeometry = false,
+                    CalcGeometry = c => Geometry.FromCapacity(c),
+                };
+            }
         }
 
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)

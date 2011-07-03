@@ -69,9 +69,9 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the type of disk represented by this object.
         /// </summary>
-        public override VirtualDiskType DiskType
+        public override VirtualDiskClass DiskClass
         {
-            get { return VirtualDiskType.HardDisk; }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -128,6 +128,27 @@ namespace DiscUtils.Iscsi
         public override IEnumerable<VirtualDiskLayer> Layers
         {
             get { yield break; }
+        }
+
+        /// <summary>
+        /// Gets information about the type of disk.
+        /// </summary>
+        /// <remarks>This property provides access to meta-data about the disk format, for example whether the
+        /// BIOS geometry is preserved in the disk file.</remarks>
+        public override VirtualDiskTypeInfo DiskTypeInfo
+        {
+            get
+            {
+                return new VirtualDiskTypeInfo()
+                    {
+                        Name = "iSCSI",
+                        Variant = string.Empty,
+                        CanBeHardDisk = true,
+                        DeterministicGeometry = false,
+                        PreservesBiosGeometry = false,
+                        CalcGeometry = c => Geometry.FromCapacity(c)
+                    };
+            }
         }
 
         /// <summary>

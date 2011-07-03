@@ -22,49 +22,29 @@
 
 namespace DiscUtils
 {
-    using System.Collections.Generic;
-
     /// <summary>
-    /// Common parameters for virtual disks.
+    /// Enumeration of different classes of disk.
     /// </summary>
-    /// <remarks>Not all attributes make sense for all kinds of disks, so some
-    /// may be null.  Modifying instances of this class does not modify the
-    /// disk itself.</remarks>
-    public sealed class VirtualDiskParameters
+    public enum VirtualDiskClass
     {
-        private Dictionary<string, string> _extendedParameters = new Dictionary<string, string>();
+        /// <summary>
+        /// Unknown (or unspecified) type.
+        /// </summary>
+        None = 0,
 
         /// <summary>
-        /// Gets or sets the type of disk (optical, hard disk, etc).
+        /// Hard disk.
         /// </summary>
-        public VirtualDiskClass DiskType { get; set; }
+        HardDisk = 1,
 
         /// <summary>
-        /// Gets or sets the disk capacity.
+        /// Optical disk, such as CD or DVD.
         /// </summary>
-        public long Capacity { get; set; }
+        OpticalDisk = 2,
 
         /// <summary>
-        /// Gets or sets the physical (aka IDE) geometry of the disk.
+        /// Floppy disk.
         /// </summary>
-        public Geometry Geometry { get; set; }
-
-        /// <summary>
-        /// Gets or sets the logical (aka BIOS) geometry of the disk.
-        /// </summary>
-        public Geometry BiosGeometry { get; set; }
-
-        /// <summary>
-        /// Gets or sets the type of disk adapter.
-        /// </summary>
-        public GenericDiskAdapterType AdapterType { get; set; }
-
-        /// <summary>
-        /// Gets a dictionary of extended parameters, that varies by disk type.
-        /// </summary>
-        public Dictionary<string, string> ExtendedParameters
-        {
-            get { return _extendedParameters; }
-        }
+        FloppyDisk = 3,
     }
 }

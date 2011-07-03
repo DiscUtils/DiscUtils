@@ -35,53 +35,22 @@ namespace DiscUtils.Vmdk
             get { return new string[] { "fixed", "dynamic", "vmfsfixed", "vmfsdynamic" }; }
         }
 
+        public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
+        {
+            return MakeDiskTypeInfo(VariantToCreateType(variant));
+        }
+
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
             DiskBuilder builder = new DiskBuilder();
-
-            switch (variant)
-            {
-                case "fixed":
-                    builder.DiskType = DiskCreateType.MonolithicFlat;
-                    break;
-                case "dynamic":
-                    builder.DiskType = DiskCreateType.MonolithicSparse;
-                    break;
-                case "vmfsfixed":
-                    builder.DiskType = DiskCreateType.Vmfs;
-                    break;
-                case "vmfsdynamic":
-                    builder.DiskType = DiskCreateType.VmfsSparse;
-                    break;
-                default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), "variant");
-            }
-
+            builder.DiskType = VariantToCreateType(variant);
             return builder;
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
         {
             DiskParameters vmdkParams = new DiskParameters(diskParameters);
-
-            switch (variant)
-            {
-                case "fixed":
-                    vmdkParams.CreateType = DiskCreateType.MonolithicFlat;
-                    break;
-                case "dynamic":
-                    vmdkParams.CreateType = DiskCreateType.MonolithicSparse;
-                    break;
-                case "vmfsfixed":
-                    vmdkParams.CreateType = DiskCreateType.Vmfs;
-                    break;
-                case "vmfsdynamic":
-                    vmdkParams.CreateType = DiskCreateType.VmfsSparse;
-                    break;
-                default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), "variant");
-            }
-
+            vmdkParams.CreateType = VariantToCreateType(variant);
             return Disk.Initialize(locator, path, vmdkParams);
         }
 
@@ -98,6 +67,59 @@ namespace DiscUtils.Vmdk
         public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
         {
             return new DiskImageFile(locator, path, access);
+        }
+
+        internal static VirtualDiskTypeInfo MakeDiskTypeInfo(DiskCreateType createType)
+        {
+            return new VirtualDiskTypeInfo()
+            {
+                Name = "VMDK",
+                Variant = CreateTypeToVariant(createType),
+                CanBeHardDisk = true,
+                DeterministicGeometry = false,
+                PreservesBiosGeometry = false,
+                CalcGeometry = c => DiskImageFile.DefaultGeometry(c),
+            };
+        }
+
+        private static DiskCreateType VariantToCreateType(string variant)
+        {
+            switch (variant)
+            {
+                case "fixed":
+                    return DiskCreateType.MonolithicFlat;
+                case "dynamic":
+                    return DiskCreateType.MonolithicSparse;
+                case "vmfsfixed":
+                    return DiskCreateType.Vmfs;
+                case "vmfsdynamic":
+                    return DiskCreateType.VmfsSparse;
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), "variant");
+            }
+        }
+
+        private static string CreateTypeToVariant(DiskCreateType createType)
+        {
+            switch (createType)
+            {
+                case DiskCreateType.MonolithicFlat:
+                case DiskCreateType.TwoGbMaxExtentFlat:
+                    return "fixed";
+
+                case DiskCreateType.MonolithicSparse:
+                case DiskCreateType.TwoGbMaxExtentSparse:
+                    return "dynamic";
+
+                case DiskCreateType.Vmfs:
+                    return "vmfsfixed";
+
+                case DiskCreateType.VmfsSparse:
+                    return "vmfsdynamic";
+
+                default:
+                    return "fixed";
+            }
         }
     }
 }

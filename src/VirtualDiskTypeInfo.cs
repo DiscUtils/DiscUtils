@@ -23,28 +23,45 @@
 namespace DiscUtils
 {
     /// <summary>
-    /// Enumeration of different types of disk.
+    /// Information about a type of virtual disk.
     /// </summary>
-    public enum VirtualDiskType
+    public sealed class VirtualDiskTypeInfo
     {
         /// <summary>
-        /// Unknown (or unspecified) type.
+        /// Delegate for calculating a disk geometry from a capacity.
         /// </summary>
-        None = 0,
+        /// <param name="capacity">The disk capacity to convert</param>
+        /// <returns>The appropriate geometry from the disk</returns>
+        public delegate Geometry GeometryCalculationDelegate(long capacity);
 
         /// <summary>
-        /// Hard disk.
+        /// Gets or sets the name of the virtual disk type.
         /// </summary>
-        HardDisk = 1,
+        public string Name { get; set; }
 
         /// <summary>
-        /// Optical disk, such as CD or DVD.
+        /// Gets or sets the variant of the virtual disk type.
         /// </summary>
-        OpticalDisk = 2,
+        public string Variant { get; set; }
 
         /// <summary>
-        /// Floppy disk.
+        /// Gets or sets a value indicating whether this disk type can represent hard disks.
         /// </summary>
-        FloppyDisk = 3,
+        public bool CanBeHardDisk { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this disk type requires a specific geometry for any given disk capacity.
+        /// </summary>
+        public bool DeterministicGeometry { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this disk type persists the BIOS geometry.
+        /// </summary>
+        public bool PreservesBiosGeometry { get; set; }
+
+        /// <summary>
+        /// Gets or sets the algorithm for determining the geometry for a given disk capacity.
+        /// </summary>
+        public GeometryCalculationDelegate CalcGeometry { get; set; }
     }
 }

@@ -95,7 +95,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Gets the type of disk represented by this object.
         /// </summary>
-        public override VirtualDiskType DiskType
+        public override VirtualDiskClass DiskClass
         {
             get { return _file.DiskType; }
         }
@@ -125,6 +125,16 @@ namespace DiscUtils.Raw
         public override IEnumerable<VirtualDiskLayer> Layers
         {
             get { yield return _file; }
+        }
+
+        /// <summary>
+        /// Gets information about the type of disk.
+        /// </summary>
+        /// <remarks>This property provides access to meta-data about the disk format, for example whether the
+        /// BIOS geometry is preserved in the disk file.</remarks>
+        public override VirtualDiskTypeInfo DiskTypeInfo
+        {
+            get { return DiskFactory.MakeDiskTypeInfo(); }
         }
 
         /// <summary>

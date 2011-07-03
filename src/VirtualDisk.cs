@@ -82,7 +82,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the type of disk represented by this object.
         /// </summary>
-        public abstract VirtualDiskType DiskType
+        public abstract VirtualDiskClass DiskClass
         {
             get;
         }
@@ -180,13 +180,23 @@ namespace DiscUtils
             {
                 return new VirtualDiskParameters()
                 {
-                    DiskType = DiskType,
+                    DiskType = DiskClass,
                     Capacity = Capacity,
                     Geometry = Geometry,
                     BiosGeometry = BiosGeometry,
                     AdapterType = GenericDiskAdapterType.Ide
                 };
             }
+        }
+
+        /// <summary>
+        /// Gets information about the type of disk.
+        /// </summary>
+        /// <remarks>This property provides access to meta-data about the disk format, for example whether the
+        /// BIOS geometry is preserved in the disk file.</remarks>
+        public abstract VirtualDiskTypeInfo DiskTypeInfo
+        {
+            get;
         }
 
         private static Dictionary<string, VirtualDiskFactory> ExtensionMap
@@ -246,6 +256,17 @@ namespace DiscUtils
         public static ICollection<string> GetSupportedDiskVariants(string type)
         {
             return TypeMap[type].Variants;
+        }
+
+        /// <summary>
+        /// Gets information about disk type.
+        /// </summary>
+        /// <param name="type">The disk type, as returned by <see cref="SupportedDiskTypes"/></param>
+        /// <param name="variant">The variant of the disk type</param>
+        /// <returns>Information about the disk type</returns>
+        public static VirtualDiskTypeInfo GetDiskType(string type, string variant)
+        {
+            return TypeMap[type].GetDiskTypeInformation(variant);
         }
 
         /// <summary>

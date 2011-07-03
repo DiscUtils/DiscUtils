@@ -35,6 +35,11 @@ namespace DiscUtils.Vhd
             get { return new string[] { "fixed", "dynamic" }; }
         }
 
+        public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
+        {
+            return MakeDiskTypeInfo(variant);
+        }
+
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
             DiskBuilder builder = new DiskBuilder();
@@ -80,6 +85,19 @@ namespace DiscUtils.Vhd
         public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
         {
             return new DiskImageFile(locator, path, access);
+        }
+
+        internal static VirtualDiskTypeInfo MakeDiskTypeInfo(string variant)
+        {
+            return new VirtualDiskTypeInfo()
+            {
+                Name = "VHD",
+                Variant = variant,
+                CanBeHardDisk = true,
+                DeterministicGeometry = true,
+                PreservesBiosGeometry = false,
+                CalcGeometry = c => Geometry.FromCapacity(c),
+            };
         }
     }
 }
