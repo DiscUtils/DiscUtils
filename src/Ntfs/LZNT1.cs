@@ -298,7 +298,7 @@ namespace DiscUtils.Ntfs
             byte offsetBits = 0;
 
             int y = 0x10;
-            for (int x = 0; x < s_compressionBits.Length; x++)
+            for (int x = 0; x < result.Length; x++)
             {
                 result[x] = (byte)(4 + offsetBits);
                 if (x == y)
