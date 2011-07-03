@@ -59,7 +59,7 @@ namespace DiscUtils.Common
 
                 if (vals.Length < 3)
                 {
-                    return string.Format("Either '{0}' or '{1}' (default is {0}).  {2}", vals[0], _defaultValue.ToString(), base.FullDescription);
+                    return string.Format("Either '{0}' or '{1}' (default is {2}).  {3}", vals[0], vals[1], _defaultValue.ToString(), base.FullDescription);
                 }
                 else
                 {

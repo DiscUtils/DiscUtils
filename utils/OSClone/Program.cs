@@ -64,7 +64,7 @@ namespace OSClone
             parser.AddParameter(_destFile);
             parser.AddSwitch(_labelSwitch);
 
-            return StandardSwitches.OutputFormat | StandardSwitches.UserAndPassword | StandardSwitches.DiskSize;
+            return StandardSwitches.OutputFormatAndAdapterType | StandardSwitches.UserAndPassword | StandardSwitches.DiskSize;
         }
 
         protected override void DoRun()
@@ -76,7 +76,7 @@ namespace OSClone
             }
 
             using (VirtualDisk sourceDisk = VirtualDisk.OpenDisk(_sourceFile.Value, FileAccess.Read, UserName, Password))
-            using (VirtualDisk destDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _destFile.Value, DiskSize, null, UserName, Password, null))
+            using (VirtualDisk destDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _destFile.Value, DiskParameters, UserName, Password))
             {
                 if (destDisk is DiscUtils.Vhd.Disk)
                 {

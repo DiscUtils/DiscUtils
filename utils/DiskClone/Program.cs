@@ -43,7 +43,6 @@ namespace DiskClone
     class Program : ProgramBase
     {
         private CommandLineEnumSwitch<GeometryTranslation> _translation;
-        private CommandLineEnumSwitch<GenericDiskAdapterType> _adaptorType;
         private CommandLineMultiParameter _volumes;
         private CommandLineParameter _destDisk;
 
@@ -56,16 +55,14 @@ namespace DiskClone
         protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
         {
             _translation = new CommandLineEnumSwitch<GeometryTranslation>("t", "translation", "mode", GeometryTranslation.Auto,"Indicates the geometry adjustment to apply.  Set this parameter to match the translation configured in the BIOS of the machine that will boot from the disk - auto should work in most cases for modern BIOS.");
-            _adaptorType = new CommandLineEnumSwitch<GenericDiskAdapterType>("a", "adaptortype", "type", GenericDiskAdapterType.Ide, "Some disk formats encode the disk type (IDE or SCSI) into the disk image, this parameter specifies the type of adaptor to encode.");
             _volumes = new CommandLineMultiParameter("volume", "Volumes to clone.  The volumes should all be on the same disk.", false);
             _destDisk = new CommandLineParameter("out_file", "Path to the output disk image.", false);
 
             parser.AddSwitch(_translation);
-            parser.AddSwitch(_adaptorType);
             parser.AddMultiParameter(_volumes);
             parser.AddParameter(_destDisk);
 
-            return StandardSwitches.OutputFormat;
+            return StandardSwitches.OutputFormatAndAdapterType;
         }
 
         protected override string[] HelpRemarks
@@ -90,7 +87,7 @@ namespace DiskClone
             }
 
             DiskImageBuilder builder = DiskImageBuilder.GetBuilder(OutputDiskType, OutputDiskVariant);
-            builder.GenericAdapterType = _adaptorType.EnumValue;
+            builder.GenericAdapterType = AdapterType;
 
             string[] sourceVolume = _volumes.Values;
 
@@ -319,21 +316,6 @@ namespace DiskClone
             byte mask = (byte)(1 << (int)(bit & 0x7));
 
             return (val & mask) != 0;
-        }
-
-        private static void ShowProgress(string label, long totalBytes, DateTime startTime, object sourceObject, PumpProgressEventArgs e)
-        {
-            int progressLen = 55 - label.Length;
-
-            int numProgressChars = (int)((e.BytesRead * progressLen) / totalBytes);
-            string progressBar = new string('=', numProgressChars) + new string(' ', progressLen - numProgressChars);
-
-            DateTime now = DateTime.Now;
-            TimeSpan timeSoFar = now - startTime;
-
-            TimeSpan remaining = TimeSpan.FromMilliseconds((timeSoFar.TotalMilliseconds / (double)e.BytesRead) * (totalBytes - e.BytesRead));
-
-            Console.Write("\r{0} ({1,3}%)  |{2}| {3}", label, (e.BytesRead * 100) / totalBytes, progressBar, remaining.ToString(@"hh\:mm\:ss\.f"));
         }
 
         private List<CloneVolume> GatherVolumes(string[] sourceVolume, out uint diskNumber)

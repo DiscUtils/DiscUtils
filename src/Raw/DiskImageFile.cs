@@ -88,6 +88,14 @@ namespace DiscUtils.Raw
             get { return false; }
         }
 
+        /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public VirtualDiskType DiskType
+        {
+            get { return DetectDiskType(Capacity); }
+        }
+
         internal override long Capacity
         {
             get { return _content.Length; }
@@ -211,6 +219,25 @@ namespace DiscUtils.Raw
             // Failing that, try to detect the geometry from any partition table.
             // Note: this call falls back to guessing the geometry from the capacity
             return BiosPartitionTable.DetectGeometry(disk);
+        }
+
+        /// <summary>
+        /// Calculates the best guess disk type (i.e. floppy or hard disk)
+        /// </summary>
+        /// <param name="capacity">The capacity of the disk</param>
+        /// <returns>The disk type</returns>
+        private static VirtualDiskType DetectDiskType(long capacity)
+        {
+            if (capacity == Sizes.Sector * 1440
+                || capacity == Sizes.Sector * 2880
+                || capacity == Sizes.Sector * 5760)
+            {
+                return VirtualDiskType.FloppyDisk;
+            }
+            else
+            {
+                return VirtualDiskType.HardDisk;
+            }
         }
 
         private static long FloppyCapacity(FloppyDiskType type)

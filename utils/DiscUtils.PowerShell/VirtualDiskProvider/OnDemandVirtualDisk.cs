@@ -74,6 +74,17 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             }
         }
 
+        public override VirtualDiskType DiskType
+        {
+            get
+            {
+                using (VirtualDisk disk = OpenDisk())
+                {
+                    return disk.DiskType;
+                }
+            }
+        }
+
         public override long Capacity
         {
             get
@@ -81,6 +92,17 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
                 using (VirtualDisk disk = OpenDisk())
                 {
                     return disk.Capacity;
+                }
+            }
+        }
+
+        public override VirtualDiskParameters Parameters
+        {
+            get
+            {
+                using (VirtualDisk disk = OpenDisk())
+                {
+                    return disk.Parameters;
                 }
             }
         }

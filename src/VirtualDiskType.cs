@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,31 +22,29 @@
 
 namespace DiscUtils
 {
-    using System.Collections.Generic;
-    using System.IO;
-
-    internal abstract class VirtualDiskFactory
+    /// <summary>
+    /// Enumeration of different types of disk.
+    /// </summary>
+    public enum VirtualDiskType
     {
-        public abstract string[] Variants { get; }
+        /// <summary>
+        /// Unknown (or unspecified) type.
+        /// </summary>
+        None = 0,
 
-        public abstract DiskImageBuilder GetImageBuilder(string variant);
+        /// <summary>
+        /// Hard disk.
+        /// </summary>
+        HardDisk = 1,
 
-        public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters);
+        /// <summary>
+        /// Optical disk, such as CD or DVD.
+        /// </summary>
+        OpticalDisk = 2,
 
-        public abstract VirtualDisk OpenDisk(string path, FileAccess access);
-
-        public abstract VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access);
-
-        public virtual VirtualDisk OpenDisk(FileLocator locator, string path, string extraInfo, Dictionary<string, string> parameters, FileAccess access)
-        {
-            return OpenDisk(locator, path, access);
-        }
-
-        public VirtualDisk OpenDisk(DiscFileSystem fileSystem, string path, FileAccess access)
-        {
-            return OpenDisk(new DiscFileLocator(fileSystem, @"\"), path, access);
-        }
-
-        public abstract VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access);
+        /// <summary>
+        /// Floppy disk.
+        /// </summary>
+        FloppyDisk = 3,
     }
 }

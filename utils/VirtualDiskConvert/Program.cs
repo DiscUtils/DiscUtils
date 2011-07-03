@@ -24,6 +24,8 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
+using DiscUtils.Ntfs;
+using DiscUtils.Partitions;
 
 namespace VirtualDiskConvert
 {
@@ -31,6 +33,7 @@ namespace VirtualDiskConvert
     {
         private CommandLineParameter _inFile;
         private CommandLineParameter _outFile;
+        private CommandLineEnumSwitch<GeometryTranslation> _translation;
         private CommandLineSwitch _wipe;
 
         static void Main(string[] args)
@@ -43,32 +46,72 @@ namespace VirtualDiskConvert
         {
             _inFile = FileOrUriParameter("in_file", "Path to the source disk.", false);
             _outFile = FileOrUriParameter("out_file", "Path to the output disk.", false);
+            _translation = new CommandLineEnumSwitch<GeometryTranslation>("t", "translation", "mode", GeometryTranslation.None, "Indicates the geometry adjustment to apply for bootable disks.  Set this parameter to match the translation configured in the BIOS of the machine that will boot from the disk - auto should work in most cases for modern BIOS.");
             _wipe = new CommandLineSwitch("w", "wipe", null, "Write zero's to all unused parts of the disk.  This option only makes sense when converting to an iSCSI LUN which may be dirty.");
 
             parser.AddParameter(_inFile);
             parser.AddParameter(_outFile);
+            parser.AddSwitch(_translation);
             parser.AddSwitch(_wipe);
 
-            return StandardSwitches.OutputFormat | StandardSwitches.UserAndPassword;
+            return StandardSwitches.OutputFormatAndAdapterType | StandardSwitches.UserAndPassword;
         }
 
         protected override void DoRun()
         {
             using (VirtualDisk inDisk = VirtualDisk.OpenDisk(_inFile.Value, FileAccess.Read, UserName, Password))
-            using (VirtualDisk outDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _outFile.Value, inDisk.Capacity, inDisk.Geometry, UserName, Password, null))
             {
-                if (outDisk.Capacity < inDisk.Capacity)
+                VirtualDiskParameters diskParams = inDisk.Parameters;
+                diskParams.AdapterType = AdapterType;
+
+                if (_translation.IsPresent && _translation.EnumValue != GeometryTranslation.None)
                 {
-                    Console.WriteLine("ERROR: The output disk is smaller than the input disk, conversion aborted");
+                    diskParams.BiosGeometry = diskParams.Geometry.TranslateToBios(diskParams.Capacity, _translation.EnumValue);
                 }
 
-                if (_wipe.IsPresent)
+                using (VirtualDisk outDisk = VirtualDisk.CreateDisk(OutputDiskType, OutputDiskVariant, _outFile.Value, diskParams, UserName, Password))
                 {
-                    Pump(inDisk.Content, outDisk.Content);
-                }
-                else
-                {
-                    SparseStream.Pump(inDisk.Content, outDisk.Content);
+                    if (outDisk.Capacity < inDisk.Capacity)
+                    {
+                        Console.WriteLine("ERROR: The output disk is smaller than the input disk, conversion aborted");
+                    }
+
+                    SparseStream contentStream = inDisk.Content;
+
+                    if (_translation.IsPresent && _translation.EnumValue != GeometryTranslation.None)
+                    {
+                        SnapshotStream ssStream = new SnapshotStream(contentStream, Ownership.None);
+                        ssStream.Snapshot();
+
+                        UpdateBiosGeometry(ssStream, inDisk.BiosGeometry, diskParams.BiosGeometry);
+
+                        contentStream = ssStream;
+                    }
+
+                    StreamPump pump = new StreamPump()
+                    {
+                        InputStream = contentStream,
+                        OutputStream = outDisk.Content,
+                        SparseCopy = !_wipe.IsPresent
+                    };
+
+                    if (!Quiet)
+                    {
+                        long totalBytes = contentStream.Length;
+                        if (!_wipe.IsPresent)
+                        {
+                            totalBytes = 0;
+                            foreach (var se in contentStream.Extents)
+                            {
+                                totalBytes += se.Length;
+                            }
+                        }
+
+                        DateTime now = DateTime.Now;
+                        pump.ProgressEvent += (o, e) => { ShowProgress("Progress", totalBytes, now, o, e); };
+                    }
+
+                    pump.Run();
                 }
             }
         }
@@ -94,6 +137,27 @@ namespace VirtualDiskConvert
             {
                 dest.Write(buffer, 0, numRead);
                 numRead = source.Read(buffer, 0, buffer.Length);
+            }
+        }
+
+        private static void UpdateBiosGeometry(SparseStream contentStream, Geometry oldGeometry, Geometry newGeometry)
+        {
+            BiosPartitionTable partTable = new BiosPartitionTable(contentStream, oldGeometry);
+            partTable.UpdateBiosGeometry(newGeometry);
+
+            VolumeManager volMgr = new VolumeManager(contentStream);
+            foreach (var volume in volMgr.GetLogicalVolumes())
+            {
+                foreach (var fsInfo in FileSystemManager.DetectDefaultFileSystems(volume.Open()))
+                {
+                    if (fsInfo.Name == "NTFS")
+                    {
+                        using (NtfsFileSystem fs = new NtfsFileSystem(volume.Open()))
+                        {
+                            fs.UpdateBiosGeometry(newGeometry);
+                        }
+                    }
+                }
             }
         }
 

@@ -31,6 +31,7 @@ namespace DiscUtils.Common
     {
         private CommandLineParser _parser;
         private CommandLineSwitch _outFormatSwitch;
+        private CommandLineEnumSwitch<GenericDiskAdapterType> _adapterTypeSwitch;
         private CommandLineSwitch _userNameSwitch;
         private CommandLineSwitch _passwordSwitch;
         private CommandLineSwitch _partitionSwitch;
@@ -45,6 +46,7 @@ namespace DiscUtils.Common
         private string _password;
         private string _outputDiskType;
         private string _outputDiskVariant;
+        private GenericDiskAdapterType _adapterType;
         private int _partition = -1;
         private string _volumeId;
         private long _diskSize;
@@ -73,6 +75,11 @@ namespace DiscUtils.Common
             get { return _outputDiskVariant; }
         }
 
+        protected GenericDiskAdapterType AdapterType
+        {
+            get { return _adapterType; }
+        }
+
         protected bool Quiet
         {
             get { return _quietSwitch.IsPresent; }
@@ -98,6 +105,18 @@ namespace DiscUtils.Common
             get { return _diskSize; }
         }
 
+        protected VirtualDiskParameters DiskParameters
+        {
+            get
+            {
+                return new VirtualDiskParameters()
+                {
+                    AdapterType = AdapterType,
+                    Capacity = DiskSize,
+                };
+            }
+        }
+
         protected abstract StandardSwitches DefineCommandLine(CommandLineParser parser);
         protected virtual string[] HelpRemarks { get { return new string[] { }; } }
         protected abstract void DoRun();
@@ -108,10 +127,13 @@ namespace DiscUtils.Common
 
             StandardSwitches stdSwitches = DefineCommandLine(_parser);
 
-            if ((stdSwitches & StandardSwitches.OutputFormat) != 0)
+            if ((stdSwitches & StandardSwitches.OutputFormatAndAdapterType) != 0)
             {
                 _outFormatSwitch = OutputFormatSwitch();
+                _adapterTypeSwitch = new CommandLineEnumSwitch<GenericDiskAdapterType>("a", "adaptortype", "type", GenericDiskAdapterType.Ide, "Some disk formats encode the disk type (IDE or SCSI) into the disk image, this parameter specifies the type of adaptor to encode.");
+
                 _parser.AddSwitch(_outFormatSwitch);
+                _parser.AddSwitch(_adapterTypeSwitch);
             }
 
             if ((stdSwitches & StandardSwitches.DiskSize) != 0)
@@ -164,7 +186,7 @@ namespace DiscUtils.Common
                 return;
             }
 
-            if ((stdSwitches & StandardSwitches.OutputFormat) != 0)
+            if ((stdSwitches & StandardSwitches.OutputFormatAndAdapterType) != 0)
             {
                 if (_outFormatSwitch.IsPresent)
                 {
@@ -176,6 +198,15 @@ namespace DiscUtils.Common
                 {
                     DisplayHelp();
                     return;
+                }
+
+                if (_adapterTypeSwitch.IsPresent)
+                {
+                    _adapterType = _adapterTypeSwitch.EnumValue;
+                }
+                else
+                {
+                    _adapterType = GenericDiskAdapterType.Ide;
                 }
             }
 
@@ -272,6 +303,21 @@ namespace DiscUtils.Common
                 optional);
         }
 
+        protected static void ShowProgress(string label, long totalBytes, DateTime startTime, object sourceObject, PumpProgressEventArgs e)
+        {
+            int progressLen = 55 - label.Length;
+
+            int numProgressChars = (int)((e.BytesRead * progressLen) / totalBytes);
+            string progressBar = new string('=', numProgressChars) + new string(' ', progressLen - numProgressChars);
+
+            DateTime now = DateTime.Now;
+            TimeSpan timeSoFar = now - startTime;
+
+            TimeSpan remaining = TimeSpan.FromMilliseconds((timeSoFar.TotalMilliseconds / (double)e.BytesRead) * (totalBytes - e.BytesRead));
+
+            Console.Write("\r{0} ({1,3}%)  |{2}| {3:hh\\:mm\\:ss\\.f}", label, (e.BytesRead * 100) / totalBytes, progressBar, remaining, remaining.TotalHours, remaining.Minutes, remaining.Seconds, remaining.Milliseconds);
+        }
+
         private CommandLineSwitch OutputFormatSwitch()
         {
             List<string> outputTypes = new List<string>();
@@ -316,7 +362,7 @@ namespace DiscUtils.Common
         {
             Default = 0,
             UserAndPassword = 1,
-            OutputFormat = 2,
+            OutputFormatAndAdapterType = 2,
             Verbose = 4,
             PartitionOrVolume = 8,
             DiskSize = 16

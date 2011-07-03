@@ -22,11 +22,64 @@
 
 namespace DiscUtils.Vmdk
 {
+    using System;
+
     /// <summary>
     /// The parameters used to create a new VMDK file.
     /// </summary>
     public sealed class DiskParameters
     {
+        /// <summary>
+        /// Initializes a new instance of the DiskParameters class with default values.
+        /// </summary>
+        public DiskParameters()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the DiskParameters class with generic parameters.
+        /// </summary>
+        /// <param name="genericParameters">The generic parameters to copy</param>
+        public DiskParameters(VirtualDiskParameters genericParameters)
+        {
+            Capacity = genericParameters.Capacity;
+            Geometry = genericParameters.Geometry;
+            BiosGeometry = genericParameters.BiosGeometry;
+
+            string stringCreateType;
+            if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyCreateType, out stringCreateType))
+            {
+                CreateType = (DiskCreateType)Enum.Parse(typeof(DiskCreateType), stringCreateType);
+            }
+            else
+            {
+                CreateType = DiskCreateType.MonolithicSparse;
+            }
+
+            if (genericParameters.AdapterType == GenericDiskAdapterType.Ide)
+            {
+                AdapterType = DiskAdapterType.Ide;
+            }
+            else
+            {
+                string stringAdapterType;
+                if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyAdapterType, out stringAdapterType))
+                {
+                    AdapterType = (DiskAdapterType)Enum.Parse(typeof(DiskAdapterType), stringAdapterType);
+
+                    // Don't refining sub-type of SCSI actually select IDE
+                    if (AdapterType == DiskAdapterType.Ide)
+                    {
+                        AdapterType = DiskAdapterType.LsiLogicScsi;
+                    }
+                }
+                else
+                {
+                    AdapterType = DiskAdapterType.LsiLogicScsi;
+                }
+            }
+        }
+
         /// <summary>
         /// Gets or sets the capacity of the virtual disk.
         /// </summary>

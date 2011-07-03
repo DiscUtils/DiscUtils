@@ -40,14 +40,14 @@ namespace DiscUtils.Vdi
             throw new NotImplementedException();
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
         {
             switch (variant)
             {
                 case "fixed":
-                    return Disk.InitializeFixed(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity);
+                    return Disk.InitializeFixed(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, diskParameters.Capacity);
                 case "dynamic":
-                    return Disk.InitializeDynamic(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity);
+                    return Disk.InitializeDynamic(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, diskParameters.Capacity);
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VDI disk variant '{0}'", variant), "variant");
             }

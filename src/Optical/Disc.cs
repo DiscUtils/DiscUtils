@@ -83,6 +83,14 @@ namespace DiscUtils.Optical
         }
 
         /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public override VirtualDiskType DiskType
+        {
+            get { return VirtualDiskType.OpticalDisk; }
+        }
+
+        /// <summary>
         /// Gets the sector size of the disk (2048 for optical discs).
         /// </summary>
         public override int BlockSize

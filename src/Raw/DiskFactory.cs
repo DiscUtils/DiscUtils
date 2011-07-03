@@ -39,9 +39,9 @@ namespace DiscUtils.Raw
             throw new NotSupportedException();
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
         {
-            return Disk.Initialize(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, capacity, geometry);
+            return Disk.Initialize(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, diskParameters.Capacity, diskParameters.Geometry);
         }
 
         public override VirtualDisk OpenDisk(string path, FileAccess access)

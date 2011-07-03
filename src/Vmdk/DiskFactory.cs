@@ -60,11 +60,9 @@ namespace DiscUtils.Vmdk
             return builder;
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
         {
-            DiskParameters vmdkParams = new DiskParameters();
-            vmdkParams.Capacity = capacity;
-            vmdkParams.Geometry = geometry;
+            DiskParameters vmdkParams = new DiskParameters(diskParameters);
 
             switch (variant)
             {

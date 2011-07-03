@@ -80,6 +80,14 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public abstract VirtualDiskType DiskType
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
         public abstract long Capacity
@@ -162,6 +170,25 @@ namespace DiscUtils
             }
         }
 
+        /// <summary>
+        /// Gets the parameters of the disk.
+        /// </summary>
+        /// <remarks>Most of the parameters are also available individually, such as DiskType and Capacity.</remarks>
+        public virtual VirtualDiskParameters Parameters
+        {
+            get
+            {
+                return new VirtualDiskParameters()
+                {
+                    DiskType = DiskType,
+                    Capacity = Capacity,
+                    Geometry = Geometry,
+                    BiosGeometry = BiosGeometry,
+                    AdapterType = GenericDiskAdapterType.Ide
+                };
+            }
+        }
+
         private static Dictionary<string, VirtualDiskFactory> ExtensionMap
         {
             get
@@ -235,7 +262,15 @@ namespace DiscUtils
         public static VirtualDisk CreateDisk(DiscFileSystem fileSystem, string type, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
         {
             VirtualDiskFactory factory = TypeMap[type];
-            return factory.CreateDisk(new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path)), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), capacity, geometry, parameters ?? new Dictionary<string, string>());
+
+            VirtualDiskParameters diskParams = new VirtualDiskParameters()
+            {
+                AdapterType = GenericDiskAdapterType.Scsi,
+                Capacity = capacity,
+                Geometry = geometry,
+            };
+
+            return factory.CreateDisk(new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path)), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), diskParams);
         }
 
         /// <summary>
@@ -267,6 +302,36 @@ namespace DiscUtils
         /// <returns>The newly created disk</returns>
         public static VirtualDisk CreateDisk(string type, string variant, string path, long capacity, Geometry geometry, string user, string password, Dictionary<string, string> parameters)
         {
+            VirtualDiskParameters diskParams = new VirtualDiskParameters()
+            {
+                AdapterType = GenericDiskAdapterType.Scsi,
+                Capacity = capacity,
+                Geometry = geometry,
+            };
+
+            if (parameters != null)
+            {
+                foreach (var key in parameters.Keys)
+                {
+                    diskParams.ExtendedParameters[key] = parameters[key];
+                }
+            }
+
+            return CreateDisk(type, variant, path, diskParams, user, password);
+        }
+
+        /// <summary>
+        /// Create a new virtual disk.
+        /// </summary>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
+        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <param name="diskParameters">Parameters controlling the capacity, geometry, etc of the new disk.</param>
+        /// <param name="user">The user identity to use when accessing the <c>path</c> (or null)</param>
+        /// <param name="password">The password to use when accessing the <c>path</c> (or null)</param>
+        /// <returns>The newly created disk</returns>
+        public static VirtualDisk CreateDisk(string type, string variant, string path, VirtualDiskParameters diskParameters, string user, string password)
+        {
             Uri uri = PathToUri(path);
             VirtualDisk result = null;
 
@@ -288,7 +353,7 @@ namespace DiscUtils
                 {
                     VirtualDiskFactory factory = TypeMap[type];
 
-                    result = factory.CreateDisk(transport.GetFileLocator(), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), capacity, geometry, parameters ?? new Dictionary<string, string>());
+                    result = factory.CreateDisk(transport.GetFileLocator(), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), diskParameters);
                 }
 
                 if (result != null)

@@ -67,6 +67,14 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public override VirtualDiskType DiskType
+        {
+            get { return VirtualDiskType.HardDisk; }
+        }
+
+        /// <summary>
         /// The capacity of the disk.
         /// </summary>
         public override long Capacity

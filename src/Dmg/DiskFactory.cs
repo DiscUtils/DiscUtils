@@ -39,7 +39,7 @@ namespace DiscUtils.Dmg
             throw new NotSupportedException();
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
         {
             throw new NotSupportedException();
         }

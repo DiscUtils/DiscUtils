@@ -634,8 +634,10 @@
     <Compile Include="VirtualDiskFactory.cs" />
     <Compile Include="VirtualDiskFactoryAttribute.cs" />
     <Compile Include="VirtualDiskLayer.cs" />
+    <Compile Include="VirtualDiskParameters.cs" />
     <Compile Include="VirtualDiskTransport.cs" />
     <Compile Include="VirtualDiskTransportAttribute.cs" />
+    <Compile Include="VirtualDiskType.cs" />
     <Compile Include="Vmdk\CommonSparseExtentHeader.cs" />
     <Compile Include="Vmdk\CommonSparseExtentStream.cs" />
     <Compile Include="Vmdk\CompressedGrainHeader.cs" />

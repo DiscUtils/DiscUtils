@@ -88,6 +88,11 @@ namespace DiskClone
             }
         }
 
+        public override VirtualDiskType DiskType
+        {
+            get { return VirtualDiskType.HardDisk; }
+        }
+
         public override long Capacity
         {
             get

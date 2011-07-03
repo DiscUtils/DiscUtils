@@ -54,14 +54,14 @@ namespace DiscUtils.Vhd
             return builder;
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
         {
             switch (variant)
             {
                 case "fixed":
-                    return Disk.InitializeFixed(locator, path, capacity, geometry);
+                    return Disk.InitializeFixed(locator, path, diskParameters.Capacity, diskParameters.Geometry);
                 case "dynamic":
-                    return Disk.InitializeDynamic(locator, path, capacity, geometry, DynamicHeader.DefaultBlockSize);
+                    return Disk.InitializeDynamic(locator, path, diskParameters.Capacity, diskParameters.Geometry, DynamicHeader.DefaultBlockSize);
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
             }

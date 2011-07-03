@@ -276,6 +276,14 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets the IDE/SCSI adapter type of the disk.
+        /// </summary>
+        internal DiskAdapterType AdapterType
+        {
+            get { return _descriptor.AdapterType; }
+        }
+
+        /// <summary>
         /// Gets the 'CreateType' of this disk.
         /// </summary>
         internal DiskCreateType CreateType

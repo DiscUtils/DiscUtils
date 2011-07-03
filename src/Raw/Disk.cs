@@ -93,6 +93,14 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public override VirtualDiskType DiskType
+        {
+            get { return _file.DiskType; }
+        }
+
+        /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
         public override long Capacity

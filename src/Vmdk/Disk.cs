@@ -31,6 +31,9 @@ namespace DiscUtils.Vmdk
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
+        internal const string ExtendedParameterKeyAdapterType = "VMDK.AdapterType";
+        internal const string ExtendedParameterKeyCreateType = "VMDK.CreateType";
+
         /// <summary>
         /// The list of files that make up the disk.
         /// </summary>
@@ -122,6 +125,14 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public override VirtualDiskType DiskType
+        {
+            get { return VirtualDiskType.HardDisk; }
+        }
+
+        /// <summary>
         /// Gets the capacity of this disk (in bytes).
         /// </summary>
         public override long Capacity
@@ -151,6 +162,32 @@ namespace DiscUtils.Vmdk
                 }
 
                 return _content;
+            }
+        }
+
+        /// <summary>
+        /// Gets the parameters of the disk.
+        /// </summary>
+        /// <remarks>Most of the parameters are also available individually, such as DiskType and Capacity.</remarks>
+        public override VirtualDiskParameters Parameters
+        {
+            get
+            {
+                DiskImageFile file = (DiskImageFile)_files[_files.Count - 1].First;
+
+                VirtualDiskParameters diskParams = new VirtualDiskParameters()
+                {
+                    DiskType = DiskType,
+                    Capacity = Capacity,
+                    Geometry = Geometry,
+                    BiosGeometry = BiosGeometry,
+                    AdapterType = file.AdapterType == DiskAdapterType.Ide ? GenericDiskAdapterType.Ide : GenericDiskAdapterType.Scsi
+                };
+
+                diskParams.ExtendedParameters[ExtendedParameterKeyAdapterType] = file.AdapterType.ToString();
+                diskParams.ExtendedParameters[ExtendedParameterKeyCreateType] = file.CreateType.ToString();
+
+                return diskParams;
             }
         }
 
