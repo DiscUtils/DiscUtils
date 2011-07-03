@@ -509,7 +509,16 @@ namespace DiscUtils.Partitions
                 if (record.IsValid)
                 {
                     ChsAddress newStartAddress = geometry.ToChsAddress(record.LBAStartAbsolute);
+                    if (newStartAddress.Cylinder > 1023)
+                    {
+                        newStartAddress = new ChsAddress(1023, geometry.HeadsPerCylinder - 1, geometry.SectorsPerTrack);
+                    }
+
                     ChsAddress newEndAddress = geometry.ToChsAddress(record.LBAStartAbsolute + record.LBALength - 1);
+                    if (newEndAddress.Cylinder > 1023)
+                    {
+                        newEndAddress = new ChsAddress(1023, geometry.HeadsPerCylinder - 1, geometry.SectorsPerTrack);
+                    }
 
                     record.StartCylinder = (ushort)newStartAddress.Cylinder;
                     record.StartHead = (byte)newStartAddress.Head;
