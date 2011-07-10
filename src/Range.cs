@@ -66,6 +66,50 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Merges sets of ranges into chunks.
+        /// </summary>
+        /// <param name="ranges">The ranges to merge</param>
+        /// <param name="chunkSize">The size of each chunk</param>
+        /// <returns>Ranges combined into larger chunks</returns>
+        /// <typeparam name="T">The type of the offset and count in the ranges</typeparam>
+        public static IEnumerable<Range<T, T>> Chunked<T>(IEnumerable<Range<T, T>> ranges, T chunkSize)
+            where T : struct, IEquatable<T>, IComparable<T>
+        {
+            Nullable<T> chunkStart = Numbers<T>.Zero;
+            T chunkLength = Numbers<T>.Zero;
+
+            foreach (var range in ranges)
+            {
+                if (Numbers<T>.NotEqual(range.Count, Numbers<T>.Zero))
+                {
+                    T rangeStart = Numbers<T>.RoundDown(range.Offset, chunkSize);
+                    T rangeNext = Numbers<T>.RoundUp(Numbers<T>.Add(range.Offset, range.Count), chunkSize);
+
+                    if (chunkStart.HasValue && Numbers<T>.GreaterThan(rangeStart, Numbers<T>.Add(chunkStart.Value, chunkLength)))
+                    {
+                        // This extent is non-contiguous (in terms of blocks), so write out the last range and start new
+                        yield return new Range<T, T>(chunkStart.Value, chunkLength);
+                        chunkStart = rangeStart;
+                    }
+                    else if (!chunkStart.HasValue)
+                    {
+                        // First extent, so start first range
+                        chunkStart = rangeStart;
+                    }
+
+                    // Set the length of the current range, based on the end of this extent
+                    chunkLength = Numbers<T>.Subtract(rangeNext, chunkStart.Value);
+                }
+            }
+
+            // Final range (if any ranges at all) hasn't been returned yet, so do that now
+            if (chunkStart.HasValue)
+            {
+                yield return new Range<T, T>(chunkStart.Value, chunkLength);
+            }
+        }
+
+        /// <summary>
         /// Returns a string representation of the extent as [start:+length].
         /// </summary>
         /// <returns>The string representation</returns>

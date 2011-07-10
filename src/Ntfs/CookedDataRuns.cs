@@ -30,6 +30,9 @@ namespace DiscUtils.Ntfs
     {
         private List<CookedDataRun> _runs;
 
+        private int _firstDirty = int.MaxValue;
+        private int _lastDirty = 0;
+
         public CookedDataRuns()
         {
             _runs = new List<CookedDataRun>();
@@ -53,22 +56,6 @@ namespace DiscUtils.Ntfs
                 {
                     int lastRun = _runs.Count - 1;
                     return _runs[lastRun].StartVcn + _runs[lastRun].Length;
-                }
-            }
-        }
-
-        public long LastLogicalCluster
-        {
-            get
-            {
-                if (_runs.Count == 0)
-                {
-                    return 0;
-                }
-                else
-                {
-                    int lastRun = _runs.Count - 1;
-                    return _runs[lastRun].StartLcn + (_runs[lastRun].IsSparse ? 0 : _runs[lastRun].Length - 1);
                 }
             }
         }
@@ -100,11 +87,29 @@ namespace DiscUtils.Ntfs
 
         public int FindDataRun(long vcn, int startIdx)
         {
-            for (int i = startIdx; i < _runs.Count; ++i)
+            int numRuns = _runs.Count;
+            if (numRuns > 0)
             {
-                if (_runs[i].StartVcn + _runs[i].Length > vcn)
+                CookedDataRun run = _runs[numRuns - 1];
+                if (vcn >= run.StartVcn)
                 {
-                    return i;
+                    if (run.StartVcn + run.Length > vcn)
+                    {
+                        return numRuns - 1;
+                    }
+                    else
+                    {
+                        throw new IOException("Looking for VCN outside of data runs");
+                    }
+                }
+
+                for (int i = startIdx; i < numRuns; ++i)
+                {
+                    run = _runs[i];
+                    if (run.StartVcn + run.Length > vcn)
+                    {
+                        return i;
+                    }
                 }
             }
 
@@ -131,6 +136,16 @@ namespace DiscUtils.Ntfs
 
         public void MakeSparse(int index)
         {
+            if (index < _firstDirty)
+            {
+                _firstDirty = index;
+            }
+
+            if (index > _lastDirty)
+            {
+                _lastDirty = index;
+            }
+
             long prevLcn = index == 0 ? 0 : _runs[index - 1].StartLcn;
             CookedDataRun run = _runs[index];
 
@@ -154,6 +169,16 @@ namespace DiscUtils.Ntfs
 
         public void MakeNonSparse(int index, IEnumerable<DataRun> rawRuns)
         {
+            if (index < _firstDirty)
+            {
+                _firstDirty = index;
+            }
+
+            if (index > _lastDirty)
+            {
+                _lastDirty = index;
+            }
+
             long prevLcn = index == 0 ? 0 : _runs[index - 1].StartLcn;
             CookedDataRun run = _runs[index];
 
@@ -200,6 +225,16 @@ namespace DiscUtils.Ntfs
 
         public void SplitRun(int runIdx, long vcn)
         {
+            if (runIdx < _firstDirty)
+            {
+                _firstDirty = runIdx;
+            }
+
+            if (runIdx > _lastDirty)
+            {
+                _lastDirty = runIdx;
+            }
+
             CookedDataRun run = _runs[runIdx];
 
             if (run.StartVcn >= vcn || run.StartVcn + run.Length <= vcn)
@@ -233,31 +268,20 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Truncates the set of data runs
         /// </summary>
-        /// <param name="length">The desired length (in clusters)</param>
-        public void Truncate(long length)
+        /// <param name="index">The first run to be truncated</param>
+        public void TruncateAt(int index)
         {
-            int i = 0;
-            while (i < _runs.Count && _runs[i].StartVcn + _runs[i].Length <= length)
+            while (index < _runs.Count)
             {
-                ++i;
-            }
-
-            if (i < _runs.Count && _runs[i].StartVcn < length)
-            {
-                _runs[i].DataRun.RunLength = length - _runs[i].StartVcn;
-                ++i;
-            }
-
-            while (i < _runs.Count)
-            {
-                _runs.RemoveAt(i);
+                _runs[index].AttributeExtent.RemoveRun(_runs[index].DataRun);
+                _runs.RemoveAt(index);
             }
         }
 
         internal void CollapseRuns()
         {
-            int i = 0;
-            while (i < _runs.Count - 1)
+            int i = _firstDirty > 1 ? _firstDirty - 1 : 0;
+            while (i < _runs.Count - 1 && i <= _lastDirty + 1)
             {
                 if (_runs[i].IsSparse && _runs[i + 1].IsSparse)
                 {
@@ -289,6 +313,9 @@ namespace DiscUtils.Ntfs
                     ++i;
                 }
             }
+
+            _firstDirty = int.MaxValue;
+            _lastDirty = 0;
         }
     }
 }

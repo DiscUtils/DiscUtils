@@ -372,6 +372,8 @@
     <Compile Include="Ntfs\BiosParameterBlock.cs" />
     <Compile Include="Ntfs\Bitmap.cs" />
     <Compile Include="Ntfs\ClusterBitmap.cs" />
+    <Compile Include="Ntfs\ClusterStream.cs" />
+    <Compile Include="Ntfs\CompressedClusterStream.cs" />
     <Compile Include="Ntfs\CookedDataRun.cs" />
     <Compile Include="Ntfs\CookedDataRuns.cs" />
     <Compile Include="Ntfs\DataRun.cs" />
@@ -409,6 +411,7 @@
     <Compile Include="Ntfs\LzWindowDictionary.cs" />
     <Compile Include="Ntfs\NonResidentAttributeBuffer.cs" />
     <Compile Include="Ntfs\NonResidentAttributeRecord.cs" />
+    <Compile Include="Ntfs\RawClusterStream.cs" />
     <Compile Include="Ntfs\NtfsContext.cs" />
     <Compile Include="Ntfs\MasterFileTable.cs" />
     <Compile Include="Ntfs\NtfsAttributeBuffer.cs" />
@@ -432,6 +435,7 @@
     <Compile Include="Ntfs\SecurityDescriptorRecord.cs" />
     <Compile Include="Ntfs\SecurityDescriptors.cs" />
     <Compile Include="Ntfs\ShortFileNameOption.cs" />
+    <Compile Include="Ntfs\SparseClusterStream.cs" />
     <Compile Include="Ntfs\StandardInformation.cs" />
     <Compile Include="Ntfs\StructuredNtfsAttribute.cs" />
     <Compile Include="Ntfs\UpperCase.cs" />
@@ -439,6 +443,7 @@
     <Compile Include="Ntfs\VolumeInformationFlags.cs" />
     <Compile Include="Ntfs\VolumeName.cs" />
     <Compile Include="ObjectCache.cs" />
+    <Compile Include="Numbers.cs" />
     <Compile Include="Optical\Disc.cs" />
     <Compile Include="Optical\DiscFactory.cs" />
     <Compile Include="Optical\DiscImageFile.cs" />

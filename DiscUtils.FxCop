@@ -80,16 +80,6 @@
    </Namespace>
    <Namespace Name="DiscUtils.Compression">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2010-09-17 21:18:15Z">
-      <Issue>
-       <Item>DiscUtils.Compression</Item>
-      </Issue>
-      <Notes>
-       <User Name="Kenneth">
-        <Note Id="130" />
-       </User>
-      </Notes>
-     </Message>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2010-09-17 21:18:15Z">
       <Issue Name="Namespace">
        <Item>Utils</Item>
@@ -1234,21 +1224,6 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="169" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#CreateDisk(System.String,System.String,System.String,System.Int64,DiscUtils.Geometry,System.String,System.String,System.Collections.Generic.Dictionary`2&lt;System.String,System.String&gt;)">
-            <Messages>
-             <Message TypeName="NormalizeStringsToUppercase" Category="Microsoft.Globalization" CheckId="CA1308" Status="Excluded" Created="2009-12-19 02:25:50Z">
-              <Issue Name="ToUpperInvariant">
-               <Item>'VirtualDisk.CreateDisk(string, string, string, long, Geometry, string, string, Dictionary&lt;string, string&gt;)'</Item>
-               <Item>'string.ToLowerInvariant()'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="98" />
                </User>
               </Notes>
              </Message>
@@ -8520,20 +8495,6 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ExtendedAttributes">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
-              <Issue>
-               <Item>'FileEntry.ExtendedAttributes'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="113" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#FileLinkCount">
             <Messages>
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2010-06-05 14:17:36Z">
@@ -8975,20 +8936,6 @@
             </Messages>
            </Member>
           </Members>
-         </Type>
-         <Type Name="ImplementationEntityIdentifier">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2010-06-05 14:17:36Z">
-            <Issue>
-             <Item>'ImplementationEntityIdentifier'</Item>
-            </Issue>
-            <Notes>
-             <User Name="Kenneth">
-              <Note Id="112" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
          </Type>
          <Type Name="InformationControlBlock">
           <Messages>
@@ -10291,24 +10238,6 @@
          </Type>
          <Type Name="DescriptorFile">
           <Members>
-           <Member Name="#AdapterType">
-            <Accessors>
-             <Accessor Name="#get_AdapterType()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
-                <Issue>
-                 <Item>'DescriptorFile.AdapterType.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="67" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
            <Member Name="#HardwareVersion">
             <Accessors>
              <Accessor Name="#get_HardwareVersion()">
@@ -10326,20 +10255,6 @@
               </Messages>
              </Accessor>
             </Accessors>
-           </Member>
-           <Member Name="#ParseAdapterType(System.String)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2009-05-23 13:41:59Z">
-              <Issue>
-               <Item>'DescriptorFile.ParseAdapterType(string)'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="67" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
            </Member>
            <Member Name="#ParseUuid(System.String)">
             <Messages>
@@ -10800,7 +10715,6 @@
     <Note Id="95" Modified="2009-12-18 14:06:58Z">Standard NFS-defined attributes.</Note>
     <Note Id="96" Modified="2009-12-18 14:26:08Z">Standard parts of NFS</Note>
     <Note Id="97" Modified="2009-12-19 02:26:50Z">Type is immutable</Note>
-    <Note Id="98" Modified="2009-12-19 02:34:33Z">Aesthetically prefer lower case in this instance.</Note>
     <Note Id="99" Modified="2009-12-19 10:58:59Z">Don't use hard link information, or reference counts as yet.</Note>
     <Note Id="100" Modified="2010-01-03 22:17:56Z">Variants are lower case</Note>
     <Note Id="101" Modified="2010-01-30 11:05:30Z">Deliberate catch of all exceptions as part of verification logic.</Note>
@@ -10832,7 +10746,6 @@
     <Note Id="127" Modified="2010-09-12 16:06:20Z">Defined part of file format</Note>
     <Note Id="128" Modified="2010-09-17 21:18:44Z">Part of Project Name</Note>
     <Note Id="129" Modified="2010-09-17 21:19:01Z">Calculated static field</Note>
-    <Note Id="130" Modified="2010-09-17 21:20:42Z">Logical separation</Note>
     <Note Id="131" Modified="2010-09-18 23:13:14Z">Physical storage type is byte</Note>
     <Note Id="132" Modified="2010-09-19 09:33:19Z">Complex names.</Note>
     <Note Id="133" Modified="2010-11-23 00:21:37Z">Symlink is a common name for symbolic links.</Note>

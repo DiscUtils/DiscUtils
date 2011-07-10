@@ -970,6 +970,30 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
+                if ((changedAttribs & FileAttributes.Compressed) != 0 && !dirEntry.IsDirectory)
+                {
+                    if ((newValue & FileAttributes.Compressed) == 0)
+                    {
+                        throw new ArgumentException("Attempt to remove compressed attribute from file", "newValue");
+                    }
+                    else
+                    {
+                        NtfsAttribute ntfsAttr = file.GetAttribute(AttributeType.Data, null);
+                        if ((ntfsAttr.Flags & AttributeFlags.Sparse) != 0)
+                        {
+                            throw new ArgumentException("Attempt to mark sparse file as compressed", "newValue");
+                        }
+
+                        ntfsAttr.Flags |= AttributeFlags.Compressed;
+                        if (ntfsAttr.IsNonResident)
+                        {
+                            ntfsAttr.CompressedDataSize = ntfsAttr.PrimaryRecord.AllocatedLength;
+                            ntfsAttr.CompressionUnitSize = 16;
+                            ((NonResidentAttributeBuffer)ntfsAttr.RawBuffer).AlignVirtualClusterCount();
+                        }
+                    }
+                }
+
                 UpdateStandardInformation(dirEntry, file, delegate(StandardInformation si) { si.FileAttributes = FileNameRecord.SetAttributes(newValue, si.FileAttributes); });
             }
         }

@@ -341,9 +341,9 @@ function TestNtfs
     $f.Attributes = "SparseFile,Archive"
     $s = $f.Open( [System.IO.FileMode]::Open )
     $s.Position = 64 * 1024
-    $s.Erase( 128 * 1024 )
+    $s.Clear( 128 * 1024 )
     $s.Position = (4 * $OneMB) - (64 * 1024)
-    $s.Erase(128 * 1024)
+    $s.Clear(128 * 1024)
     $s.Dispose()
 
     Checkpoint
