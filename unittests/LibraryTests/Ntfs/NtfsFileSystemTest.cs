@@ -392,6 +392,7 @@ namespace DiscUtils.Ntfs
                 ntfs.DeleteFile(@"DIR\file" + i + ".bin");
             }
 
+            // Create fragmented file (lots of small writes)
             using (var stream = ntfs.OpenFile(@"DIR\fragmented.bin", FileMode.Create, FileAccess.ReadWrite))
             {
                 for (int i = 0; i < 2500; ++i)
@@ -399,6 +400,28 @@ namespace DiscUtils.Ntfs
                     stream.Write(buffer, 0, buffer.Length);
                 }
             }
+
+            // Try a large write
+            byte[] largeWriteBuffer = new byte[200 * 1024];
+            for (int i = 0; i < largeWriteBuffer.Length / 4096; ++i)
+            {
+                largeWriteBuffer[i * 4096] = (byte)i;
+            }
+            using (var stream = ntfs.OpenFile(@"DIR\fragmented.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                stream.Position = stream.Length - largeWriteBuffer.Length;
+                stream.Write(largeWriteBuffer, 0, largeWriteBuffer.Length);
+            }
+
+            // And a large read
+            byte[] largeReadBuffer = new byte[largeWriteBuffer.Length];
+            using (var stream = ntfs.OpenFile(@"DIR\fragmented.bin", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                stream.Position = stream.Length - largeReadBuffer.Length;
+                stream.Read(largeReadBuffer, 0, largeReadBuffer.Length);
+            }
+
+            Assert.AreEqual(largeWriteBuffer, largeReadBuffer);
         }
 
         [Test]

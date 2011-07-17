@@ -321,7 +321,9 @@ namespace DiscUtils.Ntfs
             int totalWritten = 0;
             while (totalWritten < count)
             {
-                runIdx = _cookedRuns.FindDataRun(startVcn, runIdx);
+                long focusVcn = startVcn + totalWritten;
+
+                runIdx = _cookedRuns.FindDataRun(focusVcn, runIdx);
                 CookedDataRun run = _cookedRuns[runIdx];
 
                 if (run.IsSparse)
@@ -329,7 +331,6 @@ namespace DiscUtils.Ntfs
                     throw new NotImplementedException("Writing to sparse datarun");
                 }
 
-                long focusVcn = startVcn + totalWritten;
                 int toWrite = (int)Math.Min(count - totalWritten, run.Length - (focusVcn - run.StartVcn));
 
                 long lcn = _cookedRuns[runIdx].StartLcn + (focusVcn - run.StartVcn);
