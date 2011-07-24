@@ -407,6 +407,8 @@ namespace DiscUtils.Ntfs
                 throw new InvalidOperationException("Attempt to delete in-use file: " + ToString());
             }
 
+            _context.ForgetFile(this);
+
             NtfsStream objIdStream = GetStream(AttributeType.ObjectId, null);
             if (objIdStream != null)
             {
@@ -414,44 +416,39 @@ namespace DiscUtils.Ntfs
                 Context.ObjectIds.Remove(objId.Id);
             }
 
+            // Truncate attributes, allowing for truncation silently removing the AttributeList attribute
+            // in some cases (large file with all attributes first extent in the first MFT record).  This
+            // releases all allocated clusters in most cases.
+            List<NtfsAttribute> truncateAttrs = new List<NtfsAttribute>(_attributes.Count);
             foreach (var attr in _attributes)
+            {
+                if (attr.Type != AttributeType.AttributeList)
+                {
+                    truncateAttrs.Add(attr);
+                }
+            }
+
+            foreach (NtfsAttribute attr in truncateAttrs)
             {
                 attr.GetDataBuffer().SetCapacity(0);
             }
 
-            AttributeRecord attrListRec = _records[0].GetAttribute(AttributeType.AttributeList);
-            if (attrListRec != null)
+            // If the attribute list record remains, free any possible clusters it owns.  We've now freed
+            // all clusters.
+            NtfsAttribute attrList = GetAttribute(AttributeType.AttributeList, null);
+            if (attrList != null)
             {
-                StructuredNtfsAttribute<AttributeList> attrList = (StructuredNtfsAttribute<AttributeList>)GetAttribute(new AttributeReference(MftReference, attrListRec.AttributeId));
-                foreach (var record in attrList.Content)
-                {
-                    FileRecord attrFileRecord = _records[0];
-                    if (record.BaseFileReference.MftIndex != _records[0].MasterFileTableIndex)
-                    {
-                        attrFileRecord = _context.Mft.GetRecord(record.BaseFileReference);
-                    }
-
-                    if (attrFileRecord != null)
-                    {
-                        attrFileRecord.RemoveAttribute(record.AttributeId);
-                        if (attrFileRecord.Attributes.Count == 0)
-                        {
-                            _context.Mft.RemoveRecord(record.BaseFileReference);
-                        }
-                    }
-                }
+                attrList.GetDataBuffer().SetCapacity(0);
             }
 
-            List<AttributeRecord> records = new List<AttributeRecord>(_records[0].Attributes);
-            foreach (var record in records)
+            // Now go through the MFT records, freeing them up
+            foreach (var mftRecord in _records)
             {
-                _records[0].RemoveAttribute(record.AttributeId);
+                _context.Mft.RemoveRecord(mftRecord.Reference);
             }
 
             _attributes.Clear();
-
-            _context.Mft.RemoveRecord(MftReference);
-            _context.ForgetFile(this);
+            _records.Clear();
         }
 
         public bool StreamExists(AttributeType attrType, string name)
@@ -586,7 +583,8 @@ namespace DiscUtils.Ntfs
             {
                 fileRec.RemoveAttribute(extentRef.AttributeId);
 
-                if (fileRec.Attributes.Count == 0)
+                // Remove empty non-primary MFT records
+                if (fileRec.Attributes.Count == 0 && fileRec.BaseFile.Value != 0)
                 {
                     RemoveFileRecord(extentRef.File);
                 }

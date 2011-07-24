@@ -317,8 +317,24 @@ function TestNtfs
 
     Checkpoint
 
-    "Cleaning fragmented file"
+    "Removing fragmented file"
     Remove-Item "vd:\Volume0\fragfile.bin"
+
+    Checkpoint
+
+    "Recreating fragmented file"
+    New-Item -type file "vd:\Volume0\fragfile.bin"
+    Set-Content "vd:\Volume0\fragfile.bin" $FragFileBigBlock
+    Add-Content "vd:\Volume0\fragfile.bin" $ClusterData
+
+    Checkpoint
+
+    "Removing fragmented file"
+    Remove-Item "vd:\Volume0\fragfile.bin"
+
+    Checkpoint
+
+    "Removing scattered files"
     for($i = 0; $i -lt $NumFiles; $i++)
     {
         if(Test-Path "vd:\Volume0\file${i}.bin")
