@@ -29,6 +29,10 @@ namespace DiscUtils.Ntfs
 
     internal sealed class SecurityDescriptors : IDiagnosticTraceable
     {
+        // File consists of pairs of duplicate blocks (one after the other), providing
+        // redundancy.  When a pair is full, the next pair is used.
+        private const int BlockSize = 0x40000;
+
         private File _file;
         private IndexView<HashIndexKey, HashIndexData> _hashIndex;
         private IndexView<IdIndexKey, IdIndexData> _idIndex;
@@ -115,21 +119,25 @@ namespace DiscUtils.Ntfs
             record.SecurityDescriptor = newByteForm;
             record.Hash = newHash;
             record.Id = _nextId;
+
+            // If we'd overflow into our duplicate block, skip over it to the
+            // start of the next block
+            if (((offset + record.Size) / BlockSize) % 2 == 1)
+            {
+                _nextSpace = Utilities.RoundUp(offset, BlockSize * 2);
+                offset = _nextSpace;
+            }
+
             record.OffsetInFile = offset;
 
             byte[] buffer = new byte[record.Size];
             record.WriteTo(buffer, 0);
 
-            if (offset + buffer.Length > 0x40000)
-            {
-                throw new NotImplementedException("Excessive number of security descriptors - running into redundant storage area");
-            }
-
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.ReadWrite))
             {
                 s.Position = _nextSpace;
                 s.Write(buffer, 0, buffer.Length);
-                s.Position = 0x40000 + _nextSpace;
+                s.Position = BlockSize + _nextSpace;
                 s.Write(buffer, 0, buffer.Length);
             }
 
