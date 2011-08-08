@@ -25,6 +25,7 @@ namespace DiscUtils.Ntfs
     using System;
     using System.IO;
     using System.Security.AccessControl;
+    using System.Security.Principal;
 
     internal class NtfsFormatter
     {
@@ -47,12 +48,18 @@ namespace DiscUtils.Ntfs
 
         public byte[] BootCode { get; set; }
 
+        public SecurityIdentifier ComputerAccount { get; set; }
+
         public NtfsFileSystem Format(Stream stream)
         {
             _context = new NtfsContext();
             _context.Options = new NtfsOptions();
             _context.RawStream = stream;
             _context.AttributeDefinitions = new AttributeDefinitions();
+
+            string localAdminString = (ComputerAccount == null)
+                    ? "LA"
+                    : new SecurityIdentifier(WellKnownSidType.AccountAdministratorSid, ComputerAccount).ToString();
 
             using (new NtfsTransaction())
             {
@@ -127,7 +134,7 @@ namespace DiscUtils.Ntfs
                 volNameStream.SetContent(new VolumeName(Label ?? "New Volume"));
                 NtfsStream volInfoStream = volumeFile.CreateStream(AttributeType.VolumeInformation, null);
                 volInfoStream.SetContent(new VolumeInformation(3, 1, VolumeInformationFlags.None));
-                SetSecurityAttribute(volumeFile, "O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)");
+                SetSecurityAttribute(volumeFile, "O:" + localAdminString + "G:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)");
                 volumeFile.UpdateRecordInMft();
 
                 _context.GetFileByIndex = delegate(long index) { return new File(_context, _context.Mft.GetRecord(index, false)); };
@@ -135,11 +142,11 @@ namespace DiscUtils.Ntfs
 
                 File attrDefFile = CreateSystemFile(MasterFileTable.AttrDefIndex);
                 _context.AttributeDefinitions.WriteTo(attrDefFile);
-                SetSecurityAttribute(attrDefFile, "O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)");
+                SetSecurityAttribute(attrDefFile, "O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)");
                 attrDefFile.UpdateRecordInMft();
 
                 File bootFile = CreateFixedSystemFile(MasterFileTable.BootIndex, 0, (uint)numBootClusters, false);
-                SetSecurityAttribute(bootFile, "O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)");
+                SetSecurityAttribute(bootFile, "O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)");
                 bootFile.UpdateRecordInMft();
 
                 File badClusFile = CreateSystemFile(MasterFileTable.BadClusIndex);
@@ -186,7 +193,7 @@ namespace DiscUtils.Ntfs
                 rootDir.AddEntry(secureFile, "$Secure", FileNameNamespace.Win32AndDos);
                 rootDir.AddEntry(upcaseFile, "$UpCase", FileNameNamespace.Win32AndDos);
                 rootDir.AddEntry(extendDir, "$Extend", FileNameNamespace.Win32AndDos);
-                SetSecurityAttribute(rootDir, "O:LAG:BUD:(A;OICI;FA;;;BA)(A;OICI;FA;;;SY)(A;OICIIO;GA;;;CO)(A;OICI;0x1200a9;;;BU)(A;CI;LC;;;BU)(A;CIIO;DC;;;BU)(A;;0x1200a9;;;WD)");
+                SetSecurityAttribute(rootDir, "O:" + localAdminString + "G:BUD:(A;OICI;FA;;;BA)(A;OICI;FA;;;SY)(A;OICIIO;GA;;;CO)(A;OICI;0x1200a9;;;BU)(A;CI;LC;;;BU)(A;CIIO;DC;;;BU)(A;;0x1200a9;;;WD)");
                 rootDir.UpdateRecordInMft();
 
                 // A number of records are effectively 'reserved'
@@ -201,17 +208,17 @@ namespace DiscUtils.Ntfs
             // XP-style security permissions setup
             NtfsFileSystem ntfs = new NtfsFileSystem(stream);
 
-            ntfs.SetSecurity(@"$MFT", new RawSecurityDescriptor("O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
-            ntfs.SetSecurity(@"$MFTMirr", new RawSecurityDescriptor("O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
-            ntfs.SetSecurity(@"$LogFile", new RawSecurityDescriptor("O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
-            ntfs.SetSecurity(@"$Bitmap", new RawSecurityDescriptor("O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
-            ntfs.SetSecurity(@"$BadClus", new RawSecurityDescriptor("O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
-            ntfs.SetSecurity(@"$UpCase", new RawSecurityDescriptor("O:LAG:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
-            ntfs.SetSecurity(@"$Secure", new RawSecurityDescriptor("O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
-            ntfs.SetSecurity(@"$Extend", new RawSecurityDescriptor("O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
-            ntfs.SetSecurity(@"$Extend\$Quota", new RawSecurityDescriptor("O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
-            ntfs.SetSecurity(@"$Extend\$ObjId", new RawSecurityDescriptor("O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
-            ntfs.SetSecurity(@"$Extend\$Reparse", new RawSecurityDescriptor("O:LAG:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
+            ntfs.SetSecurity(@"$MFT", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
+            ntfs.SetSecurity(@"$MFTMirr", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
+            ntfs.SetSecurity(@"$LogFile", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
+            ntfs.SetSecurity(@"$Bitmap", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
+            ntfs.SetSecurity(@"$BadClus", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
+            ntfs.SetSecurity(@"$UpCase", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));
+            ntfs.SetSecurity(@"$Secure", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
+            ntfs.SetSecurity(@"$Extend", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
+            ntfs.SetSecurity(@"$Extend\$Quota", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
+            ntfs.SetSecurity(@"$Extend\$ObjId", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
+            ntfs.SetSecurity(@"$Extend\$Reparse", new RawSecurityDescriptor("O:" + localAdminString + "G:BAD:(A;;0x12019f;;;SY)(A;;0x12019f;;;BA)"));
 
             ntfs.CreateDirectory("System Volume Information");
             ntfs.SetAttributes("System Volume Information", FileAttributes.Hidden | FileAttributes.System | FileAttributes.Directory);
