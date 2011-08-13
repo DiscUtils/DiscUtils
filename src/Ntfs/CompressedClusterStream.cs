@@ -120,7 +120,7 @@ namespace DiscUtils.Ntfs
                 if (cuStart == focusVcn && count - totalWritten >= _attr.CompressionUnitSize)
                 {
                     // Aligned write...
-                    CompressAndWriteClusters(focusVcn, count, buffer, offset + (totalWritten * _bytesPerCluster));
+                    CompressAndWriteClusters(focusVcn, _attr.CompressionUnitSize, buffer, offset + (totalWritten * _bytesPerCluster));
 
                     totalWritten += _attr.CompressionUnitSize;
                 }
