@@ -23,7 +23,9 @@
 namespace DiscUtils.Partitions
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
 
     /// <summary>
     /// Base class for classes which represent a disk partitioning scheme.
@@ -33,6 +35,8 @@ namespace DiscUtils.Partitions
     /// the partitions to discover the next index-to-partition mapping.</remarks>
     public abstract class PartitionTable
     {
+        private static List<PartitionTableFactory> s_factories;
+
         /// <summary>
         /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
         /// </summary>
@@ -59,6 +63,67 @@ namespace DiscUtils.Partitions
         public PartitionInfo this[int index]
         {
             get { return Partitions[index]; }
+        }
+
+        /// <summary>
+        /// Determines if a disk is partitioned with a known partitioning scheme.
+        /// </summary>
+        /// <param name="content">The content of the disk to check</param>
+        /// <returns><c>true</c> if the disk is partitioned, else <c>false</c>.</returns>
+        public static bool IsPartitioned(Stream content)
+        {
+            foreach (var partTableFactory in Factories)
+            {
+                if (partTableFactory.DetectIsPartitioned(content))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if a disk is partitioned with a known partitioning scheme.
+        /// </summary>
+        /// <param name="disk">The disk to check</param>
+        /// <returns><c>true</c> if the disk is partitioned, else <c>false</c>.</returns>
+        public static bool IsPartitioned(VirtualDisk disk)
+        {
+            return IsPartitioned(disk.Content);
+        }
+
+        /// <summary>
+        /// Gets all of the partition tables found on a disk.
+        /// </summary>
+        /// <param name="disk">The disk to inspect</param>
+        /// <returns>It is rare for a disk to have multiple partition tables, but theoretically
+        /// possible.</returns>
+        public static IList<PartitionTable> GetPartitionTables(VirtualDisk disk)
+        {
+            List<PartitionTable> tables = new List<PartitionTable>();
+
+            foreach (var factory in Factories)
+            {
+                PartitionTable table = factory.DetectPartitionTable(disk);
+                if (table != null)
+                {
+                    tables.Add(table);
+                }
+            }
+
+            return tables;
+        }
+
+        /// <summary>
+        /// Gets all of the partition tables found on a disk.
+        /// </summary>
+        /// <param name="contentStream">The content of the disk to inspect</param>
+        /// <returns>It is rare for a disk to have multiple partition tables, but theoretically
+        /// possible.</returns>
+        public static IList<PartitionTable> GetPartitionTables(Stream contentStream)
+        {
+            return GetPartitionTables(new Raw.Disk(contentStream, Ownership.None));
         }
 
         /// <summary>
@@ -116,5 +181,28 @@ namespace DiscUtils.Partitions
         /// </summary>
         /// <param name="index">The index of the partition</param>
         public abstract void Delete(int index);
+
+        private static List<PartitionTableFactory> Factories
+        {
+            get
+            {
+                if (s_factories == null)
+                {
+                    List<PartitionTableFactory> factories = new List<PartitionTableFactory>();
+
+                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    {
+                        foreach (PartitionTableFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(PartitionTableFactoryAttribute), false))
+                        {
+                            factories.Add((PartitionTableFactory)Activator.CreateInstance(type));
+                        }
+                    }
+
+                    s_factories = factories;
+                }
+
+                return s_factories;
+            }
+        }
     }
 }

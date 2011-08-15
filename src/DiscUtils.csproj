@@ -77,6 +77,10 @@
     <Compile Include="..\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
+    <Compile Include="ApplePartitionMap\BlockZero.cs" />
+    <Compile Include="ApplePartitionMap\PartitionMap.cs" />
+    <Compile Include="ApplePartitionMap\PartitionMapEntry.cs" />
+    <Compile Include="ApplePartitionMap\PartitionMapFactory.cs" />
     <Compile Include="BigEndianDataReader.cs" />
     <Compile Include="BigEndianDataWriter.cs" />
     <Compile Include="Block.cs" />
@@ -459,15 +463,18 @@
     <Compile Include="Partitions\BiosPartitionTable.cs" />
     <Compile Include="Partitions\BiosPartitionTypes.cs" />
     <Compile Include="Partitions\Crc32.cs" />
+    <Compile Include="Partitions\DefaultPartitionTableFactory.cs" />
     <Compile Include="Partitions\GptEntry.cs" />
     <Compile Include="Partitions\GptHeader.cs" />
     <Compile Include="Partitions\GuidPartitionInfo.cs" />
     <Compile Include="Partitions\GuidPartitionTable.cs" />
     <Compile Include="Partitions\GuidPartitionTypes.cs" />
+    <Compile Include="Partitions\PartitionTableFactoryAttribute.cs" />
     <Compile Include="Partitions\PartitionInfo.cs" />
     <Compile Include="Partitions\PartitionTable.cs" />
     <Compile Include="Partitions\WellKnownPartitionType.cs" />
     <Compile Include="PassthroughStreamBuilder.cs" />
+    <Compile Include="Partitions\PartitionTableFactory.cs" />
     <Compile Include="PhysicalVolumeInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PumpProgressEventArgs.cs" />
