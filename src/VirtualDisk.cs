@@ -148,24 +148,54 @@ namespace DiscUtils
         /// invalid data, such as overlapping partitions.</remarks>
         public virtual bool IsPartitioned
         {
-            get { return BiosPartitionTable.IsValid(Content); }
+            get { return PartitionTable.IsPartitioned(Content); }
         }
 
         /// <summary>
         /// Gets the object that interprets the partition structure.
         /// </summary>
+        /// <remarks>It is theoretically possible for a disk to contain two independant partition structures - a
+        /// BIOS/GPT one and an Apple one, for example.  This method will return in order of preference,
+        /// a GUID partition table, a BIOS partition table, then in undefined preference one of any other partition
+        /// tables found.  See PartitionTable.GetPartitionTables to gain access to all the discovered partition
+        /// tables on a disk.</remarks>
         public virtual PartitionTable Partitions
         {
             get
             {
-                BiosPartitionTable table = new BiosPartitionTable(this);
-                if (table.Count == 1 && table[0].BiosType == BiosPartitionTypes.GptProtective)
+                IList<PartitionTable> tables = PartitionTable.GetPartitionTables(this);
+                if (tables == null || tables.Count == 0)
                 {
-                    return new GuidPartitionTable(this);
+                    return null;
+                }
+                else if (tables.Count == 1)
+                {
+                    return tables[0];
                 }
                 else
                 {
-                    return table;
+                    PartitionTable best = null;
+                    int bestScore = -1;
+                    for (int i = 0; i < tables.Count; ++i)
+                    {
+                        int newScore = 0;
+                        if (tables[i] is GuidPartitionTable)
+                        {
+                            newScore = 2;
+                        }
+                        else if (tables[i] is BiosPartitionTable)
+                        {
+                            newScore = 1;
+                        }
+
+                        if (newScore > bestScore)
+                        {
+                            bestScore = newScore;
+                            best = tables[i];
+                        }
+                    }
+
+                    return best;
                 }
             }
         }

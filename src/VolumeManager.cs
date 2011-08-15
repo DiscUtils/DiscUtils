@@ -276,12 +276,15 @@ namespace DiscUtils
                 VirtualDisk disk = _disks[i];
                 string diskId = GetDiskId(i);
 
-                if (disk.IsPartitioned)
+                if (PartitionTable.IsPartitioned(disk.Content))
                 {
-                    foreach (var part in disk.Partitions.Partitions)
+                    foreach (var table in PartitionTable.GetPartitionTables(disk.Content))
                     {
-                        PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(diskId, disk, part);
-                        result.Add(pvi.Identity, pvi);
+                        foreach (var part in table.Partitions)
+                        {
+                            PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(diskId, disk, part);
+                            result.Add(pvi.Identity, pvi);
+                        }
                     }
                 }
                 else
