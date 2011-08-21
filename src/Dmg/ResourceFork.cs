@@ -50,6 +50,21 @@ namespace DiscUtils.Dmg
             return false;
         }
 
+        public IList<Resource> GetAllResources(string type)
+        {
+            List<Resource> results = new List<Resource>();
+
+            foreach (var res in _resources)
+            {
+                if (res.Type == type)
+                {
+                    results.Add(res);
+                }
+            }
+
+            return results;
+        }
+
         internal static ResourceFork FromPlist(Dictionary<string, object> plist)
         {
             object typesObject;

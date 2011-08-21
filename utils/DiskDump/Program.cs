@@ -252,9 +252,10 @@ namespace DiskDump
                     {
                         foreach (var fsi in fileSystemInfos)
                         {
-                            Console.WriteLine("    Files ({0})...", fsi.Name);
                             using (DiscFileSystem fs = fsi.Open(vol))
                             {
+                                Console.WriteLine("    {0} Volume Label: {1}", fsi.Name, fs.VolumeLabel);
+                                Console.WriteLine("    Files ({0})...", fsi.Name);
                                 ShowDir(fs.Root, 6);
                             }
                             Console.WriteLine();
@@ -310,15 +311,27 @@ namespace DiskDump
 
         private static void ShowDir(DiscDirectoryInfo dirInfo, int indent)
         {
-            Console.WriteLine("{0}{1,-50} [{2}]", new String(' ', indent), dirInfo.FullName, dirInfo.CreationTimeUtc);
+            Console.WriteLine("{0}{1,-50} [{2}]", new String(' ', indent), CleanName(dirInfo.FullName), dirInfo.CreationTimeUtc);
             foreach (DiscDirectoryInfo subDir in dirInfo.GetDirectories())
             {
                 ShowDir(subDir, indent + 0);
             }
             foreach (DiscFileInfo file in dirInfo.GetFiles())
             {
-                Console.WriteLine("{0}{1,-50} [{2}]", new String(' ', indent), file.FullName, file.CreationTimeUtc);
+                Console.WriteLine("{0}{1,-50} [{2}]", new String(' ', indent), CleanName(file.FullName), file.CreationTimeUtc);
             }
+        }
+
+        private static char[] BadNameChars = { '\r', '\n', '\0' };
+
+        private static string CleanName(string name)
+        {
+            if (name.IndexOfAny(BadNameChars) >= 0)
+            {
+                return name.Replace('\r', '?').Replace('\n', '?').Replace('\0', '?');
+            }
+
+            return name;
         }
     }
 }

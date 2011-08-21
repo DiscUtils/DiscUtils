@@ -47,12 +47,9 @@ namespace DiscUtils.Dmg
 
             _blocks = new List<CompressedBlock>();
 
-            Resource resource;
-            int i = -1;
-            while (_resources.TryGetResource("blkx", i, out resource))
+            foreach (var resource in _resources.GetAllResources("blkx"))
             {
                 _blocks.Add(((BlkxResource)resource).Block);
-                ++i;
             }
         }
 

@@ -100,7 +100,8 @@ namespace DiscUtils.Dmg
 
             if (_buffer != null)
             {
-                return new BufferStream(_buffer, FileAccess.Read);
+                SparseStream rawStream = new BufferStream(_buffer, FileAccess.Read);
+                return new BlockCacheStream(rawStream, Ownership.Dispose);
             }
             else
             {
