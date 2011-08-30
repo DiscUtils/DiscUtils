@@ -30,12 +30,12 @@ namespace DiscUtils.Ntfs
     public sealed class NtfsFormatOptions
     {
         /// <summary>
-        /// Gets and sets the NTFS bootloader code to put in the formatted file system.
+        /// Gets or sets the NTFS bootloader code to put in the formatted file system.
         /// </summary>
         public byte[] BootCode { get; set; }
 
         /// <summary>
-        /// Gets and sets the SID of the computer account that notionally formatted the file system.
+        /// Gets or sets the SID of the computer account that notionally formatted the file system.
         /// </summary>
         /// <remarks>
         /// Certain ACLs in the file system will refer to the 'local' administrator of the indicated
