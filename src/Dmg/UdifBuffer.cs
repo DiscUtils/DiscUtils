@@ -120,15 +120,37 @@ namespace DiscUtils.Dmg
 
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
+            StreamExtent lastRun = null;
+
             foreach (var block in _blocks)
             {
                 foreach (var run in block.Runs)
                 {
                     if (run.SectorCount > 0 && run.Type != RunType.Zeros)
                     {
-                        yield return new StreamExtent((block.FirstSector + run.SectorStart) * Sizes.Sector, run.SectorCount * Sizes.Sector);
+                        long thisRunStart = (block.FirstSector + run.SectorStart) * Sizes.Sector;
+                        long thisRunLength = run.SectorCount * Sizes.Sector;
+
+                        if (lastRun != null && lastRun.Start + lastRun.Length == thisRunStart)
+                        {
+                            lastRun = new StreamExtent(lastRun.Start, lastRun.Length + thisRunLength);
+                        }
+                        else
+                        {
+                            if (lastRun != null)
+                            {
+                                yield return lastRun;
+                            }
+
+                            lastRun = new StreamExtent(thisRunStart, thisRunLength);
+                        }
                     }
                 }
+            }
+
+            if (lastRun != null)
+            {
+                yield return lastRun;
             }
         }
 
