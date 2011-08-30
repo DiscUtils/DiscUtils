@@ -55,6 +55,29 @@ namespace DiscUtils.Partitions
             get { return Partitions.Count; }
         }
 
+        private static List<PartitionTableFactory> Factories
+        {
+            get
+            {
+                if (s_factories == null)
+                {
+                    List<PartitionTableFactory> factories = new List<PartitionTableFactory>();
+
+                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    {
+                        foreach (PartitionTableFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(PartitionTableFactoryAttribute), false))
+                        {
+                            factories.Add((PartitionTableFactory)Activator.CreateInstance(type));
+                        }
+                    }
+
+                    s_factories = factories;
+                }
+
+                return s_factories;
+            }
+        }
+
         /// <summary>
         /// Gets information about a particular User partition.
         /// </summary>
@@ -181,28 +204,5 @@ namespace DiscUtils.Partitions
         /// </summary>
         /// <param name="index">The index of the partition</param>
         public abstract void Delete(int index);
-
-        private static List<PartitionTableFactory> Factories
-        {
-            get
-            {
-                if (s_factories == null)
-                {
-                    List<PartitionTableFactory> factories = new List<PartitionTableFactory>();
-
-                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
-                    {
-                        foreach (PartitionTableFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(PartitionTableFactoryAttribute), false))
-                        {
-                            factories.Add((PartitionTableFactory)Activator.CreateInstance(type));
-                        }
-                    }
-
-                    s_factories = factories;
-                }
-
-                return s_factories;
-            }
-        }
     }
 }

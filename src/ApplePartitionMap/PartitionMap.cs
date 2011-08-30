@@ -36,7 +36,7 @@ namespace DiscUtils.ApplePartitionMap
         private PartitionMapEntry[] _partitions;
 
         /// <summary>
-        /// Creates a new instance of PartitionMap.
+        /// Initializes a new instance of the PartitionMap class.
         /// </summary>
         /// <param name="stream">Stream contaning the contents of a disk</param>
         public PartitionMap(Stream stream)
