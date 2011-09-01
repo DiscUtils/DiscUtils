@@ -328,6 +328,21 @@
               This is the 'Dynamic Disk' support in Windows.  Striped, Mirrored and Spanned volumes are supported.  RAID is not supported.
             </entry>
           </row>
+
+          <row>
+            <!-- Scheme -->
+            <entry>Apple Partition Map (APM)</entry>
+            <!-- Access Volumes -->
+            <entry>Yes</entry>
+            <!-- Create and Delete Volumes -->
+            <entry>No</entry>
+            <!-- Initialize -->
+            <entry>No</entry>
+            <!-- Notes -->
+            <entry>
+              This is the classic Mac partition table.
+            </entry>
+          </row>
         </table>
 
         <para>
@@ -395,6 +410,14 @@
             <entry>No</entry>
             <entry>Yes</entry>
             <entry>Not all features of SquashFS are supported.</entry>
+          </row>
+          <row>
+            <entry>HFS+</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>This is only support for the HFS+, not the earlier HFS nor HFSX</entry>
           </row>
         </table>
       </content>

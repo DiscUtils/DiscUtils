@@ -35,21 +35,6 @@ namespace DiscUtils.Dmg
             _resources = resources;
         }
 
-        public bool TryGetResource(string type, int id, out Resource result)
-        {
-            foreach (var res in _resources)
-            {
-                if (res.Type == type && res.Id == id)
-                {
-                    result = res;
-                    return true;
-                }
-            }
-
-            result = null;
-            return false;
-        }
-
         public IList<Resource> GetAllResources(string type)
         {
             List<Resource> results = new List<Resource>();

@@ -63,6 +63,31 @@
  </Rules>
  <FxCopReport Version="10.0">
   <Namespaces>
+   <Namespace Name="DiscUtils.ApplePartitionMap">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2011-09-01 08:21:58Z">
+      <Issue>
+       <Item>DiscUtils.ApplePartitionMap</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="177" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-09-01 08:21:58Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.ApplePartitionMap</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="176" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.BootConfig">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-10-04 18:13:37Z">
@@ -952,6 +977,94 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="Numbers`1">
+          <Members>
+           <Member Name="#Ceil">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Numbers&lt;T&gt;.Ceil'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="180" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ConvertInt">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Numbers&lt;T&gt;.ConvertInt'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="180" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ConvertLong">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Numbers&lt;T&gt;.ConvertLong'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="180" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Divide">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Numbers&lt;T&gt;.Divide'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="180" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Multiply">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Numbers&lt;T&gt;.Multiply'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="180" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#One">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Numbers&lt;T&gt;.One'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="180" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="PhysicalVolumeType">
           <Members>
            <Member Name="#GptPartition">
@@ -964,6 +1077,40 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="83" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Range`2">
+          <Members>
+           <Member Name="#Chunked`1(System.Collections.Generic.IEnumerable`1&lt;DiscUtils.Range`2&lt;!!0,!!0&gt;&gt;,!!0)">
+            <Messages>
+             <Message TypeName="DoNotDeclareStaticMembersOnGenericTypes" Category="Microsoft.Design" CheckId="CA1000" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Range&lt;TOffset, TCount&gt;.Chunked&lt;T&gt;(IEnumerable&lt;Range&lt;T, T&gt;&gt;, T)'</Item>
+               <Item>'Range&lt;TOffset, TCount&gt;'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="181" />
+               </User>
+              </Notes>
+             </Message>
+             <Message TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'Range&lt;TOffset, TCount&gt;.Chunked&lt;T&gt;(IEnumerable&lt;Range&lt;T, T&gt;&gt;, T)'</Item>
+               <Item>'IEnumerable&lt;Range&lt;T, T&gt;&gt;'</Item>
+              </Issue>
+              <Issue>
+               <Item>'Range&lt;TOffset, TCount&gt;.Chunked&lt;T&gt;(IEnumerable&lt;Range&lt;T, T&gt;&gt;, T)'</Item>
+               <Item>'IEnumerable&lt;Range&lt;T, T&gt;&gt;'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="181" />
                </User>
               </Notes>
              </Message>
@@ -1246,6 +1393,186 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="169" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="DiscUtils.ApplePartitionMap">
+        <Types>
+         <Type Name="BlockZero">
+          <Members>
+           <Member Name="#BlockCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'BlockZero.BlockCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BlockSize">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'BlockZero.BlockSize'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceId">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'BlockZero.DeviceId'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DeviceType">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'BlockZero.DeviceType'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DriverCount">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'BlockZero.DriverCount'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#DriverData">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'BlockZero.DriverData'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PartitionMapEntry">
+          <Members>
+           <Member Name="#BootBlock">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'PartitionMapEntry.BootBlock'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BootBytes">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'PartitionMapEntry.BootBytes'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'PartitionMapEntry.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LogicalBlocks">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'PartitionMapEntry.LogicalBlocks'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#LogicalBlockStart">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'PartitionMapEntry.LogicalBlockStart'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Name">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'PartitionMapEntry.Name'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="178" />
                </User>
               </Notes>
              </Message>
@@ -2674,6 +3001,24 @@
                 <Notes>
                  <User Name="Kenneth">
                   <Note Id="127" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#Id">
+            <Accessors>
+             <Accessor Name="#get_Id()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-09-01 08:21:58Z">
+                <Issue>
+                 <Item>'Resource.Id.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="182" />
                  </User>
                 </Notes>
                </Message>
@@ -7908,6 +8253,28 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="NonResidentAttributeRecord">
+          <Members>
+           <Member Name="#CompressedDataSize">
+            <Accessors>
+             <Accessor Name="#get_CompressedDataSize()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-09-01 08:21:58Z">
+                <Issue>
+                 <Item>'NonResidentAttributeRecord.CompressedDataSize.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="183" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="NtfsAttribute">
           <Members>
            <Member Name="#CompressedDataSize">
@@ -8005,6 +8372,24 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="43" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="NtfsFormatOptions">
+          <Members>
+           <Member Name="#BootCode">
+            <Messages>
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Status="Excluded" Created="2011-09-01 08:21:58Z">
+              <Issue>
+               <Item>'NtfsFormatOptions.BootCode'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="179" />
                </User>
               </Notes>
              </Message>
@@ -11725,6 +12110,14 @@
     <Note Id="173" Modified="2011-08-30 08:26:57Z">Follows pattern</Note>
     <Note Id="174" Modified="2011-08-30 08:28:36Z">HFS+ is well-known name.</Note>
     <Note Id="175" Modified="2011-08-30 08:31:12Z">Defined part of HFS+ filesystem.</Note>
+    <Note Id="176" Modified="2011-09-01 08:22:22Z">DiscUtils is name of project</Note>
+    <Note Id="177" Modified="2011-09-01 08:22:40Z">Following library rules.</Note>
+    <Note Id="178" Modified="2011-09-01 08:22:59Z">Defined parts of APM</Note>
+    <Note Id="179" Modified="2011-09-01 08:23:46Z">Deliberately using byte array here</Note>
+    <Note Id="180" Modified="2011-09-01 08:24:36Z">Part of numbers class to permit generic integer handling.</Note>
+    <Note Id="181" Modified="2011-09-01 08:28:19Z">Deliberate use of generics.</Note>
+    <Note Id="182" Modified="2011-09-01 08:30:26Z">Part of defined structure.</Note>
+    <Note Id="183" Modified="2011-09-01 08:31:58Z">Is used.</Note>
    </User>
   </Notes>
   <Rules>
@@ -11758,6 +12151,9 @@
    </Rule>
    <Rule TypeName="DoNotDeclareReadOnlyMutableReferenceTypes" Category="Microsoft.Security" CheckId="CA2104">
     <Resolution Name="Default">Remove the read-only designation from {0} or change the field to one that is an immutable reference type. If the reference type {1} is, in fact, immutable, exclude this message.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotDeclareStaticMembersOnGenericTypes" Category="Microsoft.Design" CheckId="CA1000">
+    <Resolution Name="Default">Remove {0} from {1} or make it an instance member.</Resolution>
    </Rule>
    <Rule TypeName="DoNotNestGenericTypesInMemberSignatures" Category="Microsoft.Design" CheckId="CA1006">
     <Resolution Name="Default">Consider a design where {0} doesn't nest generic type {1}.</Resolution>
