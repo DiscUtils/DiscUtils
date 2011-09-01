@@ -68,7 +68,9 @@ Common / Utility classes are in the top-level namespace.</ProjectSummary>
 <NamespaceSummaryItem name="DiscUtils.Ntfs.Internals" isDocumented="True">Classes providing access read-only access to the internals of NTFS file systems.
 
 Few people should need to use these classes, they're mostly useful for writing 'undelete' applications / similar that need to bypass the normal NTFS sematics.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="DiscUtils.SquashFs" isDocumented="True">Classes implementing the SquashFS file system.</NamespaceSummaryItem></NamespaceSummaries>
+<NamespaceSummaryItem name="DiscUtils.SquashFs" isDocumented="True">Classes implementing the SquashFS file system.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.ApplePartitionMap" isDocumented="True">Classes to access an Apple Partition Map (APM)</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.HfsPlus" isDocumented="True">Classes to access the contents of a HFS+ file system (read-only)</NamespaceSummaryItem></NamespaceSummaries>
     <SyntaxFilters>CSharp</SyntaxFilters>
     <SdkLinkType>Msdn</SdkLinkType>
     <IndentHtml>True</IndentHtml>
