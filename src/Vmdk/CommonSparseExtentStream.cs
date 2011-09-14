@@ -93,6 +93,11 @@ namespace DiscUtils.Vmdk
         /// </summary>
         protected bool _atEof;
 
+        /// <summary>
+        /// Cache of recently used grain tables.
+        /// </summary>
+        private ObjectCache<int, byte[]> _grainTableCache = new ObjectCache<int, byte[]>();
+
         public override bool CanRead
         {
             get
@@ -378,6 +383,7 @@ namespace DiscUtils.Vmdk
 
         protected bool LoadGrainTable(int index)
         {
+            // Current grain table, so early-out
             if (_grainTable != null && _currentGrainTable == index)
             {
                 return true;
@@ -389,18 +395,23 @@ namespace DiscUtils.Vmdk
                 return false;
             }
 
-            byte[] newGrainTable = _grainTable;
-            _grainTable = null;
-            if (newGrainTable == null)
+            // Cached grain table?
+            byte[] cachedGrainTable = _grainTableCache[index];
+            if (cachedGrainTable != null)
             {
-                newGrainTable = new byte[_header.NumGTEsPerGT * 4];
+                _currentGrainTable = index;
+                _grainTable = cachedGrainTable;
+                return true;
             }
 
+            // Not cached, so read
             _fileStream.Position = ((long)_globalDirectory[index]) * Sizes.Sector;
-            Utilities.ReadFully(_fileStream, newGrainTable, 0, newGrainTable.Length);
-
+            byte[] newGrainTable = Utilities.ReadFully(_fileStream, (int)_header.NumGTEsPerGT * 4);
             _currentGrainTable = index;
             _grainTable = newGrainTable;
+
+            _grainTableCache[index] = newGrainTable;
+
             return true;
         }
 
