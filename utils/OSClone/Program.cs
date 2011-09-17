@@ -88,8 +88,6 @@ namespace OSClone
                 destDisk.Signature = new Random().Next();
 
                 SparseStream sourcePartStream = SparseStream.FromStream(sourceDisk.Partitions[0].Open(), Ownership.None);
-                sourcePartStream = new BlockCacheStream(sourcePartStream, Ownership.None);
-
                 NtfsFileSystem sourceNtfs = new NtfsFileSystem(sourcePartStream);
 
                 // Copy the OS boot code into memory, so we can apply it when formatting the new disk

@@ -35,6 +35,7 @@ namespace DiscUtils.Ntfs
         private bool _hideDosFileNames;
         private ShortFileNameOption _shortNameCreation;
         private BlockCompressor _compressor;
+        private bool _readCache;
 
         internal NtfsOptions()
         {
@@ -43,6 +44,7 @@ namespace DiscUtils.Ntfs
             _hideSystemFiles = true;
             _hideDosFileNames = true;
             _compressor = new LZNT1();
+            _readCache = true;
         }
 
         /// <summary>
@@ -98,6 +100,15 @@ namespace DiscUtils.Ntfs
         {
             get { return _compressor; }
             set { _compressor = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether NTFS-level read caching is used.
+        /// </summary>
+        public bool ReadCacheEnabled
+        {
+            get { return _readCache; }
+            set { _readCache = value; }
         }
 
         /// <summary>

@@ -70,6 +70,13 @@ namespace DiscUtils.Ntfs
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
+            if (NtfsOptions.ReadCacheEnabled)
+            {
+                BlockCacheSettings cacheSettings = new BlockCacheSettings();
+                cacheSettings.BlockSize = _context.BiosParameterBlock.BytesPerCluster;
+                _context.RawStream = new BlockCacheStream(SparseStream.FromStream(stream, Ownership.None), Ownership.None, cacheSettings);
+            }
+
             // Bootstrap the Master File Table
             _context.Mft = new MasterFileTable(_context);
             File mftFile = new File(_context, _context.Mft.GetBootstrapRecord());
