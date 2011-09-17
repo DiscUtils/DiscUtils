@@ -1706,7 +1706,7 @@ namespace DiscUtils.Fat
             Utilities.WriteBytesLittleEndian(volId, bootSector, offset + 3);
 
             // Volume Label
-            Utilities.StringToBytes(label, bootSector, offset + 7, 11);
+            Utilities.StringToBytes(label + "           ", bootSector, offset + 7, 11);
 
             // File System Type
             Utilities.StringToBytes(fsType, bootSector, offset + 18, 8);
