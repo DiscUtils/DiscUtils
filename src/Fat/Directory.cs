@@ -299,7 +299,7 @@ namespace DiscUtils.Fat
             foreach (long id in _entries.Keys)
             {
                 DirectoryEntry focus = _entries[id];
-                if (focus.NormalizedName == name)
+                if (focus.NormalizedName == name && (focus.Attributes & FatAttributes.VolumeId) == 0)
                 {
                     return id;
                 }
