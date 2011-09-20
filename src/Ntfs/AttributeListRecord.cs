@@ -41,7 +41,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return Utilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : (Encoding.Unicode.GetByteCount(Name) / 2)), 8);
+                return Utilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)), 8);
             }
         }
 
