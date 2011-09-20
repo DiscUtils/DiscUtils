@@ -418,7 +418,7 @@ namespace DiscUtils
             for (int i = 0; i < numBlocks; ++i)
             {
                 int bufferPos = offset + bytesProcessed;
-                int bytesThisBlock = Math.Min(count - bufferPos, blockSize - offsetInNextBlock);
+                int bytesThisBlock = Math.Min(count - bytesProcessed, blockSize - offsetInNextBlock);
 
                 Block block;
                 if (_cache.TryGetBlock(firstBlock + i, out block))
