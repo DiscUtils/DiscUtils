@@ -124,25 +124,45 @@ namespace DiscUtils.Dmg
 
             foreach (var block in _blocks)
             {
+                if ((block.FirstSector + block.SectorCount) * Sizes.Sector < start)
+                {
+                    // Skip blocks before start of range
+                    continue;
+                }
+
+                if (block.FirstSector * Sizes.Sector > start + count)
+                {
+                    // Skip blocks after end of range
+                    continue;
+                }
+
                 foreach (var run in block.Runs)
                 {
                     if (run.SectorCount > 0 && run.Type != RunType.Zeros)
                     {
                         long thisRunStart = (block.FirstSector + run.SectorStart) * Sizes.Sector;
-                        long thisRunLength = run.SectorCount * Sizes.Sector;
+                        long thisRunEnd = thisRunStart + (run.SectorCount * Sizes.Sector);
 
-                        if (lastRun != null && lastRun.Start + lastRun.Length == thisRunStart)
+                        thisRunStart = Math.Max(thisRunStart, start);
+                        thisRunEnd = Math.Min(thisRunEnd, start + count);
+
+                        long thisRunLength = thisRunEnd - thisRunStart;
+
+                        if (thisRunLength > 0)
                         {
-                            lastRun = new StreamExtent(lastRun.Start, lastRun.Length + thisRunLength);
-                        }
-                        else
-                        {
-                            if (lastRun != null)
+                            if (lastRun != null && lastRun.Start + lastRun.Length == thisRunStart)
                             {
-                                yield return lastRun;
+                                lastRun = new StreamExtent(lastRun.Start, lastRun.Length + thisRunLength);
                             }
+                            else
+                            {
+                                if (lastRun != null)
+                                {
+                                    yield return lastRun;
+                                }
 
-                            lastRun = new StreamExtent(thisRunStart, thisRunLength);
+                                lastRun = new StreamExtent(thisRunStart, thisRunLength);
+                            }
                         }
                     }
                 }
