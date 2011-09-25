@@ -103,6 +103,11 @@ namespace DiscUtils.Partitions
             get { return _entry.Identity; }
         }
 
+        internal override PhysicalVolumeType VolumeType
+        {
+            get { return PhysicalVolumeType.GptPartition; }
+        }
+
         /// <summary>
         /// Opens a stream to access the content of the partition.
         /// </summary>

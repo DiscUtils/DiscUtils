@@ -77,6 +77,11 @@ namespace DiscUtils.ApplePartitionMap
             get { return Type; }
         }
 
+        internal override PhysicalVolumeType VolumeType
+        {
+            get { return PhysicalVolumeType.ApplePartition; }
+        }
+
         public override SparseStream Open()
         {
             return new SubStream(_diskStream, PhysicalBlockStart * 512, PhysicalBlocks * 512);

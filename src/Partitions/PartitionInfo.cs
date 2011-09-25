@@ -70,6 +70,14 @@ namespace DiscUtils.Partitions
         public abstract string TypeAsString { get; }
 
         /// <summary>
+        /// Gets the physical volume type for this type of partition.
+        /// </summary>
+        internal abstract PhysicalVolumeType VolumeType
+        {
+            get;
+        }
+
+        /// <summary>
         /// Opens a stream that accesses the partition's contents.
         /// </summary>
         /// <returns>The new stream.</returns>

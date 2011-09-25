@@ -119,6 +119,11 @@ namespace DiscUtils.Partitions
             get { return PrimaryIndex >= 0; }
         }
 
+        internal override PhysicalVolumeType VolumeType
+        {
+            get { return PhysicalVolumeType.BiosPartition; }
+        }
+
         /// <summary>
         /// Opens a stream to access the content of the partition.
         /// </summary>

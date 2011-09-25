@@ -49,7 +49,12 @@ namespace DiscUtils
         /// <summary>
         /// Physical volume is defined by a GUID partition table.
         /// </summary>
-        GptPartition
+        GptPartition,
+
+        /// <summary>
+        /// Physical volume is defined by an Apple partition map.
+        /// </summary>
+        ApplePartition
     }
 
     /// <summary>
@@ -78,7 +83,7 @@ namespace DiscUtils
             _diskId = diskId;
             _disk = disk;
             _streamOpener = partitionInfo.Open;
-            _type = (partitionInfo is GuidPartitionInfo) ? PhysicalVolumeType.GptPartition : PhysicalVolumeType.BiosPartition;
+            _type = partitionInfo.VolumeType;
             _partitionInfo = partitionInfo;
         }
 
@@ -162,6 +167,7 @@ namespace DiscUtils
                             partId = "PD";
                             break;
                         case PhysicalVolumeType.BiosPartition:
+                        case PhysicalVolumeType.ApplePartition:
                             partId = "PO" + (_partitionInfo.FirstSector * Sizes.Sector).ToString("X", CultureInfo.InvariantCulture);
                             break;
                         default:
