@@ -221,8 +221,10 @@ namespace DiscUtils.Ntfs
                     // Compressed data - read via IO buffer
                     _rawStream.ReadClusters(cuStart, _attr.CompressionUnitSize, _ioBuffer, 0);
 
+                    int expected = (int)Math.Min(_attr.Length - (vcn * _bytesPerCluster), _attr.CompressionUnitSize * _bytesPerCluster);
+
                     int decomp = _context.Options.Compressor.Decompress(_ioBuffer, 0, _ioBuffer.Length, _cacheBuffer, 0);
-                    if (decomp != _cacheBuffer.Length)
+                    if (decomp < expected)
                     {
                         throw new IOException("Decompression returned too little data");
                     }
