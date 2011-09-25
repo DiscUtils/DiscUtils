@@ -23,6 +23,7 @@
 namespace DiscUtils.LogicalDiskManager
 {
     using System;
+    using System.IO;
 
     internal class DynamicVolume
     {
@@ -62,7 +63,14 @@ namespace DiscUtils.LogicalDiskManager
 
         public SparseStream Open()
         {
-            return _group.OpenVolume(Record.Id);
+            if (Status == LogicalVolumeStatus.Failed)
+            {
+                throw new IOException("Attempt to open 'failed' volume");
+            }
+            else
+            {
+                return _group.OpenVolume(Record.Id);
+            }
         }
     }
 }
