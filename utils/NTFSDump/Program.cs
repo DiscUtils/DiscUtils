@@ -53,7 +53,7 @@ namespace NTFSDump
             parser.AddSwitch(_showSystem);
             parser.AddSwitch(_showMeta);
 
-            return StandardSwitches.UserAndPassword;
+            return StandardSwitches.UserAndPassword | StandardSwitches.PartitionOrVolume;
         }
 
         protected override void DoRun()
