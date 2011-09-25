@@ -83,12 +83,12 @@ namespace DiscUtils.Ext
 
         public override string VolumeLabel
         {
-            get { throw new System.NotImplementedException(); }
+            get { return Context.SuperBlock.VolumeName; }
         }
 
         public override string FriendlyName
         {
-            get { return Context.SuperBlock.VolumeName; }
+            get { return "EXT-family"; }
         }
 
         public UnixFileSystemInfo GetUnixFileInfo(string path)
