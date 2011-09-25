@@ -309,7 +309,7 @@ namespace DiscUtils
                 }
             }
 
-            if (_position >= Length)
+            if (_position >= Length && totalBytesRead == 0)
             {
                 _atEof = true;
             }
