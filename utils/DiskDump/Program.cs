@@ -198,6 +198,13 @@ namespace DiskDump
                     Console.WriteLine("    BIOS Geometry: " + vol.BiosGeometry);
                     Console.WriteLine("    First Sector: " + vol.PhysicalStartSector);
 
+                    if (vol.Status == LogicalVolumeStatus.Failed)
+                    {
+                        Console.WriteLine("    File Systems: <unknown - failed volume>");
+                        Console.WriteLine();
+                        continue;
+                    }
+
                     DiscUtils.FileSystemInfo[] fileSystemInfos = FileSystemManager.DetectDefaultFileSystems(vol);
                     Console.WriteLine("    File Systems: " + string.Join<DiscUtils.FileSystemInfo>(", ", fileSystemInfos));
 
