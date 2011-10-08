@@ -861,13 +861,13 @@ namespace DiscUtils.Ntfs
                     }
                     else
                     {
-                        DirectoryEntry parentDirEntry = GetDirectoryEntry(Utilities.GetDirectoryFromPath(path));
+                        DirectoryEntry parentDirEntry = GetDirectoryEntry(Utilities.GetDirectoryFromPath(dirEntryPath));
                         Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
                         File file = File.CreateNew(_context, parentDir.StandardInformation.FileAttributes);
                         try
                         {
-                            entry = AddFileToDirectory(file, parentDir, Utilities.GetFileFromPath(path));
+                            entry = AddFileToDirectory(file, parentDir, Utilities.GetFileFromPath(dirEntryPath));
 
                             RawSecurityDescriptor sd = DoGetSecurity(parentDir);
                             DoSetSecurity(file, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
