@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using NUnit.Framework;
 
 namespace DiscUtils.Fat
@@ -34,6 +35,46 @@ namespace DiscUtils.Fat
         {
             MemoryStream ms = new MemoryStream();
             FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "KBFLOPPY   ");
+        }
+
+        [Test]
+        public void Cyrillic()
+        {
+            string lowerDE = "\x0434";
+            string upperDE = "\x0414";
+
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "KBFLOPPY   ");
+            fs.FatOptions.FileNameEncoding = Encoding.GetEncoding(855);
+
+            string name = lowerDE;
+            fs.CreateDirectory(name);
+
+            string[] dirs = fs.GetDirectories("");
+            Assert.AreEqual(1, dirs.Length);
+            Assert.AreEqual(upperDE, dirs[0]); // Uppercase
+
+            Assert.IsTrue(fs.DirectoryExists(lowerDE));
+            Assert.IsTrue(fs.DirectoryExists(upperDE));
+        }
+
+        [Test]
+        public void DefaultCodepage()
+        {
+            string graphicChar = "\x255D";
+
+            MemoryStream ms = new MemoryStream();
+            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "KBFLOPPY   ");
+            fs.FatOptions.FileNameEncoding = Encoding.GetEncoding(855);
+
+            string name = graphicChar;
+            fs.CreateDirectory(name);
+
+            string[] dirs = fs.GetDirectories("");
+            Assert.AreEqual(1, dirs.Length);
+            Assert.AreEqual(graphicChar, dirs[0]); // Uppercase
+
+            Assert.IsTrue(fs.DirectoryExists(graphicChar));
         }
 
         [Test]

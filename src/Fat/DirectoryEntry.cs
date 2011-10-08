@@ -28,6 +28,7 @@ namespace DiscUtils.Fat
 
     internal class DirectoryEntry
     {
+        private FatFileSystemOptions _options;
         private string _name;
         private byte _attr;
         private byte _creationTimeTenth;
@@ -40,20 +41,23 @@ namespace DiscUtils.Fat
         private ushort _firstClusterLo;
         private uint _fileSize;
 
-        internal DirectoryEntry(Stream stream)
+        internal DirectoryEntry(FatFileSystemOptions options, Stream stream)
         {
+            _options = options;
             byte[] buffer = Utilities.ReadFully(stream, 32);
             Load(buffer, 0);
         }
 
-        internal DirectoryEntry(string name, FatAttributes attrs)
+        internal DirectoryEntry(FatFileSystemOptions options, string name, FatAttributes attrs)
         {
+            _options = options;
             _name = name;
             _attr = (byte)attrs;
         }
 
         internal DirectoryEntry(DirectoryEntry toCopy)
         {
+            _options = toCopy._options;
             _name = toCopy._name;
             _attr = toCopy._attr;
             _creationTimeTenth = toCopy._creationTimeTenth;
@@ -75,7 +79,7 @@ namespace DiscUtils.Fat
 
             set
             {
-                NormalizedName = FatUtilities.NormalizeFileName(value);
+                NormalizedName = FatUtilities.NormalizeFileName(_options.FileNameEncoding, value);
             }
         }
 
@@ -155,7 +159,11 @@ namespace DiscUtils.Fat
         {
             byte[] buffer = new byte[32];
 
-            Utilities.StringToBytes(_name, buffer, 0, 11);
+            if (_options.FileNameEncoding.GetBytes(_name, 0, 11, buffer, 0) > 11)
+            {
+                throw new IOException("File name cannot be represented in 11 bytes: " + _name);
+            }
+
             buffer[11] = _attr;
             buffer[13] = _creationTimeTenth;
             Utilities.WriteBytesLittleEndian((ushort)_creationTime, buffer, 14);
@@ -216,7 +224,7 @@ namespace DiscUtils.Fat
 
         private void Load(byte[] data, int offset)
         {
-            _name = Utilities.BytesToString(data, offset, 11);
+            _name = _options.FileNameEncoding.GetString(data, offset, 11);
             _attr = data[offset + 11];
             _creationTimeTenth = data[offset + 13];
             _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);

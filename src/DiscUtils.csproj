@@ -193,6 +193,7 @@
     <Compile Include="Fat\FatBuffer.cs" />
     <Compile Include="Fat\FatFileStream.cs" />
     <Compile Include="Fat\FatFileSystem.cs" />
+    <Compile Include="Fat\FatFileSystemOptions.cs" />
     <Compile Include="Fat\FatType.cs" />
     <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />

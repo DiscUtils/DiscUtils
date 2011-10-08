@@ -92,6 +92,7 @@ namespace DiscUtils.Fat
         /// Local time is the effective timezone of the new instance.
         /// </remarks>
         public FatFileSystem(Stream data)
+            : base(new FatFileSystemOptions())
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeConverter = DefaultTimeConverter;
@@ -108,6 +109,7 @@ namespace DiscUtils.Fat
         /// Local time is the effective timezone of the new instance.
         /// </remarks>
         public FatFileSystem(Stream data, Ownership ownsData)
+            : base(new FatFileSystemOptions())
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeConverter = DefaultTimeConverter;
@@ -121,6 +123,7 @@ namespace DiscUtils.Fat
         /// <param name="data">The stream containing the file system.</param>
         /// <param name="timeConverter">A delegate to convert to/from the file system's timezone.</param>
         public FatFileSystem(Stream data, TimeConverter timeConverter)
+            : base(new FatFileSystemOptions())
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeConverter = timeConverter;
@@ -135,6 +138,7 @@ namespace DiscUtils.Fat
         /// of <paramref name="data"/>.</param>
         /// <param name="timeConverter">A delegate to convert to/from the file system's timezone.</param>
         public FatFileSystem(Stream data, Ownership ownsData, TimeConverter timeConverter)
+            : base(new FatFileSystemOptions())
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeConverter = timeConverter;
@@ -143,6 +147,14 @@ namespace DiscUtils.Fat
         }
 
         private delegate void EntryUpdateAction(DirectoryEntry entry);
+
+        /// <summary>
+        /// Gets the FAT file system options, which can be modified.
+        /// </summary>
+        public FatFileSystemOptions FatOptions
+        {
+            get { return (FatFileSystemOptions)Options; }
+        }
 
         /// <summary>
         /// Gets the FAT variant of the file system.
@@ -689,7 +701,7 @@ namespace DiscUtils.Fat
             if (entryId < 0)
             {
                 string[] pathEntries = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
-                string normFileName = FatUtilities.NormalizeFileName(pathEntries[pathEntries.Length - 1]);
+                string normFileName = FatUtilities.NormalizeFileName(FatOptions.FileNameEncoding, pathEntries[pathEntries.Length - 1]);
                 return parent.OpenFile(normFileName, mode, access);
             }
 
@@ -1013,7 +1025,7 @@ namespace DiscUtils.Fat
             }
 
             DirectoryEntry newEntry = new DirectoryEntry(sourceEntry);
-            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(destinationFile);
+            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, destinationFile);
             newEntry.FirstCluster = 0;
 
             Directory destDir;
@@ -1030,7 +1042,7 @@ namespace DiscUtils.Fat
                 DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
                 if ((destEntry.Attributes & FatAttributes.Directory) != 0)
                 {
-                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(sourceFile);
+                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, sourceFile);
                     destinationFile = Utilities.CombinePaths(destinationFile, Utilities.GetFileFromPath(sourceFile));
 
                     destEntryId = GetDirectoryEntry(destinationFile, out destDir);
@@ -1082,7 +1094,7 @@ namespace DiscUtils.Fat
                 string normalizedName;
                 try
                 {
-                    normalizedName = FatUtilities.NormalizeFileName(pathElements[i]);
+                    normalizedName = FatUtilities.NormalizeFileName(FatOptions.FileNameEncoding, pathElements[i]);
                 }
                 catch (ArgumentException ae)
                 {
@@ -1370,7 +1382,7 @@ namespace DiscUtils.Fat
                 throw new IOException("Source directory doesn't exist");
             }
 
-            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(destinationDirectoryName), GetDirectory(sourceDirectoryName));
+            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, destinationDirectoryName), GetDirectory(sourceDirectoryName));
             sourceParent.DeleteEntry(sourceId, false);
         }
 
@@ -1398,7 +1410,7 @@ namespace DiscUtils.Fat
             }
 
             DirectoryEntry newEntry = new DirectoryEntry(sourceEntry);
-            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(destinationName);
+            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, destinationName);
 
             Directory destDir;
             long destEntryId = GetDirectoryEntry(destinationName, out destDir);
@@ -1414,7 +1426,7 @@ namespace DiscUtils.Fat
                 DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
                 if ((destEntry.Attributes & FatAttributes.Directory) != 0)
                 {
-                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(sourceName);
+                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, sourceName);
                     destinationName = Utilities.CombinePaths(destinationName, Utilities.GetFileFromPath(sourceName));
 
                     destEntryId = GetDirectoryEntry(destinationName, out destDir);
@@ -1858,7 +1870,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                entryId = dir.FindEntryByNormalizedName(FatUtilities.NormalizeFileName(pathEntries[pathOffset]));
+                entryId = dir.FindEntryByNormalizedName(FatUtilities.NormalizeFileName(FatOptions.FileNameEncoding, pathEntries[pathOffset]));
                 if (entryId >= 0)
                 {
                     if (pathOffset == pathEntries.Length - 1)

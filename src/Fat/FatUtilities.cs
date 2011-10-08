@@ -30,16 +30,16 @@ namespace DiscUtils.Fat
     {
         private const string SpecialPrivateChars = "$%'-_@~`!(){}^#&";
 
-        public static string NormalizedFileNameFromPath(string path)
+        public static string NormalizedFileNameFromPath(Encoding encoding, string path)
         {
             string[] elems = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
-            return NormalizeFileName(elems[elems.Length - 1]);
+            return NormalizeFileName(encoding, elems[elems.Length - 1]);
         }
 
-        public static string NormalizeFileName(string name)
+        public static string NormalizeFileName(Encoding encoding, string name)
         {
             // Put it through a conversion round-trip, to catch invalid characters
-            string roundTripped = Encoding.Default.GetString(Encoding.Default.GetBytes(name));
+            string roundTripped = encoding.GetString(encoding.GetBytes(name));
 
             /*
              * Divide the name from extension

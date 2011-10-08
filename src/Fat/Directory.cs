@@ -97,7 +97,7 @@ namespace DiscUtils.Fat
             {
                 if (_parent == null)
                 {
-                    return new DirectoryEntry(ParentEntryNormalizedName, FatAttributes.Directory);
+                    return new DirectoryEntry(_fileSystem.FatOptions, ParentEntryNormalizedName, FatAttributes.Directory);
                 }
                 else
                 {
@@ -121,7 +121,7 @@ namespace DiscUtils.Fat
                 if (_parent == null)
                 {
                     // If we're the root directory, simulate the parent entry with a dummy record
-                    return new DirectoryEntry(string.Empty, FatAttributes.Directory);
+                    return new DirectoryEntry(_fileSystem.FatOptions, string.Empty, FatAttributes.Directory);
                 }
                 else
                 {
@@ -243,7 +243,7 @@ namespace DiscUtils.Fat
 
                     _fileSystem.Fat.SetEndOfChain(firstCluster);
 
-                    DirectoryEntry newEntry = new DirectoryEntry(normalizedName, FatAttributes.Directory);
+                    DirectoryEntry newEntry = new DirectoryEntry(_fileSystem.FatOptions, normalizedName, FatAttributes.Directory);
                     newEntry.FirstCluster = firstCluster;
                     newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                     newEntry.LastWriteTime = newEntry.CreationTime;
@@ -341,7 +341,7 @@ namespace DiscUtils.Fat
             else if ((mode == FileMode.OpenOrCreate || mode == FileMode.CreateNew || mode == FileMode.Create) && !exists)
             {
                 // Create new file
-                DirectoryEntry newEntry = new DirectoryEntry(name, FatAttributes.Archive);
+                DirectoryEntry newEntry = new DirectoryEntry(_fileSystem.FatOptions, name, FatAttributes.Archive);
                 newEntry.FirstCluster = 0; // i.e. Zero-length
                 newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                 newEntry.LastWriteTime = newEntry.CreationTime;
@@ -439,7 +439,7 @@ namespace DiscUtils.Fat
             while (_dirStream.Position < _dirStream.Length)
             {
                 long streamPos = _dirStream.Position;
-                DirectoryEntry entry = new DirectoryEntry(_dirStream);
+                DirectoryEntry entry = new DirectoryEntry(_fileSystem.FatOptions, _dirStream);
 
                 if (entry.Attributes == (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
                 {
