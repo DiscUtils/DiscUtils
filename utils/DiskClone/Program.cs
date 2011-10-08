@@ -137,7 +137,15 @@ namespace DiskClone
 
 
             IVssBackupComponents backupCmpnts;
-            int status = NativeMethods.CreateVssBackupComponents(out backupCmpnts);
+            int status;
+            if (Marshal.SizeOf(typeof(IntPtr)) == 4)
+            {
+                status = NativeMethods.CreateVssBackupComponents(out backupCmpnts);
+            }
+            else
+            {
+                status = NativeMethods.CreateVssBackupComponents64(out backupCmpnts);
+            }
 
 
             Guid snapshotSetId = CreateSnapshotSet(cloneVolumes, backupCmpnts);

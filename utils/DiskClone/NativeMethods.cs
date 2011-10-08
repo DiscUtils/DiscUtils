@@ -44,6 +44,13 @@ namespace DiskClone
             out IVssBackupComponents vssBackupCmpnts
             );
 
+
+        [DllImport("vssapi.dll", EntryPoint = "?CreateVssBackupComponents@@YAJPEAPEAVIVssBackupComponents@@@Z")]
+        internal static extern int CreateVssBackupComponents64(
+            out IVssBackupComponents vssBackupCmpnts
+            );
+
+
         [DllImport("vssapi.dll")]
         internal static extern int VssFreeSnapshotProperties(IntPtr pProperties);
         #endregion
