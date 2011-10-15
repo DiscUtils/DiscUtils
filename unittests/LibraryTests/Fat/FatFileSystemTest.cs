@@ -44,18 +44,27 @@ namespace DiscUtils.Fat
             string upperDE = "\x0414";
 
             MemoryStream ms = new MemoryStream();
-            FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "KBFLOPPY   ");
-            fs.FatOptions.FileNameEncoding = Encoding.GetEncoding(855);
+            using (FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "KBFLOPPY   "))
+            {
+                fs.FatOptions.FileNameEncoding = Encoding.GetEncoding(855);
 
-            string name = lowerDE;
-            fs.CreateDirectory(name);
+                string name = lowerDE;
+                fs.CreateDirectory(name);
 
-            string[] dirs = fs.GetDirectories("");
-            Assert.AreEqual(1, dirs.Length);
-            Assert.AreEqual(upperDE, dirs[0]); // Uppercase
+                string[] dirs = fs.GetDirectories("");
+                Assert.AreEqual(1, dirs.Length);
+                Assert.AreEqual(upperDE, dirs[0]); // Uppercase
 
-            Assert.IsTrue(fs.DirectoryExists(lowerDE));
-            Assert.IsTrue(fs.DirectoryExists(upperDE));
+                Assert.IsTrue(fs.DirectoryExists(lowerDE));
+                Assert.IsTrue(fs.DirectoryExists(upperDE));
+            }
+
+            DiscFileSystem fs2 = FileSystemManager.DetectDefaultFileSystems(ms)[0].Open(
+                ms,
+                new FileSystemParameters { FileNameEncoding = Encoding.GetEncoding(855) });
+
+            Assert.IsTrue(fs2.DirectoryExists(lowerDE));
+            Assert.IsTrue(fs2.DirectoryExists(upperDE));
         }
 
         [Test]

@@ -313,7 +313,7 @@ namespace ExternalFileSystem
             return new DiscUtils.FileSystemInfo[0];
         }
 
-        private DiscFileSystem Open(Stream stream, VolumeInfo volInfo)
+        private DiscFileSystem Open(Stream stream, VolumeInfo volInfo, FileSystemParameters parameters)
         {
             return new MyFileSystem();
         }

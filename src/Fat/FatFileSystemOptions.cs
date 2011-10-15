@@ -37,6 +37,14 @@ namespace DiscUtils.Fat
             FileNameEncoding = Encoding.GetEncoding(437);
         }
 
+        internal FatFileSystemOptions(FileSystemParameters parameters)
+        {
+            if (parameters != null)
+            {
+                FileNameEncoding = parameters.FileNameEncoding ?? Encoding.GetEncoding(437);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the character encoding used for file names.
         /// </summary>

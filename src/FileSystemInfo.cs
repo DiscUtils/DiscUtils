@@ -47,14 +47,36 @@ namespace DiscUtils
         /// </summary>
         /// <param name="volume">The volume to access</param>
         /// <returns>A file system instance</returns>
-        public abstract DiscFileSystem Open(VolumeInfo volume);
+        public DiscFileSystem Open(VolumeInfo volume)
+        {
+            return Open(volume, null);
+        }
 
         /// <summary>
         /// Opens a stream using the file system.
         /// </summary>
         /// <param name="stream">The stream to access</param>
         /// <returns>A file system instance</returns>
-        public abstract DiscFileSystem Open(Stream stream);
+        public DiscFileSystem Open(Stream stream)
+        {
+            return Open(stream, null);
+        }
+
+        /// <summary>
+        /// Opens a volume using the file system.
+        /// </summary>
+        /// <param name="volume">The volume to access</param>
+        /// <param name="parameters">Parameters for the file system</param>
+        /// <returns>A file system instance</returns>
+        public abstract DiscFileSystem Open(VolumeInfo volume, FileSystemParameters parameters);
+
+        /// <summary>
+        /// Opens a stream using the file system.
+        /// </summary>
+        /// <param name="stream">The stream to access</param>
+        /// <param name="parameters">Parameters for the file system</param>
+        /// <returns>A file system instance</returns>
+        public abstract DiscFileSystem Open(Stream stream, FileSystemParameters parameters);
 
         /// <summary>
         /// Gets the name of the file system.

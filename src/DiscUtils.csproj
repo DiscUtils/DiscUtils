@@ -201,6 +201,7 @@
     <Compile Include="FileLocator.cs" />
     <Compile Include="FileSystemInfo.cs" />
     <Compile Include="FileSystemManager.cs" />
+    <Compile Include="FileSystemParameters.cs" />
     <Compile Include="FileTransport.cs" />
     <Compile Include="FloppyDiskType.cs" />
     <Compile Include="GenericDiskAdapterType.cs" />

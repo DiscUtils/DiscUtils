@@ -38,9 +38,9 @@ namespace DiscUtils.Fat
             return new DiscUtils.FileSystemInfo[0];
         }
 
-        private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo)
+        private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
         {
-            return new FatFileSystem(stream);
+            return new FatFileSystem(stream, Ownership.None, parameters);
         }
     }
 }

@@ -30,14 +30,6 @@ namespace DiscUtils.Fat
     using System.Text.RegularExpressions;
 
     /// <summary>
-    /// Converts a time to/from UTC.
-    /// </summary>
-    /// <param name="time">The time to convert</param>
-    /// <param name="toUtc"><c>true</c> to convert FAT time to UTC, <c>false</c> to convert UTC to FAT time</param>
-    /// <returns>The converted time.</returns>
-    public delegate DateTime TimeConverter(DateTime time, bool toUtc);
-
-    /// <summary>
     /// Class for accessing FAT file systems.
     /// </summary>
     public sealed class FatFileSystem : DiscFileSystem
@@ -142,6 +134,31 @@ namespace DiscUtils.Fat
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeConverter = timeConverter;
+            Initialize(data);
+            _ownsData = ownsData;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the FatFileSystem class.
+        /// </summary>
+        /// <param name="data">The stream containing the file system.</param>
+        /// <param name="ownsData">Indicates if the new instance should take ownership
+        /// of <paramref name="data"/>.</param>
+        /// <param name="parameters">The parameters for the file system.</param>
+        public FatFileSystem(Stream data, Ownership ownsData, FileSystemParameters parameters)
+            : base(new FatFileSystemOptions(parameters))
+        {
+            _dirCache = new Dictionary<uint, Directory>();
+
+            if (parameters != null && parameters.TimeConverter != null)
+            {
+                _timeConverter = parameters.TimeConverter;
+            }
+            else
+            {
+                _timeConverter = DefaultTimeConverter;
+            }
+
             Initialize(data);
             _ownsData = ownsData;
         }

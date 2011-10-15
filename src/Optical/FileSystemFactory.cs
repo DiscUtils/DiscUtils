@@ -48,7 +48,7 @@ namespace DiscUtils.Optical
             return detected.ToArray();
         }
 
-        private DiscFileSystem OpenUdf(Stream stream, VolumeInfo volumeInfo)
+        private DiscFileSystem OpenUdf(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
         {
             if (volumeInfo != null)
             {
@@ -60,7 +60,7 @@ namespace DiscUtils.Optical
             }
         }
 
-        private DiscFileSystem OpenIso(Stream stream, VolumeInfo volumeInfo)
+        private DiscFileSystem OpenIso(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
         {
             return new CDReader(stream, true, true);
         }

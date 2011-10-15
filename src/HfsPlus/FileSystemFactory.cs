@@ -38,7 +38,7 @@ namespace DiscUtils.HfsPlus
             return new DiscUtils.FileSystemInfo[0];
         }
 
-        private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo)
+        private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
         {
             return new HfsPlusFileSystem(stream);
         }

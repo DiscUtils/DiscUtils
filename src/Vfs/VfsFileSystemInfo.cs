@@ -29,8 +29,9 @@ namespace DiscUtils.Vfs
     /// </summary>
     /// <param name="stream">The stream containing the file system</param>
     /// <param name="volumeInfo">Optional, information about the volume the file system is on</param>
+    /// <param name="parameters">Parameters for the file system</param>
     /// <returns>A file system implementation</returns>
-    public delegate DiscFileSystem VfsFileSystemOpener(Stream stream, VolumeInfo volumeInfo);
+    public delegate DiscFileSystem VfsFileSystemOpener(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters);
 
     /// <summary>
     /// Class holding information about a file system.
@@ -74,20 +75,22 @@ namespace DiscUtils.Vfs
         /// Opens a volume using the file system.
         /// </summary>
         /// <param name="volume">The volume to access</param>
+        /// <param name="parameters">Parameters for the file system</param>
         /// <returns>A file system instance</returns>
-        public override DiscFileSystem Open(VolumeInfo volume)
+        public override DiscFileSystem Open(VolumeInfo volume, FileSystemParameters parameters)
         {
-            return _openDelegate(volume.Open(), volume);
+            return _openDelegate(volume.Open(), volume, parameters);
         }
 
         /// <summary>
         /// Opens a stream using the file system.
         /// </summary>
         /// <param name="stream">The stream to access</param>
+        /// <param name="parameters">Parameters for the file system</param>
         /// <returns>A file system instance</returns>
-        public override DiscFileSystem Open(Stream stream)
+        public override DiscFileSystem Open(Stream stream, FileSystemParameters parameters)
         {
-            return _openDelegate(stream, null);
+            return _openDelegate(stream, null, parameters);
         }
     }
 }
