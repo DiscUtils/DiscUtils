@@ -48,7 +48,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets or sets the character encoding used for file names.
         /// </summary>
-        public Encoding FileNameEncoding {
+        public Encoding FileNameEncoding
+        {
             get
             {
                 return _encoding;
