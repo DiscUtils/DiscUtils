@@ -450,7 +450,7 @@ namespace DiscUtils.Ntfs
                     }
                 }
 
-                AddFileToDirectory(newFile, destParentDir, Utilities.GetFileFromPath(destinationFile));
+                AddFileToDirectory(newFile, destParentDir, Utilities.GetFileFromPath(destinationFile), null);
                 destParentDirEntry.UpdateFrom(destParentDir);
             }
         }
@@ -460,6 +460,16 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="path">The path of the new directory</param>
         public override void CreateDirectory(string path)
+        {
+            CreateDirectory(path, null);
+        }
+
+        /// <summary>
+        /// Creates a directory.
+        /// </summary>
+        /// <param name="path">The path of the new directory</param>
+        /// <param name="options">Options controlling attributes of the new Director, or <c>null</c> for defaults.</param>
+        public void CreateDirectory(string path, NewFileOptions options)
         {
             using (new NtfsTransaction())
             {
@@ -473,13 +483,36 @@ namespace DiscUtils.Ntfs
                     DirectoryEntry childDirEntry = focusDir.GetEntryByName(pathElements[i]);
                     if (childDirEntry == null)
                     {
-                        Directory childDir = Directory.CreateNew(_context, focusDir.StandardInformation.FileAttributes);
+                        FileAttributeFlags newDirAttrs = focusDir.StandardInformation.FileAttributes;
+                        if (options != null && options.Compressed.HasValue)
+                        {
+                            if (options.Compressed.Value)
+                            {
+                                newDirAttrs |= FileAttributeFlags.Compressed;
+                            }
+                            else
+                            {
+                                newDirAttrs &= ~FileAttributeFlags.Compressed;
+                            }
+                        }
+
+                        Directory childDir = Directory.CreateNew(_context, newDirAttrs);
                         try
                         {
-                            childDirEntry = AddFileToDirectory(childDir, focusDir, pathElements[i]);
+                            childDirEntry = AddFileToDirectory(childDir, focusDir, pathElements[i], options);
 
-                            RawSecurityDescriptor sd = DoGetSecurity(focusDir);
-                            DoSetSecurity(childDir, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
+                            RawSecurityDescriptor parentSd = DoGetSecurity(focusDir);
+                            RawSecurityDescriptor newSd;
+                            if (options != null && options.SecurityDescriptor != null)
+                            {
+                                newSd = options.SecurityDescriptor;
+                            }
+                            else
+                            {
+                                newSd = SecurityDescriptor.CalcNewObjectDescriptor(parentSd, false);
+                            }
+
+                            DoSetSecurity(childDir, newSd);
                             childDirEntry.UpdateFrom(childDir);
 
                             // Update the directory entry by which we found the directory we've just modified
@@ -770,7 +803,7 @@ namespace DiscUtils.Ntfs
                     }
 
                     RemoveFileFromDirectory(sourceParentDir, file, sourceEntry.Details.FileName);
-                    AddFileToDirectory(file, destParentDir, Utilities.GetFileFromPath(destinationDirectoryName));
+                    AddFileToDirectory(file, destParentDir, Utilities.GetFileFromPath(destinationDirectoryName), null);
                 }
             }
         }
@@ -833,7 +866,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 RemoveFileFromDirectory(sourceParentDir, file, sourceEntry.Details.FileName);
-                AddFileToDirectory(file, destParentDir, Utilities.GetFileFromPath(destinationName));
+                AddFileToDirectory(file, destParentDir, Utilities.GetFileFromPath(destinationName), null);
             }
         }
 
@@ -845,6 +878,19 @@ namespace DiscUtils.Ntfs
         /// <param name="access">The access permissions for the returned stream.</param>
         /// <returns>The new stream.</returns>
         public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
+        {
+            return OpenFile(path, mode, access, null);
+        }
+
+        /// <summary>
+        /// Opens the specified file.
+        /// </summary>
+        /// <param name="path">The full path of the file to open.</param>
+        /// <param name="mode">The file mode for the created stream.</param>
+        /// <param name="access">The access permissions for the returned stream.</param>
+        /// <param name="options">Options controlling attributes of a new file, or <c>null</c> for defaults (ignored if file exists).</param>
+        /// <returns>The new stream.</returns>
+        public SparseStream OpenFile(string path, FileMode mode, FileAccess access, NewFileOptions options)
         {
             using (new NtfsTransaction())
             {
@@ -861,27 +907,7 @@ namespace DiscUtils.Ntfs
                     }
                     else
                     {
-                        DirectoryEntry parentDirEntry = GetDirectoryEntry(Utilities.GetDirectoryFromPath(dirEntryPath));
-                        Directory parentDir = GetDirectory(parentDirEntry.Reference);
-
-                        File file = File.CreateNew(_context, parentDir.StandardInformation.FileAttributes);
-                        try
-                        {
-                            entry = AddFileToDirectory(file, parentDir, Utilities.GetFileFromPath(dirEntryPath));
-
-                            RawSecurityDescriptor sd = DoGetSecurity(parentDir);
-                            DoSetSecurity(file, SecurityDescriptor.CalcNewObjectDescriptor(sd, false));
-                            entry.UpdateFrom(file);
-
-                            parentDirEntry.UpdateFrom(parentDir);
-                        }
-                        finally
-                        {
-                            if (file.HardLinkCount == 0)
-                            {
-                                file.Delete();
-                            }
-                        }
+                        entry = CreateNewFile(dirEntryPath, options);
                     }
                 }
                 else if (mode == FileMode.CreateNew)
@@ -2076,6 +2102,57 @@ namespace DiscUtils.Ntfs
             file.UpdateRecordInMft();
         }
 
+        private DirectoryEntry CreateNewFile(string path, NewFileOptions options)
+        {
+            DirectoryEntry result;
+            DirectoryEntry parentDirEntry = GetDirectoryEntry(Utilities.GetDirectoryFromPath(path));
+            Directory parentDir = GetDirectory(parentDirEntry.Reference);
+
+            FileAttributeFlags newFileAttrs = parentDir.StandardInformation.FileAttributes;
+            if (options != null && options.Compressed.HasValue)
+            {
+                if (options.Compressed.Value)
+                {
+                    newFileAttrs |= FileAttributeFlags.Compressed;
+                }
+                else
+                {
+                    newFileAttrs &= ~FileAttributeFlags.Compressed;
+                }
+            }
+
+            File file = File.CreateNew(_context, newFileAttrs);
+            try
+            {
+                result = AddFileToDirectory(file, parentDir, Utilities.GetFileFromPath(path), options);
+
+                RawSecurityDescriptor parentSd = DoGetSecurity(parentDir);
+                RawSecurityDescriptor newSd;
+                if (options != null && options.SecurityDescriptor != null)
+                {
+                    newSd = options.SecurityDescriptor;
+                }
+                else
+                {
+                    newSd = SecurityDescriptor.CalcNewObjectDescriptor(parentSd, false);
+                }
+
+                DoSetSecurity(file, newSd);
+                result.UpdateFrom(file);
+
+                parentDirEntry.UpdateFrom(parentDir);
+            }
+            finally
+            {
+                if (file.HardLinkCount == 0)
+                {
+                    file.Delete();
+                }
+            }
+
+            return result;
+        }
+
         private DirectoryEntry GetDirectoryEntry(Directory dir, string path)
         {
             string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
@@ -2148,11 +2225,21 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        private DirectoryEntry AddFileToDirectory(File file, Directory dir, string name)
+        private DirectoryEntry AddFileToDirectory(File file, Directory dir, string name, NewFileOptions options)
         {
             DirectoryEntry entry;
 
-            if (CreateShortNames)
+            bool createShortNames;
+            if (options != null && options.CreateShortNames.HasValue)
+            {
+                createShortNames = options.CreateShortNames.Value;
+            }
+            else
+            {
+                createShortNames = CreateShortNames;
+            }
+
+            if (createShortNames)
             {
                 if (Utilities.Is8Dot3(name.ToUpperInvariant()))
                 {

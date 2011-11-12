@@ -453,6 +453,7 @@
     <Compile Include="Ntfs\Internals\UnknownAttribute.cs" />
     <Compile Include="Ntfs\LZNT1.cs" />
     <Compile Include="Ntfs\LzWindowDictionary.cs" />
+    <Compile Include="Ntfs\NewFileOptions.cs" />
     <Compile Include="Ntfs\NonResidentAttributeBuffer.cs" />
     <Compile Include="Ntfs\NonResidentAttributeRecord.cs" />
     <Compile Include="Ntfs\NtfsFormatOptions.cs" />
