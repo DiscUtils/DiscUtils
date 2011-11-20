@@ -295,7 +295,7 @@ namespace DiscUtils.Ntfs
         public AttributeRecord Split(int suggestedSplitIdx)
         {
             int splitIdx;
-            if (suggestedSplitIdx < 0 || suggestedSplitIdx >= _dataRuns.Count)
+            if (suggestedSplitIdx <= 0 || suggestedSplitIdx >= _dataRuns.Count)
             {
                 splitIdx = _dataRuns.Count / 2;
             }

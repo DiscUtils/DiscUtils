@@ -820,9 +820,15 @@ namespace DiscUtils.Ntfs
             int splitIndex = 1;
             if (!atStart)
             {
-                // Approximation only - assumes each run is at least one byte saved.  Could calculate the
-                // actual index here.
-                splitIndex = (int)(targetAttr.DataRuns.Count - (record.Size - record.AllocatedSize));
+                List<DataRun> runs = targetAttr.DataRuns;
+
+                splitIndex = runs.Count - 1;
+                int saved = runs[splitIndex].Size;
+                while (splitIndex > 1 && record.Size - saved > record.AllocatedSize)
+                {
+                    --splitIndex;
+                    saved += runs[splitIndex].Size;
+                }
             }
 
             AttributeRecord newAttr = targetAttr.Split(splitIndex);
