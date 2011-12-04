@@ -70,15 +70,17 @@ namespace DiscUtils.Ntfs
             _rawStream.ReadClusters(startVcn, count, buffer, offset);
         }
 
-        public override void WriteClusters(long startVcn, int count, byte[] buffer, int offset)
+        public override int WriteClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            _rawStream.AllocateClusters(startVcn, count);
-            _rawStream.WriteClusters(startVcn, count, buffer, offset);
+            int clustersAllocated = 0;
+            clustersAllocated += _rawStream.AllocateClusters(startVcn, count);
+            clustersAllocated += _rawStream.WriteClusters(startVcn, count, buffer, offset);
+            return clustersAllocated;
         }
 
-        public override void ClearClusters(long startVcn, int count)
+        public override int ClearClusters(long startVcn, int count)
         {
-            _rawStream.ReleaseClusters(startVcn, count);
+            return _rawStream.ReleaseClusters(startVcn, count);
         }
 
         private long CompressionStart(long vcn)

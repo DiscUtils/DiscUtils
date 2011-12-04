@@ -104,12 +104,14 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void WriteClusters(long startVcn, int count, byte[] buffer, int offset)
+        public override int WriteClusters(long startVcn, int count, byte[] buffer, int offset)
         {
             if (buffer.Length < (count * _bytesPerCluster) + offset)
             {
                 throw new ArgumentException("Cluster buffer too small", "buffer");
             }
+
+            int totalAllocated = 0;
 
             int totalWritten = 0;
             while (totalWritten < count)
@@ -120,7 +122,7 @@ namespace DiscUtils.Ntfs
                 if (cuStart == focusVcn && count - totalWritten >= _attr.CompressionUnitSize)
                 {
                     // Aligned write...
-                    CompressAndWriteClusters(focusVcn, _attr.CompressionUnitSize, buffer, offset + (totalWritten * _bytesPerCluster));
+                    totalAllocated += CompressAndWriteClusters(focusVcn, _attr.CompressionUnitSize, buffer, offset + (totalWritten * _bytesPerCluster));
 
                     totalWritten += _attr.CompressionUnitSize;
                 }
@@ -134,15 +136,18 @@ namespace DiscUtils.Ntfs
 
                     Array.Copy(buffer, offset + (totalWritten * _bytesPerCluster), _cacheBuffer, cacheOffset * _bytesPerCluster, toCopy * _bytesPerCluster);
 
-                    CompressAndWriteClusters(_cacheBufferVcn, _attr.CompressionUnitSize, _cacheBuffer, 0);
+                    totalAllocated += CompressAndWriteClusters(_cacheBufferVcn, _attr.CompressionUnitSize, _cacheBuffer, 0);
 
                     totalWritten += toCopy;
                 }
             }
+
+            return totalAllocated;
         }
 
-        public override void ClearClusters(long startVcn, int count)
+        public override int ClearClusters(long startVcn, int count)
         {
+            int totalReleased = 0;
             int totalCleared = 0;
             while (totalCleared < count)
             {
@@ -150,55 +155,65 @@ namespace DiscUtils.Ntfs
                 if (CompressionStart(focusVcn) == focusVcn && count - totalCleared >= _attr.CompressionUnitSize)
                 {
                     // Aligned - so it's a sparse compression unit...
-                    _rawStream.ReleaseClusters(startVcn, _attr.CompressionUnitSize);
+                    totalReleased += _rawStream.ReleaseClusters(startVcn, _attr.CompressionUnitSize);
                     totalCleared += _attr.CompressionUnitSize;
                 }
                 else
                 {
                     int toZero = (int)Math.Min(count - totalCleared, _attr.CompressionUnitSize - (focusVcn - CompressionStart(focusVcn)));
-                    WriteZeroClusters(focusVcn, toZero);
+                    totalReleased -= WriteZeroClusters(focusVcn, toZero);
                     totalCleared += toZero;
                 }
             }
+
+            return totalReleased;
         }
 
-        private void WriteZeroClusters(long focusVcn, int count)
+        private int WriteZeroClusters(long focusVcn, int count)
         {
+            int allocatedClusters = 0;
+
             byte[] zeroBuffer = new byte[16 * _bytesPerCluster];
             int numWritten = 0;
             while (numWritten < count)
             {
                 int toWrite = Math.Min(count - numWritten, 16);
 
-                WriteClusters(focusVcn + numWritten, toWrite, zeroBuffer, 0);
+                allocatedClusters += WriteClusters(focusVcn + numWritten, toWrite, zeroBuffer, 0);
 
                 numWritten += toWrite;
             }
+
+            return allocatedClusters;
         }
 
-        private void CompressAndWriteClusters(long focusVcn, int count, byte[] buffer, int offset)
+        private int CompressAndWriteClusters(long focusVcn, int count, byte[] buffer, int offset)
         {
             BlockCompressor compressor = _context.Options.Compressor;
             compressor.BlockSize = _bytesPerCluster;
+
+            int totalAllocated = 0;
 
             int compressedLength = _ioBuffer.Length;
             var result = compressor.Compress(buffer, offset, _attr.CompressionUnitSize * _bytesPerCluster, _ioBuffer, 0, ref compressedLength);
             if (result == CompressionResult.AllZeros)
             {
-                _rawStream.ReleaseClusters(focusVcn, count);
+                totalAllocated -= _rawStream.ReleaseClusters(focusVcn, count);
             }
             else if (result == CompressionResult.Compressed && (_attr.CompressionUnitSize * _bytesPerCluster) - compressedLength > _bytesPerCluster)
             {
                 int compClusters = Utilities.Ceil(compressedLength, _bytesPerCluster);
-                _rawStream.AllocateClusters(focusVcn, compClusters);
-                _rawStream.WriteClusters(focusVcn, compClusters, _ioBuffer, 0);
-                _rawStream.ReleaseClusters(focusVcn + compClusters, _attr.CompressionUnitSize - compClusters);
+                totalAllocated += _rawStream.AllocateClusters(focusVcn, compClusters);
+                totalAllocated += _rawStream.WriteClusters(focusVcn, compClusters, _ioBuffer, 0);
+                totalAllocated -= _rawStream.ReleaseClusters(focusVcn + compClusters, _attr.CompressionUnitSize - compClusters);
             }
             else
             {
-                _rawStream.AllocateClusters(focusVcn, _attr.CompressionUnitSize);
-                _rawStream.WriteClusters(focusVcn, _attr.CompressionUnitSize, buffer, offset);
+                totalAllocated += _rawStream.AllocateClusters(focusVcn, _attr.CompressionUnitSize);
+                totalAllocated += _rawStream.WriteClusters(focusVcn, _attr.CompressionUnitSize, buffer, offset);
             }
+
+            return totalAllocated;
         }
 
         private long CompressionStart(long vcn)

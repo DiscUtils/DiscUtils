@@ -172,13 +172,14 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public void AllocateClusters(long startVcn, int count)
+        public int AllocateClusters(long startVcn, int count)
         {
             if (startVcn + count > _cookedRuns.NextVirtualCluster)
             {
                 throw new IOException("Attempt to allocate unknown clusters");
             }
 
+            int totalAllocated = 0;
             int runIdx = 0;
 
             long focus = startVcn;
@@ -226,6 +227,7 @@ namespace DiscUtils.Ntfs
 
                     _cookedRuns.MakeNonSparse(runIdx, runs);
 
+                    totalAllocated += (int)numClusters;
                     focus += numClusters;
                 }
                 else
@@ -233,11 +235,15 @@ namespace DiscUtils.Ntfs
                     focus = run.StartVcn + run.Length;
                 }
             }
+
+            return totalAllocated;
         }
 
-        public void ReleaseClusters(long startVcn, int count)
+        public int ReleaseClusters(long startVcn, int count)
         {
             int runIdx = 0;
+
+            int totalReleased = 0;
 
             long focus = startVcn;
             while (focus < startVcn + count)
@@ -267,10 +273,13 @@ namespace DiscUtils.Ntfs
 
                     _context.ClusterBitmap.FreeClusters(new Range<long, long>(run.StartLcn, run.Length));
                     _cookedRuns.MakeSparse(runIdx);
+                    totalReleased += (int)run.Length;
 
                     focus += numClusters;
                 }
             }
+
+            return totalReleased;
         }
 
         public override void ReadClusters(long startVcn, int count, byte[] buffer, int offset)
@@ -310,7 +319,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void WriteClusters(long startVcn, int count, byte[] buffer, int offset)
+        public override int WriteClusters(long startVcn, int count, byte[] buffer, int offset)
         {
             if (buffer.Length < (count * _bytesPerCluster) + offset)
             {
@@ -339,21 +348,27 @@ namespace DiscUtils.Ntfs
 
                 totalWritten += toWrite;
             }
+
+            return 0;
         }
 
-        public override void ClearClusters(long startVcn, int count)
+        public override int ClearClusters(long startVcn, int count)
         {
             byte[] zeroBuffer = new byte[16 * _bytesPerCluster];
+
+            int clustersAllocated = 0;
 
             int numWritten = 0;
             while (numWritten < count)
             {
                 int toWrite = Math.Min(count - numWritten, 16);
 
-                WriteClusters(startVcn + numWritten, toWrite, zeroBuffer, 0);
+                clustersAllocated += WriteClusters(startVcn + numWritten, toWrite, zeroBuffer, 0);
 
                 numWritten += toWrite;
             }
+
+            return -clustersAllocated;
         }
     }
 }

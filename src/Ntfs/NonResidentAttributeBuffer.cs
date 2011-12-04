@@ -137,6 +137,8 @@ namespace DiscUtils.Ntfs
                 InitializeData(pos);
             }
 
+            int allocatedClusters = 0;
+
             long focusPos = pos;
             while (focusPos < pos + count)
             {
@@ -151,7 +153,7 @@ namespace DiscUtils.Ntfs
 
                     _activeStream.ReadClusters(vcn, 1, _ioBuffer, 0);
                     Array.Copy(buffer, offset + (focusPos - pos), _ioBuffer, clusterOffset, toWrite);
-                    _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
+                    allocatedClusters += _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
 
                     focusPos += toWrite;
                 }
@@ -159,7 +161,7 @@ namespace DiscUtils.Ntfs
                 {
                     // Aligned, full cluster writes...
                     int fullClusters = (int)(remaining / _bytesPerCluster);
-                    _activeStream.WriteClusters(vcn, fullClusters, buffer, (int)(offset + (focusPos - pos)));
+                    allocatedClusters += _activeStream.WriteClusters(vcn, fullClusters, buffer, (int)(offset + (focusPos - pos)));
 
                     focusPos += fullClusters * _bytesPerCluster;
                 }
@@ -181,7 +183,7 @@ namespace DiscUtils.Ntfs
 
             if ((_attribute.Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
-                PrimaryAttributeRecord.CompressedDataSize = _activeStream.AllocatedClusterCount * _bytesPerCluster;
+                PrimaryAttributeRecord.CompressedDataSize += allocatedClusters * _bytesPerCluster;
             }
 
             _cookedRuns.CollapseRuns();
@@ -212,6 +214,8 @@ namespace DiscUtils.Ntfs
                 InitializeData(pos);
             }
 
+            int releasedClusters = 0;
+
             long focusPos = pos;
             while (focusPos < pos + count)
             {
@@ -228,7 +232,7 @@ namespace DiscUtils.Ntfs
                     {
                         _activeStream.ReadClusters(vcn, 1, _ioBuffer, 0);
                         Array.Clear(_ioBuffer, (int)clusterOffset, toClear);
-                        _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
+                        releasedClusters -= _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
                     }
 
                     focusPos += toClear;
@@ -237,7 +241,7 @@ namespace DiscUtils.Ntfs
                 {
                     // Aligned, full cluster clears...
                     int fullClusters = (int)(remaining / _bytesPerCluster);
-                    _activeStream.ClearClusters(vcn, fullClusters);
+                    releasedClusters += _activeStream.ClearClusters(vcn, fullClusters);
 
                     focusPos += fullClusters * _bytesPerCluster;
                 }
@@ -251,6 +255,11 @@ namespace DiscUtils.Ntfs
             if (pos + count > PrimaryAttributeRecord.DataLength)
             {
                 PrimaryAttributeRecord.DataLength = pos + count;
+            }
+
+            if ((_attribute.Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
+            {
+                PrimaryAttributeRecord.CompressedDataSize -= releasedClusters * _bytesPerCluster;
             }
 
             _cookedRuns.CollapseRuns();
@@ -278,6 +287,8 @@ namespace DiscUtils.Ntfs
             long initDataLen = PrimaryAttributeRecord.InitializedDataLength;
             _file.MarkMftRecordDirty();
 
+            int clustersAllocated = 0;
+
             while (initDataLen < pos)
             {
                 long vcn = initDataLen / _bytesPerCluster;
@@ -290,7 +301,7 @@ namespace DiscUtils.Ntfs
                     {
                         _activeStream.ReadClusters(vcn, 1, _ioBuffer, 0);
                         Array.Clear(_ioBuffer, clusterOffset, toClear);
-                        _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
+                        clustersAllocated += _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
                     }
 
                     initDataLen += toClear;
@@ -298,13 +309,18 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     int numClusters = (int)((pos / _bytesPerCluster) - vcn);
-                    _activeStream.ClearClusters(vcn, numClusters);
+                    clustersAllocated -= _activeStream.ClearClusters(vcn, numClusters);
 
                     initDataLen += numClusters * _bytesPerCluster;
                 }
             }
 
             PrimaryAttributeRecord.InitializedDataLength = pos;
+
+            if ((_attribute.Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
+            {
+                PrimaryAttributeRecord.CompressedDataSize += clustersAllocated * _bytesPerCluster;
+            }
         }
 
         private void Truncate(long value)

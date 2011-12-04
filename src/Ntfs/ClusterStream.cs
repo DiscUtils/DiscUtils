@@ -44,8 +44,8 @@ namespace DiscUtils.Ntfs
 
         public abstract void ReadClusters(long startVcn, int count, byte[] buffer, int offset);
 
-        public abstract void WriteClusters(long startVcn, int count, byte[] buffer, int offset);
+        public abstract int WriteClusters(long startVcn, int count, byte[] buffer, int offset);
 
-        public abstract void ClearClusters(long startVcn, int count);
+        public abstract int ClearClusters(long startVcn, int count);
     }
 }
