@@ -156,8 +156,6 @@ namespace DiscUtils.Partitions
                 return false;
             }
 
-            bool foundPartition = false;
-
             List<StreamExtent> knownPartitions = new List<StreamExtent>();
             foreach (var record in ReadPrimaryRecords(bootSector))
             {
@@ -169,21 +167,19 @@ namespace DiscUtils.Partitions
 
                 if (record.LBALength > 0)
                 {
-                    foundPartition = true;
+                    StreamExtent[] thisPartitionExtents = new StreamExtent[] { new StreamExtent(record.LBAStart, record.LBALength) };
+
+                    // If the partition intersects another partition, this is probably an invalid partition table
+                    foreach (var overlap in StreamExtent.Intersect(knownPartitions, thisPartitionExtents))
+                    {
+                        return false;
+                    }
+
+                    knownPartitions = new List<StreamExtent>(StreamExtent.Union(knownPartitions, thisPartitionExtents));
                 }
-
-                StreamExtent[] thisPartitionExtents = new StreamExtent[] { new StreamExtent(record.LBAStart, record.LBALength) };
-
-                // If the partition intersects another partition, this is probably an invalid partition table
-                foreach (var overlap in StreamExtent.Intersect(knownPartitions, thisPartitionExtents))
-                {
-                    return false;
-                }
-
-                knownPartitions = new List<StreamExtent>(StreamExtent.Union(knownPartitions, thisPartitionExtents));
             }
 
-            return foundPartition;
+            return true;
         }
 
         /// <summary>
