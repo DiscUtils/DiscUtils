@@ -363,6 +363,22 @@ namespace DiscUtils.Ntfs
                 attrStream.Write(new byte[122], 0, 122);
             }
             Assert.AreEqual(122, ntfs.GetFileLength("AFILE.TXT:altstream"));
+
+
+            // Test NTFS options for hardlink behaviour
+            ntfs.CreateDirectory("Dir");
+            ntfs.CreateHardLink("AFILE.TXT", @"Dir\OtherLink.txt");
+
+            using (var stream = ntfs.OpenFile("AFILE.TXT", FileMode.Open, FileAccess.ReadWrite))
+            {
+                stream.SetLength(50);
+            }
+            Assert.AreEqual(50, ntfs.GetFileLength("AFILE.TXT"));
+            Assert.AreEqual(14325, ntfs.GetFileLength(@"Dir\OtherLink.txt"));
+
+            ntfs.NtfsOptions.FileLengthFromDirectoryEntries = false;
+
+            Assert.AreEqual(50, ntfs.GetFileLength(@"Dir\OtherLink.txt"));
         }
 
         [Test]

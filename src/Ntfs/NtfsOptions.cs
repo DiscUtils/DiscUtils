@@ -36,6 +36,7 @@ namespace DiscUtils.Ntfs
         private ShortFileNameOption _shortNameCreation;
         private BlockCompressor _compressor;
         private bool _readCache;
+        private bool _fileLengthFromDirectoryEntries;
 
         internal NtfsOptions()
         {
@@ -45,6 +46,7 @@ namespace DiscUtils.Ntfs
             _hideDosFileNames = true;
             _compressor = new LZNT1();
             _readCache = true;
+            _fileLengthFromDirectoryEntries = true;
         }
 
         /// <summary>
@@ -109,6 +111,22 @@ namespace DiscUtils.Ntfs
         {
             get { return _readCache; }
             set { _readCache = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether file length information comes from directory entries or file data.
+        /// </summary>
+        /// <remarks>
+        /// <para>The default (<c>true</c>) is that file length information is supplied by the directory entry
+        /// for a file.  In some circumstances that information may be inaccurate - specifically for files with multiple
+        /// hard links, the directory entries are only updated for the hard link used to open the file.</para>
+        /// <para>Setting this value to <c>false</c>, will always retrieve the latest information from the underlying
+        /// NTFS attribute information, which reflects the true size of the file.</para>
+        /// </remarks>
+        public bool FileLengthFromDirectoryEntries
+        {
+            get { return _fileLengthFromDirectoryEntries; }
+            set { _fileLengthFromDirectoryEntries = value; }
         }
 
         /// <summary>

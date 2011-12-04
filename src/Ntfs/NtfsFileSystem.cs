@@ -1202,8 +1202,8 @@ namespace DiscUtils.Ntfs
                     throw new FileNotFoundException("File not found", path);
                 }
 
-                // Ordinary file length request, use info from directory entry for efficiency
-                if (attributeName == null && attributeType == AttributeType.Data)
+                // Ordinary file length request, use info from directory entry for efficiency - if allowed
+                if (NtfsOptions.FileLengthFromDirectoryEntries && attributeName == null && attributeType == AttributeType.Data)
                 {
                     return (long)dirEntry.Details.RealSize;
                 }
