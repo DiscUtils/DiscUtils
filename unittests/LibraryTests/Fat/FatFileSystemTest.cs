@@ -57,6 +57,12 @@ namespace DiscUtils.Fat
 
                 Assert.IsTrue(fs.DirectoryExists(lowerDE));
                 Assert.IsTrue(fs.DirectoryExists(upperDE));
+
+                fs.CreateDirectory(lowerDE + lowerDE + lowerDE);
+                Assert.AreEqual(2, fs.GetDirectories("").Length);
+
+                fs.DeleteDirectory(lowerDE + lowerDE + lowerDE);
+                Assert.AreEqual(1, fs.GetDirectories("").Length);
             }
 
             DiscFileSystem fs2 = FileSystemManager.DetectDefaultFileSystems(ms)[0].Open(
@@ -65,6 +71,7 @@ namespace DiscUtils.Fat
 
             Assert.IsTrue(fs2.DirectoryExists(lowerDE));
             Assert.IsTrue(fs2.DirectoryExists(upperDE));
+            Assert.AreEqual(1, fs2.GetDirectories("").Length);
         }
 
         [Test]

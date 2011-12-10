@@ -195,8 +195,8 @@
     <Compile Include="Fat\FatFileSystem.cs" />
     <Compile Include="Fat\FatFileSystemOptions.cs" />
     <Compile Include="Fat\FatType.cs" />
-    <Compile Include="Fat\FatUtilities.cs" />
     <Compile Include="Fat\FileAllocationTable.cs" />
+    <Compile Include="Fat\FileName.cs" />
     <Compile Include="Fat\FileSystemFactory.cs" />
     <Compile Include="FileLocator.cs" />
     <Compile Include="FileSystemInfo.cs" />

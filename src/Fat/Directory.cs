@@ -28,9 +28,6 @@ namespace DiscUtils.Fat
 
     internal class Directory : IDisposable
     {
-        private const string SelfEntryNormalizedName = ".          ";
-        private const string ParentEntryNormalizedName = "..         ";
-
         private FatFileSystem _fileSystem;
         private Directory _parent;
         private long _parentId;
@@ -97,7 +94,7 @@ namespace DiscUtils.Fat
             {
                 if (_parent == null)
                 {
-                    return new DirectoryEntry(_fileSystem.FatOptions, ParentEntryNormalizedName, FatAttributes.Directory);
+                    return new DirectoryEntry(_fileSystem.FatOptions, FileName.ParentEntryName, FatAttributes.Directory);
                 }
                 else
                 {
@@ -121,7 +118,7 @@ namespace DiscUtils.Fat
                 if (_parent == null)
                 {
                     // If we're the root directory, simulate the parent entry with a dummy record
-                    return new DirectoryEntry(_fileSystem.FatOptions, string.Empty, FatAttributes.Directory);
+                    return new DirectoryEntry(_fileSystem.FatOptions, FileName.Null, FatAttributes.Directory);
                 }
                 else
                 {
@@ -200,9 +197,9 @@ namespace DiscUtils.Fat
             return (id < 0) ? null : _entries[id];
         }
 
-        public Directory GetChildDirectory(string name)
+        public Directory GetChildDirectory(FileName name)
         {
-            long id = FindEntryByNormalizedName(name);
+            long id = FindEntry(name);
             if (id < 0)
             {
                 return null;
@@ -217,9 +214,9 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal Directory CreateChildDirectory(string normalizedName)
+        internal Directory CreateChildDirectory(FileName name)
         {
-            long id = FindEntryByNormalizedName(normalizedName);
+            long id = FindEntry(name);
             if (id >= 0)
             {
                 if ((_entries[id].Attributes & FatAttributes.Directory) == 0)
@@ -243,7 +240,7 @@ namespace DiscUtils.Fat
 
                     _fileSystem.Fat.SetEndOfChain(firstCluster);
 
-                    DirectoryEntry newEntry = new DirectoryEntry(_fileSystem.FatOptions, normalizedName, FatAttributes.Directory);
+                    DirectoryEntry newEntry = new DirectoryEntry(_fileSystem.FatOptions, name, FatAttributes.Directory);
                     newEntry.FirstCluster = firstCluster;
                     newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
                     newEntry.LastWriteTime = newEntry.CreationTime;
@@ -263,20 +260,20 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal void AttachChildDirectory(string normalizedName, Directory newChild)
+        internal void AttachChildDirectory(FileName name, Directory newChild)
         {
-            long id = FindEntryByNormalizedName(normalizedName);
+            long id = FindEntry(name);
             if (id >= 0)
             {
                 throw new IOException("Directory entry already exists");
             }
 
             DirectoryEntry newEntry = new DirectoryEntry(newChild.ParentsChildEntry);
-            newEntry.NormalizedName = normalizedName;
+            newEntry.Name = name;
             AddEntry(newEntry);
 
             DirectoryEntry newParentEntry = new DirectoryEntry(SelfEntry);
-            newParentEntry.NormalizedName = ParentEntryNormalizedName;
+            newParentEntry.Name = FileName.ParentEntryName;
             newChild.ParentEntry = newParentEntry;
         }
 
@@ -294,12 +291,12 @@ namespace DiscUtils.Fat
             return -1;
         }
 
-        internal long FindEntryByNormalizedName(string name)
+        internal long FindEntry(FileName name)
         {
             foreach (long id in _entries.Keys)
             {
                 DirectoryEntry focus = _entries[id];
-                if (focus.NormalizedName == name && (focus.Attributes & FatAttributes.VolumeId) == 0)
+                if (focus.Name == name && (focus.Attributes & FatAttributes.VolumeId) == 0)
                 {
                     return id;
                 }
@@ -308,14 +305,14 @@ namespace DiscUtils.Fat
             return -1;
         }
 
-        internal SparseStream OpenFile(string name, FileMode mode, FileAccess fileAccess)
+        internal SparseStream OpenFile(FileName name, FileMode mode, FileAccess fileAccess)
         {
             if (mode == FileMode.Append || mode == FileMode.Truncate)
             {
                 throw new NotImplementedException();
             }
 
-            long fileId = FindEntryByNormalizedName(name);
+            long fileId = FindEntry(name);
             bool exists = fileId != -1;
 
             if (mode == FileMode.CreateNew && exists)
@@ -324,7 +321,7 @@ namespace DiscUtils.Fat
             }
             else if (mode == FileMode.Open && !exists)
             {
-                throw new FileNotFoundException("File not found", name);
+                throw new FileNotFoundException("File not found", name.GetDisplayName(_fileSystem.FatOptions.FileNameEncoding));
             }
             else if ((mode == FileMode.Open || mode == FileMode.OpenOrCreate || mode == FileMode.Create) && exists)
             {
@@ -396,7 +393,7 @@ namespace DiscUtils.Fat
                 DirectoryEntry entry = _entries[id];
 
                 DirectoryEntry copy = new DirectoryEntry(entry);
-                copy.NormalizedName = "\xE5" + entry.NormalizedName.Substring(1);
+                copy.Name = entry.Name.Deleted();
                 _dirStream.Position = id;
                 copy.WriteTo(_dirStream);
 
@@ -445,28 +442,24 @@ namespace DiscUtils.Fat
                 {
                     // Long File Name entry
                 }
-                else if (entry.NormalizedName[0] == 0xE5)
+                else if (entry.Name.IsDeleted())
                 {
                     // E5 = Free Entry
                     _freeEntries.Add(streamPos);
                 }
-                else if (entry.NormalizedName[0] == '.')
+                else if (entry.Name == FileName.SelfEntryName)
                 {
-                    // Special folders
-                    if (entry.NormalizedName == SelfEntryNormalizedName)
-                    {
-                        _selfEntry = entry;
-                        _selfEntryLocation = streamPos;
-                    }
-                    else if (entry.NormalizedName == ParentEntryNormalizedName)
-                    {
-                        _parentEntry = entry;
-                        _parentEntryLocation = streamPos;
-                    }
+                    _selfEntry = entry;
+                    _selfEntryLocation = streamPos;
                 }
-                else if (entry.NormalizedName[0] == 0x00)
+                else if (entry.Name == FileName.ParentEntryName)
                 {
-                    // 00 = Free Entry, no more entries available
+                    _parentEntry = entry;
+                    _parentEntryLocation = streamPos;
+                }
+                else if (entry.Name == FileName.Null)
+                {
+                    // Free Entry, no more entries available
                     _endOfEntries = streamPos;
                     break;
                 }
@@ -512,12 +505,12 @@ namespace DiscUtils.Fat
             {
                 // First is the self-referencing entry...
                 DirectoryEntry selfEntry = new DirectoryEntry(newEntry);
-                selfEntry.NormalizedName = SelfEntryNormalizedName;
+                selfEntry.Name = FileName.SelfEntryName;
                 selfEntry.WriteTo(stream);
 
                 // Second is a clone of our self entry (i.e. parent) - though dates are odd...
                 DirectoryEntry parentEntry = new DirectoryEntry(SelfEntry);
-                parentEntry.NormalizedName = ParentEntryNormalizedName;
+                parentEntry.Name = FileName.ParentEntryName;
                 parentEntry.CreationTime = newEntry.CreationTime;
                 parentEntry.LastWriteTime = newEntry.LastWriteTime;
                 parentEntry.WriteTo(stream);

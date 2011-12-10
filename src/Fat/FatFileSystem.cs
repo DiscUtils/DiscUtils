@@ -332,7 +332,7 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    return _rootDir.GetEntry(volId).NormalizedName;
+                    return _rootDir.GetEntry(volId).Name.GetRawName(FatOptions.FileNameEncoding);
                 }
             }
         }
@@ -717,9 +717,7 @@ namespace DiscUtils.Fat
 
             if (entryId < 0)
             {
-                string[] pathEntries = path.Split(new string[] { "\\" }, StringSplitOptions.RemoveEmptyEntries);
-                string normFileName = FatUtilities.NormalizeFileName(FatOptions.FileNameEncoding, pathEntries[pathEntries.Length - 1]);
-                return parent.OpenFile(normFileName, mode, access);
+                return parent.OpenFile(FileName.FromPath(path, FatOptions.FileNameEncoding), mode, access);
             }
 
             DirectoryEntry dirEntry = parent.GetEntry(entryId);
@@ -730,7 +728,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                return parent.OpenFile(dirEntry.NormalizedName, mode, access);
+                return parent.OpenFile(dirEntry.Name, mode, access);
             }
         }
 
@@ -1042,7 +1040,7 @@ namespace DiscUtils.Fat
             }
 
             DirectoryEntry newEntry = new DirectoryEntry(sourceEntry);
-            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, destinationFile);
+            newEntry.Name = FileName.FromPath(destinationFile, FatOptions.FileNameEncoding);
             newEntry.FirstCluster = 0;
 
             Directory destDir;
@@ -1059,7 +1057,7 @@ namespace DiscUtils.Fat
                 DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
                 if ((destEntry.Attributes & FatAttributes.Directory) != 0)
                 {
-                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, sourceFile);
+                    newEntry.Name = FileName.FromPath(sourceFile, FatOptions.FileNameEncoding);
                     destinationFile = Utilities.CombinePaths(destinationFile, Utilities.GetFileFromPath(sourceFile));
 
                     destEntryId = GetDirectoryEntry(destinationFile, out destDir);
@@ -1108,20 +1106,20 @@ namespace DiscUtils.Fat
 
             for (int i = 0; i < pathElements.Length; ++i)
             {
-                string normalizedName;
+                FileName name;
                 try
                 {
-                    normalizedName = FatUtilities.NormalizeFileName(FatOptions.FileNameEncoding, pathElements[i]);
+                    name = new FileName(pathElements[i], FatOptions.FileNameEncoding);
                 }
                 catch (ArgumentException ae)
                 {
                     throw new IOException("Invalid path", ae);
                 }
 
-                Directory child = focusDir.GetChildDirectory(normalizedName);
+                Directory child = focusDir.GetChildDirectory(name);
                 if (child == null)
                 {
-                    child = focusDir.CreateChildDirectory(normalizedName);
+                    child = focusDir.CreateChildDirectory(name);
                 }
 
                 focusDir = child;
@@ -1258,7 +1256,7 @@ namespace DiscUtils.Fat
             List<string> dirs = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                dirs.Add(Utilities.CombinePaths(path, dirEntry.Name));
+                dirs.Add(Utilities.CombinePaths(path, dirEntry.Name.GetDisplayName(FatOptions.FileNameEncoding)));
             }
 
             return dirs.ToArray();
@@ -1294,7 +1292,7 @@ namespace DiscUtils.Fat
             List<string> files = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                files.Add(Utilities.CombinePaths(path, dirEntry.Name));
+                files.Add(Utilities.CombinePaths(path, dirEntry.Name.GetDisplayName(FatOptions.FileNameEncoding)));
             }
 
             return files.ToArray();
@@ -1330,7 +1328,7 @@ namespace DiscUtils.Fat
             List<string> result = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                result.Add(Utilities.CombinePaths(path, dirEntry.Name));
+                result.Add(Utilities.CombinePaths(path, dirEntry.Name.GetDisplayName(FatOptions.FileNameEncoding)));
             }
 
             return result.ToArray();
@@ -1353,9 +1351,9 @@ namespace DiscUtils.Fat
             List<string> result = new List<string>(entries.Length);
             foreach (DirectoryEntry dirEntry in entries)
             {
-                if (re.IsMatch(dirEntry.SearchName))
+                if (re.IsMatch(dirEntry.Name.GetSearchName(FatOptions.FileNameEncoding)))
                 {
-                    result.Add(Utilities.CombinePaths(path, dirEntry.Name));
+                    result.Add(Utilities.CombinePaths(path, dirEntry.Name.GetDisplayName(FatOptions.FileNameEncoding)));
                 }
             }
 
@@ -1399,7 +1397,7 @@ namespace DiscUtils.Fat
                 throw new IOException("Source directory doesn't exist");
             }
 
-            destParent.AttachChildDirectory(FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, destinationDirectoryName), GetDirectory(sourceDirectoryName));
+            destParent.AttachChildDirectory(FileName.FromPath(destinationDirectoryName, FatOptions.FileNameEncoding), GetDirectory(sourceDirectoryName));
             sourceParent.DeleteEntry(sourceId, false);
         }
 
@@ -1427,7 +1425,7 @@ namespace DiscUtils.Fat
             }
 
             DirectoryEntry newEntry = new DirectoryEntry(sourceEntry);
-            newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, destinationName);
+            newEntry.Name = FileName.FromPath(destinationName, FatOptions.FileNameEncoding);
 
             Directory destDir;
             long destEntryId = GetDirectoryEntry(destinationName, out destDir);
@@ -1443,7 +1441,7 @@ namespace DiscUtils.Fat
                 DirectoryEntry destEntry = destDir.GetEntry(destEntryId);
                 if ((destEntry.Attributes & FatAttributes.Directory) != 0)
                 {
-                    newEntry.NormalizedName = FatUtilities.NormalizedFileNameFromPath(FatOptions.FileNameEncoding, sourceName);
+                    newEntry.Name = FileName.FromPath(sourceName, FatOptions.FileNameEncoding);
                     destinationName = Utilities.CombinePaths(destinationName, Utilities.GetFileFromPath(sourceName));
 
                     destEntryId = GetDirectoryEntry(destinationName, out destDir);
@@ -1887,7 +1885,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                entryId = dir.FindEntryByNormalizedName(FatUtilities.NormalizeFileName(FatOptions.FileNameEncoding, pathEntries[pathOffset]));
+                entryId = dir.FindEntry(new FileName(pathEntries[pathOffset], FatOptions.FileNameEncoding));
                 if (entryId >= 0)
                 {
                     if (pathOffset == pathEntries.Length - 1)
@@ -1929,15 +1927,15 @@ namespace DiscUtils.Fat
 
                 if ((isDir && dirs) || (!isDir && files))
                 {
-                    if (regex.IsMatch(de.SearchName))
+                    if (regex.IsMatch(de.Name.GetSearchName(FatOptions.FileNameEncoding)))
                     {
-                        results.Add(Utilities.CombinePaths(path, de.Name));
+                        results.Add(Utilities.CombinePaths(path, de.Name.GetDisplayName(FatOptions.FileNameEncoding)));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Utilities.CombinePaths(path, de.Name), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(path, de.Name.GetDisplayName(FatOptions.FileNameEncoding)), regex, subFolders, dirs, files);
                 }
             }
         }

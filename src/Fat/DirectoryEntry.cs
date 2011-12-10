@@ -29,7 +29,7 @@ namespace DiscUtils.Fat
     internal class DirectoryEntry
     {
         private FatFileSystemOptions _options;
-        private string _name;
+        private FileName _name;
         private byte _attr;
         private byte _creationTimeTenth;
         private ushort _creationTime;
@@ -48,7 +48,7 @@ namespace DiscUtils.Fat
             Load(buffer, 0);
         }
 
-        internal DirectoryEntry(FatFileSystemOptions options, string name, FatAttributes attrs)
+        internal DirectoryEntry(FatFileSystemOptions options, FileName name, FatAttributes attrs)
         {
             _options = options;
             _name = name;
@@ -70,20 +70,7 @@ namespace DiscUtils.Fat
             _fileSize = toCopy._fileSize;
         }
 
-        public string Name
-        {
-            get
-            {
-                return (_name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ')).TrimEnd('.');
-            }
-
-            set
-            {
-                NormalizedName = FatUtilities.NormalizeFileName(_options.FileNameEncoding, value);
-            }
-        }
-
-        public string NormalizedName
+        public FileName Name
         {
             get
             {
@@ -92,14 +79,7 @@ namespace DiscUtils.Fat
 
             set
             {
-                if (value.Length == 11)
-                {
-                    _name = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid normalized name");
-                }
+                _name = value;
             }
         }
 
@@ -147,23 +127,11 @@ namespace DiscUtils.Fat
             }
         }
 
-        internal string SearchName
-        {
-            get
-            {
-                return _name.Substring(0, 8).TrimEnd(' ') + "." + _name.Substring(8).TrimEnd(' ');
-            }
-        }
-
         internal void WriteTo(Stream stream)
         {
             byte[] buffer = new byte[32];
 
-            if (_options.FileNameEncoding.GetBytes(_name, 0, 11, buffer, 0) > 11)
-            {
-                throw new IOException("File name cannot be represented in 11 bytes: " + _name);
-            }
-
+            _name.GetBytes(buffer, 0);
             buffer[11] = _attr;
             buffer[13] = _creationTimeTenth;
             Utilities.WriteBytesLittleEndian((ushort)_creationTime, buffer, 14);
@@ -224,7 +192,7 @@ namespace DiscUtils.Fat
 
         private void Load(byte[] data, int offset)
         {
-            _name = _options.FileNameEncoding.GetString(data, offset, 11);
+            _name = new FileName(data, offset);
             _attr = data[offset + 11];
             _creationTimeTenth = data[offset + 13];
             _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);

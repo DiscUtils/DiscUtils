@@ -4270,28 +4270,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="DirectoryEntry">
-          <Members>
-           <Member Name="#Name">
-            <Accessors>
-             <Accessor Name="#set_Name(System.String)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2008-11-10 13:17:45Z">
-                <Issue>
-                 <Item>'DirectoryEntry.Name.set(string)'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="15" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="FatBuffer">
           <Members>
            <Member Name="#IsBadCluster(System.UInt32)">
@@ -11930,7 +11908,6 @@
     <Note Id="12" Modified="2008-11-10 13:34:14Z">Included for completeness</Note>
     <Note Id="13" Modified="2008-11-10 13:35:20Z">Included for completeness</Note>
     <Note Id="14" Modified="2008-11-10 13:35:58Z">Included for completeness</Note>
-    <Note Id="15" Modified="2008-11-10 13:40:13Z">Included for completeness</Note>
     <Note Id="16" Modified="2008-11-10 13:41:25Z">Included for completeness</Note>
     <Note Id="17" Modified="2008-11-10 13:41:33Z">Included for completeness</Note>
     <Note Id="18" Modified="2008-11-10 13:42:06Z">non-static to match similar methods</Note>
