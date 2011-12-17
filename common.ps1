@@ -1,4 +1,4 @@
-$ver = "0.10"
+$ver = "0.11"
 $fullver = "${ver}.0.0"
 
 $basedir = "$pwd"
