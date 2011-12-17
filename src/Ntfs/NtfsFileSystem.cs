@@ -596,9 +596,13 @@ namespace DiscUtils.Ntfs
         {
             using (new NtfsTransaction())
             {
-                string parent = Utilities.GetDirectoryFromPath(path);
+                string attributeName;
+                AttributeType attributeType;
+                string dirEntryPath = ParsePath(path, out attributeName, out attributeType);
 
-                DirectoryEntry parentDirEntry = GetDirectoryEntry(parent);
+                string parentDirPath = Utilities.GetDirectoryFromPath(dirEntryPath);
+
+                DirectoryEntry parentDirEntry = GetDirectoryEntry(parentDirPath);
                 if (parentDirEntry == null || !parentDirEntry.IsDirectory)
                 {
                     throw new FileNotFoundException("No such file", path);
@@ -606,7 +610,7 @@ namespace DiscUtils.Ntfs
 
                 Directory parentDir = GetDirectory(parentDirEntry.Reference);
 
-                DirectoryEntry dirEntry = parentDir.GetEntryByName(Utilities.GetFileFromPath(path));
+                DirectoryEntry dirEntry = parentDir.GetEntryByName(Utilities.GetFileFromPath(dirEntryPath));
                 if (dirEntry == null || dirEntry.IsDirectory)
                 {
                     throw new FileNotFoundException("No such file", path);
@@ -614,16 +618,31 @@ namespace DiscUtils.Ntfs
 
                 File file = GetFile(dirEntry.Reference);
 
-                if ((dirEntry.Details.FileAttributes & FileAttributes.ReparsePoint) != 0)
+                if (string.IsNullOrEmpty(attributeName) && attributeType == AttributeType.Data)
                 {
-                    RemoveReparsePoint(file);
+                    if ((dirEntry.Details.FileAttributes & FileAttributes.ReparsePoint) != 0)
+                    {
+                        RemoveReparsePoint(file);
+                    }
+
+                    RemoveFileFromDirectory(parentDir, file, Utilities.GetFileFromPath(path));
+
+                    if (file.HardLinkCount == 0)
+                    {
+                        file.Delete();
+                    }
                 }
-
-                RemoveFileFromDirectory(parentDir, file, Utilities.GetFileFromPath(path));
-
-                if (file.HardLinkCount == 0)
+                else
                 {
-                    file.Delete();
+                    NtfsStream attrStream = file.GetStream(attributeType, attributeName);
+                    if (attrStream == null)
+                    {
+                        throw new FileNotFoundException("No such attribute: " + attributeName, path);
+                    }
+                    else
+                    {
+                        file.RemoveStream(attrStream);
+                    }
                 }
             }
         }

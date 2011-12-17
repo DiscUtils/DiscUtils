@@ -329,6 +329,20 @@ namespace DiscUtils.Ntfs
         }
 
         [Test]
+        public void DeleteAlternateDataStreams()
+        {
+            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+
+            ntfs.OpenFile("AFILE.TXT", FileMode.Create).Close();
+            ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Close();
+            Assert.AreEqual(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+
+            ntfs.DeleteFile("AFILE.TXT:ALTSTREAM");
+            Assert.AreEqual(1, ntfs.GetFileSystemEntries("").Length);
+            Assert.AreEqual(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+        }
+
+        [Test]
         public void DeleteShortNameDir()
         {
             NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
