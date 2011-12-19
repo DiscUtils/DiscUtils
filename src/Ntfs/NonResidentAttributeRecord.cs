@@ -326,14 +326,14 @@ namespace DiscUtils.Ntfs
             // new extent (indicated by Zero run offset).
             for (int i = 0; i < newRecordRuns.Count; ++i)
             {
-                if (newRecordRuns[i].RunOffset != 0)
+                if (!newRecordRuns[i].IsSparse)
                 {
                     newRecordRuns[i].RunOffset += splitLcn;
                     break;
                 }
             }
 
-            _lastVCN = (ulong)splitLcn - 1;
+            _lastVCN = (ulong)splitVcn - 1;
 
             return new NonResidentAttributeRecord(_type, _name, 0, _flags, splitVcn, newRecordRuns);
         }
