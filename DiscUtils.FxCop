@@ -321,6 +321,21 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Net.Dns">
+    <Messages>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-12-19 22:40:55Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Net.Dns</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="184" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Nfs">
     <Messages>
      <Message Id="Nfs" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-12-15 19:24:01Z">
@@ -7498,6 +7513,212 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Net.Dns">
+        <Types>
+         <Type Name="MessageFlags">
+          <Members>
+           <Member Name="#IsAuthorative">
+            <Accessors>
+             <Accessor Name="#get_IsAuthorative()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.IsAuthorative.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#IsResponse">
+            <Accessors>
+             <Accessor Name="#get_IsResponse()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.IsResponse.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#IsTruncated">
+            <Accessors>
+             <Accessor Name="#get_IsTruncated()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.IsTruncated.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#OpCode">
+            <Accessors>
+             <Accessor Name="#get_OpCode()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.OpCode.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#RecursionAvailable">
+            <Accessors>
+             <Accessor Name="#get_RecursionAvailable()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.RecursionAvailable.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#RecursionDesired">
+            <Accessors>
+             <Accessor Name="#get_RecursionDesired()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.RecursionDesired.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#ResponseCode">
+            <Accessors>
+             <Accessor Name="#get_ResponseCode()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-12-19 22:40:55Z">
+                <Issue>
+                 <Item>'MessageFlags.ResponseCode.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="186" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ServiceInstance">
+          <Members>
+           <Member Name="#EndPoints">
+            <Messages>
+             <Message Id="EndPoints" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2011-12-19 22:57:39Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>EndPoints</Item>
+               <Item>'ServiceInstance.EndPoints'</Item>
+               <Item>Endpoints</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="189" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="ServiceInstanceEndPoint">
+          <Members>
+           <Member Name="#IPEndPoints">
+            <Messages>
+             <Message Id="EndPoints" TypeName="CompoundWordsShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1702" Status="Excluded" Created="2011-12-19 22:57:39Z">
+              <Issue Name="MemberShouldBeDiscreteTerm">
+               <Item>EndPoints</Item>
+               <Item>'ServiceInstanceEndPoint.IPEndPoints'</Item>
+               <Item>Endpoints</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="189" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="UnicastDnsClient">
+          <Messages>
+           <Message Id="Unicast" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-12-19 22:40:55Z">
+            <Issue Name="Type">
+             <Item>Unicast</Item>
+             <Item>'UnicastDnsClient'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="184" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Lookup(System.String,DiscUtils.Net.Dns.RecordType)">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2011-12-19 22:40:55Z">
+              <Issue>
+               <Item>'UnicastDnsClient.Lookup(string, RecordType)'</Item>
+               <Item>'object'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="185" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Nfs">
         <Types>
          <Type Name="Nfs3CreateResult">
@@ -12104,6 +12325,10 @@
     <Note Id="181" Modified="2011-09-01 08:28:19Z">Deliberate use of generics.</Note>
     <Note Id="182" Modified="2011-09-01 08:30:26Z">Part of defined structure.</Note>
     <Note Id="183" Modified="2011-09-01 08:31:58Z">Is used.</Note>
+    <Note Id="184" Modified="2011-12-19 22:41:26Z">Part of library name.</Note>
+    <Note Id="185" Modified="2011-12-19 22:42:15Z">Deliberate strategy to avoid corrupt packets preventing resolution.</Note>
+    <Note Id="186" Modified="2011-12-19 22:43:40Z">Part of defined protocol.</Note>
+    <Note Id="189" Modified="2011-12-19 22:59:13Z">Follows example of IPEndPoint.</Note>
    </User>
   </Notes>
   <Rules>
@@ -12156,7 +12381,6 @@
    <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
     <Resolution Name="Namespace">Correct the casing of '{0}' in namespace name '{1}' by changing it to '{2}'.</Resolution>
-    <Resolution Name="Type">Correct the casing of '{0}' in type name {1} by changing it to '{2}'.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
