@@ -95,12 +95,12 @@ namespace DiscUtils.Common
 
             foreach (CommandLineParameter p in _params)
             {
-                p.WriteDescription(Console.Out, "  {0,-" + maxNameLen + "}  {1}", 70 - maxNameLen);
+                p.WriteDescription(Console.Out, "  {0,-" + maxNameLen + "}  {1}", 74 - maxNameLen);
                 Console.WriteLine();
             }
             if (_multiParam != null)
             {
-                _multiParam.WriteDescription(Console.Out, "  {0,-" + maxNameLen + "}  {1}", 70 - maxNameLen);
+                _multiParam.WriteDescription(Console.Out, "  {0,-" + maxNameLen + "}  {1}", 74 - maxNameLen);
                 Console.WriteLine();
             }
 
@@ -115,7 +115,7 @@ namespace DiscUtils.Common
 
             foreach (CommandLineSwitch s in _switches)
             {
-                s.WriteDescription(Console.Out, "  {0,-" + maxSwitchLen + "}  {1}", 70 - maxSwitchLen);
+                s.WriteDescription(Console.Out, "  {0,-" + maxSwitchLen + "}  {1}", 74 - maxSwitchLen);
                 Console.WriteLine();
             }
 
@@ -124,7 +124,7 @@ namespace DiscUtils.Common
                 Console.WriteLine("Remarks:");
                 foreach (var remark in remarks)
                 {
-                    string[] text = Utilities.WordWrap(remark, 70);
+                    string[] text = Utilities.WordWrap(remark, 74);
 
                     foreach(string line in text)
                     {

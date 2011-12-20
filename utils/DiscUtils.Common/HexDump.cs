@@ -33,11 +33,25 @@ namespace DiscUtils.Common
         /// <summary>
         /// Creates a hex dump from a byte array.
         /// </summary>
-        /// <param name="stream">The data to generate the hex dump from.</param>
+        /// <param name="data">The buffer to generate the hex dump from.</param>
         /// <param name="output">The destination for the hex dump.</param>
         public static void Generate(byte[] data, TextWriter output)
         {
             Generate(SparseStream.FromStream(new MemoryStream(data, false), Ownership.None), output);
+        }
+
+        /// <summary>
+        /// Creates a hex dump from a byte array.
+        /// </summary>
+        /// <param name="data">The buffer to generate the hex dump from.</param>
+        /// <param name="offset">Offset of the first byte to hex dump.</param>
+        /// <param name="count">The number of bytes to hex dump</param>
+        /// <param name="output">The destination for the hex dump.</param>
+        public static void Generate(byte[] data, int offset, int count, TextWriter output)
+        {
+            byte[] tempBuffer = new byte[count];
+            Array.Copy(data, offset, tempBuffer, 0, count);
+            Generate(SparseStream.FromStream(new MemoryStream(tempBuffer, false), Ownership.None), output);
         }
 
         /// <summary>
