@@ -25,6 +25,7 @@ namespace DiscUtils.Dmg
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
     using System.Xml;
 
     internal static class Plist
@@ -44,6 +45,35 @@ namespace DiscUtils.Dmg
             return ParseDictionary(root.FirstChild);
         }
 
+        internal static void Write(Stream stream, Dictionary<string, object> plist)
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.XmlResolver = null;
+
+            XmlDeclaration xmlDecl = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
+            xmlDoc.AppendChild(xmlDecl);
+            XmlDocumentType xmlDocType = xmlDoc.CreateDocumentType("plist", "-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", null);
+            xmlDoc.AppendChild(xmlDocType);
+
+
+            XmlElement rootElement = xmlDoc.CreateElement("plist");
+            rootElement.SetAttribute("Version", "1.0");
+            xmlDoc.AppendChild(rootElement);
+
+            xmlDoc.DocumentElement.SetAttribute("Version", "1.0");
+
+            rootElement.AppendChild(CreateNode(xmlDoc, plist));
+
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.Encoding = Encoding.UTF8;
+
+            using (XmlWriter xw = XmlTextWriter.Create(stream, settings))
+            {
+                xmlDoc.Save(xw);
+            }
+        }
+
         private static object ParseNode(XmlNode xmlNode)
         {
             switch (xmlNode.Name)
@@ -56,9 +86,53 @@ namespace DiscUtils.Dmg
                     return ParseString(xmlNode);
                 case "data":
                     return ParseData(xmlNode);
+                case "integer":
+                    return ParseInteger(xmlNode);
+                case "true":
+                    return true;
+                case "false":
+                    return false;
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        private static XmlNode CreateNode(XmlDocument xmlDoc, object obj)
+        {
+            if (obj is Dictionary<string, object>)
+            {
+                return CreateDictionary(xmlDoc, (Dictionary<string, object>)obj);
+            }
+            else if (obj is string)
+            {
+                XmlText text = xmlDoc.CreateTextNode((string)obj);
+                XmlElement node = xmlDoc.CreateElement("string");
+                node.AppendChild(text);
+                return node;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private static XmlNode CreateDictionary(XmlDocument xmlDoc, Dictionary<string, object> dict)
+        {
+            XmlElement dictNode = (XmlElement)xmlDoc.CreateElement("dict");
+
+            foreach (var entry in dict)
+            {
+                XmlText text = xmlDoc.CreateTextNode(entry.Key);
+                XmlElement keyNode = xmlDoc.CreateElement("key");
+                keyNode.AppendChild(text);
+
+                dictNode.AppendChild(keyNode);
+
+                XmlNode valueNode = CreateNode(xmlDoc, entry.Value);
+                dictNode.AppendChild(valueNode);
+            }
+
+            return dictNode;
         }
 
         private static Dictionary<string, object> ParseDictionary(XmlNode xmlNode)
@@ -108,6 +182,11 @@ namespace DiscUtils.Dmg
         {
             string base64 = xmlNode.InnerText;
             return Convert.FromBase64String(base64);
+        }
+
+        private static object ParseInteger(XmlNode xmlNode)
+        {
+            return int.Parse(xmlNode.InnerText);
         }
     }
 }
