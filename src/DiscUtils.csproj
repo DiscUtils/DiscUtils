@@ -512,6 +512,13 @@
     <Compile Include="Ntfs\VolumeName.cs" />
     <Compile Include="ObjectCache.cs" />
     <Compile Include="Numbers.cs" />
+    <Compile Include="OpticalDiscSharing\Disc.cs" />
+    <Compile Include="OpticalDiscSharing\DiscTransport.cs" />
+    <Compile Include="OpticalDiscSharing\DiscImageFile.cs" />
+    <Compile Include="OpticalDiscSharing\DiscInfo.cs" />
+    <Compile Include="OpticalDiscSharing\DiscContentBuffer.cs" />
+    <Compile Include="OpticalDiscSharing\OpticalDiscService.cs" />
+    <Compile Include="OpticalDiscSharing\OpticalDiscServiceClient.cs" />
     <Compile Include="Optical\Disc.cs" />
     <Compile Include="Optical\DiscFactory.cs" />
     <Compile Include="Optical\DiscImageFile.cs" />
