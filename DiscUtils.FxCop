@@ -1084,6 +1084,33 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="Plist">
+          <Members>
+           <Member Name="#CreateNode(System.Xml.XmlDocument,System.Object)">
+            <Messages>
+             <Message TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800" Status="Excluded" Created="2011-12-19 22:35:51Z">
+              <Issue Name="Parameter">
+               <Item>'obj'</Item>
+               <Item>'Dictionary&lt;string, object&gt;'</Item>
+               <Item>'Plist.CreateNode(XmlDocument, object)'</Item>
+               <Item>castclass</Item>
+              </Issue>
+              <Issue Name="Parameter">
+               <Item>'obj'</Item>
+               <Item>'string'</Item>
+               <Item>'Plist.CreateNode(XmlDocument, object)'</Item>
+               <Item>castclass</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="15" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="Range`2">
           <Members>
            <Member Name="#Chunked`1(System.Collections.Generic.IEnumerable`1&lt;DiscUtils.Range`2&lt;!!0,!!0&gt;&gt;,!!0)">
@@ -11908,6 +11935,7 @@
     <Note Id="12" Modified="2008-11-10 13:34:14Z">Included for completeness</Note>
     <Note Id="13" Modified="2008-11-10 13:35:20Z">Included for completeness</Note>
     <Note Id="14" Modified="2008-11-10 13:35:58Z">Included for completeness</Note>
+    <Note Id="15" Modified="2011-12-19 22:36:44Z">Simplifies code - acceptable trade-off</Note>
     <Note Id="16" Modified="2008-11-10 13:41:25Z">Included for completeness</Note>
     <Note Id="17" Modified="2008-11-10 13:41:33Z">Included for completeness</Note>
     <Note Id="18" Modified="2008-11-10 13:42:06Z">non-static to match similar methods</Note>
@@ -12104,6 +12132,9 @@
    <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
     <Resolution Name="Default">{0} contains field {1} that is of IDisposable type: {2}. Change the Dispose method on {0} to call Dispose or Close on this field.</Resolution>
    </Rule>
+   <Rule TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800">
+    <Resolution Name="Parameter">{0}, a parameter, is cast to type {1} multiple times in method {2}. Cache the result of the 'as' operator or direct cast in order to eliminate the redundant {3} instruction.</Resolution>
+   </Rule>
    <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
     <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
    </Rule>
@@ -12125,6 +12156,7 @@
    <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
     <Resolution Name="Namespace">Correct the casing of '{0}' in namespace name '{1}' by changing it to '{2}'.</Resolution>
+    <Resolution Name="Type">Correct the casing of '{0}' in type name {1} by changing it to '{2}'.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
     <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>

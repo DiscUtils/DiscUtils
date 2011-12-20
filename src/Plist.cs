@@ -20,10 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Dmg
+namespace DiscUtils
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Text;
     using System.Xml;
@@ -54,7 +55,6 @@ namespace DiscUtils.Dmg
             xmlDoc.AppendChild(xmlDecl);
             XmlDocumentType xmlDocType = xmlDoc.CreateDocumentType("plist", "-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", null);
             xmlDoc.AppendChild(xmlDocType);
-
 
             XmlElement rootElement = xmlDoc.CreateElement("plist");
             rootElement.SetAttribute("Version", "1.0");
@@ -186,7 +186,7 @@ namespace DiscUtils.Dmg
 
         private static object ParseInteger(XmlNode xmlNode)
         {
-            return int.Parse(xmlNode.InnerText);
+            return int.Parse(xmlNode.InnerText, CultureInfo.InvariantCulture);
         }
     }
 }

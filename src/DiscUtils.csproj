@@ -156,7 +156,6 @@
     <Compile Include="Compression\MoveToFront.cs" />
     <Compile Include="Dmg\RunType.cs" />
     <Compile Include="Dmg\CompressedRun.cs" />
-    <Compile Include="Dmg\Plist.cs" />
     <Compile Include="Dmg\Resource.cs" />
     <Compile Include="Dmg\ResourceFork.cs" />
     <Compile Include="Dmg\UdifBuffer.cs" />
@@ -517,6 +516,7 @@
     <Compile Include="PassthroughStreamBuilder.cs" />
     <Compile Include="Partitions\PartitionTableFactory.cs" />
     <Compile Include="PhysicalVolumeInfo.cs" />
+    <Compile Include="Plist.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PumpProgressEventArgs.cs" />
     <Compile Include="Range.cs" />
