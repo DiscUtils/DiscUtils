@@ -35,7 +35,7 @@ namespace DiscUtils
     {
         private static Dictionary<string, VirtualDiskFactory> s_extensionMap;
         private static Dictionary<string, VirtualDiskFactory> s_typeMap;
-        private static Dictionary<string, VirtualDiskTransport> s_diskTransports;
+        private static Dictionary<string, Type> s_diskTransports;
 
         private VirtualDiskTransport _transport;
 
@@ -255,19 +255,19 @@ namespace DiscUtils
             }
         }
 
-        private static Dictionary<string, VirtualDiskTransport> DiskTransports
+        private static Dictionary<string, Type> DiskTransports
         {
             get
             {
                 if (s_diskTransports == null)
                 {
-                    Dictionary<string, VirtualDiskTransport> transports = new Dictionary<string, VirtualDiskTransport>();
+                    Dictionary<string, Type> transports = new Dictionary<string, Type>();
 
                     foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
                     {
                         foreach (VirtualDiskTransportAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
                         {
-                            transports.Add(attr.Scheme.ToUpperInvariant(), (VirtualDiskTransport)Activator.CreateInstance(type));
+                            transports.Add(attr.Scheme.ToUpperInvariant(), type);
                         }
                     }
 
@@ -394,11 +394,13 @@ namespace DiscUtils
             Uri uri = PathToUri(path);
             VirtualDisk result = null;
 
-            VirtualDiskTransport transport;
-            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transport))
+            Type transportType;
+            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transportType))
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "Unable to parse path '{0}'", path), path);
             }
+
+            VirtualDiskTransport transport = (VirtualDiskTransport)Activator.CreateInstance(transportType);
 
             try
             {
@@ -474,11 +476,13 @@ namespace DiscUtils
             Uri uri = PathToUri(path);
             VirtualDisk result = null;
 
-            VirtualDiskTransport transport;
-            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transport))
+            Type transportType;
+            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transportType))
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "Unable to parse path '{0}'", path), path);
             }
+
+            VirtualDiskTransport transport = (VirtualDiskTransport)Activator.CreateInstance(transportType);
 
             try
             {
@@ -662,6 +666,11 @@ namespace DiscUtils
             if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentException("Path must not be null or empty", "path");
+            }
+
+            if (path.Contains("://"))
+            {
+                return new Uri(path);
             }
 
             if (!Path.IsPathRooted(path))
