@@ -38,7 +38,7 @@ namespace iSCSIBrowse
         }
 
         protected override StandardSwitches DefineCommandLine(CommandLineParser parser)
-{
+        {
             _portalAddress = new CommandLineParameter("portal", "Address of the iSCSI server (aka Portal) in the form <host>[:<port>], for example 192.168.1.2:3260 or 192.168.1.2", false);
             parser.AddParameter(_portalAddress);
 
