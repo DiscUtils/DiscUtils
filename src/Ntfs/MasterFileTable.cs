@@ -427,7 +427,7 @@ namespace DiscUtils.Ntfs
 
             foreach (FileRecord fr in Records)
             {
-                if (fr.BaseFile.Value != 0)
+                if (fr.BaseFile.Value != 0 || (fr.Flags & FileRecordFlags.InUse) == 0)
                 {
                     continue;
                 }
