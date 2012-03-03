@@ -67,7 +67,7 @@ namespace DiscUtils.Ntfs
 
         public uint MasterFileTableIndex
         {
-            get { return _index; }
+            get { return _haveIndex ? _index : _loadedIndex; }
         }
 
         public uint LoadedIndex

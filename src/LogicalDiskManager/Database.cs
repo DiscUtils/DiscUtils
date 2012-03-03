@@ -90,7 +90,7 @@ namespace DiscUtils.LogicalDiskManager
                 if (record.RecordType == RecordType.DiskGroup)
                 {
                     DiskGroupRecord dgRecord = (DiskGroupRecord)record;
-                    if (new Guid(dgRecord.GroupGuidString) == guid)
+                    if (new Guid(dgRecord.GroupGuidString) == guid || guid == Guid.Empty)
                     {
                         return dgRecord;
                     }

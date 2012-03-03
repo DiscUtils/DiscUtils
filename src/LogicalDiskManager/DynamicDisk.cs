@@ -61,7 +61,7 @@ namespace DiscUtils.LogicalDiskManager
 
         public Guid GroupId
         {
-            get { return new Guid(_header.DiskGroupId); }
+            get { return string.IsNullOrEmpty(_header.DiskGroupId) ? Guid.Empty : new Guid(_header.DiskGroupId); }
         }
 
         public Database Database
