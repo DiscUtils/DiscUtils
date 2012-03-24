@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,22 +22,42 @@
 
 namespace DiscUtils.Iso9660
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
+    using System;
+    using System.Text;
 
-    internal class IsoContext : VfsContext
+    internal sealed class RockRidgeExtension : SuspExtension
     {
-        public CommonVolumeDescriptor VolumeDescriptor { get; set; }
+        private string _variant;
 
-        public Stream DataStream { get; set; }
+        public RockRidgeExtension(string identifier)
+        {
+            _variant = identifier;
+        }
 
-        public bool SuspDetected { get; set; }
+        public override string Identifier
+        {
+            get { return _variant; }
+        }
 
-        public List<SuspExtension> SuspExtensions { get; set; }
+        public override SystemUseEntry Parse(string name, byte[] data, int offset, int length, Encoding encoding)
+        {
+            switch (name)
+            {
+                case "PX":
+                    return new PosixFileInfoSystemUseEntry(data, offset);
 
-        public int SuspSkipBytes { get; set; }
+                case "NM":
+                    return new PosixNameSystemUseEntry(data, offset);
 
-        public string RockRidgeIdentifier { get; set; }
+                case "CL":
+                    return new ChildLinkSystemUseEntry(data, offset);
+
+                case "TF":
+                    return new FileTimeSystemUseEntry(data, offset);
+
+                default:
+                    return new GenericSystemUseEntry(data, offset);
+            }
+        }
     }
 }

@@ -29,9 +29,9 @@ namespace DiscUtils.Iso9660
     internal class File : IVfsFile
     {
         protected IsoContext _context;
-        protected DirectoryRecord _dirEntry;
+        protected ReaderDirEntry _dirEntry;
 
-        public File(IsoContext context, DirectoryRecord dirEntry)
+        public File(IsoContext context, ReaderDirEntry dirEntry)
         {
             _context = context;
             _dirEntry = dirEntry;
@@ -91,15 +91,49 @@ namespace DiscUtils.Iso9660
 
         public long FileLength
         {
-            get { return _dirEntry.DataLength; }
+            get { return _dirEntry.Record.DataLength; }
         }
 
         public IBuffer FileContent
         {
             get
             {
-                ExtentStream es = new ExtentStream(_context.DataStream, _dirEntry.LocationOfExtent, _dirEntry.DataLength, _dirEntry.FileUnitSize, _dirEntry.InterleaveGapSize);
+                ExtentStream es = new ExtentStream(_context.DataStream, _dirEntry.Record.LocationOfExtent, _dirEntry.Record.DataLength, _dirEntry.Record.FileUnitSize, _dirEntry.Record.InterleaveGapSize);
                 return new StreamBuffer(es, Ownership.Dispose);
+            }
+        }
+
+        public virtual byte[] SystemUseData
+        {
+            get { return _dirEntry.Record.SystemUseData; }
+        }
+
+        public UnixFileSystemInfo UnixFileInfo
+        {
+            get
+            {
+                if (!_context.SuspDetected || string.IsNullOrEmpty(_context.RockRidgeIdentifier))
+                {
+                    throw new InvalidOperationException("No RockRidge file information available");
+                }
+
+                SuspRecords suspRecords = new SuspRecords(_context, SystemUseData, 0);
+
+                PosixFileInfoSystemUseEntry pfi = suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
+                if (pfi != null)
+                {
+                    return new UnixFileSystemInfo()
+                    {
+                        FileType = (UnixFileType)((pfi.FileMode >> 12) & 0xff),
+                        Permissions = (UnixFilePermissions)(pfi.FileMode & 0xfff),
+                        UserId = (int)pfi.UserId,
+                        GroupId = (int)pfi.GroupId,
+                        Inode = pfi.Inode,
+                        LinkCount = (int)pfi.NumLinks
+                    };
+                }
+
+                throw new InvalidOperationException("No RockRidge file information available for this file");
             }
         }
     }

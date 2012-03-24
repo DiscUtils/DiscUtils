@@ -417,21 +417,6 @@
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="DiscUtils.OpticalDiskSharing">
-    <Messages>
-     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2011-12-19 23:06:17Z">
-      <Issue Name="Namespace">
-       <Item>Utils</Item>
-       <Item>DiscUtils.OpticalDiskSharing</Item>
-      </Issue>
-      <Notes>
-       <User Name="Kenneth">
-        <Note Id="187" />
-       </User>
-      </Notes>
-     </Message>
-    </Messages>
-   </Namespace>
    <Namespace Name="DiscUtils.Partitions">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
@@ -6636,6 +6621,130 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="ExtensionSystemUseEntry">
+          <Members>
+           <Member Name="#ExtensionDescriptor">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'ExtensionSystemUseEntry.ExtensionDescriptor'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExtensionSource">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'ExtensionSystemUseEntry.ExtensionSource'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExtensionVersion">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'ExtensionSystemUseEntry.ExtensionVersion'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FileTimeSystemUseEntry">
+          <Members>
+           <Member Name="#AttributesTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'FileTimeSystemUseEntry.AttributesTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#BackupTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'FileTimeSystemUseEntry.BackupTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#EffectiveTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'FileTimeSystemUseEntry.EffectiveTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#ExpirationTime">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'FileTimeSystemUseEntry.ExpirationTime'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="PosixNameSystemUseEntry">
+          <Members>
+           <Member Name="#Flags">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-03-24 15:22:34Z">
+              <Issue>
+               <Item>'PosixNameSystemUseEntry.Flags'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="188" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="DiscUtils.LogicalDiskManager">
@@ -12343,7 +12452,7 @@
     <Note Id="184" Modified="2011-12-19 22:41:26Z">Part of library name.</Note>
     <Note Id="185" Modified="2011-12-19 22:42:15Z">Deliberate strategy to avoid corrupt packets preventing resolution.</Note>
     <Note Id="186" Modified="2011-12-19 22:43:40Z">Part of defined protocol.</Note>
-    <Note Id="187" Modified="2011-12-19 23:06:46Z">Part of Project Name.</Note>
+    <Note Id="188" Modified="2012-03-24 15:28:08Z">Defined part of spec</Note>
     <Note Id="189" Modified="2011-12-19 22:59:13Z">Follows example of IPEndPoint.</Note>
    </User>
   </Notes>

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,22 +22,24 @@
 
 namespace DiscUtils.Iso9660
 {
+    using System;
     using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
+    using System.Text;
 
-    internal class IsoContext : VfsContext
+    internal sealed class ChildLinkSystemUseEntry : SystemUseEntry
     {
-        public CommonVolumeDescriptor VolumeDescriptor { get; set; }
+        public uint ChildDirLocation;
 
-        public Stream DataStream { get; set; }
+        public ChildLinkSystemUseEntry(byte[] data, int offset)
+        {
+            byte len = data[offset + 2];
 
-        public bool SuspDetected { get; set; }
+            Name = "CL";
+            Version = data[offset + 3];
 
-        public List<SuspExtension> SuspExtensions { get; set; }
+            CheckLengthAndVersion(len, 12, 1);
 
-        public int SuspSkipBytes { get; set; }
-
-        public string RockRidgeIdentifier { get; set; }
+            ChildDirLocation = IsoUtilities.ToUInt32FromBoth(data, offset + 4);
+        }
     }
 }

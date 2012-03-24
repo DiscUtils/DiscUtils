@@ -28,7 +28,7 @@ namespace DiscUtils.Iso9660
     /// <summary>
     /// Class for reading existing ISO images.
     /// </summary>
-    public class CDReader : VfsFileSystemFacade, IClusterBasedFileSystem
+    public class CDReader : VfsFileSystemFacade, IClusterBasedFileSystem, IUnixFileSystem
     {
         /// <summary>
         /// Initializes a new instance of the CDReader class.
@@ -109,6 +109,14 @@ namespace DiscUtils.Iso9660
         public long TotalClusters
         {
             get { return GetRealFileSystem<VfsCDReader>().TotalClusters; }
+        }
+
+        /// <summary>
+        /// Gets which of the Iso9660 variants is being used.
+        /// </summary>
+        public Iso9660Variant ActiveVariant
+        {
+            get { return GetRealFileSystem<VfsCDReader>().ActiveVariant; }
         }
 
         /// <summary>
@@ -197,6 +205,17 @@ namespace DiscUtils.Iso9660
         public ClusterMap BuildClusterMap()
         {
             return GetRealFileSystem<VfsCDReader>().BuildClusterMap();
+        }
+
+        /// <summary>
+        /// Retrieves Unix-specific information about a file or directory.
+        /// </summary>
+        /// <param name="path">Path to the file or directory</param>
+        /// <returns>Information about the owner, group, permissions and type of the
+        /// file or directory.</returns>
+        public UnixFileSystemInfo GetUnixFileInfo(string path)
+        {
+            return GetRealFileSystem<VfsCDReader>().GetUnixFileInfo(path);
         }
     }
 }

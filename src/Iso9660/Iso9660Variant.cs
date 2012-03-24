@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,22 +22,39 @@
 
 namespace DiscUtils.Iso9660
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
-
-    internal class IsoContext : VfsContext
+    /// <summary>
+    /// Enumeration of known file system variants.
+    /// </summary>
+    /// <remarks>
+    /// <para>ISO9660 has a number of significant limitations, and over time
+    /// multiple schemes have been devised for extending the standard
+    /// to support the richer file system semantics typical of most modern
+    /// operating systems.  These variants differ functionally and (in the
+    /// case of RockRidge) may represent a logically different directory
+    /// hierarchy to that encoded in the vanilla iso9660 standard.</para>
+    /// <para>Use this enum to control which variants to honour / prefer
+    /// when accessing an ISO image.</para>
+    /// </remarks>
+    public enum Iso9660Variant
     {
-        public CommonVolumeDescriptor VolumeDescriptor { get; set; }
+        /// <summary>
+        /// No known variant.
+        /// </summary>
+        None,
 
-        public Stream DataStream { get; set; }
+        /// <summary>
+        /// Vanilla ISO9660.
+        /// </summary>
+        Iso9660,
 
-        public bool SuspDetected { get; set; }
+        /// <summary>
+        /// Joliet file system (Windows).
+        /// </summary>
+        Joliet,
 
-        public List<SuspExtension> SuspExtensions { get; set; }
-
-        public int SuspSkipBytes { get; set; }
-
-        public string RockRidgeIdentifier { get; set; }
+        /// <summary>
+        /// Rock Ridge (Unix).
+        /// </summary>
+        RockRidge,
     }
 }

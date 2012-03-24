@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,22 +22,32 @@
 
 namespace DiscUtils.Iso9660
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
-
-    internal class IsoContext : VfsContext
+    internal sealed class PosixFileInfoSystemUseEntry : SystemUseEntry
     {
-        public CommonVolumeDescriptor VolumeDescriptor { get; set; }
+        public uint FileMode;
+        public uint NumLinks;
+        public uint UserId;
+        public uint GroupId;
+        public uint Inode;
 
-        public Stream DataStream { get; set; }
+        public PosixFileInfoSystemUseEntry(byte[] data, int offset)
+        {
+            byte len = data[offset + 2];
 
-        public bool SuspDetected { get; set; }
+            Name = "PX";
+            Version = data[offset + 3];
 
-        public List<SuspExtension> SuspExtensions { get; set; }
+            CheckLengthAndVersion(len, 36, 1);
 
-        public int SuspSkipBytes { get; set; }
-
-        public string RockRidgeIdentifier { get; set; }
+            FileMode = IsoUtilities.ToUInt32FromBoth(data, offset + 4);
+            NumLinks = IsoUtilities.ToUInt32FromBoth(data, offset + 12);
+            UserId = IsoUtilities.ToUInt32FromBoth(data, offset + 20);
+            GroupId = IsoUtilities.ToUInt32FromBoth(data, offset + 28);
+            Inode = 0;
+            if (len >= 44)
+            {
+                Inode = IsoUtilities.ToUInt32FromBoth(data, offset + 36);
+            }
+        }
     }
 }

@@ -26,22 +26,23 @@ namespace DiscUtils.Iso9660
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Text;
     using DiscUtils.Vfs;
 
-    internal class ReaderDirectory : File, IVfsDirectory<DirectoryRecord, File>
+    internal class ReaderDirectory : File, IVfsDirectory<ReaderDirEntry, File>
     {
-        private List<DirectoryRecord> _records;
-        private DirectoryRecord _self;
+        private List<ReaderDirEntry> _records;
+        private ReaderDirEntry _self;
 
-        public ReaderDirectory(IsoContext context, DirectoryRecord dirEntry)
+        public ReaderDirectory(IsoContext context, ReaderDirEntry dirEntry)
             : base(context, dirEntry)
         {
             byte[] buffer = new byte[IsoUtilities.SectorSize];
-            Stream extent = new ExtentStream(_context.DataStream, dirEntry.LocationOfExtent, uint.MaxValue, 0, 0);
+            Stream extent = new ExtentStream(_context.DataStream, dirEntry.Record.LocationOfExtent, uint.MaxValue, 0, 0);
 
-            _records = new List<DirectoryRecord>();
+            _records = new List<ReaderDirEntry>();
 
-            uint totalLength = dirEntry.DataLength;
+            uint totalLength = dirEntry.Record.DataLength;
             uint totalRead = 0;
             while (totalRead < totalLength)
             {
@@ -62,11 +63,23 @@ namespace DiscUtils.Iso9660
 
                     if (!IsoUtilities.IsSpecialDirectory(dr))
                     {
-                        _records.Add(dr);
+                        ReaderDirEntry childDirEntry = new ReaderDirEntry(_context, dr);
+
+                        if (context.SuspDetected && !string.IsNullOrEmpty(context.RockRidgeIdentifier))
+                        {
+                            if (childDirEntry.SuspRecords == null || !childDirEntry.SuspRecords.HasEntry(context.RockRidgeIdentifier, "RE"))
+                            {
+                                _records.Add(childDirEntry);
+                            }
+                        }
+                        else
+                        {
+                            _records.Add(childDirEntry);
+                        }
                     }
                     else if (dr.FileIdentifier == "\0")
                     {
-                        _self = dr;
+                        _self = new ReaderDirEntry(_context, dr);
                     }
 
                     pos += length;
@@ -74,17 +87,22 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        public ICollection<DirectoryRecord> AllEntries
+        public ICollection<ReaderDirEntry> AllEntries
         {
             get { return _records; }
         }
 
-        public DirectoryRecord Self
+        public ReaderDirEntry Self
         {
             get { return _self; }
         }
 
-        public DirectoryRecord GetEntryByName(string name)
+        public override byte[] SystemUseData
+        {
+            get { return _self.Record.SystemUseData; }
+        }
+
+        public ReaderDirEntry GetEntryByName(string name)
         {
             bool anyVerMatch = name.IndexOf(';') < 0;
             string normName = IsoUtilities.NormalizeFileName(name).ToUpper(CultureInfo.InvariantCulture);
@@ -93,9 +111,9 @@ namespace DiscUtils.Iso9660
                 normName = normName.Substring(0, normName.LastIndexOf(';') + 1);
             }
 
-            foreach (DirectoryRecord r in _records)
+            foreach (ReaderDirEntry r in _records)
             {
-                string toComp = IsoUtilities.NormalizeFileName(r.FileIdentifier).ToUpper(CultureInfo.InvariantCulture);
+                string toComp = IsoUtilities.NormalizeFileName(r.FileName).ToUpper(CultureInfo.InvariantCulture);
                 if (!anyVerMatch && toComp == normName)
                 {
                     return r;
@@ -109,7 +127,7 @@ namespace DiscUtils.Iso9660
             return null;
         }
 
-        public DirectoryRecord CreateNewFile(string name)
+        public ReaderDirEntry CreateNewFile(string name)
         {
             throw new NotSupportedException();
         }

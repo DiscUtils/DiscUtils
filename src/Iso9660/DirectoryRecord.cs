@@ -39,7 +39,7 @@ namespace DiscUtils.Iso9660
         MultiExtent = 0x80
     }
 
-    internal class DirectoryRecord : VfsDirEntry
+    internal class DirectoryRecord
     {
         public byte ExtendedAttributeRecordLength;
         public uint LocationOfExtent;
@@ -50,71 +50,7 @@ namespace DiscUtils.Iso9660
         public byte InterleaveGapSize;
         public ushort VolumeSequenceNumber;
         public string FileIdentifier;
-
-        public override bool IsDirectory
-        {
-            get { return (Flags & FileFlags.Directory) != 0; }
-        }
-
-        public override bool IsSymlink
-        {
-            get { return false; }
-        }
-
-        public override string FileName
-        {
-            get { return FileIdentifier; }
-        }
-
-        public override bool HasVfsTimeInfo
-        {
-            get { return true; }
-        }
-
-        public override DateTime LastAccessTimeUtc
-        {
-            get { return RecordingDateAndTime; }
-        }
-
-        public override DateTime LastWriteTimeUtc
-        {
-            get { return RecordingDateAndTime; }
-        }
-
-        public override DateTime CreationTimeUtc
-        {
-            get { return RecordingDateAndTime; }
-        }
-
-        public override bool HasVfsFileAttributes
-        {
-            get { return true; }
-        }
-
-        public override FileAttributes FileAttributes
-        {
-            get
-            {
-                FileAttributes attrs = FileAttributes.ReadOnly;
-
-                if ((Flags & FileFlags.Directory) != 0)
-                {
-                    attrs |= FileAttributes.Directory;
-                }
-
-                if ((Flags & FileFlags.Hidden) != 0)
-                {
-                    attrs |= FileAttributes.Hidden;
-                }
-
-                return attrs;
-            }
-        }
-
-        public override long UniqueCacheId
-        {
-            get { return (((long)LocationOfExtent) << 32) | DataLength; }
-        }
+        public byte[] SystemUseData;
 
         public static int ReadFrom(byte[] src, int offset, Encoding enc, out DirectoryRecord record)
         {
@@ -131,6 +67,15 @@ namespace DiscUtils.Iso9660
             record.VolumeSequenceNumber = IsoUtilities.ToUInt16FromBoth(src, offset + 28);
             byte lengthOfFileIdentifier = src[offset + 32];
             record.FileIdentifier = IsoUtilities.ReadChars(src, offset + 33, lengthOfFileIdentifier, enc);
+
+            int padding = (lengthOfFileIdentifier & 1) == 0 ? 1 : 0;
+            int startSystemArea = lengthOfFileIdentifier + padding + 33;
+            int lenSystemArea = length - startSystemArea;
+            if (lenSystemArea > 0)
+            {
+                record.SystemUseData = new byte[lenSystemArea];
+                Array.Copy(src, offset + startSystemArea, record.SystemUseData, 0, lenSystemArea);
+            }
 
             return length;
         }
