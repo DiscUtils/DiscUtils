@@ -75,7 +75,7 @@ namespace DiscUtils.Vfs
         /// </summary>
         public override DiscDirectoryInfo Root
         {
-            get { return _wrapped.Root; }
+            get { return new DiscDirectoryInfo(this, string.Empty); }
         }
 
         /// <summary>
@@ -485,7 +485,7 @@ namespace DiscUtils.Vfs
         /// <remarks>The file does not need to exist</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
-            return _wrapped.GetFileInfo(path);
+            return new DiscFileInfo(this, path);
         }
 
         /// <summary>
@@ -496,7 +496,7 @@ namespace DiscUtils.Vfs
         /// <remarks>The directory does not need to exist</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
-            return _wrapped.GetDirectoryInfo(path);
+            return new DiscDirectoryInfo(this, path);
         }
 
         /// <summary>
@@ -507,7 +507,7 @@ namespace DiscUtils.Vfs
         /// <remarks>The file system object does not need to exist</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
-            return _wrapped.GetFileSystemInfo(path);
+            return new DiscFileSystemInfo(this, path);
         }
 
         /// <summary>
