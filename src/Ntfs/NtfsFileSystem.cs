@@ -83,18 +83,22 @@ namespace DiscUtils.Ntfs
             _fileCache[MasterFileTable.MftIndex] = mftFile;
             _context.Mft.Initialize(mftFile);
 
+            // Get volume information (includes version number)
+            File volumeInfoFile = GetFile(MasterFileTable.VolumeIndex);
+            _volumeInfo = volumeInfoFile.GetStream(AttributeType.VolumeInformation, null).GetContent<VolumeInformation>();
+
             // Initialize access to the other well-known metadata files
             _context.ClusterBitmap = new ClusterBitmap(GetFile(MasterFileTable.BitmapIndex));
             _context.AttributeDefinitions = new AttributeDefinitions(GetFile(MasterFileTable.AttrDefIndex));
             _context.UpperCase = new UpperCase(GetFile(MasterFileTable.UpCaseIndex));
-            _context.SecurityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
-            _context.ObjectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
-            _context.ReparsePoints = new ReparsePoints(GetFile(GetDirectoryEntry(@"$Extend\$Reparse").Reference));
-            _context.Quotas = new Quotas(GetFile(GetDirectoryEntry(@"$Extend\$Quota").Reference));
 
-            File volumeInfoFile = GetFile(MasterFileTable.VolumeIndex);
-            _volumeInfo = volumeInfoFile.GetStream(AttributeType.VolumeInformation, null).GetContent<VolumeInformation>();
-
+            if (_volumeInfo.Version >= VolumeInformation.VersionW2k)
+            {
+                _context.SecurityDescriptors = new SecurityDescriptors(GetFile(MasterFileTable.SecureIndex));
+                _context.ObjectIds = new ObjectIds(GetFile(GetDirectoryEntry(@"$Extend\$ObjId").Reference));
+                _context.ReparsePoints = new ReparsePoints(GetFile(GetDirectoryEntry(@"$Extend\$Reparse").Reference));
+                _context.Quotas = new Quotas(GetFile(GetDirectoryEntry(@"$Extend\$Quota").Reference));
+            }
 #if false
             byte[] buffer = new byte[1024];
             for (int i = 0; i < buffer.Length; ++i)
@@ -1874,17 +1878,29 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(linePrefix);
             _context.BiosParameterBlock.Dump(writer, linePrefix);
 
-            writer.WriteLine(linePrefix);
-            _context.SecurityDescriptors.Dump(writer, linePrefix);
+            if (_context.SecurityDescriptors != null)
+            {
+                writer.WriteLine(linePrefix);
+                _context.SecurityDescriptors.Dump(writer, linePrefix);
+            }
 
-            writer.WriteLine(linePrefix);
-            _context.ObjectIds.Dump(writer, linePrefix);
+            if (_context.ObjectIds != null)
+            {
+                writer.WriteLine(linePrefix);
+                _context.ObjectIds.Dump(writer, linePrefix);
+            }
 
-            writer.WriteLine(linePrefix);
-            _context.ReparsePoints.Dump(writer, linePrefix);
+            if (_context.ReparsePoints != null)
+            {
+                writer.WriteLine(linePrefix);
+                _context.ReparsePoints.Dump(writer, linePrefix);
+            }
 
-            writer.WriteLine(linePrefix);
-            _context.Quotas.Dump(writer, linePrefix);
+            if (_context.Quotas != null)
+            {
+                writer.WriteLine(linePrefix);
+                _context.Quotas.Dump(writer, linePrefix);
+            }
 
             writer.WriteLine(linePrefix);
             GetDirectory(MasterFileTable.RootDirIndex).Dump(writer, linePrefix);

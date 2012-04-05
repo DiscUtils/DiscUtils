@@ -27,6 +27,10 @@ namespace DiscUtils.Ntfs
 
     internal sealed class VolumeInformation : IByteArraySerializable, IDiagnosticTraceable
     {
+        public const int VersionNt4 = 0x0102;
+        public const int VersionW2k = 0x0300;
+        public const int VersionXp = 0x0301;
+
         private byte _majorVersion;
         private byte _minorVersion;
         private VolumeInformationFlags _flags;
@@ -45,6 +49,11 @@ namespace DiscUtils.Ntfs
         public VolumeInformationFlags Flags
         {
             get { return _flags; }
+        }
+
+        public int Version
+        {
+            get { return ((int)_majorVersion) << 8 | _minorVersion; }
         }
 
         public int Size
