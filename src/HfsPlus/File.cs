@@ -115,7 +115,7 @@ namespace DiscUtils.HfsPlus
                     throw new InvalidOperationException();
                 }
 
-                return new FileBuffer(_context, fileInfo.DataFork);
+                return new FileBuffer(_context, fileInfo.DataFork, fileInfo.FileId);
             }
         }
 

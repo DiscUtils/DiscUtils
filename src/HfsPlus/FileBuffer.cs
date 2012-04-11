@@ -30,11 +30,13 @@ namespace DiscUtils.HfsPlus
     {
         private Context _context;
         private ForkData _baseData;
-
-        public FileBuffer(Context context, ForkData baseData)
+        private CatalogNodeId _cnid;
+		
+        public FileBuffer(Context context, ForkData baseData, CatalogNodeId catalogNodeId)
         {
             _context = context;
             _baseData = baseData;
+            _cnid = catalogNodeId;
         }
 
         public override bool CanRead
@@ -67,6 +69,11 @@ namespace DiscUtils.HfsPlus
 
                 long extentOffset = (pos + totalRead) - extentLogicalStart;
                 int toRead = (int)Math.Min(limitedCount - totalRead, extentSize - extentOffset);
+				
+                if (toRead == 0) //remaining in extent can create a sitaution where amount to read is zero, and that appears to be OK, just need to exit thie while loop to avoid infinite loop
+                {
+                    break;
+                }
 
                 Stream volStream = _context.VolumeStream;
                 volStream.Position = extentStreamStart + extentOffset;
@@ -108,7 +115,34 @@ namespace DiscUtils.HfsPlus
                 blocksSeen += _baseData.Extents[i].BlockCount;
             }
 
-            throw new NotImplementedException("Fragmented files");
+            while (blocksSeen < _baseData.TotalBlocks)
+            {
+                byte[] extentData = _context.ExtentsOverflow.Find(new ExtentKey(_cnid, blocksSeen, false));
+
+                if (extentData != null)
+                {
+                    int extentDescriptorCount = extentData.Length / 8;
+                    for (int a = 0; a < extentDescriptorCount; a++)
+                    {
+                        ExtentDescriptor extentDescriptor = new ExtentDescriptor();
+                        int bytesRead = extentDescriptor.ReadFrom(extentData, a * 8);
+
+                        if ((blocksSeen + extentDescriptor.BlockCount) > block)
+                        {
+                            extentLogicalStart = blocksSeen * (long)_context.VolumeHeader.BlockSize;
+                            return extentDescriptor;
+                        }
+
+                        blocksSeen += extentDescriptor.BlockCount;
+                    }
+                }
+                else //overflow btree lookup was not successful, not much we can do here, perhaps throw an exception?
+                {
+                    break;
+                }
+            }
+            
+            throw new InvalidOperationException("Requested file fragment beyond EOF");
         }
     }
 }

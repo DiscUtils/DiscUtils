@@ -31,6 +31,8 @@ namespace DiscUtils.HfsPlus
 
         public BTree<CatalogKey> Catalog { get; set; }
 
+        public BTree<ExtentKey> ExtentsOverflow { get; set; }
+
         public VolumeHeader VolumeHeader { get; set; }
     }
 }
