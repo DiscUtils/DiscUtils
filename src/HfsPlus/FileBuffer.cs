@@ -31,7 +31,7 @@ namespace DiscUtils.HfsPlus
         private Context _context;
         private ForkData _baseData;
         private CatalogNodeId _cnid;
-		
+
         public FileBuffer(Context context, ForkData baseData, CatalogNodeId catalogNodeId)
         {
             _context = context;
@@ -69,8 +69,10 @@ namespace DiscUtils.HfsPlus
 
                 long extentOffset = (pos + totalRead) - extentLogicalStart;
                 int toRead = (int)Math.Min(limitedCount - totalRead, extentSize - extentOffset);
-				
-                if (toRead == 0) //remaining in extent can create a sitaution where amount to read is zero, and that appears to be OK, just need to exit thie while loop to avoid infinite loop
+
+                // Remaining in extent can create a situation where amount to read is zero, and that appears
+                // to be OK, just need to exit thie while loop to avoid infinite loop.
+                if (toRead == 0)
                 {
                     break;
                 }
@@ -136,9 +138,9 @@ namespace DiscUtils.HfsPlus
                         blocksSeen += extentDescriptor.BlockCount;
                     }
                 }
-                else //overflow btree lookup was not successful, not much we can do here, perhaps throw an exception?
+                else
                 {
-                    break;
+                    throw new IOException("Missing extent from extent overflow file: cnid=" + _cnid + ", blocksSeen=" + blocksSeen);
                 }
             }
             

@@ -4808,6 +4808,28 @@
            </Message>
           </Messages>
          </Type>
+         <Type Name="ExtentKey">
+          <Members>
+           <Member Name="#NodeId">
+            <Accessors>
+             <Accessor Name="#get_NodeId()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2012-04-14 09:58:55Z">
+                <Issue>
+                 <Item>'ExtentKey.NodeId.get()'</Item>
+                </Issue>
+                <Notes>
+                 <User Name="Kenneth">
+                  <Note Id="187" />
+                 </User>
+                </Notes>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="FileInfo">
           <Messages>
            <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2011-08-30 08:21:41Z">
@@ -12452,6 +12474,7 @@
     <Note Id="184" Modified="2011-12-19 22:41:26Z">Part of library name.</Note>
     <Note Id="185" Modified="2011-12-19 22:42:15Z">Deliberate strategy to avoid corrupt packets preventing resolution.</Note>
     <Note Id="186" Modified="2011-12-19 22:43:40Z">Part of defined protocol.</Note>
+    <Note Id="187" Modified="2012-04-14 10:05:44Z">Simple getter on important field.</Note>
     <Note Id="188" Modified="2012-03-24 15:28:08Z">Defined part of spec</Note>
     <Note Id="189" Modified="2011-12-19 22:59:13Z">Follows example of IPEndPoint.</Note>
    </User>

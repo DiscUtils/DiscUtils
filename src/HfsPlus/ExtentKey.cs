@@ -20,17 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 namespace DiscUtils.HfsPlus
 {
+    using System;
+
     internal sealed class ExtentKey : BTreeKey, IComparable<ExtentKey>
     {
         private ushort _keyLength;
-        private byte _forkType; //0 is data, 0xff is rsrc
+        private byte _forkType; // 0 is data, 0xff is rsrc
         private CatalogNodeId _nodeId;
         private uint _startBlock;
 
-        public ExtentKey() { }
+        public ExtentKey()
+        {
+        }
 
         public ExtentKey(CatalogNodeId cnid, uint startBlock, bool resource_fork = false)
         {
@@ -47,7 +50,7 @@ namespace DiscUtils.HfsPlus
 
         public override int Size
         {
-            get { return 10; }
+            get { return 12; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)
@@ -72,18 +75,25 @@ namespace DiscUtils.HfsPlus
         public int CompareTo(ExtentKey other)
         {
             if (other == null)
+            {
                 throw new ArgumentNullException("other");
+            }
 
-            //sort by file id, fork type, then starting block
-
+            // Sort by file id, fork type, then starting block
             if (_nodeId != other._nodeId)
+            {
                 return _nodeId < other._nodeId ? -1 : 1;
+            }
 
             if (_forkType != other._forkType)
+            {
                 return (_forkType < other._forkType) ? -1 : 1;
+            }
 
             if (_startBlock != other._startBlock)
+            {
                 return (_startBlock < other._startBlock) ? -1 : 1;
+            }
 
             return 0;
         }
