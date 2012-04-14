@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="a2a78104-562f-464e-89c4-dc3494ae7341" revisionNumber="1">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <summary>
+      <para>An overview of the DiscUtils library and it's current status.</para>
+    </summary>
+    
+    <introduction>
+      <autoOutline />
+      <para>
+        DiscUtils is a .NET library to read and write ISO files and Virtual Machine
+        disk files (VHD, VDI, XVA, VMDK, etc). DiscUtils is developed in C# with no
+        native code (or P/Invoke).
+      </para>
+    </introduction>
+
+    <section address="Goals">
+      <title>Goals</title>
+      <content>
+        <para>
+          .NET DiscUtils aims to provide a convenient way for developers to
+          access, modify and create disk images.
+
+          Initially, DiscUtils was intended to support an easy way to access
+          the contents of .iso files, and to create new .iso's - support for
+          virtual hard disks, and the partitioning schemes has been developed
+          subsequently.
+        </para>
+      </content>
+    </section>
+
+    <section address="Status">
+      <title>Status</title>
+      <content>
+        <para>
+          Today, DiscUtils supports a number of file formats, file systems,
+          partitioning schemes, etc.  Below is the current status
+          of each technology.
+        </para>
+
+        <para>File formats are the outer layer of the onion:</para>
+
+        <!-- Disk File Formats -->
+        <table>
+          <title>Virtual Disk File Format Status</title>
+          <tableHeader>
+            <row>
+              <entry>File Format</entry>
+              <entry>Read</entry>
+              <entry>Modify</entry>
+              <entry>Create</entry>
+              <entry>Build</entry>
+              <entry>Fixed Disks</entry>
+              <entry>Sparse Disks</entry>
+              <entry>Differencing Disks</entry>
+              <entry>Notes</entry>
+            </row>
+          </tableHeader>
+
+          <row>
+            <!-- File Format -->
+            <entry>Microsoft Virtual Hard Disk (.vhd)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>Yes</entry>
+            <!-- Create -->
+            <entry>Yes</entry>
+            <!-- Build -->
+            <entry>Yes</entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>Yes</entry>
+            <!-- Differencing Disks -->
+            <entry>Yes</entry>
+            <!-- Notes -->
+            <entry/>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>VMware Disk (.vmdk)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>Yes</entry>
+            <!-- Create -->
+            <entry>Yes</entry>
+            <!-- Build -->
+            <entry>
+              Yes<superscript>1</superscript>
+            </entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>Yes</entry>
+            <!-- Differencing Disks -->
+            <entry>Yes</entry>
+            <!-- Notes -->
+            <entry>
+              <para>Notes:</para>
+              <para>
+                <superscript>1</superscript>VMFS and VMFS Sparse only
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Oracle VirtualBox Disk Image (.vdi)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>Yes</entry>
+            <!-- Create -->
+            <entry>Yes</entry>
+            <!-- Build -->
+            <entry>No</entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>Yes</entry>
+            <!-- Differencing Disks -->
+            <entry>No</entry>
+            <!-- Notes -->
+            <entry/>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Optical (.iso, .bin)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>No</entry>
+            <!-- Create -->
+            <entry>
+              Yes<superscript>1</superscript>
+            </entry>
+            <!-- Build -->
+            <entry>
+              Yes<superscript>1</superscript>
+            </entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>n/a</entry>
+            <!-- Differencing Disks -->
+            <entry>n/a</entry>
+            <!-- Notes -->
+            <entry>
+              <para>Optical disks are essentially a pure file system image.  Notes:</para>
+              <para>
+                <superscript>1</superscript>For ISO 9660 file system only, using the ISO 9660 file system support.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Apple Disk Image (.dmg)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>
+              Yes<superscript>1</superscript>
+            </entry>
+            <!-- Create -->
+            <entry>Yes</entry>
+            <!-- Build -->
+            <entry>No</entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>No</entry>
+            <!-- Differencing Disks -->
+            <entry>No</entry>
+            <!-- Notes -->
+            <entry>
+              <para>The following variants are currently supported: UDRW (Read/Write), UDCO (ADC Compressed), UDZO (Zlib compressed), UDBZ (BZip2 compressed).  Notes:</para>
+              <para>
+                <superscript>1</superscript>Only for UDRW type.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Raw (.img, .ima, .vfd, .flp, .bif)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>Yes</entry>
+            <!-- Create -->
+            <entry>Yes</entry>
+            <!-- Build -->
+            <entry>No</entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>n/a</entry>
+            <!-- Differencing Disks -->
+            <entry>n/a</entry>
+            <!-- Notes -->
+            <entry />
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>----</entry>
+            <!-- Read -->
+            <entry>----</entry>
+            <!-- Modify -->
+            <entry>----</entry>
+            <!-- Create -->
+            <entry>----</entry>
+            <!-- Build -->
+            <entry>----</entry>
+            <!-- Fixed Disks -->
+            <entry>----</entry>
+            <!-- Sparse Disks -->
+            <entry>----</entry>
+            <!-- Differencing Disks -->
+            <entry>----</entry>
+            <!-- Notes -->
+            <entry>----</entry>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Simple Disk Image (.sdi)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>Yes</entry>
+            <!-- Create -->
+            <entry>No</entry>
+            <!-- Build -->
+            <entry>No</entry>
+            <!-- Fixed Disks -->
+            <entry>Yes</entry>
+            <!-- Sparse Disks -->
+            <entry>n/a</entry>
+            <!-- Differencing Disks -->
+            <entry>n/a</entry>
+            <!-- Notes -->
+            <entry>SDI files are a essentially a combined disk format plus partition manager, so not supported as a conventional disk file format</entry>
+          </row>
+
+          <row>
+            <!-- File Format -->
+            <entry>Xen Virtual Appliance (.xva)</entry>
+            <!-- Read -->
+            <entry>Yes</entry>
+            <!-- Modify -->
+            <entry>No</entry>
+            <!-- Create -->
+            <entry>No</entry>
+            <!-- Build -->
+            <entry>No</entry>
+            <!-- Fixed Disks -->
+            <entry>n/a</entry>
+            <!-- Sparse Disks -->
+            <entry>Yes</entry>
+            <!-- Differencing Disks -->
+            <entry>n/a</entry>
+            <!-- Notes -->
+            <entry>XVAs are virtual appliances, DiscUtils has limited support for accessing disks within XVA files</entry>
+          </row>
+        </table>
+
+        <para>
+          Once access is gained to contents of the disk, it is then necessary
+          to interpret the partitioning scheme used:
+        </para>
+
+        <!-- Partitions & Logical Volumes -->
+        <table>
+          <title>Partitions and Logical Volumes</title>
+          <tableHeader>
+            <row>
+              <entry>Scheme</entry>
+              <entry>Access Volumes</entry>
+              <entry>Create and Delete Volumes</entry>
+              <entry>Initialize</entry>
+              <entry>Notes</entry>
+            </row>
+          </tableHeader>
+
+          <row>
+            <!-- Scheme -->
+            <entry>Master Boot Record / BIOS</entry>
+            <!-- Access Volumes -->
+            <entry>Yes</entry>
+            <!-- Create and Delete Volumes -->
+            <entry>Yes</entry>
+            <!-- Initialize -->
+            <entry>Yes</entry>
+            <!-- Notes -->
+            <entry>This is the 'traditional' (or legacy) partitioning scheme on PCs</entry>
+          </row>
+
+          <row>
+            <!-- Scheme -->
+            <entry>GUID Partition Table (GPT)</entry>
+            <!-- Access Volumes -->
+            <entry>Yes</entry>
+            <!-- Create and Delete Volumes -->
+            <entry>Yes</entry>
+            <!-- Initialize -->
+            <entry>Yes</entry>
+            <!-- Notes -->
+            <entry>This is the new partitioning scheme on PCs</entry>
+          </row>
+
+          <row>
+            <!-- Scheme -->
+            <entry>Logical Disk Manager (LDM)</entry>
+            <!-- Access Volumes -->
+            <entry>Yes</entry>
+            <!-- Create and Delete Volumes -->
+            <entry>No</entry>
+            <!-- Initialize -->
+            <entry>No</entry>
+            <!-- Notes -->
+            <entry>
+              This is the 'Dynamic Disk' support in Windows.  Striped, Mirrored and Spanned volumes are supported.  RAID is not supported.
+            </entry>
+          </row>
+
+          <row>
+            <!-- Scheme -->
+            <entry>Apple Partition Map (APM)</entry>
+            <!-- Access Volumes -->
+            <entry>Yes</entry>
+            <!-- Create and Delete Volumes -->
+            <entry>No</entry>
+            <!-- Initialize -->
+            <entry>No</entry>
+            <!-- Notes -->
+            <entry>
+              This is the classic Mac partition table.
+            </entry>
+          </row>
+        </table>
+
+        <para>
+          With access to the partitions/logical volumes, it is possible to
+          access the underlying file system:
+        </para>
+
+        <!-- File Systems -->
+        <table>
+          <title>File System Status</title>
+          <tableHeader>
+            <row>
+              <entry>File System</entry>
+              <entry>Read</entry>
+              <entry>Modify</entry>
+              <entry>Format</entry>
+              <entry>Build</entry>
+              <entry>Notes</entry>
+            </row>
+          </tableHeader>
+          <row>
+            <entry>ISO 9660</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>Yes</entry>
+            <entry />
+          </row>
+          <row>
+            <entry>UDF</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>Supported for optical disks and hard disk partitions</entry>
+          </row>
+          <row>
+            <entry>FAT / FAT32</entry>
+            <entry>Yes</entry>
+            <entry>Yes</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No support for Long File Names</entry>
+          </row>
+          <row>
+            <entry>NTFS</entry>
+            <entry>Yes</entry>
+            <entry>Yes</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry />
+          </row>
+          <row>
+            <entry>ext</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>The variants ext2, ext3 and ext4 are supported for read only.</entry>
+          </row>
+          <row>
+            <entry>SquashFS</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>Yes</entry>
+            <entry>Not all features of SquashFS are supported.</entry>
+          </row>
+          <row>
+            <entry>HFS+</entry>
+            <entry>Yes</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>No</entry>
+            <entry>This is only support for the HFS+, not the earlier HFS nor HFSX</entry>
+          </row>
+        </table>
+      </content>
+
+      <sections>
+        <section>
+          <title>Registry Support</title>
+          <content>
+            <para>
+              One of the interesting things to play with inside a file system is the
+              Windows registry.  DiscUtils includes full support for accessing and
+              modifying an creating registry hives.  Only NT-style registry hives
+              are supported.  Windows 98 (and earlier) are not supported.
+            </para>
+            <para>
+              In addition, Windows Vista and later use the Boot Configuration Database
+              (BCD) to control how the OS is booted (and from which partition).  The
+              BCD is implemented as a registry hive - DiscUtils provides support for
+              inspecting and modifying the BCD.
+            </para>
+          </content>
+        </section>
+
+        <section>
+          <title>Windows Imaging (WIM) Files</title>
+          <content>
+            <para>
+              WIM files are a compressed archive format that can include multiple
+              disk images in a single file, de-duplicating identical file contents
+              to store the contents of each unique file just once.
+            </para>
+            <para>
+              DiscUtils supports reading all non-split WIM files.  DiscUtils
+              cannot be used to create or modify existing WIM files.
+            </para>
+          </content>
+        </section>
+
+        <section>
+          <title>Network Protocols</title>
+          <content>
+            <para>
+              DiscUtils includes support for the NFS (v3) and iSCSI protocols.  The NFS
+              support is generic, and can be used to access any file available via NFS,
+              but is primarily intended to support accessing virtual disks.
+            </para>
+            <para>
+              The iSCSI protocol can be used to access disks exposed as iSCSI LUNs.  With
+              iSCSI access is gained directly to the disk contents, with no virtual disk
+              file format in play.
+            </para>
+          </content>
+        </section>
+      </sections>
+    </section>
+
+    <relatedTopics>
+      <link xlink:href="5c257220-1480-474f-9e33-fd495016b6c7" />
+    </relatedTopics>
+  </developerConceptualDocument>
+</topic>
