@@ -113,9 +113,9 @@ namespace DiscUtils.Vmdk
                 throw new InvalidOperationException("No content stream specified");
             }
 
-            if (_diskType != DiskCreateType.Vmfs && _diskType != DiskCreateType.VmfsSparse)
+            if (_diskType != DiskCreateType.Vmfs && _diskType != DiskCreateType.VmfsSparse && _diskType != DiskCreateType.MonolithicSparse)
             {
-                throw new NotImplementedException("Only Vmfs and VmfsSparse disks implemented");
+                throw new NotImplementedException("Only MonolithicSparse, Vmfs and VmfsSparse disks implemented");
             }
 
             List<DiskImageFileSpecification> fileSpecs = new List<DiskImageFileSpecification>();
@@ -146,6 +146,12 @@ namespace DiscUtils.Vmdk
 
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + "-sparse.vmdk", new VmfsSparseExtentBuilder(Content)));
+            }
+            else if (_diskType == DiskCreateType.MonolithicSparse)
+            {
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512, ExtentType.Sparse, baseName + ".vmdk", 0);
+                baseDescriptor.Extents.Add(extent);
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new MonolithicSparseExtentBuilder(Content, baseDescriptor)));
             }
 
             return fileSpecs.ToArray();

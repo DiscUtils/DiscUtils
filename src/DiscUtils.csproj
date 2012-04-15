@@ -122,6 +122,7 @@
     <Compile Include="BuilderStreamExtentSource.cs" />
     <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
+    <Compile Include="BuilderBytesExtent.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />
@@ -759,6 +760,7 @@
     <Compile Include="Vmdk\HostedSparseExtentHeader.cs" />
     <Compile Include="Vmdk\HostedSparseExtentStream.cs" />
     <Compile Include="MappedStream.cs" />
+    <Compile Include="Vmdk\MonolithicSparseExtentBuilder.cs" />
     <Compile Include="Vmdk\ServerSparseExtentHeader.cs" />
     <Compile Include="Vmdk\ServerSparseExtentStream.cs" />
     <Compile Include="Vmdk\VmfsSparseExtentBuilder.cs" />
