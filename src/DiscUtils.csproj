@@ -234,6 +234,7 @@
     <Compile Include="HfsPlus\Directory.cs" />
     <Compile Include="HfsPlus\DirEntry.cs" />
     <Compile Include="HfsPlus\ExtentDescriptor.cs" />
+    <Compile Include="HfsPlus\ExtentKey.cs" />
     <Compile Include="HfsPlus\File.cs" />
     <Compile Include="HfsPlus\FileBuffer.cs" />
     <Compile Include="HfsPlus\FileInfo.cs" />
