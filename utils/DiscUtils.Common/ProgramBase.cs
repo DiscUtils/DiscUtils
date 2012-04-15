@@ -257,6 +257,7 @@ namespace DiscUtils.Common
                 DoRun();
                 stopWatch.Stop();
 
+                Console.WriteLine();
                 Console.WriteLine("Time taken: {0}", stopWatch.Elapsed);
             }
             else

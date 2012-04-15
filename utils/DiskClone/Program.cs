@@ -266,6 +266,11 @@ namespace DiskClone
                     }
 
                     pump.Run();
+
+                    if (!Quiet)
+                    {
+                        Console.WriteLine();
+                    }
                 }
             }
 
