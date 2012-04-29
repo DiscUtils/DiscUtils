@@ -20,18 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Partitions
+namespace DiscUtils
 {
     /// <summary>
     /// Calculates CRC32 of buffers.
     /// </summary>
-    internal static class Crc32
+    internal sealed class Crc32LittleEndian : Crc32
     {
-        private const uint Polynomial = 0xedb88320;
+        private static readonly uint[][] Tables;
 
-        private static readonly uint[] Table;
+        static Crc32LittleEndian()
+        {
+            Tables = new uint[4][];
 
-        static Crc32()
+            Tables[(int)Crc32Algorithm.Common] = CalcTable(0xEDB88320);
+            Tables[(int)Crc32Algorithm.Castagnoli] = CalcTable(0x82F63B78);
+            Tables[(int)Crc32Algorithm.Koopman] = CalcTable(0xEB31D82E);
+            Tables[(int)Crc32Algorithm.Aeronautical] = CalcTable(0xD5828281);
+        }
+
+        private static uint[] CalcTable(uint polynomial)
         {
             uint[] table = new uint[256];
 
@@ -44,7 +52,7 @@ namespace DiscUtils.Partitions
                 {
                     if ((crc & 1) != 0)
                     {
-                        crc = (crc >> 1) ^ Polynomial;
+                        crc = (crc >> 1) ^ polynomial;
                     }
                     else
                     {
@@ -53,21 +61,36 @@ namespace DiscUtils.Partitions
                 }
 
                 table[i] = crc;
-
-                Table = table;
             }
+
+            return table;
         }
 
-        public static uint Compute(uint crc, byte[] buffer, int offset, int count)
+        public Crc32LittleEndian(Crc32Algorithm algorithm)
+            : base(Tables[(int)algorithm])
         {
-            uint value = crc;
+        }
+
+        public static uint Compute(Crc32Algorithm algorithm, byte[] buffer, int offset, int count)
+        {
+            return Process(Tables[(int)algorithm], 0xFFFFFFFF, buffer, offset, count) ^ 0xFFFFFFFF;
+        }
+
+        public override void Process(byte[] buffer, int offset, int count)
+        {
+            _value = Process(_table, _value, buffer, offset, count);
+        }
+
+        private static uint Process(uint[] table, uint accumulator, byte[] buffer, int offset, int count)
+        {
+            uint value = accumulator;
 
             for (int i = 0; i < count; ++i)
             {
                 byte b = buffer[offset + i];
 
                 uint temp1 = (value >> 8) & 0x00FFFFFF;
-                uint temp2 = Table[(value ^ b) & 0xFF];
+                uint temp2 = table[(value ^ b) & 0xFF];
                 value = temp1 ^ temp2;
             }
 

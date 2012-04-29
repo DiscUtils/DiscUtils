@@ -318,7 +318,7 @@ namespace DiscUtils.Partitions
 
         private static uint CalcEntriesCrc(byte[] buffer)
         {
-            return Crc32.Compute(0xFFFFFFFF, buffer, 0, buffer.Length) ^ 0xFFFFFFFF;
+            return Crc32LittleEndian.Compute(Crc32Algorithm.Common, buffer, 0, buffer.Length);
         }
 
         private static int CountEntries<T>(ICollection<T> values, Func<T, bool> pred)
@@ -560,7 +560,7 @@ namespace DiscUtils.Partitions
 
         private uint CalcEntriesCrc()
         {
-            return Crc32.Compute(0xFFFFFFFF, _entryBuffer, 0, _entryBuffer.Length) ^ 0xFFFFFFFF;
+            return Crc32LittleEndian.Compute(Crc32Algorithm.Common, _entryBuffer, 0, _entryBuffer.Length);
         }
 
         private IEnumerable<GptEntry> GetAllEntries()

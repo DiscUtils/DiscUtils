@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,51 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-//
-// Based on "libbzip2", Copyright (C) 1996-2007 Julian R Seward.
-//
-
-namespace DiscUtils.Compression
+namespace DiscUtils
 {
-    /// <summary>
-    /// Calculates CRC32 of buffers.
-    /// </summary>
-    internal class BZip2Crc32
+    internal abstract class Crc32
     {
-        private const uint Polynomial = 0x04c11db7;
+        protected readonly uint[] _table;
+        protected uint _value;
 
-        private static readonly uint[] Table;
-
-        private uint _value;
-
-        static BZip2Crc32()
+        protected Crc32(uint[] table)
         {
-            uint[] table = new uint[256];
-
-            for (uint i = 0; i < 256; ++i)
-            {
-                uint crc = i << 24;
-
-                for (int j = 8; j > 0; --j)
-                {
-                    if ((crc & 0x80000000) != 0)
-                    {
-                        crc = (crc << 1) ^ Polynomial;
-                    }
-                    else
-                    {
-                        crc <<= 1;
-                    }
-                }
-
-                table[i] = crc;
-            }
-
-            Table = table;
-        }
-
-        public BZip2Crc32()
-        {
+            _table = table;
             _value = 0xFFFFFFFF;
         }
 
@@ -73,13 +38,6 @@ namespace DiscUtils.Compression
             get { return _value ^ 0xFFFFFFFF; }
         }
 
-        public void Compute(byte[] buffer, int offset, int count)
-        {
-            for (int i = 0; i < count; ++i)
-            {
-                byte b = buffer[offset + i];
-                _value = Table[(_value >> 24) ^ b] ^ (_value << 8);
-            }
-        }
+        public abstract void Process(byte[] buffer, int offset, int count);
     }
 }

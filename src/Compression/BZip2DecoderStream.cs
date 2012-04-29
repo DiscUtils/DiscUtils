@@ -40,7 +40,7 @@ namespace DiscUtils.Compression
         private BitStream _bitstream;
         private BZip2RleStream _rleStream;
         private BZip2BlockDecoder _blockDecoder;
-        private BZip2Crc32 _calcBlockCrc;
+        private Crc32 _calcBlockCrc;
 
         private byte[] _blockBuffer;
         private uint _blockCrc;
@@ -198,7 +198,7 @@ namespace DiscUtils.Compression
                     _eof = true;
                     if (_calcCompoundCrc != _compoundCrc)
                     {
-                        throw new InvalidDataException("Decompression failed - compound CRC mismatch");
+                        throw new InvalidDataException("Decompression failed - compound CRC");
                     }
 
                     return 0;
@@ -207,12 +207,21 @@ namespace DiscUtils.Compression
                 numRead = _rleStream.Read(buffer, offset, count);
             }
 
-            _calcBlockCrc.Compute(buffer, offset, numRead);
+            _calcBlockCrc.Process(buffer, offset, numRead);
 
             // Pre-read next block, so a client that knows the decompressed length will still
             // have the overall CRC calculated.
             if (_rleStream.AtEof)
             {
+                // If there was an existing block, check it's crc.
+                if (_calcBlockCrc != null)
+                {
+                    if (_blockCrc != _calcBlockCrc.Value)
+                    {
+                        throw new InvalidDataException("Decompression failed - block CRC mismatch");
+                    }
+                }
+
                 _calcCompoundCrc = ((_calcCompoundCrc << 1) | (_calcCompoundCrc >> 31)) ^ _blockCrc;
                 if (ReadBlock() == 0)
                 {
@@ -299,7 +308,7 @@ namespace DiscUtils.Compression
                 int blockSize = _blockDecoder.Process(_bitstream, _blockBuffer, 0);
                 _rleStream.Reset(_blockBuffer, 0, blockSize);
                 _blockCrc = _blockDecoder.Crc;
-                _calcBlockCrc = new BZip2Crc32();
+                _calcBlockCrc = new Crc32BigEndian(Crc32Algorithm.Common);
                 return blockSize;
             }
             else if (marker == 0x177245385090)

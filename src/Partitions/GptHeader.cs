@@ -138,7 +138,7 @@ namespace DiscUtils.Partitions
             // Reset CRC field
             Utilities.WriteBytesLittleEndian((uint)0, temp, 16);
 
-            return Crc32.Compute(0xFFFFFFFF, temp, 0, count) ^ 0xFFFFFFFF;
+            return Crc32LittleEndian.Compute(Crc32Algorithm.Common, temp, 0, count);
         }
     }
 }

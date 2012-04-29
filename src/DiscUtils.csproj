@@ -123,11 +123,16 @@
     <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
     <Compile Include="BuilderBytesExtent.cs" />
+    <Compile Include="Crc32.cs" />
+    <Compile Include="Crc32BigEndian.cs" />
+    <Compile Include="Crc32Algorithm.cs" />
+    <Compile Include="Crc32LittleEndian.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />
     <Compile Include="Compression\BlockCompressor.cs" />
-    <Compile Include="Compression\BZip2Crc.cs" />
     <Compile Include="Compression\BZip2DecoderStream.cs" />
     <Compile Include="Compression\BZip2Randomizer.cs" />
     <Compile Include="Compression\BZip2BlockDecoder.cs" />
@@ -552,7 +557,6 @@
     <Compile Include="Partitions\BiosPartitionRecord.cs" />
     <Compile Include="Partitions\BiosPartitionTable.cs" />
     <Compile Include="Partitions\BiosPartitionTypes.cs" />
-    <Compile Include="Partitions\Crc32.cs" />
     <Compile Include="Partitions\DefaultPartitionTableFactory.cs" />
     <Compile Include="Partitions\GptEntry.cs" />
     <Compile Include="Partitions\GptHeader.cs" />
