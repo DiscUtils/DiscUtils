@@ -109,6 +109,17 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Calculates the CEIL function.
+        /// </summary>
+        /// <param name="numerator">The value to divide</param>
+        /// <param name="denominator">The value to divide by</param>
+        /// <returns>The value of CEIL(numerator/denominator)</returns>
+        public static ulong Ceil(ulong numerator, ulong denominator)
+        {
+            return (numerator + (denominator - 1)) / denominator;
+        }
+
+        /// <summary>
         /// Converts between two arrays.
         /// </summary>
         /// <typeparam name="T">The type of the elements of the source array</typeparam>
@@ -879,6 +890,21 @@ namespace DiscUtils
         public static byte[] ReadSector(Stream stream)
         {
             return ReadFully(stream, SectorSize);
+        }
+
+        /// <summary>
+        /// Reads a structure from a stream.
+        /// </summary>
+        /// <typeparam name="T">The type of the structure</typeparam>
+        /// <param name="stream">The stream to read</param>
+        /// <returns>The structure</returns>
+        public static T ReadStruct<T>(Stream stream)
+            where T : IByteArraySerializable, new()
+        {
+            T result = new T();
+            byte[] buffer = Utilities.ReadFully(stream, result.Size);
+            result.ReadFrom(buffer, 0);
+            return result;
         }
 
         /// <summary>
