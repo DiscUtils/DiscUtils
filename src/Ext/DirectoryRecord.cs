@@ -52,6 +52,8 @@ namespace DiscUtils.Ext
             FileType = buffer[offset + 7];
             Name = Utilities.BytesToString(buffer, offset + 8, nameLen);
 
+            Name = Name.Replace('\\', '/');
+
             return recordLen;
         }
 
