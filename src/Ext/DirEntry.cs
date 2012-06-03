@@ -89,5 +89,10 @@ namespace DiscUtils.Ext
         {
             get { return _record; }
         }
+
+        public override string ToString()
+        {
+            return _record.Name ?? "(no name)";
+        }
     }
 }
