@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="f477ae13-3919-45eb-a5ee-d664403860fd" revisionNumber="1">
+  <developerOrientationDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+      <para>
+        DiscUtils is a .NET library to read and write ISO files and Virtual Machine
+        disk files (VHD, VDI, XVA, VMDK, etc).  This documentation describes the
+        status of the DiscUtils library and provides API documentation for the
+        DiscUtils class library.
+      </para>
+    </introduction>
+
+    <inThisSection>
+      <content>
+        <list class="nobullet">
+          <listitem>
+            <link xlink:href="a2a78104-562f-464e-89c4-dc3494ae7341">Introduction</link>
+          </listitem>
+          <listitem>
+            <link xlink:href="5c257220-1480-474f-9e33-fd495016b6c7">API Reference</link>
+          </listitem>
+        </list>
+      </content>
+    </inThisSection>
+    
+    <relatedTopics>
+    </relatedTopics>
+  </developerOrientationDocument>
+</topic>

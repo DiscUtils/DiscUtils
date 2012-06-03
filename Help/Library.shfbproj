@@ -1,0 +1,180 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <!-- The configuration and platform will be used to determine which
+         assemblies to include from solution and project documentation
+         sources -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{035e0420-7846-4da5-a627-b95f9dc6709a}</ProjectGuid>
+    <SHFBSchemaVersion>1.9.0.0</SHFBSchemaVersion>
+    <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual
+         Studio adds them anyway -->
+    <AssemblyName>Documentation</AssemblyName>
+    <RootNamespace>Documentation</RootNamespace>
+    <Name>Documentation</Name>
+    <!-- SHFB properties -->
+    <OutputPath>.\Output\</OutputPath>
+    <HtmlHelpName>DiscUtilsClassLibrary</HtmlHelpName>
+    <ProjectSummary>DiscUtils consists of a number of separate namespaces, with each type of virtual disk or filesystem within it%27s own namespace.
+
+Common / Utility classes are in the top-level namespace.</ProjectSummary>
+    <MissingTags>Summary, Parameter, Returns, AutoDocumentCtors, Namespace, TypeParameter</MissingTags>
+    <VisibleItems>InheritedMembers, InheritedFrameworkMembers, Protected, SealedProtected</VisibleItems>
+    <HtmlHelp1xCompilerPath>C:\Program Files\HTML Help Workshop\</HtmlHelp1xCompilerPath>
+    <HtmlHelp2xCompilerPath>
+    </HtmlHelp2xCompilerPath>
+    <SandcastlePath>
+    </SandcastlePath>
+    <WorkingPath>
+    </WorkingPath>
+    <BuildLogFile>
+    </BuildLogFile>
+    <HelpFileFormat>HtmlHelp1, MSHelpViewer</HelpFileFormat>
+    <FrameworkVersion>2.0.50727</FrameworkVersion>
+    <HelpTitle>DiscUtils Class Library</HelpTitle>
+    <CopyrightText>Copyright %28c%29 Kenneth Bell, 2008-2011</CopyrightText>
+    <FooterText>Free software released under the MIT license, see http://discutils.codeplex.com</FooterText>
+    <PresentationStyle>vs2005</PresentationStyle>
+    <NamingMethod>MemberName</NamingMethod>
+    <DocumentationSources>
+      <DocumentationSource sourceFile="..\src\DiscUtils.csproj" configuration="SignedRelease" />
+    </DocumentationSources>
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="(global)" isDocumented="False" />
+<NamespaceSummaryItem name="DiscUtils" isDocumented="True">Shared classes common to multiple file systems.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Fat" isDocumented="True">Classes to access and modify disks formatted with a FAT file system.  FAT12, FAT16 and FAT32 are supported.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Iscsi" isDocumented="True">Provides read/write access to disk images available over iSCSI, supporting CHAP authentication.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Iso9660" isDocumented="True">Classes to create and read ISO 9660 (aka CDROM) disc images.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Ntfs" isDocumented="True">Classes providing access to NTFS file systems.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Partitions" isDocumented="True">Classes to initialize, access and modify hard disk partition tables.  Currently, only legacy BIOS-style partition tables are fully supported (GUID Partition Tables are read-only).</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Registry" isDocumented="True">Provides read/write access to NT-style registry hives.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Sdi" isDocumented="True">Classes to access the contents of Simple Deployment Image (SDI) files.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Vdi" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VirtualBox .vdi format.  Fixed and Dynamic disks are currently supported.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Vhd" isDocumented="True">Classes to create, read and modify virtual hard-disks in the Microsoft VHD format.  Fixed, Dynamic and Differencing disks are supported.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Vmdk" isDocumented="True">Classes to create, read and modify virtual hard-disks in the VMWare VMDK format.  Most disk forms (dynamic, static, etc) are supported.  Stream optimized disks can be read from a seekable stream, but can not be read as a sequential stream, nor written to.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Wim" isDocumented="True">Classes to read Windows Image File Format (WIM) files.  Only LZX (i.e. maximum) compression is supported, and files are read-only.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Xva" isDocumented="True">Classes to create and read virtual hard-disks held within a XenServer Virtual Appliance (XVA).  Disks cannot be directly modified within an XVA itself.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Raw" isDocumented="True">Classes to access the contents of raw disk images (IMG, IMA, FLP, VFD file extensions).</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.LogicalDiskManager" isDocumented="True">Classes to access Windows logical volumes inside a disk, created using Logical Disk Manager - these are also known as 'dynamic disks'.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.BootConfig" isDocumented="True">Classes to access and modify a Windows Boot Configuration Database (BCD), that controls the Windows boot process.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Nfs" isDocumented="True">Classes implementing the NFS storage protocol.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Vfs" isDocumented="True">Classes that can be used to add additional file systems into DiscUtils.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Udf" isDocumented="True">Classes to read OSTA Universal Disk Format (aka UDF) disc images and file system partitions.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Optical" isDocumented="True">Classes to access the contents of optical disk images (ISO and BIN file extensions).</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Dmg" isDocumented="True">Classes to read virtual disks in the Apple DMG (aka UDIF) format.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Compression" isDocumented="True">Classes implementing re-usable compression and decompression functionality implemented in DiscUtils.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Ext" isDocumented="True">Classes to read the Linux ext family of file systems.  The variants ext2, ext3 and ext4 are supported.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.Ntfs.Internals" isDocumented="True">Classes providing access read-only access to the internals of NTFS file systems.
+
+Few people should need to use these classes, they're mostly useful for writing 'undelete' applications / similar that need to bypass the normal NTFS sematics.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.SquashFs" isDocumented="True">Classes implementing the SquashFS file system.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.ApplePartitionMap" isDocumented="True">Classes to access an Apple Partition Map (APM)</NamespaceSummaryItem>
+<NamespaceSummaryItem name="DiscUtils.HfsPlus" isDocumented="True">Classes to access the contents of a HFS+ file system (read-only)</NamespaceSummaryItem></NamespaceSummaries>
+    <SyntaxFilters>CSharp</SyntaxFilters>
+    <SdkLinkType>Msdn</SdkLinkType>
+    <IndentHtml>True</IndentHtml>
+    <ComponentConfigurations>
+      <ComponentConfig id="Cached MSDN URL References" enabled="True">
+        <component id="Cached MSDN URL References" type="SandcastleBuilder.Components.CachedResolveReferenceLinksComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll" locale="{@Locale}" linkTarget="{@SdkLinkTarget}">
+          <helpOutput format="HtmlHelp1">
+            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
+            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@HtmlSdkLinkType}" />
+            <targets files="reflection.xml" type="Local" />
+          </helpOutput>
+          <helpOutput format="MSHelp2">
+            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
+            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@MSHelp2SdkLinkType}" />
+            <targets files="reflection.xml" type="Index" />
+          </helpOutput>
+          <helpOutput format="MSHelpViewer">
+            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
+            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@MSHelpViewerSdkLinkType}" />
+            <targets files="reflection.xml" type="Id" />
+          </helpOutput>
+          <helpOutput format="Website">
+            <cache filename="{@LocalDataFolder}Cache\MsdnUrl.cache" />
+            <targets base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" type="{@WebsiteSdkLinkType}" />
+            <targets files="reflection.xml" type="Local" />
+          </helpOutput>
+        </component>
+      </ComponentConfig>
+      <ComponentConfig id="Cached Framework Comments Index Data" enabled="True">
+        <component id="Cached Framework Comments Index Data" type="SandcastleBuilder.Components.CachedCopyFromIndexComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
+          <index name="comments" value="/doc/members/member" key="@name" cache="100">
+{@CachedFrameworkCommentList}
+{@CommentFileList}
+            </index>
+          <copy name="comments" source="*" target="/document/comments" />
+        </component>
+      </ComponentConfig>
+      <ComponentConfig id="Cached Reflection Index Data" enabled="True">
+        <component id="Cached Reflection Index Data" type="SandcastleBuilder.Components.CachedCopyFromIndexComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
+          <index name="reflection" value="/reflection/apis/api" key="@id" cache="10">
+            <cache base="{@SandcastlePath}Data\Reflection" recurse="true" files="*.xml" cacheFile="{@LocalDataFolder}Cache\Reflection.cache" />
+            <data files="reflection.xml" />
+          </index>
+          <copy name="reflection" source="*" target="/document/reference" />
+        </component>
+      </ComponentConfig>
+      <ComponentConfig id="Code Block Component" enabled="True">
+        <component id="Code Block Component" type="SandcastleBuilder.Components.CodeBlockComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
+          <!-- Base path for relative filenames in source attributes
+                 (optional) -->
+          <basePath value="{@HtmlEncProjectFolder}" />
+          <!-- Connect to language filter (optional).  If omitted,
+                 language filtering is enabled by default. -->
+          <languageFilter value="true" />
+          <!-- Allow missing source files (Optional).  If omitted,
+                 it will generate errors if referenced source files
+                 are missing. -->
+          <allowMissingSource value="false" />
+          <!-- Remove region markers from imported code blocks.  If omitted,
+                 region markers in imported code blocks are left alone. -->
+          <removeRegionMarkers value="false" />
+          <!-- Code colorizer options (required).
+                 Attributes:
+                    Language syntax configuration file (required)
+                    XSLT style file (required)
+                    "Copy" image file URL (required)
+                    Default language (optional)
+                    Enable line numbering (optional)
+                    Enable outlining (optional)
+                    Keep XML comment "see" tags within the code (optional)
+                    Tab size override (optional, 0 = Use syntax file setting)
+                    Use language name as default title (optional) -->
+          <colorizer syntaxFile="{@SHFBFolder}Colorizer\highlight.xml" styleFile="{@SHFBFolder}Colorizer\highlight.xsl" copyImageUrl="../icons/CopyCode.gif" language="cs" numberLines="false" outlining="false" keepSeeTags="false" tabSize="0" defaultTitle="true" />
+        </component>
+      </ComponentConfig>
+      <ComponentConfig id="IntelliSense Component" enabled="True">
+        <component id="IntelliSense Component" type="SandcastleBuilder.Components.IntelliSenseComponent" assembly="{@SHFBFolder}SandcastleBuilder.Components.dll">
+          <!-- Output options (optional)
+                 Attributes:
+                    Include Namespaces (false by default)
+                    Namespaces filename ("Namespaces" if not specified or empty)
+                    Directory (current folder if not specified or empty) -->
+          <output includeNamespaces="false" namespacesFile="Namespaces" folder="{@OutputFolder}" />
+        </component>
+      </ComponentConfig>
+    </ComponentConfigurations>
+    <VendorName>.NET DiscUtils</VendorName>
+    <TocParentId>-1</TocParentId>
+    <IncludeFavorites>False</IncludeFavorites>
+  </PropertyGroup>
+  <!-- There are no properties for these two groups but they need to appear in
+       order for Visual Studio to perform the build. -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <ItemGroup>
+    <ContentLayout Include="Content Layout.content" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="API Reference.aml" />
+    <None Include="Contents.aml" />
+    <None Include="Introduction.aml" />
+  </ItemGroup>
+  <!-- Import the SHFB build targets -->
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />
+</Project>

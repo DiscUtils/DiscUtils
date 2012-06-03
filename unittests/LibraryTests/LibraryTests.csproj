@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A33BA1D9-BBEA-4513-9180-D392436F62FA}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DiscUtils</RootNamespace>
+    <AssemblyName>LibraryTests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'SignedRelease|AnyCPU'">
+    <OutputPath>bin\SignedRelease\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release %28StyleCop%29|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit-gui-runner">
+      <HintPath>C:\Program Files\NUnit 2.5.10\bin\net-2.0\lib\nunit-gui-runner.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\NUnit 2.5.10\bin\net-2.0\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Version.cs">
+      <Link>Version.cs</Link>
+    </Compile>
+    <Compile Include="BlockCacheStreamTest.cs" />
+    <Compile Include="BlockCacheTest.cs" />
+    <Compile Include="BootConfig\BcdObjectTest.cs" />
+    <Compile Include="BootConfig\ElementTest.cs" />
+    <Compile Include="BootConfig\ElementValueTest.cs" />
+    <Compile Include="BootConfig\StoreTest.cs" />
+    <Compile Include="ChsAddressTest.cs" />
+    <Compile Include="Compression\BZip2DecoderStreamTest.cs" />
+    <Compile Include="Compression\ZlibStreamTest.cs" />
+    <Compile Include="FileSystemManagerTest.cs" />
+    <Compile Include="FileSystemSource.cs" />
+    <Compile Include="Combined\CombinedTest.cs" />
+    <Compile Include="DiscFileSystemDirectoryTest.cs" />
+    <Compile Include="DiscFileSystemFileTest.cs" />
+    <Compile Include="DiskBuilderFileSystem.cs" />
+    <Compile Include="GeometryTest.cs" />
+    <Compile Include="InMemoryFileSystem.cs" />
+    <Compile Include="Iso9660\BuilderTest.cs" />
+    <Compile Include="Iso9660\IsoDirectoryInfoTest.cs" />
+    <Compile Include="Iso9660\IsoFileInfoTest.cs" />
+    <Compile Include="Iso9660\IsoFileSystemTest.cs" />
+    <Compile Include="Ntfs\LZNT1Test.cs" />
+    <Compile Include="Ntfs\NtfsFileSystemTest.cs" />
+    <Compile Include="Partitions\BiosPartitionedDiskBuilderTest.cs" />
+    <Compile Include="Partitions\BiosPartitionTableTest.cs" />
+    <Compile Include="Partitions\GuidPartitionTableTest.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Fat\FatFileSystemTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Registry\RegistryHiveTest.cs" />
+    <Compile Include="Registry\RegistryKeyTest.cs" />
+    <Compile Include="SquashFs\SquashFileSystemBuilderTest.cs" />
+    <Compile Include="SquashFs\SquashFileSystemReaderTest.cs" />
+    <Compile Include="StreamExtentTest.cs" />
+    <Compile Include="ThreadSafeStreamTest.cs" />
+    <Compile Include="Vdi\DiskTest.cs" />
+    <Compile Include="Vdi\StreamTest.cs" />
+    <Compile Include="Vhd\DiskBuilderTest.cs" />
+    <Compile Include="Vhd\DiskImageFileTest.cs" />
+    <Compile Include="Vhd\DiskTest.cs" />
+    <Compile Include="Vhd\DynamicStreamTest.cs" />
+    <Compile Include="VirtualDiskTest.cs" />
+    <Compile Include="Vmdk\DiskBuilderTest.cs" />
+    <Compile Include="Vmdk\DiskTest.cs" />
+    <Compile Include="Vmdk\DynamicStreamTest.cs" />
+    <Compile Include="Xva\VirtualMachineBuilderTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\diag\DiscUtils.Diagnostics.csproj">
+      <Project>{C8C3DCA6-5BCD-4F9C-B453-5E0702CB7375}</Project>
+      <Name>DiscUtils.Diagnostics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\DiscUtils.csproj">
+      <Project>{DBB340F9-2386-43C2-A473-FA496CBE07A4}</Project>
+      <Name>DiscUtils</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
