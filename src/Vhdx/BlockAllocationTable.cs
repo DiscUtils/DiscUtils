@@ -31,7 +31,7 @@ namespace DiscUtils.Vhdx
         private const ulong PayloadBlockNotPresent = 0;
         private const ulong PayloadBlockUndefined = 1;
         private const ulong PayloadBlockZero = 2;
-        private const ulong PayloadBlockUnmapped = 5;
+        private const ulong PayloadBlockUnmapped = 3;
         private const ulong PayloadBlockFullyPresent = 6;
         private const ulong PayloadBlockPartiallyPresent = 7;
 
@@ -181,7 +181,6 @@ namespace DiscUtils.Vhdx
                 case PayloadBlockNotPresent:
                     return SectorDisposition.Parent;
 
-                case 3: // Seen in wild - purpose unknown, assume zero...
                 case PayloadBlockUndefined:
                 case PayloadBlockZero:
                 case PayloadBlockUnmapped:
@@ -203,7 +202,6 @@ namespace DiscUtils.Vhdx
             switch (entry & 0x7)
             {
                 case PayloadBlockNotPresent:
-                case 3: // Seen in wild - purpose unknown, assume zero...
                 case PayloadBlockUndefined:
                 case PayloadBlockZero:
                 case PayloadBlockUnmapped:
