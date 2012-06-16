@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,15 +22,34 @@
 
 namespace DiscUtils.Ext
 {
-    using System.IO;
-    using DiscUtils.Vfs;
+    using System;
+    using System.Text;
 
-    internal class Context : VfsContext
+    /// <summary>
+    /// FAT file system options.
+    /// </summary>
+    public sealed class ExtFileSystemOptions : DiscFileSystemOptions
     {
-        public Stream RawStream { get; set; }
+        internal ExtFileSystemOptions()
+        {
+            FileNameEncoding = Encoding.UTF8;
+        }
 
-        public SuperBlock SuperBlock { get; set; }
+        internal ExtFileSystemOptions(FileSystemParameters parameters)
+        {
+            if (parameters != null && parameters.FileNameEncoding != null)
+            {
+                FileNameEncoding = parameters.FileNameEncoding;
+            }
+            else
+            {
+                FileNameEncoding = Encoding.UTF8;
+            }
+        }
 
-        public ExtFileSystemOptions Options { get; set; }
+        /// <summary>
+        /// Gets or sets the character encoding used for file names.
+        /// </summary>
+        public Encoding FileNameEncoding { get; set; }
     }
 }

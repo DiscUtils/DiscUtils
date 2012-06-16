@@ -23,6 +23,7 @@
 namespace DiscUtils.Ext
 {
     using System;
+    using System.Text;
 
     internal class DirectoryRecord : IByteArraySerializable
     {
@@ -39,6 +40,13 @@ namespace DiscUtils.Ext
         public string Name;
         public byte FileType;
 
+        private Encoding _nameEncoding;
+
+        public DirectoryRecord(Encoding nameEncoding)
+        {
+            _nameEncoding = nameEncoding;
+        }
+
         public int Size
         {
             get { return Utilities.RoundUp(8 + Name.Length, 4); }
@@ -50,7 +58,7 @@ namespace DiscUtils.Ext
             ushort recordLen = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             int nameLen = buffer[offset + 6];
             FileType = buffer[offset + 7];
-            Name = Utilities.BytesToString(buffer, offset + 8, nameLen);
+            Name = _nameEncoding.GetString(buffer, offset + 8, nameLen);
 
             Name = Name.Replace('\\', '/');
 

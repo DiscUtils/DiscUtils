@@ -53,7 +53,7 @@ namespace DiscUtils.Ext
                     int blockPos = 0;
                     while (blockPos < blockSize)
                     {
-                        DirectoryRecord r = new DirectoryRecord();
+                        DirectoryRecord r = new DirectoryRecord(Context.Options.FileNameEncoding);
                         int numRead = r.ReadFrom(blockData, blockPos);
 
                         if (r.Inode != 0 && r.Name != "." && r.Name != "..")

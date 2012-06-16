@@ -37,6 +37,7 @@ namespace DiscUtils.Common
         private CommandLineSwitch _partitionSwitch;
         private CommandLineSwitch _volumeIdSwitch;
         private CommandLineSwitch _diskSizeSwitch;
+        private CommandLineSwitch _filenameEncodingSwitch;
         private CommandLineSwitch _helpSwitch;
         private CommandLineSwitch _quietSwitch;
         private CommandLineSwitch _verboseSwitch;
@@ -117,6 +118,17 @@ namespace DiscUtils.Common
             }
         }
 
+        protected FileSystemParameters FileSystemParameters
+        {
+            get
+            {
+                return new FileSystemParameters()
+                {
+                    FileNameEncoding = (_filenameEncodingSwitch != null && _filenameEncodingSwitch.IsPresent) ? Encoding.GetEncoding(_filenameEncodingSwitch.Value) : null,
+                };
+            }
+        }
+
         protected abstract StandardSwitches DefineCommandLine(CommandLineParser parser);
         protected virtual string[] HelpRemarks { get { return new string[] { }; } }
         protected abstract void DoRun();
@@ -140,6 +152,12 @@ namespace DiscUtils.Common
             {
                 _diskSizeSwitch = new CommandLineSwitch("sz", "size", "size", "The size of the output disk.  Use B, KB, MB, GB to specify units (units default to bytes if not specified).");
                 _parser.AddSwitch(_diskSizeSwitch);
+            }
+
+            if ((stdSwitches & StandardSwitches.FileNameEncoding) != 0)
+            {
+                _filenameEncodingSwitch = new CommandLineSwitch(new string[]{"ne"}, "nameencoding", "encoding", "The encoding used for filenames in the file system (aka the codepage), e.g. UTF-8 or IBM437.  This is ignored for file systems have fixed/defined encodings.");
+                _parser.AddSwitch(_filenameEncodingSwitch);
             }
 
             if ((stdSwitches & StandardSwitches.PartitionOrVolume) != 0)
@@ -368,7 +386,8 @@ namespace DiscUtils.Common
             OutputFormatAndAdapterType = 2,
             Verbose = 4,
             PartitionOrVolume = 8,
-            DiskSize = 16
+            DiskSize = 16,
+            FileNameEncoding = 32
         }
     }
 }

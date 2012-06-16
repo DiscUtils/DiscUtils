@@ -129,6 +129,7 @@
     <Compile Include="Crc32LittleEndian.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Ext\ExtFileSystemOptions.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />

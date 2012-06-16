@@ -35,7 +35,17 @@ namespace DiscUtils.Ext
         /// </summary>
         /// <param name="stream">The stream containing the ext file system.</param>
         public ExtFileSystem(Stream stream)
-            : base(new VfsExtFileSystem(stream))
+            : base(new VfsExtFileSystem(stream, null))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ExtFileSystem class.
+        /// </summary>
+        /// <param name="stream">The stream containing the ext file system.</param>
+        /// <param name="parameters">The generic file system parameters (only file name encoding is honoured)</param>
+        public ExtFileSystem(Stream stream, FileSystemParameters parameters)
+            : base(new VfsExtFileSystem(stream, parameters))
         {
         }
 

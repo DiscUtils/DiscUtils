@@ -85,7 +85,7 @@ namespace FileExtract
             DiscUtils.FileSystemInfo fsInfo = FileSystemManager.DetectDefaultFileSystems(volInfo)[0];
 
 
-            using (DiscFileSystem fs = fsInfo.Open(volInfo))
+            using (DiscFileSystem fs = fsInfo.Open(volInfo, FileSystemParameters))
             {
                 using (Stream source = fs.OpenFile(_inFilePath.Value, FileMode.Open, FileAccess.Read))
                 {

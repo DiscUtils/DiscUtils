@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.LogicalDiskManager;
@@ -64,11 +65,13 @@ namespace DiskDump
             parser.AddSwitch(_hideExtents);
             parser.AddSwitch(_diskType);
 
-            return StandardSwitches.UserAndPassword;
+            return StandardSwitches.UserAndPassword | StandardSwitches.FileNameEncoding;
         }
 
         protected override void DoRun()
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             List<VirtualDisk> disks = new List<VirtualDisk>();
             foreach (var path in _inFiles.Values)
             {
@@ -146,7 +149,6 @@ namespace DiskDump
                     Console.WriteLine();
                 }
             }
-
 
             Console.WriteLine();
             Console.WriteLine();
@@ -234,7 +236,7 @@ namespace DiskDump
                             Console.WriteLine("    Boot Code: {0}", fsi.Name);
                             try
                             {
-                                using (DiscFileSystem fs = fsi.Open(vol))
+                                using (DiscFileSystem fs = fsi.Open(vol, FileSystemParameters))
                                 {
                                     byte[] bootCode = fs.ReadBootCode();
                                     if (bootCode != null)
@@ -259,7 +261,7 @@ namespace DiskDump
                     {
                         foreach (var fsi in fileSystemInfos)
                         {
-                            using (DiscFileSystem fs = fsi.Open(vol))
+                            using (DiscFileSystem fs = fsi.Open(vol, FileSystemParameters))
                             {
                                 Console.WriteLine("    {0} Volume Label: {1}", fsi.Name, fs.VolumeLabel);
                                 Console.WriteLine("    Files ({0})...", fsi.Name);

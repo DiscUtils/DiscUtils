@@ -34,8 +34,8 @@ namespace DiscUtils.Ext
 
         private BlockGroup[] _blockGroups;
 
-        public VfsExtFileSystem(Stream stream)
-            : base(new DiscFileSystemOptions())
+        public VfsExtFileSystem(Stream stream, FileSystemParameters parameters)
+            : base(new ExtFileSystemOptions(parameters))
         {
             stream.Position = 1024;
             byte[] superblockData = Utilities.ReadFully(stream, 1024);
@@ -61,7 +61,8 @@ namespace DiscUtils.Ext
             Context = new Context()
             {
                 RawStream = stream,
-                SuperBlock = superblock
+                SuperBlock = superblock,
+                Options = (ExtFileSystemOptions)Options
             };
 
             uint numGroups = Utilities.Ceil(superblock.BlocksCount, superblock.BlocksPerGroup);

@@ -40,7 +40,7 @@ namespace DiscUtils.Ext
 
         private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
         {
-            return new ExtFileSystem(stream);
+            return new ExtFileSystem(stream, parameters);
         }
     }
 }
