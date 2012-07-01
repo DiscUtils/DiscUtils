@@ -90,7 +90,18 @@ namespace DiscUtils.OpticalDiscSharing
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
+            try
+            {
+                if (_odsClient != null)
+                {
+                    _odsClient.Dispose();
+                    _odsClient = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
     }
 }

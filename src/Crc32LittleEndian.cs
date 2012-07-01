@@ -39,6 +39,21 @@ namespace DiscUtils
             Tables[(int)Crc32Algorithm.Aeronautical] = CalcTable(0xD5828281);
         }
 
+        public Crc32LittleEndian(Crc32Algorithm algorithm)
+            : base(Tables[(int)algorithm])
+        {
+        }
+
+        public static uint Compute(Crc32Algorithm algorithm, byte[] buffer, int offset, int count)
+        {
+            return Process(Tables[(int)algorithm], 0xFFFFFFFF, buffer, offset, count) ^ 0xFFFFFFFF;
+        }
+
+        public override void Process(byte[] buffer, int offset, int count)
+        {
+            _value = Process(Table, _value, buffer, offset, count);
+        }
+
         private static uint[] CalcTable(uint polynomial)
         {
             uint[] table = new uint[256];
@@ -64,21 +79,6 @@ namespace DiscUtils
             }
 
             return table;
-        }
-
-        public Crc32LittleEndian(Crc32Algorithm algorithm)
-            : base(Tables[(int)algorithm])
-        {
-        }
-
-        public static uint Compute(Crc32Algorithm algorithm, byte[] buffer, int offset, int count)
-        {
-            return Process(Tables[(int)algorithm], 0xFFFFFFFF, buffer, offset, count) ^ 0xFFFFFFFF;
-        }
-
-        public override void Process(byte[] buffer, int offset, int count)
-        {
-            _value = Process(_table, _value, buffer, offset, count);
         }
 
         private static uint Process(uint[] table, uint accumulator, byte[] buffer, int offset, int count)

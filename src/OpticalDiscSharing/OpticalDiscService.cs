@@ -93,8 +93,8 @@ namespace DiscUtils.OpticalDiscSharing
         /// </summary>
         /// <param name="userName">The username to use, if the owner of the Mac / PC is prompted.</param>
         /// <param name="computerName">The computer name to use, if the owner of the Mac / PC is prompted.</param>
-        /// <param name="maxWaitSecs">The maximum number of seconds to wait to be granted access.</param>
-        public void Connect(string userName, string computerName, int maxWaitSecs)
+        /// <param name="maxWaitSeconds">The maximum number of seconds to wait to be granted access.</param>
+        public void Connect(string userName, string computerName, int maxWaitSeconds)
         {
             var sysParams = GetParams("sys");
 
@@ -108,7 +108,7 @@ namespace DiscUtils.OpticalDiscSharing
             if ((volFlags & 0x200) != 0)
             {
                 _userName = userName;
-                AskForAccess(userName, computerName, maxWaitSecs);
+                AskForAccess(userName, computerName, maxWaitSeconds);
 
                 // Flush any stale mDNS data - the server advertises extra info (such as the discs available)
                 // after a client is granted permission to access a disc.
@@ -202,10 +202,22 @@ namespace DiscUtils.OpticalDiscSharing
             using (Stream inStream = wrsp.GetResponseStream())
             {
                 Dictionary<string, object> plist = Plist.Parse(inStream);
-                askId = ((int)plist["askID"]).ToString();
+                askId = ((int)plist["askID"]).ToString(CultureInfo.InvariantCulture);
             }
 
             return askId;
+        }
+
+        private static int ParseInt(string volFlagsStr)
+        {
+            if (volFlagsStr.StartsWith("0x", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return int.Parse(volFlagsStr.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                return int.Parse(volFlagsStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            }
         }
 
         private void AskForAccess(string userName, string computerName, int maxWaitSecs)
@@ -221,18 +233,6 @@ namespace DiscUtils.OpticalDiscSharing
             string askId = InitiateAsk(userName, computerName, uriBuilder);
 
             _askToken = GetAskToken(askId, uriBuilder, maxWaitSecs);
-        }
-
-        private int ParseInt(string volFlagsStr)
-        {
-            if (volFlagsStr.StartsWith("0x", System.StringComparison.OrdinalIgnoreCase))
-            {
-                return int.Parse(volFlagsStr.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                return int.Parse(volFlagsStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
-            }
         }
 
         private Dictionary<string, string> GetParams(string section)

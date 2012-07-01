@@ -22,7 +22,6 @@
 
 namespace DiscUtils
 {
-    using System.IO;
     using System;
 
     internal class BuilderBytesExtent : BuilderExtent

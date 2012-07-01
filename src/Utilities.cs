@@ -109,17 +109,6 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Calculates the CEIL function.
-        /// </summary>
-        /// <param name="numerator">The value to divide</param>
-        /// <param name="denominator">The value to divide by</param>
-        /// <returns>The value of CEIL(numerator/denominator)</returns>
-        public static ulong Ceil(ulong numerator, ulong denominator)
-        {
-            return (numerator + (denominator - 1)) / denominator;
-        }
-
-        /// <summary>
         /// Converts between two arrays.
         /// </summary>
         /// <typeparam name="T">The type of the elements of the source array</typeparam>

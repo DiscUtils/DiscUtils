@@ -417,6 +417,31 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.OpticalDiscSharing">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2012-07-01 14:25:20Z">
+      <Issue>
+       <Item>DiscUtils.OpticalDiscSharing</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="192" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2012-07-01 14:25:20Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.OpticalDiscSharing</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="195" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Partitions">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2008-11-22 16:45:38Z">
@@ -658,6 +683,42 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="DiscUtils.Vhdx">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Status="Excluded" Created="2012-07-01 14:25:20Z">
+      <Issue>
+       <Item>DiscUtils.Vhdx</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="192" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2012-07-01 14:25:20Z">
+      <Issue Name="Namespace">
+       <Item>Utils</Item>
+       <Item>DiscUtils.Vhdx</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="193" />
+       </User>
+      </Notes>
+     </Message>
+     <Message Id="Vhdx" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2012-07-01 14:25:20Z">
+      <Issue Name="Namespace">
+       <Item>Vhdx</Item>
+       <Item>DiscUtils.Vhdx</Item>
+      </Issue>
+      <Notes>
+       <User Name="Kenneth">
+        <Note Id="193" />
+       </User>
+      </Notes>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="DiscUtils.Vmdk">
     <Messages>
      <Message Id="Utils" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2009-02-14 11:07:51Z">
@@ -891,6 +952,68 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="23" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Crc32BigEndian">
+          <Members>
+           <Member Name="#.cctor()">
+            <Messages>
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2012-07-01 14:25:20Z">
+              <Issue>
+               <Item>'Crc32BigEndian'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="194" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#Compute(DiscUtils.Crc32Algorithm,System.Byte[],System.Int32,System.Int32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2012-07-01 14:25:20Z">
+              <Issue>
+               <Item>'Crc32BigEndian.Compute(Crc32Algorithm, byte[], int, int)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="190" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="Crc32LittleEndian">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-07-01 14:25:20Z">
+            <Issue>
+             <Item>'Crc32LittleEndian'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="191" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#.cctor()">
+            <Messages>
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2012-07-01 14:25:20Z">
+              <Issue>
+               <Item>'Crc32LittleEndian'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="194" />
                </User>
               </Notes>
              </Message>
@@ -2864,24 +2987,6 @@
               <Notes>
                <User Name="Kenneth">
                 <Note Id="170" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="BZip2Crc32">
-          <Members>
-           <Member Name="#.cctor()">
-            <Messages>
-             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2010-09-17 21:18:15Z">
-              <Issue>
-               <Item>'BZip2Crc32'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="129" />
                </User>
               </Notes>
              </Message>
@@ -9128,24 +9233,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="Crc32">
-          <Members>
-           <Member Name="#.cctor()">
-            <Messages>
-             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Status="Excluded" Created="2009-01-20 20:09:47Z">
-              <Issue>
-               <Item>'Crc32'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="32" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="GuidPartitionTypes">
           <Members>
            <Member Name="#EfiSystem">
@@ -12319,7 +12406,6 @@
     <Note Id="29" Modified="2008-12-15 22:03:59Z">Deliberate use of namespace to separate technologies.</Note>
     <Note Id="30" Modified="2008-12-15 22:04:20Z">DiscUtils is the establish project name.</Note>
     <Note Id="31" Modified="2008-12-15 22:04:48Z">VDI is an established acronym for VirtualBox's virtual disk images.</Note>
-    <Note Id="32" Modified="2009-01-20 20:14:24Z">Complex table values to be calculated, so in static constructor.</Note>
     <Note Id="33" Modified="2009-02-07 12:25:57Z">Xva fits in with existing namespace naming scheme</Note>
     <Note Id="34" Modified="2009-02-07 12:26:27Z">Xva is camel case form of XVA acronym</Note>
     <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
@@ -12416,7 +12502,6 @@
     <Note Id="126" Modified="2010-09-12 16:05:03Z">Instantiated via templates.</Note>
     <Note Id="127" Modified="2010-09-12 16:06:20Z">Defined part of file format</Note>
     <Note Id="128" Modified="2010-09-17 21:18:44Z">Part of Project Name</Note>
-    <Note Id="129" Modified="2010-09-17 21:19:01Z">Calculated static field</Note>
     <Note Id="130" Modified="2011-08-30 08:26:43Z">DiscUtils is name of project</Note>
     <Note Id="131" Modified="2010-09-18 23:13:14Z">Physical storage type is byte</Note>
     <Note Id="132" Modified="2010-09-19 09:33:19Z">Complex names.</Note>
@@ -12477,6 +12562,12 @@
     <Note Id="187" Modified="2012-04-14 10:05:44Z">Simple getter on important field.</Note>
     <Note Id="188" Modified="2012-03-24 15:28:08Z">Defined part of spec</Note>
     <Note Id="189" Modified="2011-12-19 22:59:13Z">Follows example of IPEndPoint.</Note>
+    <Note Id="190" Modified="2012-07-01 14:27:21Z">Mirrors LittleEndian</Note>
+    <Note Id="191" Modified="2012-07-01 14:29:03Z">Mirrors BigEndian</Note>
+    <Note Id="192" Modified="2012-07-01 14:29:37Z">Using project practice of separating functions</Note>
+    <Note Id="193" Modified="2012-07-01 14:34:27Z">Follows practice</Note>
+    <Note Id="194" Modified="2012-07-01 15:15:17Z">Complex initialization</Note>
+    <Note Id="195" Modified="2012-07-01 15:17:29Z">Part of project name.</Note>
    </User>
   </Notes>
   <Rules>

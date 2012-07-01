@@ -24,12 +24,12 @@ namespace DiscUtils
 {
     internal abstract class Crc32
     {
-        protected readonly uint[] _table;
+        protected readonly uint[] Table;
         protected uint _value;
 
         protected Crc32(uint[] table)
         {
-            _table = table;
+            Table = table;
             _value = 0xFFFFFFFF;
         }
 

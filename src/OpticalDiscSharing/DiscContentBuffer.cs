@@ -126,6 +126,23 @@ namespace DiscUtils.OpticalDiscSharing
             return result.ToString();
         }
 
+        private static Dictionary<string, string> ParseAuthenticationHeader(string header, out string authMethod)
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            string[] elements = header.Split(' ');
+
+            authMethod = elements[0];
+
+            for (int i = 1; i < elements.Length; ++i)
+            {
+                string[] nvPair = elements[i].Split(new char[] { '=' }, 2, StringSplitOptions.None);
+                result.Add(nvPair[0], nvPair[1].Trim('\"'));
+            }
+
+            return result;
+        }
+
         private HttpWebResponse SendRequest(WebRequestCreator wrc)
         {
             HttpWebRequest wr = wrc();
@@ -149,7 +166,7 @@ namespace DiscUtils.OpticalDiscSharing
 
                     if (authMethod != "Digest")
                     {
-                        throw we;
+                        throw;
                     }
 
                     string resp = CalcDigestResponse(authParams["nonce"], wr.RequestUri.AbsolutePath, wr.Method, authParams["realm"]);
@@ -164,7 +181,7 @@ namespace DiscUtils.OpticalDiscSharing
                     return (HttpWebResponse)wr.GetResponse();
                 }
 
-                throw we;
+                throw;
             }
         }
 
@@ -182,23 +199,6 @@ namespace DiscUtils.OpticalDiscSharing
             MD5 respHas = MD5.Create();
             byte[] hash = respHas.ComputeHash(Encoding.ASCII.GetBytes(toHash));
             return ToHexString(hash);
-        }
-
-        private Dictionary<string, string> ParseAuthenticationHeader(string header, out string authMethod)
-        {
-            Dictionary<string, string> result = new Dictionary<string, string>();
-
-            string[] elements = header.Split(' ');
-
-            authMethod = elements[0];
-
-            for (int i = 1; i < elements.Length; ++i)
-            {
-                string[] nvPair = elements[i].Split(new char[] { '=' }, 2, StringSplitOptions.None);
-                result.Add(nvPair[0], nvPair[1].Trim('\"'));
-            }
-
-            return result;
         }
     }
 }

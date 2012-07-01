@@ -25,7 +25,7 @@ namespace DiscUtils.Ext
     using System.IO;
     using DiscUtils.Vfs;
 
-    internal class VfsExtFileSystem : VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
+    internal sealed class VfsExtFileSystem : VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
         internal const IncompatibleFeatures SupportedIncompatibleFeatures =
             IncompatibleFeatures.FileType

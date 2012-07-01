@@ -91,7 +91,6 @@ namespace DiscUtils.Vmdk
                 extents.Add(new BuilderStreamExtent(descriptorStart * Sizes.Sector, descriptorStream));
             }
 
-
             // The grain directory extents
             extents.Add(new GrainDirectoryExtent(redundantGrainDirStart * Sizes.Sector, redundantGrainTablesStart, numGrainTables, GtesPerGt));
             extents.Add(new GrainDirectoryExtent(grainDirStart * Sizes.Sector, grainTablesStart, numGrainTables, GtesPerGt));
@@ -182,7 +181,7 @@ namespace DiscUtils.Vmdk
                 {
                     for (int i = 0; i < block.Count; ++i)
                     {
-                        Utilities.WriteBytesLittleEndian((uint)(_dataStart + sectorsAllocated),_data,(int)((block.Offset + i) * 4));
+                        Utilities.WriteBytesLittleEndian((uint)(_dataStart + sectorsAllocated), _data, (int)((block.Offset + i) * 4));
                         sectorsAllocated += _grainSize;
                     }
                 }
@@ -206,18 +205,6 @@ namespace DiscUtils.Vmdk
             {
                 _content = content;
                 _grainSize = grainSize;
-            }
-
-            private static long SectorsPresent(SparseStream content, long grainSize)
-            {
-                long total = 0;
-
-                foreach (var grainRange in StreamExtent.Blocks(content.Extents, grainSize * Sizes.Sector))
-                {
-                    total += grainRange.Count * grainSize;
-                }
-
-                return total;
             }
 
             internal override void PrepareForRead()
@@ -248,7 +235,6 @@ namespace DiscUtils.Vmdk
                 long grainStart = (_grainMapRanges[outputGrain].Offset + _grainMapOffsets[outputGrain]) * grainSizeBytes;
                 long maxRead = (_grainMapRanges[outputGrain].Count - _grainMapOffsets[outputGrain]) * grainSizeBytes;
 
-
                 long readStart = grainStart + outputGrainOffset;
                 int toRead = (int)Math.Min(count, maxRead - outputGrainOffset);
 
@@ -268,6 +254,18 @@ namespace DiscUtils.Vmdk
             {
                 _grainMapOffsets = null;
                 _grainMapRanges = null;
+            }
+
+            private static long SectorsPresent(SparseStream content, long grainSize)
+            {
+                long total = 0;
+
+                foreach (var grainRange in StreamExtent.Blocks(content.Extents, grainSize * Sizes.Sector))
+                {
+                    total += grainRange.Count * grainSize;
+                }
+
+                return total;
             }
         }
     }
