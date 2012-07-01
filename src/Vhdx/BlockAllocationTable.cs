@@ -35,25 +35,30 @@ namespace DiscUtils.Vhdx
         private const ulong PayloadBlockFullyPresent = 6;
         private const ulong PayloadBlockPartiallyPresent = 7;
 
+        private Stream _fileStream;
         private Stream _stream;
         private Metadata _metadata;
 
         private long _logicalSectorSize;
         private long _chunkSize;
         private int _chunkRatio;
+        private byte[] _sectorBitmap;
+        private ulong _currentSectorBitmap;
 
-        public BlockAllocationTable(Stream stream, Metadata metadata)
+        public BlockAllocationTable(Stream fileStream, Stream stream, Metadata metadata)
         {
+            _fileStream = fileStream;
             _stream = stream;
             _metadata = metadata;
 
             _logicalSectorSize = _metadata.LogicalSectorSize;
             _chunkSize = (1L << 23) * _logicalSectorSize;
             _chunkRatio = (int)(_chunkSize / _metadata.FileParameters.BlockSize);
-
-            long dataBlocksCount = (long)Utilities.Ceil(_metadata.DiskSize, _metadata.FileParameters.BlockSize);
-            long sectorBitmapsBlocksCount = (long)Utilities.Ceil(dataBlocksCount, _chunkRatio);
-
+            if ((_metadata.FileParameters.Flags & FileParametersFlags.HasParent) != 0)
+            {
+                _sectorBitmap = new byte[Sizes.OneMiB];
+                _currentSectorBitmap = ulong.MaxValue;
+            }
         }
 
         public long ChunkSize
@@ -66,41 +71,27 @@ namespace DiscUtils.Vhdx
             get { return _logicalSectorSize; }
         }
 
-        public IEnumerable<StreamExtent> StoredExtents()
+        public IEnumerable<StreamExtent> StoredExtents(long start, long length)
         {
-            uint blockSize = _metadata.FileParameters.BlockSize;
-
-            _stream.Position = 0;
-            byte[] data = Utilities.ReadFully(_stream, (int)_stream.Length);
-
-            long lastStart = 0;
-            bool inExtent = false;
-
+            long end = start + length;
             long pos = 0;
-            while (pos < (long)_metadata.DiskSize)
+            while (pos < end)
             {
-                long chunk = pos / _chunkSize;
-                long chunkOffset = pos % _chunkSize;
-                int block = (int)(chunkOffset / blockSize);
-
-                ulong entry = Utilities.ToUInt64LittleEndian(data, (int)((chunk * (_chunkRatio + 1)) + block) * 8);
-                if(inExtent && !IsInExtent(entry))
+                while (pos < end && GetDisposition(pos) != SectorDisposition.Stored)
                 {
-                    yield return new StreamExtent(lastStart, pos - lastStart);
-                    inExtent = false;
-                }
-                else if (!inExtent && IsInExtent(entry))
-                {
-                    lastStart = pos;
-                    inExtent = true;
+                    pos += ContiguousBytes(pos, end - pos);
                 }
 
-                pos += blockSize;
-            }
+                long rangeStart = pos;
+                while (pos < end && GetDisposition(pos) == SectorDisposition.Stored)
+                {
+                    pos += ContiguousBytes(pos, end - pos);
+                }
 
-            if (inExtent)
-            {
-                yield return new StreamExtent(lastStart, Math.Min((long)_metadata.DiskSize, pos) - lastStart);
+                if (pos - start > 0)
+                {
+                    yield return new StreamExtent(rangeStart, pos - rangeStart);
+                }
             }
         }
 
@@ -116,10 +107,26 @@ namespace DiscUtils.Vhdx
             _stream.Position = chunk * (_chunkRatio + 1) * 8;
             byte[] chunkData = Utilities.ReadFully(_stream, (_chunkRatio + 1) * 8);
 
-            ulong bitmapEntry = Utilities.ToUInt64LittleEndian(chunkData, _chunkRatio * 8);
-
             ulong entry = Utilities.ToUInt64LittleEndian(chunkData, block * 8);
-            return GetEntryDisposition(entry);
+
+            if ((entry & 0x7) == PayloadBlockPartiallyPresent)
+            {
+                ulong bitmapEntry = Utilities.ToUInt64LittleEndian(chunkData, _chunkRatio * 8);
+                if (!LoadSectorBitmap(bitmapEntry))
+                {
+                    throw new IOException("Unable to load sector bitmap for partially present block");
+                }
+
+                long chunkSector = chunkOffset / _metadata.LogicalSectorSize;
+                long bitmapByte = chunkSector / 8;
+                byte b = _sectorBitmap[bitmapByte];
+                int mask = 1 << (int)(chunkSector % 8);
+                return ((b & mask) != 0) ? SectorDisposition.Stored : SectorDisposition.Parent;
+            }
+            else
+            {
+                return GetEntryDisposition(entry);
+            }
         }
 
         public long GetFilePosition(long diskPosition)
@@ -160,12 +167,26 @@ namespace DiscUtils.Vhdx
             _stream.Position = chunk * (_chunkRatio + 1) * 8;
             byte[] chunkData = Utilities.ReadFully(_stream, (_chunkRatio + 1) * 8);
 
-
             ulong entry = Utilities.ToUInt64LittleEndian(chunkData, block * 8);
             if ((entry & 0x07) == PayloadBlockPartiallyPresent)
             {
                 ulong bitmapEntry = Utilities.ToUInt64LittleEndian(chunkData, _chunkRatio * 8);
-                throw new NotImplementedException();
+                if (!LoadSectorBitmap(bitmapEntry))
+                {
+                    throw new IOException("Unable to load sector bitmap for partially present block");
+                }
+
+                bool sectorIsPresent = SectorIsPresent(chunkOffset);
+                long currentPos = chunkOffset + _metadata.LogicalSectorSize;
+
+                while (currentPos < _chunkSize
+                    && (currentPos - chunkOffset) < max
+                    && SectorIsPresent(currentPos) == sectorIsPresent)
+                {
+                    currentPos += _metadata.LogicalSectorSize;
+                }
+
+                return currentPos - chunkOffset;
             }
             else
             {
@@ -214,6 +235,41 @@ namespace DiscUtils.Vhdx
                 default:
                     throw new IOException("Unexpected BAT entry state: " + (entry & 0x7));
             }
+        }
+
+        private bool LoadSectorBitmap(ulong bitmapEntry)
+        {
+            if ((bitmapEntry & 0x7) == 0)
+            {
+                return false;
+            }
+
+            if (_currentSectorBitmap == bitmapEntry)
+            {
+                return true;
+            }
+
+            long bitmapFilePos = (long)((bitmapEntry >> 20) & 0xFFFFFFFFFFF) * Sizes.OneMiB;
+            _fileStream.Position = bitmapFilePos;
+            if (Utilities.ReadFully(_fileStream, _sectorBitmap, 0, (int)Sizes.OneMiB) != Sizes.OneMiB)
+            {
+                _currentSectorBitmap = ulong.MaxValue;
+                return false;
+            }
+            else
+            {
+                _currentSectorBitmap = bitmapEntry;
+                return true;
+            }
+        }
+
+        private bool SectorIsPresent(long chunkOffset)
+        {
+            long chunkSector = chunkOffset / _metadata.LogicalSectorSize;
+            byte b = _sectorBitmap[chunkSector / 8];
+            int mask = 1 << (int)(chunkSector % 8);
+            bool val = (b & mask) != 0;
+            return val;
         }
     }
 }

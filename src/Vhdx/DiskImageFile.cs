@@ -129,92 +129,6 @@ namespace DiscUtils.Vhdx
             Initialize();
         }
 
-        private void Initialize()
-        {
-            _fileStream.Position = 0;
-            FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
-            if (!fileHeader.IsValid)
-            {
-                throw new IOException("Invalid VHDX file - file signature mismatch");
-            }
-
-            ReadHeaders();
-
-            if (_header.LogGuid != Guid.Empty)
-            {
-                throw new NotSupportedException("Detected VHDX file with replay log - not yet supported");
-            }
-
-            ReadRegionTable();
-
-            ReadMetadata();
-
-            Stream batStream = OpenRegion(RegionTable.BatGuid);
-            _bat = new BlockAllocationTable(batStream, _metadata);
-        }
-
-        /// <summary>
-        /// Opens an existing region within the VHDX file.
-        /// </summary>
-        /// <param name="region">Identifier for the region to open.</param>
-        /// <returns>A stream containing the region data.</returns>
-        /// <remarks>Regions are an extension mechanism in VHDX - with some regions defined by
-        /// the VHDX specification to hold metadata and the block allocation data.</remarks>
-        public Stream OpenRegion(Guid region)
-        {
-            RegionEntry metadataRegion = _regionTable.Regions[region];
-            return new SubStream(_fileStream, metadataRegion.FileOffset, metadataRegion.Length);
-        }
-
-        private void ReadMetadata()
-        {
-            Stream regionStream = OpenRegion(RegionTable.MetadataRegionGuid);
-            _metadata = new Metadata(regionStream);
-        }
-
-        private void ReadRegionTable()
-        {
-            _fileStream.Position = 192 * Sizes.OneKiB;
-            _regionTable = Utilities.ReadStruct<RegionTable>(_fileStream);
-            foreach (var entry in _regionTable.Regions.Values)
-            {
-                if ((entry.Flags & RegionFlags.Required) != 0)
-                {
-                    if (entry.Guid != RegionTable.BatGuid && entry.Guid != RegionTable.MetadataRegionGuid)
-                    {
-                        throw new IOException("Invalid VHDX file - unrecognised required region");
-                    }
-                }
-            }
-        }
-
-        private void ReadHeaders()
-        {
-            _activeHeader = 0;
-
-            _fileStream.Position = 64 * Sizes.OneKiB;
-            VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
-            if (vhdxHeader1.IsValid)
-            {
-                _header = vhdxHeader1;
-                _activeHeader = 1;
-
-            }
-
-            _fileStream.Position = 128 * Sizes.OneKiB;
-            VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
-            if (vhdxHeader2.IsValid && (_activeHeader == 0 || _header.SequenceNumber < vhdxHeader2.SequenceNumber))
-            {
-                _header = vhdxHeader2;
-                _activeHeader = 2;
-            }
-
-            if (_activeHeader == 0)
-            {
-                throw new IOException("Invalid VHDX file - no valid VHDX headers found");
-            }
-        }
-
         /// <summary>
         /// Gets the unique id of the parent disk.
         /// </summary>
@@ -227,7 +141,15 @@ namespace DiscUtils.Vhdx
                     return Guid.Empty;
                 }
 
-                throw new NotImplementedException();
+                string parentLinkage;
+                if (_metadata.ParentLocator.Entries.TryGetValue("parent_linkage", out parentLinkage))
+                {
+                    return new Guid(parentLinkage);
+                }
+                else
+                {
+                    return Guid.Empty;
+                }
             }
         }
 
@@ -276,7 +198,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public Guid UniqueId
         {
-            get { return _header.FileWriteGuid; }
+            get { return _header.DataWriteGuid; }
         }
 
         /// <summary>
@@ -408,6 +330,19 @@ namespace DiscUtils.Vhdx
             InitializeDifferencingInternal(stream, parent, parentAbsolutePath, parentRelativePath, parentModificationTimeUtc);
 
             return new DiskImageFile(stream, ownsStream);
+        }
+
+        /// <summary>
+        /// Opens an existing region within the VHDX file.
+        /// </summary>
+        /// <param name="region">Identifier for the region to open.</param>
+        /// <returns>A stream containing the region data.</returns>
+        /// <remarks>Regions are an extension mechanism in VHDX - with some regions defined by
+        /// the VHDX specification to hold metadata and the block allocation data.</remarks>
+        public Stream OpenRegion(Guid region)
+        {
+            RegionEntry metadataRegion = _regionTable.Regions[region];
+            return new SubStream(_fileStream, metadataRegion.FileOffset, metadataRegion.Length);
         }
 
         /// <summary>
@@ -549,6 +484,78 @@ namespace DiscUtils.Vhdx
             throw new NotImplementedException();
         }
 
+        private void Initialize()
+        {
+            _fileStream.Position = 0;
+            FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
+            if (!fileHeader.IsValid)
+            {
+                throw new IOException("Invalid VHDX file - file signature mismatch");
+            }
+
+            ReadHeaders();
+
+            if (_header.LogGuid != Guid.Empty)
+            {
+                throw new NotSupportedException("Detected VHDX file with replay log - not yet supported");
+            }
+
+            ReadRegionTable();
+
+            ReadMetadata();
+
+            Stream batStream = OpenRegion(RegionTable.BatGuid);
+            _bat = new BlockAllocationTable(_fileStream, batStream, _metadata);
+        }
+
+        private void ReadMetadata()
+        {
+            Stream regionStream = OpenRegion(RegionTable.MetadataRegionGuid);
+            _metadata = new Metadata(regionStream);
+        }
+
+        private void ReadRegionTable()
+        {
+            _fileStream.Position = 192 * Sizes.OneKiB;
+            _regionTable = Utilities.ReadStruct<RegionTable>(_fileStream);
+            foreach (var entry in _regionTable.Regions.Values)
+            {
+                if ((entry.Flags & RegionFlags.Required) != 0)
+                {
+                    if (entry.Guid != RegionTable.BatGuid && entry.Guid != RegionTable.MetadataRegionGuid)
+                    {
+                        throw new IOException("Invalid VHDX file - unrecognised required region");
+                    }
+                }
+            }
+        }
+
+        private void ReadHeaders()
+        {
+            _activeHeader = 0;
+
+            _fileStream.Position = 64 * Sizes.OneKiB;
+            VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+            if (vhdxHeader1.IsValid)
+            {
+                _header = vhdxHeader1;
+                _activeHeader = 1;
+            }
+
+            _fileStream.Position = 128 * Sizes.OneKiB;
+            VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+            if (vhdxHeader2.IsValid && (_activeHeader == 0 || _header.SequenceNumber < vhdxHeader2.SequenceNumber))
+            {
+                _header = vhdxHeader2;
+                _activeHeader = 2;
+            }
+
+            if (_activeHeader == 0)
+            {
+                throw new IOException("Invalid VHDX file - no valid VHDX headers found");
+            }
+        }
+
         /// <summary>
         /// Gets the locations of the parent file.
         /// </summary>
@@ -567,7 +574,27 @@ namespace DiscUtils.Vhdx
                 fileLocator = new LocalFileLocator(string.Empty);
             }
 
-            throw new NotImplementedException();
+            List<string> paths = new List<string>();
+
+            ParentLocator locator = _metadata.ParentLocator;
+            string value;
+
+            if (locator.Entries.TryGetValue("relative_path", out value))
+            {
+                paths.Add(fileLocator.ResolveRelativePath(value));
+            }
+
+            if (locator.Entries.TryGetValue("volume_path", out value))
+            {
+                paths.Add(value);
+            }
+
+            if (locator.Entries.TryGetValue("absolute_win32_path", out value))
+            {
+                paths.Add(value);
+            }
+
+            return paths.ToArray();
         }
     }
 }

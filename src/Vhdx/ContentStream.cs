@@ -46,40 +46,13 @@ namespace DiscUtils.Vhdx
             _ownsParent = ownsParent;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (_parentStream != null)
-                {
-                    if (_ownsParent == Ownership.Dispose)
-                    {
-                        _parentStream.Dispose();
-                    }
-
-                    _parentStream = null;
-                }
-            }
-            finally
-            {
-                base.Dispose(disposing);
-            }
-        }
-
-        public override IEnumerable<StreamExtent> MapContent(long start, long length)
-        {
-            CheckDisposed();
-
-            throw new NotImplementedException();
-        }
-
         public override IEnumerable<StreamExtent> Extents
         {
             get
             {
                 CheckDisposed();
 
-                return _bat.StoredExtents();
+                return StreamExtent.Union(_bat.StoredExtents(0, _length), _parentStream.Extents);
             }
         }
 
@@ -113,13 +86,6 @@ namespace DiscUtils.Vhdx
             }
         }
 
-        public override void Flush()
-        {
-            CheckDisposed();
-
-            throw new NotImplementedException();
-        }
-
         public override long Length
         {
             get
@@ -145,11 +111,25 @@ namespace DiscUtils.Vhdx
             }
         }
 
-        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        public override void Flush()
         {
             CheckDisposed();
 
             throw new NotImplementedException();
+        }
+
+        public override IEnumerable<StreamExtent> MapContent(long start, long length)
+        {
+            CheckDisposed();
+
+            throw new NotImplementedException();
+        }
+
+        public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
+        {
+            CheckDisposed();
+
+            return StreamExtent.Union(_bat.StoredExtents(start, count), _parentStream.GetExtentsInRange(start, count));
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -242,6 +222,26 @@ namespace DiscUtils.Vhdx
             CheckDisposed();
 
             throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (_parentStream != null)
+                {
+                    if (_ownsParent == Ownership.Dispose)
+                    {
+                        _parentStream.Dispose();
+                    }
+
+                    _parentStream = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         private void CheckDisposed()

@@ -33,13 +33,13 @@ namespace DiscUtils.Vhdx
         public static readonly Guid BatGuid = new Guid("2DC27766-F623-4200-9D64-115E9BFD4A08");
         public static readonly Guid MetadataRegionGuid = new Guid("8B7CA206-4790-4B9A-B8FE-575F050F886E");
 
-        private byte[] _data;
-
         public uint Signature;
         public uint Checksum;
         public uint EntryCount;
         public uint Reserved;
         public IDictionary<Guid, RegionEntry> Regions;
+
+        private byte[] _data;
 
         public int Size
         {

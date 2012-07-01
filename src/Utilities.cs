@@ -908,6 +908,22 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Reads a structure from a stream.
+        /// </summary>
+        /// <typeparam name="T">The type of the structure</typeparam>
+        /// <param name="stream">The stream to read</param>
+        /// <param name="length">The number of bytes to read</param>
+        /// <returns>The structure</returns>
+        public static T ReadStruct<T>(Stream stream, int length)
+            where T : IByteArraySerializable, new()
+        {
+            T result = new T();
+            byte[] buffer = Utilities.ReadFully(stream, length);
+            result.ReadFrom(buffer, 0);
+            return result;
+        }
+
+        /// <summary>
         /// Copies the contents of one stream to another.
         /// </summary>
         /// <param name="source">The stream to copy from</param>

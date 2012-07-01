@@ -45,36 +45,6 @@ namespace DiscUtils.Vhdx
             get { return _isUser; }
         }
 
-        public static MetadataEntryKey FromEntry(MetadataEntry entry)
-        {
-            return new MetadataEntryKey(entry.ItemId, (entry.Flags & MetadataEntryFlags.IsUser) != 0);
-        }
-
-        public bool Equals(MetadataEntryKey other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return _itemId == other._itemId && _isUser == other._isUser;
-        }
-
-        public override bool Equals(object other)
-        {
-            if (other is MetadataEntryKey)
-            {
-                return Equals((MetadataEntryKey)other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return _itemId.GetHashCode() ^ (_isUser ? 0x3C13A5 : 0);
-        }
-
         public static bool operator ==(MetadataEntryKey x, MetadataEntryKey y)
         {
             if (Object.ReferenceEquals(x, y))
@@ -93,6 +63,37 @@ namespace DiscUtils.Vhdx
         public static bool operator !=(MetadataEntryKey x, MetadataEntryKey y)
         {
             return !(x == y);
+        }
+
+        public static MetadataEntryKey FromEntry(MetadataEntry entry)
+        {
+            return new MetadataEntryKey(entry.ItemId, (entry.Flags & MetadataEntryFlags.IsUser) != 0);
+        }
+
+        public bool Equals(MetadataEntryKey other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return _itemId == other._itemId && _isUser == other._isUser;
+        }
+
+        public override bool Equals(object other)
+        {
+            MetadataEntryKey otherKey = other as MetadataEntryKey;
+            if (otherKey != null)
+            {
+                return Equals(otherKey);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return _itemId.GetHashCode() ^ (_isUser ? 0x3C13A5 : 0);
         }
 
         public override string ToString()

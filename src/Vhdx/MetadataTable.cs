@@ -35,26 +35,15 @@ namespace DiscUtils.Vhdx
         public static readonly Guid Page83DataGuid = new Guid("BECA12AB-B2E6-4523-93EF-C309E000C746");
         public static readonly Guid LogicalSectorSizeGuid = new Guid("8141Bf1D-A96F-4709-BA47-F233A8FAAb5F");
         public static readonly Guid PhysicalSectorSizeGuid = new Guid("CDA348C7-445D-4471-9CC9-E9885251C556");
-        public static readonly Guid ParentLocatorSizeGuid = new Guid("A8D35F2D-B30B-454D-ABF7-D3D84834AB0C");
-
-        private static readonly Dictionary<Guid, object> KnownMetadata;
-
-        private byte[] _headerData;
+        public static readonly Guid ParentLocatorGuid = new Guid("A8D35F2D-B30B-454D-ABF7-D3D84834AB0C");
 
         public ulong Signature;
         public ushort EntryCount;
         public IDictionary<MetadataEntryKey, MetadataEntry> Entries;
 
-        static MetadataTable()
-        {
-            KnownMetadata = new Dictionary<Guid, object>();
-            KnownMetadata[FileParametersGuid] = null;
-            KnownMetadata[VirtualDiskSizeGuid] = null;
-            KnownMetadata[Page83DataGuid] = null;
-            KnownMetadata[LogicalSectorSizeGuid] = null;
-            KnownMetadata[PhysicalSectorSizeGuid] = null;
-            KnownMetadata[ParentLocatorSizeGuid] = null;
-        }
+        private static readonly Dictionary<Guid, object> KnownMetadata = InitMetadataTable();
+
+        private byte[] _headerData;
 
         public int Size
         {
@@ -114,6 +103,18 @@ namespace DiscUtils.Vhdx
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
+        }
+
+        private static Dictionary<Guid, object> InitMetadataTable()
+        {
+            Dictionary<Guid, object> knownMetadata = new Dictionary<Guid, object>();
+            knownMetadata[FileParametersGuid] = null;
+            knownMetadata[VirtualDiskSizeGuid] = null;
+            knownMetadata[Page83DataGuid] = null;
+            knownMetadata[LogicalSectorSizeGuid] = null;
+            knownMetadata[PhysicalSectorSizeGuid] = null;
+            knownMetadata[ParentLocatorGuid] = null;
+            return knownMetadata;
         }
     }
 }

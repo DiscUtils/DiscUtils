@@ -55,7 +55,7 @@ namespace DiscUtils
 
         public override FileLocator GetFileLocator()
         {
-            return new LocalFileLocator(Path.GetDirectoryName(_path));
+            return new LocalFileLocator(Path.GetDirectoryName(_path) + @"\");
         }
 
         public override string GetFileName()

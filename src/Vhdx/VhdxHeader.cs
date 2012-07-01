@@ -28,7 +28,6 @@ namespace DiscUtils.Vhdx
     {
         public const uint VhdxHeaderSignature = 0x64616568;
 
-        private byte[] _data;
         public uint Signature;
         public uint Checksum;
         public ulong SequenceNumber;
@@ -39,10 +38,27 @@ namespace DiscUtils.Vhdx
         public ushort Version;
         public uint LogLength;
         public ulong LogOffset;
+        private byte[] _data;
 
         public int Size
         {
             get { return (int)(4 * Sizes.OneKiB); }
+        }
+
+        public bool IsValid
+        {
+            get
+            {
+                if (Signature != VhdxHeaderSignature)
+                {
+                    return false;
+                }
+
+                byte[] checkData = new byte[4096];
+                Array.Copy(_data, checkData, 4096);
+                Utilities.WriteBytesLittleEndian((uint)0, checkData, 4);
+                return Checksum == Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, checkData, 0, 4096);
+            }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -63,23 +79,6 @@ namespace DiscUtils.Vhdx
             LogOffset = Utilities.ToUInt64LittleEndian(_data, 72);
 
             return Size;
-        }
-
-
-        public bool IsValid
-        {
-            get
-            {
-                if (Signature != VhdxHeaderSignature)
-                {
-                    return false;
-                }
-
-                byte[] checkData = new byte[4096];
-                Array.Copy(_data, checkData, 4096);
-                Utilities.WriteBytesLittleEndian((uint)0, checkData, 4);
-                return Checksum == Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, checkData, 0, 4096);
-            }
         }
 
         public void WriteTo(byte[] buffer, int offset)

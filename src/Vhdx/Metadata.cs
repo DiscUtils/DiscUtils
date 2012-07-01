@@ -36,6 +36,7 @@ namespace DiscUtils.Vhdx
         private Guid _page83Data;
         private uint _logicalSectorSize;
         private uint _physicalSectorSize;
+        private ParentLocator _parentLocator;
 
         public Metadata(Stream regionStream)
         {
@@ -47,8 +48,11 @@ namespace DiscUtils.Vhdx
             _diskSize = ReadValue<ulong>(MetadataTable.VirtualDiskSizeGuid, false, Utilities.ToUInt64LittleEndian);
             _page83Data = ReadValue<Guid>(MetadataTable.Page83DataGuid, false, Utilities.ToGuidLittleEndian);
             _logicalSectorSize = ReadValue<uint>(MetadataTable.LogicalSectorSizeGuid, false, Utilities.ToUInt32LittleEndian);
-            _physicalSectorSize = ReadValue<uint>(MetadataTable.PhysicalSectorSizeGuid, false, Utilities.ToUInt32LittleEndian); ;
+            _physicalSectorSize = ReadValue<uint>(MetadataTable.PhysicalSectorSizeGuid, false, Utilities.ToUInt32LittleEndian);
+            _parentLocator = ReadStruct<ParentLocator>(MetadataTable.ParentLocatorGuid, false);
         }
+
+        private delegate T Reader<T>(byte[] buffer, int offset);
 
         public FileParameters FileParameters
         {
@@ -70,6 +74,11 @@ namespace DiscUtils.Vhdx
             get { return _physicalSectorSize; }
         }
 
+        public ParentLocator ParentLocator
+        {
+            get { return _parentLocator; }
+        }
+
         private T ReadStruct<T>(Guid itemId, bool isUser)
             where T : IByteArraySerializable, new()
         {
@@ -78,13 +87,11 @@ namespace DiscUtils.Vhdx
             if (_table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
-                return Utilities.ReadStruct<T>(_regionStream);
+                return Utilities.ReadStruct<T>(_regionStream, (int)entry.Length);
             }
 
             return default(T);
         }
-
-        private delegate T Reader<T>(byte[] buffer, int offset);
 
         private T ReadValue<T>(Guid itemId, bool isUser, Reader<T> reader)
         {

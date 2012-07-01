@@ -125,12 +125,10 @@ namespace DiscUtils.Vhdx
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} does not have a parent disk", i));
                 }
 
-                // Note: Can't do timestamp check, not a property on DiskImageFile.
-                //if (files[i].Information.DynamicParentUniqueId != files[i + 1].UniqueId)
-                //{
-                //    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
-                //}
-                throw new NotImplementedException();
+                if (files[i].ParentUniqueId != files[i + 1].UniqueId)
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
+                }
 
                 tempList.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(files[i], ownsFiles));
             }

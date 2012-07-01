@@ -738,6 +738,7 @@
     <Compile Include="Vhdx\MetadataEntryFlags.cs" />
     <Compile Include="Vhdx\MetadataEntryKey.cs" />
     <Compile Include="Vhdx\MetadataTable.cs" />
+    <Compile Include="Vhdx\ParentLocator.cs" />
     <Compile Include="Vhdx\RegionEntry.cs" />
     <Compile Include="Vhdx\RegionFlags.cs" />
     <Compile Include="Vhdx\RegionTable.cs" />
