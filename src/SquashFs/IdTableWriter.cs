@@ -61,8 +61,13 @@ namespace DiscUtils.SquashFs
             return (ushort)(_ids.Count - 1);
         }
 
-        internal void Persist()
+        internal long Persist()
         {
+            if (_ids.Count <= 0)
+            {
+                return -1;
+            }
+
             if (_ids.Count * 4 > _context.DataBlockSize)
             {
                 throw new NotImplementedException("Large numbers of user / group id's");
@@ -73,16 +78,19 @@ namespace DiscUtils.SquashFs
                 Utilities.WriteBytesLittleEndian(_ids[i], _context.IoBuffer, i * 4);
             }
 
+            // Persist the actual Id's
+            long blockPos = _context.RawStream.Position;
+            MetablockWriter writer = new MetablockWriter();
+            writer.Write(_context.IoBuffer, 0, _ids.Count * 4);
+            writer.Persist(_context.RawStream);
+
             // Persist the table that references the block containing the id's
-            long blockPos = _context.RawStream.Position + 8;
+            long tablePos = _context.RawStream.Position;
             byte[] tableBuffer = new byte[8];
             Utilities.WriteBytesLittleEndian(blockPos, tableBuffer, 0);
             _context.RawStream.Write(tableBuffer, 0, 8);
 
-            // Persist the actual Id's
-            MetablockWriter writer = new MetablockWriter();
-            writer.Write(_context.IoBuffer, 0, _ids.Count * 4);
-            writer.Persist(_context.RawStream);
+            return tablePos;
         }
     }
 }

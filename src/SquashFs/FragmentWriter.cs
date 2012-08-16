@@ -77,32 +77,37 @@ namespace DiscUtils.SquashFs
             return (uint)_fragmentBlocks.Count;
         }
 
-        internal void Persist()
+        internal long Persist()
         {
-            if (_fragmentBlocks.Count > 0)
+            if (_fragmentBlocks.Count <= 0)
             {
-                if (_fragmentBlocks.Count * FragmentRecord.RecordSize > _context.DataBlockSize)
-                {
-                    throw new NotImplementedException("Large numbers of fragments");
-                }
-
-                // Persist the table that references the block containing the fragment records
-                long blockPos = _context.RawStream.Position + 8;
-                byte[] tableBuffer = new byte[8];
-                Utilities.WriteBytesLittleEndian(blockPos, tableBuffer, 0);
-                _context.RawStream.Write(tableBuffer, 0, 8);
-
-                int recordSize = FragmentRecord.RecordSize;
-                byte[] buffer = new byte[_fragmentBlocks.Count * recordSize];
-                for (int i = 0; i < _fragmentBlocks.Count; ++i)
-                {
-                    _fragmentBlocks[i].WriteTo(buffer, i * recordSize);
-                }
-
-                MetablockWriter writer = new MetablockWriter();
-                writer.Write(buffer, 0, buffer.Length);
-                writer.Persist(_context.RawStream);
+                return -1;
             }
+
+            if (_fragmentBlocks.Count * FragmentRecord.RecordSize > _context.DataBlockSize)
+            {
+                throw new NotImplementedException("Large numbers of fragments");
+            }
+
+            // Persist the table that references the block containing the fragment records
+            long blockPos = _context.RawStream.Position;
+            int recordSize = FragmentRecord.RecordSize;
+            byte[] buffer = new byte[_fragmentBlocks.Count * recordSize];
+            for (int i = 0; i < _fragmentBlocks.Count; ++i)
+            {
+                _fragmentBlocks[i].WriteTo(buffer, i * recordSize);
+            }
+
+            MetablockWriter writer = new MetablockWriter();
+            writer.Write(buffer, 0, buffer.Length);
+            writer.Persist(_context.RawStream);
+
+            long tablePos = _context.RawStream.Position;
+            byte[] tableBuffer = new byte[8];
+            Utilities.WriteBytesLittleEndian(blockPos, tableBuffer, 0);
+            _context.RawStream.Write(tableBuffer, 0, 8);
+
+            return tablePos;
         }
 
         private void NextBlock()

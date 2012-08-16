@@ -315,30 +315,10 @@ namespace DiscUtils.SquashFs
             superBlock.DirectoryTableStart = output.Position;
             dirWriter.Persist(output);
 
-            if (fragWriter.FragmentCount > 0)
-            {
-                superBlock.FragmentTableStart = output.Position;
-                fragWriter.Persist();
-            }
-            else
-            {
-                superBlock.FragmentTableStart = -1;
-            }
-
+            superBlock.FragmentTableStart = fragWriter.Persist();
             superBlock.LookupTableStart = -1;
-
-            if (idWriter.IdCount > 0)
-            {
-                superBlock.UidGidTableStart = output.Position;
-                idWriter.Persist();
-            }
-            else
-            {
-                superBlock.UidGidTableStart = -1;
-            }
-
+            superBlock.UidGidTableStart = idWriter.Persist();
             superBlock.ExtendedAttrsTableStart = -1;
-
             superBlock.BytesUsed = output.Position;
 
             // Pad to 4KB
