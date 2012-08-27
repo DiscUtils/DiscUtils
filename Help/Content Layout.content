@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Topics>
+  <Topic id="f477ae13-3919-45eb-a5ee-d664403860fd" visible="False" isMSHVRoot="true" title=".NET DiscUtils Class Library" />
+  <Topic id="a2a78104-562f-464e-89c4-dc3494ae7341" visible="True" title="Introduction" tocTitle="Introduction" />
+  <Topic id="5c257220-1480-474f-9e33-fd495016b6c7" visible="True" isDefault="true" apiParentMode="InsertAsChild" title="API Reference" tocTitle="API Reference" />
+</Topics>
