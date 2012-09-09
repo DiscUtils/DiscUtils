@@ -913,6 +913,20 @@ namespace DiscUtils
         }
 
         /// <summary>
+        /// Writes a structure to a stream.
+        /// </summary>
+        /// <typeparam name="T">The type of the structure</typeparam>
+        /// <param name="stream">The stream to write to</param>
+        /// <param name="obj">The structure to write</param>
+        public static void WriteStruct<T>(Stream stream, T obj)
+            where T : IByteArraySerializable
+        {
+            byte[] buffer = new byte[obj.Size];
+            obj.WriteTo(buffer, 0);
+            stream.Write(buffer, 0, buffer.Length);
+        }
+
+        /// <summary>
         /// Copies the contents of one stream to another.
         /// </summary>
         /// <param name="source">The stream to copy from</param>

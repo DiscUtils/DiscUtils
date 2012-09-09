@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2008-2012, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -61,6 +61,13 @@ namespace DiscUtils.Vhdx
             }
         }
 
+        public void CalcChecksum()
+        {
+            Checksum = 0;
+            RefreshData();
+            Checksum = Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, _data, 0, 4096);
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             _data = new byte[4096];
@@ -83,7 +90,22 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            RefreshData();
+            Array.Copy(_data, 0, buffer, offset, (int)(4 * Sizes.OneKiB));
+        }
+
+        private void RefreshData()
+        {
+            Utilities.WriteBytesLittleEndian(Signature, _data, 0);
+            Utilities.WriteBytesLittleEndian(Checksum, _data, 4);
+            Utilities.WriteBytesLittleEndian(SequenceNumber, _data, 8);
+            Utilities.WriteBytesLittleEndian(FileWriteGuid, _data, 16);
+            Utilities.WriteBytesLittleEndian(DataWriteGuid, _data, 32);
+            Utilities.WriteBytesLittleEndian(LogGuid, _data, 48);
+            Utilities.WriteBytesLittleEndian(LogVersion, _data, 64);
+            Utilities.WriteBytesLittleEndian(Version, _data, 66);
+            Utilities.WriteBytesLittleEndian(LogLength, _data, 68);
+            Utilities.WriteBytesLittleEndian(LogOffset, _data, 72);
         }
     }
 }

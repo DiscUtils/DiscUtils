@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2008-2012, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -419,11 +419,6 @@ namespace DiscUtils.Vhdx
         internal static Disk InitializeFixed(FileLocator fileLocator, string path, long capacity, Geometry geometry)
         {
             return new Disk(DiskImageFile.InitializeFixed(fileLocator, path, capacity, geometry), Ownership.Dispose);
-        }
-
-        internal static Disk InitializeDynamic(FileLocator fileLocator, string path, long capacity, Geometry geometry, long blockSize)
-        {
-            return new Disk(DiskImageFile.InitializeDynamic(fileLocator, path, capacity, geometry, blockSize), Ownership.Dispose);
         }
 
         /// <summary>

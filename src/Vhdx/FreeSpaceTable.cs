@@ -24,7 +24,7 @@ namespace DiscUtils.Vhdx
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
+    using System.Globalization;
 
     internal sealed class FreeSpaceTable
     {
@@ -43,7 +43,7 @@ namespace DiscUtils.Vhdx
             _fileSize = fileSize;
         }
 
-        public void ExtendTo(long fileSize)
+        public void ExtendTo(long fileSize, bool isFree)
         {
             if (fileSize % Sizes.OneMiB != 0)
             {
@@ -52,11 +52,15 @@ namespace DiscUtils.Vhdx
 
             if (fileSize < _fileSize)
             {
-                throw new ArgumentOutOfRangeException("Attempt to extend file to smaller size", "fileSize");
+                throw new ArgumentOutOfRangeException("fileSize", "Attempt to extend file to smaller size", fileSize.ToString(CultureInfo.InvariantCulture));
             }
 
-            _freeExtents = new List<StreamExtent>(StreamExtent.Union(_freeExtents, new StreamExtent(_fileSize, fileSize - _fileSize)));
             _fileSize = fileSize;
+
+            if (isFree)
+            {
+                _freeExtents = new List<StreamExtent>(StreamExtent.Union(_freeExtents, new StreamExtent(_fileSize, fileSize - _fileSize)));
+            }
         }
 
         public void Release(long start, long length)

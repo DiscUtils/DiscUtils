@@ -1591,6 +1591,24 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="WrappingStream">
+          <Members>
+           <Member Name="#.ctor(DiscUtils.SparseStream,DiscUtils.Ownership)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2012-09-09 21:58:20Z">
+              <Issue>
+               <Item>'WrappingStream.WrappingStream(SparseStream, Ownership)'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="129" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
         </Types>
        </Namespace>
        <Namespace Name="DiscUtils.ApplePartitionMap">
@@ -4925,20 +4943,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="ExtentDescriptor">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2011-08-30 08:21:41Z">
-            <Issue>
-             <Item>'ExtentDescriptor'</Item>
-            </Issue>
-            <Notes>
-             <User Name="Kenneth">
-              <Note Id="175" />
-             </User>
-            </Notes>
-           </Message>
-          </Messages>
-         </Type>
          <Type Name="ExtentKey">
           <Members>
            <Member Name="#NodeId">
@@ -5052,20 +5056,6 @@
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-08-30 08:21:41Z">
               <Issue>
                <Item>'ForkData.ClumpSize'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="175" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#TotalBlocks">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-08-30 08:21:41Z">
-              <Issue>
-               <Item>'ForkData.TotalBlocks'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -5241,20 +5231,6 @@
              <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-08-30 08:21:41Z">
               <Issue>
                <Item>'VolumeHeader.EncodingsBitmap'</Item>
-              </Issue>
-              <Notes>
-               <User Name="Kenneth">
-                <Note Id="175" />
-               </User>
-              </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ExtentsFile">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2011-08-30 08:21:41Z">
-              <Issue>
-               <Item>'VolumeHeader.ExtentsFile'</Item>
               </Issue>
               <Notes>
                <User Name="Kenneth">
@@ -8737,28 +8713,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="NonResidentAttributeRecord">
-          <Members>
-           <Member Name="#CompressedDataSize">
-            <Accessors>
-             <Accessor Name="#get_CompressedDataSize()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="Excluded" Created="2011-09-01 08:21:58Z">
-                <Issue>
-                 <Item>'NonResidentAttributeRecord.CompressedDataSize.get()'</Item>
-                </Issue>
-                <Notes>
-                 <User Name="Kenneth">
-                  <Note Id="183" />
-                 </User>
-                </Notes>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="NtfsAttribute">
           <Members>
            <Member Name="#CompressedDataSize">
@@ -11999,6 +11953,188 @@
          </Type>
         </Types>
        </Namespace>
+       <Namespace Name="DiscUtils.Vhdx">
+        <Types>
+         <Type Name="FileHeader">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'FileHeader'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Creator">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-09-09 21:57:06Z">
+              <Issue>
+               <Item>'FileHeader.Creator'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="196" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="FileParameters">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'FileParameters'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="Metadata">
+          <Members>
+           <Member Name="#_page83Data">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-09-09 21:57:06Z">
+              <Issue>
+               <Item>'Metadata._page83Data'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="196" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MetadataEntry">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'MetadataEntry'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Reserved">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-09-09 21:57:06Z">
+              <Issue>
+               <Item>'MetadataEntry.Reserved'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="196" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="MetadataTable">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'MetadataTable'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="ParentLocator">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'ParentLocator'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="RegionEntry">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'RegionEntry'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="RegionTable">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'RegionTable'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+          <Members>
+           <Member Name="#Reserved">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2012-09-09 21:57:06Z">
+              <Issue>
+               <Item>'RegionTable.Reserved'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="196" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="VhdxHeader">
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Status="Excluded" Created="2012-09-09 21:57:06Z">
+            <Issue>
+             <Item>'VhdxHeader'</Item>
+            </Issue>
+            <Notes>
+             <User Name="Kenneth">
+              <Note Id="197" />
+             </User>
+            </Notes>
+           </Message>
+          </Messages>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="DiscUtils.Vmdk">
         <Types>
          <Type Name="CompressedGrainHeader">
@@ -12529,6 +12665,7 @@
     <Note Id="126" Modified="2010-09-12 16:05:03Z">Instantiated via templates.</Note>
     <Note Id="127" Modified="2010-09-12 16:06:20Z">Defined part of file format</Note>
     <Note Id="128" Modified="2010-09-17 21:18:44Z">Part of Project Name</Note>
+    <Note Id="129" Modified="2012-09-09 22:03:26Z">Ctor for utility stream</Note>
     <Note Id="130" Modified="2011-08-30 08:26:43Z">DiscUtils is name of project</Note>
     <Note Id="131" Modified="2010-09-18 23:13:14Z">Physical storage type is byte</Note>
     <Note Id="132" Modified="2010-09-19 09:33:19Z">Complex names.</Note>
@@ -12582,7 +12719,6 @@
     <Note Id="180" Modified="2011-09-01 08:24:36Z">Part of numbers class to permit generic integer handling.</Note>
     <Note Id="181" Modified="2011-09-01 08:28:19Z">Deliberate use of generics.</Note>
     <Note Id="182" Modified="2011-09-01 08:30:26Z">Part of defined structure.</Note>
-    <Note Id="183" Modified="2011-09-01 08:31:58Z">Is used.</Note>
     <Note Id="184" Modified="2011-12-19 22:41:26Z">Part of library name.</Note>
     <Note Id="185" Modified="2011-12-19 22:42:15Z">Deliberate strategy to avoid corrupt packets preventing resolution.</Note>
     <Note Id="186" Modified="2011-12-19 22:43:40Z">Part of defined protocol.</Note>
@@ -12595,6 +12731,8 @@
     <Note Id="193" Modified="2012-07-01 14:34:27Z">Follows practice</Note>
     <Note Id="194" Modified="2012-07-01 15:15:17Z">Complex initialization</Note>
     <Note Id="195" Modified="2012-07-01 15:17:29Z">Part of project name.</Note>
+    <Note Id="196" Modified="2012-09-09 22:09:56Z">Defined part of strucures</Note>
+    <Note Id="197" Modified="2012-09-09 22:10:42Z">Instantiated via templates</Note>
    </User>
   </Notes>
   <Rules>
