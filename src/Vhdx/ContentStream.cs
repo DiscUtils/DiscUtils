@@ -221,8 +221,32 @@ namespace DiscUtils.Vhdx
         {
             CheckDisposed();
 
-            throw new NotImplementedException();
-        }
+            int writtenSoFar = 0;
+
+            while (writtenSoFar < count)
+            {
+                SectorDisposition disposition = _bat.GetDisposition(_position);
+                if (disposition == SectorDisposition.Stored)
+                {
+                    int bytesPresent = (int)_bat.ContiguousBytes(_position, count - writtenSoFar);
+                    int toWrite = Math.Min(bytesPresent, count - writtenSoFar);
+
+                    _fileStream.Position = _bat.GetFilePosition(_position);
+                    _fileStream.Write(buffer, offset, toWrite);
+
+                    _position += toWrite;
+                    writtenSoFar += count;
+                }
+                else if (disposition == SectorDisposition.Parent)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+         }
 
         protected override void Dispose(bool disposing)
         {
