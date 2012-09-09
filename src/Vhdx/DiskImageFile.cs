@@ -77,6 +77,11 @@ namespace DiscUtils.Vhdx
         private BlockAllocationTable _bat;
 
         /// <summary>
+        /// Table of all free space in the file.
+        /// </summary>
+        private FreeSpaceTable _freeSpace;
+
+        /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret</param>
@@ -493,6 +498,8 @@ namespace DiscUtils.Vhdx
                 throw new IOException("Invalid VHDX file - file signature mismatch");
             }
 
+            _freeSpace = new FreeSpaceTable(_fileStream.Length);
+
             ReadHeaders();
 
             if (_header.LogGuid != Guid.Empty)
@@ -500,12 +507,16 @@ namespace DiscUtils.Vhdx
                 throw new NotSupportedException("Detected VHDX file with replay log - not yet supported");
             }
 
+            _freeSpace.Reserve((long)_header.LogOffset, _header.LogLength);
+
             ReadRegionTable();
 
             ReadMetadata();
 
             Stream batStream = OpenRegion(RegionTable.BatGuid);
             _bat = new BlockAllocationTable(_fileStream, batStream, _metadata);
+
+            _freeSpace.Reserve(_bat.ReservedFileExtents());
         }
 
         private void ReadMetadata()
@@ -527,11 +538,15 @@ namespace DiscUtils.Vhdx
                         throw new IOException("Invalid VHDX file - unrecognised required region");
                     }
                 }
+
+                _freeSpace.Reserve(entry.FileOffset, entry.Length);
             }
         }
 
         private void ReadHeaders()
         {
+            _freeSpace.Reserve(0, Sizes.OneMiB);
+
             _activeHeader = 0;
 
             _fileStream.Position = 64 * Sizes.OneKiB;

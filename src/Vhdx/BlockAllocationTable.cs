@@ -71,6 +71,37 @@ namespace DiscUtils.Vhdx
             get { return _logicalSectorSize; }
         }
 
+        public IEnumerable<StreamExtent> ReservedFileExtents()
+        {
+            _stream.Position = 0;
+            byte[] batData = Utilities.ReadFully(_stream, (int)_stream.Length);
+
+            uint blockSize = _metadata.FileParameters.BlockSize;
+
+            List<StreamExtent> extents = new List<StreamExtent>();
+            for (int i = 0; i < batData.Length; i += 8)
+            {
+                ulong entry = Utilities.ToUInt64LittleEndian(batData, i);
+                long filePos = (long)((entry >> 20) & 0xFFFFFFFFFFF) * Sizes.OneMiB;
+                if (filePos != 0)
+                {
+                    if (i % ((_chunkRatio + 1) * 8) == _chunkRatio * 8)
+                    {
+                        // This is a sector bitmap block (always 1MB in size)
+                        extents.Add(new StreamExtent(filePos, Sizes.OneMiB));
+                    }
+                    else
+                    {
+                        extents.Add(new StreamExtent(filePos, blockSize));
+                    }
+                }
+            }
+
+            extents.Sort();
+
+            return extents;
+        }
+
         public IEnumerable<StreamExtent> StoredExtents(long start, long length)
         {
             long end = start + length;
@@ -203,8 +234,10 @@ namespace DiscUtils.Vhdx
                     return SectorDisposition.Parent;
 
                 case PayloadBlockUndefined:
-                case PayloadBlockZero:
                 case PayloadBlockUnmapped:
+                    return ((entry & 0xFFFFFFFFFFF00000) == 0) ? SectorDisposition.Zero : SectorDisposition.Stored;
+
+                case PayloadBlockZero:
                     return SectorDisposition.Zero;
 
                 case PayloadBlockFullyPresent:
