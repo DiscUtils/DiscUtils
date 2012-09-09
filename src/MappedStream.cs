@@ -47,7 +47,7 @@ namespace DiscUtils
         /// maps directly onto the parent stream)</remarks>
         public static new MappedStream FromStream(Stream stream, Ownership takeOwnership)
         {
-            return new MappedWrapperStream(stream, takeOwnership, null);
+            return new WrappingMappedStream<Stream>(stream, takeOwnership, null);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace DiscUtils
         /// maps directly onto the parent stream)</remarks>
         public static new MappedStream FromStream(Stream stream, Ownership takeOwnership, IEnumerable<StreamExtent> extents)
         {
-            return new MappedWrapperStream(stream, takeOwnership, extents);
+            return new WrappingMappedStream<Stream>(stream, takeOwnership, extents);
         }
 
         /// <summary>
@@ -79,137 +79,5 @@ namespace DiscUtils
         /// returned stream extents is not equivalent to reading the logical disk range.</para>
         /// </remarks>
         public abstract IEnumerable<StreamExtent> MapContent(long start, long length);
-
-        private class MappedWrapperStream : MappedStream
-        {
-            private Stream _wrapped;
-            private Ownership _ownsWrapped;
-            private List<StreamExtent> _extents;
-
-            public MappedWrapperStream(Stream wrapped, Ownership ownsWrapped, IEnumerable<StreamExtent> extents)
-            {
-                _wrapped = wrapped;
-                _ownsWrapped = ownsWrapped;
-                if (extents != null)
-                {
-                    _extents = new List<StreamExtent>(extents);
-                }
-            }
-
-            public override bool CanRead
-            {
-                get { return _wrapped.CanRead; }
-            }
-
-            public override bool CanSeek
-            {
-                get { return _wrapped.CanSeek; }
-            }
-
-            public override bool CanWrite
-            {
-                get { return _wrapped.CanWrite; }
-            }
-
-            public override long Length
-            {
-                get { return _wrapped.Length; }
-            }
-
-            public override long Position
-            {
-                get
-                {
-                    return _wrapped.Position;
-                }
-
-                set
-                {
-                    _wrapped.Position = value;
-                }
-            }
-
-            public override IEnumerable<StreamExtent> Extents
-            {
-                get
-                {
-                    if (_extents != null)
-                    {
-                        return _extents;
-                    }
-                    else
-                    {
-                        SparseStream wrappedAsSparse = _wrapped as SparseStream;
-                        if (wrappedAsSparse != null)
-                        {
-                            return wrappedAsSparse.Extents;
-                        }
-                        else
-                        {
-                            return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
-                        }
-                    }
-                }
-            }
-
-            public override IEnumerable<StreamExtent> MapContent(long start, long length)
-            {
-                MappedStream wrappedAsMapped = _wrapped as MappedStream;
-                if (wrappedAsMapped != null)
-                {
-                    return wrappedAsMapped.MapContent(start, length);
-                }
-                else
-                {
-                    return new StreamExtent[] { new StreamExtent(start, length) };
-                }
-            }
-
-            public override void Flush()
-            {
-                _wrapped.Flush();
-            }
-
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                return _wrapped.Read(buffer, offset, count);
-            }
-
-            public override long Seek(long offset, SeekOrigin origin)
-            {
-                return _wrapped.Seek(offset, origin);
-            }
-
-            public override void SetLength(long value)
-            {
-                _wrapped.SetLength(value);
-            }
-
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                if (_extents != null)
-                {
-                    throw new InvalidOperationException("Attempt to write to stream with explicit extents");
-                }
-
-                _wrapped.Write(buffer, offset, count);
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                try
-                {
-                    if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
-                    {
-                        _wrapped.Dispose();
-                        _wrapped = null;
-                    }
-                }
-                finally
-                {
-                    base.Dispose(disposing);
-                }
-            }
-        }
     }
 }

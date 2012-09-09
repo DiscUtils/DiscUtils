@@ -77,6 +77,7 @@
     <Compile Include="..\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
+    <Compile Include="AligningStream.cs" />
     <Compile Include="ApplePartitionMap\BlockZero.cs" />
     <Compile Include="ApplePartitionMap\PartitionMap.cs" />
     <Compile Include="ApplePartitionMap\PartitionMapEntry.cs" />
@@ -809,6 +810,8 @@
     <Compile Include="Wim\XpressBitStream.cs" />
     <Compile Include="Wim\XpressStream.cs" />
     <Compile Include="WindowsFileInformation.cs" />
+    <Compile Include="WrappingMappedStream.cs" />
+    <Compile Include="WrappingStream.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />
