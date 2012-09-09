@@ -1422,6 +1422,32 @@
              </Message>
             </Messages>
            </Member>
+           <Member Name="#Subtract(System.Collections.Generic.IEnumerable`1&lt;DiscUtils.StreamExtent&gt;,System.Collections.Generic.IEnumerable`1&lt;DiscUtils.StreamExtent&gt;)">
+            <Messages>
+             <Message Id="a" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2012-09-09 21:46:38Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.Subtract(IEnumerable&lt;StreamExtent&gt;, IEnumerable&lt;StreamExtent&gt;)'</Item>
+               <Item>'a'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="32" />
+               </User>
+              </Notes>
+             </Message>
+             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Excluded" Created="2012-09-09 21:46:38Z">
+              <Issue Name="MemberParameterMoreMeaningfulName">
+               <Item>'StreamExtent.Subtract(IEnumerable&lt;StreamExtent&gt;, IEnumerable&lt;StreamExtent&gt;)'</Item>
+               <Item>'b'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Kenneth">
+                <Note Id="32" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
           </Members>
          </Type>
          <Type Name="UnixFileSystemInfo">
@@ -12406,6 +12432,7 @@
     <Note Id="29" Modified="2008-12-15 22:03:59Z">Deliberate use of namespace to separate technologies.</Note>
     <Note Id="30" Modified="2008-12-15 22:04:20Z">DiscUtils is the establish project name.</Note>
     <Note Id="31" Modified="2008-12-15 22:04:48Z">VDI is an established acronym for VirtualBox's virtual disk images.</Note>
+    <Note Id="32" Modified="2012-09-09 21:47:10Z">Just two parameters</Note>
     <Note Id="33" Modified="2009-02-07 12:25:57Z">Xva fits in with existing namespace naming scheme</Note>
     <Note Id="34" Modified="2009-02-07 12:26:27Z">Xva is camel case form of XVA acronym</Note>
     <Note Id="35" Modified="2009-02-07 12:31:11Z">Uuid is camel case for UUID</Note>
