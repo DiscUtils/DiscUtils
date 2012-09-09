@@ -75,7 +75,7 @@ namespace DiscUtils.Vhdx
             LogGuid = Utilities.ToGuidLittleEndian(_data, 48);
             LogVersion = Utilities.ToUInt16LittleEndian(_data, 64);
             Version = Utilities.ToUInt16LittleEndian(_data, 66);
-            LogLength = Utilities.ToUInt16LittleEndian(_data, 68);
+            LogLength = Utilities.ToUInt32LittleEndian(_data, 68);
             LogOffset = Utilities.ToUInt64LittleEndian(_data, 72);
 
             return Size;
