@@ -734,6 +734,7 @@
     <Compile Include="Vhdx\FileHeader.cs" />
     <Compile Include="Vhdx\FileParameters.cs" />
     <Compile Include="Vhdx\FileParametersFlags.cs" />
+    <Compile Include="Vhdx\FreeSpaceTable.cs" />
     <Compile Include="Vhdx\Metadata.cs" />
     <Compile Include="Vhdx\MetadataEntry.cs" />
     <Compile Include="Vhdx\MetadataEntryFlags.cs" />
