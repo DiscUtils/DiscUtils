@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2008-2012, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -24,7 +24,6 @@ namespace DiscUtils.Vhdx
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
 
     internal sealed class RegionTable : IByteArraySerializable
     {

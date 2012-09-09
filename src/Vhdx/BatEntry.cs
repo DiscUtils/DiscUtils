@@ -22,12 +22,32 @@
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-
-    internal sealed class FileParameters : IByteArraySerializable
+    internal struct BatEntry : IByteArraySerializable
     {
-        public uint BlockSize;
-        public FileParametersFlags Flags;
+        private ulong _value;
+
+        public BatEntry(byte[] buffer, int offset)
+        {
+            _value = Utilities.ToUInt64LittleEndian(buffer, offset);
+        }
+
+        public PayloadBlockStatus PayloadBlockStatus
+        {
+            get { return (PayloadBlockStatus)(_value & 0x7); }
+            set { _value = (_value & ~0x7u) | (ulong)value; }
+        }
+
+        public bool BitmapBlockPresent
+        {
+            get { return (_value & 0x7) == 6; }
+            set { _value = (_value & ~0x7u) | (value ? 6u : 0u); }
+        }
+
+        public long FileOffsetMB
+        {
+            get { return (long)(_value >> 20) & 0xFFFFFFFFFFFL; }
+            set { _value = (_value & 0xFFFFF) | ((ulong)value) << 20; }
+        }
 
         public int Size
         {
@@ -36,15 +56,13 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            BlockSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            Flags = (FileParametersFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-
+            _value = Utilities.ToUInt64LittleEndian(buffer, offset);
             return 8;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(_value, buffer, offset);
         }
     }
 }

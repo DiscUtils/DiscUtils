@@ -77,6 +77,7 @@
     <Compile Include="..\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
+    <Compile Include="AligningStream.cs" />
     <Compile Include="ApplePartitionMap\BlockZero.cs" />
     <Compile Include="ApplePartitionMap\PartitionMap.cs" />
     <Compile Include="ApplePartitionMap\PartitionMapEntry.cs" />
@@ -724,7 +725,9 @@
     <Compile Include="Vfs\VfsFileSystemFactoryAttribute.cs" />
     <Compile Include="Vfs\VfsFileSystemInfo.cs" />
     <Compile Include="Vfs\VfsReadOnlyFileSystem.cs" />
-    <Compile Include="Vhdx\BlockAllocationTable.cs" />
+    <Compile Include="Vhdx\BatEntry.cs" />
+    <Compile Include="Vhdx\BlockBitmap.cs" />
+    <Compile Include="Vhdx\Chunk.cs" />
     <Compile Include="Vhdx\ContentStream.cs" />
     <Compile Include="Vhdx\Disk.cs" />
     <Compile Include="Vhdx\DiskExtent.cs" />
@@ -733,16 +736,17 @@
     <Compile Include="Vhdx\FileHeader.cs" />
     <Compile Include="Vhdx\FileParameters.cs" />
     <Compile Include="Vhdx\FileParametersFlags.cs" />
+    <Compile Include="Vhdx\FreeSpaceTable.cs" />
     <Compile Include="Vhdx\Metadata.cs" />
     <Compile Include="Vhdx\MetadataEntry.cs" />
     <Compile Include="Vhdx\MetadataEntryFlags.cs" />
     <Compile Include="Vhdx\MetadataEntryKey.cs" />
     <Compile Include="Vhdx\MetadataTable.cs" />
     <Compile Include="Vhdx\ParentLocator.cs" />
+    <Compile Include="Vhdx\PayloadBlockStatus.cs" />
     <Compile Include="Vhdx\RegionEntry.cs" />
     <Compile Include="Vhdx\RegionFlags.cs" />
     <Compile Include="Vhdx\RegionTable.cs" />
-    <Compile Include="Vhdx\SectorDisposition.cs" />
     <Compile Include="Vhdx\VhdxHeader.cs" />
     <Compile Include="Vhd\Disk.cs" />
     <Compile Include="Vhd\DiskBuilder.cs" />
@@ -809,6 +813,8 @@
     <Compile Include="Wim\XpressBitStream.cs" />
     <Compile Include="Wim\XpressStream.cs" />
     <Compile Include="WindowsFileInformation.cs" />
+    <Compile Include="WrappingMappedStream.cs" />
+    <Compile Include="WrappingStream.cs" />
     <Compile Include="Xva\BuildFileRecord.cs" />
     <Compile Include="Xva\ChecksumStream.cs" />
     <Compile Include="Xva\Disk.cs" />

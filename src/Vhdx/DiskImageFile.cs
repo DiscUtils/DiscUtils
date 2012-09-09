@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2008-2012, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -74,7 +74,12 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Block Allocation Table for disk content.
         /// </summary>
-        private BlockAllocationTable _bat;
+        private Stream _batStream;
+
+        /// <summary>
+        /// Table of all free space in the file.
+        /// </summary>
+        private FreeSpaceTable _freeSpace;
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
@@ -397,27 +402,6 @@ namespace DiscUtils.Vhdx
             return result;
         }
 
-        internal static DiskImageFile InitializeDynamic(FileLocator locator, string path, long capacity, Geometry geometry, long blockSize)
-        {
-            DiskImageFile result = null;
-            Stream stream = locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-            try
-            {
-                InitializeDynamicInternal(stream, capacity, geometry, blockSize);
-                result = new DiskImageFile(locator, path, stream, Ownership.Dispose);
-                stream = null;
-            }
-            finally
-            {
-                if (stream != null)
-                {
-                    stream.Dispose();
-                }
-            }
-
-            return result;
-        }
-
         internal DiskImageFile CreateDifferencing(FileLocator fileLocator, string path)
         {
             Stream stream = fileLocator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
@@ -442,7 +426,8 @@ namespace DiscUtils.Vhdx
                 theOwnership = Ownership.Dispose;
             }
 
-            return new ContentStream(SparseStream.FromStream(_fileStream, Ownership.None), _bat, Capacity, theParent, theOwnership);
+            ContentStream contentStream = new ContentStream(SparseStream.FromStream(_fileStream, Ownership.None), _batStream, _freeSpace, _metadata, Capacity, theParent, theOwnership);
+            return new AligningStream(contentStream, Ownership.Dispose, (int)_metadata.LogicalSectorSize);
         }
 
         /// <summary>
@@ -493,6 +478,8 @@ namespace DiscUtils.Vhdx
                 throw new IOException("Invalid VHDX file - file signature mismatch");
             }
 
+            _freeSpace = new FreeSpaceTable(_fileStream.Length);
+
             ReadHeaders();
 
             if (_header.LogGuid != Guid.Empty)
@@ -500,12 +487,54 @@ namespace DiscUtils.Vhdx
                 throw new NotSupportedException("Detected VHDX file with replay log - not yet supported");
             }
 
+            _freeSpace.Reserve((long)_header.LogOffset, _header.LogLength);
+
             ReadRegionTable();
 
             ReadMetadata();
 
-            Stream batStream = OpenRegion(RegionTable.BatGuid);
-            _bat = new BlockAllocationTable(_fileStream, batStream, _metadata);
+            _batStream = OpenRegion(RegionTable.BatGuid);
+            _freeSpace.Reserve(BatControlledFileExtents());
+
+            // Indicate the file is open for modification
+            if (_fileStream.CanWrite)
+            {
+                _header.FileWriteGuid = Guid.NewGuid();
+                WriteHeader();
+            }
+        }
+
+        private IEnumerable<StreamExtent> BatControlledFileExtents()
+        {
+            _batStream.Position = 0;
+            byte[] batData = Utilities.ReadFully(_batStream, (int)_batStream.Length);
+
+            uint blockSize = _metadata.FileParameters.BlockSize;
+            long chunkSize = (1L << 23) * (long)_metadata.LogicalSectorSize;
+            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
+
+            List<StreamExtent> extents = new List<StreamExtent>();
+            for (int i = 0; i < batData.Length; i += 8)
+            {
+                ulong entry = Utilities.ToUInt64LittleEndian(batData, i);
+                long filePos = (long)((entry >> 20) & 0xFFFFFFFFFFF) * Sizes.OneMiB;
+                if (filePos != 0)
+                {
+                    if (i % ((chunkRatio + 1) * 8) == chunkRatio * 8)
+                    {
+                        // This is a sector bitmap block (always 1MB in size)
+                        extents.Add(new StreamExtent(filePos, Sizes.OneMiB));
+                    }
+                    else
+                    {
+                        extents.Add(new StreamExtent(filePos, blockSize));
+                    }
+                }
+            }
+
+            extents.Sort();
+
+            return extents;
         }
 
         private void ReadMetadata()
@@ -527,11 +556,15 @@ namespace DiscUtils.Vhdx
                         throw new IOException("Invalid VHDX file - unrecognised required region");
                     }
                 }
+
+                _freeSpace.Reserve(entry.FileOffset, entry.Length);
             }
         }
 
         private void ReadHeaders()
         {
+            _freeSpace.Reserve(0, Sizes.OneMiB);
+
             _activeHeader = 0;
 
             _fileStream.Position = 64 * Sizes.OneKiB;
@@ -554,6 +587,35 @@ namespace DiscUtils.Vhdx
             {
                 throw new IOException("Invalid VHDX file - no valid VHDX headers found");
             }
+        }
+
+        private void WriteHeader()
+        {
+            long otherPos;
+
+            _header.SequenceNumber++;
+            _header.CalcChecksum();
+
+            if (_activeHeader == 1)
+            {
+                _fileStream.Position = 128 * Sizes.OneKiB;
+                otherPos = 64 * Sizes.OneKiB;
+            }
+            else
+            {
+                _fileStream.Position = 64 * Sizes.OneKiB;
+                otherPos = 128 * Sizes.OneKiB;
+            }
+
+            Utilities.WriteStruct(_fileStream, _header);
+            _fileStream.Flush();
+
+            _header.SequenceNumber++;
+            _header.CalcChecksum();
+
+            _fileStream.Position = otherPos;
+            Utilities.WriteStruct(_fileStream, _header);
+            _fileStream.Flush();
         }
 
         /// <summary>

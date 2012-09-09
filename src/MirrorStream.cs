@@ -120,6 +120,22 @@ namespace DiscUtils
             }
         }
 
+        public override void Clear(int count)
+        {
+            long pos = _wrapped[0].Position;
+
+            if (pos + count > _length)
+            {
+                throw new IOException("Attempt to clear beyond end of mirrored stream");
+            }
+
+            foreach (var stream in _wrapped)
+            {
+                stream.Position = pos;
+                stream.Clear(count);
+            }
+        }
+
         public override void Write(byte[] buffer, int offset, int count)
         {
             long pos = _wrapped[0].Position;

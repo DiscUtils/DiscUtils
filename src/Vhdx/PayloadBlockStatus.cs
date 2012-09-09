@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2008-2012, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,10 +22,13 @@
 
 namespace DiscUtils.Vhdx
 {
-    internal enum SectorDisposition
+    internal enum PayloadBlockStatus : ulong
     {
-        Zero = 0x00,
-        Stored = 0x01,
-        Parent = 0x02
+        NotPresent = 0,
+        Undefined = 1,
+        Zero = 2,
+        Unmapped = 3,
+        FullyPresent = 6,
+        PartiallyPresent = 7,
     }
 }

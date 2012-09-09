@@ -202,7 +202,8 @@ namespace DiscUtils
                 for (int i = 0; i < streams.Length; ++i)
                 {
                     // Move stream on past all extents that are earlier than our candidate start point
-                    while (enums[i].Current.Start + enums[i].Current.Length <= extentStart)
+                    while (enums[i].Current.Length == 0
+                        || enums[i].Current.Start + enums[i].Current.Length <= extentStart)
                     {
                         if (!enums[i].MoveNext())
                         {
@@ -234,6 +235,65 @@ namespace DiscUtils
                         overlapsFound = 0;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Calculates the subtraction of the extents of a stream by another extent.
+        /// </summary>
+        /// <param name="extents">The stream extents</param>
+        /// <param name="other">The extent to subtract</param>
+        /// <returns>The subtraction of <c>other</c> from <c>extents</c>.</returns>
+        public static IEnumerable<StreamExtent> Subtract(IEnumerable<StreamExtent> extents, StreamExtent other)
+        {
+            return Subtract(extents, new StreamExtent[] { other });
+        }
+
+        /// <summary>
+        /// Calculates the subtraction of the extents of a stream by another stream.
+        /// </summary>
+        /// <param name="a">The stream extents to subtract from</param>
+        /// <param name="b">The stream extents to subtract</param>
+        /// <returns>The subtraction of the extents of b from a.</returns>
+        public static IEnumerable<StreamExtent> Subtract(IEnumerable<StreamExtent> a, IEnumerable<StreamExtent> b)
+        {
+            return Intersect(a, Invert(b));
+        }
+
+        /// <summary>
+        /// Calculates the inverse of the extents of a stream.
+        /// </summary>
+        /// <param name="extents">The stream extents to inverse</param>
+        /// <returns>The inverted extents</returns>
+        /// <remarks>
+        /// This method assumes a logical stream addressable from <c>0</c> to <c>long.MaxValue</c>, and is undefined
+        /// should any stream extent start at less than 0.  To constrain the extents to a specific range, use the
+        /// <c>Intersect</c> method.
+        /// </remarks>
+        public static IEnumerable<StreamExtent> Invert(IEnumerable<StreamExtent> extents)
+        {
+            StreamExtent last = new StreamExtent(0, 0);
+            foreach (StreamExtent extent in extents)
+            {
+                // Skip over any 'noise'
+                if (extent.Length == 0)
+                {
+                    continue;
+                }
+
+                long lastEnd = last.Start + last.Length;
+                if (lastEnd < extent.Start)
+                {
+                    yield return new StreamExtent(lastEnd, extent.Start - lastEnd);
+                }
+
+                last = extent;
+            }
+
+            long finalEnd = last.Start + last.Length;
+            if (finalEnd < long.MaxValue)
+            {
+                yield return new StreamExtent(finalEnd, long.MaxValue - finalEnd);
             }
         }
 

@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2008-2012, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -29,21 +29,30 @@ namespace DiscUtils.Vhdx
     internal sealed class ContentStream : MappedStream
     {
         private SparseStream _fileStream;
-        private BlockAllocationTable _bat;
+        private Stream _batStream;
+        private FreeSpaceTable _freeSpaceTable;
+        private FileParameters _fileParameters;
+        private Metadata _metadata;
         private long _length;
         private SparseStream _parentStream;
         private Ownership _ownsParent;
 
+        private ObjectCache<int, Chunk> _chunks;
         private long _position;
         private bool _atEof;
 
-        public ContentStream(SparseStream fileStream, BlockAllocationTable bat, long length, SparseStream parentStream, Ownership ownsParent)
+        public ContentStream(SparseStream fileStream, Stream batStream, FreeSpaceTable freeSpaceTable, Metadata metadata, long length, SparseStream parentStream, Ownership ownsParent)
         {
             _fileStream = fileStream;
-            _bat = bat;
+            _batStream = batStream;
+            _freeSpaceTable = freeSpaceTable;
+            _metadata = metadata;
+            _fileParameters = _metadata.FileParameters;
             _length = length;
             _parentStream = parentStream;
             _ownsParent = ownsParent;
+
+            _chunks = new ObjectCache<int, Chunk>();
         }
 
         public override IEnumerable<StreamExtent> Extents
@@ -52,7 +61,7 @@ namespace DiscUtils.Vhdx
             {
                 CheckDisposed();
 
-                return StreamExtent.Union(_bat.StoredExtents(0, _length), _parentStream.Extents);
+                throw new NotImplementedException();
             }
         }
 
@@ -129,7 +138,7 @@ namespace DiscUtils.Vhdx
         {
             CheckDisposed();
 
-            return StreamExtent.Union(_bat.StoredExtents(start, count), _parentStream.GetExtentsInRange(start, count));
+            throw new NotImplementedException();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -148,39 +157,64 @@ namespace DiscUtils.Vhdx
                 return 0;
             }
 
-            SectorDisposition disposition = _bat.GetDisposition(_position);
-            if (disposition == SectorDisposition.Stored)
+            if (_position % _metadata.LogicalSectorSize != 0 || count % _metadata.LogicalSectorSize != 0)
             {
-                int bytesPresent = (int)_bat.ContiguousBytes(_position, count);
-
-                _fileStream.Position = _bat.GetFilePosition(_position);
-                int read = (int)_fileStream.Read(buffer, offset, bytesPresent);
-
-                _position += read;
-
-                return read;
+                throw new IOException("Unaligned read");
             }
-            else if (disposition == SectorDisposition.Parent)
+
+            int totalToRead = (int)Math.Min(_length - _position, count);
+            int totalRead = 0;
+
+            while (totalRead < totalToRead)
             {
-                int bytesFromParent = (int)_bat.ContiguousBytes(_position, count);
+                int chunkIndex;
+                int blockIndex;
+                int sectorIndex;
+                Chunk chunk = GetChunk(_position + totalRead, out chunkIndex, out blockIndex, out sectorIndex);
 
-                _parentStream.Position = _position;
-                int read = _parentStream.Read(buffer, offset, bytesFromParent);
+                int blockOffset = (int)(sectorIndex * _metadata.LogicalSectorSize);
+                int blockBytesRemaining = (int)(_fileParameters.BlockSize - blockOffset);
 
-                _position += read;
+                PayloadBlockStatus blockStatus = chunk.GetBlockStatus(blockIndex);
+                if (blockStatus == PayloadBlockStatus.FullyPresent)
+                {
+                    _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
+                    int read = Utilities.ReadFully(_fileStream, buffer, offset + totalRead, Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
-                return read;
+                    totalRead += read;
+                }
+                else if (blockStatus == PayloadBlockStatus.PartiallyPresent)
+                {
+                    BlockBitmap bitmap = chunk.GetBlockBitmap(blockIndex);
+
+                    bool present;
+                    int numSectors = bitmap.ContiguousSectors(sectorIndex, out present);
+                    int toRead = (int)Math.Min(numSectors * _metadata.LogicalSectorSize, totalToRead - totalRead);
+                    int read;
+
+                    if (present)
+                    {
+                        _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
+                        read = Utilities.ReadFully(_fileStream, buffer, offset + totalRead, toRead);
+                    }
+                    else
+                    {
+                        _parentStream.Position = _position + totalRead;
+                        read = Utilities.ReadFully(_parentStream, buffer, offset + totalRead, toRead);
+                    }
+
+                    totalRead += read;
+                }
+                else
+                {
+                    int zeroed = Math.Min(blockBytesRemaining, totalToRead - totalRead);
+                    Array.Clear(buffer, offset + totalRead, zeroed);
+                    totalRead += zeroed;
+                }
             }
-            else
-            {
-                int bytesZero = (int)_bat.ContiguousBytes(_position, count);
 
-                Array.Clear(buffer, offset, bytesZero);
-
-                _position += bytesZero;
-
-                return bytesZero;
-            }
+            _position += totalRead;
+            return totalRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -221,8 +255,49 @@ namespace DiscUtils.Vhdx
         {
             CheckDisposed();
 
-            throw new NotImplementedException();
-        }
+            if (_position % _metadata.LogicalSectorSize != 0 || count % _metadata.LogicalSectorSize != 0)
+            {
+                throw new IOException("Unaligned read");
+            }
+
+            int totalWritten = 0;
+
+            while (totalWritten < count)
+            {
+                int chunkIndex;
+                int blockIndex;
+                int sectorIndex;
+                Chunk chunk = GetChunk(_position + totalWritten, out chunkIndex, out blockIndex, out sectorIndex);
+
+                int blockOffset = (int)(sectorIndex * _metadata.LogicalSectorSize);
+                int blockBytesRemaining = (int)(_fileParameters.BlockSize - blockOffset);
+
+                PayloadBlockStatus blockStatus = chunk.GetBlockStatus(blockIndex);
+                if (blockStatus != PayloadBlockStatus.FullyPresent && blockStatus != PayloadBlockStatus.PartiallyPresent)
+                {
+                    blockStatus = chunk.AllocateSpaceForBlock(blockIndex);
+                }
+
+                int toWrite = Math.Min(blockBytesRemaining, count - totalWritten);
+                _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
+                _fileStream.Write(buffer, offset + totalWritten, toWrite);
+
+                if (blockStatus == PayloadBlockStatus.PartiallyPresent)
+                {
+                    BlockBitmap bitmap = chunk.GetBlockBitmap(blockIndex);
+                    bool changed = bitmap.MarkSectorsPresent(sectorIndex, (int)(toWrite / _metadata.LogicalSectorSize));
+
+                    if (changed)
+                    {
+                        chunk.WriteBlockBitmap(blockIndex);
+                    }
+                }
+
+                totalWritten += toWrite;
+            }
+
+            _position += totalWritten;
+         }
 
         protected override void Dispose(bool disposing)
         {
@@ -242,6 +317,29 @@ namespace DiscUtils.Vhdx
             {
                 base.Dispose(disposing);
             }
+        }
+
+        private Chunk GetChunk(long position, out int chunk, out int block, out int sector)
+        {
+            long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
+            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
+
+            chunk = (int)(position / chunkSize);
+            long chunkOffset = position % chunkSize;
+
+            block = (int)(chunkOffset / _fileParameters.BlockSize);
+            int blockOffset = (int)(chunkOffset % _fileParameters.BlockSize);
+
+            sector = (int)(blockOffset / _metadata.LogicalSectorSize);
+
+            Chunk result = _chunks[chunk];
+            if (result == null)
+            {
+                result = new Chunk(_batStream, _fileStream, _freeSpaceTable, _fileParameters, chunk, chunkRatio);
+                _chunks[chunk] = result;
+            }
+
+            return result;
         }
 
         private void CheckDisposed()
