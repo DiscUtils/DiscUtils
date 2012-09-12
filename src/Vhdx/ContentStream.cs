@@ -205,6 +205,13 @@ namespace DiscUtils.Vhdx
 
                     totalRead += read;
                 }
+                else if (blockStatus == PayloadBlockStatus.NotPresent)
+                {
+                    _parentStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
+                    int read = Utilities.ReadFully(_parentStream, buffer, offset + totalRead, Math.Min(blockBytesRemaining, totalToRead - totalRead));
+
+                    totalRead += read;
+                }
                 else
                 {
                     int zeroed = Math.Min(blockBytesRemaining, totalToRead - totalRead);
