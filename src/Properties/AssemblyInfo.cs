@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("DiscUtils")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Kenneth Bell")]
 [assembly: AssemblyProduct("DiscUtils")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
