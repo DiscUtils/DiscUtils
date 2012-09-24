@@ -155,7 +155,7 @@ namespace DiscUtils.Wim
                 return streamEntry.Length;
             }
 
-            throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such alternate stream '{1}' in file '{2}'", streamName, FileName), FileName + ":" + streamName);
+            throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such alternate stream '{0}' in file '{1}'", streamName, FileName), FileName + ":" + streamName);
         }
     }
 }

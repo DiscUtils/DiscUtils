@@ -36,7 +36,7 @@ namespace DiscUtils.Compression
                 throw new ArgumentException(
                     string.Format(
                     CultureInfo.InvariantCulture,
-                    "Output buffer to small, must be at least {0} bytes may need to be {0} bytes",
+                    "Output buffer to small, must be at least {0} bytes may need to be {1} bytes",
                     MinOutputCount(inputCount),
                     MaxOutputCount(inputCount)));
             }
