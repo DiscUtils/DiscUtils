@@ -85,7 +85,7 @@ namespace DiscUtils.Iso9660
             }
             else if (_contentPath != null)
             {
-                return new FileStream(_contentPath, FileMode.Open, FileAccess.Read);
+                return new FileStream(_contentPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             }
             else
             {
