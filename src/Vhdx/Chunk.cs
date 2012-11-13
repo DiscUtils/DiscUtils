@@ -72,12 +72,7 @@ namespace DiscUtils.Vhdx
             set
             {
                 BatEntry entry = new BatEntry();
-
-                if (value == 0)
-                {
-                    entry.BitmapBlockPresent = false;
-                }
-
+                entry.BitmapBlockPresent = (value != 0);
                 entry.FileOffsetMB = value / Sizes.OneMiB;
                 entry.WriteTo(_batData, _blocksPerChunk * 8);
             }
