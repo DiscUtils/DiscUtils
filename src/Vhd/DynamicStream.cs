@@ -73,7 +73,7 @@ namespace DiscUtils.Vhd
             _ownsParentStream = ownsParentStream;
 
             _blockBitmaps = new byte[_dynamicHeader.MaxTableEntries][];
-            _blockBitmapSize = (int)Utilities.RoundUp((_dynamicHeader.BlockSize / Utilities.SectorSize) / 8, Utilities.SectorSize);
+            _blockBitmapSize = (int)Utilities.RoundUp(Utilities.Ceil(_dynamicHeader.BlockSize, Utilities.SectorSize * 8), Utilities.SectorSize);
 
             ReadBlockAllocationTable();
 
