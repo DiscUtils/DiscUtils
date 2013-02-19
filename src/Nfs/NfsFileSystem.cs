@@ -85,6 +85,28 @@ namespace DiscUtils.Nfs
         {
             get { return true; }
         }
+        
+       /// <summary>
+       /// Get preferred NFS read size
+       /// </summary>
+        public int PreferredReadSize
+        {
+           get
+           {
+              return _client == null ? 0 : (int)_client.FileSystemInfo.ReadPreferredBytes;
+           }
+        }
+
+        /// <summary>
+        /// Get preferred NFS write size
+        /// </summary>
+        public int PreferredWriteSize
+        {
+           get
+           {
+              return _client == null ? 0 : (int)_client.FileSystemInfo.WritePreferredBytes;
+           }
+        }
 
         /// <summary>
         /// Gets the folders exported by a server.
@@ -521,9 +543,7 @@ namespace DiscUtils.Nfs
             try
             {
                 Nfs3FileHandle handle = GetFile(path);
-                Nfs3FileAttributes nfsAttrs = null;
-
-                _client.GetAttributes(handle);
+                Nfs3FileAttributes nfsAttrs = _client.GetAttributes(handle);
 
                 FileAttributes result = (FileAttributes)0;
                 if (nfsAttrs.Type == Nfs3FileType.Directory)
@@ -711,8 +731,16 @@ namespace DiscUtils.Nfs
             throw new IOException("NFS Status: " + ne.Message, ne);
         }
 
-        private void DoSearch(List<string> results, Nfs3FileHandle dir, string path, Regex regex, bool subFolders, bool dirs, bool files)
+        private void DoSearch(List<string> results, Nfs3FileHandle parentDir, string path, Regex regex, bool subFolders, bool dirs, bool files)
         {
+            Nfs3FileHandle dir = parentDir;
+           
+            try
+            {
+                dir = GetDirectoryHandle(path);
+            }
+            catch (DirectoryNotFoundException){/* ignore */ }
+        
             foreach (Nfs3DirectoryEntry de in _client.ReadDirectory(dir, true))
             {
                 if (de.Name == "." || de.Name == "..")
@@ -751,6 +779,13 @@ namespace DiscUtils.Nfs
             }
 
             return handle;
+        }
+        
+        private Nfs3FileHandle GetDirectoryHandle(string path)
+        {
+            string[] dirs = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            Nfs3FileHandle dir = GetDirectory(_client.RootHandle, dirs);
+            return dir;
         }
 
         private Nfs3FileHandle GetParentDirectory(string path)
