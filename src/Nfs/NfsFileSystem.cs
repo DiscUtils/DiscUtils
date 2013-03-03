@@ -312,7 +312,7 @@ namespace DiscUtils.Nfs
                 Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
                 List<string> dirs = new List<string>();
-                DoSearch(dirs, _client.RootHandle, path, re, searchOption == SearchOption.AllDirectories, true, false);
+                DoSearch(dirs, path, re, searchOption == SearchOption.AllDirectories, true, false);
                 return dirs.ToArray();
             }
             catch (Nfs3Exception ne)
@@ -336,7 +336,7 @@ namespace DiscUtils.Nfs
                 Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
                 List<string> results = new List<string>();
-                DoSearch(results, _client.RootHandle, path, re, searchOption == SearchOption.AllDirectories, false, true);
+                DoSearch(results, path, re, searchOption == SearchOption.AllDirectories, false, true);
                 return results.ToArray();
             }
             catch (Nfs3Exception ne)
@@ -357,7 +357,7 @@ namespace DiscUtils.Nfs
                 Regex re = Utilities.ConvertWildcardsToRegEx("*.*");
 
                 List<string> results = new List<string>();
-                DoSearch(results, _client.RootHandle, path, re, false, true, true);
+                DoSearch(results, path, re, false, true, true);
                 return results.ToArray();
             }
             catch (Nfs3Exception ne)
@@ -380,7 +380,7 @@ namespace DiscUtils.Nfs
                 Regex re = Utilities.ConvertWildcardsToRegEx(searchPattern);
 
                 List<string> results = new List<string>();
-                DoSearch(results, _client.RootHandle, path, re, false, true, true);
+                DoSearch(results, path, re, false, true, true);
                 return results.ToArray();
             }
             catch (Nfs3Exception ne)
@@ -731,16 +731,10 @@ namespace DiscUtils.Nfs
             throw new IOException("NFS Status: " + ne.Message, ne);
         }
 
-        private void DoSearch(List<string> results, Nfs3FileHandle parentDir, string path, Regex regex, bool subFolders, bool dirs, bool files)
+        private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
         {
-            Nfs3FileHandle dir = parentDir;
-           
-            try
-            {
-                dir = GetDirectoryHandle(path);
-            }
-            catch (DirectoryNotFoundException){/* ignore */ }
-        
+            Nfs3FileHandle dir = GetDirectory(path);
+
             foreach (Nfs3DirectoryEntry de in _client.ReadDirectory(dir, true))
             {
                 if (de.Name == "." || de.Name == "..")
@@ -762,7 +756,7 @@ namespace DiscUtils.Nfs
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, de.FileHandle, Utilities.CombinePaths(path, de.Name), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(path, de.Name), regex, subFolders, dirs, files);
                 }
             }
         }
@@ -781,18 +775,17 @@ namespace DiscUtils.Nfs
             return handle;
         }
         
-        private Nfs3FileHandle GetDirectoryHandle(string path)
-        {
-            string[] dirs = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            Nfs3FileHandle dir = GetDirectory(_client.RootHandle, dirs);
-            return dir;
-        }
-
         private Nfs3FileHandle GetParentDirectory(string path)
         {
             string[] dirs = Utilities.GetDirectoryFromPath(path).Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
             return parent;
+        }
+
+        private Nfs3FileHandle GetDirectory(string path)
+        {
+            string[] dirs = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            return GetDirectory(_client.RootHandle, dirs);
         }
 
         private Nfs3FileHandle GetDirectory(Nfs3FileHandle parent, string[] dirs)
