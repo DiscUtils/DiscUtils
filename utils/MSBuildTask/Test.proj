@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <CreateSquashFileSystem FileName="TestFS.squashfs" SourceFiles="@(SquashFiles)" RemoveRoot="C:\Temp\DiscUtils"/>
-    <CreateIso FileName="TestIso.iso" VolumeLabel="DISCUTILS_ARCHIVE" SourceFiles="@(IsoFiles)" RemoveRoot="C:\Temp\DiscUtils" UseJoliet="true"/>
+    <CreateIso FileName="TestIso.iso" VolumeLabel="DISCUTILS_ARCHIVE" SourceFiles="@(IsoFiles)" RemoveRoots="C:\Temp\DiscUtils" UseJoliet="true"/>
   </Target>
 
 </Project>
