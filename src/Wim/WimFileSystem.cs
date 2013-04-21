@@ -580,7 +580,7 @@ namespace DiscUtils.Wim
                 reader.Skip((int)(startPos + totalLength - reader.Position));
             }
 
-            _rootDirPos = startPos + totalLength;
+            _rootDirPos = Utilities.RoundUp(startPos + totalLength, 8);
         }
 
         private DirectoryEntry GetEntry(string path)
