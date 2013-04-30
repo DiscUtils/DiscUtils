@@ -87,7 +87,7 @@ namespace DiscUtils.Nfs
         }
         
        /// <summary>
-       /// Get preferred NFS read size
+       /// Gets the preferred NFS read size
        /// </summary>
         public int PreferredReadSize
         {
@@ -98,7 +98,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Get preferred NFS write size
+        /// Gets the preferred NFS write size
         /// </summary>
         public int PreferredWriteSize
         {
