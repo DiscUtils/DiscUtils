@@ -26,6 +26,7 @@ namespace DiscUtils.Xva
     using System.Collections.Generic;
     using System.IO;
     using System.Xml.XPath;
+    using DiscUtils.Archives;
 
     /// <summary>
     /// Class representing the virtual machine stored in a Xen Virtual Appliance (XVA)

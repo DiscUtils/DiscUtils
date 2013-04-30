@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Xva
+namespace DiscUtils.Archives
 {
     using System;
 
-    internal class TarHeader
+    internal sealed class TarHeader
     {
         public const int Length = 512;
 

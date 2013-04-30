@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Xva
+namespace DiscUtils.Archives
 {
     using System;
     using System.IO;
 
-    internal sealed class BuildFileRecord
+    internal sealed class UnixBuildFileRecord
     {
         private string _name;
         private UnixFilePermissions _fileMode;
@@ -34,29 +34,29 @@ namespace DiscUtils.Xva
         private DateTime _modificationTime;
         private BuilderExtentSource _source;
 
-        public BuildFileRecord(string name, byte[] buffer)
+        public UnixBuildFileRecord(string name, byte[] buffer)
             : this(name, new BuilderBufferExtentSource(buffer), 0, 0, 0, Utilities.UnixEpoch)
         {
         }
 
-        public BuildFileRecord(string name, Stream stream)
+        public UnixBuildFileRecord(string name, Stream stream)
             : this(name, new BuilderStreamExtentSource(stream), 0, 0, 0, Utilities.UnixEpoch)
         {
         }
 
-        public BuildFileRecord(
+        public UnixBuildFileRecord(
             string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
             : this(name, new BuilderBufferExtentSource(buffer), fileMode, ownerId, groupId, modificationTime)
         {
         }
 
-        public BuildFileRecord(
+        public UnixBuildFileRecord(
             string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
             : this(name, new BuilderStreamExtentSource(stream), fileMode, ownerId, groupId, modificationTime)
         {
         }
 
-        public BuildFileRecord(string name, BuilderExtentSource fileSource, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+        public UnixBuildFileRecord(string name, BuilderExtentSource fileSource, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
         {
             _name = name;
             _source = fileSource;

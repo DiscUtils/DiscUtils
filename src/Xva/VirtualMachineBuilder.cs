@@ -28,6 +28,7 @@ namespace DiscUtils.Xva
     using System.IO;
     using System.Security.Cryptography;
     using System.Text;
+    using DiscUtils.Archives;
     using DiskRecord = DiscUtils.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
 
     /// <summary>

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Xva
+namespace DiscUtils.Archives
 {
     using System;
     using System.Collections.Generic;
@@ -29,16 +29,16 @@ namespace DiscUtils.Xva
     /// <summary>
     /// Builder to create UNIX Tar archive files.
     /// </summary>
-    public class TarFileBuilder : StreamBuilder
+    public sealed class TarFileBuilder : StreamBuilder
     {
-        private readonly List<BuildFileRecord> _files;
+        private readonly List<UnixBuildFileRecord> _files;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TarFileBuilder"/> class.
         /// </summary>
         public TarFileBuilder()
         {
-            _files = new List<BuildFileRecord>();
+            _files = new List<UnixBuildFileRecord>();
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace DiscUtils.Xva
         /// <param name="buffer">The file data</param>
         public void AddFile(string name, byte[] buffer)
         {
-            _files.Add(new BuildFileRecord(name, buffer));
+            _files.Add(new UnixBuildFileRecord(name, buffer));
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace DiscUtils.Xva
         public void AddFile(
             string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
         {
-            _files.Add(new BuildFileRecord(name, buffer, fileMode, ownerId, groupId, modificationTime));
+            _files.Add(new UnixBuildFileRecord(name, buffer, fileMode, ownerId, groupId, modificationTime));
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace DiscUtils.Xva
         /// <param name="stream">The file data</param>
         public void AddFile(string name, Stream stream)
         {
-            _files.Add(new BuildFileRecord(name, stream));
+            _files.Add(new UnixBuildFileRecord(name, stream));
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace DiscUtils.Xva
         public void AddFile(
             string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
         {
-            _files.Add(new BuildFileRecord(name, stream, fileMode, ownerId, groupId, modificationTime));
+            _files.Add(new UnixBuildFileRecord(name, stream, fileMode, ownerId, groupId, modificationTime));
         }
 
         internal override List<BuilderExtent> FixExtents(out long totalLength)
@@ -96,7 +96,7 @@ namespace DiscUtils.Xva
             List<BuilderExtent> result = new List<BuilderExtent>((_files.Count * 2) + 2);
             long pos = 0;
 
-            foreach (BuildFileRecord file in _files)
+            foreach (UnixBuildFileRecord file in _files)
             {
                 BuilderExtent fileContentExtent = file.Fix(pos + TarHeader.Length);
 

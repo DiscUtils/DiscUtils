@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Xva
+namespace DiscUtils.Archives
 {
     using System;
 
-    internal class TarHeaderExtent : BuilderBufferExtent
+    internal sealed class TarHeaderExtent : BuilderBufferExtent
     {
         private string _fileName;
         private long _fileLength;

@@ -20,22 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Xva
+namespace DiscUtils.Archives
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
     /// <summary>
-    /// Minimal tar file format implementation needed for XVA file support.
+    /// Minimal tar file format implementation.
     /// </summary>
-    /// <remarks>This is not a complete implementation of the tar file format, it
-    /// is just functional enough to make valid XVA files.</remarks>
-    internal class TarFile
+    public sealed class TarFile
     {
         private Stream _fileStream;
         private Dictionary<string, FileRecord> _files;
 
+        /// <summary>
+        /// Initializes a new instance of the TarFile class.
+        /// </summary>
+        /// <param name="fileStream">The Tar file</param>
         public TarFile(Stream fileStream)
         {
             _fileStream = fileStream;
@@ -55,6 +57,12 @@ namespace DiscUtils.Xva
             }
         }
 
+        /// <summary>
+        /// Tries to open a file contained in the archive, if it exists.
+        /// </summary>
+        /// <param name="path">The path to the file within the archive</param>
+        /// <param name="stream">A stream containing the file contents, or null.</param>
+        /// <returns><c>true</c> if the file could be opened, else <c>false</c>.</returns>
         public bool TryOpenFile(string path, out Stream stream)
         {
             if (_files.ContainsKey(path))
@@ -68,6 +76,12 @@ namespace DiscUtils.Xva
             return false;
         }
 
+        /// <summary>
+        /// Open a file contained in the archive.
+        /// </summary>
+        /// <param name="path">The path to the file within the archive</param>
+        /// <returns>A stream containing the file contents.</returns>
+        /// <exception cref="FileNotFoundException">Thrown if the file is not found.</exception>
         public Stream OpenFile(string path)
         {
             if (_files.ContainsKey(path))
@@ -79,12 +93,22 @@ namespace DiscUtils.Xva
             throw new FileNotFoundException("File is not in archive", path);
         }
 
-        internal bool FileExists(string path)
+        /// <summary>
+        /// Determines if a given file exists in the archive.
+        /// </summary>
+        /// <param name="path">The file path to test</param>
+        /// <returns><c>true</c> if the file is present, else <c>false</c>.</returns>
+        public bool FileExists(string path)
         {
             return _files.ContainsKey(path);
         }
 
-        internal bool DirExists(string path)
+        /// <summary>
+        /// Determines if a given directory exists in the archive.
+        /// </summary>
+        /// <param name="path">The file path to test</param>
+        /// <returns><c>true</c> if the directory is present, else <c>false</c>.</returns>
+        public bool DirExists(string path)
         {
             string searchStr = path;
             searchStr = searchStr.Replace(@"\", "/");

@@ -20,9 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Xva
+namespace DiscUtils.Archives
 {
-    internal class FileRecord
+    internal sealed class FileRecord
     {
         public string Name;
         public long Start;
