@@ -22,26 +22,73 @@
 
 namespace DiscUtils.Xva
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
-    internal class TarFileBuilder : StreamBuilder
+    /// <summary>
+    /// Builder to create UNIX Tar archive files.
+    /// </summary>
+    public class TarFileBuilder : StreamBuilder
     {
-        private List<BuildFileRecord> _files;
+        private readonly List<BuildFileRecord> _files;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TarFileBuilder"/> class.
+        /// </summary>
         public TarFileBuilder()
         {
             _files = new List<BuildFileRecord>();
         }
 
+        /// <summary>
+        /// Add a file to the tar archive
+        /// </summary>
+        /// <param name="name">The name of the file</param>
+        /// <param name="buffer">The file data</param>
         public void AddFile(string name, byte[] buffer)
         {
             _files.Add(new BuildFileRecord(name, buffer));
         }
 
+        /// <summary>
+        /// Add a file to the tar archive
+        /// </summary>
+        /// <param name="name">The name of the file</param>
+        /// <param name="buffer">The file data</param>
+        /// <param name="fileMode">The access mode of the file</param>
+        /// <param name="ownerId">The uid of the owner</param>
+        /// <param name="groupId">The gid of the owner</param>
+        /// <param name="modificationTime">The modification time for the file</param>
+        public void AddFile(
+            string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+        {
+            _files.Add(new BuildFileRecord(name, buffer, fileMode, ownerId, groupId, modificationTime));
+        }
+
+        /// <summary>
+        /// Add a file to the tar archive
+        /// </summary>
+        /// <param name="name">The name of the file</param>
+        /// <param name="stream">The file data</param>
         public void AddFile(string name, Stream stream)
         {
             _files.Add(new BuildFileRecord(name, stream));
+        }
+
+        /// <summary>
+        /// Add a file to the tar archive
+        /// </summary>
+        /// <param name="name">The name of the file</param>
+        /// <param name="stream">The file data</param>
+        /// <param name="fileMode">The access mode of the file</param>
+        /// <param name="ownerId">The uid of the owner</param>
+        /// <param name="groupId">The gid of the owner</param>
+        /// <param name="modificationTime">The modification time for the file</param>
+        public void AddFile(
+            string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+        {
+            _files.Add(new BuildFileRecord(name, stream, fileMode, ownerId, groupId, modificationTime));
         }
 
         internal override List<BuilderExtent> FixExtents(out long totalLength)
@@ -53,7 +100,8 @@ namespace DiscUtils.Xva
             {
                 BuilderExtent fileContentExtent = file.Fix(pos + TarHeader.Length);
 
-                result.Add(new TarHeaderExtent(pos, file.Name, fileContentExtent.Length));
+                result.Add(new TarHeaderExtent(
+                    pos, file.Name, fileContentExtent.Length, file.FileMode, file.OwnerId, file.GroupId, file.ModificationTime));
                 pos += TarHeader.Length;
 
                 result.Add(fileContentExtent);

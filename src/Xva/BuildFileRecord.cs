@@ -22,28 +22,73 @@
 
 namespace DiscUtils.Xva
 {
+    using System;
     using System.IO;
 
-    internal class BuildFileRecord
+    internal sealed class BuildFileRecord
     {
         private string _name;
+        private UnixFilePermissions _fileMode;
+        private int _ownerId;
+        private int _groupId;
+        private DateTime _modificationTime;
         private BuilderExtentSource _source;
 
         public BuildFileRecord(string name, byte[] buffer)
+            : this(name, new BuilderBufferExtentSource(buffer), 0, 0, 0, Utilities.UnixEpoch)
         {
-            _name = name;
-            _source = new BuilderBufferExtentSource(buffer);
         }
 
         public BuildFileRecord(string name, Stream stream)
+            : this(name, new BuilderStreamExtentSource(stream), 0, 0, 0, Utilities.UnixEpoch)
+        {
+        }
+
+        public BuildFileRecord(
+            string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+            : this(name, new BuilderBufferExtentSource(buffer), fileMode, ownerId, groupId, modificationTime)
+        {
+        }
+
+        public BuildFileRecord(
+            string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+            : this(name, new BuilderStreamExtentSource(stream), fileMode, ownerId, groupId, modificationTime)
+        {
+        }
+
+        public BuildFileRecord(string name, BuilderExtentSource fileSource, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
         {
             _name = name;
-            _source = new BuilderStreamExtentSource(stream);
+            _source = fileSource;
+            _fileMode = fileMode;
+            _ownerId = ownerId;
+            _groupId = groupId;
+            _modificationTime = modificationTime;
         }
 
         public string Name
         {
             get { return _name; }
+        }
+
+        public UnixFilePermissions FileMode
+        {
+            get { return this._fileMode; }
+        }
+
+        public int OwnerId
+        {
+            get { return this._ownerId; }
+        }
+
+        public int GroupId
+        {
+            get { return this._groupId; }
+        }
+
+        public DateTime ModificationTime
+        {
+            get { return this._modificationTime; }
         }
 
         public BuilderExtent Fix(long pos)

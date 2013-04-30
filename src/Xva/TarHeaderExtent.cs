@@ -22,16 +22,31 @@
 
 namespace DiscUtils.Xva
 {
+    using System;
+
     internal class TarHeaderExtent : BuilderBufferExtent
     {
         private string _fileName;
         private long _fileLength;
+        private UnixFilePermissions _mode;
+        private int _ownerId;
+        private int _groupId;
+        private DateTime _modificationTime;
 
-        public TarHeaderExtent(long start, string fileName, long fileLength)
+        public TarHeaderExtent(long start, string fileName, long fileLength, UnixFilePermissions mode, int ownerId, int groupId, DateTime modificationTime)
             : base(start, 512)
         {
             _fileName = fileName;
             _fileLength = fileLength;
+            _mode = mode;
+            _ownerId = ownerId;
+            _groupId = groupId;
+            _modificationTime = modificationTime;
+        }
+
+        public TarHeaderExtent(long start, string fileName, long fileLength)
+            : this(start, fileName, fileLength, 0, 0, 0, Utilities.UnixEpoch)
+        {
         }
 
         protected override byte[] GetBuffer()
@@ -41,6 +56,10 @@ namespace DiscUtils.Xva
             TarHeader header = new TarHeader();
             header.FileName = _fileName;
             header.FileLength = _fileLength;
+            header.FileMode = _mode;
+            header.OwnerId = _ownerId;
+            header.GroupId = _groupId;
+            header.ModificationTime = _modificationTime;
             header.WriteTo(buffer, 0);
 
             return buffer;

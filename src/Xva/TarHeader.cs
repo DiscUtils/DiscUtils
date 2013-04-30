@@ -29,7 +29,11 @@ namespace DiscUtils.Xva
         public const int Length = 512;
 
         public string FileName;
+        public UnixFilePermissions FileMode;
+        public int OwnerId;
+        public int GroupId;
         public long FileLength;
+        public DateTime ModificationTime;
 
         public TarHeader()
         {
@@ -38,7 +42,11 @@ namespace DiscUtils.Xva
         public void ReadFrom(byte[] buffer, int offset)
         {
             FileName = ReadNullTerminatedString(buffer, offset + 0, 100);
+            FileMode = (UnixFilePermissions)OctalToLong(ReadNullTerminatedString(buffer, offset + 100, 8));
+            OwnerId = (int)OctalToLong(ReadNullTerminatedString(buffer, offset + 108, 8));
+            GroupId = (int)OctalToLong(ReadNullTerminatedString(buffer, offset + 116, 8));
             FileLength = OctalToLong(ReadNullTerminatedString(buffer, offset + 124, 12));
+            ModificationTime = Utilities.DateTimeFromUnix((uint)OctalToLong(ReadNullTerminatedString(buffer, offset + 136, 12)));
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -46,11 +54,11 @@ namespace DiscUtils.Xva
             Array.Clear(buffer, offset, Length);
 
             Utilities.StringToBytes(FileName, buffer, offset, 99);
-            Utilities.StringToBytes(LongToOctal(0, 7), buffer, offset + 100, 7);
-            Utilities.StringToBytes(LongToOctal(0, 7), buffer, offset + 108, 7);
-            Utilities.StringToBytes(LongToOctal(0, 7), buffer, offset + 116, 7);
+            Utilities.StringToBytes(LongToOctal((long)FileMode, 7), buffer, offset + 100, 7);
+            Utilities.StringToBytes(LongToOctal(OwnerId, 7), buffer, offset + 108, 7);
+            Utilities.StringToBytes(LongToOctal(GroupId, 7), buffer, offset + 116, 7);
             Utilities.StringToBytes(LongToOctal(FileLength, 11), buffer, offset + 124, 11);
-            Utilities.StringToBytes(LongToOctal(0, 11), buffer, offset + 136, 11);
+            Utilities.StringToBytes(LongToOctal(Utilities.DateTimeToUnix(ModificationTime), 11), buffer, offset + 136, 11);
 
             // Checksum
             Utilities.StringToBytes(new string(' ', 8), buffer, offset + 148, 8);
