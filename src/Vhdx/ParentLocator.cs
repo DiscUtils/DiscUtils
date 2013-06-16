@@ -29,8 +29,9 @@ namespace DiscUtils.Vhdx
 
     internal sealed class ParentLocator : IByteArraySerializable
     {
-        private static readonly Guid LocatorType = new Guid("B04AEFB7-D19E-4A81-B789-25B8E9445913");
+        private static readonly Guid LocatorTypeGuid = new Guid("B04AEFB7-D19E-4A81-B789-25B8E9445913");
 
+        public Guid LocatorType;
         private Dictionary<string, string> _entries;
 
         public int Size
@@ -45,10 +46,10 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Guid locatorType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
-            if (locatorType != LocatorType)
+            LocatorType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
+            if (LocatorType != ParentLocator.LocatorTypeGuid)
             {
-                throw new IOException("Unrecognized Parent Locator type: " + locatorType);
+                throw new IOException("Unrecognized Parent Locator type: " + LocatorType);
             }
 
             _entries = new Dictionary<string, string>();

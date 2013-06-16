@@ -54,6 +54,11 @@ namespace DiscUtils.Vhdx
 
         private delegate T Reader<T>(byte[] buffer, int offset);
 
+        public MetadataTable Table
+        {
+            get { return _table; }
+        }
+
         public FileParameters FileParameters
         {
             get { return _fileParams; }

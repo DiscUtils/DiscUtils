@@ -215,6 +215,21 @@ namespace DiscUtils
             return val == 1;
         }
 
+        public static bool IsPowerOfTwo(long val)
+        {
+            if (val == 0)
+            {
+                return false;
+            }
+
+            while ((val & 1) != 1)
+            {
+                val >>= 1;
+            }
+
+            return val == 1;
+        }
+
         public static int Log2(uint val)
         {
             if (val == 0)

@@ -135,6 +135,26 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
+        /// Gets detailed information about the VHDX file.
+        /// </summary>
+        public DiskImageFileInfo Information
+        {
+            get
+            {
+                _fileStream.Position = 0;
+                FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
+
+                _fileStream.Position = 64 * Sizes.OneKiB;
+                VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+
+                _fileStream.Position = 128 * Sizes.OneKiB;
+                VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+
+                return new DiskImageFileInfo(fileHeader, vhdxHeader1, vhdxHeader2, _regionTable, _metadata);
+            }
+        }
+
+        /// <summary>
         /// Gets the unique id of the parent disk.
         /// </summary>
         public Guid ParentUniqueId

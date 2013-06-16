@@ -34,6 +34,7 @@ Copy-Item "${basedir}\utils\NTFSDump\bin\SignedRelease\NTFSDump.exe" "${basedir}
 Copy-Item "${basedir}\utils\FileExtract\bin\SignedRelease\FileExtract.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VHDCreate\bin\SignedRelease\VHDCreate.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VHDDump\bin\SignedRelease\VHDDump.exe" "${basedir}\layout\bin"
+Copy-Item "${basedir}\utils\VHDXDump\bin\SignedRelease\VHDXDump.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\iSCSIBrowse\bin\SignedRelease\iSCSIBrowse.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VirtualDiskConvert\bin\SignedRelease\VirtualDiskConvert.exe" "${basedir}\layout\bin"
 Copy-Item "${basedir}\utils\VolInfo\bin\SignedRelease\VolInfo.exe" "${basedir}\layout\bin"
