@@ -26,6 +26,10 @@ namespace DiscUtils.Vhdx
 
     internal sealed class FileParameters : IByteArraySerializable
     {
+        public const uint DefaultBlockSize = 32 * (uint)Sizes.OneMiB;
+        public const uint DefaultDifferencingBlockSize = 2 * (uint)Sizes.OneMiB;
+        public const uint DefaultDynamicBlockSize = 32 * (uint)Sizes.OneMiB;
+
         public uint BlockSize;
         public FileParametersFlags Flags;
 
@@ -44,7 +48,8 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(BlockSize, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 4);
         }
     }
 }

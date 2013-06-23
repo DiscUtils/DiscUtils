@@ -28,7 +28,7 @@ namespace DiscUtils.Vhdx
     {
         public const uint VhdxHeaderSignature = 0x64616568;
 
-        public uint Signature;
+        public uint Signature = VhdxHeaderSignature;
         public uint Checksum;
         public ulong SequenceNumber;
         public Guid FileWriteGuid;
@@ -38,7 +38,27 @@ namespace DiscUtils.Vhdx
         public ushort Version;
         public uint LogLength;
         public ulong LogOffset;
-        private byte[] _data;
+        private byte[] _data = new byte[4096];
+
+        public VhdxHeader()
+        {
+        }
+
+        public VhdxHeader(VhdxHeader header)
+        {
+            Array.Copy(header._data, _data, 4096);
+
+            Signature = header.Signature;
+            Checksum = header.Checksum;
+            SequenceNumber = header.SequenceNumber;
+            FileWriteGuid = header.FileWriteGuid;
+            DataWriteGuid = header.DataWriteGuid;
+            LogGuid = header.LogGuid;
+            LogVersion = header.LogVersion;
+            Version = header.Version;
+            LogLength = header.LogLength;
+            LogOffset = header.LogOffset;
+        }
 
         public int Size
         {
@@ -70,7 +90,6 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _data = new byte[4096];
             Array.Copy(buffer, offset, _data, 0, 4096);
 
             Signature = Utilities.ToUInt32LittleEndian(_data, 0);

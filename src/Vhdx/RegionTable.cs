@@ -32,13 +32,14 @@ namespace DiscUtils.Vhdx
         public static readonly Guid BatGuid = new Guid("2DC27766-F623-4200-9D64-115E9BFD4A08");
         public static readonly Guid MetadataRegionGuid = new Guid("8B7CA206-4790-4B9A-B8FE-575F050F886E");
 
-        public uint Signature;
+        public uint Signature = RegionTableSignature;
         public uint Checksum;
         public uint EntryCount;
         public uint Reserved;
-        public IDictionary<Guid, RegionEntry> Regions;
+        public IDictionary<Guid, RegionEntry> Regions = new Dictionary<Guid, RegionEntry>();
 
-        private byte[] _data;
+        private byte[] _data = new byte[FixedSize];
+
 
         public int Size
         {
@@ -68,7 +69,6 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _data = new byte[FixedSize];
             Array.Copy(buffer, offset, _data, 0, FixedSize);
 
             Signature = Utilities.ToUInt32LittleEndian(_data, 0);
@@ -91,7 +91,24 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            EntryCount = (uint)Regions.Count;
+            Checksum = 0;
+
+            Utilities.WriteBytesLittleEndian(Signature, _data, 0);
+            Utilities.WriteBytesLittleEndian(Checksum, _data, 4);
+            Utilities.WriteBytesLittleEndian(EntryCount, _data, 8);
+
+            int dataOffset = 16;
+            foreach (var region in Regions)
+            {
+                region.Value.WriteTo(_data, dataOffset);
+                dataOffset += 32;
+            }
+
+            Checksum = Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, _data, 0, FixedSize);
+            Utilities.WriteBytesLittleEndian(Checksum, _data, 4);
+
+            Array.Copy(_data, 0, buffer, offset, FixedSize);
         }
     }
 }

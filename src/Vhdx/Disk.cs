@@ -317,20 +317,7 @@ namespace DiscUtils.Vhdx
         /// <returns>An object that accesses the stream as a VHDX file</returns>
         public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
-            return InitializeDynamic(stream, ownsStream, capacity, null);
-        }
-
-        /// <summary>
-        /// Initializes a stream as a dynamically-sized VHDX file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
-        public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
-        {
-            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity, geometry), Ownership.Dispose);
+            return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity), Ownership.Dispose);
         }
 
         /// <summary>
@@ -419,6 +406,11 @@ namespace DiscUtils.Vhdx
         internal static Disk InitializeFixed(FileLocator fileLocator, string path, long capacity, Geometry geometry)
         {
             return new Disk(DiskImageFile.InitializeFixed(fileLocator, path, capacity, geometry), Ownership.Dispose);
+        }
+
+        internal static Disk InitializeDynamic(FileLocator fileLocator, string path, long capacity, long blockSize)
+        {
+            return new Disk(DiskImageFile.InitializeDynamic(fileLocator, path, capacity, blockSize), Ownership.Dispose);
         }
 
         /// <summary>

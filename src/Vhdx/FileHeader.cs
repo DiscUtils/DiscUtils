@@ -29,7 +29,7 @@ namespace DiscUtils.Vhdx
     {
         public const ulong VhdxSignature = 0x656C696678646876;
 
-        public ulong Signature;
+        public ulong Signature = VhdxSignature;
         public string Creator;
 
         public int Size
@@ -52,7 +52,9 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Array.Clear(buffer, offset, Size);
+            Utilities.WriteBytesLittleEndian(Signature, buffer, offset + 0);
+            Encoding.Unicode.GetBytes(Creator, 0, Creator.Length, buffer, offset + 8);
         }
     }
 }

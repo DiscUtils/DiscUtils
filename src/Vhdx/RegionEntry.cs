@@ -51,7 +51,10 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(Guid, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(Length, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 28);
         }
     }
 }

@@ -31,12 +31,22 @@ namespace DiscUtils.Vhdx
     {
         private static readonly Guid LocatorTypeGuid = new Guid("B04AEFB7-D19E-4A81-B789-25B8E9445913");
 
-        public Guid LocatorType;
-        private Dictionary<string, string> _entries;
+        public Guid LocatorType = LocatorTypeGuid;
+        public ushort Reserved = 0;
+        public ushort Count = 0;
+        private Dictionary<string, string> _entries = new Dictionary<string,string>();
 
         public int Size
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                if (Entries.Count != 0)
+                {
+                    throw new NotImplementedException();
+                }
+
+                return 20;
+            }
         }
 
         public Dictionary<string, string> Entries
@@ -54,8 +64,8 @@ namespace DiscUtils.Vhdx
 
             _entries = new Dictionary<string, string>();
 
-            int count = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
-            for (int i = 0; i < count; ++i)
+            Count = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
+            for (ushort i = 0; i < Count; ++i)
             {
                 int kvOffset = offset + 20 + (i * 12);
                 int keyOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 0);
@@ -74,7 +84,16 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            if (Entries.Count != 0)
+            {
+                throw new NotImplementedException();
+            }
+
+            Count = (ushort)Entries.Count;
+
+            Utilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(Count, buffer, offset + 18);
         }
     }
 }

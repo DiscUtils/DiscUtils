@@ -37,13 +37,13 @@ namespace DiscUtils.Vhdx
         public static readonly Guid PhysicalSectorSizeGuid = new Guid("CDA348C7-445D-4471-9CC9-E9885251C556");
         public static readonly Guid ParentLocatorGuid = new Guid("A8D35F2D-B30B-454D-ABF7-D3D84834AB0C");
 
-        public ulong Signature;
-        public ushort EntryCount;
-        public IDictionary<MetadataEntryKey, MetadataEntry> Entries;
+        public ulong Signature = MetadataTableSignature;
+        public ushort EntryCount = 0;
+        public IDictionary<MetadataEntryKey, MetadataEntry> Entries = new Dictionary<MetadataEntryKey, MetadataEntry>();
 
         private static readonly Dictionary<Guid, object> KnownMetadata = InitMetadataTable();
 
-        private byte[] _headerData;
+        private byte[] _headerData = new byte[32];
 
         public int Size
         {
@@ -81,7 +81,6 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _headerData = new byte[32];
             Array.Copy(buffer, offset, _headerData, 0, 32);
 
             Signature = Utilities.ToUInt64LittleEndian(_headerData, 0);
@@ -102,7 +101,18 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            EntryCount = (ushort)Entries.Count;
+            Utilities.WriteBytesLittleEndian(Signature, _headerData, 0);
+            Utilities.WriteBytesLittleEndian(EntryCount, _headerData, 10);
+
+            Array.Copy(_headerData, 0, buffer, offset, 32);
+
+            int bufferOffset = 32 + offset;
+            foreach (var entry in Entries)
+            {
+                entry.Value.WriteTo(buffer, bufferOffset);
+                bufferOffset += 32;
+            }
         }
 
         private static Dictionary<Guid, object> InitMetadataTable()

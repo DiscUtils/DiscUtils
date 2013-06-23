@@ -30,7 +30,7 @@ namespace DiscUtils.Vhdx
         public uint Offset;
         public uint Length;
         public MetadataEntryFlags Flags;
-        public uint Reserved;
+        public uint Reserved = 0;
 
         public int Size
         {
@@ -50,7 +50,11 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new NotImplementedException();
+            Utilities.WriteBytesLittleEndian(ItemId, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(Length, buffer, offset + 20);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 28);
         }
     }
 }

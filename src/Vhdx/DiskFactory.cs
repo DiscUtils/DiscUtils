@@ -51,7 +51,7 @@ namespace DiscUtils.Vhdx
                 case "fixed":
                     return Disk.InitializeFixed(locator, path, diskParameters.Capacity, diskParameters.Geometry);
                 case "dynamic":
-                    throw new NotImplementedException();
+                    return Disk.InitializeDynamic(locator, path, diskParameters.Capacity, FileParameters.DefaultDynamicBlockSize);
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
             }

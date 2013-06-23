@@ -289,20 +289,8 @@ namespace DiscUtils.Vhdx
         /// <returns>An object that accesses the stream as a VHDX file</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Initializes a stream as a dynamically-sized VHDX file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
-        {
-            throw new NotImplementedException();
+            InitializeDynamicInternal(stream, capacity, FileParameters.DefaultDynamicBlockSize);
+            return new DiskImageFile(stream, ownsStream);
         }
 
         /// <summary>
@@ -315,21 +303,7 @@ namespace DiscUtils.Vhdx
         /// <returns>An object that accesses the stream as a VHDX file</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, long blockSize)
         {
-            return InitializeDynamic(stream, ownsStream, capacity, null, blockSize);
-        }
-
-        /// <summary>
-        /// Initializes a stream as a dynamically-sized VHDX file.
-        /// </summary>
-        /// <param name="stream">The stream to initialize.</param>
-        /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <param name="blockSize">The size of each block (unit of allocation)</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry, long blockSize)
-        {
-            InitializeDynamicInternal(stream, capacity, geometry, blockSize);
+            InitializeDynamicInternal(stream, capacity, blockSize);
 
             return new DiskImageFile(stream, ownsStream);
         }
@@ -422,6 +396,27 @@ namespace DiscUtils.Vhdx
             return result;
         }
 
+        internal static DiskImageFile InitializeDynamic(FileLocator locator, string path, long capacity, long blockSize)
+        {
+            DiskImageFile result = null;
+            Stream stream = locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            try
+            {
+                InitializeDynamicInternal(stream, capacity, blockSize);
+                result = new DiskImageFile(locator, path, stream, Ownership.Dispose);
+                stream = null;
+            }
+            finally
+            {
+                if (stream != null)
+                {
+                    stream.Dispose();
+                }
+            }
+
+            return result;
+        }
+
         internal DiskImageFile CreateDifferencing(FileLocator fileLocator, string path)
         {
             Stream stream = fileLocator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
@@ -479,9 +474,90 @@ namespace DiscUtils.Vhdx
             throw new NotImplementedException();
         }
 
-        private static void InitializeDynamicInternal(Stream stream, long capacity, Geometry geometry, long blockSize)
+        private static void InitializeDynamicInternal(Stream stream, long capacity, long blockSize)
         {
-            throw new NotImplementedException();
+            if (blockSize < Sizes.OneMiB || blockSize > Sizes.OneMiB * 256 || !Utilities.IsPowerOfTwo(blockSize))
+            {
+                throw new ArgumentOutOfRangeException("blockSize", blockSize, "BlockSize must be a power of 2 between 1MB and 256MB");
+            }
+
+            int logicalSectorSize = 512;
+            int physicalSectorSize = 4096;
+            long chunkRatio = (0x800000L * logicalSectorSize) / blockSize;
+            long dataBlocksCount = Utilities.Ceil(capacity, blockSize);
+            long sectorBitmapBlocksCount = Utilities.Ceil(dataBlocksCount, chunkRatio);
+            long totalBatEntriesDynamic = dataBlocksCount + ((dataBlocksCount - 1) / chunkRatio);
+
+            FileHeader fileHeader = new FileHeader() { Creator = ".NET DiscUtils" };
+
+            long fileEnd = Sizes.OneMiB;
+
+            VhdxHeader header1 = new VhdxHeader();
+            header1.SequenceNumber = 0;
+            header1.FileWriteGuid = Guid.NewGuid();
+            header1.DataWriteGuid = Guid.NewGuid();
+            header1.LogGuid = Guid.Empty;
+            header1.LogVersion = 0;
+            header1.Version = 1;
+            header1.LogLength = (uint)Sizes.OneMiB;
+            header1.LogOffset = (ulong)fileEnd;
+            header1.CalcChecksum();
+
+            fileEnd += header1.LogLength;
+
+            VhdxHeader header2 = new VhdxHeader(header1);
+            header2.SequenceNumber = 1;
+            header2.CalcChecksum();
+
+            RegionTable regionTable = new RegionTable();
+
+            RegionEntry metadataRegion = new RegionEntry();
+            metadataRegion.Guid = RegionEntry.MetadataRegionGuid;
+            metadataRegion.FileOffset = fileEnd;
+            metadataRegion.Length = (uint)Sizes.OneMiB;
+            metadataRegion.Flags = RegionFlags.Required;
+            regionTable.Regions.Add(metadataRegion.Guid, metadataRegion);
+
+
+            fileEnd += metadataRegion.Length;
+
+            RegionEntry batRegion = new RegionEntry();
+            batRegion.Guid = RegionEntry.BatGuid;
+            batRegion.FileOffset = 3 * Sizes.OneMiB;
+            batRegion.Length = (uint)Utilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
+            batRegion.Flags = RegionFlags.Required;
+            regionTable.Regions.Add(batRegion.Guid, batRegion);
+
+            fileEnd += batRegion.Length;
+
+            stream.Position = 0;
+            Utilities.WriteStruct(stream, fileHeader);
+
+            stream.Position = 64 * Sizes.OneKiB;
+            Utilities.WriteStruct(stream, header1);
+
+            stream.Position = 128 * Sizes.OneKiB;
+            Utilities.WriteStruct(stream, header2);
+
+            stream.Position = 192 * Sizes.OneKiB;
+            Utilities.WriteStruct(stream, regionTable);
+
+            stream.Position = 256 * Sizes.OneKiB;
+            Utilities.WriteStruct(stream, regionTable);
+             
+            // Set stream to min size
+            stream.Position = fileEnd - 1;
+            stream.WriteByte(0);
+
+            // Metadata
+            FileParameters fileParams = new FileParameters() { BlockSize = (uint)blockSize, Flags = FileParametersFlags.None };
+            ParentLocator parentLocator = new ParentLocator();
+
+
+            Stream metadataStream = new SubStream(stream, metadataRegion.FileOffset, metadataRegion.Length);
+            Metadata metadata = Metadata.Initialize(metadataStream, fileParams, (ulong)capacity, (uint)logicalSectorSize, (uint)physicalSectorSize, null);
+
+
         }
 
         private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent, string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
