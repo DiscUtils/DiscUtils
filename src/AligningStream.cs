@@ -57,8 +57,11 @@ namespace DiscUtils
             int startOffset = (int)(_position % _blockSize);
             if (startOffset == 0 && (count % _blockSize == 0 || _position + count == Length))
             {
+                // Aligned read - pass through to underlying stream.
                 WrappedStream.Position = _position;
-                return WrappedStream.Read(buffer, offset, count);
+                int numRead = WrappedStream.Read(buffer, offset, count);
+                _position += numRead;
+                return numRead;
             }
 
             long startPos = Utilities.RoundDown(_position, _blockSize);
@@ -77,6 +80,7 @@ namespace DiscUtils
 
             Array.Copy(tempBuffer, startOffset, buffer, offset, available);
 
+            _position += available;
             return available;
         }
 
@@ -126,6 +130,7 @@ namespace DiscUtils
             {
                 WrappedStream.Position = _position;
                 modifyStream(WrappedStream, 0, count);
+                _position += count;
                 return;
             }
 
@@ -146,6 +151,7 @@ namespace DiscUtils
             alignedPos = Utilities.RoundUp(_position, _blockSize);
             if (alignedPos >= unalignedEnd)
             {
+                _position = unalignedEnd;
                 return;
             }
 
@@ -159,6 +165,7 @@ namespace DiscUtils
             alignedPos += passthroughLength;
             if (alignedPos >= unalignedEnd)
             {
+                _position = unalignedEnd;
                 return;
             }
 
@@ -170,7 +177,7 @@ namespace DiscUtils
             WrappedStream.Position = alignedPos;
             WrappedStream.Write(_alignmentBuffer, 0, _blockSize);
 
-            _position += count;
+            _position = unalignedEnd;
         }
     }
 }
