@@ -134,7 +134,7 @@ namespace DiscUtils.Ntfs
             using (SparseMemoryStream ms = new SparseMemoryStream())
             {
                 Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-                NtfsFileSystem ntfs = NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
+                NtfsFileSystem ntfs = NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
 
                 // Check non-resident attribute
                 using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))

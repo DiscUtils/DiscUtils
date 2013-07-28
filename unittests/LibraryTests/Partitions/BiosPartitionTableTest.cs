@@ -52,7 +52,7 @@ namespace DiscUtils.Partitions
             int idx = table.Create(WellKnownPartitionType.WindowsFat, true);
 
             // Make sure the partition fills all but the first track on the disk.
-            Assert.AreEqual(geom.TotalSectors, table[idx].SectorCount + geom.SectorsPerTrack);
+            Assert.AreEqual(geom.TotalSectorsLong, table[idx].SectorCount + geom.SectorsPerTrack);
 
             // Make sure FAT16 was selected for a disk of this size
             Assert.AreEqual(BiosPartitionTypes.Fat16, table[idx].BiosType);

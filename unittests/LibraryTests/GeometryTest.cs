@@ -58,7 +58,7 @@ namespace DiscUtils
         public void TotalSectors()
         {
             Geometry g = new Geometry(333, 22, 11);
-            Assert.AreEqual(333 * 22 * 11, g.TotalSectors);
+            Assert.AreEqual(333 * 22 * 11, g.TotalSectorsLong);
         }
 
         [Test]

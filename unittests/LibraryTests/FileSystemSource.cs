@@ -74,7 +74,7 @@ namespace DiscUtils
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();
             Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
+            Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
             var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<Ntfs.NtfsFileSystem, Ntfs.NtfsFileSystemChecker>(ms);
             discFs.CheckpointInterval = 1;
             discFs.GlobalIOTraceCapturesStackTraces = false;
@@ -86,7 +86,7 @@ namespace DiscUtils
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();
             Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            return Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectors);
+            return Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
         }
 
     }

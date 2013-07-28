@@ -123,9 +123,18 @@ namespace DiscUtils
         /// <summary>
         /// Gets the total size of the disk (in sectors).
         /// </summary>
+        [Obsolete("Use TotalSectorsLong instead, to support very large disks.")]
         public int TotalSectors
         {
             get { return Cylinders * HeadsPerCylinder * SectorsPerTrack; }
+        }
+
+        /// <summary>
+        /// Gets the total size of the disk (in sectors).
+        /// </summary>
+        public long TotalSectorsLong
+        {
+            get { return (long)Cylinders * (long)HeadsPerCylinder * (long)SectorsPerTrack; }
         }
 
         /// <summary>
@@ -133,7 +142,7 @@ namespace DiscUtils
         /// </summary>
         public long Capacity
         {
-            get { return ((long)TotalSectors) * ((long)BytesPerSector); }
+            get { return (TotalSectorsLong) * ((long)BytesPerSector); }
         }
 
         /// <summary>
@@ -398,7 +407,7 @@ namespace DiscUtils
         {
             if (capacity <= 0)
             {
-                capacity = TotalSectors * 512L;
+                capacity = TotalSectorsLong * 512L;
             }
 
             switch (translation)

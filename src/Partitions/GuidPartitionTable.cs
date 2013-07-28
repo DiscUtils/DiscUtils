@@ -478,7 +478,7 @@ namespace DiscUtils.Partitions
                 }
             }
 
-            if (_diskGeometry.TotalSectors - startSector < numSectors)
+            if (_diskGeometry.TotalSectorsLong - startSector < numSectors)
             {
                 throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to find free space of {0} sectors", numSectors));
             }
