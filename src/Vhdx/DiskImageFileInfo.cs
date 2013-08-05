@@ -35,14 +35,16 @@ namespace DiscUtils.Vhdx
         private VhdxHeader _vhdxHeader2;
         private RegionTable _regions;
         private Metadata _metadata;
+        private LogSequence _activeLogSequence;
 
-        internal DiskImageFileInfo(FileHeader fileHeader, VhdxHeader vhdxHeader1, VhdxHeader vhdxHeader2, RegionTable regions, Metadata metadata)
+        internal DiskImageFileInfo(FileHeader fileHeader, VhdxHeader vhdxHeader1, VhdxHeader vhdxHeader2, RegionTable regions, Metadata metadata, LogSequence activeLogSequence)
         {
             _fileHeader = fileHeader;
             _vhdxHeader1 = vhdxHeader1;
             _vhdxHeader2 = vhdxHeader2;
             _regions = regions;
             _metadata = metadata;
+            _activeLogSequence = activeLogSequence;
         }
 
         /// <summary>
@@ -144,6 +146,52 @@ namespace DiscUtils.Vhdx
         public HeaderInfo SecondHeader
         {
             get { return new HeaderInfo(_vhdxHeader2); }
+        }
+
+        /// <summary>
+        /// Gets the active header for the VHDX file.
+        /// </summary>
+        public HeaderInfo ActiveHeader
+        {
+            get
+            {
+                if (_vhdxHeader1 == null)
+                {
+                    if (_vhdxHeader2 == null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return new HeaderInfo(_vhdxHeader2);
+                    }
+                }
+                else if (_vhdxHeader2 == null)
+                {
+                    return new HeaderInfo(_vhdxHeader1);
+                }
+                else
+                {
+                    return new HeaderInfo((_vhdxHeader1.SequenceNumber > _vhdxHeader2.SequenceNumber) ? _vhdxHeader1 : _vhdxHeader2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the active log sequence for this VHDX file.
+        /// </summary>
+        public IEnumerable<LogEntryInfo> ActiveLogSequence
+        {
+            get
+            {
+                if (_activeLogSequence != null)
+                {
+                    foreach (var entry in _activeLogSequence)
+                    {
+                        yield return new LogEntryInfo(entry);
+                    }
+                }
+            }
         }
 
         /// <summary>

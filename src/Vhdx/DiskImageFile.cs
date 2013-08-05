@@ -42,6 +42,11 @@ namespace DiscUtils.Vhdx
         private Ownership _ownsStream;
 
         /// <summary>
+        /// The stream containing the logical VHDX content and metadata allowing for log replay.
+        /// </summary>
+        private Stream _logicalStream;
+
+        /// <summary>
         /// The object that can be used to locate relative file paths.
         /// </summary>
         private FileLocator _fileLocator;
@@ -150,7 +155,9 @@ namespace DiscUtils.Vhdx
                 _fileStream.Position = 128 * Sizes.OneKiB;
                 VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
 
-                return new DiskImageFileInfo(fileHeader, vhdxHeader1, vhdxHeader2, _regionTable, _metadata);
+                LogSequence activeLogSequence = FindActiveLogSequence();
+
+                return new DiskImageFileInfo(fileHeader, vhdxHeader1, vhdxHeader2, _regionTable, _metadata, activeLogSequence);
             }
         }
 
@@ -341,7 +348,7 @@ namespace DiscUtils.Vhdx
         public Stream OpenRegion(Guid region)
         {
             RegionEntry metadataRegion = _regionTable.Regions[region];
-            return new SubStream(_fileStream, metadataRegion.FileOffset, metadataRegion.Length);
+            return new SubStream(_logicalStream, metadataRegion.FileOffset, metadataRegion.Length);
         }
 
         /// <summary>
@@ -441,7 +448,7 @@ namespace DiscUtils.Vhdx
                 theOwnership = Ownership.Dispose;
             }
 
-            ContentStream contentStream = new ContentStream(SparseStream.FromStream(_fileStream, Ownership.None), _batStream, _freeSpace, _metadata, Capacity, theParent, theOwnership);
+            ContentStream contentStream = new ContentStream(SparseStream.FromStream(_logicalStream, Ownership.None), _fileStream.CanWrite, _batStream, _freeSpace, _metadata, Capacity, theParent, theOwnership);
             return new AligningStream(contentStream, Ownership.Dispose, (int)_metadata.LogicalSectorSize);
         }
 
@@ -456,6 +463,12 @@ namespace DiscUtils.Vhdx
             {
                 if (disposing)
                 {
+                    if (_logicalStream != _fileStream)
+                    {
+                        _logicalStream.Dispose();
+                        _logicalStream = null;
+                    }
+
                     if (_ownsStream == Ownership.Dispose)
                     {
                         _fileStream.Dispose();
@@ -578,12 +591,7 @@ namespace DiscUtils.Vhdx
 
             ReadHeaders();
 
-            if (_header.LogGuid != Guid.Empty)
-            {
-                throw new NotSupportedException("Detected VHDX file with replay log - not yet supported");
-            }
-
-            _freeSpace.Reserve((long)_header.LogOffset, _header.LogLength);
+            ReplayLog();
 
             ReadRegionTable();
 
@@ -637,6 +645,92 @@ namespace DiscUtils.Vhdx
         {
             Stream regionStream = OpenRegion(RegionTable.MetadataRegionGuid);
             _metadata = new Metadata(regionStream);
+        }
+
+        private void ReplayLog()
+        {
+            _freeSpace.Reserve((long)_header.LogOffset, _header.LogLength);
+
+            _logicalStream = _fileStream;
+
+            // If log is empty, skip.
+            if (_header.LogGuid == Guid.Empty)
+            {
+                return;
+            }
+
+            LogSequence activeLogSequence = FindActiveLogSequence();
+
+            if (activeLogSequence == null || activeLogSequence.Count == 0)
+            {
+                throw new IOException("Unable to replay VHDX log, suspected corrupt VHDX file");
+            }
+
+            if (activeLogSequence.Count > 1 || !activeLogSequence.Head.IsEmpty)
+            {
+                // TODO - perform actual replay (needs VHDX with real log to replay)
+                // However, have seen VHDX with a non-empty log with no data to replay.  These are
+                // 'safe' to open.
+                throw new NotImplementedException("Actual replay of VHDX logs not implemented yet");
+
+                // Have a log to replay, and the base stream is read-only. Use a snapshot stream to
+                // replay in RAM.
+                //if (!_fileStream.CanWrite)
+                //{
+                //    SnapshotStream replayStream = new SnapshotStream(_fileStream, Ownership.None);
+                //    replayStream.Snapshot();
+                //    _logicalStream = replayStream;
+                //}
+            }
+        }
+
+        private LogSequence FindActiveLogSequence()
+        {
+            using (Stream logStream = new CircularStream(new SubStream(_fileStream, (long)_header.LogOffset, (long)_header.LogLength), Ownership.Dispose))
+            {
+                LogSequence candidateActiveSequence = new LogSequence();
+                LogEntry logEntry = null;
+
+                long oldTail;
+                long currentTail = 0;
+
+                do
+                {
+                    oldTail = currentTail;
+
+                    logStream.Position = currentTail;
+                    LogSequence currentSequence = new LogSequence();
+
+                    while (LogEntry.TryRead(logStream, out logEntry)
+                        && logEntry.LogGuid == _header.LogGuid
+                        && (currentSequence.Count == 0
+                            || logEntry.SequenceNumber == currentSequence.Head.SequenceNumber + 1))
+                    {
+                        currentSequence.Add(logEntry);
+                        logEntry = null;
+                    }
+
+                    if (currentSequence.Count > 0
+                        && currentSequence.Contains(currentSequence.Head.Tail)
+                        && currentSequence.HigherSequenceThan(candidateActiveSequence))
+                    {
+                        candidateActiveSequence = currentSequence;
+                    }
+
+                    if (currentSequence.Count == 0)
+                    {
+                        currentTail += LogEntry.LogSectorSize;
+                    }
+                    else
+                    {
+                        currentTail = currentSequence.Head.Position + LogEntry.LogSectorSize;
+                    }
+
+                    currentTail = currentTail % logStream.Length;
+                } while (currentTail > oldTail);
+
+                return candidateActiveSequence;
+            }
         }
 
         private void ReadRegionTable()

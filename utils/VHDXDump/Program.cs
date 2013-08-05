@@ -80,6 +80,28 @@ namespace VHDDump
                 WriteHeaderInfo(info.FirstHeader);
                 WriteHeaderInfo(info.SecondHeader);
 
+                if (info.ActiveHeader.LogGuid != Guid.Empty)
+                {
+                    Console.WriteLine("Log Info (Active Sequence)");
+                    Console.WriteLine("--------------------------");
+
+                    foreach (var entry in info.ActiveLogSequence)
+                    {
+                        Console.WriteLine("   Log Entry");
+                        Console.WriteLine("   ---------");
+                        Console.WriteLine("         Sequence Number: {0}", entry.SequenceNumber);
+                        Console.WriteLine("                    Tail: {0}", entry.Tail);
+                        Console.WriteLine("     Flushed File Offset: {0} (0x{0:X8})", entry.FlushedFileOffset);
+                        Console.WriteLine("        Last File Offset: {0} (0x{0:X8})", entry.LastFileOffset);
+                        Console.WriteLine("            File Extents: {0}", entry.IsEmpty ? "<none>" : "");
+                        foreach (var extent in entry.ModifiedExtents)
+                        {
+                            Console.WriteLine("                          {0} +{1}  (0x{0:X8} +0x{1:X8})", extent.Offset, extent.Count);
+                        }
+                        Console.WriteLine();
+                    }
+                }
+
                 RegionTableInfo regionTable = info.RegionTable;
                 Console.WriteLine("Region Table Info");
                 Console.WriteLine("-----------------");

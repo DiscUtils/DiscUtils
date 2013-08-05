@@ -29,6 +29,7 @@ namespace DiscUtils.Vhdx
     internal sealed class ContentStream : MappedStream
     {
         private SparseStream _fileStream;
+        private bool? _canWrite;
         private Stream _batStream;
         private FreeSpaceTable _freeSpaceTable;
         private FileParameters _fileParameters;
@@ -41,9 +42,10 @@ namespace DiscUtils.Vhdx
         private long _position;
         private bool _atEof;
 
-        public ContentStream(SparseStream fileStream, Stream batStream, FreeSpaceTable freeSpaceTable, Metadata metadata, long length, SparseStream parentStream, Ownership ownsParent)
+        public ContentStream(SparseStream fileStream, bool? canWrite, Stream batStream, FreeSpaceTable freeSpaceTable, Metadata metadata, long length, SparseStream parentStream, Ownership ownsParent)
         {
             _fileStream = fileStream;
+            _canWrite = canWrite;
             _batStream = batStream;
             _freeSpaceTable = freeSpaceTable;
             _metadata = metadata;
@@ -91,7 +93,7 @@ namespace DiscUtils.Vhdx
             {
                 CheckDisposed();
 
-                return _fileStream.CanWrite;
+                return _canWrite ?? _fileStream.CanWrite;
             }
         }
 
@@ -261,6 +263,11 @@ namespace DiscUtils.Vhdx
         public override void Write(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
+
+            if (!CanWrite)
+            {
+                throw new InvalidOperationException("Attempt to write to read-only VHDX");
+            }
 
             if (_position % _metadata.LogicalSectorSize != 0 || count % _metadata.LogicalSectorSize != 0)
             {

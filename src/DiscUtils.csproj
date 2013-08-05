@@ -124,6 +124,7 @@
     <Compile Include="BuiltStream.cs" />
     <Compile Include="ChsAddress.cs" />
     <Compile Include="BuilderBytesExtent.cs" />
+    <Compile Include="CircularStream.cs" />
     <Compile Include="Crc32.cs" />
     <Compile Include="Crc32BigEndian.cs" />
     <Compile Include="Crc32Algorithm.cs" />
@@ -739,6 +740,10 @@
     <Compile Include="Vhdx\FileParametersFlags.cs" />
     <Compile Include="Vhdx\FreeSpaceTable.cs" />
     <Compile Include="Vhdx\HeaderInfo.cs" />
+    <Compile Include="Vhdx\LogEntry.cs" />
+    <Compile Include="Vhdx\LogEntryHeader.cs" />
+    <Compile Include="Vhdx\LogEntryInfo.cs" />
+    <Compile Include="Vhdx\LogSequence.cs" />
     <Compile Include="Vhdx\Metadata.cs" />
     <Compile Include="Vhdx\MetadataEntry.cs" />
     <Compile Include="Vhdx\MetadataEntryFlags.cs" />
