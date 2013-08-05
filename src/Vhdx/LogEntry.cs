@@ -104,8 +104,6 @@ namespace DiscUtils.Vhdx
             LogEntryHeader header = new LogEntryHeader();
             header.ReadFrom(sectorBuffer, 0);
 
-            Console.WriteLine("{0:X}", header.SequenceNumber);
-
             if (!header.IsValid || header.EntryLength > logStream.Length)
             {
                 entry = null;
