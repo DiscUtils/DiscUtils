@@ -25,7 +25,7 @@ namespace DiscUtils.Ntfs
     using System;
     using System.IO;
 
-    internal sealed class Bitmap
+    internal sealed class Bitmap : IDisposable
     {
         private Stream _stream;
         private long _maxIndex;
@@ -39,6 +39,15 @@ namespace DiscUtils.Ntfs
             _stream = stream;
             _maxIndex = maxIndex;
             _bitmap = new BlockCacheStream(SparseStream.FromStream(stream, Ownership.None), Ownership.None);
+        }
+
+        public void Dispose()
+        {
+            if (_bitmap != null)
+            {
+                _bitmap.Dispose();
+                _bitmap = null;
+            }
         }
 
         public bool IsPresent(long index)

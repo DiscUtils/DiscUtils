@@ -110,12 +110,15 @@ namespace DiscUtils
                 // If we need to find a new region, look for it
                 if (_currentExtent == null)
                 {
-                    int idx = _extents.BinarySearch(new SearchExtent(_position), new ExtentRangeComparer());
-                    if (idx >= 0)
+                    using (SearchExtent searchExtent = new SearchExtent(_position))
                     {
-                        BuilderExtent extent = _extents[idx];
-                        extent.PrepareForRead();
-                        _currentExtent = extent;
+                        int idx = _extents.BinarySearch(searchExtent, new ExtentRangeComparer());
+                        if (idx >= 0)
+                        {
+                            BuilderExtent extent = _extents[idx];
+                            extent.PrepareForRead();
+                            _currentExtent = extent;
+                        }
                     }
                 }
 
@@ -238,6 +241,10 @@ namespace DiscUtils
             {
             }
 
+            public override void Dispose()
+            {
+            }
+
             internal override void PrepareForRead()
             {
                 // Not valid to use this 'dummy' extent for actual construction
@@ -261,6 +268,16 @@ namespace DiscUtils
         {
             public int Compare(BuilderExtent x, BuilderExtent y)
             {
+                if (x == null)
+                {
+                    throw new ArgumentNullException("x");
+                }
+
+                if (y == null)
+                {
+                    throw new ArgumentNullException("y");
+                }
+
                 if (x.Start + x.Length <= y.Start)
                 {
                     // x < y, with no intersection
@@ -281,6 +298,16 @@ namespace DiscUtils
         {
             public int Compare(BuilderExtent x, BuilderExtent y)
             {
+                if (x == null)
+                {
+                    throw new ArgumentNullException("x");
+                }
+
+                if (y == null)
+                {
+                    throw new ArgumentNullException("y");
+                }
+
                 long val = x.Start - y.Start;
                 if (val < 0)
                 {

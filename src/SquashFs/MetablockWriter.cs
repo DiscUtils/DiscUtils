@@ -27,7 +27,7 @@ namespace DiscUtils.SquashFs
     using System.IO.Compression;
     using DiscUtils.Compression;
 
-    internal sealed class MetablockWriter
+    internal sealed class MetablockWriter : IDisposable
     {
         private MemoryStream _buffer;
 
@@ -46,6 +46,15 @@ namespace DiscUtils.SquashFs
             get
             {
                 return new MetadataRef(_currentBlockNum, _currentOffset);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_buffer != null)
+            {
+                _buffer.Dispose();
+                _buffer = null;
             }
         }
 

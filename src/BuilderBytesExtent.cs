@@ -39,6 +39,10 @@ namespace DiscUtils
         {
         }
 
+        public override void Dispose()
+        {
+        }
+
         internal override void PrepareForRead()
         {
         }

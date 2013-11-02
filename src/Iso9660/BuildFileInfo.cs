@@ -100,7 +100,6 @@ namespace DiscUtils.Iso9660
             if (_contentStream != s)
             {
                 s.Close();
-                s.Dispose();
             }
         }
 

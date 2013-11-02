@@ -164,6 +164,12 @@ namespace DiscUtils.Ntfs
                 _recordStream = null;
             }
 
+            if (_bitmap != null)
+            {
+                _bitmap.Dispose();
+                _bitmap = null;
+            }
+
             GC.SuppressFinalize(this);
         }
 

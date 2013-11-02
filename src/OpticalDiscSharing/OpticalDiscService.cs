@@ -192,7 +192,6 @@ namespace DiscUtils.OpticalDiscSharing
             req["user"] = userName;
 
             using (Stream outStream = wreq.GetRequestStream())
-            using (StreamWriter w = new StreamWriter(outStream, Encoding.UTF8))
             {
                 Plist.Write(outStream, req);
             }

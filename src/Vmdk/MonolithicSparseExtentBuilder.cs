@@ -196,15 +196,31 @@ namespace DiscUtils.Vmdk
         private class GrainTableDataExtent : BuilderExtent
         {
             private SparseStream _content;
+            private Ownership _contentOwnership;
             private long _grainSize;
             private int[] _grainMapOffsets;
             private Range<long, long>[] _grainMapRanges;
 
             public GrainTableDataExtent(long start, SparseStream content, long grainSize)
+                : this(start, content, Ownership.None, grainSize)
+            {
+            }
+
+            public GrainTableDataExtent(long start, SparseStream content, Ownership contentOwnership, long grainSize)
                 : base(start, SectorsPresent(content, grainSize) * Sizes.Sector)
             {
                 _content = content;
+                _contentOwnership = contentOwnership;
                 _grainSize = grainSize;
+            }
+
+            public override void Dispose()
+            {
+                if (_content != null && _contentOwnership != Ownership.Dispose)
+                {
+                    _content.Dispose();
+                    _content = null;
+                }
             }
 
             internal override void PrepareForRead()

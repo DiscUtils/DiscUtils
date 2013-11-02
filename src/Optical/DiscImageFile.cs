@@ -178,9 +178,14 @@ namespace DiscUtils.Optical
                     if (_toDispose != null)
                     {
                         _toDispose.Dispose();
+                        _toDispose = null;
                     }
 
-                    _toDispose = null;
+                    if (_content != null)
+                    {
+                        _content.Dispose();
+                        _content = null;
+                    }
                 }
             }
             finally

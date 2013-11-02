@@ -38,6 +38,15 @@ namespace DiscUtils.Iso9660
             _fileInfo = fileInfo;
         }
 
+        public override void Dispose()
+        {
+            if (_readStream != null)
+            {
+                _fileInfo.CloseStream(_readStream);
+                _readStream = null;
+            }
+        }
+
         internal override void PrepareForRead()
         {
             _readStream = _fileInfo.OpenStream();

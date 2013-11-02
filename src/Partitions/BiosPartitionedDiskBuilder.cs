@@ -35,6 +35,7 @@ namespace DiscUtils.Partitions
     /// streams only when a client of this class tries to read from
     /// that partition.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification="SparseMemoryStream holds no resources")]
     public class BiosPartitionedDiskBuilder : StreamBuilder
     {
         private long _capacity;
@@ -70,6 +71,11 @@ namespace DiscUtils.Partitions
         [Obsolete("Use the variant that takes VirtualDisk, this method breaks for disks with extended partitions", false)]
         public BiosPartitionedDiskBuilder(long capacity, byte[] bootSectors, Geometry biosGeometry)
         {
+            if (bootSectors == null)
+            {
+                throw new ArgumentNullException("bootSectors");
+            }
+
             _capacity = capacity;
             _biosGeometry = biosGeometry;
 
@@ -88,6 +94,11 @@ namespace DiscUtils.Partitions
         /// <param name="sourceDisk">The disk to clone</param>
         public BiosPartitionedDiskBuilder(VirtualDisk sourceDisk)
         {
+            if (sourceDisk == null)
+            {
+                throw new ArgumentNullException("sourceDisk");
+            }
+
             _capacity = sourceDisk.Capacity;
             _biosGeometry = sourceDisk.BiosGeometry;
 

@@ -104,6 +104,15 @@ namespace DiscUtils.Vhd
                 }
             }
 
+            public override void Dispose()
+            {
+                if (_dataStream != null)
+                {
+                    _dataStream.Dispose();
+                    _dataStream = null;
+                }
+            }
+
             public void SetEntry(int index, uint fileSector)
             {
                 _entries[index] = fileSector;
@@ -129,19 +138,45 @@ namespace DiscUtils.Vhd
 
             internal override void DisposeReadState()
             {
-                _dataStream = null;
+                if (_dataStream != null)
+                {
+                    _dataStream.Dispose();
+                    _dataStream = null;
+                }
             }
         }
 
         private class DataBlockExtent : BuilderExtent
         {
             private SparseStream _content;
+            private Ownership _ownership;
             private MemoryStream _bitmapStream;
 
             public DataBlockExtent(long start, SparseStream content)
+                : this(start, content, Ownership.None)
+            {
+            }
+
+            public DataBlockExtent(long start, SparseStream content, Ownership ownership)
                 : base(start, Utilities.RoundUp(Utilities.Ceil(content.Length, Sizes.Sector) / 8, Sizes.Sector) + Utilities.RoundUp(content.Length, Sizes.Sector))
             {
                 _content = content;
+                _ownership = ownership;
+            }
+
+            public override void Dispose()
+            {
+                if (_content != null && _ownership == Ownership.Dispose)
+                {
+                    _content.Dispose();
+                    _content = null;
+                }
+
+                if (_bitmapStream != null)
+                {
+                    _bitmapStream.Dispose();
+                    _bitmapStream = null;
+                }
             }
 
             internal override void PrepareForRead()
@@ -177,7 +212,11 @@ namespace DiscUtils.Vhd
 
             internal override void DisposeReadState()
             {
-                _bitmapStream = null;
+                if (_bitmapStream != null)
+                {
+                    _bitmapStream.Dispose();
+                    _bitmapStream = null;
+                }
             }
         }
     }

@@ -27,11 +27,27 @@ namespace DiscUtils
     internal class BuilderStreamExtent : BuilderExtent
     {
         private Stream _source;
+        private Ownership _ownership;
 
         public BuilderStreamExtent(long start, Stream source)
+            : this(start, source, Ownership.None)
+        {
+        }
+
+        public BuilderStreamExtent(long start, Stream source, Ownership ownership)
             : base(start, source.Length)
         {
             _source = source;
+            _ownership = ownership;
+        }
+
+        public override void Dispose()
+        {
+            if (_source != null && _ownership == Ownership.Dispose)
+            {
+                _source.Dispose();
+                _source = null;
+            }
         }
 
         internal override void PrepareForRead()

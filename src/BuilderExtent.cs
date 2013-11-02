@@ -22,9 +22,10 @@
 
 namespace DiscUtils
 {
+    using System;
     using System.Collections.Generic;
 
-    internal abstract class BuilderExtent
+    internal abstract class BuilderExtent : IDisposable
     {
         private long _start;
         private long _length;
@@ -56,6 +57,8 @@ namespace DiscUtils
         {
             get { return _length; }
         }
+
+        public abstract void Dispose();
 
         internal abstract void PrepareForRead();
 

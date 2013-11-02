@@ -26,7 +26,7 @@ namespace DiscUtils.Ntfs
     using System.Collections.Generic;
     using System.IO;
 
-    internal class Index
+    internal class Index : IDisposable
     {
         protected File _file;
         protected string _name;
@@ -167,6 +167,15 @@ namespace DiscUtils.Ntfs
                 {
                     _rootNode.AddEntry(key, value);
                 }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_indexBitmap != null)
+            {
+                _indexBitmap.Dispose();
+                _indexBitmap = null;
             }
         }
 

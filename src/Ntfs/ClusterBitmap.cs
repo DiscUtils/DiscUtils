@@ -22,10 +22,11 @@
 
 namespace DiscUtils.Ntfs
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
-    internal class ClusterBitmap
+    internal class ClusterBitmap : IDisposable
     {
         private File _file;
         private Bitmap _bitmap;
@@ -39,6 +40,15 @@ namespace DiscUtils.Ntfs
             _bitmap = new Bitmap(
                 _file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite),
                 Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64, file.Context.BiosParameterBlock.SectorsPerCluster));
+        }
+
+        public void Dispose()
+        {
+            if (_bitmap != null)
+            {
+                _bitmap.Dispose();
+                _bitmap = null;
+            }
         }
 
         /// <summary>

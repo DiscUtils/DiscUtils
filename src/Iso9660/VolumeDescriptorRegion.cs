@@ -33,6 +33,10 @@ namespace DiscUtils.Iso9660
         {
         }
 
+        public override void Dispose()
+        {
+        }
+
         internal override void PrepareForRead()
         {
             _readCache = GetBlockData();

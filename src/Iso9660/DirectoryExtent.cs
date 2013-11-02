@@ -42,6 +42,10 @@ namespace DiscUtils.Iso9660
             _enc = enc;
         }
 
+        public override void Dispose()
+        {
+        }
+
         internal override void PrepareForRead()
         {
             _readCache = new byte[Length];

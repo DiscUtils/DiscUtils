@@ -82,6 +82,15 @@ namespace DiscUtils.Vmdk
                 _buffer = new byte[Length];
             }
 
+            public override void Dispose()
+            {
+                if (_streamView != null)
+                {
+                    _streamView.Dispose();
+                    _streamView = null;
+                }
+            }
+
             public void SetEntry(int index, uint grainTableSector)
             {
                 Utilities.WriteBytesLittleEndian(grainTableSector, _buffer, index * 4);
@@ -100,13 +109,18 @@ namespace DiscUtils.Vmdk
 
             internal override void DisposeReadState()
             {
-                _streamView = null;
+                if (_streamView != null)
+                {
+                    _streamView.Dispose();
+                    _streamView = null;
+                }
             }
         }
 
         private class GrainTableExtent : BuilderExtent
         {
             private SparseStream _content;
+            private Ownership _contentOwnership;
             private ServerSparseExtentHeader _header;
 
             private MemoryStream _grainTableStream;
@@ -114,10 +128,31 @@ namespace DiscUtils.Vmdk
             private List<long> _grainContiguousRangeMapping;
 
             public GrainTableExtent(long outputStart, SparseStream content, ServerSparseExtentHeader header)
+                : this(outputStart, content, Ownership.None, header)
+            {
+            }
+
+            public GrainTableExtent(long outputStart, SparseStream content, Ownership contentOwnership, ServerSparseExtentHeader header)
                 : base(outputStart, CalcSize(content, header))
             {
                 _content = content;
+                _contentOwnership = contentOwnership;
                 _header = header;
+            }
+
+            public override void Dispose()
+            {
+                if (_content != null && _contentOwnership == Ownership.Dispose)
+                {
+                    _content.Dispose();
+                    _content = null;
+                }
+
+                if (_grainTableStream != null)
+                {
+                    _grainTableStream.Dispose();
+                    _grainTableStream = null;
+                }
             }
 
             internal override void PrepareForRead()
@@ -166,7 +201,12 @@ namespace DiscUtils.Vmdk
 
             internal override void DisposeReadState()
             {
-                _grainTableStream = null;
+                if (_grainTableStream != null)
+                {
+                    _grainTableStream.Dispose();
+                    _grainTableStream = null;
+                }
+
                 _grainMapping = null;
                 _grainContiguousRangeMapping = null;
             }

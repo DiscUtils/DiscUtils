@@ -84,12 +84,9 @@ namespace DiscUtils.Wim
         {
             get
             {
-                using (Stream s = OpenResourceStream(_fileHeader.XmlDataHeader))
+                using (StreamReader reader = new StreamReader(OpenResourceStream(_fileHeader.XmlDataHeader), true))
                 {
-                    using (StreamReader reader = new StreamReader(s, true))
-                    {
-                        return reader.ReadToEnd();
-                    }
+                    return reader.ReadToEnd();
                 }
             }
         }

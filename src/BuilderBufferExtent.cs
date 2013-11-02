@@ -41,6 +41,10 @@ namespace DiscUtils
             _buffer = buffer;
         }
 
+        public override void Dispose()
+        {
+        }
+
         internal override void PrepareForRead()
         {
             if (!_fixedBuffer)
