@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -55,6 +55,9 @@
     <SignAssembly>true</SignAssembly>
     <StyleCopEnabled>true</StyleCopEnabled>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>DiscUtilsCodeAnalysisRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release %28StyleCop%29|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -132,6 +135,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Ext\ExtFileSystemOptions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />
@@ -857,7 +861,9 @@
     <None Include="Resources\XVA_ova_vdi.xml" />
     <None Include="Resources\XVA_ova_vm.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProgramFiles)\MSBuild\Microsoft\StyleCop\v4.4\Microsoft.StyleCop.targets" Condition="Exists('$(ProgramFiles)\MSBuild\Microsoft\StyleCop\v4.4\Microsoft.StyleCop.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

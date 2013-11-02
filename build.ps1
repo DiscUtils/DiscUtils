@@ -25,13 +25,14 @@ if(Test-Path ${basedir}\Help\Output)
 {
   del ${basedir}\Help\Output -recurse -force
 }
-& ${vcsexpress} "${basedir}\DiscUtils.sln" /clean Debug | out-null
-& ${vcsexpress} "${basedir}\DiscUtils.sln" /clean Release | out-null
-& ${vcsexpress} "${basedir}\DiscUtils.sln" /clean SignedRelease | out-null
+& ${msbuild} "${basedir}\DiscUtils.sln" /t:Clean Debug | out-null
+& ${msbuild} "${basedir}\DiscUtils.sln" /t:Clean Release | out-null
+& ${msbuild} "${basedir}\DiscUtils.sln" /t:Clean SignedRelease | out-null
 
 # Compile
 Write-Host "Compiling..."
-& ${vcsexpress} "${basedir}\DiscUtils.sln" /build SignedRelease | out-null
+& ${msbuild} "${basedir}\DiscUtils.sln" /m /t:Build /p:Configuration=SignedRelease
+# | out-null
 if(-not $?)
 {
   Write-Host "Visual Studio Build Failed"
@@ -57,17 +58,18 @@ $lines = $lines | Foreach-Object { $_ -replace "AssemblyVersion\(.*\)", "Assembl
 $lines | Set-Content "${basedir}\Version.cs"
 
 # Check FxCop
-Write-Host "Checking output against FxCop..."
-$fxcopOutput = & "${fxcop}" /p:${basedir}\DiscUtils.fxcop /o:${basedir}\FxCopReport.xml | out-string
-if(Test-Path ${basedir}\FxCopReport.xml)
-{
-  Write-Host "FxCop failed"
-  Write-Host $fxcopOutput
-  Exit
-}
+#Write-Host "Checking output against FxCop..."
+#$fxcopOutput = & "${fxcop}" /p:${basedir}\DiscUtils.fxcop /o:${basedir}\FxCopReport.xml | out-string
+#if(Test-Path ${basedir}\FxCopReport.xml)
+#{
+#  Write-Host "FxCop failed"
+#  Write-Host $fxcopOutput
+#  Exit
+#}
 
 # Generate help
 Write-Host "Generating help... (takes a long time)"
-& ${msbuild} ${basedir}\Help\Library.shfbproj | out-null
+& ${msbuild} ${basedir}\Help\Library.shfbproj /p:Configuration=SignedRelease
+# | out-null
 
 Write-Host "Build Complete!"
