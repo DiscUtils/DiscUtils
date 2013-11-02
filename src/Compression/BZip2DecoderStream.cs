@@ -148,14 +148,14 @@ namespace DiscUtils.Compression
         /// <returns>The number of bytes read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (buffer.Length < offset + count)
-            {
-                throw new ArgumentException("Buffer smaller than declared");
-            }
-
             if (buffer == null)
             {
                 throw new ArgumentNullException("buffer");
+            }
+
+            if (buffer.Length < offset + count)
+            {
+                throw new ArgumentException("Buffer smaller than declared");
             }
 
             if (offset < 0)
