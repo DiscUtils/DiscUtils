@@ -145,6 +145,11 @@ namespace DiscUtils.Fat
             return _raw[0] == 0xE5;
         }
 
+        public bool IsEndMarker()
+        {
+            return _raw[0] == 0x00;
+        }
+
         public void GetBytes(byte[] data, int offset)
         {
             Array.Copy(_raw, 0, data, offset, 11);

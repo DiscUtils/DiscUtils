@@ -457,7 +457,7 @@ namespace DiscUtils.Fat
                     _parentEntry = entry;
                     _parentEntryLocation = streamPos;
                 }
-                else if (entry.Name == FileName.Null)
+                else if (entry.Name.IsEndMarker())
                 {
                     // Free Entry, no more entries available
                     _endOfEntries = streamPos;
