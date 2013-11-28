@@ -25,6 +25,7 @@ namespace DiscUtils.Vhdx
     using System;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Security.Permissions;
 
     internal sealed class Metadata
     {
@@ -124,6 +125,7 @@ namespace DiscUtils.Vhdx
 
         private delegate void Writer<T>(T val, byte[] buffer, int offset);
 
+        [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
         private static uint AddEntryValue<T>(T data, Writer<T> writer, Guid id, MetadataEntryFlags flags, MetadataTable header, uint dataOffset, Stream stream)
         {
             MetadataEntryKey key = new MetadataEntryKey(id, (flags & MetadataEntryFlags.IsUser) != 0);
@@ -158,6 +160,7 @@ namespace DiscUtils.Vhdx
             return default(T);
         }
 
+        [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
         private T ReadValue<T>(Guid itemId, bool isUser, Reader<T> reader)
         {
             MetadataEntryKey key = new MetadataEntryKey(itemId, isUser);
