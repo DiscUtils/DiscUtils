@@ -142,7 +142,25 @@ namespace DiscUtils.Vhdx
                 Metadata.Initialize(metadataStream, fileParams, (ulong)_content.Length, (uint)logicalSectorSize, (uint)physicalSectorSize, null);
                 extents.Add(new BuilderBufferExtent(metadataRegion.FileOffset, metadataBuffer));
 
-                // TODO: BAT & Stream contents
+                List<Range<long, long>> presentBlocks = new List<Range<long, long>>(StreamExtent.Blocks(_content.Extents, blockSize));
+
+                // BAT
+                BlockAllocationTableBuilderExtent batExtent = new BlockAllocationTableBuilderExtent(batRegion.FileOffset, batRegion.Length, presentBlocks, fileEnd, blockSize, chunkRatio);
+                extents.Add(batExtent);
+
+                // Stream contents
+                foreach (var range in presentBlocks)
+                {
+                    long substreamStart = range.Offset * blockSize;
+                    long substreamCount = Math.Min(_content.Length - substreamStart, range.Count * blockSize);
+
+                    SubStream dataSubStream = new SubStream(_content, substreamStart, substreamCount);
+                    BuilderSparseStreamExtent dataExtent = new BuilderSparseStreamExtent(fileEnd, dataSubStream);
+                    extents.Add(dataExtent);
+
+                    fileEnd += range.Count * blockSize;
+                }
+
 
                 totalLength = fileEnd;
 
@@ -154,6 +172,69 @@ namespace DiscUtils.Vhdx
                 byte[] buffer = new byte[structure.Size];
                 structure.WriteTo(buffer, 0);
                 return new BuilderBufferExtent(position, buffer);
+            }
+        }
+
+        private class BlockAllocationTableBuilderExtent : BuilderExtent
+        {
+            private List<Range<long, long>> _blocks;
+            private long _dataStart;
+            private long _blockSize;
+            private long _chunkRatio;
+
+            private byte[] _batData;
+
+            public BlockAllocationTableBuilderExtent(long start, long length, List<Range<long,long>> blocks, long dataStart, long blockSize, long chunkRatio)
+                : base(start, length)
+            {
+                _blocks = blocks;
+                _dataStart = dataStart;
+                _blockSize = blockSize;
+                _chunkRatio = chunkRatio;
+            }
+
+            public override void Dispose()
+            {
+                _batData = null;
+            }
+
+            internal override void PrepareForRead()
+            {
+                _batData = new byte[Length];
+
+                long fileOffset = _dataStart;
+                BatEntry entry = new BatEntry();
+
+                foreach(var range in _blocks)
+                {
+                    for(long block = range.Offset; block < range.Offset + range.Count; ++block)
+                    {
+                        long chunk = block / _chunkRatio;
+                        long chunkOffset = block % _chunkRatio;
+                        long batIndex = (chunk * (_chunkRatio + 1)) + chunkOffset;
+
+                        entry.FileOffsetMB = fileOffset / Sizes.OneMiB;
+                        entry.PayloadBlockStatus = PayloadBlockStatus.FullyPresent;
+                        entry.WriteTo(_batData, (int)(batIndex * 8));
+
+                        fileOffset += _blockSize;
+                    }
+                }
+            }
+
+            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            {
+                int start = (int)Math.Min(diskOffset - Start, _batData.Length);
+                int numRead = Math.Min(count, _batData.Length - start);
+
+                Array.Copy(_batData, start, block, offset, numRead);
+
+                return numRead;
+            }
+
+            internal override void DisposeReadState()
+            {
+                _batData = null;
             }
         }
     }

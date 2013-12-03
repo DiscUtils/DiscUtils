@@ -33,18 +33,18 @@ namespace DiscUtils.Vhdx
         [SetUp]
         public void Setup()
         {
-            MemoryStream fileStream = new MemoryStream();
-            Disk baseFile = Disk.InitializeDynamic(fileStream, Ownership.Dispose, 16 * 1024L * 1024);
-            for (int i = 0; i < 8; i += 1024 * 1024)
+            SparseMemoryStream sourceStream = new SparseMemoryStream();
+            sourceStream.SetLength(160 * 1024L * 1024);
+            for (int i = 0; i < 8; ++i)
             {
-                baseFile.Content.Position = i;
-                baseFile.Content.WriteByte((byte)i);
+                sourceStream.Position = i * 1024L * 1024;
+                sourceStream.WriteByte((byte)i);
             }
 
-            baseFile.Content.Position = 15 * 1024 * 1024;
-            baseFile.Content.WriteByte(0xFF);
+            sourceStream.Position = 150 * 1024 * 1024;
+            sourceStream.WriteByte(0xFF);
 
-            diskContent = baseFile.Content;
+            diskContent = sourceStream;
         }
 
         [Test]
@@ -62,13 +62,13 @@ namespace DiscUtils.Vhdx
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
             {
-                for (int i = 0; i < 8; i += 1024 * 1024)
+                for (int i = 0; i < 8; ++i)
                 {
-                    disk.Content.Position = i;
+                    disk.Content.Position = i * 1024L * 1024;
                     Assert.AreEqual(i, disk.Content.ReadByte());
                 }
 
-                disk.Content.Position = 15 * 1024 * 1024;
+                disk.Content.Position = 150 * 1024 * 1024;
                 Assert.AreEqual(0xFF, disk.Content.ReadByte());
             }
         }
@@ -92,13 +92,11 @@ namespace DiscUtils.Vhdx
         }
 
         [Test]
-        [Ignore]
         public void BuildDynamic()
         {
             DiskBuilder builder = new DiskBuilder();
             builder.DiskType = DiskType.Dynamic;
             builder.Content = diskContent;
-
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
             Assert.AreEqual(1, fileSpecs.Length);
@@ -106,13 +104,13 @@ namespace DiscUtils.Vhdx
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
             {
-                for (int i = 0; i < 8; i += 1024 * 1024)
+                for (int i = 0; i < 8; ++i)
                 {
-                    disk.Content.Position = i;
+                    disk.Content.Position = i * 1024L * 1024;
                     Assert.AreEqual(i, disk.Content.ReadByte());
                 }
 
-                disk.Content.Position = 15 * 1024 * 1024;
+                disk.Content.Position = 150 * 1024 * 1024;
                 Assert.AreEqual(0xFF, disk.Content.ReadByte());
             }
         }
