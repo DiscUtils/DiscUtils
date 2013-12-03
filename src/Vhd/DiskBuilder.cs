@@ -48,7 +48,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Initiates the build process.
         /// </summary>
-        /// <param name="baseName">The base name for the VMDK, for example 'foo' to create 'foo.vhd'.</param>
+        /// <param name="baseName">The base name for the VHD, for example 'foo' to create 'foo.vhd'.</param>
         /// <returns>A set of one or more logical files that constitute the VHD.  The first file is
         /// the 'primary' file that is normally attached to VMs.</returns>
         public override DiskImageFileSpecification[] Build(string baseName)
