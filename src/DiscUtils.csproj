@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -735,6 +735,7 @@
     <Compile Include="Vhdx\Chunk.cs" />
     <Compile Include="Vhdx\ContentStream.cs" />
     <Compile Include="Vhdx\Disk.cs" />
+    <Compile Include="Vhdx\DiskBuilder.cs" />
     <Compile Include="Vhdx\DiskExtent.cs" />
     <Compile Include="Vhdx\DiskFactory.cs" />
     <Compile Include="Vhdx\DiskImageFile.cs" />
@@ -742,6 +743,7 @@
     <Compile Include="Vhdx\FileHeader.cs" />
     <Compile Include="Vhdx\FileParameters.cs" />
     <Compile Include="Vhdx\FileParametersFlags.cs" />
+    <Compile Include="Vhdx\DiskType.cs" />
     <Compile Include="Vhdx\FreeSpaceTable.cs" />
     <Compile Include="Vhdx\HeaderInfo.cs" />
     <Compile Include="Vhdx\LogEntry.cs" />

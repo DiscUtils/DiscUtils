@@ -569,8 +569,6 @@ namespace DiscUtils.Vhdx
 
             Stream metadataStream = new SubStream(stream, metadataRegion.FileOffset, metadataRegion.Length);
             Metadata metadata = Metadata.Initialize(metadataStream, fileParams, (ulong)capacity, (uint)logicalSectorSize, (uint)physicalSectorSize, null);
-
-
         }
 
         private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent, string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)

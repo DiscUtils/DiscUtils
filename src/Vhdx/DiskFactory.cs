@@ -41,7 +41,21 @@ namespace DiscUtils.Vhdx
 
         public override DiskImageBuilder GetImageBuilder(string variant)
         {
-            throw new NotImplementedException();
+            DiskBuilder builder = new DiskBuilder();
+
+            switch (variant)
+            {
+                case "fixed":
+                    builder.DiskType = DiskType.Fixed;
+                    break;
+                case "dynamic":
+                    builder.DiskType = DiskType.Dynamic;
+                    break;
+                default:
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
+            }
+
+            return builder;
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)

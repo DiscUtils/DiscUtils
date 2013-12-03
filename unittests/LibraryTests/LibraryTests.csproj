@@ -118,6 +118,7 @@
     <Compile Include="ThreadSafeStreamTest.cs" />
     <Compile Include="Vdi\DiskTest.cs" />
     <Compile Include="Vdi\StreamTest.cs" />
+    <Compile Include="Vhdx\DiskBuilderTest.cs" />
     <Compile Include="Vhd\DiskBuilderTest.cs" />
     <Compile Include="Vhd\DiskImageFileTest.cs" />
     <Compile Include="Vhd\DiskTest.cs" />
