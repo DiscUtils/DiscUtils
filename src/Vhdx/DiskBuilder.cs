@@ -35,11 +35,40 @@ namespace DiscUtils.Vhdx
     /// is simply to present a VHD version of an existing disk.</remarks>
     public sealed class DiskBuilder : DiskImageBuilder
     {
+        private long _blockSize = 32 * Sizes.OneMiB;
+
         /// <summary>
         /// Gets or sets the type of VHDX file to build.
         /// </summary>
         public DiskType DiskType { get; set; }
 
+        /// <summary>
+        /// The VHDX block size, or <c>0</c> (indicating default).
+        /// </summary>
+        public long BlockSize
+        {
+            get
+            {
+                return _blockSize;
+            }
+            set
+            {
+                if (value % Sizes.OneMiB != 0)
+                {
+                    throw new ArgumentException("BlockSize must be a multiple of 1MB", "value");
+                }
+
+                _blockSize = value;
+            }
+        }
+
+
+        /// <summary>
+        /// Initiates the build process.
+        /// </summary>
+        /// <param name="baseName">The base name for the VHDX, for example 'foo' to create 'foo.vhdx'.</param>
+        /// <returns>A set of one or more logical files that constitute the virtual disk.  The first file is
+        /// the 'primary' file that is normally attached to VMs.</returns>
         public override DiskImageFileSpecification[] Build(string baseName)
         {
             if (string.IsNullOrEmpty(baseName))
@@ -52,7 +81,7 @@ namespace DiscUtils.Vhdx
                 throw new InvalidOperationException("No content stream specified");
             }
 
-            DiskImageFileSpecification fileSpec = new DiskImageFileSpecification(baseName + ".vhdx", new DiskStreamBuilder(Content, DiskType));
+            DiskImageFileSpecification fileSpec = new DiskImageFileSpecification(baseName + ".vhdx", new DiskStreamBuilder(Content, DiskType, BlockSize));
 
             return new DiskImageFileSpecification[] { fileSpec };
         }
@@ -61,11 +90,13 @@ namespace DiscUtils.Vhdx
         {
             private SparseStream _content;
             private DiskType _diskType;
+            private long _blockSize;
 
-            public DiskStreamBuilder(SparseStream content, DiskType diskType)
+            public DiskStreamBuilder(SparseStream content, DiskType diskType, long blockSize)
             {
                 _content = content;
                 _diskType = diskType;
+                _blockSize = blockSize;
             }
 
             internal override List<BuilderExtent> FixExtents(out long totalLength)
@@ -77,11 +108,10 @@ namespace DiscUtils.Vhdx
 
                 List<BuilderExtent> extents = new List<BuilderExtent>();
 
-                long blockSize = 32 * Sizes.OneMiB;
                 int logicalSectorSize = 512;
                 int physicalSectorSize = 4096;
-                long chunkRatio = (0x800000L * logicalSectorSize) / blockSize;
-                long dataBlocksCount = Utilities.Ceil(_content.Length, blockSize);
+                long chunkRatio = (0x800000L * logicalSectorSize) / _blockSize;
+                long dataBlocksCount = Utilities.Ceil(_content.Length, _blockSize);
                 long sectorBitmapBlocksCount = Utilities.Ceil(dataBlocksCount, chunkRatio);
                 long totalBatEntriesDynamic = dataBlocksCount + ((dataBlocksCount - 1) / chunkRatio);
 
@@ -134,7 +164,7 @@ namespace DiscUtils.Vhdx
                 extents.Add(ExtentForStruct(regionTable, 256 * Sizes.OneKiB));
 
                 // Metadata
-                FileParameters fileParams = new FileParameters() { BlockSize = (uint)blockSize, Flags = FileParametersFlags.None };
+                FileParameters fileParams = new FileParameters() { BlockSize = (uint)_blockSize, Flags = FileParametersFlags.None };
                 ParentLocator parentLocator = new ParentLocator();
 
                 byte[] metadataBuffer = new byte[metadataRegion.Length];
@@ -142,23 +172,23 @@ namespace DiscUtils.Vhdx
                 Metadata.Initialize(metadataStream, fileParams, (ulong)_content.Length, (uint)logicalSectorSize, (uint)physicalSectorSize, null);
                 extents.Add(new BuilderBufferExtent(metadataRegion.FileOffset, metadataBuffer));
 
-                List<Range<long, long>> presentBlocks = new List<Range<long, long>>(StreamExtent.Blocks(_content.Extents, blockSize));
+                List<Range<long, long>> presentBlocks = new List<Range<long, long>>(StreamExtent.Blocks(_content.Extents, _blockSize));
 
                 // BAT
-                BlockAllocationTableBuilderExtent batExtent = new BlockAllocationTableBuilderExtent(batRegion.FileOffset, batRegion.Length, presentBlocks, fileEnd, blockSize, chunkRatio);
+                BlockAllocationTableBuilderExtent batExtent = new BlockAllocationTableBuilderExtent(batRegion.FileOffset, batRegion.Length, presentBlocks, fileEnd, _blockSize, chunkRatio);
                 extents.Add(batExtent);
 
                 // Stream contents
                 foreach (var range in presentBlocks)
                 {
-                    long substreamStart = range.Offset * blockSize;
-                    long substreamCount = Math.Min(_content.Length - substreamStart, range.Count * blockSize);
+                    long substreamStart = range.Offset * _blockSize;
+                    long substreamCount = Math.Min(_content.Length - substreamStart, range.Count * _blockSize);
 
                     SubStream dataSubStream = new SubStream(_content, substreamStart, substreamCount);
                     BuilderSparseStreamExtent dataExtent = new BuilderSparseStreamExtent(fileEnd, dataSubStream);
                     extents.Add(dataExtent);
 
-                    fileEnd += range.Count * blockSize;
+                    fileEnd += range.Count * _blockSize;
                 }
 
 
