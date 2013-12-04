@@ -37,7 +37,7 @@ namespace DiscUtils.Archives
         /// <summary>
         /// Initializes a new instance of the TarFile class.
         /// </summary>
-        /// <param name="fileStream">The Tar file</param>
+        /// <param name="fileStream">The Tar file.</param>
         public TarFile(Stream fileStream)
         {
             _fileStream = fileStream;
@@ -60,7 +60,7 @@ namespace DiscUtils.Archives
         /// <summary>
         /// Tries to open a file contained in the archive, if it exists.
         /// </summary>
-        /// <param name="path">The path to the file within the archive</param>
+        /// <param name="path">The path to the file within the archive.</param>
         /// <param name="stream">A stream containing the file contents, or null.</param>
         /// <returns><c>true</c> if the file could be opened, else <c>false</c>.</returns>
         public bool TryOpenFile(string path, out Stream stream)
@@ -79,7 +79,7 @@ namespace DiscUtils.Archives
         /// <summary>
         /// Open a file contained in the archive.
         /// </summary>
-        /// <param name="path">The path to the file within the archive</param>
+        /// <param name="path">The path to the file within the archive.</param>
         /// <returns>A stream containing the file contents.</returns>
         /// <exception cref="FileNotFoundException">Thrown if the file is not found.</exception>
         public Stream OpenFile(string path)
@@ -96,7 +96,7 @@ namespace DiscUtils.Archives
         /// <summary>
         /// Determines if a given file exists in the archive.
         /// </summary>
-        /// <param name="path">The file path to test</param>
+        /// <param name="path">The file path to test.</param>
         /// <returns><c>true</c> if the file is present, else <c>false</c>.</returns>
         public bool FileExists(string path)
         {
@@ -106,7 +106,7 @@ namespace DiscUtils.Archives
         /// <summary>
         /// Determines if a given directory exists in the archive.
         /// </summary>
-        /// <param name="path">The file path to test</param>
+        /// <param name="path">The file path to test.</param>
         /// <returns><c>true</c> if the directory is present, else <c>false</c>.</returns>
         public bool DirExists(string path)
         {

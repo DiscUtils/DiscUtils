@@ -101,8 +101,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the reparse point data associated with a file or directory.
         /// </summary>
-        /// <param name="path">The file to query</param>
-        /// <returns>The reparse point information</returns>
+        /// <param name="path">The file to query.</param>
+        /// <returns>The reparse point information.</returns>
         public ReparsePoint GetReparsePoint(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -134,7 +134,7 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Removes a reparse point from a file or directory, without deleting the file or directory.
         /// </summary>
-        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
+        /// <param name="path">The path to the file or directory to remove the reparse point from.</param>
         public void RemoveReparsePoint(string path)
         {
             throw new NotSupportedException();
@@ -143,8 +143,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the short name for a given path.
         /// </summary>
-        /// <param name="path">The path to convert</param>
-        /// <returns>The short name</returns>
+        /// <param name="path">The path to convert.</param>
+        /// <returns>The short name.</returns>
         /// <remarks>
         /// This method only gets the short name for the final part of the path, to
         /// convert a complete path, call this method repeatedly, once for each path
@@ -171,7 +171,7 @@ namespace DiscUtils.Wim
         /// Gets the standard file information for a file.
         /// </summary>
         /// <param name="path">The full path to the file or directory to query.</param>
-        /// <returns>The standard file information</returns>
+        /// <returns>The standard file information.</returns>
         public WindowsFileInformation GetFileStandardInformation(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -190,7 +190,7 @@ namespace DiscUtils.Wim
         /// Sets the standard file information for a file.
         /// </summary>
         /// <param name="path">The full path to the file or directory to query.</param>
-        /// <param name="info">The standard file information</param>
+        /// <param name="info">The standard file information.</param>
         public void SetFileStandardInformation(string path, WindowsFileInformation info)
         {
             throw new NotSupportedException();
@@ -199,7 +199,7 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the names of the alternate data streams for a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
+        /// <param name="path">The path to the file.</param>
         /// <returns>
         /// The list of alternate data streams (or empty, if none).  To access the contents
         /// of the alternate streams, use OpenFile(path + ":" + name, ...).
@@ -226,8 +226,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the file id for a given path.
         /// </summary>
-        /// <param name="path">The path to get the id of</param>
-        /// <returns>The file id, or -1</returns>
+        /// <param name="path">The path to get the id of.</param>
+        /// <returns>The file id, or -1.</returns>
         /// <remarks>
         /// The returned file id uniquely identifies the file, and is shared by all hard
         /// links to the same file.  The value -1 indicates no unique identifier is
@@ -242,8 +242,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Indicates whether the file is known by other names.
         /// </summary>
-        /// <param name="path">The file to inspect</param>
-        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        /// <param name="path">The file to inspect.</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c>.</returns>
         public bool HasHardLinks(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -253,8 +253,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public override bool DirectoryExists(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -264,8 +264,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public override bool FileExists(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -392,8 +392,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -424,8 +424,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -440,8 +440,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
@@ -456,8 +456,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             string filePart;
@@ -476,8 +476,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets the SHA-1 hash of a file's contents.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The 160-bit hash</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The 160-bit hash.</returns>
         /// <remarks>The WIM file format internally stores the SHA-1 hash of files.
         /// This method provides access to the stored hash.  Callers can use this
         /// value to compare against the actual hash of the byte stream to validate
@@ -500,7 +500,7 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Disposes of this instance.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, else <c>false</c></param>
+        /// <param name="disposing"><c>true</c> if disposing, else <c>false</c>.</param>
         protected override void Dispose(bool disposing)
         {
             try

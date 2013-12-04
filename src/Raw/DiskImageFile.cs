@@ -38,7 +38,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         public DiskImageFile(Stream stream)
             : this(stream, Ownership.None, null)
         {
@@ -47,7 +47,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         /// <param name="geometry">The emulated geometry of the disk.</param>
         public DiskImageFile(Stream stream, Ownership ownsStream, Geometry geometry)
@@ -116,9 +116,9 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The geometry of the new disk</param>
-        /// <returns>An object that accesses the stream as a raw disk image</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The geometry of the new disk.</param>
+        /// <returns>An object that accesses the stream as a raw disk image.</returns>
         public static DiskImageFile Initialize(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
             stream.SetLength(Utilities.RoundUp(capacity, Sizes.Sector));
@@ -136,8 +136,8 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="type">The type of floppy disk image to create</param>
-        /// <returns>An object that accesses the stream as a disk</returns>
+        /// <param name="type">The type of floppy disk image to create.</param>
+        /// <returns>An object that accesses the stream as a disk.</returns>
         public static DiskImageFile Initialize(Stream stream, Ownership ownsStream, FloppyDiskType type)
         {
             return Initialize(stream, ownsStream, FloppyCapacity(type), null);
@@ -146,9 +146,9 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Gets the content of this layer.
         /// </summary>
-        /// <param name="parent">The parent stream (if any)</param>
-        /// <param name="ownsParent">Controls ownership of the parent stream</param>
-        /// <returns>The content as a stream</returns>
+        /// <param name="parent">The parent stream (if any).</param>
+        /// <param name="ownsParent">Controls ownership of the parent stream.</param>
+        /// <returns>The content as a stream.</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (ownsParent == Ownership.Dispose && parent != null)
@@ -162,7 +162,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Gets the possible locations of the parent file (if any).
         /// </summary>
-        /// <returns>Array of strings, empty if no parent</returns>
+        /// <returns>Array of strings, empty if no parent.</returns>
         public override string[] GetParentLocations()
         {
             return new string[0];
@@ -196,8 +196,8 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Calculates the best guess geometry of a disk.
         /// </summary>
-        /// <param name="disk">The disk to detect the geometry of</param>
-        /// <returns>The geometry of the disk</returns>
+        /// <param name="disk">The disk to detect the geometry of.</param>
+        /// <returns>The geometry of the disk.</returns>
         private static Geometry DetectGeometry(Stream disk)
         {
             long capacity = disk.Length;
@@ -222,10 +222,10 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Calculates the best guess disk type (i.e. floppy or hard disk)
+        /// Calculates the best guess disk type (i.e. floppy or hard disk).
         /// </summary>
-        /// <param name="capacity">The capacity of the disk</param>
-        /// <returns>The disk type</returns>
+        /// <param name="capacity">The capacity of the disk.</param>
+        /// <returns>The disk type.</returns>
         private static VirtualDiskClass DetectDiskType(long capacity)
         {
             if (capacity == Sizes.Sector * 1440

@@ -298,9 +298,9 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// Converts a DirectoryRecord time to UTC.
         /// </summary>
-        /// <param name="data">buffer containing the time data</param>
-        /// <param name="offset">offset in buffer of the time data</param>
-        /// <returns>The time in UTC</returns>
+        /// <param name="data">Buffer containing the time data.</param>
+        /// <param name="offset">Offset in buffer of the time data.</param>
+        /// <returns>The time in UTC.</returns>
         internal static DateTime ToUTCDateTimeFromDirectoryTime(byte[] data, int offset)
         {
             try

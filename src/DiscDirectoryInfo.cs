@@ -35,8 +35,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the DiscDirectoryInfo class.
         /// </summary>
-        /// <param name="fileSystem">The file system the directory info relates to</param>
-        /// <param name="path">The path within the file system of the directory</param>
+        /// <param name="fileSystem">The file system the directory info relates to.</param>
+        /// <param name="path">The path within the file system of the directory.</param>
         internal DiscDirectoryInfo(DiscFileSystem fileSystem, string path)
             : base(fileSystem, path)
         {
@@ -77,7 +77,7 @@ namespace DiscUtils
         /// <summary>
         /// Deletes a directory, with the caller choosing whether to recurse.
         /// </summary>
-        /// <param name="recursive"><c>true</c> to delete all child node, <c>false</c> to fail if the directory is not empty</param>
+        /// <param name="recursive"><c>true</c> to delete all child node, <c>false</c> to fail if the directory is not empty.</param>
         public void Delete(bool recursive)
         {
             FileSystem.DeleteDirectory(Path, recursive);
@@ -86,7 +86,7 @@ namespace DiscUtils
         /// <summary>
         /// Moves a directory and it's contents to a new path.
         /// </summary>
-        /// <param name="destinationDirName">The destination directory name</param>
+        /// <param name="destinationDirName">The destination directory name.</param>
         public void MoveTo(string destinationDirName)
         {
             FileSystem.MoveDirectory(Path, destinationDirName);
@@ -95,7 +95,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets all child directories.
         /// </summary>
-        /// <returns>An array of child directories</returns>
+        /// <returns>An array of child directories.</returns>
         public DiscDirectoryInfo[] GetDirectories()
         {
             return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path), (p) => new DiscDirectoryInfo(FileSystem, p));
@@ -104,8 +104,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets all child directories matching a search pattern.
         /// </summary>
-        /// <param name="pattern">The search pattern</param>
-        /// <returns>An array of child directories, or empty if none match</returns>
+        /// <param name="pattern">The search pattern.</param>
+        /// <returns>An array of child directories, or empty if none match.</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).</remarks>
         public DiscDirectoryInfo[] GetDirectories(string pattern)
@@ -116,9 +116,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets all descendant directories matching a search pattern.
         /// </summary>
-        /// <param name="pattern">The search pattern</param>
-        /// <param name="searchOption">Whether to search just this directory, or all children</param>
-        /// <returns>An array of descendant directories, or empty if none match</returns>
+        /// <param name="pattern">The search pattern.</param>
+        /// <param name="searchOption">Whether to search just this directory, or all children.</param>
+        /// <returns>An array of descendant directories, or empty if none match.</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).  The option parameter determines whether only immediate
         /// children, or all children are returned.</remarks>
@@ -139,8 +139,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets all files matching a search pattern.
         /// </summary>
-        /// <param name="pattern">The search pattern</param>
-        /// <returns>An array of files, or empty if none match</returns>
+        /// <param name="pattern">The search pattern.</param>
+        /// <returns>An array of files, or empty if none match.</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).</remarks>
         public DiscFileInfo[] GetFiles(string pattern)
@@ -151,9 +151,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets all descendant files matching a search pattern.
         /// </summary>
-        /// <param name="pattern">The search pattern</param>
-        /// <param name="searchOption">Whether to search just this directory, or all children</param>
-        /// <returns>An array of descendant files, or empty if none match</returns>
+        /// <param name="pattern">The search pattern.</param>
+        /// <param name="searchOption">Whether to search just this directory, or all children.</param>
+        /// <returns>An array of descendant files, or empty if none match.</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).  The option parameter determines whether only immediate
         /// children, or all children are returned.</remarks>
@@ -174,7 +174,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets all files and directories in this directory.
         /// </summary>
-        /// <param name="pattern">The search pattern</param>
+        /// <param name="pattern">The search pattern.</param>
         /// <returns>An array of files and directories.</returns>
         /// <remarks>The search pattern can include the wildcards * (matching 0 or more characters)
         /// and ? (matching 1 character).</remarks>

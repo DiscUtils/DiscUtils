@@ -56,7 +56,7 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the ThreadSafeStream class.
         /// </summary>
-        /// <param name="toWrap">The stream to wrap</param>
+        /// <param name="toWrap">The stream to wrap.</param>
         /// <remarks>Do not directly modify <c>toWrap</c> after wrapping it, unless the thread-safe views
         /// will no longer be used.</remarks>
         public ThreadSafeStream(SparseStream toWrap)
@@ -67,8 +67,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the ThreadSafeStream class.
         /// </summary>
-        /// <param name="toWrap">The stream to wrap</param>
-        /// <param name="ownership">Whether to transfer ownership of <c>toWrap</c> to the new instance</param>
+        /// <param name="toWrap">The stream to wrap.</param>
+        /// <param name="ownership">Whether to transfer ownership of <c>toWrap</c> to the new instance.</param>
         /// <remarks>Do not directly modify <c>toWrap</c> after wrapping it, unless the thread-safe views
         /// will no longer be used.</remarks>
         public ThreadSafeStream(SparseStream toWrap, Ownership ownership)
@@ -193,7 +193,7 @@ namespace DiscUtils
         /// <summary>
         /// Opens a new thread-safe view on the stream.
         /// </summary>
-        /// <returns>The new view</returns>
+        /// <returns>The new view.</returns>
         public SparseStream OpenView()
         {
             return new ThreadSafeStream(this);
@@ -202,9 +202,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the parts of a stream that are stored, within a specified range.
         /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        /// <param name="start">The offset of the first byte of interest.</param>
+        /// <param name="count">The number of bytes of interest.</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             lock (_common)
@@ -227,10 +227,10 @@ namespace DiscUtils
         /// <summary>
         /// Reads data from the stream.
         /// </summary>
-        /// <param name="buffer">The buffer to fill</param>
-        /// <param name="offset">The first byte in buffer to fill</param>
-        /// <param name="count">The requested number of bytes to read</param>
-        /// <returns>The actual number of bytes read</returns>
+        /// <param name="buffer">The buffer to fill.</param>
+        /// <param name="offset">The first byte in buffer to fill.</param>
+        /// <param name="count">The requested number of bytes to read.</param>
+        /// <returns>The actual number of bytes read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             lock (_common)
@@ -246,9 +246,9 @@ namespace DiscUtils
         /// <summary>
         /// Changes the current stream position (each view has it's own Position).
         /// </summary>
-        /// <param name="offset">The relative location to move to</param>
-        /// <param name="origin">The origin of the location</param>
-        /// <returns>The new location as an absolute position</returns>
+        /// <param name="offset">The relative location to move to.</param>
+        /// <param name="origin">The origin of the location.</param>
+        /// <returns>The new location as an absolute position.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             long effectiveOffset = offset;
@@ -275,7 +275,7 @@ namespace DiscUtils
         /// <summary>
         /// Sets the length of the stream (not supported).
         /// </summary>
-        /// <param name="value">The new length</param>
+        /// <param name="value">The new length.</param>
         public override void SetLength(long value)
         {
             throw new NotSupportedException();
@@ -284,9 +284,9 @@ namespace DiscUtils
         /// <summary>
         /// Writes data to the stream (not currently supported).
         /// </summary>
-        /// <param name="buffer">The data to write</param>
-        /// <param name="offset">The first byte to write</param>
-        /// <param name="count">The number of bytes to write</param>
+        /// <param name="buffer">The data to write.</param>
+        /// <param name="offset">The first byte to write.</param>
+        /// <param name="count">The number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             lock (_common)
@@ -307,7 +307,7 @@ namespace DiscUtils
         /// <summary>
         /// Disposes of this instance, invalidating any remaining views.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, lese <c>false</c></param>
+        /// <param name="disposing"><c>true</c> if disposing, lese <c>false</c>.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

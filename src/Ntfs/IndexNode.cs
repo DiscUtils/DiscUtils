@@ -345,7 +345,7 @@ namespace DiscUtils.Ntfs
         /// Only valid on the root node, this method moves all entries into a
         /// single child node.
         /// </summary>
-        /// <returns>Whether any changes were made</returns>
+        /// <returns>Whether any changes were made.</returns>
         internal bool Depose()
         {
             if (!_isRoot)
@@ -377,8 +377,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Removes redundant nodes (that contain only an 'End' entry).
         /// </summary>
-        /// <param name="entryIndex">The index of the entry that may have a redundant child</param>
-        /// <returns>An entry that needs to be promoted to the parent node (if any)</returns>
+        /// <param name="entryIndex">The index of the entry that may have a redundant child.</param>
+        /// <returns>An entry that needs to be promoted to the parent node (if any).</returns>
         private IndexEntry LiftNode(int entryIndex)
         {
             if ((_entries[entryIndex].Flags & IndexEntryFlags.Node) != 0)
@@ -496,7 +496,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Finds the largest leaf entry in this tree.
         /// </summary>
-        /// <returns>The index entry of the largest leaf</returns>
+        /// <returns>The index entry of the largest leaf.</returns>
         private IndexEntry FindLargestLeaf()
         {
             if ((_entries[_entries.Count - 1].Flags & IndexEntryFlags.Node) != 0)
@@ -517,7 +517,7 @@ namespace DiscUtils.Ntfs
         /// Only valid on non-root nodes, this method divides the node in two,
         /// adding the new node to the current parent.
         /// </summary>
-        /// <returns>An entry that needs to be promoted to the parent node (if any)</returns>
+        /// <returns>An entry that needs to be promoted to the parent node (if any).</returns>
         private IndexEntry Divide()
         {
             int midEntryIdx = _entries.Count / 2;

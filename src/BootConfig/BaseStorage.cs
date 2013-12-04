@@ -33,17 +33,17 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Tests if an element is present (i.e. has a value) on an object.
         /// </summary>
-        /// <param name="obj">The object to inspect</param>
-        /// <param name="element">The element to inspect</param>
+        /// <param name="obj">The object to inspect.</param>
+        /// <param name="element">The element to inspect.</param>
         /// <returns><c>true</c> if present, else <c>false</c>.</returns>
         public abstract bool HasValue(Guid obj, int element);
 
         /// <summary>
         /// Gets the value of a string element.
         /// </summary>
-        /// <param name="obj">The object to inspect</param>
-        /// <param name="element">The element to retrieve</param>
-        /// <returns>The value as a string</returns>
+        /// <param name="obj">The object to inspect.</param>
+        /// <param name="element">The element to retrieve.</param>
+        /// <returns>The value as a string.</returns>
         public abstract string GetString(Guid obj, int element);
 
         public abstract byte[] GetBinary(Guid obj, int element);

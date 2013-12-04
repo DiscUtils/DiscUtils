@@ -35,7 +35,7 @@ namespace DiscUtils.Udf
         /// <summary>
         /// Initializes a new instance of the UdfReader class.
         /// </summary>
-        /// <param name="data">The stream containing the UDF file system</param>
+        /// <param name="data">The stream containing the UDF file system.</param>
         public UdfReader(Stream data)
             : base(new VfsUdfReader(data))
         {
@@ -44,8 +44,8 @@ namespace DiscUtils.Udf
         /// <summary>
         /// Initializes a new instance of the UdfReader class.
         /// </summary>
-        /// <param name="data">The stream containing the UDF file system</param>
-        /// <param name="sectorSize">The sector size of the physical media</param>
+        /// <param name="data">The stream containing the UDF file system.</param>
+        /// <param name="sectorSize">The sector size of the physical media.</param>
         public UdfReader(Stream data, int sectorSize)
             : base(new VfsUdfReader(data, sectorSize))
         {
@@ -54,7 +54,7 @@ namespace DiscUtils.Udf
         /// <summary>
         /// Detects if a stream contains a valid UDF file system.
         /// </summary>
-        /// <param name="data">The stream to inspect</param>
+        /// <param name="data">The stream to inspect.</param>
         /// <returns><c>true</c> if the stream contains a UDF file system, else false.</returns>
         public static bool Detect(Stream data)
         {
@@ -109,7 +109,7 @@ namespace DiscUtils.Udf
         /// <summary>
         /// Gets UDF extended attributes for a file or directory.
         /// </summary>
-        /// <param name="path">Path to the file or directory</param>
+        /// <param name="path">Path to the file or directory.</param>
         /// <returns>Array of extended attributes, which may be empty or <c>null</c> if
         /// there are no extended attributes.</returns>
         public ExtendedAttribute[] GetExtendedAttributes(string path)

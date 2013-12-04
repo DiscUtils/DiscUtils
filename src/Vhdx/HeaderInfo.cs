@@ -37,7 +37,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// The signature of the header.
+        /// Gets the signature of the header.
         /// </summary>
         public string Signature
         {
@@ -50,7 +50,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// The checksum of the header information.
+        /// Gets the checksum of the header information.
         /// </summary>
         public int Checksum
         {
@@ -58,7 +58,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// The sequence number of the header information.
+        /// Gets the sequence number of the header information.
         /// </summary>
         /// <remarks>
         /// VHDX files contain two copies of the header, both contain a sequence number, the highest
@@ -105,7 +105,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// VHDX file format version, expected to be One.
+        /// Gets the VHDX file format version, expected to be One.
         /// </summary>
         public int Version
         {
@@ -113,7 +113,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// The length of the VHDX log.
+        /// Gets the length of the VHDX log.
         /// </summary>
         public long LogLength
         {
@@ -121,7 +121,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// The offset of the VHDX log within the file.
+        /// Gets the offset of the VHDX log within the file.
         /// </summary>
         public long LogOffset
         {

@@ -49,7 +49,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         public DiskImageFile(Stream stream)
         {
             _stream = stream;
@@ -60,7 +60,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public DiskImageFile(Stream stream, Ownership ownsStream)
         {
@@ -124,8 +124,8 @@ namespace DiscUtils.Vdi
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VDI file.</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
@@ -160,8 +160,8 @@ namespace DiscUtils.Vdi
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VDI file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
@@ -188,9 +188,9 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Opens the content of the disk image file as a stream.
         /// </summary>
-        /// <param name="parent">The parent file's content (if any)</param>
-        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream</param>
-        /// <returns>The new content stream</returns>
+        /// <param name="parent">The parent file's content (if any).</param>
+        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream.</param>
+        /// <returns>The new content stream.</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (parent != null && ownsParent == Ownership.Dispose)
@@ -207,7 +207,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Gets the possible locations of the parent file (if any).
         /// </summary>
-        /// <returns>Array of strings, empty if no parent</returns>
+        /// <returns>Array of strings, empty if no parent.</returns>
         public override string[] GetParentLocations()
         {
             // Until diff/undo supported

@@ -32,12 +32,12 @@ namespace DiscUtils.Iscsi
     public enum LunClass
     {
         /// <summary>
-        /// Device is block storage (i.e. normal disk)
+        /// Device is block storage (i.e. normal disk).
         /// </summary>
         BlockStorage = 0x00,
 
         /// <summary>
-        /// Device is sequential access storage
+        /// Device is sequential access storage.
         /// </summary>
         TapeStorage = 0x01,
 
@@ -218,8 +218,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Parses a URI referring to a LUN.
         /// </summary>
-        /// <param name="uri">The URI to parse</param>
-        /// <returns>The LUN info</returns>
+        /// <param name="uri">The URI to parse.</param>
+        /// <returns>The LUN info.</returns>
         /// <remarks>
         /// Note the LUN info is incomplete, only as much of the information as is encoded
         /// into the URL is available.
@@ -232,8 +232,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Parses a URI referring to a LUN.
         /// </summary>
-        /// <param name="uri">The URI to parse</param>
-        /// <returns>The LUN info</returns>
+        /// <param name="uri">The URI to parse.</param>
+        /// <returns>The LUN info.</returns>
         /// <remarks>
         /// Note the LUN info is incomplete, only as much of the information as is encoded
         /// into the URL is available.
@@ -293,7 +293,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the LUN as a string.
         /// </summary>
-        /// <returns>The LUN in string form</returns>
+        /// <returns>The LUN in string form.</returns>
         public override string ToString()
         {
             if ((((ulong)_lun) & 0xFF00000000000000) == 0)

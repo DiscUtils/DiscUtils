@@ -42,8 +42,8 @@ namespace DiscUtils.HfsPlus
         /// <summary>
         /// Gets the Unix (BSD) file information about a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>Unix file information</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>Unix file information.</returns>
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             return GetRealFileSystem<HfsPlusFileSystemImpl>().GetUnixFileInfo(path);

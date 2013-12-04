@@ -64,7 +64,7 @@ namespace DiscUtils
         /// <param name="buffer">The destination byte array.</param>
         /// <param name="offset">The start offset within the destination buffer.</param>
         /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The actual number of bytes read</returns>
+        /// <returns>The actual number of bytes read.</returns>
         public abstract int Read(long pos, byte[] buffer, int offset, int count);
 
         /// <summary>
@@ -80,11 +80,11 @@ namespace DiscUtils
         /// Clears bytes from the buffer.
         /// </summary>
         /// <param name="pos">The start offset within the buffer.</param>
-        /// <param name="count">The number of bytes to ckear</param>
+        /// <param name="count">The number of bytes to clear.</param>
         /// <remarks>
         /// <para>Logically equivalent to writing <c>count</c> null/zero bytes to the buffer, some
         /// implementations determine that some (or all) of the range indicated is not actually
-        /// stored.  There is no direct, automatic, correspondance to clearing bytes and them
+        /// stored.  There is no direct, automatic, correspondence to clearing bytes and them
         /// not being represented as an 'extent' - for example, the implementation of the underlying
         /// stream may not permit fine-grained extent storage.</para>
         /// <para>It is always safe to call this method to 'zero-out' a section of a buffer, regardless of
@@ -112,9 +112,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the parts of a buffer that are stored, within a specified range.
         /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        /// <param name="start">The offset of the first byte of interest.</param>
+        /// <param name="count">The number of bytes of interest.</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public abstract IEnumerable<StreamExtent> GetExtentsInRange(long start, long count);
     }
 }

@@ -29,8 +29,8 @@ namespace DiscUtils
     /// <summary>
     /// Represents a range of values.
     /// </summary>
-    /// <typeparam name="TOffset">The type of the offset element</typeparam>
-    /// <typeparam name="TCount">The type of the size element</typeparam>
+    /// <typeparam name="TOffset">The type of the offset element.</typeparam>
+    /// <typeparam name="TCount">The type of the size element.</typeparam>
     public class Range<TOffset, TCount> : IEquatable<Range<TOffset, TCount>>
         where TOffset : IEquatable<TOffset>
         where TCount : IEquatable<TCount>
@@ -41,8 +41,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the Range class.
         /// </summary>
-        /// <param name="offset">The offset (i.e. start) of the range</param>
-        /// <param name="count">The size of the range</param>
+        /// <param name="offset">The offset (i.e. start) of the range.</param>
+        /// <param name="count">The size of the range.</param>
         public Range(TOffset offset, TCount count)
         {
             _offset = offset;
@@ -50,7 +50,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the offset (i.e. start) of the range
+        /// Gets the offset (i.e. start) of the range.
         /// </summary>
         public TOffset Offset
         {
@@ -68,14 +68,14 @@ namespace DiscUtils
         /// <summary>
         /// Merges sets of ranges into chunks.
         /// </summary>
-        /// <param name="ranges">The ranges to merge</param>
-        /// <param name="chunkSize">The size of each chunk</param>
-        /// <returns>Ranges combined into larger chunks</returns>
-        /// <typeparam name="T">The type of the offset and count in the ranges</typeparam>
+        /// <param name="ranges">The ranges to merge.</param>
+        /// <param name="chunkSize">The size of each chunk.</param>
+        /// <returns>Ranges combined into larger chunks.</returns>
+        /// <typeparam name="T">The type of the offset and count in the ranges.</typeparam>
         public static IEnumerable<Range<T, T>> Chunked<T>(IEnumerable<Range<T, T>> ranges, T chunkSize)
             where T : struct, IEquatable<T>, IComparable<T>
         {
-            Nullable<T> chunkStart = Numbers<T>.Zero;
+            T? chunkStart = Numbers<T>.Zero;
             T chunkLength = Numbers<T>.Zero;
 
             foreach (var range in ranges)
@@ -112,7 +112,7 @@ namespace DiscUtils
         /// <summary>
         /// Returns a string representation of the extent as [start:+length].
         /// </summary>
-        /// <returns>The string representation</returns>
+        /// <returns>The string representation.</returns>
         public override string ToString()
         {
             return "[" + _offset + ":+" + _count + "]";
@@ -123,7 +123,7 @@ namespace DiscUtils
         /// <summary>
         /// Compares this range to another.
         /// </summary>
-        /// <param name="other">The range to compare</param>
+        /// <param name="other">The range to compare.</param>
         /// <returns><c>true</c> if the ranges are equivalent, else <c>false</c>.</returns>
         public bool Equals(Range<TOffset, TCount> other)
         {

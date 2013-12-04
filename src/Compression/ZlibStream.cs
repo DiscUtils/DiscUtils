@@ -40,8 +40,8 @@ namespace DiscUtils.Compression
         /// <summary>
         /// Initializes a new instance of the ZlibStream class.
         /// </summary>
-        /// <param name="stream">The stream to compress of decompress</param>
-        /// <param name="mode">Whether to compress or decompress</param>
+        /// <param name="stream">The stream to compress of decompress.</param>
+        /// <param name="mode">Whether to compress or decompress.</param>
         /// <param name="leaveOpen">Whether closing this stream should leave <c>stream</c> open.</param>
         public ZlibStream(Stream stream, CompressionMode mode, bool leaveOpen)
         {
@@ -169,10 +169,10 @@ namespace DiscUtils.Compression
         /// <summary>
         /// Reads data from the stream.
         /// </summary>
-        /// <param name="buffer">The buffer to populate</param>
-        /// <param name="offset">The first byte to write</param>
-        /// <param name="count">The number of bytes requested</param>
-        /// <returns>The number of bytes read</returns>
+        /// <param name="buffer">The buffer to populate.</param>
+        /// <param name="offset">The first byte to write.</param>
+        /// <param name="count">The number of bytes requested.</param>
+        /// <returns>The number of bytes read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckParams(buffer, offset, count);
@@ -187,7 +187,7 @@ namespace DiscUtils.Compression
         /// </summary>
         /// <param name="offset">Relative position to seek to.</param>
         /// <param name="origin">The origin of the seek.</param>
-        /// <returns>The new position</returns>
+        /// <returns>The new position.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();

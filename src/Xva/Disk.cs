@@ -26,7 +26,7 @@ namespace DiscUtils.Xva
     using System.Collections.Generic;
 
     /// <summary>
-    /// Class representing a disk containing withing an XVA file.
+    /// Class representing a disk containing within an XVA file.
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
@@ -126,9 +126,9 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotSupportedException("Differencing disks not supported by XVA format");
@@ -137,8 +137,8 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Create a new differencing disk.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported by XVA format");

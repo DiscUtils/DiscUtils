@@ -55,13 +55,13 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Gets the type of the partition, as a GUID, when available.
         /// </summary>
-        /// <remarks><see cref="System.Guid"/>.Empty for MBR-style partitions</remarks>
+        /// <remarks><see cref="System.Guid"/>.Empty for MBR-style partitions.</remarks>
         public abstract Guid GuidType { get; }
 
         /// <summary>
         /// Gets the type of the partition, in legacy BIOS form, when available.
         /// </summary>
-        /// <remarks>Zero for GUID-style partitions</remarks>
+        /// <remarks>Zero for GUID-style partitions.</remarks>
         public abstract byte BiosType { get; }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Gets a summary of the partition information as 'first - last (type)'.
         /// </summary>
-        /// <returns>A string representation of the partition information</returns>
+        /// <returns>A string representation of the partition information.</returns>
         public override string ToString()
         {
             return String.Format(CultureInfo.InvariantCulture, "0x{0:X} - 0x{1:X} ({2})", FirstSector, LastSector, TypeAsString);

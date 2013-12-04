@@ -38,8 +38,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the BufferStream class.
         /// </summary>
-        /// <param name="buffer">The buffer to use</param>
-        /// <param name="access">The access permitted to clients</param>
+        /// <param name="buffer">The buffer to use.</param>
+        /// <param name="access">The access permitted to clients.</param>
         public BufferStream(IBuffer buffer, FileAccess access)
         {
             _buffer = buffer;
@@ -126,7 +126,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="offset">The origin-relative stream position.</param>
         /// <param name="origin">The origin for the stream position.</param>
-        /// <returns>The new stream position</returns>
+        /// <returns>The new stream position.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             long effectiveOffset = offset;
@@ -179,11 +179,11 @@ namespace DiscUtils
         /// <summary>
         /// Clears bytes from the stream.
         /// </summary>
-        /// <param name="count">The number of bytes (from the current position) to clear</param>
+        /// <param name="count">The number of bytes (from the current position) to clear.</param>
         /// <remarks>
         /// <para>Logically equivalent to writing <c>count</c> null/zero bytes to the stream, some
         /// implementations determine that some (or all) of the range indicated is not actually
-        /// stored.  There is no direct, automatic, correspondance to clearing bytes and them
+        /// stored.  There is no direct, automatic, correspondence to clearing bytes and them
         /// not being represented as an 'extent' - for example, the implementation of the underlying
         /// stream may not permit fine-grained extent storage.</para>
         /// <para>It is always safe to call this method to 'zero-out' a section of a stream, regardless of
@@ -203,9 +203,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the parts of a stream that are stored, within a specified range.
         /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        /// <param name="start">The offset of the first byte of interest.</param>
+        /// <param name="count">The number of bytes of interest.</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             return _buffer.GetExtentsInRange(start, count);

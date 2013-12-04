@@ -43,7 +43,7 @@ namespace DiscUtils.Ext
         /// Initializes a new instance of the ExtFileSystem class.
         /// </summary>
         /// <param name="stream">The stream containing the ext file system.</param>
-        /// <param name="parameters">The generic file system parameters (only file name encoding is honoured)</param>
+        /// <param name="parameters">The generic file system parameters (only file name encoding is honoured).</param>
         public ExtFileSystem(Stream stream, FileSystemParameters parameters)
             : base(new VfsExtFileSystem(stream, parameters))
         {
@@ -52,7 +52,7 @@ namespace DiscUtils.Ext
         /// <summary>
         /// Retrieves Unix-specific information about a file or directory.
         /// </summary>
-        /// <param name="path">Path to the file or directory</param>
+        /// <param name="path">Path to the file or directory.</param>
         /// <returns>Information about the owner, group, permissions and type of the
         /// file or directory.</returns>
         public UnixFileSystemInfo GetUnixFileInfo(string path)

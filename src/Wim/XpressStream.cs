@@ -40,8 +40,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Initializes a new instance of the XpressStream class.
         /// </summary>
-        /// <param name="compressed">The stream of compressed data</param>
-        /// <param name="count">The length of this stream (in uncompressed bytes)</param>
+        /// <param name="compressed">The stream of compressed data.</param>
+        /// <param name="count">The length of this stream (in uncompressed bytes).</param>
         public XpressStream(Stream compressed, int count)
         {
             _compressedStream = new BufferedStream(compressed);

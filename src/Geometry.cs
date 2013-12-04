@@ -39,9 +39,9 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the Geometry class.  The default 512 bytes per sector is assumed.
         /// </summary>
-        /// <param name="cylinders">The number of cylinders of the disk</param>
-        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
-        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk</param>
+        /// <param name="cylinders">The number of cylinders of the disk.</param>
+        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk.</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk.</param>
         public Geometry(int cylinders, int headsPerCylinder, int sectorsPerTrack)
         {
             _cylinders = cylinders;
@@ -53,10 +53,10 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the Geometry class.
         /// </summary>
-        /// <param name="cylinders">The number of cylinders of the disk</param>
-        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
-        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk</param>
-        /// <param name="bytesPerSector">The number of bytes per sector of the disk</param>
+        /// <param name="cylinders">The number of cylinders of the disk.</param>
+        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk.</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk.</param>
+        /// <param name="bytesPerSector">The number of bytes per sector of the disk.</param>
         public Geometry(int cylinders, int headsPerCylinder, int sectorsPerTrack, int bytesPerSector)
         {
             _cylinders = cylinders;
@@ -68,10 +68,10 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the Geometry class.
         /// </summary>
-        /// <param name="capacity">The total capacity of the disk</param>
-        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk</param>
-        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk</param>
-        /// <param name="bytesPerSector">The number of bytes per sector of the disk</param>
+        /// <param name="capacity">The total capacity of the disk.</param>
+        /// <param name="headsPerCylinder">The number of heads (aka platters) of the disk.</param>
+        /// <param name="sectorsPerTrack">The number of sectors per track/cylinder of the disk.</param>
+        /// <param name="bytesPerSector">The number of bytes per sector of the disk.</param>
         public Geometry(long capacity, int headsPerCylinder, int sectorsPerTrack, int bytesPerSector)
         {
             _cylinders = (int)(capacity / (headsPerCylinder * (long)sectorsPerTrack * bytesPerSector));
@@ -142,7 +142,7 @@ namespace DiscUtils
         /// </summary>
         public long Capacity
         {
-            get { return (TotalSectorsLong) * ((long)BytesPerSector); }
+            get { return TotalSectorsLong * (long)BytesPerSector; }
         }
 
         /// <summary>
@@ -180,8 +180,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the 'Large' BIOS geometry for a disk, given it's physical geometry.
         /// </summary>
-        /// <param name="ideGeometry">The physical (aka IDE) geometry of the disk</param>
-        /// <returns>The geometry a BIOS using the 'Large' method for calculating disk geometry will indicate for the disk</returns>
+        /// <param name="ideGeometry">The physical (aka IDE) geometry of the disk.</param>
+        /// <returns>The geometry a BIOS using the 'Large' method for calculating disk geometry will indicate for the disk.</returns>
         public static Geometry LargeBiosGeometry(Geometry ideGeometry)
         {
             int cylinders = ideGeometry.Cylinders;
@@ -200,8 +200,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the 'LBA Assisted' BIOS geometry for a disk, given it's capacity.
         /// </summary>
-        /// <param name="capacity">The capacity of the disk</param>
-        /// <returns>The geometry a BIOS using the 'LBA Assisted' method for calculating disk geometry will indicate for the disk</returns>
+        /// <param name="capacity">The capacity of the disk.</param>
+        /// <returns>The geometry a BIOS using the 'LBA Assisted' method for calculating disk geometry will indicate for the disk.</returns>
         public static Geometry LbaAssistedBiosGeometry(long capacity)
         {
             int heads;
@@ -236,7 +236,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="geometry">The geometry to make BIOS-safe.</param>
         /// <param name="capacity">The capacity of the disk.</param>
-        /// <returns>The new geometry</returns>
+        /// <returns>The new geometry.</returns>
         /// <remarks>This method returns the LBA-Assisted geometry if the given geometry isn't BIOS-safe.</remarks>
         public static Geometry MakeBiosSafe(Geometry geometry, long capacity)
         {
@@ -257,7 +257,7 @@ namespace DiscUtils
         /// <summary>
         /// Calculates a sensible disk geometry for a disk capacity using the VHD algorithm (errs under).
         /// </summary>
-        /// <param name="capacity">The desired capacity of the disk</param>
+        /// <param name="capacity">The desired capacity of the disk.</param>
         /// <returns>The appropriate disk geometry.</returns>
         /// <remarks>The geometry returned tends to produce a disk with less capacity
         /// than requested (an exact capacity is not always possible).  The geometry returned is the IDE
@@ -323,8 +323,8 @@ namespace DiscUtils
         /// <summary>
         /// Converts a CHS (Cylinder,Head,Sector) address to a LBA (Logical Block Address).
         /// </summary>
-        /// <param name="chsAddress">The CHS address to convert</param>
-        /// <returns>The Logical Block Address (in sectors)</returns>
+        /// <param name="chsAddress">The CHS address to convert.</param>
+        /// <returns>The Logical Block Address (in sectors).</returns>
         public long ToLogicalBlockAddress(ChsAddress chsAddress)
         {
             return ToLogicalBlockAddress(chsAddress.Cylinder, chsAddress.Head, chsAddress.Sector);
@@ -333,10 +333,10 @@ namespace DiscUtils
         /// <summary>
         /// Converts a CHS (Cylinder,Head,Sector) address to a LBA (Logical Block Address).
         /// </summary>
-        /// <param name="cylinder">The cylinder of the address</param>
-        /// <param name="head">The head of the address</param>
-        /// <param name="sector">The sector of the address</param>
-        /// <returns>The Logical Block Address (in sectors)</returns>
+        /// <param name="cylinder">The cylinder of the address.</param>
+        /// <param name="head">The head of the address.</param>
+        /// <param name="sector">The sector of the address.</param>
+        /// <returns>The Logical Block Address (in sectors).</returns>
         public long ToLogicalBlockAddress(int cylinder, int head, int sector)
         {
             if (cylinder < 0)
@@ -370,7 +370,7 @@ namespace DiscUtils
         /// <summary>
         /// Converts a LBA (Logical Block Address) to a CHS (Cylinder, Head, Sector) address.
         /// </summary>
-        /// <param name="logicalBlockAddress">The logical block address (in sectors)</param>
+        /// <param name="logicalBlockAddress">The logical block address (in sectors).</param>
         /// <returns>The address in CHS form.</returns>
         public ChsAddress ToChsAddress(long logicalBlockAddress)
         {
@@ -390,8 +390,8 @@ namespace DiscUtils
         /// <summary>
         /// Translates an IDE (aka Physical) geometry to a BIOS (aka Logical) geometry.
         /// </summary>
-        /// <param name="translation">The translation to perform</param>
-        /// <returns>The translated disk geometry</returns>
+        /// <param name="translation">The translation to perform.</param>
+        /// <returns>The translated disk geometry.</returns>
         public Geometry TranslateToBios(GeometryTranslation translation)
         {
             return TranslateToBios(0, translation);
@@ -400,9 +400,9 @@ namespace DiscUtils
         /// <summary>
         /// Translates an IDE (aka Physical) geometry to a BIOS (aka Logical) geometry.
         /// </summary>
-        /// <param name="capacity">The capacity of the disk, required if the geometry is an approximation on the actual disk size</param>
-        /// <param name="translation">The translation to perform</param>
-        /// <returns>The translated disk geometry</returns>
+        /// <param name="capacity">The capacity of the disk, required if the geometry is an approximation on the actual disk size.</param>
+        /// <param name="translation">The translation to perform.</param>
+        /// <returns>The translated disk geometry.</returns>
         public Geometry TranslateToBios(long capacity, GeometryTranslation translation)
         {
             if (capacity <= 0)
@@ -440,7 +440,7 @@ namespace DiscUtils
         /// Determines if this object is equivalent to another.
         /// </summary>
         /// <param name="obj">The object to test against.</param>
-        /// <returns><c>true</c> if the <paramref name="obj"/> is equalivalent, else <c>false</c>.</returns>
+        /// <returns><c>true</c> if the <paramref name="obj"/> is equivalent, else <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null || obj.GetType() != GetType())
@@ -467,7 +467,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets a string representation of this object, in the form (C/H/S).
         /// </summary>
-        /// <returns>The string representation</returns>
+        /// <returns>The string representation.</returns>
         public override string ToString()
         {
             if (_bytesPerSector == 512)

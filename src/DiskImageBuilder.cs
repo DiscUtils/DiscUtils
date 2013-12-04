@@ -98,7 +98,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets an instance that constructs the specified type (and variant) of virtual disk image.
         /// </summary>
-        /// <param name="type">The type of image to build (VHD, VMDK, etc)</param>
+        /// <param name="type">The type of image to build (VHD, VMDK, etc).</param>
         /// <param name="variant">The variant type (differencing/dynamic, fixed/static, etc).</param>
         /// <returns>The builder instance.</returns>
         public static DiskImageBuilder GetBuilder(string type, string variant)

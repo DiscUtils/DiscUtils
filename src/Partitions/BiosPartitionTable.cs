@@ -39,7 +39,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Initializes a new instance of the BiosPartitionTable class.
         /// </summary>
-        /// <param name="disk">The disk containing the partition table</param>
+        /// <param name="disk">The disk containing the partition table.</param>
         public BiosPartitionTable(VirtualDisk disk)
         {
             Init(disk.Content, disk.BiosGeometry);
@@ -48,8 +48,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Initializes a new instance of the BiosPartitionTable class.
         /// </summary>
-        /// <param name="disk">The stream containing the disk data</param>
-        /// <param name="diskGeometry">The geometry of the disk</param>
+        /// <param name="disk">The stream containing the disk data.</param>
+        /// <param name="diskGeometry">The geometry of the disk.</param>
         public BiosPartitionTable(Stream disk, Geometry diskGeometry)
         {
             Init(disk, diskGeometry);
@@ -106,8 +106,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Makes a best guess at the geometry of a disk.
         /// </summary>
-        /// <param name="disk">String containing the disk image to detect the geometry from</param>
-        /// <returns>The detected geometry</returns>
+        /// <param name="disk">String containing the disk image to detect the geometry from.</param>
+        /// <returns>The detected geometry.</returns>
         public static Geometry DetectGeometry(Stream disk)
         {
             if (disk.Length >= Utilities.SectorSize)
@@ -138,7 +138,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Indicates if a stream contains a valid partition table.
         /// </summary>
-        /// <param name="disk">The stream to inspect</param>
+        /// <param name="disk">The stream to inspect.</param>
         /// <returns><c>true</c> if the partition table is valid, else <c>false</c>.</returns>
         public static bool IsValid(Stream disk)
         {
@@ -186,7 +186,7 @@ namespace DiscUtils.Partitions
         /// Creates a new partition table on a disk.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>
-        /// <returns>An object to access the newly created partition table</returns>
+        /// <returns>An object to access the newly created partition table.</returns>
         public static BiosPartitionTable Initialize(VirtualDisk disk)
         {
             return Initialize(disk.Content, disk.BiosGeometry);
@@ -196,8 +196,8 @@ namespace DiscUtils.Partitions
         /// Creates a new partition table on a disk containing a single partition.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>
-        /// <param name="type">The partition type for the single partition</param>
-        /// <returns>An object to access the newly created partition table</returns>
+        /// <param name="type">The partition type for the single partition.</param>
+        /// <returns>An object to access the newly created partition table.</returns>
         public static BiosPartitionTable Initialize(VirtualDisk disk, WellKnownPartitionType type)
         {
             BiosPartitionTable table = Initialize(disk.Content, disk.BiosGeometry);
@@ -208,9 +208,9 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new partition table on a disk.
         /// </summary>
-        /// <param name="disk">The stream containing the disk data</param>
-        /// <param name="diskGeometry">The geometry of the disk</param>
-        /// <returns>An object to access the newly created partition table</returns>
+        /// <param name="disk">The stream containing the disk data.</param>
+        /// <param name="diskGeometry">The geometry of the disk.</param>
+        /// <returns>An object to access the newly created partition table.</returns>
         public static BiosPartitionTable Initialize(Stream disk, Geometry diskGeometry)
         {
             Stream data = disk;
@@ -242,9 +242,9 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new partition that encompasses the entire disk.
         /// </summary>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <returns>The index of the partition</returns>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <returns>The index of the partition.</returns>
         /// <remarks>The partition table must be empty before this method is called,
         /// otherwise IOException is thrown.</remarks>
         public override int Create(WellKnownPartitionType type, bool active)
@@ -263,10 +263,10 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new primary partition with a target size.
         /// </summary>
-        /// <param name="size">The target size (in bytes)</param>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="size">The target size (in bytes).</param>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <returns>The index of the new partition.</returns>
         public override int Create(long size, WellKnownPartitionType type, bool active)
         {
             int cylinderCapacity = _diskGeometry.SectorsPerTrack * _diskGeometry.HeadsPerCylinder * _diskGeometry.BytesPerSector;
@@ -280,10 +280,10 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new aligned partition that encompasses the entire disk.
         /// </summary>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <param name="alignment">The alignment (in bytes)</param>
-        /// <returns>The index of the partition</returns>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <param name="alignment">The alignment (in bytes).</param>
+        /// <returns>The index of the partition.</returns>
         /// <remarks>The partition table must be empty before this method is called,
         /// otherwise IOException is thrown.</remarks>
         /// <remarks>
@@ -298,7 +298,7 @@ namespace DiscUtils.Partitions
             ChsAddress start = new ChsAddress(0, 1, 1);
 
             long startLba = Utilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start), alignment / _diskGeometry.BytesPerSector);
-            long lastLba = Utilities.RoundDown((_diskData.Length / _diskGeometry.BytesPerSector), alignment / _diskGeometry.BytesPerSector);
+            long lastLba = Utilities.RoundDown(_diskData.Length / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
 
             return CreatePrimaryBySector(startLba, lastLba - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
         }
@@ -306,14 +306,14 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new aligned partition with a target size.
         /// </summary>
-        /// <param name="size">The target size (in bytes)</param>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <param name="alignment">The alignment (in bytes)</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="size">The target size (in bytes).</param>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <param name="alignment">The alignment (in bytes).</param>
+        /// <returns>The index of the new partition.</returns>
         /// <remarks>
         /// Traditionally partitions were aligned to the physical structure of the underlying disk,
-        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// however with modern storage greater efficiency is achieved by aligning partitions on
         /// large values that are a power of two.
         /// </remarks>
         public override int CreateAligned(long size, WellKnownPartitionType type, bool active, int alignment)
@@ -342,7 +342,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Deletes a partition at a given index.
         /// </summary>
-        /// <param name="index">The index of the partition</param>
+        /// <param name="index">The index of the partition.</param>
         public override void Delete(int index)
         {
             WriteRecord(index, new BiosPartitionRecord());
@@ -351,11 +351,11 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new Primary Partition that occupies whole cylinders, for best compatibility.
         /// </summary>
-        /// <param name="first">The first cylinder to include in the partition (inclusive)</param>
-        /// <param name="last">The last cylinder to include in the partition (inclusive)</param>
-        /// <param name="type">The BIOS (MBR) type of the new partition</param>
-        /// <param name="markActive">Whether to mark the partition active (bootable)</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="first">The first cylinder to include in the partition (inclusive).</param>
+        /// <param name="last">The last cylinder to include in the partition (inclusive).</param>
+        /// <param name="type">The BIOS (MBR) type of the new partition.</param>
+        /// <param name="markActive">Whether to mark the partition active (bootable).</param>
+        /// <returns>The index of the new partition.</returns>
         /// <remarks>If the cylinder 0 is given, the first track will not be used, to reserve space
         /// for the meta-data at the start of the disk.</remarks>
         public int CreatePrimaryByCylinder(int first, int last, byte type, bool markActive)
@@ -379,11 +379,11 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new Primary Partition, specified by Logical Block Addresses.
         /// </summary>
-        /// <param name="first">The LBA address of the first sector (inclusive)</param>
-        /// <param name="last">The LBA address of the last sector (inclusive)</param>
-        /// <param name="type">The BIOS (MBR) type of the new partition</param>
-        /// <param name="markActive">Whether to mark the partition active (bootable)</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="first">The LBA address of the first sector (inclusive).</param>
+        /// <param name="last">The LBA address of the last sector (inclusive).</param>
+        /// <param name="type">The BIOS (MBR) type of the new partition.</param>
+        /// <param name="markActive">Whether to mark the partition active (bootable).</param>
+        /// <returns>The index of the new partition.</returns>
         public int CreatePrimaryBySector(long first, long last, byte type, bool markActive)
         {
             if (first >= last)
@@ -450,7 +450,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Sets the active partition.
         /// </summary>
-        /// <param name="index">The index of the primary partition to mark bootable, or <c>-1</c> for none</param>
+        /// <param name="index">The index of the primary partition to mark bootable, or <c>-1</c> for none.</param>
         /// <remarks>The supplied index is the index within the primary partition, see <c>PrimaryIndex</c> on <c>BiosPartitionInfo</c>.</remarks>
         public void SetActivePartition(int index)
         {
@@ -490,7 +490,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Updates the CHS fields in partition records to reflect a new BIOS geometry.
         /// </summary>
-        /// <param name="geometry">The disk's new BIOS geometry</param>
+        /// <param name="geometry">The disk's new BIOS geometry.</param>
         /// <remarks>The partitions are not relocated to a cylinder boundary, just the CHS fields are updated on the
         /// assumption the LBA fields are definitive.</remarks>
         public void UpdateBiosGeometry(Geometry geometry)

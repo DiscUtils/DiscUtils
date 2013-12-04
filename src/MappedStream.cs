@@ -42,9 +42,9 @@ namespace DiscUtils
         /// <param name="stream">The stream to convert.</param>
         /// <param name="takeOwnership"><c>true</c> to have the new stream dispose the wrapped
         /// stream when it is disposed.</param>
-        /// <returns>A sparse stream</returns>
+        /// <returns>A sparse stream.</returns>
         /// <remarks>The wrapped stream is assumed to be a linear stream (such that any byte range
-        /// maps directly onto the parent stream)</remarks>
+        /// maps directly onto the parent stream).</remarks>
         public static new MappedStream FromStream(Stream stream, Ownership takeOwnership)
         {
             return new WrappingMappedStream<Stream>(stream, takeOwnership, null);
@@ -56,10 +56,10 @@ namespace DiscUtils
         /// <param name="stream">The stream to convert.</param>
         /// <param name="takeOwnership"><c>true</c> to have the new stream dispose the wrapped
         /// stream when it is disposed.</param>
-        /// <param name="extents">The set of extents actually stored in <c>stream</c></param>
-        /// <returns>A sparse stream</returns>
+        /// <param name="extents">The set of extents actually stored in <c>stream</c>.</param>
+        /// <returns>A sparse stream.</returns>
         /// <remarks>The wrapped stream is assumed to be a linear stream (such that any byte range
-        /// maps directly onto the parent stream)</remarks>
+        /// maps directly onto the parent stream).</remarks>
         public static new MappedStream FromStream(Stream stream, Ownership takeOwnership, IEnumerable<StreamExtent> extents)
         {
             return new WrappingMappedStream<Stream>(stream, takeOwnership, extents);
@@ -68,8 +68,8 @@ namespace DiscUtils
         /// <summary>
         /// Maps a logical range down to storage locations.
         /// </summary>
-        /// <param name="start">The first logical range to map</param>
-        /// <param name="length">The length of the range to map</param>
+        /// <param name="start">The first logical range to map.</param>
+        /// <param name="length">The length of the range to map.</param>
         /// <returns>One or more stream extents specifying the storage locations that correspond
         /// to the identified logical extent range.</returns>
         /// <remarks>

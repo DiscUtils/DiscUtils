@@ -37,9 +37,9 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Looks up a record in DNS.
         /// </summary>
-        /// <param name="name">The name to lookup</param>
-        /// <param name="type">The type of record requested</param>
-        /// <returns>The records returned by the DNS server, if any</returns>
+        /// <param name="name">The name to lookup.</param>
+        /// <param name="type">The type of record requested.</param>
+        /// <returns>The records returned by the DNS server, if any.</returns>
         public abstract ResourceRecord[] Lookup(string name, RecordType type);
 
         internal static string NormalizeDomainName(string name)

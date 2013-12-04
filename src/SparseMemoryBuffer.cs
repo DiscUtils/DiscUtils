@@ -40,7 +40,7 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the SparseMemoryBuffer class.
         /// </summary>
-        /// <param name="chunkSize">The size of each allocation chunk</param>
+        /// <param name="chunkSize">The size of each allocation chunk.</param>
         public SparseMemoryBuffer(int chunkSize)
         {
             _chunkSize = chunkSize;
@@ -82,7 +82,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the (sorted) list of allocated chunks, as chunk indexes.
         /// </summary>
-        /// <returns>An enumeration of chunk indexes</returns>
+        /// <returns>An enumeration of chunk indexes.</returns>
         /// <remarks>This method returns chunks as an index rather than absolute stream position.
         /// For example, if ChunkSize is 16KB, and the first 32KB of the buffer is actually stored,
         /// this method will return 0 and 1.  This indicates the first and second chunks are stored.</remarks>
@@ -100,7 +100,7 @@ namespace DiscUtils
         /// Accesses this memory buffer as an infinite byte array.
         /// </summary>
         /// <param name="pos">The buffer position to read.</param>
-        /// <returns>The byte stored at this position (or Zero if not explicitly stored)</returns>
+        /// <returns>The byte stored at this position (or Zero if not explicitly stored).</returns>
         public byte this[long pos]
         {
             get
@@ -131,7 +131,7 @@ namespace DiscUtils
         /// <param name="buffer">The destination byte array.</param>
         /// <param name="offset">The start offset within the destination buffer.</param>
         /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The actual number of bytes read</returns>
+        /// <returns>The actual number of bytes read.</returns>
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
             int totalRead = 0;
@@ -207,9 +207,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the parts of a buffer that are stored, within a specified range.
         /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        /// <param name="start">The offset of the first byte of interest.</param>
+        /// <param name="count">The number of bytes of interest.</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             long end = start + count;

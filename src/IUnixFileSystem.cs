@@ -30,7 +30,7 @@ namespace DiscUtils
         /// <summary>
         /// Retrieves Unix-specific information about a file or directory.
         /// </summary>
-        /// <param name="path">Path to the file or directory</param>
+        /// <param name="path">Path to the file or directory.</param>
         /// <returns>Information about the owner, group, permissions and type of the
         /// file or directory.</returns>
         UnixFileSystemInfo GetUnixFileInfo(string path);

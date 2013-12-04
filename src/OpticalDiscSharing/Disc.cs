@@ -109,9 +109,9 @@ namespace DiscUtils.OpticalDiscSharing
         /// <summary>
         /// Not supported for Optical Discs.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disc on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>Not Applicable</returns>
+        /// <param name="fileSystem">The file system to create the disc on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>Not Applicable.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");
@@ -120,8 +120,8 @@ namespace DiscUtils.OpticalDiscSharing
         /// <summary>
         /// Not supported for Optical Discs.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>Not Applicable</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>Not Applicable.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");

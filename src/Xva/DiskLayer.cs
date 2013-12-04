@@ -52,7 +52,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Gets a indication of whether the disk is 'sparse'.
         /// </summary>
-        /// <remarks>Always true for XVA disks</remarks>
+        /// <remarks>Always true for XVA disks.</remarks>
         public override bool IsSparse
         {
             get { return true; }
@@ -82,9 +82,9 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Opens the content of the disk layer as a stream.
         /// </summary>
-        /// <param name="parent">The parent file's content (if any)</param>
-        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream</param>
-        /// <returns>The new content stream</returns>
+        /// <param name="parent">The parent file's content (if any).</param>
+        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream.</param>
+        /// <returns>The new content stream.</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (ownsParent == Ownership.Dispose && parent != null)
@@ -98,7 +98,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Gets the possible locations of the parent file (if any).
         /// </summary>
-        /// <returns>Array of strings, empty if no parent</returns>
+        /// <returns>Array of strings, empty if no parent.</returns>
         public override string[] GetParentLocations()
         {
             return new string[0];

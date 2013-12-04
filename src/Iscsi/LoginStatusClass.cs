@@ -28,7 +28,7 @@ namespace DiscUtils.Iscsi
     public enum LoginStatusCode
     {
         /// <summary>
-        /// Login succeeded
+        /// Login succeeded.
         /// </summary>
         Success = 0,
 

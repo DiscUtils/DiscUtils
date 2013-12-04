@@ -55,6 +55,8 @@ namespace DiscUtils.Vhdx
 
         private delegate T Reader<T>(byte[] buffer, int offset);
 
+        private delegate void Writer<T>(T val, byte[] buffer, int offset);
+
         public MetadataTable Table
         {
             get { return _table; }
@@ -122,8 +124,6 @@ namespace DiscUtils.Vhdx
 
             return entry.Length;
         }
-
-        private delegate void Writer<T>(T val, byte[] buffer, int offset);
 
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
         private static uint AddEntryValue<T>(T data, Writer<T> writer, Guid id, MetadataEntryFlags flags, MetadataTable header, uint dataOffset, Stream stream)

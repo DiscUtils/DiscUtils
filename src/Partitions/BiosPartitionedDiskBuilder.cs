@@ -35,7 +35,7 @@ namespace DiscUtils.Partitions
     /// streams only when a client of this class tries to read from
     /// that partition.
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification="SparseMemoryStream holds no resources")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "SparseMemoryStream holds no resources")]
     public class BiosPartitionedDiskBuilder : StreamBuilder
     {
         private long _capacity;
@@ -48,8 +48,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Initializes a new instance of the BiosPartitionedDiskBuilder class.
         /// </summary>
-        /// <param name="capacity">The capacity of the disk (in bytes)</param>
-        /// <param name="biosGeometry">The BIOS geometry of the disk</param>
+        /// <param name="capacity">The capacity of the disk (in bytes).</param>
+        /// <param name="biosGeometry">The BIOS geometry of the disk.</param>
         public BiosPartitionedDiskBuilder(long capacity, Geometry biosGeometry)
         {
             _capacity = capacity;
@@ -65,7 +65,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Initializes a new instance of the BiosPartitionedDiskBuilder class.
         /// </summary>
-        /// <param name="capacity">The capacity of the disk (in bytes)</param>
+        /// <param name="capacity">The capacity of the disk (in bytes).</param>
         /// <param name="bootSectors">The boot sector(s) of the disk.</param>
         /// <param name="biosGeometry">The BIOS geometry of the disk.</param>
         [Obsolete("Use the variant that takes VirtualDisk, this method breaks for disks with extended partitions", false)]
@@ -91,7 +91,7 @@ namespace DiscUtils.Partitions
         /// Initializes a new instance of the BiosPartitionedDiskBuilder class by
         /// cloning the partition structure of a source disk.
         /// </summary>
-        /// <param name="sourceDisk">The disk to clone</param>
+        /// <param name="sourceDisk">The disk to clone.</param>
         public BiosPartitionedDiskBuilder(VirtualDisk sourceDisk)
         {
             if (sourceDisk == null)
@@ -129,8 +129,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Sets a stream representing the content of a partition in the partition table.
         /// </summary>
-        /// <param name="index">The index of the partition</param>
-        /// <param name="stream">The stream with the contents of the partition</param>
+        /// <param name="index">The index of the partition.</param>
+        /// <param name="stream">The stream with the contents of the partition.</param>
         public void SetPartitionContent(int index, SparseStream stream)
         {
             _partitionContents[index] = new BuilderSparseStreamExtent(_partitionTable[index].FirstSector * Sizes.Sector, stream);
@@ -139,7 +139,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Updates the CHS fields in partition records to reflect a new BIOS geometry.
         /// </summary>
-        /// <param name="geometry">The disk's new BIOS geometry</param>
+        /// <param name="geometry">The disk's new BIOS geometry.</param>
         /// <remarks>The partitions are not relocated to a cylinder boundary, just the CHS fields are updated on the
         /// assumption the LBA fields are definitive.</remarks>
         public void UpdateBiosGeometry(Geometry geometry)

@@ -45,8 +45,8 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// Initializes a new instance of the BuildDirectoryMember class.
         /// </summary>
-        /// <param name="name">The Joliet compliant name of the file or directory</param>
-        /// <param name="shortName">The ISO 9660 compliant name of the file or directory</param>
+        /// <param name="name">The Joliet compliant name of the file or directory.</param>
+        /// <param name="shortName">The ISO 9660 compliant name of the file or directory.</param>
         protected BuildDirectoryMember(string name, string shortName)
         {
             _name = name;

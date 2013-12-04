@@ -95,7 +95,7 @@ namespace DiscUtils.Vhdx
             Utilities.ReadFully(logStream, sectorBuffer, 0, sectorBuffer.Length);
 
             uint sig = Utilities.ToUInt32LittleEndian(sectorBuffer, 0);
-            if(sig != LogEntryHeader.LogEntrySignature)
+            if (sig != LogEntryHeader.LogEntrySignature)
             {
                 entry = null;
                 return false;
@@ -127,7 +127,7 @@ namespace DiscUtils.Vhdx
             List<Descriptor> descriptors = new List<Descriptor>();
             for (int i = 0; i < header.DescriptorCount; ++i)
             {
-                int offset = i * 32 + 64;
+                int offset = (i * 32) + 64;
                 Descriptor descriptor;
 
                 uint descriptorSig = Utilities.ToUInt32LittleEndian(logEntryBuffer, offset);
@@ -151,6 +151,7 @@ namespace DiscUtils.Vhdx
                     entry = null;
                     return false;
                 }
+
                 descriptors.Add(descriptor);
             }
 

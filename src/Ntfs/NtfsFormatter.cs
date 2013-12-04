@@ -78,7 +78,7 @@ namespace DiscUtils.Ntfs
 
                 // The bitmap is also near the middle
                 _bitmapCluster = _mftMirrorCluster + 13;
-                int numBitmapClusters = (int)Utilities.Ceil((totalClusters / 8), _clusterSize);
+                int numBitmapClusters = (int)Utilities.Ceil(totalClusters / 8, _clusterSize);
 
                 // The MFT bitmap goes 'near' the start - approx 10% in - but ensure we avoid the bootloader
                 long mftBitmapCluster = Math.Max(3 + (totalClusters / 10), numBootClusters);

@@ -51,8 +51,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
-        /// <param name="message">The exception message</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="message">The exception message.</param>
+        /// <param name="innerException">The inner exception.</param>
         public InvalidFileSystemException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -61,8 +61,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">The streaming context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         protected InvalidFileSystemException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

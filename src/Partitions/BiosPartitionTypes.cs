@@ -106,7 +106,7 @@ namespace DiscUtils.Partitions
         /// Provides a string representation of some known BIOS partition types.
         /// </summary>
         /// <param name="type">The partition type to represent as a string.</param>
-        /// <returns>The string representation</returns>
+        /// <returns>The string representation.</returns>
         public static string ToString(byte type)
         {
             switch (type)

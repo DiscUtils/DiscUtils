@@ -201,8 +201,8 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if <paramref name="obj"/> is equivalent to this object.
         /// </summary>
-        /// <param name="obj">The object to compare</param>
-        /// <returns><c>true</c> if <paramref name="obj"/> is equivalent, else <c>false</c></returns>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns><c>true</c> if <paramref name="obj"/> is equivalent, else <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
             DiscFileSystemInfo asInfo = obj as DiscFileSystemInfo;
@@ -217,7 +217,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the hash code for this object.
         /// </summary>
-        /// <returns>The hash code</returns>
+        /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
             return _path.GetHashCode() ^ _fileSystem.GetHashCode();

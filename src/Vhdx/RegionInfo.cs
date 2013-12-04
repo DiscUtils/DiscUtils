@@ -45,7 +45,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// The well-known name (if any) of the region.
+        /// Gets the well-known name (if any) of the region.
         /// </summary>
         /// <remarks>
         /// VHDX 1.0 specification defines the "BAT" and "Metadata Region", unknown regions
@@ -87,7 +87,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Gets a flag indicating if this region is required.
+        /// Gets a value indicating whether this region is required.
         /// </summary>
         /// <remarks>
         /// To load a VHDX file, a parser must be able to interpret all regions marked as required.

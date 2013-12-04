@@ -30,7 +30,6 @@ namespace DiscUtils.Vhdx
     /// Class representing the table of file metadata.
     /// </summary>
     public sealed class MetadataTableInfo : ICollection<MetadataInfo>
-
     {
         private MetadataTable _table;
 
@@ -53,9 +52,36 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
+        /// Gets the number of metadata items present.
+        /// </summary>
+        public int Count
+        {
+            get { return _table.EntryCount; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this table is read-only (always true).
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
+        private IEnumerable<MetadataInfo> Entries
+        {
+            get
+            {
+                foreach (var entry in _table.Entries)
+                {
+                    yield return new MetadataInfo(entry.Value);
+                }
+            }
+        }
+
+        /// <summary>
         /// Always throws InvalidOperationException.
         /// </summary>
-        /// <param name="item">The item to add</param>
+        /// <param name="item">The item to add.</param>
         public void Add(MetadataInfo item)
         {
             throw new InvalidOperationException();
@@ -74,7 +100,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         /// <param name="item">The item to look for.</param>
         /// <returns><c>true</c> if present, else <c>false</c>.</returns>
-        /// <remarks>The comparision is based on the metadata item identity, not the value.</remarks>
+        /// <remarks>The comparison is based on the metadata item identity, not the value.</remarks>
         public bool Contains(MetadataInfo item)
         {
             foreach (var entry in _table.Entries)
@@ -105,26 +131,10 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Gets the number of metadata items present.
-        /// </summary>
-        public int Count
-        {
-            get { return _table.EntryCount; }
-        }
-
-        /// <summary>
-        /// Indicates if this table is read-only (always true).
-        /// </summary>
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
-
-        /// <summary>
         /// Removes an item from the table.
         /// </summary>
-        /// <param name="item">The item to remove</param>
-        /// <returns><c>true</c> if the item was removed, else <c>false</c></returns>
+        /// <param name="item">The item to remove.</param>
+        /// <returns><c>true</c> if the item was removed, else <c>false</c>.</returns>
         /// <remarks>Always throws InvalidOperationException as the table is read-only.</remarks>
         public bool Remove(MetadataInfo item)
         {
@@ -147,17 +157,6 @@ namespace DiscUtils.Vhdx
         IEnumerator IEnumerable.GetEnumerator()
         {
             return Entries.GetEnumerator();
-        }
-
-        private IEnumerable<MetadataInfo> Entries
-        {
-            get
-            {
-                foreach (var entry in _table.Entries)
-                {
-                    yield return new MetadataInfo(entry.Value);
-                }
-            }
         }
     }
 }

@@ -103,7 +103,7 @@ namespace DiscUtils.Iso9660
 
         /// <summary>
         /// Gets or sets a value indicating whether to update the ISOLINUX info table at the
-        /// start of the boot image.  Use with ISOLINUX only!
+        /// start of the boot image.  Use with ISOLINUX only.
         /// </summary>
         /// <remarks>
         /// ISOLINUX has an 'information table' at the start of the boot loader that verifies
@@ -141,7 +141,7 @@ namespace DiscUtils.Iso9660
         /// Adds a directory to the ISO image.
         /// </summary>
         /// <param name="name">The name of the directory on the ISO image.</param>
-        /// <returns>The object representing this directory</returns>
+        /// <returns>The object representing this directory.</returns>
         /// <remarks>
         /// The name is the full path to the directory, for example:
         /// <example><code>

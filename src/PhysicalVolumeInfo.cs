@@ -71,10 +71,10 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the PhysicalVolumeInfo class.
         /// </summary>
-        /// <param name="diskId">The containing disk's identity</param>
-        /// <param name="disk">The disk containing the partition</param>
-        /// <param name="partitionInfo">Information about the partition</param>
-        /// <remarks>Use this constructor to represent a (BIOS or GPT) partition</remarks>
+        /// <param name="diskId">The containing disk's identity.</param>
+        /// <param name="disk">The disk containing the partition.</param>
+        /// <param name="partitionInfo">Information about the partition.</param>
+        /// <remarks>Use this constructor to represent a (BIOS or GPT) partition.</remarks>
         internal PhysicalVolumeInfo(
             string diskId,
             VirtualDisk disk,
@@ -90,8 +90,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the PhysicalVolumeInfo class.
         /// </summary>
-        /// <param name="diskId">The identity of the disk</param>
-        /// <param name="disk">The disk itself</param>
+        /// <param name="diskId">The identity of the disk.</param>
+        /// <param name="disk">The disk itself.</param>
         /// <remarks>Use this constructor to represent an entire disk as a single volume.</remarks>
         internal PhysicalVolumeInfo(
             string diskId,

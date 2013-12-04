@@ -44,7 +44,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Initializes a new instance of the FileChecker class.
         /// </summary>
-        /// <param name="stream">The VHD file stream</param>
+        /// <param name="stream">The VHD file stream.</param>
         public FileChecker(Stream stream)
         {
             _fileStream = stream;
@@ -53,9 +53,9 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Verifies the VHD file, generating a report and a pass/fail indication.
         /// </summary>
-        /// <param name="reportOutput">The destination for the report</param>
-        /// <param name="levels">How verbose the report should be</param>
-        /// <returns><c>true</c> if the file is valid, else false</returns>
+        /// <param name="reportOutput">The destination for the report.</param>
+        /// <param name="levels">How verbose the report should be.</param>
+        /// <returns><c>true</c> if the file is valid, else false.</returns>
         public bool Check(TextWriter reportOutput, ReportLevels levels)
         {
             _report = reportOutput;

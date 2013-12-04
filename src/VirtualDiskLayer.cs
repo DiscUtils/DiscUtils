@@ -109,15 +109,15 @@ namespace DiscUtils
         /// <summary>
         /// Gets the content of this layer.
         /// </summary>
-        /// <param name="parent">The parent stream (if any)</param>
-        /// <param name="ownsParent">Controls ownership of the parent stream</param>
-        /// <returns>The content as a stream</returns>
+        /// <param name="parent">The parent stream (if any).</param>
+        /// <param name="ownsParent">Controls ownership of the parent stream.</param>
+        /// <returns>The content as a stream.</returns>
         public abstract SparseStream OpenContent(SparseStream parent, Ownership ownsParent);
 
         /// <summary>
         /// Gets the possible locations of the parent file (if any).
         /// </summary>
-        /// <returns>Array of strings, empty if no parent</returns>
+        /// <returns>Array of strings, empty if no parent.</returns>
         public abstract string[] GetParentLocations();
 
         /// <summary>

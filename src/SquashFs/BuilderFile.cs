@@ -25,7 +25,7 @@ namespace DiscUtils.SquashFs
     using System.Collections.Generic;
     using System.IO;
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification="FileStream instance is correctly disposed")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "FileStream instance is correctly disposed")]
     internal sealed class BuilderFile : BuilderNode
     {
         private Stream _source;

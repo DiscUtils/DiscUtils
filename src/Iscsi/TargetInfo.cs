@@ -38,8 +38,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the TargetInfo class.
         /// </summary>
-        /// <param name="name">The name of the Target</param>
-        /// <param name="addresses">The network addresses of the Target</param>
+        /// <param name="name">The name of the Target.</param>
+        /// <param name="addresses">The network addresses of the Target.</param>
         public TargetInfo(string name, TargetAddress[] addresses)
         {
             _name = name;
@@ -65,7 +65,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the primary address of the Target as a string.
         /// </summary>
-        /// <returns>String of the form host[:port][,group]/name</returns>
+        /// <returns>String of the form host[:port][,group]/name.</returns>
         public override string ToString()
         {
             return _addresses[0] + "/" + _name;

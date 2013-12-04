@@ -227,8 +227,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Indicates if the settings in this object are inheritable by another object.
         /// </summary>
-        /// <param name="type">The type of the object to test for inheritability</param>
-        /// <returns><c>true</c> if the settings can be inherited, else <c>false</c></returns>
+        /// <param name="type">The type of the object to test for inheritability.</param>
+        /// <returns><c>true</c> if the settings can be inherited, else <c>false</c>.</returns>
         public bool IsInheritableBy(ObjectType type)
         {
             if (type == ObjectType.Inherit)
@@ -252,7 +252,7 @@ namespace DiscUtils.BootConfig
         /// Indicates if this object has a specific element.
         /// </summary>
         /// <param name="id">The identity of the element to look for.</param>
-        /// <returns><c>true</c> if present, else <c>false</c></returns>
+        /// <returns><c>true</c> if present, else <c>false</c>.</returns>
         public bool HasElement(int id)
         {
             return _storage.HasValue(_id, id);
@@ -262,7 +262,7 @@ namespace DiscUtils.BootConfig
         /// Indicates if this object has a specific element.
         /// </summary>
         /// <param name="id">The identity of the element to look for.</param>
-        /// <returns><c>true</c> if present, else <c>false</c></returns>
+        /// <returns><c>true</c> if present, else <c>false</c>.</returns>
         public bool HasElement(WellKnownElement id)
         {
             return HasElement((int)id);
@@ -272,7 +272,7 @@ namespace DiscUtils.BootConfig
         /// Gets a specific element in this object.
         /// </summary>
         /// <param name="id">The identity of the element to look for.</param>
-        /// <returns>The element object</returns>
+        /// <returns>The element object.</returns>
         public Element GetElement(int id)
         {
             if (HasElement(id))
@@ -287,7 +287,7 @@ namespace DiscUtils.BootConfig
         /// Gets a specific element in this object.
         /// </summary>
         /// <param name="id">The identity of the element to look for.</param>
-        /// <returns>The element object</returns>
+        /// <returns>The element object.</returns>
         public Element GetElement(WellKnownElement id)
         {
             return GetElement((int)id);
@@ -297,8 +297,8 @@ namespace DiscUtils.BootConfig
         /// Adds an element in this object.
         /// </summary>
         /// <param name="id">The identity of the element to add.</param>
-        /// <param name="initialValue">The initial value of the element</param>
-        /// <returns>The element object</returns>
+        /// <param name="initialValue">The initial value of the element.</param>
+        /// <returns>The element object.</returns>
         public Element AddElement(int id, ElementValue initialValue)
         {
             _storage.CreateElement(_id, id);
@@ -311,26 +311,26 @@ namespace DiscUtils.BootConfig
         /// Adds an element in this object.
         /// </summary>
         /// <param name="id">The identity of the element to add.</param>
-        /// <param name="initialValue">The initial value of the element</param>
-        /// <returns>The element object</returns>
+        /// <param name="initialValue">The initial value of the element.</param>
+        /// <returns>The element object.</returns>
         public Element AddElement(WellKnownElement id, ElementValue initialValue)
         {
             return AddElement((int)id, initialValue);
         }
 
         /// <summary>
-        /// Removes a specific element
+        /// Removes a specific element.
         /// </summary>
-        /// <param name="id">The element to remove</param>
+        /// <param name="id">The element to remove.</param>
         public void RemoveElement(int id)
         {
             _storage.DeleteElement(_id, id);
         }
 
         /// <summary>
-        /// Removes a specific element
+        /// Removes a specific element.
         /// </summary>
-        /// <param name="id">The element to remove</param>
+        /// <param name="id">The element to remove.</param>
         public void RemoveElement(WellKnownElement id)
         {
             RemoveElement((int)id);
@@ -339,7 +339,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Returns the object identity as a GUID string.
         /// </summary>
-        /// <returns>A string representation, with surrounding curly braces</returns>
+        /// <returns>A string representation, with surrounding curly braces.</returns>
         public override string ToString()
         {
             return _id.ToString("B");

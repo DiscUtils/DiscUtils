@@ -32,7 +32,6 @@ namespace DiscUtils.Vhd
         public const uint FeatureReservedMustBeSet = 0x2;
         public const uint Version1 = 0x00010000;
         public const uint Version6Point1 = 0x00060001;
-        public static readonly DateTime EpochUtc = new DateTime(2000, 1, 1, 0, 0, 0, 0);
         public const string VirtualPCSig = "vpc ";
         public const string VirtualServerSig = "vs  ";
         public const uint VirtualPC2004Version = 0x00050000;
@@ -42,6 +41,8 @@ namespace DiscUtils.Vhd
         public const uint CylindersMask = 0x0000FFFF;
         public const uint HeadsMask = 0x00FF0000;
         public const uint SectorsMask = 0xFF000000;
+
+        public static readonly DateTime EpochUtc = new DateTime(2000, 1, 1, 0, 0, 0, 0);
 
         public string Cookie;
         public uint Features;

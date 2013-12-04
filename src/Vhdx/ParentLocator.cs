@@ -29,12 +29,13 @@ namespace DiscUtils.Vhdx
 
     internal sealed class ParentLocator : IByteArraySerializable
     {
-        private static readonly Guid LocatorTypeGuid = new Guid("B04AEFB7-D19E-4A81-B789-25B8E9445913");
-
         public Guid LocatorType = LocatorTypeGuid;
         public ushort Reserved = 0;
         public ushort Count = 0;
-        private Dictionary<string, string> _entries = new Dictionary<string,string>();
+
+        private static readonly Guid LocatorTypeGuid = new Guid("B04AEFB7-D19E-4A81-B789-25B8E9445913");
+
+        private Dictionary<string, string> _entries = new Dictionary<string, string>();
 
         public int Size
         {

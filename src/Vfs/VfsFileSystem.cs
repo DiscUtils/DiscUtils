@@ -31,10 +31,10 @@ namespace DiscUtils.Vfs
     /// <summary>
     /// Base class for VFS file systems.
     /// </summary>
-    /// <typeparam name="TDirEntry">The concrete type representing directory entries</typeparam>
-    /// <typeparam name="TFile">The concrete type representing files</typeparam>
-    /// <typeparam name="TDirectory">The concrete type representing directories</typeparam>
-    /// <typeparam name="TContext">The concrete type holding global state</typeparam>
+    /// <typeparam name="TDirEntry">The concrete type representing directory entries.</typeparam>
+    /// <typeparam name="TFile">The concrete type representing files.</typeparam>
+    /// <typeparam name="TDirectory">The concrete type representing directories.</typeparam>
+    /// <typeparam name="TContext">The concrete type holding global state.</typeparam>
     public abstract class VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> : DiscFileSystem
         where TDirEntry : VfsDirEntry
         where TFile : IVfsFile
@@ -48,7 +48,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Initializes a new instance of the VfsFileSystem class.
         /// </summary>
-        /// <param name="defaultOptions">The default file system options</param>
+        /// <param name="defaultOptions">The default file system options.</param>
         protected VfsFileSystem(DiscFileSystemOptions defaultOptions)
             : base(defaultOptions)
         {
@@ -58,8 +58,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Delegate for processing directory entries.
         /// </summary>
-        /// <param name="path">Full path to the directory entry</param>
-        /// <param name="dirEntry">The directory entry itself</param>
+        /// <param name="path">Full path to the directory entry.</param>
+        /// <param name="dirEntry">The directory entry itself.</param>
         protected delegate void DirEntryHandler(string path, TDirEntry dirEntry);
 
         /// <summary>
@@ -91,8 +91,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Copies a file - not supported on read-only file systems.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
@@ -102,7 +102,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Creates a directory - not supported on read-only file systems.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public override void CreateDirectory(string path)
         {
             throw new NotImplementedException();
@@ -129,8 +129,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public override bool DirectoryExists(string path)
         {
             if (IsRoot(path))
@@ -151,8 +151,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public override bool FileExists(string path)
         {
             TDirEntry dirEntry = GetDirectoryEntry(path);
@@ -376,8 +376,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             if (IsRoot(path))
@@ -404,8 +404,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             throw new NotImplementedException();
@@ -452,8 +452,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             if (IsRoot(path))
@@ -490,8 +490,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             if (IsRoot(path))
@@ -528,8 +528,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             TFile file = GetFile(path);
@@ -585,8 +585,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets all directory entries in the specified directory and sub-directories.
         /// </summary>
-        /// <param name="path">The path to inspect</param>
-        /// <param name="handler">Delegate invoked for each directory entry</param>
+        /// <param name="path">The path to inspect.</param>
+        /// <param name="handler">Delegate invoked for each directory entry.</param>
         protected void ForAllDirEntries(string path, DirEntryHandler handler)
         {
             TDirectory dir = null;
@@ -618,7 +618,7 @@ namespace DiscUtils.Vfs
         /// Gets the file object for a given path.
         /// </summary>
         /// <param name="path">The path to query.</param>
-        /// <returns>The file object corresponding to the path</returns>
+        /// <returns>The file object corresponding to the path.</returns>
         protected TFile GetFile(string path)
         {
             if (IsRoot(path))
@@ -642,15 +642,15 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Converts a directory entry to an object representing a file.
         /// </summary>
-        /// <param name="dirEntry">The directory entry to convert</param>
-        /// <returns>The corresponding file object</returns>
+        /// <param name="dirEntry">The directory entry to convert.</param>
+        /// <returns>The corresponding file object.</returns>
         protected abstract TFile ConvertDirEntryToFile(TDirEntry dirEntry);
 
         /// <summary>
         /// Converts an internal directory entry name into an external one.
         /// </summary>
-        /// <param name="name">The name to convert</param>
-        /// <returns>The external name</returns>
+        /// <param name="name">The name to convert.</param>
+        /// <returns>The external name.</returns>
         /// <remarks>
         /// This method is called on a single path element (i.e. name contains no path
         /// separators).

@@ -362,7 +362,7 @@ namespace DiscUtils.Fat
         }
 
         /// <summary>
-        /// Gets the file-system version (usually 0)
+        /// Gets the file-system version (usually 0).
         /// </summary>
         public int Version
         {
@@ -396,7 +396,7 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Indicates if this file system is read-only or read-write.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>.</returns>
         public override bool CanWrite
         {
             get { return _data.CanWrite; }
@@ -416,10 +416,10 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Creates a formatted floppy disk image in a stream.
         /// </summary>
-        /// <param name="stream">The stream to write the blank image to</param>
-        /// <param name="type">The type of floppy to create</param>
-        /// <param name="label">The volume label for the floppy (or null)</param>
-        /// <returns>An object that provides access to the newly created floppy disk image</returns>
+        /// <param name="stream">The stream to write the blank image to.</param>
+        /// <param name="type">The type of floppy to create.</param>
+        /// <param name="label">The volume label for the floppy (or null).</param>
+        /// <returns>An object that provides access to the newly created floppy disk image.</returns>
         public static FatFileSystem FormatFloppy(Stream stream, FloppyDiskType type, string label)
         {
             long pos = stream.Position;
@@ -479,10 +479,10 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Formats a virtual hard disk partition.
         /// </summary>
-        /// <param name="disk">The disk containing the partition</param>
-        /// <param name="partitionIndex">The index of the partition on the disk</param>
-        /// <param name="label">The volume label for the partition (or null)</param>
-        /// <returns>An object that provides access to the newly created partition file system</returns>
+        /// <param name="disk">The disk containing the partition.</param>
+        /// <param name="partitionIndex">The index of the partition on the disk.</param>
+        /// <param name="label">The volume label for the partition (or null).</param>
+        /// <returns>An object that provides access to the newly created partition file system.</returns>
         public static FatFileSystem FormatPartition(VirtualDisk disk, int partitionIndex, string label)
         {
             using (Stream partitionStream = disk.Partitions[partitionIndex].Open())
@@ -500,13 +500,13 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Creates a formatted hard disk partition in a stream.
         /// </summary>
-        /// <param name="stream">The stream to write the new file system to</param>
-        /// <param name="label">The volume label for the partition (or null)</param>
-        /// <param name="diskGeometry">The geometry of the disk containing the partition</param>
-        /// <param name="firstSector">The starting sector number of this partition (hide's sectors in other partitions)</param>
-        /// <param name="sectorCount">The number of sectors in this partition</param>
-        /// <param name="reservedSectors">The number of reserved sectors at the start of the partition</param>
-        /// <returns>An object that provides access to the newly created partition file system</returns>
+        /// <param name="stream">The stream to write the new file system to.</param>
+        /// <param name="label">The volume label for the partition (or null).</param>
+        /// <param name="diskGeometry">The geometry of the disk containing the partition.</param>
+        /// <param name="firstSector">The starting sector number of this partition (hide's sectors in other partitions).</param>
+        /// <param name="sectorCount">The number of sectors in this partition.</param>
+        /// <param name="reservedSectors">The number of reserved sectors at the start of the partition.</param>
+        /// <returns>An object that provides access to the newly created partition file system.</returns>
         public static FatFileSystem FormatPartition(
             Stream stream,
             string label,
@@ -655,8 +655,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Detects if a stream contains a FAT file system.
         /// </summary>
-        /// <param name="stream">The stream to inspect</param>
-        /// <returns><c>true</c> if the stream appears to be a FAT file system, else <c>false</c></returns>
+        /// <param name="stream">The stream to inspect.</param>
+        /// <returns><c>true</c> if the stream appears to be a FAT file system, else <c>false</c>.</returns>
         public static bool Detect(Stream stream)
         {
             if (stream.Length < 512)
@@ -693,10 +693,10 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Opens a file for reading and/or writing.
         /// </summary>
-        /// <param name="path">The full path to the file</param>
-        /// <param name="mode">The file mode</param>
-        /// <param name="access">The desired access</param>
-        /// <returns>The stream to the opened file</returns>
+        /// <param name="path">The full path to the file.</param>
+        /// <param name="mode">The file mode.</param>
+        /// <param name="access">The desired access.</param>
+        /// <returns>The stream to the opened file.</returns>
         public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             Directory parent;
@@ -735,8 +735,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             // Simulate a root directory entry - doesn't really exist though
@@ -758,8 +758,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             if (IsRootPath(path))
@@ -799,7 +799,7 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the creation time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
+        /// <param name="path">The path of the file or directory.</param>
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
@@ -869,8 +869,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The time the file or directory was last accessed</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The time the file or directory was last accessed.</returns>
         public override DateTime GetLastAccessTime(string path)
         {
             if (IsRootPath(path))
@@ -904,8 +904,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The time the file or directory was last accessed</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The time the file or directory was last accessed.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             if (IsRootPath(path))
@@ -939,8 +939,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The time the file or directory was last modified</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The time the file or directory was last modified.</returns>
         public override DateTime GetLastWriteTime(string path)
         {
             if (IsRootPath(path))
@@ -974,8 +974,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The time the file or directory was last modified</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The time the file or directory was last modified.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             if (IsRootPath(path))
@@ -1009,8 +1009,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             return GetDirectoryEntry(path).FileSize;
@@ -1019,8 +1019,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
@@ -1186,8 +1186,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public override bool DirectoryExists(string path)
         {
             // Special case - root directory
@@ -1205,8 +1205,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public override bool FileExists(string path)
         {
             // Special case - root directory
@@ -1224,8 +1224,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Indicates if a file or directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file or directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file or directory exists.</returns>
         public override bool Exists(string path)
         {
             // Special case - root directory
@@ -1406,7 +1406,7 @@ namespace DiscUtils.Fat
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             Directory sourceDir;
@@ -1560,7 +1560,7 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Disposes of this instance.
         /// </summary>
-        /// <param name="disposing">true if Disposing</param>
+        /// <param name="disposing">The value <c>true</c> if Disposing.</param>
         protected override void Dispose(bool disposing)
         {
             try
@@ -1590,17 +1590,17 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Writes a FAT12/FAT16 BPB.
         /// </summary>
-        /// <param name="bootSector">The buffer to fill</param>
-        /// <param name="sectors">The total capacity of the disk (in sectors)</param>
-        /// <param name="fatType">The number of bits in each FAT entry</param>
-        /// <param name="maxRootEntries">The maximum number of root directory entries</param>
-        /// <param name="hiddenSectors">The number of hidden sectors before this file system (i.e. partition offset)</param>
-        /// <param name="reservedSectors">The number of reserved sectors before the FAT</param>
-        /// <param name="sectorsPerCluster">The number of sectors per cluster</param>
-        /// <param name="diskGeometry">The geometry of the disk containing the Fat file system</param>
-        /// <param name="isFloppy">Indicates if the disk is a removable media (a floppy disk)</param>
-        /// <param name="volId">The disk's volume Id</param>
-        /// <param name="label">The disk's label (or null)</param>
+        /// <param name="bootSector">The buffer to fill.</param>
+        /// <param name="sectors">The total capacity of the disk (in sectors).</param>
+        /// <param name="fatType">The number of bits in each FAT entry.</param>
+        /// <param name="maxRootEntries">The maximum number of root directory entries.</param>
+        /// <param name="hiddenSectors">The number of hidden sectors before this file system (i.e. partition offset).</param>
+        /// <param name="reservedSectors">The number of reserved sectors before the FAT.</param>
+        /// <param name="sectorsPerCluster">The number of sectors per cluster.</param>
+        /// <param name="diskGeometry">The geometry of the disk containing the Fat file system.</param>
+        /// <param name="isFloppy">Indicates if the disk is a removable media (a floppy disk).</param>
+        /// <param name="volId">The disk's volume Id.</param>
+        /// <param name="label">The disk's label (or null).</param>
         private static void WriteBPB(
             byte[] bootSector,
             uint sectors,

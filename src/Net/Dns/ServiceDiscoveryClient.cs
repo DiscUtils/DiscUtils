@@ -68,7 +68,7 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Queries for all the different types of service available on the local network.
         /// </summary>
-        /// <returns>An array of service types, for example "_http._tcp"</returns>
+        /// <returns>An array of service types, for example "_http._tcp".</returns>
         public string[] LookupServiceTypes()
         {
             return LookupServiceTypes("local.");
@@ -77,8 +77,8 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Queries for all the different types of service available in a domain.
         /// </summary>
-        /// <param name="domain">The domain to query</param>
-        /// <returns>An array of service types, for example "_http._tcp"</returns>
+        /// <param name="domain">The domain to query.</param>
+        /// <returns>An array of service types, for example "_http._tcp".</returns>
         public string[] LookupServiceTypes(string domain)
         {
             List<ResourceRecord> records = DoLookup("_services._dns-sd._udp" + "." + domain, RecordType.Pointer);
@@ -96,8 +96,8 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Queries for all instances of a particular service on the local network, retrieving all details.
         /// </summary>
-        /// <param name="service">The service to query, for example "_http._tcp"</param>
-        /// <returns>An array of service instances</returns>
+        /// <param name="service">The service to query, for example "_http._tcp".</param>
+        /// <returns>An array of service instances.</returns>
         public ServiceInstance[] LookupInstances(string service)
         {
             return LookupInstances(service, "local.", ServiceInstanceFields.All);
@@ -106,10 +106,10 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Queries for all instances of a particular service on the local network.
         /// </summary>
-        /// <param name="service">The service to query, for example "_http._tcp"</param>
-        /// <param name="fields">The details to query</param>
-        /// <returns>An array of service instances</returns>
-        /// <remarks>Excluding some fields (for example the IP address) may reduce the time taken</remarks>
+        /// <param name="service">The service to query, for example "_http._tcp".</param>
+        /// <param name="fields">The details to query.</param>
+        /// <returns>An array of service instances.</returns>
+        /// <remarks>Excluding some fields (for example the IP address) may reduce the time taken.</remarks>
         public ServiceInstance[] LookupInstances(string service, ServiceInstanceFields fields)
         {
             return LookupInstances(service, "local.", fields);
@@ -118,11 +118,11 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Queries for all instances of a particular service on the local network.
         /// </summary>
-        /// <param name="service">The service to query, for example "_http._tcp"</param>
-        /// <param name="domain">The domain to query</param>
-        /// <param name="fields">The details to query</param>
-        /// <returns>An array of service instances</returns>
-        /// <remarks>Excluding some fields (for example the IP address) may reduce the time taken</remarks>
+        /// <param name="service">The service to query, for example "_http._tcp".</param>
+        /// <param name="domain">The domain to query.</param>
+        /// <param name="fields">The details to query.</param>
+        /// <returns>An array of service instances.</returns>
+        /// <remarks>Excluding some fields (for example the IP address) may reduce the time taken.</remarks>
         public ServiceInstance[] LookupInstances(string service, string domain, ServiceInstanceFields fields)
         {
             List<ResourceRecord> records = DoLookup(service + "." + domain, RecordType.Pointer);
@@ -139,10 +139,10 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Queries for all instances of a particular service on the local network.
         /// </summary>
-        /// <param name="name">The instance to query, for example "My WebServer._http._tcp"</param>
-        /// <param name="fields">The details to query</param>
-        /// <returns>The service instance</returns>
-        /// <remarks>Excluding some fields (for example the IP address) may reduce the time taken</remarks>
+        /// <param name="name">The instance to query, for example "My WebServer._http._tcp".</param>
+        /// <param name="fields">The details to query.</param>
+        /// <returns>The service instance.</returns>
+        /// <remarks>Excluding some fields (for example the IP address) may reduce the time taken.</remarks>
         public ServiceInstance LookupInstance(string name, ServiceInstanceFields fields)
         {
             ServiceInstance instance = new ServiceInstance(name);

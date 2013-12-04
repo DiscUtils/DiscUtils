@@ -45,8 +45,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Initializes a new instance of the Directory class.  Use this constructor to represent non-root directories.
         /// </summary>
-        /// <param name="parent">The parent directory</param>
-        /// <param name="parentId">The identity of the entry representing this directory in the parent</param>
+        /// <param name="parent">The parent directory.</param>
+        /// <param name="parentId">The identity of the entry representing this directory in the parent.</param>
         internal Directory(Directory parent, long parentId)
         {
             _fileSystem = parent._fileSystem;
@@ -62,8 +62,8 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Initializes a new instance of the Directory class.  Use this constructor to represent the root directory.
         /// </summary>
-        /// <param name="fileSystem">The file system</param>
-        /// <param name="dirStream">The stream containing the directory info</param>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="dirStream">The stream containing the directory info.</param>
         internal Directory(FatFileSystem fileSystem, Stream dirStream)
         {
             _fileSystem = fileSystem;

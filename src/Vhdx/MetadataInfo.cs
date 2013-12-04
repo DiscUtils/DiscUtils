@@ -84,7 +84,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Offset within the metadata region of the metadata.
+        /// Gets the offset within the metadata region of the metadata.
         /// </summary>
         public long Offset
         {
@@ -92,7 +92,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Length of the metadata.
+        /// Gets the length of the metadata.
         /// </summary>
         public long Length
         {
@@ -100,27 +100,27 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Indicates whether this is system or user metadata.
+        /// Gets a value indicating whether this is system or user metadata.
         /// </summary>
         public bool IsUser
         {
-            get { return (_entry.Flags & MetadataEntryFlags.IsUser) != 0;}
+            get { return (_entry.Flags & MetadataEntryFlags.IsUser) != 0; }
         }
 
         /// <summary>
-        /// Indicates whether parsing this metadata is needed to open the VHDX file.
+        /// Gets a value indicating whether parsing this metadata is needed to open the VHDX file.
         /// </summary>
         public bool IsRequired
         {
-            get { return (_entry.Flags & MetadataEntryFlags.IsRequired) != 0;}
+            get { return (_entry.Flags & MetadataEntryFlags.IsRequired) != 0; }
         }
 
         /// <summary>
-        /// Indicates whether this is virtual disk metadata, or VHDX file metadata.
+        /// Gets a value indicating whether this is virtual disk metadata, or VHDX file metadata.
         /// </summary>
         public bool IsVirtualDisk
         {
-            get { return (_entry.Flags & MetadataEntryFlags.IsVirtualDisk) != 0;}
+            get { return (_entry.Flags & MetadataEntryFlags.IsVirtualDisk) != 0; }
         }
     }
 }

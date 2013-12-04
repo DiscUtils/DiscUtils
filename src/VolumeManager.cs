@@ -101,8 +101,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the physical volumes held on a disk.
         /// </summary>
-        /// <param name="diskContent">The contents of the disk to inspect</param>
-        /// <returns>An array of volumes</returns>
+        /// <param name="diskContent">The contents of the disk to inspect.</param>
+        /// <returns>An array of volumes.</returns>
         /// <remarks>
         /// <para>By preference, use the form of this method that takes a disk parameter.</para>
         /// <para>If the disk isn't partitioned, this method returns the entire disk contents
@@ -116,8 +116,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the physical volumes held on a disk.
         /// </summary>
-        /// <param name="disk">The disk to inspect</param>
-        /// <returns>An array of volumes</returns>
+        /// <param name="disk">The disk to inspect.</param>
+        /// <returns>An array of volumes.</returns>
         /// <remarks>If the disk isn't partitioned, this method returns the entire disk contents
         /// as a single volume.</remarks>
         public static PhysicalVolumeInfo[] GetPhysicalVolumes(VirtualDisk disk)
@@ -128,8 +128,8 @@ namespace DiscUtils
         /// <summary>
         /// Adds a disk to the volume manager.
         /// </summary>
-        /// <param name="disk">The disk to add</param>
-        /// <returns>The GUID the volume manager will use to identify the disk</returns>
+        /// <param name="disk">The disk to add.</param>
+        /// <returns>The GUID the volume manager will use to identify the disk.</returns>
         public string AddDisk(VirtualDisk disk)
         {
             _needScan = true;
@@ -141,8 +141,8 @@ namespace DiscUtils
         /// <summary>
         /// Adds a disk to the volume manager.
         /// </summary>
-        /// <param name="content">The contents of the disk to add</param>
-        /// <returns>The GUID the volume manager will use to identify the disk</returns>
+        /// <param name="content">The contents of the disk to add.</param>
+        /// <returns>The GUID the volume manager will use to identify the disk.</returns>
         public string AddDisk(Stream content)
         {
             return AddDisk(new Raw.Disk(content, Ownership.None));
@@ -151,7 +151,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the physical volumes from all disks added to this volume manager.
         /// </summary>
-        /// <returns>An array of physical volumes</returns>
+        /// <returns>An array of physical volumes.</returns>
         public PhysicalVolumeInfo[] GetPhysicalVolumes()
         {
             if (_needScan)
@@ -165,7 +165,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the logical volumes from all disks added to this volume manager.
         /// </summary>
-        /// <returns>An array of logical volumes</returns>
+        /// <returns>An array of logical volumes.</returns>
         public LogicalVolumeInfo[] GetLogicalVolumes()
         {
             if (_needScan)
@@ -179,8 +179,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets a particular volume, based on it's identity.
         /// </summary>
-        /// <param name="identity">The volume's identity</param>
-        /// <returns>The volume information for the volume, or returns <c>null</c></returns>
+        /// <param name="identity">The volume's identity.</param>
+        /// <returns>The volume information for the volume, or returns <c>null</c>.</returns>
         public VolumeInfo GetVolume(string identity)
         {
             if (_needScan)

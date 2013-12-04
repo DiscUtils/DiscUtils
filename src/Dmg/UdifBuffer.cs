@@ -78,7 +78,7 @@ namespace DiscUtils.Dmg
                 LoadRun(currentPos);
 
                 int bufferOffset = (int)(currentPos - (_activeRunOffset + (_activeRun.SectorStart * Sizes.Sector)));
-                int toCopy = (int)Math.Min(((_activeRun.SectorCount * Sizes.Sector) - bufferOffset), count - totalCopied);
+                int toCopy = (int)Math.Min((_activeRun.SectorCount * Sizes.Sector) - bufferOffset, count - totalCopied);
 
                 switch (_activeRun.Type)
                 {

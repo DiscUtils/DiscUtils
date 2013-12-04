@@ -52,13 +52,13 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Allocates clusters from the disk
+        /// Allocates clusters from the disk.
         /// </summary>
-        /// <param name="count">The number of clusters to allocate</param>
-        /// <param name="proposedStart">The proposed start cluster (or -1)</param>
-        /// <param name="isMft"><c>true</c> if this attribute is the $MFT\$DATA attribute</param>
-        /// <param name="total">The total number of clusters in the file, including this allocation</param>
-        /// <returns>The list of cluster allocations</returns>
+        /// <param name="count">The number of clusters to allocate.</param>
+        /// <param name="proposedStart">The proposed start cluster (or -1).</param>
+        /// <param name="isMft"><c>true</c> if this attribute is the $MFT\$DATA attribute.</param>
+        /// <param name="total">The total number of clusters in the file, including this allocation.</param>
+        /// <returns>The list of cluster allocations.</returns>
         public Tuple<long, long>[] AllocateClusters(long count, long proposedStart, bool isMft, long total)
         {
             List<Tuple<long, long>> result = new List<Tuple<long, long>>();
@@ -162,7 +162,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Sets the total number of clusters managed in the volume.
         /// </summary>
-        /// <param name="numClusters">Total number of clusters in the volume</param>
+        /// <param name="numClusters">Total number of clusters in the volume.</param>
         /// <remarks>
         /// Any clusters represented in the bitmap beyond the total number in the volume are marked as in-use.
         /// </remarks>
@@ -198,13 +198,13 @@ namespace DiscUtils.Ntfs
         /// Finds one or more free clusters in a range.
         /// </summary>
         /// <param name="count">The number of clusters required.</param>
-        /// <param name="result">The list of clusters found (i.e. out param)</param>
-        /// <param name="start">The first cluster in the range to look at</param>
-        /// <param name="end">The last cluster in the range to look at (exclusive)</param>
-        /// <param name="isMft">Indicates if the clusters are for the MFT</param>
-        /// <param name="contiguous">Indicates if contiguous clusters are required</param>
-        /// <param name="headroom">Indicates how many clusters to skip before next allocation, to prevent fragmentation</param>
-        /// <returns>The number of clusters found in the range</returns>
+        /// <param name="result">The list of clusters found (i.e. out param).</param>
+        /// <param name="start">The first cluster in the range to look at.</param>
+        /// <param name="end">The last cluster in the range to look at (exclusive).</param>
+        /// <param name="isMft">Indicates if the clusters are for the MFT.</param>
+        /// <param name="contiguous">Indicates if contiguous clusters are required.</param>
+        /// <param name="headroom">Indicates how many clusters to skip before next allocation, to prevent fragmentation.</param>
+        /// <returns>The number of clusters found in the range.</returns>
         private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, bool isMft, bool contiguous, long headroom)
         {
             long numFound = 0;

@@ -77,7 +77,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Indicates whether blocks should be left allocated within the file.
+        /// Gets a value indicating whether blocks should be left allocated within the file.
         /// </summary>
         public bool LeaveBlocksAllocated
         {
@@ -85,7 +85,7 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Indicates whether the VHDX file has a parent file (i.e. is a differencing file).
+        /// Gets a value indicating whether the VHDX file has a parent file (i.e. is a differencing file).
         /// </summary>
         public bool HasParent
         {
@@ -127,9 +127,9 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Gets the set of parent locators, for differencing files.
         /// </summary>
-        public IDictionary<string,string> ParentLocatorEntries
+        public IDictionary<string, string> ParentLocatorEntries
         {
-            get { return (_metadata.ParentLocator != null) ? _metadata.ParentLocator.Entries : new Dictionary<string,string>(); }
+            get { return (_metadata.ParentLocator != null) ? _metadata.ParentLocator.Entries : new Dictionary<string, string>(); }
         }
 
         /// <summary>

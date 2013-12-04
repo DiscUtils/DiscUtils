@@ -154,7 +154,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the object that interprets the partition structure.
         /// </summary>
-        /// <remarks>It is theoretically possible for a disk to contain two independant partition structures - a
+        /// <remarks>It is theoretically possible for a disk to contain two independent partition structures - a
         /// BIOS/GPT one and an Apple one, for example.  This method will return in order of preference,
         /// a GUID partition table, a BIOS partition table, then in undefined preference one of any other partition
         /// tables found.  See PartitionTable.GetPartitionTables to gain access to all the discovered partition
@@ -281,7 +281,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the set of supported variants of a type of virtual disk.
         /// </summary>
-        /// <param name="type">A type, as returned by <see cref="SupportedDiskTypes"/></param>
+        /// <param name="type">A type, as returned by <see cref="SupportedDiskTypes"/>.</param>
         /// <returns>A collection of identifiers, or empty if there is no variant concept for this type of disk.</returns>
         public static ICollection<string> GetSupportedDiskVariants(string type)
         {
@@ -291,9 +291,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets information about disk type.
         /// </summary>
-        /// <param name="type">The disk type, as returned by <see cref="SupportedDiskTypes"/></param>
-        /// <param name="variant">The variant of the disk type</param>
-        /// <returns>Information about the disk type</returns>
+        /// <param name="type">The disk type, as returned by <see cref="SupportedDiskTypes"/>.</param>
+        /// <param name="variant">The variant of the disk type.</param>
+        /// <returns>Information about the disk type.</returns>
         public static VirtualDiskTypeInfo GetDiskType(string type, string variant)
         {
             return TypeMap[type].GetDiskTypeInformation(variant);
@@ -302,14 +302,14 @@ namespace DiscUtils
         /// <summary>
         /// Create a new virtual disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
-        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <param name="capacity">The capacity of the new disk</param>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>).</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>).</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <param name="capacity">The capacity of the new disk.</param>
         /// <param name="geometry">The geometry of the new disk (or null).</param>
-        /// <param name="parameters">Untyped parameters controlling the creation process (TBD)</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="parameters">Untyped parameters controlling the creation process (TBD).</param>
+        /// <returns>The newly created disk.</returns>
         public static VirtualDisk CreateDisk(DiscFileSystem fileSystem, string type, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
         {
             VirtualDiskFactory factory = TypeMap[type];
@@ -335,13 +335,13 @@ namespace DiscUtils
         /// <summary>
         /// Create a new virtual disk.
         /// </summary>
-        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
-        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <param name="capacity">The capacity of the new disk</param>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>).</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>).</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <param name="capacity">The capacity of the new disk.</param>
         /// <param name="geometry">The geometry of the new disk (or null).</param>
-        /// <param name="parameters">Untyped parameters controlling the creation process (TBD)</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="parameters">Untyped parameters controlling the creation process (TBD).</param>
+        /// <returns>The newly created disk.</returns>
         public static VirtualDisk CreateDisk(string type, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
         {
             return CreateDisk(type, variant, path, capacity, geometry, null, null, parameters);
@@ -350,15 +350,15 @@ namespace DiscUtils
         /// <summary>
         /// Create a new virtual disk.
         /// </summary>
-        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
-        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <param name="capacity">The capacity of the new disk</param>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>).</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>).</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <param name="capacity">The capacity of the new disk.</param>
         /// <param name="geometry">The geometry of the new disk (or null).</param>
-        /// <param name="user">The user identity to use when accessing the <c>path</c> (or null)</param>
-        /// <param name="password">The password to use when accessing the <c>path</c> (or null)</param>
-        /// <param name="parameters">Untyped parameters controlling the creation process (TBD)</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="user">The user identity to use when accessing the <c>path</c> (or null).</param>
+        /// <param name="password">The password to use when accessing the <c>path</c> (or null).</param>
+        /// <param name="parameters">Untyped parameters controlling the creation process (TBD).</param>
+        /// <returns>The newly created disk.</returns>
         public static VirtualDisk CreateDisk(string type, string variant, string path, long capacity, Geometry geometry, string user, string password, Dictionary<string, string> parameters)
         {
             VirtualDiskParameters diskParams = new VirtualDiskParameters()
@@ -382,13 +382,13 @@ namespace DiscUtils
         /// <summary>
         /// Create a new virtual disk.
         /// </summary>
-        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>)</param>
-        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>)</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
+        /// <param name="type">The type of disk to create (see <see cref="SupportedDiskTypes"/>).</param>
+        /// <param name="variant">The variant of the type to create (see <see cref="GetSupportedDiskVariants"/>).</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
         /// <param name="diskParameters">Parameters controlling the capacity, geometry, etc of the new disk.</param>
-        /// <param name="user">The user identity to use when accessing the <c>path</c> (or null)</param>
-        /// <param name="password">The password to use when accessing the <c>path</c> (or null)</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="user">The user identity to use when accessing the <c>path</c> (or null).</param>
+        /// <param name="password">The password to use when accessing the <c>path</c> (or null).</param>
+        /// <returns>The newly created disk.</returns>
         public static VirtualDisk CreateDisk(string type, string variant, string path, VirtualDiskParameters diskParameters, string user, string password)
         {
             Uri uri = PathToUri(path);
@@ -437,9 +437,9 @@ namespace DiscUtils
         /// <summary>
         /// Opens an existing virtual disk.
         /// </summary>
-        /// <param name="path">The path of the virtual disk to open, can be a URI</param>
-        /// <param name="access">The desired access to the disk</param>
-        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        /// <param name="path">The path of the virtual disk to open, can be a URI.</param>
+        /// <param name="access">The desired access to the disk.</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format.</returns>
         public static VirtualDisk OpenDisk(string path, FileAccess access)
         {
             return OpenDisk(path, null, access, null, null);
@@ -448,11 +448,11 @@ namespace DiscUtils
         /// <summary>
         /// Opens an existing virtual disk.
         /// </summary>
-        /// <param name="path">The path of the virtual disk to open, can be a URI</param>
-        /// <param name="access">The desired access to the disk</param>
-        /// <param name="user">The user name to use for authentication (if necessary)</param>
-        /// <param name="password">The password to use for authentication (if necessary)</param>
-        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        /// <param name="path">The path of the virtual disk to open, can be a URI.</param>
+        /// <param name="access">The desired access to the disk.</param>
+        /// <param name="user">The user name to use for authentication (if necessary).</param>
+        /// <param name="password">The password to use for authentication (if necessary).</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format.</returns>
         public static VirtualDisk OpenDisk(string path, FileAccess access, string user, string password)
         {
             return OpenDisk(path, null, access, user, password);
@@ -461,12 +461,12 @@ namespace DiscUtils
         /// <summary>
         /// Opens an existing virtual disk.
         /// </summary>
-        /// <param name="path">The path of the virtual disk to open, can be a URI</param>
-        /// <param name="forceType">Force the detected disk type (<c>null</c> to detect)</param>
-        /// <param name="access">The desired access to the disk</param>
-        /// <param name="user">The user name to use for authentication (if necessary)</param>
-        /// <param name="password">The password to use for authentication (if necessary)</param>
-        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        /// <param name="path">The path of the virtual disk to open, can be a URI.</param>
+        /// <param name="forceType">Force the detected disk type (<c>null</c> to detect).</param>
+        /// <param name="access">The desired access to the disk.</param>
+        /// <param name="user">The user name to use for authentication (if necessary).</param>
+        /// <param name="password">The password to use for authentication (if necessary).</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format.</returns>
         /// <remarks>
         /// The detected disk type can be forced by specifying a known disk type: 
         /// RAW, VHD, VMDK, etc.
@@ -538,10 +538,10 @@ namespace DiscUtils
         /// <summary>
         /// Opens an existing virtual disk, possibly from within an existing disk.
         /// </summary>
-        /// <param name="fs">The file system to open the disk on</param>
-        /// <param name="path">The path of the virtual disk to open</param>
-        /// <param name="access">The desired access to the disk</param>
-        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format</returns>
+        /// <param name="fs">The file system to open the disk on.</param>
+        /// <param name="path">The path of the virtual disk to open.</param>
+        /// <param name="access">The desired access to the disk.</param>
+        /// <returns>The Virtual Disk, or <c>null</c> if an unknown disk format.</returns>
         public static VirtualDisk OpenDisk(DiscFileSystem fs, string path, FileAccess access)
         {
             if (fs == null)
@@ -576,7 +576,7 @@ namespace DiscUtils
         /// <summary>
         /// Reads the first sector of the disk, known as the Master Boot Record.
         /// </summary>
-        /// <returns>The MBR as a byte array</returns>
+        /// <returns>The MBR as a byte array.</returns>
         public virtual byte[] GetMasterBootRecord()
         {
             byte[] sector = new byte[Sizes.Sector];
@@ -613,16 +613,16 @@ namespace DiscUtils
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public abstract VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path);
 
         /// <summary>
         /// Create a new differencing disk.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public abstract VirtualDisk CreateDifferencingDisk(string path);
 
         internal static VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)

@@ -38,9 +38,9 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the SubBuffer class.
         /// </summary>
-        /// <param name="parent">The parent buffer</param>
-        /// <param name="first">The first byte in <paramref name="parent"/> represented by this sub-buffer</param>
-        /// <param name="length">The number of bytes of <paramref name="parent"/> represented by this sub-buffer</param>
+        /// <param name="parent">The parent buffer.</param>
+        /// <param name="first">The first byte in <paramref name="parent"/> represented by this sub-buffer.</param>
+        /// <param name="length">The number of bytes of <paramref name="parent"/> represented by this sub-buffer.</param>
         public SubBuffer(IBuffer parent, long first, long length)
         {
             _parent = parent;
@@ -104,7 +104,7 @@ namespace DiscUtils
         /// <param name="buffer">The destination byte array.</param>
         /// <param name="offset">The start offset within the destination buffer.</param>
         /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The actual number of bytes read</returns>
+        /// <returns>The actual number of bytes read.</returns>
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
             if (count < 0)
@@ -154,9 +154,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the parts of a buffer that are stored, within a specified range.
         /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        /// <param name="start">The offset of the first byte of interest.</param>
+        /// <param name="count">The number of bytes of interest.</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             long absStart = _first + start;

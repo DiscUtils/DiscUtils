@@ -36,7 +36,7 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Initializes a new instance of the Disc class.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public Disc(Stream stream, Ownership ownsStream)
             : this(stream, ownsStream, OpticalFormat.None)
@@ -46,9 +46,9 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Initializes a new instance of the Disc class.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
-        /// <param name="format">The disk image format</param>
+        /// <param name="format">The disk image format.</param>
         public Disc(Stream stream, Ownership ownsStream, OpticalFormat format)
         {
             _file = new DiscImageFile(stream, ownsStream, format);
@@ -57,7 +57,7 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Initializes a new instance of the Disc class.
         /// </summary>
-        /// <param name="path">The path to the disc image</param>
+        /// <param name="path">The path to the disc image.</param>
         public Disc(string path)
         {
             _file = new DiscImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, OpticalFormat.None);
@@ -66,8 +66,8 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Initializes a new instance of the Disc class.
         /// </summary>
-        /// <param name="path">The path to the disc image</param>
-        /// <param name="access">The access requested to the disk</param>
+        /// <param name="path">The path to the disc image.</param>
+        /// <param name="access">The access requested to the disk.</param>
         public Disc(string path, FileAccess access)
         {
             FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
@@ -138,9 +138,9 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Not supported for Optical Discs.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disc on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>Not Applicable</returns>
+        /// <param name="fileSystem">The file system to create the disc on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>Not Applicable.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");
@@ -149,8 +149,8 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Not supported for Optical Discs.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>Not Applicable</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>Not Applicable.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported for optical disks");

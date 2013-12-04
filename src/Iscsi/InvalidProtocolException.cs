@@ -41,7 +41,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the InvalidProtocolException class.
         /// </summary>
-        /// <param name="message">The reason for the exception</param>
+        /// <param name="message">The reason for the exception.</param>
         public InvalidProtocolException(string message)
             : base(message)
         {
@@ -50,8 +50,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the InvalidProtocolException class.
         /// </summary>
-        /// <param name="message">The reason for the exception</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="message">The reason for the exception.</param>
+        /// <param name="innerException">The inner exception.</param>
         public InvalidProtocolException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -60,8 +60,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the InvalidProtocolException class.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">Ther context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">Ther context.</param>
         protected InvalidProtocolException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

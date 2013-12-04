@@ -29,8 +29,8 @@ namespace DiscUtils
     /// <summary>
     /// Caches objects.
     /// </summary>
-    /// <typeparam name="K">The type of the object key</typeparam>
-    /// <typeparam name="V">The type of the objects to cache</typeparam>
+    /// <typeparam name="K">The type of the object key.</typeparam>
+    /// <typeparam name="V">The type of the objects to cache.</typeparam>
     /// <remarks>
     /// Can be use for two purposes - to ensure there is only one instance of a given object,
     /// and to prevent the need to recreate objects that are expensive to create.

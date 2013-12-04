@@ -89,9 +89,9 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Adds a new entry.
         /// </summary>
-        /// <param name="name">The name of the subkey</param>
-        /// <param name="cellIndex">The cell index of the subkey</param>
-        /// <returns>The index of the new entry</returns>
+        /// <param name="name">The name of the subkey.</param>
+        /// <param name="cellIndex">The cell index of the subkey.</param>
+        /// <returns>The index of the new entry.</returns>
         internal int Add(string name, int cellIndex)
         {
             for (int i = 0; i < _numElements; ++i)
@@ -169,7 +169,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Finds a subkey cell, returning it's index in this list.
         /// </summary>
-        /// <param name="name">The name of the key to find</param>
+        /// <param name="name">The name of the key to find.</param>
         /// <returns>The index of the found key, or <c>-1</c>.</returns>
         internal int IndexOf(string name)
         {

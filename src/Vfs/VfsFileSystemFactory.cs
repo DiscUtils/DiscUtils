@@ -32,8 +32,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Detects if a stream contains any known file systems.
         /// </summary>
-        /// <param name="stream">The stream to inspect</param>
-        /// <returns>A list of file systems (may be empty)</returns>
+        /// <param name="stream">The stream to inspect.</param>
+        /// <returns>A list of file systems (may be empty).</returns>
         public DiscUtils.FileSystemInfo[] Detect(Stream stream)
         {
             return Detect(stream, null);
@@ -42,8 +42,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Detects if a volume contains any known file systems.
         /// </summary>
-        /// <param name="volume">The volume to inspect</param>
-        /// <returns>A list of file systems (may be empty)</returns>
+        /// <param name="volume">The volume to inspect.</param>
+        /// <returns>A list of file systems (may be empty).</returns>
         public DiscUtils.FileSystemInfo[] Detect(VolumeInfo volume)
         {
             using (Stream stream = volume.Open())
@@ -56,8 +56,8 @@ namespace DiscUtils.Vfs
         /// The logic for detecting file systems.
         /// </summary>
         /// <param name="stream">The stream to inspect.</param>
-        /// <param name="volumeInfo">Optionally, information about the volume</param>
-        /// <returns>A list of file systems detected (may be empty)</returns>
+        /// <param name="volumeInfo">Optionally, information about the volume.</param>
+        /// <returns>A list of file systems detected (may be empty).</returns>
         public abstract DiscUtils.FileSystemInfo[] Detect(Stream stream, VolumeInfo volumeInfo);
     }
 }

@@ -594,8 +594,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets an attribute by reference.
         /// </summary>
-        /// <param name="attrRef">Reference to the attribute</param>
-        /// <returns>The attribute</returns>
+        /// <param name="attrRef">Reference to the attribute.</param>
+        /// <returns>The attribute.</returns>
         internal NtfsAttribute GetAttribute(AttributeReference attrRef)
         {
             foreach (var attr in _attributes)
@@ -612,8 +612,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         ///  Gets the first (if more than one) instance of a named attribute.
         /// </summary>
-        /// <param name="type">The attribute type</param>
-        /// <param name="name">The attribute's name</param>
+        /// <param name="type">The attribute type.</param>
+        /// <param name="name">The attribute's name.</param>
         /// <returns>The attribute of <c>null</c>.</returns>
         internal NtfsAttribute GetAttribute(AttributeType type, string name)
         {
@@ -631,7 +631,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         ///  Gets all instances of an unnamed attribute.
         /// </summary>
-        /// <param name="type">The attribute type</param>
+        /// <param name="type">The attribute type.</param>
         /// <returns>The attributes.</returns>
         internal NtfsAttribute[] GetAttributes(AttributeType type)
         {
@@ -977,9 +977,9 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a new unnamed attribute.
         /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="flags">The flags of the new attribute</param>
-        /// <returns>The new attribute</returns>
+        /// <param name="type">The type of the new attribute.</param>
+        /// <param name="flags">The flags of the new attribute.</param>
+        /// <returns>The new attribute.</returns>
         private NtfsAttribute CreateAttribute(AttributeType type, AttributeFlags flags)
         {
             return CreateAttribute(type, null, flags);
@@ -988,10 +988,10 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a new attribute.
         /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="flags">The flags of the new attribute</param>
-        /// <returns>The new attribute</returns>
+        /// <param name="type">The type of the new attribute.</param>
+        /// <param name="name">The name of the new attribute.</param>
+        /// <param name="flags">The flags of the new attribute.</param>
+        /// <returns>The new attribute.</returns>
         private NtfsAttribute CreateAttribute(AttributeType type, string name, AttributeFlags flags)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);
@@ -1011,13 +1011,13 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a new attribute at a fixed cluster.
         /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="flags">The flags of the new attribute</param>
-        /// <param name="firstCluster">The first cluster to assign to the attribute</param>
-        /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
-        /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
-        /// <returns>The new attribute</returns>
+        /// <param name="type">The type of the new attribute.</param>
+        /// <param name="name">The name of the new attribute.</param>
+        /// <param name="flags">The flags of the new attribute.</param>
+        /// <param name="firstCluster">The first cluster to assign to the attribute.</param>
+        /// <param name="numClusters">The number of sequential clusters to assign to the attribute.</param>
+        /// <param name="bytesPerCluster">The number of bytes in each cluster.</param>
+        /// <returns>The new attribute.</returns>
         private NtfsAttribute CreateAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             bool indexed = _context.AttributeDefinitions.IsIndexed(type);
@@ -1252,9 +1252,9 @@ namespace DiscUtils.Ntfs
             /// <summary>
             /// Change attribute residency if it gets too big (or small).
             /// </summary>
-            /// <param name="value">The new (anticipated) length of the stream</param>
+            /// <param name="value">The new (anticipated) length of the stream.</param>
             /// <remarks>Has hysteresis - the decision is based on the input and the current
-            /// state, not the current state alone</remarks>
+            /// state, not the current state alone.</remarks>
             private void ChangeAttributeResidencyByLength(long value)
             {
                 // This is a bit of a hack - but it's really important the bitmap file remains non-resident

@@ -72,8 +72,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Converts a well known partition type to a Guid.
         /// </summary>
-        /// <param name="wellKnown">The value to convert</param>
-        /// <returns>The GUID value</returns>
+        /// <param name="wellKnown">The value to convert.</param>
+        /// <returns>The GUID value.</returns>
         internal static Guid Convert(WellKnownPartitionType wellKnown)
         {
             switch (wellKnown)

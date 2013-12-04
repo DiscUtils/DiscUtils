@@ -45,8 +45,8 @@ namespace DiscUtils
         /// <summary>
         /// Opens a volume using the file system.
         /// </summary>
-        /// <param name="volume">The volume to access</param>
-        /// <returns>A file system instance</returns>
+        /// <param name="volume">The volume to access.</param>
+        /// <returns>A file system instance.</returns>
         public DiscFileSystem Open(VolumeInfo volume)
         {
             return Open(volume, null);
@@ -55,8 +55,8 @@ namespace DiscUtils
         /// <summary>
         /// Opens a stream using the file system.
         /// </summary>
-        /// <param name="stream">The stream to access</param>
-        /// <returns>A file system instance</returns>
+        /// <param name="stream">The stream to access.</param>
+        /// <returns>A file system instance.</returns>
         public DiscFileSystem Open(Stream stream)
         {
             return Open(stream, null);
@@ -65,23 +65,23 @@ namespace DiscUtils
         /// <summary>
         /// Opens a volume using the file system.
         /// </summary>
-        /// <param name="volume">The volume to access</param>
-        /// <param name="parameters">Parameters for the file system</param>
-        /// <returns>A file system instance</returns>
+        /// <param name="volume">The volume to access.</param>
+        /// <param name="parameters">Parameters for the file system.</param>
+        /// <returns>A file system instance.</returns>
         public abstract DiscFileSystem Open(VolumeInfo volume, FileSystemParameters parameters);
 
         /// <summary>
         /// Opens a stream using the file system.
         /// </summary>
-        /// <param name="stream">The stream to access</param>
-        /// <param name="parameters">Parameters for the file system</param>
-        /// <returns>A file system instance</returns>
+        /// <param name="stream">The stream to access.</param>
+        /// <param name="parameters">Parameters for the file system.</param>
+        /// <returns>A file system instance.</returns>
         public abstract DiscFileSystem Open(Stream stream, FileSystemParameters parameters);
 
         /// <summary>
         /// Gets the name of the file system.
         /// </summary>
-        /// <returns>The file system name</returns>
+        /// <returns>The file system name.</returns>
         public override string ToString()
         {
             return Name;

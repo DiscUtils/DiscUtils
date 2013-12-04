@@ -36,7 +36,7 @@ namespace DiscUtils.Dmg
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public DiskImageFile(Stream stream, Ownership ownsStream)
         {
@@ -112,7 +112,7 @@ namespace DiscUtils.Dmg
         /// <summary>
         /// Gets the location of the parent file, given a base path.
         /// </summary>
-        /// <returns>Array of candidate file locations</returns>
+        /// <returns>Array of candidate file locations.</returns>
         public override string[] GetParentLocations()
         {
             return new string[0];

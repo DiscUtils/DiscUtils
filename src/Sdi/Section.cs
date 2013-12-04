@@ -47,7 +47,7 @@ namespace DiscUtils.Sdi
         /// <summary>
         /// Gets the type of this section.
         /// </summary>
-        /// <remarks>Sample types are "PART" (disk partition), "WIM" (Windows Imaging Format)</remarks>
+        /// <remarks>Sample types are "PART" (disk partition), "WIM" (Windows Imaging Format).</remarks>
         public string SectionType
         {
             get { return _record.SectionType; }

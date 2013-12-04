@@ -46,8 +46,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Sets credentials used to authenticate this Initiator to the Target.
         /// </summary>
-        /// <param name="userName">The user name</param>
-        /// <param name="password">The password, should be at least 12 characters</param>
+        /// <param name="userName">The user name.</param>
+        /// <param name="password">The password, should be at least 12 characters.</param>
         public void SetCredentials(string userName, string password)
         {
             _userName = userName;
@@ -67,8 +67,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Connects to a Target.
         /// </summary>
-        /// <param name="target">The Target to connect to</param>
-        /// <param name="addresses">The list of addresses for the target</param>
+        /// <param name="target">The Target to connect to.</param>
+        /// <param name="addresses">The list of addresses for the target.</param>
         /// <returns>The session representing the target connection.</returns>
         public Session ConnectTo(string target, params string[] addresses)
         {
@@ -84,8 +84,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Connects to a Target.
         /// </summary>
-        /// <param name="target">The Target to connect to</param>
-        /// <param name="addresses">The list of addresses for the target</param>
+        /// <param name="target">The Target to connect to.</param>
+        /// <param name="addresses">The list of addresses for the target.</param>
         /// <returns>The session representing the target connection.</returns>
         public Session ConnectTo(string target, IList<TargetAddress> addresses)
         {
@@ -95,8 +95,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the Targets available from a Portal (i.e. network entity).
         /// </summary>
-        /// <param name="address">The address of the Portal</param>
-        /// <returns>The list of Targets available</returns>
+        /// <param name="address">The address of the Portal.</param>
+        /// <returns>The list of Targets available.</returns>
         /// <remarks>If you just have an IP address, use this method to discover the available Targets.</remarks>
         public TargetInfo[] GetTargets(string address)
         {
@@ -106,8 +106,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the Targets available from a Portal (i.e. network entity).
         /// </summary>
-        /// <param name="address">The address of the Portal</param>
-        /// <returns>The list of Targets available</returns>
+        /// <param name="address">The address of the Portal.</param>
+        /// <returns>The list of Targets available.</returns>
         /// <remarks>If you just have an IP address, use this method to discover the available Targets.</remarks>
         public TargetInfo[] GetTargets(TargetAddress address)
         {

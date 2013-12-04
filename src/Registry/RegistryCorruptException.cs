@@ -50,8 +50,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
-        /// <param name="message">The exception message</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="message">The exception message.</param>
+        /// <param name="innerException">The inner exception.</param>
         public RegistryCorruptException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -60,8 +60,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">The streaming context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         protected RegistryCorruptException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

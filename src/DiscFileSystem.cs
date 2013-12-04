@@ -106,8 +106,8 @@ namespace DiscUtils
         /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         public virtual void CopyFile(string sourceFile, string destinationFile)
         {
             CopyFile(sourceFile, destinationFile, false);
@@ -116,15 +116,15 @@ namespace DiscUtils
         /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public abstract void CopyFile(string sourceFile, string destinationFile, bool overwrite);
 
         /// <summary>
         /// Creates a directory.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public abstract void CreateDirectory(string path);
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace DiscUtils
         /// Deletes a directory, optionally with all descendants.
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
-        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted.</param>
         public virtual void DeleteDirectory(string path, bool recursive)
         {
             if (recursive)
@@ -165,22 +165,22 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public abstract bool DirectoryExists(string path);
 
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public abstract bool FileExists(string path);
 
         /// <summary>
         /// Indicates if a file or directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file or directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file or directory exists.</returns>
         public virtual bool Exists(string path)
         {
             return FileExists(path) || DirectoryExists(path);
@@ -287,7 +287,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten.</param>
         public abstract void MoveFile(string sourceName, string destinationName, bool overwrite);
 
         /// <summary>
@@ -313,21 +313,21 @@ namespace DiscUtils
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public abstract FileAttributes GetAttributes(string path);
 
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public abstract void SetAttributes(string path, FileAttributes newValue);
 
         /// <summary>
         /// Gets the creation time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
+        /// <param name="path">The path of the file or directory.</param>
         /// <returns>The creation time.</returns>
         public virtual DateTime GetCreationTime(string path)
         {
@@ -361,8 +361,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public virtual DateTime GetLastAccessTime(string path)
         {
             return GetLastAccessTimeUtc(path).ToLocalTime();
@@ -381,8 +381,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public abstract DateTime GetLastAccessTimeUtc(string path);
 
         /// <summary>
@@ -395,8 +395,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public virtual DateTime GetLastWriteTime(string path)
         {
             return GetLastWriteTimeUtc(path).ToLocalTime();
@@ -415,8 +415,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public abstract DateTime GetLastWriteTimeUtc(string path);
 
         /// <summary>
@@ -429,16 +429,16 @@ namespace DiscUtils
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public abstract long GetFileLength(string path);
 
         /// <summary>
         /// Gets an object representing a possible file.
         /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
+        /// <param name="path">The file path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The file does not need to exist.</remarks>
         public virtual DiscFileInfo GetFileInfo(string path)
         {
             return new DiscFileInfo(this, path);
@@ -447,9 +447,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets an object representing a possible directory.
         /// </summary>
-        /// <param name="path">The directory path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The directory does not need to exist</remarks>
+        /// <param name="path">The directory path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The directory does not need to exist.</remarks>
         public virtual DiscDirectoryInfo GetDirectoryInfo(string path)
         {
             return new DiscDirectoryInfo(this, path);
@@ -458,9 +458,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets an object representing a possible file system object (file or directory).
         /// </summary>
-        /// <param name="path">The file system path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file system object does not need to exist</remarks>
+        /// <param name="path">The file system path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The file system object does not need to exist.</remarks>
         public virtual DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);
@@ -469,7 +469,7 @@ namespace DiscUtils
         /// <summary>
         /// Reads the boot code of the file system into a byte array.
         /// </summary>
-        /// <returns>The boot code, or <c>null</c> if not available</returns>
+        /// <returns>The boot code, or <c>null</c> if not available.</returns>
         public virtual byte[] ReadBootCode()
         {
             return null;
@@ -489,7 +489,7 @@ namespace DiscUtils
         /// <summary>
         /// Disposes of this instance.
         /// </summary>
-        /// <param name="disposing">true if Disposing</param>
+        /// <param name="disposing">The value <c>true</c> if Disposing.</param>
         protected virtual void Dispose(bool disposing)
         {
         }

@@ -43,7 +43,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>
-        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files</param>
+        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files.</param>
         public VfsCDReader(Stream data, bool joliet, bool hideVersions)
             : this(data, joliet ? DefaultVariantsWithJoliet : DefaultVariantsNoJoliet, hideVersions)
         {
@@ -53,8 +53,8 @@ namespace DiscUtils.Iso9660
         /// Initializes a new instance of the VfsCDReader class.
         /// </summary>
         /// <param name="data">The stream to read the ISO image from.</param>
-        /// <param name="variantPriorities">Which possible file system variants to use, and with which priority</param>
-        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files</param>
+        /// <param name="variantPriorities">Which possible file system variants to use, and with which priority.</param>
+        /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files.</param>
         /// <remarks>
         /// <para>
         /// The implementation considers each of the file system variants in <c>variantProperties</c> and selects

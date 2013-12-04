@@ -35,8 +35,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new instance of the AttributeReference class.
         /// </summary>
-        /// <param name="fileReference">The file containing the attribute</param>
-        /// <param name="attributeId">The identity of the attribute within the file record</param>
+        /// <param name="fileReference">The file containing the attribute.</param>
+        /// <param name="attributeId">The identity of the attribute within the file record.</param>
         public AttributeReference(FileRecordReference fileReference, ushort attributeId)
         {
             _fileReference = fileReference;
@@ -62,7 +62,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// The reference as a string.
         /// </summary>
-        /// <returns>String representing the attribute</returns>
+        /// <returns>String representing the attribute.</returns>
         public override string ToString()
         {
             return _fileReference.ToString() + ".attr[" + _attributeId + "]";
@@ -73,7 +73,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Compares this attribute reference to another.
         /// </summary>
-        /// <param name="other">The attribute reference to compare against</param>
+        /// <param name="other">The attribute reference to compare against.</param>
         /// <returns>Zero if references are identical.</returns>
         public int CompareTo(AttributeReference other)
         {
@@ -93,7 +93,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Indicates if two references are equivalent.
         /// </summary>
-        /// <param name="other">The attribute reference to compare</param>
+        /// <param name="other">The attribute reference to compare.</param>
         /// <returns><c>true</c> if the references are equivalent.</returns>
         public bool Equals(AttributeReference other)
         {
@@ -105,8 +105,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Indicates if this reference is equivalent to another object.
         /// </summary>
-        /// <param name="obj">The object to compare</param>
-        /// <returns><c>true</c> if obj is an equivalent attribute reference</returns>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns><c>true</c> if obj is an equivalent attribute reference.</returns>
         public override bool Equals(object obj)
         {
             AttributeReference objAsAttrRef = obj as AttributeReference;

@@ -41,7 +41,7 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the BlockCacheSettings class.
         /// </summary>
-        /// <param name="settings">The cache settings</param>
+        /// <param name="settings">The cache settings.</param>
         internal BlockCacheSettings(BlockCacheSettings settings)
         {
             this.BlockSize = settings.BlockSize;
@@ -71,7 +71,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets or sets the optimum size of a read to the wrapped stream.
         /// </summary>
-        /// <remarks>This value must be a multiple of BlockSize</remarks>
+        /// <remarks>This value must be a multiple of BlockSize.</remarks>
         public int OptimumReadSize { get; set; }
     }
 }

@@ -50,7 +50,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Initializes a new instance of the VirtualMachine class.
         /// </summary>
-        /// <param name="fileStream">The stream containing the .XVA file</param>
+        /// <param name="fileStream">The stream containing the .XVA file.</param>
         /// <remarks>
         /// Ownership of the stream is not transfered.
         /// </remarks>
@@ -62,7 +62,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Initializes a new instance of the VirtualMachine class.
         /// </summary>
-        /// <param name="fileStream">The stream containing the .XVA file</param>
+        /// <param name="fileStream">The stream containing the .XVA file.</param>
         /// <param name="ownership">Whether to transfer ownership of <c>fileStream</c> to the new instance.</param>
         public VirtualMachine(Stream fileStream, Ownership ownership)
         {
@@ -75,7 +75,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Gets the disks in this XVA.
         /// </summary>
-        /// <returns>An enumeration of disks</returns>
+        /// <returns>An enumeration of disks.</returns>
         public IEnumerable<Disk> Disks
         {
             get

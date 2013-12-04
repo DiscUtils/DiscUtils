@@ -48,8 +48,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the RpcUnixCredential class.
         /// </summary>
-        /// <param name="user">The user's unique id (UID)</param>
-        /// <param name="primaryGroup">The user's primary group id (GID)</param>
+        /// <param name="user">The user's unique id (UID).</param>
+        /// <param name="primaryGroup">The user's primary group id (GID).</param>
         public RpcUnixCredential(int user, int primaryGroup)
             : this(user, primaryGroup, new int[] { })
         {
@@ -58,9 +58,9 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the RpcUnixCredential class.
         /// </summary>
-        /// <param name="user">The user's unique id (UID)</param>
-        /// <param name="primaryGroup">The user's primary group id (GID)</param>
-        /// <param name="groups">The user's supplementary group ids</param>
+        /// <param name="user">The user's unique id (UID).</param>
+        /// <param name="primaryGroup">The user's primary group id (GID).</param>
+        /// <param name="groups">The user's supplementary group ids.</param>
         public RpcUnixCredential(int user, int primaryGroup, int[] groups)
         {
             _machineName = Environment.MachineName;

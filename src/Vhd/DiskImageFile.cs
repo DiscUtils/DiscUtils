@@ -43,7 +43,7 @@ namespace DiscUtils.Vhd
         private Footer _footer;
 
         /// <summary>
-        /// The VHD file's dynamic header (if not static)
+        /// The VHD file's dynamic header (if not static).
         /// </summary>
         private DynamicHeader _dynamicHeader;
 
@@ -65,7 +65,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         public DiskImageFile(Stream stream)
         {
             _fileStream = stream;
@@ -78,7 +78,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public DiskImageFile(Stream stream, Ownership ownsStream)
         {
@@ -93,8 +93,8 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="path">The file path to open</param>
-        /// <param name="access">Controls how the file can be accessed</param>
+        /// <param name="path">The file path to open.</param>
+        /// <param name="access">Controls how the file can be accessed.</param>
         public DiskImageFile(string path, FileAccess access)
             : this(new LocalFileLocator(Path.GetDirectoryName(path)), Path.GetFileName(path), access)
         {
@@ -226,8 +226,8 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             return InitializeFixed(stream, ownsStream, capacity, null);
@@ -238,9 +238,9 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
             InitializeFixedInternal(stream, capacity, geometry);
@@ -252,8 +252,8 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             return InitializeDynamic(stream, ownsStream, capacity, null, DynamicHeader.DefaultBlockSize);
@@ -264,9 +264,9 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
             return InitializeDynamic(stream, ownsStream, capacity, geometry, DynamicHeader.DefaultBlockSize);
@@ -277,9 +277,9 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="blockSize">The size of each block (unit of allocation)</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="blockSize">The size of each block (unit of allocation).</param>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, long blockSize)
         {
             return InitializeDynamic(stream, ownsStream, capacity, null, blockSize);
@@ -290,10 +290,10 @@ namespace DiscUtils.Vhd
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <param name="blockSize">The size of each block (unit of allocation)</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <param name="blockSize">The size of each block (unit of allocation).</param>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry, long blockSize)
         {
             InitializeDynamicInternal(stream, capacity, geometry, blockSize);
@@ -310,7 +310,7 @@ namespace DiscUtils.Vhd
         /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
         /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
         /// <param name="parentModificationTimeUtc">The time the parent disk's file was last modified (from file system).</param>
-        /// <returns>An object that accesses the stream as a VHD file</returns>
+        /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDifferencing(
             Stream stream,
             Ownership ownsStream,
@@ -327,9 +327,9 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Opens the content of the disk image file as a stream.
         /// </summary>
-        /// <param name="parent">The parent file's content (if any)</param>
-        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream</param>
-        /// <returns>The new content stream</returns>
+        /// <param name="parent">The parent file's content (if any).</param>
+        /// <param name="ownsParent">Whether the created stream assumes ownership of parent stream.</param>
+        /// <returns>The new content stream.</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             return DoOpenContent(parent, ownsParent);
@@ -338,7 +338,7 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the location of the parent file, given a base path.
         /// </summary>
-        /// <returns>Array of candidate file locations</returns>
+        /// <returns>Array of candidate file locations.</returns>
         public override string[] GetParentLocations()
         {
             return GetParentLocations(_fileLocator);
@@ -347,8 +347,8 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the location of the parent file, given a base path.
         /// </summary>
-        /// <param name="basePath">The full path to this file</param>
-        /// <returns>Array of candidate file locations</returns>
+        /// <param name="basePath">The full path to this file.</param>
+        /// <returns>Array of candidate file locations.</returns>
         [Obsolete("Use GetParentLocations() by preference")]
         public string[] GetParentLocations(string basePath)
         {
@@ -569,8 +569,8 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Gets the locations of the parent file.
         /// </summary>
-        /// <param name="fileLocator">The file locator to use</param>
-        /// <returns>Array of candidate file locations</returns>
+        /// <param name="fileLocator">The file locator to use.</param>
+        /// <returns>Array of candidate file locations.</returns>
         private string[] GetParentLocations(FileLocator fileLocator)
         {
             if (!NeedsParent)

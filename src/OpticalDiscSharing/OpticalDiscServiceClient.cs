@@ -65,7 +65,7 @@ namespace DiscUtils.OpticalDiscSharing
         /// <summary>
         /// Looks up the ODS services advertised in a domain.
         /// </summary>
-        /// <param name="domain">The domain to look in</param>
+        /// <param name="domain">The domain to look in.</param>
         /// <returns>A list of discovered ODS services.</returns>
         public OpticalDiscService[] LookupServices(string domain)
         {

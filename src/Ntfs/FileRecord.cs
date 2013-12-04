@@ -180,8 +180,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets an attribute by it's id.
         /// </summary>
-        /// <param name="id">The attribute's id</param>
-        /// <returns>The attribute, or <c>null</c></returns>
+        /// <param name="id">The attribute's id.</param>
+        /// <returns>The attribute, or <c>null</c>.</returns>
         public AttributeRecord GetAttribute(ushort id)
         {
             foreach (AttributeRecord attrRec in _attributes)
@@ -198,7 +198,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets an unnamed attribute.
         /// </summary>
-        /// <param name="type">The attribute type</param>
+        /// <param name="type">The attribute type.</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
         public AttributeRecord GetAttribute(AttributeType type)
         {
@@ -208,8 +208,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets an named attribute.
         /// </summary>
-        /// <param name="type">The attribute type</param>
-        /// <param name="name">The name of the attribute</param>
+        /// <param name="type">The attribute type.</param>
+        /// <param name="name">The name of the attribute.</param>
         /// <returns>The attribute, or <c>null</c>.</returns>
         public AttributeRecord GetAttribute(AttributeType type, string name)
         {
@@ -241,11 +241,11 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a new attribute.
         /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="indexed">Whether the attribute is marked as indexed</param>
-        /// <param name="flags">Flags for the new attribute</param>
-        /// <returns>The id of the new attribute</returns>
+        /// <param name="type">The type of the new attribute.</param>
+        /// <param name="name">The name of the new attribute.</param>
+        /// <param name="indexed">Whether the attribute is marked as indexed.</param>
+        /// <param name="flags">Flags for the new attribute.</param>
+        /// <returns>The id of the new attribute.</returns>
         public ushort CreateAttribute(AttributeType type, string name, bool indexed, AttributeFlags flags)
         {
             ushort id = _nextAttributeId++;
@@ -263,10 +263,10 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a new non-resident attribute.
         /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="flags">Flags for the new attribute</param>
-        /// <returns>The id of the new attribute</returns>
+        /// <param name="type">The type of the new attribute.</param>
+        /// <param name="name">The name of the new attribute.</param>
+        /// <param name="flags">Flags for the new attribute.</param>
+        /// <returns>The id of the new attribute.</returns>
         public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags)
         {
             ushort id = _nextAttributeId++;
@@ -285,13 +285,13 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a new attribute.
         /// </summary>
-        /// <param name="type">The type of the new attribute</param>
-        /// <param name="name">The name of the new attribute</param>
-        /// <param name="flags">Flags for the new attribute</param>
-        /// <param name="firstCluster">The first cluster to assign to the attribute</param>
-        /// <param name="numClusters">The number of sequential clusters to assign to the attribute</param>
-        /// <param name="bytesPerCluster">The number of bytes in each cluster</param>
-        /// <returns>The id of the new attribute</returns>
+        /// <param name="type">The type of the new attribute.</param>
+        /// <param name="name">The name of the new attribute.</param>
+        /// <param name="flags">Flags for the new attribute.</param>
+        /// <param name="firstCluster">The first cluster to assign to the attribute.</param>
+        /// <param name="numClusters">The number of sequential clusters to assign to the attribute.</param>
+        /// <param name="bytesPerCluster">The number of bytes in each cluster.</param>
+        /// <returns>The id of the new attribute.</returns>
         public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             ushort id = _nextAttributeId++;
@@ -311,9 +311,9 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Adds an existing attribute.
         /// </summary>
-        /// <param name="attrRec">The attribute to add</param>
-        /// <returns>The new Id of the attribute</returns>
-        /// <remarks>This method is used to move an attribute between different MFT records</remarks>
+        /// <param name="attrRec">The attribute to add.</param>
+        /// <returns>The new Id of the attribute.</returns>
+        /// <remarks>This method is used to move an attribute between different MFT records.</remarks>
         public ushort AddAttribute(AttributeRecord attrRec)
         {
             attrRec.AttributeId = _nextAttributeId++;
@@ -325,7 +325,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Removes an attribute by it's id.
         /// </summary>
-        /// <param name="id">The attribute's id</param>
+        /// <param name="id">The attribute's id.</param>
         public void RemoveAttribute(ushort id)
         {
             for (int i = 0; i < _attributes.Count; ++i)

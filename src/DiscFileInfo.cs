@@ -100,7 +100,7 @@ namespace DiscUtils
         /// <summary>
         /// Creates a <see cref="StreamWriter" /> that appends text to the file represented by this <see cref="DiscFileInfo"/>.
         /// </summary>
-        /// <returns>The newly created writer</returns>
+        /// <returns>The newly created writer.</returns>
         public StreamWriter AppendText()
         {
             return new StreamWriter(Open(FileMode.Append));
@@ -109,7 +109,7 @@ namespace DiscUtils
         /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
-        /// <param name="destinationFileName">The destination file</param>
+        /// <param name="destinationFileName">The destination file.</param>
         public void CopyTo(string destinationFileName)
         {
             CopyTo(destinationFileName, false);
@@ -118,7 +118,7 @@ namespace DiscUtils
         /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
-        /// <param name="destinationFileName">The destination file</param>
+        /// <param name="destinationFileName">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public void CopyTo(string destinationFileName, bool overwrite)
         {
@@ -146,7 +146,7 @@ namespace DiscUtils
         /// <summary>
         /// Moves a file to a new location.
         /// </summary>
-        /// <param name="destinationFileName">The new name of the file</param>
+        /// <param name="destinationFileName">The new name of the file.</param>
         public void MoveTo(string destinationFileName)
         {
             FileSystem.MoveFile(Path, destinationFileName);
@@ -156,7 +156,7 @@ namespace DiscUtils
         /// Opens the current file.
         /// </summary>
         /// <param name="mode">The file mode for the created stream.</param>
-        /// <returns>The newly created stream</returns>
+        /// <returns>The newly created stream.</returns>
         /// <remarks>Read-only file systems only support <c>FileMode.Open</c>.</remarks>
         public Stream Open(FileMode mode)
         {
@@ -168,7 +168,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="mode">The file mode for the created stream.</param>
         /// <param name="access">The access permissions for the created stream.</param>
-        /// <returns>The newly created stream</returns>
+        /// <returns>The newly created stream.</returns>
         /// <remarks>Read-only file systems only support <c>FileMode.Open</c> and <c>FileAccess.Read</c>.</remarks>
         public Stream Open(FileMode mode, FileAccess access)
         {
@@ -178,7 +178,7 @@ namespace DiscUtils
         /// <summary>
         /// Opens an existing file for read-only access.
         /// </summary>
-        /// <returns>The newly created stream</returns>
+        /// <returns>The newly created stream.</returns>
         public Stream OpenRead()
         {
             return Open(FileMode.Open, FileAccess.Read);
@@ -187,7 +187,7 @@ namespace DiscUtils
         /// <summary>
         /// Opens an existing file for reading as UTF-8 text.
         /// </summary>
-        /// <returns>The newly created reader</returns>
+        /// <returns>The newly created reader.</returns>
         public StreamReader OpenText()
         {
             return new StreamReader(OpenRead());

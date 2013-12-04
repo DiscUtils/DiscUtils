@@ -31,7 +31,7 @@ namespace DiscUtils.Nfs
     /// <summary>
     /// A file system backed by an NFS server.
     /// </summary>
-    /// <remarks>NFS is a common storage protocol for Virtual Machines.  Currently, only NFS v3 is supported</remarks>
+    /// <remarks>NFS is a common storage protocol for Virtual Machines.  Currently, only NFS v3 is supported.</remarks>
     public class NfsFileSystem : DiscFileSystem
     {
         private Nfs3Client _client;
@@ -39,8 +39,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the NfsFileSystem class.
         /// </summary>
-        /// <param name="address">The address of the NFS server (IP or DNS address)</param>
-        /// <param name="mountPoint">The mount point on the server to root the file system</param>
+        /// <param name="address">The address of the NFS server (IP or DNS address).</param>
+        /// <param name="mountPoint">The mount point on the server to root the file system.</param>
         /// <remarks>
         /// The created instance uses default credentials.
         /// </remarks>
@@ -53,9 +53,9 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the NfsFileSystem class.
         /// </summary>
-        /// <param name="address">The address of the NFS server (IP or DNS address)</param>
-        /// <param name="credentials">The credentials to use when accessing the NFS server</param>
-        /// <param name="mountPoint">The mount point on the server to root the file system</param>
+        /// <param name="address">The address of the NFS server (IP or DNS address).</param>
+        /// <param name="credentials">The credentials to use when accessing the NFS server.</param>
+        /// <param name="mountPoint">The mount point on the server to root the file system.</param>
         public NfsFileSystem(string address, RpcCredentials credentials, string mountPoint)
             : base(new NfsFileSystemOptions())
         {
@@ -87,7 +87,7 @@ namespace DiscUtils.Nfs
         }
         
        /// <summary>
-       /// Gets the preferred NFS read size
+       /// Gets the preferred NFS read size.
        /// </summary>
         public int PreferredReadSize
         {
@@ -98,7 +98,7 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Gets the preferred NFS write size
+        /// Gets the preferred NFS write size.
         /// </summary>
         public int PreferredWriteSize
         {
@@ -111,8 +111,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Gets the folders exported by a server.
         /// </summary>
-        /// <param name="address">The address of the server</param>
-        /// <returns>An enumeration of exported folders</returns>
+        /// <param name="address">The address of the server.</param>
+        /// <returns>An enumeration of exported folders.</returns>
         public static IEnumerable<string> GetExports(string address)
         {
             using (RpcClient rpcClient = new RpcClient(address, null))
@@ -128,9 +128,9 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Copies a file from one location to another.
         /// </summary>
-        /// <param name="sourceFile">The source file to copy</param>
-        /// <param name="destinationFile">The destination path</param>
-        /// <param name="overwrite">Whether to overwrite any existing file (true), or fail if such a file exists</param>
+        /// <param name="sourceFile">The source file to copy.</param>
+        /// <param name="destinationFile">The destination path.</param>
+        /// <param name="overwrite">Whether to overwrite any existing file (true), or fail if such a file exists.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
             try
@@ -206,7 +206,7 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Creates a directory at the specified path.
         /// </summary>
-        /// <param name="path">The path of the directory to create</param>
+        /// <param name="path">The path of the directory to create.</param>
         public override void CreateDirectory(string path)
         {
             try
@@ -280,7 +280,7 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Indicates whether a specified path exists, and refers to a directory.
         /// </summary>
-        /// <param name="path">The path to inspect</param>
+        /// <param name="path">The path to inspect.</param>
         /// <returns><c>true</c> if the path is a directory, else <c>false</c>.</returns>
         public override bool DirectoryExists(string path)
         {
@@ -290,7 +290,7 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Indicates whether a specified path exists, and refers to a directory.
         /// </summary>
-        /// <param name="path">The path to inspect</param>
+        /// <param name="path">The path to inspect.</param>
         /// <returns><c>true</c> if the path is a file, else <c>false</c>.</returns>
         public override bool FileExists(string path)
         {
@@ -429,7 +429,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             try
@@ -536,8 +536,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             try
@@ -575,8 +575,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             if (newValue != GetAttributes(path))
@@ -618,8 +618,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             try
@@ -655,8 +655,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             try
@@ -692,8 +692,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             try
@@ -711,7 +711,7 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Disposes of this instance, freeing up any resources used.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if called from Dispose, else <c>false</c></param>
+        /// <param name="disposing"><c>true</c> if called from Dispose, else <c>false</c>.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

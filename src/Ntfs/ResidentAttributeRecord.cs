@@ -62,7 +62,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// The amount of initialized data in the attribute (in bytes)
+        /// The amount of initialized data in the attribute (in bytes).
         /// </summary>
         public override long InitializedDataLength
         {

@@ -65,8 +65,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
-        /// <param name="message">The exception message</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="message">The exception message.</param>
+        /// <param name="innerException">The inner exception.</param>
         public Nfs3Exception(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -85,8 +85,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">The streaming context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         private Nfs3Exception(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -105,7 +105,7 @@ namespace DiscUtils.Nfs
         /// Serializes this exception.
         /// </summary>
         /// <param name="info">The object to populate with serialized data.</param>
-        /// <param name="context">The context for this serialization</param>
+        /// <param name="context">The context for this serialization.</param>
         [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

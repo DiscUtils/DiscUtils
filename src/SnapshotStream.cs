@@ -38,7 +38,7 @@ namespace DiscUtils
         private Ownership _baseStreamOwnership;
 
         /// <summary>
-        /// Captures changes to the base stream (when enabled)
+        /// Captures changes to the base stream (when enabled).
         /// </summary>
         private SparseMemoryStream _diffStream;
 
@@ -64,8 +64,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the SnapshotStream class.
         /// </summary>
-        /// <param name="baseStream">The stream to wrap</param>
-        /// <param name="owns">Indicates if this stream should control the lifetime of baseStream</param>
+        /// <param name="baseStream">The stream to wrap.</param>
+        /// <param name="owns">Indicates if this stream should control the lifetime of baseStream.</param>
         public SnapshotStream(Stream baseStream, Ownership owns)
         {
             _baseStream = baseStream;
@@ -94,7 +94,7 @@ namespace DiscUtils
         /// </summary>
         /// <remarks>This property is orthogonal to Freezing/Thawing, it's
         /// perfectly possible for a stream to be frozen and this method
-        /// return <c>true</c></remarks>
+        /// return <c>true</c>.</remarks>
         public override bool CanWrite
         {
             get { return (_diffStream != null) ? true : _baseStream.CanWrite; }
@@ -249,10 +249,10 @@ namespace DiscUtils
         /// <summary>
         /// Reads data from the stream.
         /// </summary>
-        /// <param name="buffer">The buffer to fill</param>
-        /// <param name="offset">The buffer offset to start from</param>
-        /// <param name="count">The number of bytes to read</param>
-        /// <returns>The number of bytes read</returns>
+        /// <param name="buffer">The buffer to fill.</param>
+        /// <param name="offset">The buffer offset to start from.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The number of bytes read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             int numRead;
@@ -311,9 +311,9 @@ namespace DiscUtils
         /// <summary>
         /// Moves the stream position.
         /// </summary>
-        /// <param name="offset">The origin-relative location</param>
-        /// <param name="origin">The base location</param>
-        /// <returns>The new absolute stream position</returns>
+        /// <param name="offset">The origin-relative location.</param>
+        /// <param name="origin">The base location.</param>
+        /// <returns>The new absolute stream position.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             CheckFrozen();
@@ -342,7 +342,7 @@ namespace DiscUtils
         /// <summary>
         /// Sets the length of the stream.
         /// </summary>
-        /// <param name="value">The new length</param>
+        /// <param name="value">The new length.</param>
         public override void SetLength(long value)
         {
             CheckFrozen();
@@ -360,9 +360,9 @@ namespace DiscUtils
         /// <summary>
         /// Writes data to the stream at the current location.
         /// </summary>
-        /// <param name="buffer">The data to write</param>
-        /// <param name="offset">The first byte to write from buffer</param>
-        /// <param name="count">The number of bytes to write</param>
+        /// <param name="buffer">The data to write.</param>
+        /// <param name="offset">The first byte to write from buffer.</param>
+        /// <param name="count">The number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             CheckFrozen();
@@ -389,7 +389,7 @@ namespace DiscUtils
         /// <summary>
         /// Disposes of this instance.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if called from Dispose(), else <c>false</c></param>
+        /// <param name="disposing"><c>true</c> if called from Dispose(), else <c>false</c>.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

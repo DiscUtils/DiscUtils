@@ -46,8 +46,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the BlockCacheStream class.
         /// </summary>
-        /// <param name="toWrap">The stream to wrap</param>
-        /// <param name="ownership">Whether to assume ownership of <c>toWrap</c></param>
+        /// <param name="toWrap">The stream to wrap.</param>
+        /// <param name="ownership">Whether to assume ownership of <c>toWrap</c>.</param>
         public BlockCacheStream(SparseStream toWrap, Ownership ownership)
             : this(toWrap, ownership, new BlockCacheSettings())
         {
@@ -56,9 +56,9 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the BlockCacheStream class.
         /// </summary>
-        /// <param name="toWrap">The stream to wrap</param>
-        /// <param name="ownership">Whether to assume ownership of <c>toWrap</c></param>
-        /// <param name="settings">The cache settings</param>
+        /// <param name="toWrap">The stream to wrap.</param>
+        /// <param name="ownership">Whether to assume ownership of <c>toWrap</c>.</param>
+        /// <param name="settings">The cache settings.</param>
         public BlockCacheStream(SparseStream toWrap, Ownership ownership, BlockCacheSettings settings)
         {
             if (!toWrap.CanRead)
@@ -172,9 +172,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the parts of a stream that are stored, within a specified range.
         /// </summary>
-        /// <param name="start">The offset of the first byte of interest</param>
-        /// <param name="count">The number of bytes of interest</param>
-        /// <returns>An enumeration of stream extents, indicating stored bytes</returns>
+        /// <param name="start">The offset of the first byte of interest.</param>
+        /// <param name="count">The number of bytes of interest.</param>
+        /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             CheckDisposed();
@@ -184,10 +184,10 @@ namespace DiscUtils
         /// <summary>
         /// Reads data from the stream.
         /// </summary>
-        /// <param name="buffer">The buffer to fill</param>
-        /// <param name="offset">The buffer offset to start from</param>
-        /// <param name="count">The number of bytes to read</param>
-        /// <returns>The number of bytes read</returns>
+        /// <param name="buffer">The buffer to fill.</param>
+        /// <param name="offset">The buffer offset to start from.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The number of bytes read.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
@@ -339,9 +339,9 @@ namespace DiscUtils
         /// <summary>
         /// Moves the stream position.
         /// </summary>
-        /// <param name="offset">The origin-relative location</param>
-        /// <param name="origin">The base location</param>
-        /// <returns>The new absolute stream position</returns>
+        /// <param name="offset">The origin-relative location.</param>
+        /// <param name="origin">The base location.</param>
+        /// <returns>The new absolute stream position.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
@@ -372,7 +372,7 @@ namespace DiscUtils
         /// <summary>
         /// Sets the length of the stream.
         /// </summary>
-        /// <param name="value">The new length</param>
+        /// <param name="value">The new length.</param>
         public override void SetLength(long value)
         {
             CheckDisposed();
@@ -382,9 +382,9 @@ namespace DiscUtils
         /// <summary>
         /// Writes data to the stream at the current location.
         /// </summary>
-        /// <param name="buffer">The data to write</param>
-        /// <param name="offset">The first byte to write from buffer</param>
-        /// <param name="count">The number of bytes to write</param>
+        /// <param name="buffer">The data to write.</param>
+        /// <param name="offset">The first byte to write from buffer.</param>
+        /// <param name="count">The number of bytes to write.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
             CheckDisposed();

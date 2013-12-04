@@ -47,8 +47,8 @@ namespace DiscUtils.BootConfig
         /// Gets a value representing a device (aka partition).
         /// </summary>
         /// <param name="parentObject">Object containing detailed information about the device.</param>
-        /// <param name="physicalVolume">The volume to represent</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="physicalVolume">The volume to represent.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForDevice(Guid parentObject, PhysicalVolumeInfo physicalVolume)
         {
             return new DeviceElementValue(parentObject, physicalVolume);
@@ -57,7 +57,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing the logical boot device.
         /// </summary>
-        /// <returns>The boot pseudo-device as an object</returns>
+        /// <returns>The boot pseudo-device as an object.</returns>
         public static ElementValue ForBootDevice()
         {
             return new DeviceElementValue();
@@ -66,8 +66,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a string value.
         /// </summary>
-        /// <param name="value">The value to convert</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForString(string value)
         {
             return new StringElementValue(value);
@@ -76,8 +76,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing an integer value.
         /// </summary>
-        /// <param name="value">The value to convert</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForInteger(long value)
         {
             return new IntegerElementValue((ulong)value);
@@ -86,8 +86,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing an integer list value.
         /// </summary>
-        /// <param name="values">The value to convert</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="values">The value to convert.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForIntegerList(long[] values)
         {
             ulong[] ulValues = new ulong[values.Length];
@@ -102,8 +102,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a boolean value.
         /// </summary>
-        /// <param name="value">The value to convert</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForBoolean(bool value)
         {
             return new BooleanElementValue(value);
@@ -112,8 +112,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a GUID value.
         /// </summary>
-        /// <param name="value">The value to convert</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForGuid(Guid value)
         {
             return new GuidElementValue(value.ToString("B"));
@@ -122,8 +122,8 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets a value representing a GUID list value.
         /// </summary>
-        /// <param name="values">The value to convert</param>
-        /// <returns>The value as an object</returns>
+        /// <param name="values">The value to convert.</param>
+        /// <returns>The value as an object.</returns>
         public static ElementValue ForGuidList(Guid[] values)
         {
             string[] strValues = new string[values.Length];

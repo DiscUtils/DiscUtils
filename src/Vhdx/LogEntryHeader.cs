@@ -46,6 +46,14 @@ namespace DiscUtils.Vhdx
             get { return 64; }
         }
 
+        public bool IsValid
+        {
+            get
+            {
+                return Signature == LogEntrySignature;
+            }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             _data = new byte[Size];
@@ -68,14 +76,6 @@ namespace DiscUtils.Vhdx
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
-        }
-
-        public bool IsValid
-        {
-            get
-            {
-                return Signature == LogEntrySignature;
-            }
         }
     }
 }

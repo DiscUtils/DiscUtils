@@ -211,7 +211,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Enumerates all of the Targets.
         /// </summary>
-        /// <returns>The list of Targets</returns>
+        /// <returns>The list of Targets.</returns>
         /// <remarks>In practice, for an established session, this just returns details of
         /// the connected Target.</remarks>
         public TargetInfo[] EnumerateTargets()
@@ -222,7 +222,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets information about the LUNs available from the Target.
         /// </summary>
-        /// <returns>The LUNs available</returns>
+        /// <returns>The LUNs available.</returns>
         public LunInfo[] GetLuns()
         {
             ScsiReportLunsCommand cmd = new ScsiReportLunsCommand(ScsiReportLunsCommand.InitialResponseSize);
@@ -252,7 +252,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets all the block-device LUNs available from the Target.
         /// </summary>
-        /// <returns>The block-device LUNs</returns>
+        /// <returns>The block-device LUNs.</returns>
         public long[] GetBlockDeviceLuns()
         {
             List<long> luns = new List<long>();
@@ -271,7 +271,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets information about a particular LUN.
         /// </summary>
-        /// <param name="lun">The LUN to query</param>
+        /// <param name="lun">The LUN to query.</param>
         /// <returns>Information about the LUN.</returns>
         public LunInfo GetInfo(long lun)
         {
@@ -286,8 +286,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the capacity of a particular LUN.
         /// </summary>
-        /// <param name="lun">The LUN to query</param>
-        /// <returns>The LUN's capacity</returns>
+        /// <param name="lun">The LUN to query.</param>
+        /// <returns>The LUN's capacity.</returns>
         public LunCapacity GetCapacity(long lun)
         {
             ScsiReadCapacityCommand cmd = new ScsiReadCapacityCommand((ulong)lun);
@@ -305,8 +305,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Provides read-write access to a LUN as a VirtualDisk.
         /// </summary>
-        /// <param name="lun">The LUN to access</param>
-        /// <returns>The new VirtualDisk instance</returns>
+        /// <param name="lun">The LUN to access.</param>
+        /// <returns>The new VirtualDisk instance.</returns>
         public Disk OpenDisk(long lun)
         {
             return OpenDisk(lun, FileAccess.ReadWrite);
@@ -315,9 +315,9 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Provides access to a LUN as a VirtualDisk.
         /// </summary>
-        /// <param name="lun">The LUN to access</param>
-        /// <param name="access">The type of access desired</param>
-        /// <returns>The new VirtualDisk instance</returns>
+        /// <param name="lun">The LUN to access.</param>
+        /// <param name="access">The type of access desired.</param>
+        /// <returns>The new VirtualDisk instance.</returns>
         public Disk OpenDisk(long lun, FileAccess access)
         {
             return new Disk(this, lun, access);
@@ -326,12 +326,12 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Reads some data from a LUN.
         /// </summary>
-        /// <param name="lun">The LUN to read from</param>
-        /// <param name="startBlock">The first block to read</param>
-        /// <param name="blockCount">The number of blocks to read</param>
-        /// <param name="buffer">The buffer to fill</param>
-        /// <param name="offset">The offset of the first byte to fill</param>
-        /// <returns>The number of bytes read</returns>
+        /// <param name="lun">The LUN to read from.</param>
+        /// <param name="startBlock">The first block to read.</param>
+        /// <param name="blockCount">The number of blocks to read.</param>
+        /// <param name="buffer">The buffer to fill.</param>
+        /// <param name="offset">The offset of the first byte to fill.</param>
+        /// <returns>The number of bytes read.</returns>
         public int Read(long lun, long startBlock, short blockCount, byte[] buffer, int offset)
         {
             ScsiReadCommand cmd = new ScsiReadCommand((ulong)lun, (uint)startBlock, (ushort)blockCount);
@@ -341,12 +341,12 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Writes some data to a LUN.
         /// </summary>
-        /// <param name="lun">The LUN to write to</param>
-        /// <param name="startBlock">The first block to write</param>
-        /// <param name="blockCount">The number of blocks to write</param>
-        /// <param name="blockSize">The size of each block (must match the actual LUN geometry)</param>
-        /// <param name="buffer">The data to write</param>
-        /// <param name="offset">The offset of the first byte to write in buffer</param>
+        /// <param name="lun">The LUN to write to.</param>
+        /// <param name="startBlock">The first block to write.</param>
+        /// <param name="blockCount">The number of blocks to write.</param>
+        /// <param name="blockSize">The size of each block (must match the actual LUN geometry).</param>
+        /// <param name="buffer">The data to write.</param>
+        /// <param name="offset">The offset of the first byte to write in buffer.</param>
         public void Write(long lun, long startBlock, short blockCount, int blockSize, byte[] buffer, int offset)
         {
             ScsiWriteCommand cmd = new ScsiWriteCommand((ulong)lun, (uint)startBlock, (ushort)blockCount);
@@ -356,15 +356,15 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Performs a raw SCSI command.
         /// </summary>
-        /// <param name="lun">The target LUN for the command</param>
-        /// <param name="command">The command (a SCSI Command Descriptor Block, aka CDB)</param>
-        /// <param name="outBuffer">Buffer of data to send with the command (or <c>null</c>)</param>
-        /// <param name="outBufferOffset">Offset of first byte of data to send with the command</param>
-        /// <param name="outBufferLength">Amount of data to send with the command</param>
-        /// <param name="inBuffer">Buffer to receive data from the command (or <c>null</c>)</param>
-        /// <param name="inBufferOffset">Offset of the first byte position to fill with received data</param>
-        /// <param name="inBufferLength">The expected amount of data to receive</param>
-        /// <returns>The number of bytes of data received</returns>
+        /// <param name="lun">The target LUN for the command.</param>
+        /// <param name="command">The command (a SCSI Command Descriptor Block, aka CDB).</param>
+        /// <param name="outBuffer">Buffer of data to send with the command (or <c>null</c>).</param>
+        /// <param name="outBufferOffset">Offset of first byte of data to send with the command.</param>
+        /// <param name="outBufferLength">Amount of data to send with the command.</param>
+        /// <param name="inBuffer">Buffer to receive data from the command (or <c>null</c>).</param>
+        /// <param name="inBufferOffset">Offset of the first byte position to fill with received data.</param>
+        /// <param name="inBufferLength">The expected amount of data to receive.</param>
+        /// <returns>The number of bytes of data received.</returns>
         /// <remarks>
         /// <para>This method permits the caller to send raw SCSI commands to a LUN.</para>
         /// <para>The command .</para>
@@ -450,14 +450,14 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Sends an SCSI command (aka task) to a LUN via the connected target.
         /// </summary>
-        /// <param name="cmd">The command to send</param>
-        /// <param name="outBuffer">The data to send with the command</param>
-        /// <param name="outBufferOffset">The offset of the first byte to send</param>
-        /// <param name="outBufferCount">The number of bytes to send, if any</param>
-        /// <param name="inBuffer">The buffer to fill with returned data</param>
-        /// <param name="inBufferOffset">The first byte to fill with returned data</param>
-        /// <param name="inBufferMax">The maximum amount of data to receive</param>
-        /// <returns>The number of bytes received</returns>
+        /// <param name="cmd">The command to send.</param>
+        /// <param name="outBuffer">The data to send with the command.</param>
+        /// <param name="outBufferOffset">The offset of the first byte to send.</param>
+        /// <param name="outBufferCount">The number of bytes to send, if any.</param>
+        /// <param name="inBuffer">The buffer to fill with returned data.</param>
+        /// <param name="inBufferOffset">The first byte to fill with returned data.</param>
+        /// <param name="inBufferMax">The maximum amount of data to receive.</param>
+        /// <returns>The number of bytes received.</returns>
         private int Send(ScsiCommand cmd, byte[] outBuffer, int outBufferOffset, int outBufferCount, byte[] inBuffer, int inBufferOffset, int inBufferMax)
         {
             return _currentConnection.Send(cmd, outBuffer, outBufferOffset, outBufferCount, inBuffer, inBufferOffset, inBufferMax);

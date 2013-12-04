@@ -45,9 +45,9 @@ namespace DiscUtils
         /// <summary>
         /// Round up a value to a multiple of a unit size.
         /// </summary>
-        /// <param name="value">The value to round up</param>
-        /// <param name="unit">The unit (the returned value will be a multiple of this number)</param>
-        /// <returns>The rounded-up value</returns>
+        /// <param name="value">The value to round up.</param>
+        /// <param name="unit">The unit (the returned value will be a multiple of this number).</param>
+        /// <returns>The rounded-up value.</returns>
         public static long RoundUp(long value, long unit)
         {
             return ((value + (unit - 1)) / unit) * unit;
@@ -56,9 +56,9 @@ namespace DiscUtils
         /// <summary>
         /// Round up a value to a multiple of a unit size.
         /// </summary>
-        /// <param name="value">The value to round up</param>
-        /// <param name="unit">The unit (the returned value will be a multiple of this number)</param>
-        /// <returns>The rounded-up value</returns>
+        /// <param name="value">The value to round up.</param>
+        /// <param name="unit">The unit (the returned value will be a multiple of this number).</param>
+        /// <returns>The rounded-up value.</returns>
         public static int RoundUp(int value, int unit)
         {
             return ((value + (unit - 1)) / unit) * unit;
@@ -67,9 +67,9 @@ namespace DiscUtils
         /// <summary>
         /// Round down a value to a multiple of a unit size.
         /// </summary>
-        /// <param name="value">The value to round down</param>
-        /// <param name="unit">The unit (the returned value will be a multiple of this number)</param>
-        /// <returns>The rounded-down value</returns>
+        /// <param name="value">The value to round down.</param>
+        /// <param name="unit">The unit (the returned value will be a multiple of this number).</param>
+        /// <returns>The rounded-down value.</returns>
         public static long RoundDown(long value, long unit)
         {
             return (value / unit) * unit;
@@ -78,9 +78,9 @@ namespace DiscUtils
         /// <summary>
         /// Calculates the CEIL function.
         /// </summary>
-        /// <param name="numerator">The value to divide</param>
-        /// <param name="denominator">The value to divide by</param>
-        /// <returns>The value of CEIL(numerator/denominator)</returns>
+        /// <param name="numerator">The value to divide.</param>
+        /// <param name="denominator">The value to divide by.</param>
+        /// <returns>The value of CEIL(numerator/denominator).</returns>
         public static int Ceil(int numerator, int denominator)
         {
             return (numerator + (denominator - 1)) / denominator;
@@ -89,9 +89,9 @@ namespace DiscUtils
         /// <summary>
         /// Calculates the CEIL function.
         /// </summary>
-        /// <param name="numerator">The value to divide</param>
-        /// <param name="denominator">The value to divide by</param>
-        /// <returns>The value of CEIL(numerator/denominator)</returns>
+        /// <param name="numerator">The value to divide.</param>
+        /// <param name="denominator">The value to divide by.</param>
+        /// <returns>The value of CEIL(numerator/denominator).</returns>
         public static uint Ceil(uint numerator, uint denominator)
         {
             return (numerator + (denominator - 1)) / denominator;
@@ -100,9 +100,9 @@ namespace DiscUtils
         /// <summary>
         /// Calculates the CEIL function.
         /// </summary>
-        /// <param name="numerator">The value to divide</param>
-        /// <param name="denominator">The value to divide by</param>
-        /// <returns>The value of CEIL(numerator/denominator)</returns>
+        /// <param name="numerator">The value to divide.</param>
+        /// <param name="denominator">The value to divide by.</param>
+        /// <returns>The value of CEIL(numerator/denominator).</returns>
         public static long Ceil(long numerator, long denominator)
         {
             return (numerator + (denominator - 1)) / denominator;
@@ -111,11 +111,11 @@ namespace DiscUtils
         /// <summary>
         /// Converts between two arrays.
         /// </summary>
-        /// <typeparam name="T">The type of the elements of the source array</typeparam>
-        /// <typeparam name="U">The type of the elements of the destination array</typeparam>
-        /// <param name="source">The source array</param>
-        /// <param name="func">The function to map from source type to destination type</param>
-        /// <returns>The resultant array</returns>
+        /// <typeparam name="T">The type of the elements of the source array.</typeparam>
+        /// <typeparam name="U">The type of the elements of the destination array.</typeparam>
+        /// <param name="source">The source array.</param>
+        /// <param name="func">The function to map from source type to destination type.</param>
+        /// <returns>The resultant array.</returns>
         public static U[] Map<T, U>(ICollection<T> source, Func<T, U> func)
         {
             U[] result = new U[source.Count];
@@ -132,11 +132,11 @@ namespace DiscUtils
         /// <summary>
         /// Converts between two arrays.
         /// </summary>
-        /// <typeparam name="T">The type of the elements of the source array</typeparam>
-        /// <typeparam name="U">The type of the elements of the destination array</typeparam>
-        /// <param name="source">The source array</param>
-        /// <param name="func">The function to map from source type to destination type</param>
-        /// <returns>The resultant array</returns>
+        /// <typeparam name="T">The type of the elements of the source array.</typeparam>
+        /// <typeparam name="U">The type of the elements of the destination array.</typeparam>
+        /// <param name="source">The source array.</param>
+        /// <param name="func">The function to map from source type to destination type.</param>
+        /// <returns>The resultant array.</returns>
         public static U[] Map<T, U>(IEnumerable<T> source, Func<T, U> func)
         {
             List<U> result = new List<U>();
@@ -152,11 +152,11 @@ namespace DiscUtils
         /// <summary>
         /// Filters a collection into a new collection.
         /// </summary>
-        /// <typeparam name="C">The type of the new collection</typeparam>
-        /// <typeparam name="T">The type of the collection entries</typeparam>
-        /// <param name="source">The collection to filter</param>
-        /// <param name="predicate">The predicate to select which entries are carried over</param>
-        /// <returns>The new collection, containing all entries where the predicate returns <c>true</c></returns>
+        /// <typeparam name="C">The type of the new collection.</typeparam>
+        /// <typeparam name="T">The type of the collection entries.</typeparam>
+        /// <param name="source">The collection to filter.</param>
+        /// <param name="predicate">The predicate to select which entries are carried over.</param>
+        /// <returns>The new collection, containing all entries where the predicate returns <c>true</c>.</returns>
         public static C Filter<C, T>(ICollection<T> source, Func<T, bool> predicate) where C : ICollection<T>, new()
         {
             C result = new C();
@@ -174,12 +174,12 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if two ranges overlap.
         /// </summary>
-        /// <typeparam name="T">The type of the ordinals</typeparam>
-        /// <param name="xFirst">The lowest ordinal of the first range (inclusive)</param>
-        /// <param name="xLast">The highest ordinal of the first range (exclusive)</param>
-        /// <param name="yFirst">The lowest ordinal of the second range (inclusive)</param>
-        /// <param name="yLast">The highest ordinal of the second range (exclusive)</param>
-        /// <returns><c>true</c> if the ranges overlap, else <c>false</c></returns>
+        /// <typeparam name="T">The type of the ordinals.</typeparam>
+        /// <param name="xFirst">The lowest ordinal of the first range (inclusive).</param>
+        /// <param name="xLast">The highest ordinal of the first range (exclusive).</param>
+        /// <param name="yFirst">The lowest ordinal of the second range (inclusive).</param>
+        /// <param name="yLast">The highest ordinal of the second range (exclusive).</param>
+        /// <returns><c>true</c> if the ranges overlap, else <c>false</c>.</returns>
         public static bool RangesOverlap<T>(T xFirst, T xLast, T yFirst, T yLast) where T : IComparable<T>
         {
             return !((xLast.CompareTo(yFirst) <= 0) || (xFirst.CompareTo(yLast) >= 0));
@@ -527,10 +527,10 @@ namespace DiscUtils
         /// <summary>
         /// Primitive conversion from Unicode to ASCII that preserves special characters.
         /// </summary>
-        /// <param name="value">The string to convert</param>
-        /// <param name="dest">The buffer to fill</param>
-        /// <param name="offset">The start of the string in the buffer</param>
-        /// <param name="count">The number of characters to convert</param>
+        /// <param name="value">The string to convert.</param>
+        /// <param name="dest">The buffer to fill.</param>
+        /// <param name="offset">The start of the string in the buffer.</param>
+        /// <param name="count">The number of characters to convert.</param>
         /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
         /// this preserves those code points by removing the top 16 bits of each character.</remarks>
         public static void StringToBytes(string value, byte[] dest, int offset, int count)
@@ -554,10 +554,10 @@ namespace DiscUtils
         /// <summary>
         /// Primitive conversion from ASCII to Unicode that preserves special characters.
         /// </summary>
-        /// <param name="data">The data to convert</param>
-        /// <param name="offset">The first byte to convert</param>
-        /// <param name="count">The number of bytes to convert</param>
-        /// <returns>The string</returns>
+        /// <param name="data">The data to convert.</param>
+        /// <param name="offset">The first byte to convert.</param>
+        /// <param name="count">The number of bytes to convert.</param>
+        /// <returns>The string.</returns>
         /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
         /// this preserves those code points.</remarks>
         public static string BytesToString(byte[] data, int offset, int count)
@@ -575,10 +575,10 @@ namespace DiscUtils
         /// <summary>
         /// Primitive conversion from ASCII to Unicode that stops at a null-terminator.
         /// </summary>
-        /// <param name="data">The data to convert</param>
-        /// <param name="offset">The first byte to convert</param>
-        /// <param name="count">The number of bytes to convert</param>
-        /// <returns>The string</returns>
+        /// <param name="data">The data to convert.</param>
+        /// <param name="offset">The first byte to convert.</param>
+        /// <param name="count">The number of bytes to convert.</param>
+        /// <returns>The string.</returns>
         /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
         /// this preserves those code points.</remarks>
         public static string BytesToZString(byte[] data, int offset, int count)
@@ -605,8 +605,8 @@ namespace DiscUtils
         /// <summary>
         /// Extracts the directory part of a path.
         /// </summary>
-        /// <param name="path">The path to process</param>
-        /// <returns>The directory part</returns>
+        /// <param name="path">The path to process.</param>
+        /// <returns>The directory part.</returns>
         public static string GetDirectoryFromPath(string path)
         {
             string trimmed = path.TrimEnd('\\');
@@ -623,8 +623,8 @@ namespace DiscUtils
         /// <summary>
         /// Extracts the file part of a path.
         /// </summary>
-        /// <param name="path">The path to process</param>
-        /// <returns>The file part of the path</returns>
+        /// <param name="path">The path to process.</param>
+        /// <returns>The file part of the path.</returns>
         public static string GetFileFromPath(string path)
         {
             string trimmed = path.Trim('\\');
@@ -641,9 +641,9 @@ namespace DiscUtils
         /// <summary>
         /// Combines two paths.
         /// </summary>
-        /// <param name="a">The first part of the path</param>
-        /// <param name="b">The second part of the path</param>
-        /// <returns>The combined path</returns>
+        /// <param name="a">The first part of the path.</param>
+        /// <param name="b">The second part of the path.</param>
+        /// <returns>The combined path.</returns>
         public static string CombinePaths(string a, string b)
         {
             if (string.IsNullOrEmpty(a) || (b.Length > 0 && b[0] == '\\'))
@@ -663,8 +663,8 @@ namespace DiscUtils
         /// <summary>
         /// Resolves a relative path into an absolute one.
         /// </summary>
-        /// <param name="basePath">The base path to resolve from</param>
-        /// <param name="relativePath">The relative path</param>
+        /// <param name="basePath">The base path to resolve from.</param>
+        /// <param name="relativePath">The relative path.</param>
         /// <returns>The absolute path, so far as it can be resolved.  If the
         /// <paramref name="relativePath"/> contains more '..' characters than the
         /// base path contains levels of directory, the resultant string will be relative.
@@ -787,10 +787,10 @@ namespace DiscUtils
         /// <summary>
         /// Read bytes until buffer filled or EOF.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
-        /// <param name="buffer">The buffer to populate</param>
-        /// <param name="offset">Offset in the buffer to start</param>
-        /// <param name="length">The number of bytes to read</param>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="buffer">The buffer to populate.</param>
+        /// <param name="offset">Offset in the buffer to start.</param>
+        /// <param name="length">The number of bytes to read.</param>
         /// <returns>The number of bytes actually read.</returns>
         public static int ReadFully(Stream stream, byte[] buffer, int offset, int length)
         {
@@ -813,9 +813,9 @@ namespace DiscUtils
         /// <summary>
         /// Read bytes until buffer filled or throw IOException.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
-        /// <param name="count">The number of bytes to read</param>
-        /// <returns>The data read from the stream</returns>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The data read from the stream.</returns>
         public static byte[] ReadFully(Stream stream, int count)
         {
             byte[] buffer = new byte[count];
@@ -832,11 +832,11 @@ namespace DiscUtils
         /// <summary>
         /// Read bytes until buffer filled or EOF.
         /// </summary>
-        /// <param name="buffer">The stream to read</param>
-        /// <param name="pos">The position in buffer to read from</param>
-        /// <param name="data">The buffer to populate</param>
-        /// <param name="offset">Offset in the buffer to start</param>
-        /// <param name="length">The number of bytes to read</param>
+        /// <param name="buffer">The stream to read.</param>
+        /// <param name="pos">The position in buffer to read from.</param>
+        /// <param name="data">The buffer to populate.</param>
+        /// <param name="offset">Offset in the buffer to start.</param>
+        /// <param name="length">The number of bytes to read.</param>
         /// <returns>The number of bytes actually read.</returns>
         public static int ReadFully(IBuffer buffer, long pos, byte[] data, int offset, int length)
         {
@@ -859,10 +859,10 @@ namespace DiscUtils
         /// <summary>
         /// Read bytes until buffer filled or throw IOException.
         /// </summary>
-        /// <param name="buffer">The buffer to read</param>
-        /// <param name="pos">The position in buffer to read from</param>
-        /// <param name="count">The number of bytes to read</param>
-        /// <returns>The data read from the stream</returns>
+        /// <param name="buffer">The buffer to read.</param>
+        /// <param name="pos">The position in buffer to read from.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The data read from the stream.</returns>
         public static byte[] ReadFully(IBuffer buffer, long pos, int count)
         {
             byte[] result = new byte[count];
@@ -879,8 +879,8 @@ namespace DiscUtils
         /// <summary>
         /// Read bytes until buffer filled or throw IOException.
         /// </summary>
-        /// <param name="buffer">The buffer to read</param>
-        /// <returns>The data read from the stream</returns>
+        /// <param name="buffer">The buffer to read.</param>
+        /// <returns>The data read from the stream.</returns>
         public static byte[] ReadAll(IBuffer buffer)
         {
             return ReadFully(buffer, 0, (int)buffer.Capacity);
@@ -889,8 +889,8 @@ namespace DiscUtils
         /// <summary>
         /// Reads a disk sector (512 bytes).
         /// </summary>
-        /// <param name="stream">The stream to read</param>
-        /// <returns>The sector data as a byte array</returns>
+        /// <param name="stream">The stream to read.</param>
+        /// <returns>The sector data as a byte array.</returns>
         public static byte[] ReadSector(Stream stream)
         {
             return ReadFully(stream, SectorSize);
@@ -899,9 +899,9 @@ namespace DiscUtils
         /// <summary>
         /// Reads a structure from a stream.
         /// </summary>
-        /// <typeparam name="T">The type of the structure</typeparam>
-        /// <param name="stream">The stream to read</param>
-        /// <returns>The structure</returns>
+        /// <typeparam name="T">The type of the structure.</typeparam>
+        /// <param name="stream">The stream to read.</param>
+        /// <returns>The structure.</returns>
         public static T ReadStruct<T>(Stream stream)
             where T : IByteArraySerializable, new()
         {
@@ -914,10 +914,10 @@ namespace DiscUtils
         /// <summary>
         /// Reads a structure from a stream.
         /// </summary>
-        /// <typeparam name="T">The type of the structure</typeparam>
-        /// <param name="stream">The stream to read</param>
-        /// <param name="length">The number of bytes to read</param>
-        /// <returns>The structure</returns>
+        /// <typeparam name="T">The type of the structure.</typeparam>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="length">The number of bytes to read.</param>
+        /// <returns>The structure.</returns>
         public static T ReadStruct<T>(Stream stream, int length)
             where T : IByteArraySerializable, new()
         {
@@ -930,9 +930,9 @@ namespace DiscUtils
         /// <summary>
         /// Writes a structure to a stream.
         /// </summary>
-        /// <typeparam name="T">The type of the structure</typeparam>
-        /// <param name="stream">The stream to write to</param>
-        /// <param name="obj">The structure to write</param>
+        /// <typeparam name="T">The type of the structure.</typeparam>
+        /// <param name="stream">The stream to write to.</param>
+        /// <param name="obj">The structure to write.</param>
         public static void WriteStruct<T>(Stream stream, T obj)
             where T : IByteArraySerializable
         {
@@ -944,9 +944,9 @@ namespace DiscUtils
         /// <summary>
         /// Copies the contents of one stream to another.
         /// </summary>
-        /// <param name="source">The stream to copy from</param>
-        /// <param name="dest">The destination stream</param>
-        /// <remarks>Copying starts at the current stream positions</remarks>
+        /// <param name="source">The stream to copy from.</param>
+        /// <param name="dest">The destination stream.</param>
+        /// <remarks>Copying starts at the current stream positions.</remarks>
         public static void PumpStreams(Stream source, Stream dest)
         {
             byte[] buffer = new byte[64 * 1024];
@@ -966,7 +966,7 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if a file name matches the 8.3 pattern.
         /// </summary>
-        /// <param name="name">The name to test</param>
+        /// <param name="name">The name to test.</param>
         /// <returns><c>true</c> if the name is 8.3, otherwise <c>false</c>.</returns>
         public static bool Is8Dot3(string name)
         {
@@ -1022,8 +1022,8 @@ namespace DiscUtils
         /// <summary>
         /// Converts a 'standard' wildcard file/path specification into a regular expression.
         /// </summary>
-        /// <param name="pattern">The wildcard pattern to convert</param>
-        /// <returns>The resultant regular expression</returns>
+        /// <param name="pattern">The wildcard pattern to convert.</param>
+        /// <returns>The resultant regular expression.</returns>
         /// <remarks>
         /// The wildcard * (star) matches zero or more characters (including '.'), and ?
         /// (question mark) matches precisely one character (except '.').

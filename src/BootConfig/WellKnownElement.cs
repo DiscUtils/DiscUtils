@@ -91,7 +91,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Policy on use of first mega-byte of physical RAM.
         /// </summary>
-        /// <remarks>0 = UseNone, 1 = UseAll, 2 = UsePrivate</remarks>
+        /// <remarks>0 = UseNone, 1 = UseAll, 2 = UsePrivate.</remarks>
         LibraryFirstMegaBytePolicy = 0x1500000C,
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Debugger type.
         /// </summary>
-        /// <remarks>0 = Serial, 1 = 1394, 2 = USB</remarks>
+        /// <remarks>0 = Serial, 1 = 1394, 2 = USB.</remarks>
         LibraryDebuggerType = 0x15000011,
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Debugger start policy.
         /// </summary>
-        /// <remarks>0 = Active, 1 = AutoEnable, 2 = Disable</remarks>
+        /// <remarks>0 = Active, 1 = AutoEnable, 2 = Disable.</remarks>
         LibraryDebuggerStartPolicy = 0x15000018,
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Configure access policy.
         /// </summary>
-        /// <remarks>0 = default, 1 = DisallowMmConfig</remarks>
+        /// <remarks>0 = default, 1 = DisallowMmConfig.</remarks>
         LibraryConfigAccessPolicy = 0x15000047,
 
         /// <summary>
@@ -320,13 +320,13 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// NX (No-Execute) policy.
         /// </summary>
-        /// <remarks>0 = OptIn, 1 = OptOut, 2 = AlwaysOff, 3 = AlwaysOn</remarks>
+        /// <remarks>0 = OptIn, 1 = OptOut, 2 = AlwaysOff, 3 = AlwaysOn.</remarks>
         OsLoaderNxPolicy = 0x25000020,
 
         /// <summary>
         /// PAE policy.
         /// </summary>
-        /// <remarks>0 = default, 1 = ForceEnable, 2 = ForceDisable</remarks>
+        /// <remarks>0 = default, 1 = ForceEnable, 2 = ForceDisable.</remarks>
         OsLoaderPaePolicy = 0x25000021,
 
         /// <summary>
@@ -442,7 +442,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// The safe boot option.
         /// </summary>
-        /// <remarks>0 = Minimal, 1 = Network, 2 = DsRepair</remarks>
+        /// <remarks>0 = Minimal, 1 = Network, 2 = DsRepair.</remarks>
         OsLoaderSafeBoot = 0x25000080,
 
         /// <summary>
@@ -511,7 +511,7 @@ namespace DiscUtils.BootConfig
         ResumePaeMode = 0x26000004,
 
         /// <summary>
-        /// An MS-DOS device with containing resume application
+        /// An MS-DOS device with containing resume application.
         /// </summary>
         ResumeAssociatedDosDevice = 0x21000005,
 

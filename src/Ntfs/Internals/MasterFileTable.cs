@@ -107,8 +107,8 @@ namespace DiscUtils.Ntfs.Internals
         /// <summary>
         /// Gets an entry by index.
         /// </summary>
-        /// <param name="index">The index of the entry</param>
-        /// <returns>The entry</returns>
+        /// <param name="index">The index of the entry.</param>
+        /// <returns>The entry.</returns>
         public MasterFileTableEntry this[long index]
         {
             get
@@ -128,7 +128,7 @@ namespace DiscUtils.Ntfs.Internals
         /// <summary>
         /// Enumerates all entries.
         /// </summary>
-        /// <param name="filter">Filter controlling which entries are returned</param>
+        /// <param name="filter">Filter controlling which entries are returned.</param>
         /// <returns>An enumeration of entries matching the filter.</returns>
         public IEnumerable<MasterFileTableEntry> GetEntries(EntryStates filter)
         {

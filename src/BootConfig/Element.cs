@@ -107,7 +107,7 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Gets the element's id as a hex string.
         /// </summary>
-        /// <returns>A hex string</returns>
+        /// <returns>A hex string.</returns>
         public override string ToString()
         {
             return _identifier.ToString("X8", CultureInfo.InvariantCulture);

@@ -42,24 +42,24 @@ namespace DiscUtils.Archives
         }
 
         /// <summary>
-        /// Add a file to the tar archive
+        /// Add a file to the tar archive.
         /// </summary>
-        /// <param name="name">The name of the file</param>
-        /// <param name="buffer">The file data</param>
+        /// <param name="name">The name of the file.</param>
+        /// <param name="buffer">The file data.</param>
         public void AddFile(string name, byte[] buffer)
         {
             _files.Add(new UnixBuildFileRecord(name, buffer));
         }
 
         /// <summary>
-        /// Add a file to the tar archive
+        /// Add a file to the tar archive.
         /// </summary>
-        /// <param name="name">The name of the file</param>
-        /// <param name="buffer">The file data</param>
-        /// <param name="fileMode">The access mode of the file</param>
-        /// <param name="ownerId">The uid of the owner</param>
-        /// <param name="groupId">The gid of the owner</param>
-        /// <param name="modificationTime">The modification time for the file</param>
+        /// <param name="name">The name of the file.</param>
+        /// <param name="buffer">The file data.</param>
+        /// <param name="fileMode">The access mode of the file.</param>
+        /// <param name="ownerId">The uid of the owner.</param>
+        /// <param name="groupId">The gid of the owner.</param>
+        /// <param name="modificationTime">The modification time for the file.</param>
         public void AddFile(
             string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
         {
@@ -67,24 +67,24 @@ namespace DiscUtils.Archives
         }
 
         /// <summary>
-        /// Add a file to the tar archive
+        /// Add a file to the tar archive.
         /// </summary>
-        /// <param name="name">The name of the file</param>
-        /// <param name="stream">The file data</param>
+        /// <param name="name">The name of the file.</param>
+        /// <param name="stream">The file data.</param>
         public void AddFile(string name, Stream stream)
         {
             _files.Add(new UnixBuildFileRecord(name, stream));
         }
 
         /// <summary>
-        /// Add a file to the tar archive
+        /// Add a file to the tar archive.
         /// </summary>
-        /// <param name="name">The name of the file</param>
-        /// <param name="stream">The file data</param>
-        /// <param name="fileMode">The access mode of the file</param>
-        /// <param name="ownerId">The uid of the owner</param>
-        /// <param name="groupId">The gid of the owner</param>
-        /// <param name="modificationTime">The modification time for the file</param>
+        /// <param name="name">The name of the file.</param>
+        /// <param name="stream">The file data.</param>
+        /// <param name="fileMode">The access mode of the file.</param>
+        /// <param name="ownerId">The uid of the owner.</param>
+        /// <param name="groupId">The gid of the owner.</param>
+        /// <param name="modificationTime">The modification time for the file.</param>
         public void AddFile(
             string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
         {

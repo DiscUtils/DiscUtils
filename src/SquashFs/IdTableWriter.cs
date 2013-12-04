@@ -45,8 +45,8 @@ namespace DiscUtils.SquashFs
         /// <summary>
         /// Allocates space for a User / Group id.
         /// </summary>
-        /// <param name="id">The id to allocate</param>
-        /// <returns>The key of the id</returns>
+        /// <param name="id">The id to allocate.</param>
+        /// <returns>The key of the id.</returns>
         public ushort AllocateId(int id)
         {
             for (int i = 0; i < _ids.Count; ++i)

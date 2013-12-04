@@ -42,7 +42,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Initializes a new instance of the RegistryHive class.
         /// </summary>
-        /// <param name="hive">The stream containing the registry hive</param>
+        /// <param name="hive">The stream containing the registry hive.</param>
         /// <remarks>
         /// The created object does not assume ownership of the stream.
         /// </remarks>
@@ -54,8 +54,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Initializes a new instance of the RegistryHive class.
         /// </summary>
-        /// <param name="hive">The stream containing the registry hive</param>
-        /// <param name="ownership">Whether the new object assumes object of the stream</param>
+        /// <param name="hive">The stream containing the registry hive.</param>
+        /// <param name="ownership">Whether the new object assumes object of the stream.</param>
         public RegistryHive(Stream hive, Ownership ownership)
         {
             _fileStream = hive;
@@ -92,8 +92,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Creates a new (empty) registry hive.
         /// </summary>
-        /// <param name="stream">The stream to contain the new hive</param>
-        /// <returns>The new hive</returns>
+        /// <param name="stream">The stream to contain the new hive.</param>
+        /// <returns>The new hive.</returns>
         /// <remarks>
         /// The returned object does not assume ownership of the stream.
         /// </remarks>
@@ -105,9 +105,9 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Creates a new (empty) registry hive.
         /// </summary>
-        /// <param name="stream">The stream to contain the new hive</param>
-        /// <param name="ownership">Whether the returned object owns the stream</param>
-        /// <returns>The new hive</returns>
+        /// <param name="stream">The stream to contain the new hive.</param>
+        /// <param name="ownership">Whether the returned object owns the stream.</param>
+        /// <returns>The new hive.</returns>
         public static RegistryHive Create(Stream stream, Ownership ownership)
         {
             if (stream == null)
@@ -173,8 +173,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Creates a new (empty) registry hive.
         /// </summary>
-        /// <param name="path">The file to create the new hive in</param>
-        /// <returns>The new hive</returns>
+        /// <param name="path">The file to create the new hive in.</param>
+        /// <returns>The new hive.</returns>
         public static RegistryHive Create(string path)
         {
             return Create(new FileStream(path, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose);

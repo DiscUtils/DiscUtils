@@ -34,7 +34,7 @@ namespace DiscUtils.Wim
     /// converted byte stream is consumed, an infinite sequence of zero's is emulated.</para>
     /// <para>It is strongly recommended to use some kind of in memory buffering (such as a
     /// BufferedStream) for the wrapped stream.  This class makes a large number of small
-    /// reads.</para></remarks>
+    /// reads.</para>.</remarks>
     internal sealed class LzxBitStream : BitStream
     {
         private Stream _byteStream;

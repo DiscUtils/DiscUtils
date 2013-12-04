@@ -40,7 +40,7 @@ namespace DiscUtils
         FailedRedundancy = 1,
 
         /// <summary>
-        /// The volume is wholely, or partly, inaccessible.
+        /// The volume is wholey, or partly, inaccessible.
         /// </summary>
         Failed = 2
     }

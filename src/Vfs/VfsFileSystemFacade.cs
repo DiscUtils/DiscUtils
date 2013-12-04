@@ -39,7 +39,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Initializes a new instance of the VfsFileSystemFacade class.
         /// </summary>
-        /// <param name="toWrap">The actual file system instance</param>
+        /// <param name="toWrap">The actual file system instance.</param>
         protected VfsFileSystemFacade(DiscFileSystem toWrap)
         {
             _wrapped = toWrap;
@@ -97,8 +97,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         public override void CopyFile(string sourceFile, string destinationFile)
         {
             _wrapped.CopyFile(sourceFile, destinationFile);
@@ -107,9 +107,9 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
-        /// <param name="overwrite">Overwrite any existing file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
+        /// <param name="overwrite">Overwrite any existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
             _wrapped.CopyFile(sourceFile, destinationFile, overwrite);
@@ -118,7 +118,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Creates a directory.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public override void CreateDirectory(string path)
         {
             _wrapped.CreateDirectory(path);
@@ -137,7 +137,7 @@ namespace DiscUtils.Vfs
         /// Deletes a directory, optionally with all descendants.
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
-        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted.</param>
         public override void DeleteDirectory(string path, bool recursive)
         {
             _wrapped.DeleteDirectory(path, recursive);
@@ -155,8 +155,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public override bool DirectoryExists(string path)
         {
             return _wrapped.DirectoryExists(path);
@@ -165,8 +165,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public override bool FileExists(string path)
         {
             return _wrapped.FileExists(path);
@@ -175,8 +175,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Indicates if a file or directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file or directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file or directory exists.</returns>
         public override bool Exists(string path)
         {
             return _wrapped.Exists(path);
@@ -298,7 +298,7 @@ namespace DiscUtils.Vfs
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             _wrapped.MoveFile(sourceName, destinationName, overwrite);
@@ -330,8 +330,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             return _wrapped.GetAttributes(path);
@@ -340,8 +340,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             _wrapped.SetAttributes(path, newValue);
@@ -350,7 +350,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the creation time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
+        /// <param name="path">The path of the file or directory.</param>
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
@@ -390,8 +390,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTime(string path)
         {
             return _wrapped.GetLastAccessTime(path);
@@ -410,8 +410,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             return _wrapped.GetLastAccessTimeUtc(path);
@@ -430,8 +430,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTime(string path)
         {
             return _wrapped.GetLastWriteTime(path);
@@ -450,8 +450,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             return _wrapped.GetLastWriteTimeUtc(path);
@@ -470,8 +470,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             return _wrapped.GetFileLength(path);
@@ -480,9 +480,9 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets an object representing a possible file.
         /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
+        /// <param name="path">The file path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The file does not need to exist.</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
             return new DiscFileInfo(this, path);
@@ -491,9 +491,9 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets an object representing a possible directory.
         /// </summary>
-        /// <param name="path">The directory path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The directory does not need to exist</remarks>
+        /// <param name="path">The directory path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The directory does not need to exist.</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
             return new DiscDirectoryInfo(this, path);
@@ -502,21 +502,21 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets an object representing a possible file system object (file or directory).
         /// </summary>
-        /// <param name="path">The file system path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file system object does not need to exist</remarks>
+        /// <param name="path">The file system path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The file system object does not need to exist.</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);
         }
 
         /// <summary>
-        /// Provides access to the actual file system implementation
+        /// Provides access to the actual file system implementation.
         /// </summary>
-        /// <typeparam name="TDirEntry">The concrete type representing directory entries</typeparam>
-        /// <typeparam name="TFile">The concrete type representing files</typeparam>
-        /// <typeparam name="TDirectory">The concrete type representing directories</typeparam>
-        /// <typeparam name="TContext">The concrete type holding global state</typeparam>
+        /// <typeparam name="TDirEntry">The concrete type representing directory entries.</typeparam>
+        /// <typeparam name="TFile">The concrete type representing files.</typeparam>
+        /// <typeparam name="TDirectory">The concrete type representing directories.</typeparam>
+        /// <typeparam name="TContext">The concrete type holding global state.</typeparam>
         /// <returns>The actual file system instance.</returns>
         protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem<TDirEntry, TFile, TDirectory, TContext>()
             where TDirEntry : VfsDirEntry
@@ -528,7 +528,7 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Provides access to the actual file system implementation
+        /// Provides access to the actual file system implementation.
         /// </summary>
         /// <typeparam name="T">The concrete type of the actual file system.</typeparam>
         /// <returns>The actual file system instance.</returns>

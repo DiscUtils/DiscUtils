@@ -49,15 +49,15 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets a specific directory entry, by name.
         /// </summary>
-        /// <param name="name">The name of the directory entry</param>
-        /// <returns>The directory entry, or <c>null</c> if not found</returns>
+        /// <param name="name">The name of the directory entry.</param>
+        /// <returns>The directory entry, or <c>null</c> if not found.</returns>
         TDirEntry GetEntryByName(string name);
 
         /// <summary>
         /// Creates a new file.
         /// </summary>
-        /// <param name="name">The name of the file (relative to this directory)</param>
-        /// <returns>The newly created file</returns>
+        /// <param name="name">The name of the file (relative to this directory).</param>
+        /// <returns>The newly created file.</returns>
         TDirEntry CreateNewFile(string name);
     }
 }

@@ -23,7 +23,7 @@
 namespace DiscUtils
 {
     /// <summary>
-    /// Enumeration of standard BIOS disk geometry translation methods
+    /// Enumeration of standard BIOS disk geometry translation methods.
     /// </summary>
     public enum GeometryTranslation
     {

@@ -38,8 +38,8 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="path">The path to the disk</param>
-        /// <param name="access">The access requested to the disk</param>
+        /// <param name="path">The path to the disk.</param>
+        /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
             : this(new FileStream(path, FileMode.Open, access), Ownership.Dispose)
         {
@@ -57,7 +57,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         public Disk(Stream stream)
         {
             _diskImage = new DiskImageFile(stream);
@@ -66,7 +66,7 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new disk should take ownership of <paramref name="stream"/> lifetime.</param>
         public Disk(Stream stream, Ownership ownsStream)
         {
@@ -139,8 +139,8 @@ namespace DiscUtils.Vdi
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VDI file.</returns>
         public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity));
@@ -151,8 +151,8 @@ namespace DiscUtils.Vdi
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VDI file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VDI file.</returns>
         public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity));
@@ -161,9 +161,9 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotImplementedException("Differencing disks not implemented for the VDI format");
@@ -172,8 +172,8 @@ namespace DiscUtils.Vdi
         /// <summary>
         /// Create a new differencing disk.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotImplementedException("Differencing disks not implemented for the VDI format");

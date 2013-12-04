@@ -66,7 +66,7 @@ namespace DiscUtils
         /// <summary>
         /// Detect which file systems are present on a volume.
         /// </summary>
-        /// <param name="volume">The volume to inspect</param>
+        /// <param name="volume">The volume to inspect.</param>
         /// <returns>The list of file systems detected.</returns>
         public static FileSystemInfo[] DetectDefaultFileSystems(VolumeInfo volume)
         {
@@ -76,7 +76,7 @@ namespace DiscUtils
         /// <summary>
         /// Detect which file systems are present in a stream.
         /// </summary>
-        /// <param name="stream">The stream to inspect</param>
+        /// <param name="stream">The stream to inspect.</param>
         /// <returns>The list of file systems detected.</returns>
         public static FileSystemInfo[] DetectDefaultFileSystems(Stream stream)
         {
@@ -86,7 +86,7 @@ namespace DiscUtils
         /// <summary>
         /// Registers new file systems with an instance of this class.
         /// </summary>
-        /// <param name="factory">The detector for the new file systems</param>
+        /// <param name="factory">The detector for the new file systems.</param>
         public void RegisterFileSystems(VfsFileSystemFactory factory)
         {
             _factories.Add(factory);
@@ -95,7 +95,7 @@ namespace DiscUtils
         /// <summary>
         /// Registers new file systems detected in an assembly.
         /// </summary>
-        /// <param name="assembly">The assembly to inspect</param>
+        /// <param name="assembly">The assembly to inspect.</param>
         /// <remarks>
         /// To be detected, the <c>VfsFileSystemFactory</c> instances must be marked with the
         /// <c>VfsFileSystemFactoryAttribute</c>> attribute.
@@ -108,7 +108,7 @@ namespace DiscUtils
         /// <summary>
         /// Detect which file systems are present on a volume.
         /// </summary>
-        /// <param name="volume">The volume to inspect</param>
+        /// <param name="volume">The volume to inspect.</param>
         /// <returns>The list of file systems detected.</returns>
         public FileSystemInfo[] DetectFileSystems(VolumeInfo volume)
         {
@@ -121,7 +121,7 @@ namespace DiscUtils
         /// <summary>
         /// Detect which file systems are present in a stream.
         /// </summary>
-        /// <param name="stream">The stream to inspect</param>
+        /// <param name="stream">The stream to inspect.</param>
         /// <returns>The list of file systems detected.</returns>
         public FileSystemInfo[] DetectFileSystems(Stream stream)
         {

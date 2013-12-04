@@ -132,7 +132,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Returns a string representation of the file system options.
         /// </summary>
-        /// <returns>A string of the form Show: XX XX XX</returns>
+        /// <returns>A string of the form Show: XX XX XX.</returns>
         public override string ToString()
         {
             return "Show: Normal " + (HideMetafiles ? string.Empty : "Meta ") + (HideHiddenFiles ? string.Empty : "Hidden ") + (HideSystemFiles ? string.Empty : "System ") + (HideDosFileNames ? string.Empty : "ShortNames ");

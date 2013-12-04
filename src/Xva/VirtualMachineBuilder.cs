@@ -78,9 +78,9 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Adds a sparse disk image to the XVA file.
         /// </summary>
-        /// <param name="label">The admin-visible name of the disk</param>
-        /// <param name="content">The content of the disk</param>
-        /// <param name="ownsContent">Indicates if ownership of content is transfered</param>
+        /// <param name="label">The admin-visible name of the disk.</param>
+        /// <param name="content">The content of the disk.</param>
+        /// <param name="ownsContent">Indicates if ownership of content is transfered.</param>
         public void AddDisk(string label, SparseStream content, Ownership ownsContent)
         {
             _disks.Add(new DiskRecord(label, content, ownsContent));
@@ -89,9 +89,9 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Adds a disk image to the XVA file.
         /// </summary>
-        /// <param name="label">The admin-visible name of the disk</param>
-        /// <param name="content">The content of the disk</param>
-        /// <param name="ownsContent">Indicates if ownership of content is transfered</param>
+        /// <param name="label">The admin-visible name of the disk.</param>
+        /// <param name="content">The content of the disk.</param>
+        /// <param name="ownsContent">Indicates if ownership of content is transfered.</param>
         public void AddDisk(string label, Stream content, Ownership ownsContent)
         {
             _disks.Add(new DiskRecord(label, SparseStream.FromStream(content, ownsContent), Ownership.Dispose));
@@ -100,7 +100,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Creates a new stream that contains the XVA image.
         /// </summary>
-        /// <returns>The new stream</returns>
+        /// <returns>The new stream.</returns>
         public override SparseStream Build()
         {
             TarFileBuilder tarBuilder = new TarFileBuilder();

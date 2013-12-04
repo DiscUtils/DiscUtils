@@ -45,7 +45,7 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public Disk(Stream stream, Ownership ownsStream)
         {
@@ -61,7 +61,7 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
-        /// <param name="path">The path to the disk image</param>
+        /// <param name="path">The path to the disk image.</param>
         public Disk(string path)
         {
             DiskImageFile file = new DiskImageFile(path, FileAccess.ReadWrite);
@@ -73,8 +73,8 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
-        /// <param name="path">The path to the disk image</param>
-        /// <param name="access">The access requested to the disk</param>
+        /// <param name="path">The path to the disk image.</param>
+        /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
         {
             DiskImageFile file = new DiskImageFile(path, access);
@@ -101,9 +101,9 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="files">The set of image files</param>
-        /// <param name="ownsFiles">Indicates if the new instance controls the lifetime of the image files</param>
-        /// <remarks>The disks shound be ordered with the first file referencing the second, etc.  The final
+        /// <param name="files">The set of image files.</param>
+        /// <param name="ownsFiles">Indicates if the new instance controls the lifetime of the image files.</param>
+        /// <remarks>The disks should be ordered with the first file referencing the second, etc.  The final
         /// file must not require any parent.</remarks>
         public Disk(IList<DiskImageFile> files, Ownership ownsFiles)
         {
@@ -141,9 +141,9 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
-        /// <param name="locator">The locator to access relative files</param>
-        /// <param name="path">The path to the disk image</param>
-        /// <param name="access">The access requested to the disk</param>
+        /// <param name="locator">The locator to access relative files.</param>
+        /// <param name="path">The path to the disk image.</param>
+        /// <param name="access">The access requested to the disk.</param>
         internal Disk(FileLocator locator, string path, FileAccess access)
         {
             DiskImageFile file = new DiskImageFile(locator, path, access);
@@ -155,7 +155,7 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
         /// </summary>
-        /// <param name="file">The file containing the disk</param>
+        /// <param name="file">The file containing the disk.</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
         private Disk(DiskImageFile file, Ownership ownsFile)
         {
@@ -167,10 +167,10 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
-        /// <param name="file">The file containing the disk</param>
+        /// <param name="file">The file containing the disk.</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
-        /// <param name="parentLocator">Object used to locate the parent disk</param>
-        /// <param name="parentPath">Path to the parent disk (if required)</param>
+        /// <param name="parentLocator">Object used to locate the parent disk.</param>
+        /// <param name="parentPath">Path to the parent disk (if required).</param>
         private Disk(DiskImageFile file, Ownership ownsFile, FileLocator parentLocator, string parentPath)
         {
             _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
@@ -188,10 +188,10 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are supported.
         /// </summary>
-        /// <param name="file">The file containing the disk</param>
+        /// <param name="file">The file containing the disk.</param>
         /// <param name="ownsFile">Indicates if the new instance should control the lifetime of the file.</param>
-        /// <param name="parentFile">The file containing the disk's parent</param>
-        /// <param name="ownsParent">Indicates if the new instance should control the lifetime of the parentFile</param>
+        /// <param name="parentFile">The file containing the disk's parent.</param>
+        /// <param name="ownsParent">Indicates if the new instance should control the lifetime of the parentFile.</param>
         private Disk(DiskImageFile file, Ownership ownsFile, DiskImageFile parentFile, Ownership ownsParent)
         {
             _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
@@ -288,8 +288,8 @@ namespace DiscUtils.Vhdx
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VHDX file.</returns>
         public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             return InitializeFixed(stream, ownsStream, capacity, null);
@@ -300,9 +300,9 @@ namespace DiscUtils.Vhdx
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <returns>An object that accesses the stream as a VHDX file.</returns>
         public static Disk InitializeFixed(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
             return new Disk(DiskImageFile.InitializeFixed(stream, ownsStream, capacity, geometry), Ownership.Dispose);
@@ -313,8 +313,8 @@ namespace DiscUtils.Vhdx
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a VHDX file.</returns>
         public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity), Ownership.Dispose);
@@ -325,9 +325,9 @@ namespace DiscUtils.Vhdx
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="blockSize">The size of each block (unit of allocation)</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="blockSize">The size of each block (unit of allocation).</param>
+        /// <returns>An object that accesses the stream as a VHDX file.</returns>
         public static Disk InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, long blockSize)
         {
             return new Disk(DiskImageFile.InitializeDynamic(stream, ownsStream, capacity, blockSize), Ownership.Dispose);
@@ -336,9 +336,9 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Creates a new VHDX differencing disk file.
         /// </summary>
-        /// <param name="path">The path to the new disk file</param>
-        /// <param name="parentPath">The path to the parent disk file</param>
-        /// <returns>An object that accesses the new file as a Disk</returns>
+        /// <param name="path">The path to the new disk file.</param>
+        /// <param name="parentPath">The path to the parent disk file.</param>
+        /// <returns>An object that accesses the new file as a Disk.</returns>
         public static Disk InitializeDifferencing(string path, string parentPath)
         {
             LocalFileLocator parentLocator = new LocalFileLocator(Path.GetDirectoryName(parentPath));
@@ -364,7 +364,7 @@ namespace DiscUtils.Vhdx
         /// <param name="parentAbsolutePath">The full path to the parent disk.</param>
         /// <param name="parentRelativePath">The relative path from the new disk to the parent disk.</param>
         /// <param name="parentModificationTime">The time the parent disk's file was last modified (from file system).</param>
-        /// <returns>An object that accesses the stream as a VHDX file</returns>
+        /// <returns>An object that accesses the stream as a VHDX file.</returns>
         public static Disk InitializeDifferencing(
             Stream stream,
             Ownership ownsStream,
@@ -381,9 +381,9 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             FileLocator locator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
@@ -394,8 +394,8 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Create a new differencing disk.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));

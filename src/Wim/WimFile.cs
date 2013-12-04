@@ -39,7 +39,7 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Initializes a new instance of the WimFile class.
         /// </summary>
-        /// <param name="stream">A stream of the WIM file contents</param>
+        /// <param name="stream">A stream of the WIM file contents.</param>
         public WimFile(Stream stream)
         {
             _fileStream = stream;
@@ -110,8 +110,8 @@ namespace DiscUtils.Wim
         /// <summary>
         /// Gets a particular image within the file (zero-based index).
         /// </summary>
-        /// <param name="index">The index of the image to retrieve</param>
-        /// <returns>The image as a file system</returns>
+        /// <param name="index">The index of the image to retrieve.</param>
+        /// <returns>The image as a file system.</returns>
         /// <remarks>The XML manifest file uses a one-based index, whereas this
         /// method is zero-based.</remarks>
         public WimFileSystem GetImage(int index)

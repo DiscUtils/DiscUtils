@@ -46,7 +46,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="status">The SCSI status code</param>
+        /// <param name="status">The SCSI status code.</param>
         public ScsiCommandException(ScsiStatus status)
         {
             _status = status;
@@ -55,7 +55,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="message">The reason for the exception</param>
+        /// <param name="message">The reason for the exception.</param>
         public ScsiCommandException(string message)
             : base(message)
         {
@@ -65,8 +65,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="status">The SCSI status code</param>
-        /// <param name="message">The reason for the exception</param>
+        /// <param name="status">The SCSI status code.</param>
+        /// <param name="message">The reason for the exception.</param>
         public ScsiCommandException(ScsiStatus status, string message)
             : base(message)
         {
@@ -76,9 +76,9 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="status">The SCSI status code</param>
-        /// <param name="message">The reason for the exception</param>
-        /// <param name="senseData">The SCSI sense data</param>
+        /// <param name="status">The SCSI status code.</param>
+        /// <param name="message">The reason for the exception.</param>
+        /// <param name="senseData">The SCSI sense data.</param>
         public ScsiCommandException(ScsiStatus status, string message, byte[] senseData)
             : base(message)
         {
@@ -89,8 +89,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="message">The reason for the exception</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="message">The reason for the exception.</param>
+        /// <param name="innerException">The inner exception.</param>
         public ScsiCommandException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -100,9 +100,9 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="status">The SCSI status code</param>
-        /// <param name="message">The reason for the exception</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="status">The SCSI status code.</param>
+        /// <param name="message">The reason for the exception.</param>
+        /// <param name="innerException">The inner exception.</param>
         public ScsiCommandException(ScsiStatus status, string message, Exception innerException)
             : base(message, innerException)
         {
@@ -112,8 +112,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">Ther context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">Ther context.</param>
         protected ScsiCommandException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -132,8 +132,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the serialized state of this exception.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">The serialization context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The serialization context.</param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

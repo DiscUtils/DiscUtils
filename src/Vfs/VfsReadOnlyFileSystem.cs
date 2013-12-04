@@ -28,10 +28,10 @@ namespace DiscUtils.Vfs
     /// <summary>
     /// Base class for read-only file system implementations.
     /// </summary>
-    /// <typeparam name="TDirEntry">The concrete type representing directory entries</typeparam>
-    /// <typeparam name="TFile">The concrete type representing files</typeparam>
-    /// <typeparam name="TDirectory">The concrete type representing directories</typeparam>
-    /// <typeparam name="TContext">The concrete type holding global state</typeparam>
+    /// <typeparam name="TDirEntry">The concrete type representing directory entries.</typeparam>
+    /// <typeparam name="TFile">The concrete type representing files.</typeparam>
+    /// <typeparam name="TDirectory">The concrete type representing directories.</typeparam>
+    /// <typeparam name="TContext">The concrete type holding global state.</typeparam>
     public abstract class VfsReadOnlyFileSystem<TDirEntry, TFile, TDirectory, TContext> : VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>
         where TDirEntry : VfsDirEntry
         where TFile : IVfsFile
@@ -41,7 +41,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Initializes a new instance of the VfsReadOnlyFileSystem class.
         /// </summary>
-        /// <param name="defaultOptions">The default file system options</param>
+        /// <param name="defaultOptions">The default file system options.</param>
         protected VfsReadOnlyFileSystem(DiscFileSystemOptions defaultOptions)
             : base(defaultOptions)
         {
@@ -59,8 +59,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Copies a file - not supported on read-only file systems.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
@@ -70,7 +70,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Creates a directory - not supported on read-only file systems.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public override void CreateDirectory(string path)
         {
             throw new NotSupportedException();
@@ -109,7 +109,7 @@ namespace DiscUtils.Vfs
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to allow an existing file to be overwritten</param>
+        /// <param name="overwrite">Whether to allow an existing file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             throw new NotSupportedException();
@@ -129,8 +129,8 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Sets the attributes of a file or directory - not supported on read-only file systems.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             throw new NotSupportedException();

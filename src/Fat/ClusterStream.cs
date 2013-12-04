@@ -302,10 +302,10 @@ namespace DiscUtils.Fat
         /// that falls outside of the updated range.
         /// </summary>
         /// <param name="cluster">The cluster to write to.</param>
-        /// <param name="pos">The file position of the write (within the cluster)</param>
-        /// <param name="buffer">The buffer with the new data</param>
-        /// <param name="offset">Offset into buffer of the first byte to write</param>
-        /// <param name="count">The maximum number of bytes to write</param>
+        /// <param name="pos">The file position of the write (within the cluster).</param>
+        /// <param name="buffer">The buffer with the new data.</param>
+        /// <param name="offset">Offset into buffer of the first byte to write.</param>
+        /// <param name="count">The maximum number of bytes to write.</param>
         /// <returns>The number of bytes written - either count, or the number that fit up to
         /// the cluster boundary.</returns>
         private int WriteToCluster(uint cluster, int pos, byte[] buffer, int offset, int count)
@@ -336,7 +336,7 @@ namespace DiscUtils.Fat
         /// <summary>
         /// Adds a new cluster to the end of the existing chain, by allocating a free cluster.
         /// </summary>
-        /// <returns>The cluster allocated</returns>
+        /// <returns>The cluster allocated.</returns>
         /// <remarks>This method does not initialize the data in the cluster, the caller should
         /// perform a write to ensure the cluster data is in known state.</remarks>
         private uint ExtendChain()

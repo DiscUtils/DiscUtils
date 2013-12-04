@@ -124,7 +124,7 @@ namespace DiscUtils.SquashFs
         /// <param name="user">The owner of the file.</param>
         /// <param name="group">The group of the file.</param>
         /// <param name="permissions">The access permission of the file.</param>
-        /// <param name="modificationTime">The modification time of the file</param>
+        /// <param name="modificationTime">The modification time of the file.</param>
         /// <remarks>
         /// <para>Any missing parent directories will be created with the specified owner and group,
         /// default directory permissions and the current time as the modification time.</para>
@@ -153,7 +153,7 @@ namespace DiscUtils.SquashFs
         /// <param name="user">The owner of the file.</param>
         /// <param name="group">The group of the file.</param>
         /// <param name="permissions">The access permission of the file.</param>
-        /// <param name="modificationTime">The modification time of the file</param>
+        /// <param name="modificationTime">The modification time of the file.</param>
         /// <remarks>
         /// <para>Any missing parent directories will be created with the specified owner and group,
         /// default directory permissions and the current time as the modification time.</para>
@@ -352,7 +352,7 @@ namespace DiscUtils.SquashFs
         /// <summary>
         /// Allocates a unique inode identifier.
         /// </summary>
-        /// <returns>The inode identifier</returns>
+        /// <returns>The inode identifier.</returns>
         private uint AllocateInode()
         {
             return _nextInode++;
@@ -361,9 +361,9 @@ namespace DiscUtils.SquashFs
         /// <summary>
         /// Writes a block of file data, possibly compressing it.
         /// </summary>
-        /// <param name="buffer">The data to write</param>
-        /// <param name="offset">Offset of the first byte to write</param>
-        /// <param name="count">The number of bytes to write</param>
+        /// <param name="buffer">The data to write.</param>
+        /// <param name="offset">Offset of the first byte to write.</param>
+        /// <param name="count">The number of bytes to write.</param>
         /// <returns>
         /// The 'length' of the (possibly compressed) data written, including
         /// a flag indicating compression (or not).

@@ -40,9 +40,9 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the ChsAddress class.
         /// </summary>
-        /// <param name="cylinder">The number of cylinders of the disk</param>
-        /// <param name="head">The number of heads (aka platters) of the disk</param>
-        /// <param name="sector">The number of sectors per track/cylinder of the disk</param>
+        /// <param name="cylinder">The number of cylinders of the disk.</param>
+        /// <param name="head">The number of heads (aka platters) of the disk.</param>
+        /// <param name="sector">The number of sectors per track/cylinder of the disk.</param>
         public ChsAddress(int cylinder, int head, int sector)
         {
             _cylinder = cylinder;
@@ -78,7 +78,7 @@ namespace DiscUtils
         /// Determines if this object is equivalent to another.
         /// </summary>
         /// <param name="obj">The object to test against.</param>
-        /// <returns><c>true</c> if the <paramref name="obj"/> is equalivalent, else <c>false</c>.</returns>
+        /// <returns><c>true</c> if the <paramref name="obj"/> is equivalent, else <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null || obj.GetType() != GetType())
@@ -103,7 +103,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets a string representation of this object, in the form (C/H/S).
         /// </summary>
-        /// <returns>The string representation</returns>
+        /// <returns>The string representation.</returns>
         public override string ToString()
         {
             return "(" + _cylinder + "/" + _head + "/" + _sector + ")";

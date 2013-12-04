@@ -183,7 +183,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets the names of all child sub keys.
         /// </summary>
-        /// <returns>The names of the sub keys</returns>
+        /// <returns>The names of the sub keys.</returns>
         public string[] GetSubKeyNames()
         {
             List<string> names = new List<string>();
@@ -199,7 +199,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets a named value stored within this key.
         /// </summary>
-        /// <param name="name">The name of the value to retrieve</param>
+        /// <param name="name">The name of the value to retrieve.</param>
         /// <returns>The value as a .NET object.</returns>
         /// <remarks>The mapping from registry type of .NET type is as follows:
         /// <list type="table">
@@ -365,7 +365,7 @@ namespace DiscUtils.Registry
         /// </summary>
         /// <param name="name">The name of the value to store.</param>
         /// <param name="value">The value to store.</param>
-        /// <param name="valueType">The registry type of the data</param>
+        /// <param name="valueType">The registry type of the data.</param>
         public void SetValue(string name, object value, RegistryValueType valueType)
         {
             RegistryValue valObj = GetRegistryValue(name);
@@ -390,7 +390,7 @@ namespace DiscUtils.Registry
         /// Deletes a named value stored within this key.
         /// </summary>
         /// <param name="name">The name of the value to delete.</param>
-        /// <param name="throwOnMissingValue">Throws ArgumentException if <c>name</c> doesn't exist</param>
+        /// <param name="throwOnMissingValue">Throws ArgumentException if <c>name</c> doesn't exist.</param>
         public void DeleteValue(string name, bool throwOnMissingValue)
         {
             bool foundValue = false;
@@ -459,7 +459,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Gets the names of all values in this key.
         /// </summary>
-        /// <returns>An array of strings containing the value names</returns>
+        /// <returns>An array of strings containing the value names.</returns>
         public string[] GetValueNames()
         {
             List<string> names = new List<string>();
@@ -474,8 +474,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Creates or opens a subkey.
         /// </summary>
-        /// <param name="subkey">The relative path the the subkey</param>
-        /// <returns>The subkey</returns>
+        /// <param name="subkey">The relative path the the subkey.</param>
+        /// <returns>The subkey.</returns>
         public RegistryKey CreateSubKey(string subkey)
         {
             if (string.IsNullOrEmpty(subkey))
@@ -554,7 +554,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Deletes a subkey and any child subkeys recursively. The string subkey is not case-sensitive.
         /// </summary>
-        /// <param name="subkey">The subkey to delete</param>
+        /// <param name="subkey">The subkey to delete.</param>
         public void DeleteSubKeyTree(string subkey)
         {
             RegistryKey subKeyObj = OpenSubKey(subkey);
@@ -579,7 +579,7 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Deletes the specified subkey. The string subkey is not case-sensitive.
         /// </summary>
-        /// <param name="subkey">The subkey to delete</param>
+        /// <param name="subkey">The subkey to delete.</param>
         public void DeleteSubKey(string subkey)
         {
             DeleteSubKey(subkey, true);
@@ -588,8 +588,8 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Deletes the specified subkey. The string subkey is not case-sensitive.
         /// </summary>
-        /// <param name="subkey">The subkey to delete</param>
-        /// <param name="throwOnMissingSubKey"><c>true</c> to throw an argument exception if <c>subkey</c> doesn't exist</param>
+        /// <param name="subkey">The subkey to delete.</param>
+        /// <param name="throwOnMissingSubKey"><c>true</c> to throw an argument exception if <c>subkey</c> doesn't exist.</param>
         public void DeleteSubKey(string subkey, bool throwOnMissingSubKey)
         {
             if (string.IsNullOrEmpty(subkey))

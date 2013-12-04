@@ -87,7 +87,7 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the last access time of the file
+        /// Gets the last access time of the file.
         /// </summary>
         public DateTime LastAccessTime
         {

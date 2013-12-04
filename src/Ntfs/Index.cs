@@ -170,6 +170,13 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
+        {
+            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock, file.Context.UpperCase);
+
+            idx.WriteRootNodeToDisk();
+        }
+
         public void Dispose()
         {
             if (_indexBitmap != null)
@@ -177,13 +184,6 @@ namespace DiscUtils.Ntfs
                 _indexBitmap.Dispose();
                 _indexBitmap = null;
             }
-        }
-
-        public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
-        {
-            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock, file.Context.UpperCase);
-
-            idx.WriteRootNodeToDisk();
         }
 
         public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query)

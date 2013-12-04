@@ -47,7 +47,7 @@ namespace DiscUtils.SquashFs
         /// <summary>
         /// Detects if the stream contains a SquashFs file system.
         /// </summary>
-        /// <param name="stream">The stream to inspect</param>
+        /// <param name="stream">The stream to inspect.</param>
         /// <returns><c>true</c> if stream appears to be a SquashFs file system.</returns>
         public static bool Detect(Stream stream)
         {
@@ -69,8 +69,8 @@ namespace DiscUtils.SquashFs
         /// <summary>
         /// Gets Unix file information about a file or directory.
         /// </summary>
-        /// <param name="path">Path to the file or directory</param>
-        /// <returns>Unix information about the file or directory</returns>
+        /// <param name="path">Path to the file or directory.</param>
+        /// <returns>Unix information about the file or directory.</returns>
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             return GetRealFileSystem<VfsSquashFileSystemReader>().GetUnixFileInfo(path);

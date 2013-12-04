@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new instance of the NtfsFileSystem class.
         /// </summary>
-        /// <param name="stream">The stream containing the NTFS file system</param>
+        /// <param name="stream">The stream containing the NTFS file system.</param>
         public NtfsFileSystem(Stream stream)
             : base(new NtfsOptions())
         {
@@ -185,12 +185,12 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
-        /// <param name="stream">The stream to write the new file system to</param>
-        /// <param name="label">The label for the new file system</param>
-        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system</param>
-        /// <param name="firstSector">The first sector of the new file system on the disk</param>
-        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk</param>
-        /// <returns>The newly-initialized file system</returns>
+        /// <param name="stream">The stream to write the new file system to.</param>
+        /// <param name="label">The label for the new file system.</param>
+        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system.</param>
+        /// <param name="firstSector">The first sector of the new file system on the disk.</param>
+        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk.</param>
+        /// <returns>The newly-initialized file system.</returns>
         public static NtfsFileSystem Format(
             Stream stream,
             string label,
@@ -209,13 +209,13 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
-        /// <param name="stream">The stream to write the new file system to</param>
-        /// <param name="label">The label for the new file system</param>
-        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system</param>
-        /// <param name="firstSector">The first sector of the new file system on the disk</param>
-        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk</param>
-        /// <param name="bootCode">The Operating System's boot code</param>
-        /// <returns>The newly-initialized file system</returns>
+        /// <param name="stream">The stream to write the new file system to.</param>
+        /// <param name="label">The label for the new file system.</param>
+        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system.</param>
+        /// <param name="firstSector">The first sector of the new file system on the disk.</param>
+        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk.</param>
+        /// <param name="bootCode">The Operating System's boot code.</param>
+        /// <returns>The newly-initialized file system.</returns>
         public static NtfsFileSystem Format(
             Stream stream,
             string label,
@@ -236,13 +236,13 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
-        /// <param name="stream">The stream to write the new file system to</param>
-        /// <param name="label">The label for the new file system</param>
-        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system</param>
-        /// <param name="firstSector">The first sector of the new file system on the disk</param>
-        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk</param>
-        /// <param name="options">The formatting options</param>
-        /// <returns>The newly-initialized file system</returns>
+        /// <param name="stream">The stream to write the new file system to.</param>
+        /// <param name="label">The label for the new file system.</param>
+        /// <param name="diskGeometry">The disk geometry of the disk containing the new file system.</param>
+        /// <param name="firstSector">The first sector of the new file system on the disk.</param>
+        /// <param name="sectorCount">The number of sectors allocated to the new file system on the disk.</param>
+        /// <param name="options">The formatting options.</param>
+        /// <returns>The newly-initialized file system.</returns>
         public static NtfsFileSystem Format(
             Stream stream,
             string label,
@@ -264,9 +264,9 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
-        /// <param name="volume">The volume to format</param>
-        /// <param name="label">The label for the new file system</param>
-        /// <returns>The newly-initialized file system</returns>
+        /// <param name="volume">The volume to format.</param>
+        /// <param name="label">The label for the new file system.</param>
+        /// <returns>The newly-initialized file system.</returns>
         public static NtfsFileSystem Format(
             VolumeInfo volume,
             string label)
@@ -282,10 +282,10 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
-        /// <param name="volume">The volume to format</param>
-        /// <param name="label">The label for the new file system</param>
-        /// <param name="bootCode">The Operating System's boot code</param>
-        /// <returns>The newly-initialized file system</returns>
+        /// <param name="volume">The volume to format.</param>
+        /// <param name="label">The label for the new file system.</param>
+        /// <param name="bootCode">The Operating System's boot code.</param>
+        /// <returns>The newly-initialized file system.</returns>
         public static NtfsFileSystem Format(
             VolumeInfo volume,
             string label,
@@ -303,10 +303,10 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new NTFS file system.
         /// </summary>
-        /// <param name="volume">The volume to format</param>
-        /// <param name="label">The label for the new file system</param>
-        /// <param name="options">The formatting options</param>
-        /// <returns>The newly-initialized file system</returns>
+        /// <param name="volume">The volume to format.</param>
+        /// <param name="label">The label for the new file system.</param>
+        /// <param name="options">The formatting options.</param>
+        /// <returns>The newly-initialized file system.</returns>
         public static NtfsFileSystem Format(
             VolumeInfo volume,
             string label,
@@ -325,7 +325,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Detects if a stream contains an NTFS file system.
         /// </summary>
-        /// <param name="stream">The stream to inspect</param>
+        /// <param name="stream">The stream to inspect.</param>
         /// <returns><c>true</c> if NTFS is detected, else <c>false</c>.</returns>
         public static bool Detect(Stream stream)
         {
@@ -364,8 +364,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
@@ -462,7 +462,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a directory.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public override void CreateDirectory(string path)
         {
             CreateDirectory(path, null);
@@ -471,7 +471,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Creates a directory.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         /// <param name="options">Options controlling attributes of the new Director, or <c>null</c> for defaults.</param>
         public void CreateDirectory(string path, NewFileOptions options)
         {
@@ -654,8 +654,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public override bool DirectoryExists(string path)
         {
             using (new NtfsTransaction())
@@ -676,8 +676,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public override bool FileExists(string path)
         {
             using (new NtfsTransaction())
@@ -836,7 +836,7 @@ namespace DiscUtils.Ntfs
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             using (new NtfsTransaction())
@@ -974,11 +974,11 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Opens an existing file stream.
         /// </summary>
-        /// <param name="file">The file containing the stream</param>
-        /// <param name="type">The type of the stream</param>
-        /// <param name="name">The name of the stream</param>
-        /// <param name="access">The desired access to the stream</param>
-        /// <returns>A stream that can be used to access the file stream</returns>
+        /// <param name="file">The file containing the stream.</param>
+        /// <param name="type">The type of the stream.</param>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="access">The desired access to the stream.</param>
+        /// <returns>A stream that can be used to access the file stream.</returns>
         [Obsolete(@"Use OpenFile with filename:attributename:$attributetype syntax (e.g. \FILE.TXT:STREAM:$DATA)", false)]
         public SparseStream OpenRawStream(string file, AttributeType type, string name, FileAccess access)
         {
@@ -998,8 +998,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             using (new NtfsTransaction())
@@ -1019,8 +1019,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             using (new NtfsTransaction())
@@ -1141,8 +1141,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             using (new NtfsTransaction())
@@ -1175,8 +1175,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             using (new NtfsTransaction())
@@ -1209,8 +1209,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             using (new NtfsTransaction())
@@ -1246,7 +1246,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Converts a cluster (index) into an absolute byte position in the underlying stream.
         /// </summary>
-        /// <param name="cluster">The cluster to convert</param>
+        /// <param name="cluster">The cluster to convert.</param>
         /// <returns>The corresponding absolute byte position.</returns>
         public long ClusterToOffset(long cluster)
         {
@@ -1256,8 +1256,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Converts an absolute byte position in the underlying stream to a cluster (index).
         /// </summary>
-        /// <param name="offset">The byte position to convert</param>
-        /// <returns>The cluster containing the specified byte</returns>
+        /// <param name="offset">The byte position to convert.</param>
+        /// <returns>The cluster containing the specified byte.</returns>
         public long OffsetToCluster(long offset)
         {
             return offset / ClusterSize;
@@ -1266,8 +1266,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Converts a file name to the list of clusters occupied by the file's data.
         /// </summary>
-        /// <param name="path">The path to inspect</param>
-        /// <returns>The clusters as a list of cluster ranges</returns>
+        /// <param name="path">The path to inspect.</param>
+        /// <returns>The clusters as a list of cluster ranges.</returns>
         /// <remarks>Note that in some file systems, small files may not have dedicated
         /// clusters.  Only dedicated clusters will be returned.</remarks>
         public Range<long, long>[] PathToClusters(string path)
@@ -1296,8 +1296,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Converts a file name to the extents containing its data.
         /// </summary>
-        /// <param name="path">The path to inspect</param>
-        /// <returns>The file extents, as absolute byte positions in the underlying stream</returns>
+        /// <param name="path">The path to inspect.</param>
+        /// <returns>The file extents, as absolute byte positions in the underlying stream.</returns>
         /// <remarks>Use this method with caution - NTFS supports encrypted, sparse and compressed files
         /// where bytes are not directly stored in extents.  Small files may be entirely stored in the 
         /// Master File Table, where corruption protection algorithms mean that some bytes do not contain
@@ -1329,7 +1329,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets an object that can convert between clusters and files.
         /// </summary>
-        /// <returns>The cluster map</returns>
+        /// <returns>The cluster map.</returns>
         public ClusterMap BuildClusterMap()
         {
             return _context.Mft.GetClusterMap();
@@ -1378,9 +1378,9 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the number of hard links to a given file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The number of hard links</returns>
-        /// <remarks>All files have at least one hard link</remarks>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The number of hard links.</returns>
+        /// <remarks>All files have at least one hard link.</remarks>
         public int GetHardLinkCount(string path)
         {
             using (new NtfsTransaction())
@@ -1418,8 +1418,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Indicates whether the file is known by other names.
         /// </summary>
-        /// <param name="path">The file to inspect</param>
-        /// <returns><c>true</c> if the file has other names, else <c>false</c></returns>
+        /// <param name="path">The file to inspect.</param>
+        /// <returns><c>true</c> if the file has other names, else <c>false</c>.</returns>
         public bool HasHardLinks(string path)
         {
             return GetHardLinkCount(path) > 1;
@@ -1542,8 +1542,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the reparse point data associated with a file or directory.
         /// </summary>
-        /// <param name="path">The file to query</param>
-        /// <returns>The reparse point information</returns>
+        /// <param name="path">The file to query.</param>
+        /// <returns>The reparse point information.</returns>
         public ReparsePoint GetReparsePoint(string path)
         {
             using (new NtfsTransaction())
@@ -1578,7 +1578,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Removes a reparse point from a file or directory, without deleting the file or directory.
         /// </summary>
-        /// <param name="path">The path to the file or directory to remove the reparse point from</param>
+        /// <param name="path">The path to the file or directory to remove the reparse point from.</param>
         public void RemoveReparsePoint(string path)
         {
             using (new NtfsTransaction())
@@ -1605,8 +1605,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the short name for a given path.
         /// </summary>
-        /// <param name="path">The path to convert</param>
-        /// <returns>The short name</returns>
+        /// <param name="path">The path to convert.</param>
+        /// <returns>The short name.</returns>
         /// <remarks>
         /// This method only gets the short name for the final part of the path, to
         /// convert a complete path, call this method repeatedly, once for each path
@@ -1730,7 +1730,7 @@ namespace DiscUtils.Ntfs
         /// Gets the standard file information for a file.
         /// </summary>
         /// <param name="path">The full path to the file or directory to query.</param>
-        /// <returns>The standard file information</returns>
+        /// <returns>The standard file information.</returns>
         public WindowsFileInformation GetFileStandardInformation(string path)
         {
             using (new NtfsTransaction())
@@ -1759,7 +1759,7 @@ namespace DiscUtils.Ntfs
         /// Sets the standard file information for a file.
         /// </summary>
         /// <param name="path">The full path to the file or directory to query.</param>
-        /// <param name="info">The standard file information</param>
+        /// <param name="info">The standard file information.</param>
         public void SetFileStandardInformation(string path, WindowsFileInformation info)
         {
             using (new NtfsTransaction())
@@ -1780,8 +1780,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the file id for a given path.
         /// </summary>
-        /// <param name="path">The path to get the id of</param>
-        /// <returns>The file id</returns>
+        /// <param name="path">The path to get the id of.</param>
+        /// <returns>The file id.</returns>
         /// <remarks>
         /// The returned file id includes the MFT index of the primary file record for the file.
         /// The file id can be used to determine if two paths refer to the same actual file.
@@ -1806,7 +1806,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the names of the alternate data streams for a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
+        /// <param name="path">The path to the file.</param>
         /// <returns>
         /// The list of alternate data streams (or empty, if none).  To access the contents
         /// of the alternate streams, use OpenFile(path + ":" + name, ...).
@@ -1836,7 +1836,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Reads the boot code of the file system into a byte array.
         /// </summary>
-        /// <returns>The boot code, or <c>null</c> if not available</returns>
+        /// <returns>The boot code, or <c>null</c> if not available.</returns>
         public override byte[] ReadBootCode()
         {
             using (Stream s = OpenFile(@"\$Boot", FileMode.Open))
@@ -1848,8 +1848,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Updates the BIOS Parameter Block (BPB) of the file system to reflect a new disk geometry.
         /// </summary>
-        /// <param name="geometry">The disk's new BIOS geometry</param>
-        /// <remarks>Having an accurate geometry in the BPB is essential for booting some Operating Systems (e.g. Windows XP)</remarks>
+        /// <param name="geometry">The disk's new BIOS geometry.</param>
+        /// <remarks>Having an accurate geometry in the BPB is essential for booting some Operating Systems (e.g. Windows XP).</remarks>
         public void UpdateBiosGeometry(Geometry geometry)
         {
             _context.BiosParameterBlock.SectorsPerTrack = (ushort)geometry.SectorsPerTrack;
@@ -2054,9 +2054,9 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Disposes of this instance
+        /// Disposes of this instance.
         /// </summary>
-        /// <param name="disposing">Whether called from Dispose or from a finalizer</param>
+        /// <param name="disposing">Whether called from Dispose or from a finalizer.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

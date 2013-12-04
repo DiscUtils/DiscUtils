@@ -27,7 +27,7 @@ namespace DiscUtils.Iso9660
     using System.Text;
     using DiscUtils.Vfs;
 
-    [Flags()]
+    [Flags]
     internal enum FileFlags : byte
     {
         None = 0x00,

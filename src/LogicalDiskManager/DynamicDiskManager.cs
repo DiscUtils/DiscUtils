@@ -50,7 +50,7 @@ namespace DiscUtils.LogicalDiskManager
         /// <summary>
         /// Determines if a physical volume contains LDM data.
         /// </summary>
-        /// <param name="volumeInfo">The volume to inspect</param>
+        /// <param name="volumeInfo">The volume to inspect.</param>
         /// <returns><c>true</c> if the physical volume contains LDM data, else <c>false</c>.</returns>
         public static bool HandlesPhysicalVolume(PhysicalVolumeInfo volumeInfo)
         {
@@ -66,7 +66,7 @@ namespace DiscUtils.LogicalDiskManager
         /// <summary>
         /// Determines if a disk is 'dynamic' (i.e. contains LDM volumes).
         /// </summary>
-        /// <param name="disk">The disk to inspect</param>
+        /// <param name="disk">The disk to inspect.</param>
         /// <returns><c>true</c> if the disk contains LDM volumes, else <c>false</c>.</returns>
         public static bool IsDynamicDisk(VirtualDisk disk)
         {
@@ -87,7 +87,7 @@ namespace DiscUtils.LogicalDiskManager
         /// <summary>
         /// Adds a new disk to be managed.
         /// </summary>
-        /// <param name="disk">The disk to manage</param>
+        /// <param name="disk">The disk to manage.</param>
         public void Add(VirtualDisk disk)
         {
             PrivateHeader header = DynamicDisk.GetPrivateHeader(disk);
@@ -107,7 +107,7 @@ namespace DiscUtils.LogicalDiskManager
         /// <summary>
         /// Gets the logical volumes held across the set of managed disks.
         /// </summary>
-        /// <returns>An array of logical volumes</returns>
+        /// <returns>An array of logical volumes.</returns>
         public LogicalVolumeInfo[] GetLogicalVolumes()
         {
             List<LogicalVolumeInfo> result = new List<LogicalVolumeInfo>();
@@ -132,8 +132,8 @@ namespace DiscUtils.LogicalDiskManager
         /// <summary>
         /// Writes a diagnostic report about the state of the disk manager.
         /// </summary>
-        /// <param name="writer">The writer to send the report to</param>
-        /// <param name="linePrefix">The prefix to place at the start of each line</param>
+        /// <param name="writer">The writer to send the report to.</param>
+        /// <param name="linePrefix">The prefix to place at the start of each line.</param>
         public void Dump(TextWriter writer, string linePrefix)
         {
             writer.WriteLine(linePrefix + "DISK GROUPS");

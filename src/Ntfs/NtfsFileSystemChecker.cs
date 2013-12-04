@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Initializes a new instance of the NtfsFileSystemChecker class.
         /// </summary>
-        /// <param name="diskData">The file system to check</param>
+        /// <param name="diskData">The file system to check.</param>
         public NtfsFileSystemChecker(Stream diskData)
         {
             SnapshotStream protectiveStream = new SnapshotStream(diskData, Ownership.None);
@@ -59,9 +59,9 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Checks the integrity of an NTFS file system held in a stream.
         /// </summary>
-        /// <param name="reportOutput">A report on issues found</param>
-        /// <param name="levels">The amount of detail to report</param>
-        /// <returns><c>true</c> if the file system appears valid, else <c>false</c></returns>
+        /// <param name="reportOutput">A report on issues found.</param>
+        /// <param name="levels">The amount of detail to report.</param>
+        /// <returns><c>true</c> if the file system appears valid, else <c>false</c>.</returns>
         public override bool Check(TextWriter reportOutput, ReportLevels levels)
         {
             _context = new NtfsContext();
@@ -93,7 +93,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets an object that can convert between clusters and files.
         /// </summary>
-        /// <returns>The cluster map</returns>
+        /// <returns>The cluster map.</returns>
         public ClusterMap BuildClusterMap()
         {
             _context = new NtfsContext();

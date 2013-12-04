@@ -50,7 +50,7 @@ namespace DiscUtils.Sdi
         /// Initializes a new instance of the SdiFile class.
         /// </summary>
         /// <param name="stream">The stream formatted as an SDI file.</param>
-        /// <param name="ownership">Whether to pass ownership of <c>stream</c> to the new instance</param>
+        /// <param name="ownership">Whether to pass ownership of <c>stream</c> to the new instance.</param>
         public SdiFile(Stream stream, Ownership ownership)
         {
             _stream = stream;
@@ -107,7 +107,7 @@ namespace DiscUtils.Sdi
         /// <summary>
         /// Opens a stream to access a particular section.
         /// </summary>
-        /// <param name="index">The zero-based index of the section</param>
+        /// <param name="index">The zero-based index of the section.</param>
         /// <returns>A stream that can be used to access the section.</returns>
         public Stream OpenSection(int index)
         {

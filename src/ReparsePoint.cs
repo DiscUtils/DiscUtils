@@ -33,8 +33,8 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the ReparsePoint class.
         /// </summary>
-        /// <param name="tag">The defined reparse point tag</param>
-        /// <param name="content">The reparse point's content</param>
+        /// <param name="tag">The defined reparse point tag.</param>
+        /// <param name="content">The reparse point's content.</param>
         public ReparsePoint(int tag, byte[] content)
         {
             _tag = tag;

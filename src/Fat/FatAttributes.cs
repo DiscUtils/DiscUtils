@@ -24,7 +24,7 @@ namespace DiscUtils.Fat
 {
     using System;
 
-    [Flags()]
+    [Flags]
     internal enum FatAttributes : byte
     {
         ReadOnly = 0x01,

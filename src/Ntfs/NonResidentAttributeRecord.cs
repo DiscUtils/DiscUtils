@@ -89,7 +89,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// The amount of space occupied by the attribute (in bytes)
+        /// The amount of space occupied by the attribute (in bytes).
         /// </summary>
         public override long AllocatedLength
         {
@@ -98,7 +98,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// The amount of data in the attribute (in bytes)
+        /// The amount of data in the attribute (in bytes).
         /// </summary>
         public override long DataLength
         {
@@ -107,7 +107,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// The amount of initialized data in the attribute (in bytes)
+        /// The amount of initialized data in the attribute (in bytes).
         /// </summary>
         public override long InitializedDataLength
         {
@@ -133,7 +133,7 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Gets or sets the size of a compression unit (in clusters)
+        /// Gets or sets the size of a compression unit (in clusters).
         /// </summary>
         public int CompressionUnitSize
         {

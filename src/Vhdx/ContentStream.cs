@@ -144,40 +144,6 @@ namespace DiscUtils.Vhdx
             return StreamExtent.Intersect(StreamExtent.Union(GetExtentsRaw(start, count), _parentStream.GetExtentsInRange(start, count)), new StreamExtent(start, count));
         }
 
-        private IEnumerable<StreamExtent> GetExtentsRaw(long start, long count)
-        {
-            long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
-            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
-
-            long pos = Utilities.RoundDown(start, chunkSize);
-
-            while (pos < start + count)
-            {
-                int chunkIndex;
-                int blockIndex;
-                int sectorIndex;
-
-                Chunk chunk = GetChunk(pos, out chunkIndex, out blockIndex, out sectorIndex);
-
-                for (int i = 0; i < chunkRatio; ++i)
-                {
-                    switch (chunk.GetBlockStatus(i))
-                    {
-                        case PayloadBlockStatus.NotPresent:
-                        case PayloadBlockStatus.Undefined:
-                        case PayloadBlockStatus.Unmapped:
-                        case PayloadBlockStatus.Zero:
-                            break;
-                        default:
-                            yield return new StreamExtent(pos + (i * _metadata.FileParameters.BlockSize), _metadata.FileParameters.BlockSize);
-                            break;
-                    }
-                }
-
-                pos += chunkSize;
-            }
-        }
-
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
@@ -365,6 +331,40 @@ namespace DiscUtils.Vhdx
             finally
             {
                 base.Dispose(disposing);
+            }
+        }
+
+        private IEnumerable<StreamExtent> GetExtentsRaw(long start, long count)
+        {
+            long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
+            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
+
+            long pos = Utilities.RoundDown(start, chunkSize);
+
+            while (pos < start + count)
+            {
+                int chunkIndex;
+                int blockIndex;
+                int sectorIndex;
+
+                Chunk chunk = GetChunk(pos, out chunkIndex, out blockIndex, out sectorIndex);
+
+                for (int i = 0; i < chunkRatio; ++i)
+                {
+                    switch (chunk.GetBlockStatus(i))
+                    {
+                        case PayloadBlockStatus.NotPresent:
+                        case PayloadBlockStatus.Undefined:
+                        case PayloadBlockStatus.Unmapped:
+                        case PayloadBlockStatus.Zero:
+                            break;
+                        default:
+                            yield return new StreamExtent(pos + (i * _metadata.FileParameters.BlockSize), _metadata.FileParameters.BlockSize);
+                            break;
+                    }
+                }
+
+                pos += chunkSize;
             }
         }
 

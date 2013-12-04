@@ -40,7 +40,6 @@ namespace DiscUtils.Vhdx
 
         private byte[] _data = new byte[FixedSize];
 
-
         public int Size
         {
             get { return FixedSize; }

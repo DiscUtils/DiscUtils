@@ -42,7 +42,7 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Initializes a new instance of the DiscImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         public DiscImageFile(Stream stream)
             : this(stream, Ownership.None, OpticalFormat.None)
         {
@@ -51,9 +51,9 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Initializes a new instance of the DiscImageFile class.
         /// </summary>
-        /// <param name="stream">The stream to interpret</param>
+        /// <param name="stream">The stream to interpret.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
-        /// <param name="format">The disc image format</param>
+        /// <param name="format">The disc image format.</param>
         public DiscImageFile(Stream stream, Ownership ownsStream, OpticalFormat format)
         {
             if (ownsStream == Ownership.Dispose)
@@ -142,9 +142,9 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Gets the content of this layer.
         /// </summary>
-        /// <param name="parent">The parent stream (if any)</param>
-        /// <param name="ownsParent">Controls ownership of the parent stream</param>
-        /// <returns>The content as a stream</returns>
+        /// <param name="parent">The parent stream (if any).</param>
+        /// <param name="ownsParent">Controls ownership of the parent stream.</param>
+        /// <returns>The content as a stream.</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (ownsParent == Ownership.Dispose && parent != null)
@@ -158,7 +158,7 @@ namespace DiscUtils.Optical
         /// <summary>
         /// Gets the possible locations of the parent file (if any).
         /// </summary>
-        /// <returns>Array of strings, empty if no parent</returns>
+        /// <returns>Array of strings, empty if no parent.</returns>
         public override string[] GetParentLocations()
         {
             return new string[0];

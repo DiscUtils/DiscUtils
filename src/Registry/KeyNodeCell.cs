@@ -37,17 +37,17 @@ namespace DiscUtils.Registry
         public int ClassNameIndex;
 
         /// <summary>
-        /// Number of bytes to represent largest subkey name in Unicode - no null terminator
+        /// Number of bytes to represent largest subkey name in Unicode - no null terminator.
         /// </summary>
         public int MaxSubKeyNameBytes;
 
         /// <summary>
-        /// Number of bytes to represent largest value name in Unicode - no null terminator
+        /// Number of bytes to represent largest value name in Unicode - no null terminator.
         /// </summary>
         public int MaxValNameBytes;
 
         /// <summary>
-        /// Number of bytes to represent largest value content (strings in Unicode, with null terminator - if stored)
+        /// Number of bytes to represent largest value content (strings in Unicode, with null terminator - if stored).
         /// </summary>
         public int MaxValDataBytes;
 

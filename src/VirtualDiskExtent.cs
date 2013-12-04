@@ -61,9 +61,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets the content of this extent.
         /// </summary>
-        /// <param name="parent">The parent stream (if any)</param>
-        /// <param name="ownsParent">Controls ownership of the parent stream</param>
-        /// <returns>The content as a stream</returns>
+        /// <param name="parent">The parent stream (if any).</param>
+        /// <param name="ownsParent">Controls ownership of the parent stream.</param>
+        /// <returns>The content as a stream.</returns>
         public abstract MappedStream OpenContent(SparseStream parent, Ownership ownsParent);
 
         /// <summary>

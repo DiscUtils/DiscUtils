@@ -266,9 +266,9 @@ namespace DiscUtils.Ntfs
         }
 
         /// <summary>
-        /// Truncates the set of data runs
+        /// Truncates the set of data runs.
         /// </summary>
-        /// <param name="index">The first run to be truncated</param>
+        /// <param name="index">The first run to be truncated.</param>
         public void TruncateAt(int index)
         {
             while (index < _runs.Count)

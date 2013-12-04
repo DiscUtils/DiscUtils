@@ -29,7 +29,7 @@ namespace DiscUtils.Raw
     /// <summary>
     /// Represents a raw disk image.
     /// </summary>
-    /// <remarks>This disk format is simply an uncompressed capture of all blocks on a disk</remarks>
+    /// <remarks>This disk format is simply an uncompressed capture of all blocks on a disk.</remarks>
     public sealed class Disk : VirtualDisk
     {
         private DiskImageFile _file;
@@ -37,7 +37,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public Disk(Stream stream, Ownership ownsStream)
             : this(stream, ownsStream, null)
@@ -47,7 +47,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="stream">The stream to read</param>
+        /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         /// <param name="geometry">The emulated geometry of the disk.</param>
         public Disk(Stream stream, Ownership ownsStream, Geometry geometry)
@@ -58,7 +58,7 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="path">The path to the disk image</param>
+        /// <param name="path">The path to the disk image.</param>
         public Disk(string path)
         {
             _file = new DiskImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, null);
@@ -67,8 +67,8 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="path">The path to the disk image</param>
-        /// <param name="access">The access requested to the disk</param>
+        /// <param name="path">The path to the disk image.</param>
+        /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
         {
             FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
@@ -142,8 +142,8 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <returns>An object that accesses the stream as a disk</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <returns>An object that accesses the stream as a disk.</returns>
         public static Disk Initialize(Stream stream, Ownership ownsStream, long capacity)
         {
             return Initialize(stream, ownsStream, capacity, null);
@@ -154,9 +154,9 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <returns>An object that accesses the stream as a disk</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <returns>An object that accesses the stream as a disk.</returns>
         public static Disk Initialize(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
             return new Disk(DiskImageFile.Initialize(stream, ownsStream, capacity, geometry));
@@ -167,8 +167,8 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="stream">The stream to initialize.</param>
         /// <param name="ownsStream">Indicates if the new instance controls the lifetime of the stream.</param>
-        /// <param name="type">The type of floppy disk image to create</param>
-        /// <returns>An object that accesses the stream as a disk</returns>
+        /// <param name="type">The type of floppy disk image to create.</param>
+        /// <returns>An object that accesses the stream as a disk.</returns>
         public static Disk Initialize(Stream stream, Ownership ownsStream, FloppyDiskType type)
         {
             return new Disk(DiskImageFile.Initialize(stream, ownsStream, type));
@@ -177,9 +177,9 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotSupportedException("Differencing disks not supported for raw disks");
@@ -188,8 +188,8 @@ namespace DiscUtils.Raw
         /// <summary>
         /// Create a new differencing disk.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException("Differencing disks not supported for raw disks");

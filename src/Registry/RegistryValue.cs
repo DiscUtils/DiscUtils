@@ -126,10 +126,10 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Sets the value as raw bytes, with no validation that enough data is specified for the given value type.
         /// </summary>
-        /// <param name="data">The data to store</param>
-        /// <param name="offset">The offset within <c>data</c> of the first byte to store</param>
-        /// <param name="count">The number of bytes to store</param>
-        /// <param name="valueType">The type of the data</param>
+        /// <param name="data">The data to store.</param>
+        /// <param name="offset">The offset within <c>data</c> of the first byte to store.</param>
+        /// <param name="count">The number of bytes to store.</param>
+        /// <param name="valueType">The type of the data.</param>
         public void SetData(byte[] data, int offset, int count, RegistryValueType valueType)
         {
             // If we can place the data in the DataIndex field, do that to save space / allocation
@@ -170,7 +170,7 @@ namespace DiscUtils.Registry
         /// Sets the value stored.
         /// </summary>
         /// <param name="value">The value to store.</param>
-        /// <param name="valueType">The registry type of the data</param>
+        /// <param name="valueType">The registry type of the data.</param>
         public void SetValue(object value, RegistryValueType valueType)
         {
             if (valueType == RegistryValueType.None)

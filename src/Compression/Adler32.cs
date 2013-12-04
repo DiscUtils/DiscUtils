@@ -51,9 +51,9 @@ namespace DiscUtils.Compression
         /// <summary>
         /// Provides data that should be checksummed.
         /// </summary>
-        /// <param name="buffer">Buffer containing the data to checksum</param>
-        /// <param name="offset">Offset of the first byte to checksum</param>
-        /// <param name="count">The number of bytes to checksum</param>
+        /// <param name="buffer">Buffer containing the data to checksum.</param>
+        /// <param name="offset">Offset of the first byte to checksum.</param>
+        /// <param name="count">The number of bytes to checksum.</param>
         /// <remarks>
         /// Call this method repeatedly until all checksummed
         /// data has been processed.

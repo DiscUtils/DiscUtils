@@ -26,9 +26,10 @@ namespace DiscUtils.Nfs
 
     internal class Nfs3FileTime
     {
-        private readonly DateTime NfsEpoch = new DateTime(1970, 1, 1);
         private const long TicksPerSec = 10 * 1000 * 1000;  // 10 million ticks per sec
         private const long TicksPerNanoSec = 100; // 1 tick = 100 ns
+
+        private readonly DateTime nfsEpoch = new DateTime(1970, 1, 1);
 
         private uint _seconds;
         private uint _nseconds;
@@ -41,7 +42,7 @@ namespace DiscUtils.Nfs
 
         public Nfs3FileTime(DateTime time)
         {
-            long ticks = time.Ticks - NfsEpoch.Ticks;
+            long ticks = time.Ticks - nfsEpoch.Ticks;
             _seconds = (uint)(ticks / TicksPerSec);
             _nseconds = (uint)((ticks % TicksPerSec) * TicksPerNanoSec);
         }
@@ -55,7 +56,7 @@ namespace DiscUtils.Nfs
 
         public DateTime ToDateTime()
         {
-            return new DateTime(((_seconds * TicksPerSec) + (_nseconds / TicksPerNanoSec)) + NfsEpoch.Ticks);
+            return new DateTime(((_seconds * TicksPerSec) + (_nseconds / TicksPerNanoSec)) + nfsEpoch.Ticks);
         }
 
         ////public TimeSpan ToTimeSpan()

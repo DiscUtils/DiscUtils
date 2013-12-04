@@ -54,7 +54,7 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Initializes a new instance of the UnicastDnsClient class, using nominated DNS servers.
         /// </summary>
-        /// <param name="servers">The servers to use (non-standard ports may be specified)</param>
+        /// <param name="servers">The servers to use (non-standard ports may be specified).</param>
         public UnicastDnsClient(params IPEndPoint[] servers)
         {
             _nextTransId = (ushort)new Random().Next();
@@ -64,7 +64,7 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Initializes a new instance of the UnicastDnsClient class, using nominated DNS servers.
         /// </summary>
-        /// <param name="servers">The servers to use (the default DNS port, 53, is used)</param>
+        /// <param name="servers">The servers to use (the default DNS port, 53, is used).</param>
         public UnicastDnsClient(params IPAddress[] servers)
         {
             _nextTransId = (ushort)new Random().Next();
@@ -86,9 +86,9 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Looks up a record in DNS.
         /// </summary>
-        /// <param name="name">The name to lookup</param>
-        /// <param name="type">The type of record requested</param>
-        /// <returns>The records returned by the DNS server, if any</returns>
+        /// <param name="name">The name to lookup.</param>
+        /// <param name="type">The type of record requested.</param>
+        /// <returns>The records returned by the DNS server, if any.</returns>
         public override ResourceRecord[] Lookup(string name, RecordType type)
         {
             ushort transactionId = _nextTransId++;

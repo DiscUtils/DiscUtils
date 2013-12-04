@@ -36,10 +36,10 @@ namespace DiscUtils.Ntfs
     /// * Cluster Allocation / Release
     /// * Reading clusters from disk
     /// * Writing clusters to disk
-    /// * Substituing zeros for 'sparse'/'unallocated' clusters
+    /// * Substituting zeros for 'sparse'/'unallocated' clusters
     /// Not responsible for:
     /// * Compression / Decompression
-    /// * Extending attributes
+    /// * Extending attributes.
     /// </remarks>
     internal sealed class RawClusterStream : ClusterStream
     {

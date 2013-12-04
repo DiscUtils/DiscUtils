@@ -55,7 +55,7 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Gets the content of a stream.
         /// </summary>
-        /// <typeparam name="T">The stream's content structure</typeparam>
+        /// <typeparam name="T">The stream's content structure.</typeparam>
         /// <returns>The content.</returns>
         public T GetContent<T>()
             where T : IByteArraySerializable, IDiagnosticTraceable, new()
@@ -74,8 +74,8 @@ namespace DiscUtils.Ntfs
         /// <summary>
         /// Sets the content of a stream.
         /// </summary>
-        /// <typeparam name="T">The stream's content structure</typeparam>
-        /// <param name="value">The new value for the stream</param>
+        /// <typeparam name="T">The stream's content structure.</typeparam>
+        /// <param name="value">The new value for the stream.</param>
         public void SetContent<T>(T value)
             where T : IByteArraySerializable, IDiagnosticTraceable, new()
         {

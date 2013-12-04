@@ -48,9 +48,9 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the StreamPump class.
         /// </summary>
-        /// <param name="inStream">The stream to read from</param>
-        /// <param name="outStream">The stream to write to</param>
-        /// <param name="sparseChunkSize">The size of each sparse chunk</param>
+        /// <param name="inStream">The stream to read from.</param>
+        /// <param name="outStream">The stream to write to.</param>
+        /// <param name="sparseChunkSize">The size of each sparse chunk.</param>
         public StreamPump(Stream inStream, Stream outStream, int sparseChunkSize)
         {
             InputStream = inStream;

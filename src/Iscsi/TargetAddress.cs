@@ -43,8 +43,8 @@ namespace DiscUtils.Iscsi
         /// Initializes a new instance of the TargetAddress class.
         /// </summary>
         /// <param name="address">The IP address (or FQDN) of the Target.</param>
-        /// <param name="port">The network port of the Target</param>
-        /// <param name="targetGroupTag">The Group Tag of the Target</param>
+        /// <param name="port">The network port of the Target.</param>
+        /// <param name="targetGroupTag">The Group Tag of the Target.</param>
         public TargetAddress(string address, int port, string targetGroupTag)
         {
             _networkAddress = address;
@@ -79,8 +79,8 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Parses a Target address in string form.
         /// </summary>
-        /// <param name="address">The address to parse</param>
-        /// <returns>The structured address</returns>
+        /// <param name="address">The address to parse.</param>
+        /// <returns>The structured address.</returns>
         public static TargetAddress Parse(string address)
         {
             int addrEnd = address.IndexOfAny(new char[] { ':', ',' });
@@ -122,7 +122,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the TargetAddress in string format.
         /// </summary>
-        /// <returns>The string in 'host:port,targetgroup' format</returns>
+        /// <returns>The string in 'host:port,targetgroup' format.</returns>
         public override string ToString()
         {
             string result = NetworkAddress;
@@ -142,7 +142,7 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the target address as a URI.
         /// </summary>
-        /// <returns>The target address in the form: iscsi://host[:port][/grouptag]</returns>
+        /// <returns>The target address in the form: iscsi://host[:port][/grouptag].</returns>
         public Uri ToUri()
         {
             UriBuilder builder = new UriBuilder();

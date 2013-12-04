@@ -24,7 +24,7 @@ namespace DiscUtils.LogicalDiskManager
 {
     using System.Collections.Generic;
 
-    [LogicalVolumeFactory()]
+    [LogicalVolumeFactory]
     internal class DynamicDiskManagerFactory : LogicalVolumeFactory
     {
         public override bool HandlesPhysicalVolume(PhysicalVolumeInfo volume)

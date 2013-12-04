@@ -53,8 +53,8 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="path">The path to the disk</param>
-        /// <param name="access">The desired access to the disk</param>
+        /// <param name="path">The path to the disk.</param>
+        /// <param name="access">The desired access to the disk.</param>
         public DiskImageFile(string path, FileAccess access)
         {
             _access = access;
@@ -97,8 +97,8 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="stream">The stream containing a monolithic disk</param>
-        /// <param name="ownsStream">Indicates if the created instance should own the stream</param>
+        /// <param name="stream">The stream containing a monolithic disk.</param>
+        /// <param name="ownsStream">Indicates if the created instance should own the stream.</param>
         public DiskImageFile(Stream stream, Ownership ownsStream)
         {
             _access = stream.CanWrite ? FileAccess.ReadWrite : FileAccess.Read;
@@ -122,9 +122,9 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
-        /// <param name="fileLocator">An object to open the file and any extents</param>
-        /// <param name="file">The file name</param>
-        /// <param name="access">The type of access desired</param>
+        /// <param name="fileLocator">An object to open the file and any extents.</param>
+        /// <param name="file">The file name.</param>
+        /// <param name="access">The type of access desired.</param>
         internal DiskImageFile(FileLocator fileLocator, string file, FileAccess access)
         {
             _access = access;
@@ -296,7 +296,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="parameters">The desired parameters for the new disk.</param>
-        /// <returns>The newly created disk image</returns>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(string path, DiskParameters parameters)
         {
             FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
@@ -309,7 +309,7 @@ namespace DiscUtils.Vmdk
         /// <param name="fileSystem">The file system to create the disk on.</param>
         /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="parameters">The desired parameters for the new disk.</param>
-        /// <returns>The newly created disk image</returns>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, DiskParameters parameters)
         {
             FileLocator locator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
@@ -320,9 +320,9 @@ namespace DiscUtils.Vmdk
         /// Creates a new virtual disk at the specified path.
         /// </summary>
         /// <param name="path">The name of the VMDK to create.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="type">The type of virtual disk to create</param>
-        /// <returns>The newly created disk image</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="type">The type of virtual disk to create.</param>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(string path, long capacity, DiskCreateType type)
         {
             DiskParameters diskParams = new DiskParameters();
@@ -336,10 +336,10 @@ namespace DiscUtils.Vmdk
         /// Creates a new virtual disk at the specified path.
         /// </summary>
         /// <param name="path">The name of the VMDK to create.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <param name="createType">The type of virtual disk to create</param>
-        /// <returns>The newly created disk image</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <param name="createType">The type of virtual disk to create.</param>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType createType)
         {
             DiskParameters diskParams = new DiskParameters();
@@ -354,11 +354,11 @@ namespace DiscUtils.Vmdk
         /// Creates a new virtual disk at the specified path.
         /// </summary>
         /// <param name="path">The name of the VMDK to create.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default</param>
-        /// <param name="createType">The type of virtual disk to create</param>
-        /// <param name="adapterType">The type of disk adapter used with the disk</param>
-        /// <returns>The newly created disk image</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
+        /// <param name="createType">The type of virtual disk to create.</param>
+        /// <param name="adapterType">The type of disk adapter used with the disk.</param>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(string path, long capacity, Geometry geometry, DiskCreateType createType, DiskAdapterType adapterType)
         {
             DiskParameters diskParams = new DiskParameters();
@@ -373,11 +373,11 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Creates a new virtual disk at the specified path.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the VMDK on</param>
+        /// <param name="fileSystem">The file system to create the VMDK on.</param>
         /// <param name="path">The name of the VMDK to create.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="createType">The type of virtual disk to create</param>
-        /// <returns>The newly created disk image</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="createType">The type of virtual disk to create.</param>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType createType)
         {
             DiskParameters diskParams = new DiskParameters();
@@ -390,12 +390,12 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Creates a new virtual disk at the specified path.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the VMDK on</param>
+        /// <param name="fileSystem">The file system to create the VMDK on.</param>
         /// <param name="path">The name of the VMDK to create.</param>
-        /// <param name="capacity">The desired capacity of the new disk</param>
-        /// <param name="createType">The type of virtual disk to create</param>
-        /// <param name="adapterType">The type of disk adapter used with the disk</param>
-        /// <returns>The newly created disk image</returns>
+        /// <param name="capacity">The desired capacity of the new disk.</param>
+        /// <param name="createType">The type of virtual disk to create.</param>
+        /// <param name="adapterType">The type of disk adapter used with the disk.</param>
+        /// <returns>The newly created disk image.</returns>
         public static DiskImageFile Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType createType, DiskAdapterType adapterType)
         {
             DiskParameters diskParams = new DiskParameters();
@@ -409,10 +409,10 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Creates a new virtual disk that is a linked clone of an existing disk.
         /// </summary>
-        /// <param name="path">The path to the new disk</param>
-        /// <param name="type">The type of the new disk</param>
-        /// <param name="parent">The disk to clone</param>
-        /// <returns>The new virtual disk</returns>
+        /// <param name="path">The path to the new disk.</param>
+        /// <param name="type">The type of the new disk.</param>
+        /// <param name="parent">The disk to clone.</param>
+        /// <returns>The new virtual disk.</returns>
         public static DiskImageFile InitializeDifferencing(string path, DiskCreateType type, string parent)
         {
             if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
@@ -432,11 +432,11 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Creates a new virtual disk that is a linked clone of an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the VMDK on</param>
-        /// <param name="path">The path to the new disk</param>
-        /// <param name="type">The type of the new disk</param>
-        /// <param name="parent">The disk to clone</param>
-        /// <returns>The new virtual disk</returns>
+        /// <param name="fileSystem">The file system to create the VMDK on.</param>
+        /// <param name="path">The path to the new disk.</param>
+        /// <param name="type">The type of the new disk.</param>
+        /// <param name="parent">The disk to clone.</param>
+        /// <returns>The new virtual disk.</returns>
         public static DiskImageFile InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type, string parent)
         {
             if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
@@ -459,9 +459,9 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Gets the contents of this disk as a stream.
         /// </summary>
-        /// <param name="parent">The content of the parent disk (needed if this is a differencing disk)</param>
+        /// <param name="parent">The content of the parent disk (needed if this is a differencing disk).</param>
         /// <param name="ownsParent">A value indicating whether ownership of the parent stream is transfered.</param>
-        /// <returns>The stream containing the disk contents</returns>
+        /// <returns>The stream containing the disk contents.</returns>
         public override SparseStream OpenContent(SparseStream parent, Ownership ownsParent)
         {
             if (_descriptor.ParentContentId == uint.MaxValue)
@@ -525,7 +525,7 @@ namespace DiscUtils.Vmdk
         /// <param name="fileLocator">The object used to locate / create the component files.</param>
         /// <param name="path">The name of the VMDK to create.</param>
         /// <param name="parameters">The desired parameters for the new disk.</param>
-        /// <returns>The newly created disk image</returns>
+        /// <returns>The newly created disk image.</returns>
         internal static DiskImageFile Initialize(FileLocator fileLocator, string path, DiskParameters parameters)
         {
             if (parameters.Capacity <= 0)
@@ -609,7 +609,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Disposes of this instance.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if disposing, <c>false</c> if in destructor</param>
+        /// <param name="disposing"><c>true</c> if disposing, <c>false</c> if in destructor.</param>
         protected override void Dispose(bool disposing)
         {
             try

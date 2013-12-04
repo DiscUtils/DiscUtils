@@ -34,7 +34,7 @@ namespace DiscUtils.Ntfs.Internals
     public enum NtfsNamespace
     {
         /// <summary>
-        /// Posix namespace (i.e. long name)
+        /// Posix namespace (i.e. long name).
         /// </summary>
         Posix = 0,
 

@@ -42,7 +42,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Initializes a new instance of the GuidPartitionTable class.
         /// </summary>
-        /// <param name="disk">The disk containing the partition table</param>
+        /// <param name="disk">The disk containing the partition table.</param>
         public GuidPartitionTable(VirtualDisk disk)
         {
             Init(disk.Content, disk.Geometry);
@@ -51,8 +51,8 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Initializes a new instance of the GuidPartitionTable class.
         /// </summary>
-        /// <param name="disk">The stream containing the disk data</param>
-        /// <param name="diskGeometry">The geometry of the disk</param>
+        /// <param name="disk">The stream containing the disk data.</param>
+        /// <param name="diskGeometry">The geometry of the disk.</param>
         public GuidPartitionTable(Stream disk, Geometry diskGeometry)
         {
             Init(disk, diskGeometry);
@@ -97,7 +97,7 @@ namespace DiscUtils.Partitions
         /// Creates a new partition table on a disk.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>
-        /// <returns>An object to access the newly created partition table</returns>
+        /// <returns>An object to access the newly created partition table.</returns>
         public static GuidPartitionTable Initialize(VirtualDisk disk)
         {
             return Initialize(disk.Content, disk.Geometry);
@@ -106,9 +106,9 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new partition table on a disk.
         /// </summary>
-        /// <param name="disk">The stream containing the disk data</param>
-        /// <param name="diskGeometry">The geometry of the disk</param>
-        /// <returns>An object to access the newly created partition table</returns>
+        /// <param name="disk">The stream containing the disk data.</param>
+        /// <param name="diskGeometry">The geometry of the disk.</param>
+        /// <returns>An object to access the newly created partition table.</returns>
         public static GuidPartitionTable Initialize(Stream disk, Geometry diskGeometry)
         {
             // Create the protective MBR partition record.
@@ -158,8 +158,8 @@ namespace DiscUtils.Partitions
         /// Creates a new partition table on a disk containing a single partition.
         /// </summary>
         /// <param name="disk">The disk to initialize.</param>
-        /// <param name="type">The partition type for the single partition</param>
-        /// <returns>An object to access the newly created partition table</returns>
+        /// <param name="type">The partition type for the single partition.</param>
+        /// <returns>An object to access the newly created partition table.</returns>
         public static GuidPartitionTable Initialize(VirtualDisk disk, WellKnownPartitionType type)
         {
             GuidPartitionTable pt = Initialize(disk);
@@ -170,9 +170,9 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new partition that encompasses the entire disk.
         /// </summary>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <returns>The index of the partition</returns>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <returns>The index of the partition.</returns>
         /// <remarks>The partition table must be empty before this method is called,
         /// otherwise IOException is thrown.</remarks>
         public override int Create(WellKnownPartitionType type, bool active)
@@ -191,10 +191,10 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new primary partition with a target size.
         /// </summary>
-        /// <param name="size">The target size (in bytes)</param>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="size">The target size (in bytes).</param>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <returns>The index of the new partition.</returns>
         public override int Create(long size, WellKnownPartitionType type, bool active)
         {
             if (size < _diskGeometry.BytesPerSector)
@@ -211,10 +211,10 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new aligned partition that encompasses the entire disk.
         /// </summary>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <param name="alignment">The alignment (in bytes)</param>
-        /// <returns>The index of the partition</returns>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <param name="alignment">The alignment (in bytes).</param>
+        /// <returns>The index of the partition.</returns>
         /// <remarks>The partition table must be empty before this method is called,
         /// otherwise IOException is thrown.</remarks>
         /// <remarks>
@@ -248,14 +248,14 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Creates a new aligned partition with a target size.
         /// </summary>
-        /// <param name="size">The target size (in bytes)</param>
-        /// <param name="type">The partition type</param>
-        /// <param name="active">Whether the partition is active (bootable)</param>
-        /// <param name="alignment">The alignment (in bytes)</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="size">The target size (in bytes).</param>
+        /// <param name="type">The partition type.</param>
+        /// <param name="active">Whether the partition is active (bootable).</param>
+        /// <param name="alignment">The alignment (in bytes).</param>
+        /// <returns>The index of the new partition.</returns>
         /// <remarks>
         /// Traditionally partitions were aligned to the physical structure of the underlying disk,
-        /// however with modern storage greater efficiency is acheived by aligning partitions on
+        /// however with modern storage greater efficiency is achieved by aligning partitions on
         /// large values that are a power of two.
         /// </remarks>
         public override int CreateAligned(long size, WellKnownPartitionType type, bool active, int alignment)
@@ -286,10 +286,10 @@ namespace DiscUtils.Partitions
         /// </summary>
         /// <param name="startSector">The first sector of the partition.</param>
         /// <param name="endSector">The last sector of the partition.</param>
-        /// <param name="type">The partition type</param>
-        /// <param name="attributes">The partition attributes</param>
-        /// <param name="name">The name of the partition</param>
-        /// <returns>The index of the new partition</returns>
+        /// <param name="type">The partition type.</param>
+        /// <param name="attributes">The partition attributes.</param>
+        /// <param name="name">The name of the partition.</param>
+        /// <returns>The index of the new partition.</returns>
         /// <remarks>No checking is performed on the parameters, the caller is
         /// responsible for ensuring that the partition does not overlap other partitions.</remarks>
         public int Create(long startSector, long endSector, Guid type, long attributes, string name)
@@ -301,7 +301,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Deletes a partition at a given index.
         /// </summary>
-        /// <param name="index">The index of the partition</param>
+        /// <param name="index">The index of the partition.</param>
         public override void Delete(int index)
         {
             int offset = GetPartitionOffset(index);

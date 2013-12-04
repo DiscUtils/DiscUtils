@@ -54,7 +54,7 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the base path used to create the file system
+        /// Gets the base path used to create the file system.
         /// </summary>
         public string BasePath
         {
@@ -97,7 +97,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets a value indicating whether the file system is thread-safe.
         /// </summary>
-        /// <remarks>The Native File System is thread safe</remarks>
+        /// <remarks>The Native File System is thread safe.</remarks>
         public override bool IsThreadSafe
         {
             get { return true; }
@@ -106,8 +106,8 @@ namespace DiscUtils
         /// <summary>
         /// Copies an existing file to a new file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         public override void CopyFile(string sourceFile, string destinationFile)
         {
             CopyFile(sourceFile, destinationFile, true);
@@ -116,8 +116,8 @@ namespace DiscUtils
         /// <summary>
         /// Copies an existing file to a new file, allowing overwriting of an existing file.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
@@ -142,7 +142,7 @@ namespace DiscUtils
         /// <summary>
         /// Creates a directory.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public override void CreateDirectory(string path)
         {
             if (_readOnly)
@@ -181,7 +181,7 @@ namespace DiscUtils
         /// Deletes a directory, optionally with all descendants.
         /// </summary>
         /// <param name="path">The path of the directory to delete.</param>
-        /// <param name="recursive">Determines if the all descendants should be deleted</param>
+        /// <param name="recursive">Determines if the all descendants should be deleted.</param>
         public override void DeleteDirectory(string path, bool recursive)
         {
             if (recursive)
@@ -222,8 +222,8 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if a directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the directory exists.</returns>
         public override bool DirectoryExists(string path)
         {
             if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
@@ -237,8 +237,8 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if a file exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file exists.</returns>
         public override bool FileExists(string path)
         {
             if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
@@ -252,8 +252,8 @@ namespace DiscUtils
         /// <summary>
         /// Indicates if a file or directory exists.
         /// </summary>
-        /// <param name="path">The path to test</param>
-        /// <returns>true if the file or directory exists</returns>
+        /// <param name="path">The path to test.</param>
+        /// <returns>true if the file or directory exists.</returns>
         public override bool Exists(string path)
         {
             return FileExists(path) || DirectoryExists(path);
@@ -438,7 +438,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
+        /// <param name="overwrite">Whether to permit a destination file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             if (_readOnly)
@@ -513,8 +513,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to inspect</param>
-        /// <returns>The attributes of the file or directory</returns>
+        /// <param name="path">The file or directory to inspect.</param>
+        /// <returns>The attributes of the file or directory.</returns>
         public override FileAttributes GetAttributes(string path)
         {
             if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
@@ -528,8 +528,8 @@ namespace DiscUtils
         /// <summary>
         /// Sets the attributes of a file or directory.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             if (_readOnly)
@@ -548,7 +548,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the creation time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
+        /// <param name="path">The path of the file or directory.</param>
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
@@ -603,8 +603,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last access time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTime(string path)
         {
             return GetLastAccessTimeUtc(path).ToLocalTime();
@@ -623,8 +623,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last access time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last access time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last access time.</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
             if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
@@ -658,8 +658,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last modification time (in local time) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTime(string path)
         {
             return GetLastWriteTimeUtc(path).ToLocalTime();
@@ -678,8 +678,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the last modification time (in UTC) of a file or directory.
         /// </summary>
-        /// <param name="path">The path of the file or directory</param>
-        /// <returns>The last write time</returns>
+        /// <param name="path">The path of the file or directory.</param>
+        /// <returns>The last write time.</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
             if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
@@ -713,8 +713,8 @@ namespace DiscUtils
         /// <summary>
         /// Gets the length of a file.
         /// </summary>
-        /// <param name="path">The path to the file</param>
-        /// <returns>The length in bytes</returns>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The length in bytes.</returns>
         public override long GetFileLength(string path)
         {
             if (path.StartsWith(@"\", StringComparison.OrdinalIgnoreCase))
@@ -728,9 +728,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets an object representing a possible file.
         /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file does not need to exist</remarks>
+        /// <param name="path">The file path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The file does not need to exist.</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
             return new DiscFileInfo(this, path);
@@ -739,9 +739,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets an object representing a possible directory.
         /// </summary>
-        /// <param name="path">The directory path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The directory does not need to exist</remarks>
+        /// <param name="path">The directory path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The directory does not need to exist.</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
             return new DiscDirectoryInfo(this, path);
@@ -750,9 +750,9 @@ namespace DiscUtils
         /// <summary>
         /// Gets an object representing a possible file system object (file or directory).
         /// </summary>
-        /// <param name="path">The file system path</param>
-        /// <returns>The representing object</returns>
-        /// <remarks>The file system object does not need to exist</remarks>
+        /// <param name="path">The file system path.</param>
+        /// <returns>The representing object.</returns>
+        /// <remarks>The file system object does not need to exist.</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);

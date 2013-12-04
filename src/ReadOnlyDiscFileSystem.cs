@@ -59,8 +59,8 @@ namespace DiscUtils
         /// <summary>
         /// Copies a file - not supported on read-only file systems.
         /// </summary>
-        /// <param name="sourceFile">The source file</param>
-        /// <param name="destinationFile">The destination file</param>
+        /// <param name="sourceFile">The source file.</param>
+        /// <param name="destinationFile">The destination file.</param>
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
@@ -70,7 +70,7 @@ namespace DiscUtils
         /// <summary>
         /// Creates a directory - not supported on read-only file systems.
         /// </summary>
-        /// <param name="path">The path of the new directory</param>
+        /// <param name="path">The path of the new directory.</param>
         public override void CreateDirectory(string path)
         {
             throw new NotSupportedException();
@@ -109,7 +109,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="sourceName">The file to move.</param>
         /// <param name="destinationName">The target file name.</param>
-        /// <param name="overwrite">Whether to allow an existing file to be overwritten</param>
+        /// <param name="overwrite">Whether to allow an existing file to be overwritten.</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
             throw new NotSupportedException();
@@ -129,8 +129,8 @@ namespace DiscUtils
         /// <summary>
         /// Sets the attributes of a file or directory - not supported on read-only file systems.
         /// </summary>
-        /// <param name="path">The file or directory to change</param>
-        /// <param name="newValue">The new attributes of the file or directory</param>
+        /// <param name="path">The file or directory to change.</param>
+        /// <param name="newValue">The new attributes of the file or directory.</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
             throw new NotSupportedException();

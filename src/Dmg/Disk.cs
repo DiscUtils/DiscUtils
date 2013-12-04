@@ -37,8 +37,8 @@ namespace DiscUtils.Dmg
         /// <summary>
         /// Initializes a new instance of the Disk class.
         /// </summary>
-        /// <param name="stream">The stream containing the disk</param>
-        /// <param name="ownsStream">Whether the new instance takes ownership of stream</param>
+        /// <param name="stream">The stream containing the disk.</param>
+        /// <param name="ownsStream">Whether the new instance takes ownership of stream.</param>
         public Disk(Stream stream, Ownership ownsStream)
         {
             _file = new DiskImageFile(stream, ownsStream);
@@ -110,9 +110,9 @@ namespace DiscUtils.Dmg
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.
         /// </summary>
-        /// <param name="fileSystem">The file system to create the disk on</param>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="fileSystem">The file system to create the disk on.</param>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             throw new NotSupportedException();
@@ -121,8 +121,8 @@ namespace DiscUtils.Dmg
         /// <summary>
         /// Create a new differencing disk.
         /// </summary>
-        /// <param name="path">The path (or URI) for the disk to create</param>
-        /// <returns>The newly created disk</returns>
+        /// <param name="path">The path (or URI) for the disk to create.</param>
+        /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             throw new NotSupportedException();
@@ -131,7 +131,7 @@ namespace DiscUtils.Dmg
         /// <summary>
         /// Disposes of this instance, freeing underlying resources.
         /// </summary>
-        /// <param name="disposing"><c>true</c> if called from Dispose</param>
+        /// <param name="disposing"><c>true</c> if called from Dispose.</param>
         protected override void Dispose(bool disposing)
         {
             try

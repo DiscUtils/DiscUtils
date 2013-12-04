@@ -244,7 +244,7 @@ namespace DiscUtils.Compression
         /// </summary>
         /// <param name="offset">The origin-relative stream position.</param>
         /// <param name="origin">The origin for the stream position.</param>
-        /// <returns>The new stream position</returns>
+        /// <returns>The new stream position.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();

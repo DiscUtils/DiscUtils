@@ -52,8 +52,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the RpcException class.
         /// </summary>
-        /// <param name="message">The exception message</param>
-        /// <param name="innerException">The inner exception</param>
+        /// <param name="message">The exception message.</param>
+        /// <param name="innerException">The inner exception.</param>
         public RpcException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -71,8 +71,8 @@ namespace DiscUtils.Nfs
         /// <summary>
         /// Initializes a new instance of the RpcException class.
         /// </summary>
-        /// <param name="info">The serialization info</param>
-        /// <param name="context">The streaming context</param>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         private RpcException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

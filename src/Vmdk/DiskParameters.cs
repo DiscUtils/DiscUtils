@@ -39,7 +39,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Initializes a new instance of the DiskParameters class with generic parameters.
         /// </summary>
-        /// <param name="genericParameters">The generic parameters to copy</param>
+        /// <param name="genericParameters">The generic parameters to copy.</param>
         public DiskParameters(VirtualDiskParameters genericParameters)
         {
             Capacity = genericParameters.Capacity;
