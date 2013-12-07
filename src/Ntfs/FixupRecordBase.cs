@@ -141,7 +141,7 @@ namespace DiscUtils.Ntfs
         {
             _magic = magic;
             _sectorSize = sectorSize;
-            _updateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, sectorSize));
+            _updateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, Sizes.Sector));
             _updateSequenceNumber = 1;
             _updateSequenceArray = new ushort[_updateSequenceCount - 1];
         }
