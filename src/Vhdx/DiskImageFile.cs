@@ -186,11 +186,19 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
+        /// Gets the logical sector size of the virtual disk.
+        /// </summary>
+        public long LogicalSectorSize
+        {
+            get { return _metadata.LogicalSectorSize; }
+        }
+
+        /// <summary>
         /// Gets the geometry of the virtual disk.
         /// </summary>
         public override Geometry Geometry
         {
-            get { return Geometry.FromCapacity(Capacity); }
+            get { return Geometry.FromCapacity(Capacity, (int)_metadata.LogicalSectorSize); }
         }
 
         /// <summary>

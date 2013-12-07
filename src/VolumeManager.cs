@@ -278,7 +278,7 @@ namespace DiscUtils
 
                 if (PartitionTable.IsPartitioned(disk.Content))
                 {
-                    foreach (var table in PartitionTable.GetPartitionTables(disk.Content))
+                    foreach (var table in PartitionTable.GetPartitionTables(disk))
                     {
                         foreach (var part in table.Partitions)
                         {

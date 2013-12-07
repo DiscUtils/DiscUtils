@@ -300,7 +300,7 @@ namespace DiscUtils.Partitions
             long startLba = Utilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start), alignment / _diskGeometry.BytesPerSector);
             long lastLba = Utilities.RoundDown(_diskData.Length / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
 
-            return CreatePrimaryBySector(startLba, lastLba - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
+            return CreatePrimaryBySector(startLba, lastLba - 1, ConvertType(type, (lastLba - startLba) * _diskGeometry.BytesPerSector), active);
         }
 
         /// <summary>
@@ -532,7 +532,7 @@ namespace DiscUtils.Partitions
 
         internal SparseStream Open(BiosPartitionRecord record)
         {
-            return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * Utilities.SectorSize, ((long)record.LBALength) * Utilities.SectorSize);
+            return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * _diskGeometry.BytesPerSector, ((long)record.LBALength) * _diskGeometry.BytesPerSector);
         }
 
         private static BiosPartitionRecord[] ReadPrimaryRecords(byte[] bootSector)

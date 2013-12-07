@@ -157,7 +157,7 @@ namespace DiscUtils.Ntfs
             // First do validation check - make sure the USN matches on all sectors)
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                if (_updateSequenceNumber != Utilities.ToUInt16LittleEndian(buffer, offset + (_sectorSize * (i + 1)) - 2))
+                if (_updateSequenceNumber != Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector * (i + 1)) - 2))
                 {
                     throw new IOException("Corrupt file system record found");
                 }
@@ -166,7 +166,7 @@ namespace DiscUtils.Ntfs
             // Now replace the USNs with the actual data from the sequence array
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + (_sectorSize * (i + 1)) - 2);
+                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + (Sizes.Sector * (i + 1)) - 2);
             }
         }
 
@@ -177,13 +177,13 @@ namespace DiscUtils.Ntfs
             // Read in the bytes that are replaced by the USN
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + (_sectorSize * (i + 1)) - 2);
+                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector * (i + 1)) - 2);
             }
 
             // Overwrite the bytes that are replaced with the USN
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + (_sectorSize * (i + 1)) - 2);
+                Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + (Sizes.Sector * (i + 1)) - 2);
             }
         }
     }

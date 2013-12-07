@@ -264,19 +264,33 @@ namespace DiscUtils
         /// (aka Physical) geometry of the disk, not necessarily the geometry used by the BIOS.</remarks>
         public static Geometry FromCapacity(long capacity)
         {
+            return FromCapacity(capacity, Utilities.SectorSize);
+        }
+
+        /// <summary>
+        /// Calculates a sensible disk geometry for a disk capacity using the VHD algorithm (errs under).
+        /// </summary>
+        /// <param name="capacity">The desired capacity of the disk.</param>
+        /// <param name="sectorSize">The logical sector size of the disk.</param>
+        /// <returns>The appropriate disk geometry.</returns>
+        /// <remarks>The geometry returned tends to produce a disk with less capacity
+        /// than requested (an exact capacity is not always possible).  The geometry returned is the IDE
+        /// (aka Physical) geometry of the disk, not necessarily the geometry used by the BIOS.</remarks>
+        public static Geometry FromCapacity(long capacity, int sectorSize)
+        {
             int totalSectors;
             int cylinders;
             int headsPerCylinder;
             int sectorsPerTrack;
 
             // If more than ~128GB truncate at ~128GB
-            if (capacity > 65535 * (long)16 * 255 * 512)
+            if (capacity > 65535 * (long)16 * 255 * sectorSize)
             {
                 totalSectors = 65535 * 16 * 255;
             }
             else
             {
-                totalSectors = (int)(capacity / 512);
+                totalSectors = (int)(capacity / sectorSize);
             }
 
             // If more than ~32GB, break partition table compatibility.
@@ -317,7 +331,7 @@ namespace DiscUtils
 
             cylinders = (totalSectors / sectorsPerTrack) / headsPerCylinder;
 
-            return new Geometry(cylinders, headsPerCylinder, sectorsPerTrack);
+            return new Geometry(cylinders, headsPerCylinder, sectorsPerTrack, sectorSize);
         }
 
         /// <summary>

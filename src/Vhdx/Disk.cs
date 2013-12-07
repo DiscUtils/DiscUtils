@@ -211,6 +211,14 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
+        /// Gets the size of the disk's logical blocks (aka sector size), in bytes.
+        /// </summary>
+        public override int BlockSize
+        {
+            get { return (int)_files[0].First.LogicalSectorSize; }
+        }
+
+        /// <summary>
         /// Gets the geometry of the disk.
         /// </summary>
         public override Geometry Geometry

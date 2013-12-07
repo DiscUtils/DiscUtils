@@ -96,11 +96,20 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the size of the disk's logical blocks (in bytes).
+        /// Gets the size of the disk's logical blocks (aka sector size), in bytes.
         /// </summary>
         public virtual int BlockSize
         {
             get { return Sizes.Sector; }
+        }
+
+        /// <summary>
+        /// Gets the logical sector size of the disk, in bytes.
+        /// </summary>
+        /// <remarks>This is an alias for the <c>BlockSize</c> property.</remarks>
+        public int SectorSize
+        {
+            get { return BlockSize; }
         }
 
         /// <summary>

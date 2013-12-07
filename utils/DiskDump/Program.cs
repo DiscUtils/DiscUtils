@@ -133,7 +133,7 @@ namespace DiskDump
                     Console.WriteLine("    ==  ================  ================  ==================");
                     foreach (var partition in disk.Partitions.Partitions)
                     {
-                        Console.WriteLine("    {0:X2}  {1:X16}  {2:X16}  {3}", partition.BiosType, partition.FirstSector * 512, partition.LastSector * 512 + 512, partition.TypeAsString);
+                        Console.WriteLine("    {0:X2}  {1:X16}  {2:X16}  {3}", partition.BiosType, partition.FirstSector * disk.SectorSize, (partition.LastSector + 1) * disk.SectorSize, partition.TypeAsString);
 
                         BiosPartitionInfo bpi = partition as BiosPartitionInfo;
                         if (bpi != null)
