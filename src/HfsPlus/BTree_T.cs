@@ -43,7 +43,10 @@ namespace DiscUtils.HfsPlus
             BTreeHeaderNode node0 = BTreeNode.ReadNode(this, node0data, 0) as BTreeHeaderNode;
             node0.ReadFrom(node0data, 0);
 
-            _rootNode = GetKeyedNode(node0.HeaderRecord.RootNode);
+            if (node0.HeaderRecord.RootNode != 0)
+            {
+                _rootNode = GetKeyedNode(node0.HeaderRecord.RootNode);
+            }
         }
 
         internal override int NodeSize
@@ -53,7 +56,7 @@ namespace DiscUtils.HfsPlus
 
         public byte[] Find(TKey key)
         {
-            return _rootNode.FindKey(key);
+            return _rootNode == null ? null : _rootNode.FindKey(key);
         }
 
         public void VisitRange(BTreeVisitor<TKey> visitor)
