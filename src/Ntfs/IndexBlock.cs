@@ -49,7 +49,7 @@ namespace DiscUtils.Ntfs
             _isRoot = isRoot;
 
             Stream stream = index.AllocationStream;
-            _streamPosition = parentEntry.ChildrenVirtualCluster * bpb.BytesPerSector * bpb.SectorsPerCluster;
+            _streamPosition = index.IndexBlockVcnToPosition(parentEntry.ChildrenVirtualCluster);
             stream.Position = _streamPosition;
             byte[] buffer = Utilities.ReadFully(stream, (int)index.IndexBufferSize);
             FromBytes(buffer, 0);

@@ -294,6 +294,28 @@ namespace DiscUtils.Ntfs
             return "{Unknown-Index-Type}";
         }
 
+        internal long IndexBlockVcnToPosition(long vcn)
+        {
+            if(_bpb.BytesPerCluster <= _root.IndexAllocationSize)
+            {
+                if(_root.RawClustersPerIndexRecord != 1)
+                {
+                    throw new NotSupportedException("Unexpected RawClustersPerIndexRecord (multiple clusters per index block): " + _root.RawClustersPerIndexRecord);
+                }
+
+                return vcn * (long)_bpb.BytesPerCluster;
+            }
+            else
+            {
+                if (_root.RawClustersPerIndexRecord != 8)
+                {
+                    throw new NotSupportedException("Unexpected RawClustersPerIndexRecord (multiple index blocks per cluster): " + _root.RawClustersPerIndexRecord);
+                }
+
+                return (vcn / _root.RawClustersPerIndexRecord) * _root.IndexAllocationSize;
+            }
+        }
+
         internal bool ShrinkRoot()
         {
             if (_rootNode.Depose())
