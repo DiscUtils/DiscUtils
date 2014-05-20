@@ -216,10 +216,11 @@ namespace DiscUtils
             foreach (var chunk in AllocatedChunks)
             {
                 long chunkStart = chunk * (long)_chunkSize;
-                if (chunkStart >= start && (chunkStart + _chunkSize) <= end)
+                long chunkEnd = chunkStart + _chunkSize;
+                if (chunkEnd > start && chunkStart < end)
                 {
-                    long extentStart = Math.Max(start, chunk * (long)_chunkSize);
-                    yield return new StreamExtent(extentStart, Math.Min(chunkStart + _chunkSize, end) - extentStart);
+                    long extentStart = Math.Max(start, chunkStart);
+                    yield return new StreamExtent(extentStart, Math.Min(chunkEnd, end) - extentStart);
                 }
             }
         }
