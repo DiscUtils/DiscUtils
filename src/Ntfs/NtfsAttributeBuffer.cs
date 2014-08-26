@@ -82,10 +82,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to read from file not opened for read");
             }
 
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException("count", "Attempt to read negative number of bytes");
-            }
+            Utilities.AssertBufferParameters(buffer, offset, count);
 
             if (pos >= Capacity)
             {
@@ -155,6 +152,8 @@ namespace DiscUtils.Ntfs
             {
                 throw new IOException("Attempt to write to file not opened for write");
             }
+
+            Utilities.AssertBufferParameters(buffer, offset, count);
 
             if (count == 0)
             {

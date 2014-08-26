@@ -138,6 +138,8 @@ namespace DiscUtils.Ntfs
         public override int Read(byte[] buffer, int offset, int count)
         {
             AssertOpen();
+            Utilities.AssertBufferParameters(buffer, offset, count);
+
             using (new NtfsTransaction())
             {
                 return _baseStream.Read(buffer, offset, count);
@@ -169,6 +171,8 @@ namespace DiscUtils.Ntfs
         public override void Write(byte[] buffer, int offset, int count)
         {
             AssertOpen();
+            Utilities.AssertBufferParameters(buffer, offset, count);
+
             using (new NtfsTransaction())
             {
                 _isDirty = true;

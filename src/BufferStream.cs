@@ -116,6 +116,8 @@ namespace DiscUtils
                 throw new IOException("Attempt to read from write-only stream");
             }
 
+            Utilities.AssertBufferParameters(buffer, offset, count);
+
             int numRead = _buffer.Read(_position, buffer, offset, count);
             _position += numRead;
             return numRead;
@@ -171,6 +173,8 @@ namespace DiscUtils
             {
                 throw new IOException("Attempt to write to read-only stream");
             }
+
+            Utilities.AssertBufferParameters(buffer, offset, count);
 
             _buffer.Write(_position, buffer, offset, count);
             _position += count;

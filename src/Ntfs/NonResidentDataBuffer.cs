@@ -116,10 +116,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to read from file not opened for read");
             }
 
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException("count", "Attempt to read negative number of bytes");
-            }
+            Utilities.AssertBufferParameters(buffer, offset, count);
 
             // Limit read to length of attribute
             int totalToRead = (int)Math.Min(count, Capacity - pos);

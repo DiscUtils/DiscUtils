@@ -185,6 +185,35 @@ namespace DiscUtils
             return !((xLast.CompareTo(yFirst) <= 0) || (xFirst.CompareTo(yLast) >= 0));
         }
 
+        /// <summary>
+        /// Validates standard buffer, offset, count parameters to a method.
+        /// </summary>
+        /// <param name="buffer">The byte array to read from / write to.</param>
+        /// <param name="offset">The starting offset in <c>buffer</c>.</param>
+        /// <param name="count">The number of bytes to read / write.</param>
+        public static void AssertBufferParameters(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer");
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException("offset", offset, "Offset is negative");
+            }
+
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count", count, "Count is negative");
+            }
+
+            if (buffer.Length < offset + count)
+            {
+                throw new ArgumentException("buffer is too small", "buffer");
+            }
+        }
+
         #region Bit Twiddling
         public static bool IsAllZeros(byte[] buffer, int offset, int count)
         {

@@ -284,10 +284,7 @@ namespace DiscUtils.Ntfs
 
         public override void ReadClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            if (buffer.Length < (count * _bytesPerCluster) + offset)
-            {
-                throw new ArgumentException("Cluster buffer too small", "buffer");
-            }
+            Utilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
 
             int runIdx = 0;
             int totalRead = 0;
@@ -321,10 +318,7 @@ namespace DiscUtils.Ntfs
 
         public override int WriteClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            if (buffer.Length < (count * _bytesPerCluster) + offset)
-            {
-                throw new ArgumentException("Cluster buffer too small", "buffer");
-            }
+            Utilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
 
             int runIdx = 0;
             int totalWritten = 0;
