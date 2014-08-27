@@ -296,13 +296,13 @@ namespace DiscUtils.Ntfs
 
         internal long IndexBlockVcnToPosition(long vcn)
         {
-            if(_bpb.BytesPerCluster <= _root.IndexAllocationSize)
+            if (vcn % _root.RawClustersPerIndexRecord != 0)
             {
-                if(_root.RawClustersPerIndexRecord != 1)
-                {
-                    throw new NotSupportedException("Unexpected RawClustersPerIndexRecord (multiple clusters per index block): " + _root.RawClustersPerIndexRecord);
-                }
+                throw new NotSupportedException("Unexpected vcn (not a multiple of clusters-per-index-record): vcn=" + vcn + " rcpir=" + _root.RawClustersPerIndexRecord);
+            }
 
+            if (_bpb.BytesPerCluster <= _root.IndexAllocationSize)
+            {
                 return vcn * (long)_bpb.BytesPerCluster;
             }
             else
