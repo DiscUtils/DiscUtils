@@ -137,6 +137,12 @@ namespace DiscUtils.LogicalDiskManager
             return Utilities.BytesToString(buffer, offset - len, len);
         }
 
+        protected static Guid ReadBinaryGuid(byte[] buffer, ref int offset)
+        {
+            offset += 16;
+            return Utilities.ToGuidBigEndian(buffer, offset - 16);
+        }
+
         protected virtual void DoReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.BytesToString(buffer, offset + 0x00, 4);

@@ -296,12 +296,15 @@ namespace DiscUtils.LogicalDiskManager
             List<SparseStream> cmpntStreams = new List<SparseStream>();
             foreach (var component in _database.GetVolumeComponents(volume.Id))
             {
-                cmpntStreams.Add(OpenComponent(component));
+                if (GetComponentStatus(component) == LogicalVolumeStatus.Healthy)
+                {
+                    cmpntStreams.Add(OpenComponent(component));
+                }
             }
 
             if (cmpntStreams.Count < 1)
             {
-                throw new IOException("Volume with no associated components");
+                throw new IOException("Volume with no associated or healthy components");
             }
             else if (cmpntStreams.Count == 1)
             {

@@ -35,7 +35,14 @@ namespace DiscUtils.LogicalDiskManager
 
             Id = ReadVarULong(buffer, ref pos);
             Name = ReadVarString(buffer, ref pos);
-            GroupGuidString = ReadVarString(buffer, ref pos);
+            if ((Flags & 0xF0) == 0x40)
+            {
+                GroupGuidString = ReadBinaryGuid(buffer, ref pos).ToString();
+            }
+            else
+            {
+                GroupGuidString = ReadVarString(buffer, ref pos);
+            }
             Unknown1 = ReadUInt(buffer, ref pos);
         }
     }
