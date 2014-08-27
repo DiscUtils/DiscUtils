@@ -133,10 +133,18 @@ namespace DiscUtils.Vhdx
             _fileStream = locator.Open(path, FileMode.Open, access, share);
             _ownsStream = Ownership.Dispose;
 
-            _fileLocator = locator.GetRelativeLocator(locator.GetDirectoryFromPath(path));
-            _fileName = locator.GetFileFromPath(path);
+            try
+            {
+                _fileLocator = locator.GetRelativeLocator(locator.GetDirectoryFromPath(path));
+                _fileName = locator.GetFileFromPath(path);
 
-            Initialize();
+                Initialize();
+            }
+            catch
+            {
+                _fileStream.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
@@ -471,17 +479,19 @@ namespace DiscUtils.Vhdx
             {
                 if (disposing)
                 {
-                    if (_logicalStream != _fileStream)
+                    if (_logicalStream != _fileStream && _logicalStream != null)
                     {
                         _logicalStream.Dispose();
-                        _logicalStream = null;
                     }
 
-                    if (_ownsStream == Ownership.Dispose)
+                    _logicalStream = null;
+
+                    if (_ownsStream == Ownership.Dispose && _fileStream != null)
                     {
                         _fileStream.Dispose();
-                        _fileStream = null;
                     }
+
+                    _fileStream = null;
                 }
             }
             finally
