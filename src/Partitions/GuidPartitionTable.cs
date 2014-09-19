@@ -312,7 +312,7 @@ namespace DiscUtils.Partitions
         internal SparseStream Open(GptEntry entry)
         {
             long start = entry.FirstUsedLogicalBlock * _diskGeometry.BytesPerSector;
-            long end = entry.LastUsedLogicalBlock * _diskGeometry.BytesPerSector;
+            long end = (entry.LastUsedLogicalBlock + 1) * _diskGeometry.BytesPerSector;
             return new SubStream(_diskData, start, end - start);
         }
 
