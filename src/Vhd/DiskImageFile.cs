@@ -440,6 +440,12 @@ namespace DiscUtils.Vhd
             }
             else
             {
+                if (parent == null)
+                {
+                    parent = new ZeroStream(_footer.CurrentSize);
+                    ownsParent = Ownership.Dispose;
+                }
+
                 return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
             }
         }
