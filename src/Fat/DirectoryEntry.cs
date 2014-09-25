@@ -29,6 +29,7 @@ namespace DiscUtils.Fat
     internal class DirectoryEntry
     {
         private FatFileSystemOptions _options;
+        private FatType _fatVariant;
         private FileName _name;
         private byte _attr;
         private byte _creationTimeTenth;
@@ -41,16 +42,18 @@ namespace DiscUtils.Fat
         private ushort _firstClusterLo;
         private uint _fileSize;
 
-        internal DirectoryEntry(FatFileSystemOptions options, Stream stream)
+        internal DirectoryEntry(FatFileSystemOptions options, Stream stream, FatType fatVariant)
         {
             _options = options;
+            _fatVariant = fatVariant;
             byte[] buffer = Utilities.ReadFully(stream, 32);
             Load(buffer, 0);
         }
 
-        internal DirectoryEntry(FatFileSystemOptions options, FileName name, FatAttributes attrs)
+        internal DirectoryEntry(FatFileSystemOptions options, FileName name, FatAttributes attrs, FatType fatVariant)
         {
             _options = options;
+            _fatVariant = fatVariant;
             _name = name;
             _attr = (byte)attrs;
         }
@@ -58,6 +61,7 @@ namespace DiscUtils.Fat
         internal DirectoryEntry(DirectoryEntry toCopy)
         {
             _options = toCopy._options;
+            _fatVariant = toCopy._fatVariant;
             _name = toCopy._name;
             _attr = toCopy._attr;
             _creationTimeTenth = toCopy._creationTimeTenth;
@@ -117,12 +121,23 @@ namespace DiscUtils.Fat
         {
             get
             {
-                return (uint)(_firstClusterHi << 16) | _firstClusterLo;
+                if (_fatVariant == FatType.Fat32)
+                {
+                    return (uint)(_firstClusterHi << 16) | _firstClusterLo;
+                }
+                else
+                {
+                    return _firstClusterLo;
+                }
             }
 
             set
             {
-                _firstClusterHi = (ushort)((value >> 16) & 0xFFFF);
+                if (_fatVariant == FatType.Fat32)
+                {
+                    _firstClusterHi = (ushort)((value >> 16) & 0xFFFF);
+                }
+
                 _firstClusterLo = (ushort)(value & 0xFFFF);
             }
         }
