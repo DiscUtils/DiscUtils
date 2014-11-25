@@ -158,6 +158,60 @@ namespace DiscUtils.HfsPlus
                         ZlibStream compressedStream = new ZlibStream(stream, CompressionMode.Decompress, false);
                         return new ZlibBuffer(compressedStream, Ownership.Dispose);
                     }
+                    else if (compressionAttribute.CompressionType == 4)
+                    {
+                        // The data is stored in the resource fork.
+                        FileBuffer buffer = new FileBuffer(_context, fileInfo.ResourceFork, fileInfo.FileId);
+                        CompressionResourceHeader compressionFork = new CompressionResourceHeader();
+                        byte[] compressionForkData = new byte[CompressionResourceHeader.Size];
+                        buffer.Read(0, compressionForkData, 0, CompressionResourceHeader.Size);
+                        compressionFork.ReadFrom(compressionForkData, 0);
+                        
+                        // The data is compressed in a number of blocks. Each block originally accounted for
+                        // 0x10000 bytes (that's 64 KB) of data. The compressed size may vary.
+                        // The data in each block can be read using a SparseStream. The first block contains
+                        // the zlib header but the others don't, so we read them directly as deflate streams.
+                        // For each block, we create a separate stream which we later aggregate.
+                        CompressionResourceBlockHead blockHeader = new CompressionResourceBlockHead();
+                        byte[] blockHeaderData = new byte[CompressionResourceBlockHead.Size];
+                        buffer.Read(compressionFork.HeaderSize, blockHeaderData, 0, CompressionResourceBlockHead.Size);
+                        blockHeader.ReadFrom(blockHeaderData, 0);
+
+                        uint blockCount = blockHeader.NumBlocks;
+                        CompressionResourceBlock[] blocks = new CompressionResourceBlock[blockCount];
+                        SparseStream[] streams = new SparseStream[blockCount];
+
+                        for (int i = 0; i < blockCount; i++)
+                        {
+                            // Read the block data, first into a buffer and the into the class.
+                            blocks[i] = new CompressionResourceBlock();
+                            byte[] blockData = new byte[CompressionResourceBlock.Size];
+                            buffer.Read(
+                                compressionFork.HeaderSize + CompressionResourceBlockHead.Size + i * CompressionResourceBlock.Size, 
+                                blockData, 
+                                0, 
+                                blockData.Length);
+                            blocks[i].ReadFrom(blockData, 0);
+
+                            // Create a SubBuffer which points to the data window that corresponds to the block.
+                            SubBuffer subBuffer = new SubBuffer(
+                                buffer, 
+                                compressionFork.HeaderSize + blocks[i].Offset + 6, blocks[i].DataSize);
+
+                            // ... convert it to a stream
+                            BufferStream stream = new BufferStream(subBuffer, FileAccess.Read);
+
+                            // ... and create a deflate stream. Because we will concatenate the streams, the streams
+                            // must report on their size. We know the size (0x10000) so we pass it as a parameter.
+                            DeflateStream s = new SizedDeflateStream(stream, CompressionMode.Decompress, false, 0x10000);
+                            streams[i] = SparseStream.FromStream(s, Ownership.Dispose);
+
+                        }
+
+                        // Finally, concatenate the streams together and that's about it.
+                        ConcatStream concatStream = new ConcatStream(Ownership.Dispose, streams);
+                        return new ZlibBuffer(concatStream, Ownership.Dispose);
+                    }
                     else
                     {
                         // Fall back to the default behavior.
