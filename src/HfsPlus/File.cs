@@ -25,6 +25,8 @@ namespace DiscUtils.HfsPlus
     using System;
     using System.IO;
     using DiscUtils.Vfs;
+    using DiscUtils.Compression;
+    using System.IO.Compression;
 
     internal class File : IVfsFileWithStreams
     {
@@ -119,7 +121,53 @@ namespace DiscUtils.HfsPlus
                     throw new InvalidOperationException();
                 }
 
-                return new FileBuffer(_context, fileInfo.DataFork, fileInfo.FileId);
+                if (_hasCompressionAttribute)
+                {
+                    // Open the compression attribute
+                    byte[] compressionAttributeData = _context.Attributes.Find(new AttributeKey(_catalogInfo.FileId, "com.apple.decmpfs"));
+                    CompressionAttribute compressionAttribute = new CompressionAttribute();
+                    compressionAttribute.ReadFrom(compressionAttributeData, 0);
+
+                    // There are three possibilities:
+                    // - The file is very small and embedded "as is" in the compression attribute
+                    // - The file is small and is embedded as a compressed stream in the compression attribute
+                    // - The file is large and is embedded as a compressed stream in the resource fork 
+                    if(compressionAttribute.CompressionType == 3 
+                        && compressionAttribute.UncompressedSize == compressionAttribute.AttrSize - 0x11)
+                    {
+                        // Inline, no compression, very small file
+                        MemoryStream stream = new MemoryStream(
+                            compressionAttributeData, 
+                            CompressionAttribute.Size + 1, 
+                            (int)compressionAttribute.UncompressedSize, 
+                            false);
+
+                        return new StreamBuffer(stream, Ownership.Dispose);
+                    }
+                    else if(compressionAttribute.CompressionType == 3)
+                    {
+                        // Inline, but we must decompress
+                        MemoryStream stream = new MemoryStream(
+                            compressionAttributeData, 
+                            CompressionAttribute.Size,
+                            compressionAttributeData.Length - CompressionAttribute.Size, 
+                            false);
+
+                        // The usage upstream will want to seek or set the position, the ZlibBuffer
+                        // wraps around a zlibstream and allows for this (in a limited fashion).
+                        ZlibStream compressedStream = new ZlibStream(stream, CompressionMode.Decompress, false);
+                        return new ZlibBuffer(compressedStream, Ownership.Dispose);
+                    }
+                    else
+                    {
+                        // Fall back to the default behavior.
+                        return new FileBuffer(_context, fileInfo.DataFork, fileInfo.FileId);
+                    }
+                }
+                else
+                {
+                    return new FileBuffer(_context, fileInfo.DataFork, fileInfo.FileId);
+                }
             }
         }
 

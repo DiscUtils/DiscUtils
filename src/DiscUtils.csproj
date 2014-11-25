@@ -131,6 +131,7 @@
     <Compile Include="ChsAddress.cs" />
     <Compile Include="BuilderBytesExtent.cs" />
     <Compile Include="CircularStream.cs" />
+    <Compile Include="Compression\ZlibBuffer.cs" />
     <Compile Include="Crc32.cs" />
     <Compile Include="Crc32BigEndian.cs" />
     <Compile Include="Crc32Algorithm.cs" />
@@ -142,6 +143,7 @@
     <Compile Include="Ext\ExtFileSystemOptions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HfsPlus\AttributeKey.cs" />
+    <Compile Include="HfsPlus\CompressionAttribute.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />
