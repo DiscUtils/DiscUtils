@@ -60,7 +60,40 @@ namespace DmgExtract
             using(var disk = VirtualDisk.OpenDisk(_dmg.Value, FileAccess.Read))
             using(HfsPlusFileSystem hfs = new HfsPlusFileSystem(disk.Partitions[3].Open()))
             {
+                var source = hfs.GetDirectoryInfo(_folder.Value);
+                var target = new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, source.Name));
 
+                if(target.Exists)
+                {
+                    target.Delete(true);
+                }
+
+                target.Create();
+
+                CopyDirectory(source, target, _recursive.IsPresent);
+            }
+        }
+
+        private void CopyDirectory(DiscDirectoryInfo source, DirectoryInfo target, bool recurse)
+        {
+            if (recurse)
+            {
+                foreach (var childDiscDirectory in source.GetDirectories())
+                {
+                    DirectoryInfo childDirectory = target.CreateSubdirectory(childDiscDirectory.Name);
+                    CopyDirectory(childDiscDirectory, childDirectory, recurse);
+                }
+            }
+
+            Console.WriteLine("{0}", source.Name);
+
+            foreach (var childFile in source.GetFiles())
+            {
+                using (Stream sourceStream = childFile.OpenRead())
+                using (Stream targetStream = File.OpenWrite(Path.Combine(target.FullName, childFile.Name)))
+                {
+                    sourceStream.CopyTo(targetStream);
+                }
             }
         }
     }
