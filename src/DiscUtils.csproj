@@ -141,6 +141,7 @@
     <Compile Include="Dmg\UdifPartitionTable.cs" />
     <Compile Include="Ext\ExtFileSystemOptions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="HfsPlus\AttributeKey.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />

@@ -109,8 +109,8 @@ namespace DiscUtils.HfsPlus
             AllocationFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 112);
             ExtentsFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 192);
             CatalogFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 272);
-            AttributesFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 272);
-            StartupFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 272);
+            AttributesFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 352);
+            StartupFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 432);
 
             return 512;
         }

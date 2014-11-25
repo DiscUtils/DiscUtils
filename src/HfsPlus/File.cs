@@ -31,12 +31,16 @@ namespace DiscUtils.HfsPlus
         private Context _context;
         private CatalogNodeId _nodeId;
         private CommonCatalogFileInfo _catalogInfo;
+        private bool _hasCompressionAttribute;
+
+        private const string CompressionAttributeName = "com.apple.decmpfs";
 
         public File(Context context, CatalogNodeId nodeId, CommonCatalogFileInfo catalogInfo)
         {
             _context = context;
             _nodeId = nodeId;
             _catalogInfo = catalogInfo;
+            _hasCompressionAttribute = this._context.Attributes.Find(new AttributeKey(this._nodeId, CompressionAttributeName)) != null;
         }
 
         public DateTime LastAccessTimeUtc

@@ -33,6 +33,8 @@ namespace DiscUtils.HfsPlus
 
         public BTree<ExtentKey> ExtentsOverflow { get; set; }
 
+        public BTree<AttributeKey> Attributes { get; set; }
+
         public VolumeHeader VolumeHeader { get; set; }
     }
 }

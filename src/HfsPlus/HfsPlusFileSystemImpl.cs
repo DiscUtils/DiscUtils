@@ -47,6 +47,9 @@ namespace DiscUtils.HfsPlus
             FileBuffer extentsBuffer = new FileBuffer(Context, hdr.ExtentsFile, CatalogNodeId.ExtentsFileId);
             Context.ExtentsOverflow = new BTree<ExtentKey>(extentsBuffer);
 
+            FileBuffer attributesBuffer = new FileBuffer(Context, hdr.AttributesFile, CatalogNodeId.AttributesFileId);
+            Context.Attributes = new BTree<AttributeKey>(attributesBuffer);
+
             // Establish Root directory
             byte[] rootThreadData = Context.Catalog.Find(new CatalogKey(CatalogNodeId.RootFolderId, string.Empty));
             CatalogThread rootThread = new CatalogThread();
