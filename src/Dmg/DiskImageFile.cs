@@ -23,7 +23,8 @@
 namespace DiscUtils.Dmg
 {
     using System;
-    using System.IO;
+using System.Collections.Generic;
+using System.IO;
 
     internal sealed class DiskImageFile : VirtualDiskLayer
     {
@@ -58,6 +59,11 @@ namespace DiscUtils.Dmg
                 _resources = ResourceFork.FromPlist(plist);
                 _buffer = new UdifBuffer(stream, _resources, _udifHeader.SectorCount);
             }
+        }
+
+        public UdifBuffer Buffer
+        {
+            get { return _buffer; }
         }
 
         /// <summary>

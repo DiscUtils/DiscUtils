@@ -22,9 +22,10 @@
 
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
+    using DiscUtils.Partitions;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
     /// <summary>
     /// Represents a DMG (aka UDIF) backed disk.
@@ -86,6 +87,14 @@ namespace DiscUtils.Dmg
                 }
 
                 return _content;
+            }
+        }
+
+        public override Partitions.PartitionTable Partitions
+        {
+            get
+            {
+                return new UdifPartitionTable(this, this._file.Buffer);
             }
         }
 

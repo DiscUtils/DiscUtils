@@ -137,6 +137,8 @@
     <Compile Include="Crc32LittleEndian.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Dmg\PartitionInfo.cs" />
+    <Compile Include="Dmg\UdifPartitionTable.cs" />
     <Compile Include="Ext\ExtFileSystemOptions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />

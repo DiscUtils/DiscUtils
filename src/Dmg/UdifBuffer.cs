@@ -53,6 +53,11 @@ namespace DiscUtils.Dmg
             }
         }
 
+        public List<CompressedBlock> Blocks
+        {
+            get { return this._blocks;  }
+        }
+
         public override bool CanRead
         {
             get { return true; }
