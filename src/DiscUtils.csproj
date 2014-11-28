@@ -148,6 +148,8 @@
     <Compile Include="HfsPlus\CompressionResourceBlock.cs" />
     <Compile Include="HfsPlus\CompressionResourceBlockHead.cs" />
     <Compile Include="HfsPlus\CompressionResourceHeader.cs" />
+    <Compile Include="HfsPlus\FileTypeFlags.cs" />
+    <Compile Include="HfsPlus\Symlink.cs" />
     <Compile Include="Iso9660\RockRidge\ChildLinkSystemUseEntry.cs" />
     <Compile Include="ClusterMap.cs" />
     <Compile Include="Compression\Adler32.cs" />

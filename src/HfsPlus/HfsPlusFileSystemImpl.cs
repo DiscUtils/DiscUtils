@@ -61,7 +61,7 @@ namespace DiscUtils.HfsPlus
 
         public override string VolumeLabel
         {
-            get 
+            get
             {
                 byte[] rootThreadData = Context.Catalog.Find(new CatalogKey(CatalogNodeId.RootFolderId, string.Empty));
                 CatalogThread rootThread = new CatalogThread();
@@ -97,6 +97,10 @@ namespace DiscUtils.HfsPlus
             if (dirEntry.IsDirectory)
             {
                 return new Directory(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
+            }
+            else if (dirEntry.IsSymlink)
+            {
+                return new Symlink(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
             }
             else
             {

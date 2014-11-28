@@ -720,19 +720,26 @@ namespace DiscUtils.Vfs
 
             foreach (TDirEntry de in parentDir.AllEntries)
             {
-                bool isDir = de.IsDirectory;
+                TDirEntry entry = de;
+
+                if(entry.IsSymlink)
+                {
+                    entry = ResolveSymlink(entry, path + "\\" + entry.FileName);
+                }
+
+                bool isDir = entry.IsDirectory;
 
                 if ((isDir && dirs) || (!isDir && files))
                 {
                     if (regex.IsMatch(de.SearchName))
                     {
-                        results.Add(Utilities.CombinePaths(resultPrefixPath, FormatFileName(de.FileName)));
+                        results.Add(Utilities.CombinePaths(resultPrefixPath, FormatFileName(entry.FileName)));
                     }
                 }
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Utilities.CombinePaths(resultPrefixPath, FormatFileName(de.FileName)), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(resultPrefixPath, FormatFileName(entry.FileName)), regex, subFolders, dirs, files);
                 }
             }
         }

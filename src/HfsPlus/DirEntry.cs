@@ -44,7 +44,12 @@ namespace DiscUtils.HfsPlus
 
         public override bool IsSymlink
         {
-            get { return false; }
+            get
+            {
+                return
+                    !IsDirectory
+                    && ((FileTypeFlags)((CatalogFileInfo)_info).FileInfo.FileType) == FileTypeFlags.SymLinkFileType;
+            }
         }
 
         public override string FileName
