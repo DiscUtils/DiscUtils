@@ -26,9 +26,10 @@ using DiscUtils.HfsPlus;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
-namespace DmgExtract 
+namespace DmgExtract
 {
     class Program : ProgramBase
     {
@@ -57,20 +58,34 @@ namespace DmgExtract
 
         protected override void DoRun()
         {
-            using(var disk = VirtualDisk.OpenDisk(_dmg.Value, FileAccess.Read))
-            using(HfsPlusFileSystem hfs = new HfsPlusFileSystem(disk.Partitions[3].Open()))
+            using (var disk = VirtualDisk.OpenDisk(_dmg.Value, FileAccess.Read))
             {
-                var source = hfs.GetDirectoryInfo(_folder.Value);
-                var target = new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, source.Name));
+                // Find the first (and supposedly, only, HFS partition)
 
-                if(target.Exists)
+                foreach (var volume in VolumeManager.GetPhysicalVolumes(disk))
                 {
-                    target.Delete(true);
+                    foreach (var fileSystem in FileSystemManager.DetectDefaultFileSystems(volume))
+                    {
+                        if (fileSystem.Name == "HFS+")
+                        {
+                            using (HfsPlusFileSystem hfs = (HfsPlusFileSystem)fileSystem.Open(volume))
+                            {
+                                var source = hfs.GetDirectoryInfo(_folder.Value);
+                                var target = new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, source.Name));
+
+                                if (target.Exists)
+                                {
+                                    target.Delete(true);
+                                }
+
+                                target.Create();
+
+                                CopyDirectory(source, target, _recursive.IsPresent);
+                            }
+                            break;
+                        }
+                    }
                 }
-
-                target.Create();
-
-                CopyDirectory(source, target, _recursive.IsPresent);
             }
         }
 
