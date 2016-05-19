@@ -139,7 +139,7 @@ namespace DiscUtils.Ntfs
 
                     int toRead = (int)Math.Min(remaining, _bytesPerCluster - clusterOffset);
 
-                    Array.Copy(_ioBuffer, clusterOffset, buffer, offset + (focusPos - pos), toRead);
+                    Array.Copy(_ioBuffer, (int)clusterOffset, buffer, (int)(offset + (focusPos - pos)), toRead);
 
                     focusPos += toRead;
                 }

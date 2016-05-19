@@ -111,7 +111,7 @@ namespace DiscUtils.Iscsi
             int numRead = _session.Read(_lun, firstBlock, (short)(lastBlock - firstBlock), tempBuffer, 0);
 
             int numCopied = Math.Min(maxToRead, numRead);
-            Array.Copy(tempBuffer, _position - (firstBlock * _blockSize), buffer, offset, numCopied);
+            Array.Copy(tempBuffer, (int)(_position - (firstBlock * _blockSize)), buffer, offset, numCopied);
 
             _position += numCopied;
 
@@ -181,7 +181,7 @@ namespace DiscUtils.Iscsi
                     }
 
                     // Overlay as much data as we have for this block
-                    Array.Copy(buffer, offset + numWritten, blockBuffer, offsetInBlock, toWrite);
+                    Array.Copy(buffer, offset + numWritten, blockBuffer, (int)offsetInBlock, toWrite);
 
                     // Write the block back
                     _session.Write(_lun, block, 1, _blockSize, blockBuffer, 0);

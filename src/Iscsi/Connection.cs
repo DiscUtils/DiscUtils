@@ -246,7 +246,7 @@ namespace DiscUtils.Iscsi
 
                     if (resp.ReadData != null)
                     {
-                        Array.Copy(resp.ReadData, 0, inBuffer, inBufferOffset + resp.BufferOffset, resp.ReadData.Length);
+                        Array.Copy(resp.ReadData, 0, inBuffer, (int)(inBufferOffset + resp.BufferOffset), resp.ReadData.Length);
                         numRead += resp.ReadData.Length;
                     }
 

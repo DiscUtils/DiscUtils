@@ -48,7 +48,7 @@ namespace DiscUtils.Iso9660
 
             int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 
-            Array.Copy(_readCache, relPos, buffer, offset, numRead);
+            Array.Copy(_readCache, (int)relPos, buffer, offset, numRead);
 
             return numRead;
         }
