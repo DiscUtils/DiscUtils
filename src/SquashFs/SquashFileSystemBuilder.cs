@@ -381,7 +381,7 @@ namespace DiscUtils.SquashFs
             int writeLen;
             if (compressed.Length < count)
             {
-                writeData = compressed.GetBuffer();
+                writeData = compressed.ToArray();
                 writeOffset = 0;
                 writeLen = (int)compressed.Length;
             }

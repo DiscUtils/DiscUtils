@@ -397,7 +397,7 @@ namespace DiscUtils.Iscsi
                     ms.Write(resp.TextData, 0, resp.TextData.Length);
                 }
 
-                settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
             }
             else if (resp.TextData != null)
             {
@@ -468,7 +468,7 @@ namespace DiscUtils.Iscsi
                             ms.Write(resp.TextData, 0, resp.TextData.Length);
                         }
 
-                        settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                        settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
                     }
                     else
                     {
@@ -530,7 +530,7 @@ namespace DiscUtils.Iscsi
                     ms.Write(resp.TextData, 0, resp.TextData.Length);
                 }
 
-                settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
             }
             else if (resp.TextData != null)
             {
@@ -580,7 +580,7 @@ namespace DiscUtils.Iscsi
                             ms.Write(resp.TextData, 0, resp.TextData.Length);
                         }
 
-                        settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                        settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
                     }
                     else
                     {
