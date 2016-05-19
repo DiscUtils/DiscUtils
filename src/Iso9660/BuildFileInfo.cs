@@ -43,7 +43,7 @@ namespace DiscUtils.Iso9660
         {
             _parent = parent;
             _contentData = content;
-            _contentSize = content.LongLength;
+            _contentSize = content.Length;
         }
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, string content)
