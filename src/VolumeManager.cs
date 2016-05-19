@@ -87,9 +87,9 @@ namespace DiscUtils
                 {
                     List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
 
-                    foreach (var type in typeof(VolumeManager).GetAssembly().GetTypes())
+                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
                     {
-                        foreach (LogicalVolumeFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
+                        foreach (LogicalVolumeFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
                         {
                             factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
                         }

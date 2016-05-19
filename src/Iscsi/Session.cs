@@ -405,7 +405,7 @@ namespace DiscUtils.Iscsi
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var propInfo in properties)
             {
-                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
 
                 if (attr != null)
                 {
@@ -425,7 +425,7 @@ namespace DiscUtils.Iscsi
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var propInfo in properties)
             {
-                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null)
                 {
                     if (inParameters[attr.Name] != null)
@@ -446,7 +446,7 @@ namespace DiscUtils.Iscsi
             }
         }
 
-        #region Scsi Bus
+#region Scsi Bus
         /// <summary>
         /// Sends an SCSI command (aka task) to a LUN via the connected target.
         /// </summary>
@@ -468,6 +468,6 @@ namespace DiscUtils.Iscsi
         {
             return _currentConnection.Send<T>(cmd, buffer, offset, count, expected);
         }
-        #endregion
+#endregion
     }
 }

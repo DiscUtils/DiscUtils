@@ -26,6 +26,7 @@ namespace DiscUtils.Partitions
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
+    using System.Reflection;
 
     /// <summary>
     /// Base class for classes which represent a disk partitioning scheme.
@@ -62,10 +63,10 @@ namespace DiscUtils.Partitions
                 if (s_factories == null)
                 {
                     List<PartitionTableFactory> factories = new List<PartitionTableFactory>();
-
-                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    
+                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
                     {
-                        foreach (PartitionTableFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(PartitionTableFactoryAttribute), false))
+                        foreach (PartitionTableFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(PartitionTableFactoryAttribute), false))
                         {
                             factories.Add((PartitionTableFactory)Activator.CreateInstance(type));
                         }

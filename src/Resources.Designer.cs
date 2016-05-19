@@ -39,7 +39,7 @@ namespace DiscUtils {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DiscUtils.Resources", typeof(Resources).GetAssembly());
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DiscUtils.Resources", ReflectionHelper.GetAssembly(typeof(Resources)));
                     resourceMan = temp;
                 }
                 return resourceMan;
