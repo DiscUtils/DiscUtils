@@ -115,7 +115,7 @@ namespace DiscUtils.Iscsi
 
         private string CalcResponse()
         {
-            MD5 md5 = MD5CryptoServiceProvider.Create();
+            MD5 md5 = MD5.Create();
 
             byte[] toHash = new byte[1 + _password.Length + _challenge.Length];
             toHash[0] = _identifier;
