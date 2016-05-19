@@ -26,6 +26,7 @@ namespace DiscUtils
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Reflection;
     using DiscUtils.Partitions;
 
     /// <summary>
@@ -86,7 +87,7 @@ namespace DiscUtils
                 {
                     List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
 
-                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    foreach (var type in typeof(VolumeManager).GetAssembly().GetTypes())
                     {
                         foreach (LogicalVolumeFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
                         {

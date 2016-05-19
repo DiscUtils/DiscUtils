@@ -26,6 +26,7 @@ namespace DiscUtils
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Reflection;
     using DiscUtils.Partitions;
 
     /// <summary>
@@ -276,7 +277,7 @@ namespace DiscUtils
                 {
                     Dictionary<string, Type> transports = new Dictionary<string, Type>();
 
-                    foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+                    foreach (var type in typeof(VirtualDisk).GetAssembly().GetTypes())
                     {
                         foreach (VirtualDiskTransportAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
                         {
@@ -719,7 +720,7 @@ namespace DiscUtils
             Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
             Dictionary<string, VirtualDiskFactory> extensionMap = new Dictionary<string, VirtualDiskFactory>();
 
-            foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+            foreach (var type in typeof(VirtualDisk).GetAssembly().GetTypes())
             {
                 VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)Attribute.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
                 if (attr != null)

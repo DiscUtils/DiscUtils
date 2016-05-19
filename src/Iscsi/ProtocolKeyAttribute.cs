@@ -116,7 +116,7 @@ namespace DiscUtils.Iscsi
             {
                 return ((int)value).ToString(CultureInfo.InvariantCulture);
             }
-            else if (valueType.IsEnum)
+            else if (valueType.GetIsEnum())
             {
                 FieldInfo[] infos = valueType.GetFields();
                 foreach (var info in infos)
@@ -154,7 +154,7 @@ namespace DiscUtils.Iscsi
             {
                 return int.Parse(value, CultureInfo.InvariantCulture);
             }
-            else if (valueType.IsEnum)
+            else if (valueType.GetIsEnum())
             {
                 FieldInfo[] infos = valueType.GetFields();
                 foreach (var info in infos)
