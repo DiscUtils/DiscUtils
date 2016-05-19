@@ -1197,10 +1197,10 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            public override void Close()
+            protected override void Dispose(bool disposing)
             {
-                base.Close();
-                _wrapped.Close();
+                base.Dispose();
+                _wrapped.Dispose();
             }
 
             public override void Flush()

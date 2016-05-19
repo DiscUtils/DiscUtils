@@ -130,7 +130,7 @@ namespace DiscUtils.Compression
         /// <summary>
         /// Closes the stream.
         /// </summary>
-        public override void Close()
+        protected override void Dispose(bool disposing)
         {
             if (_mode == CompressionMode.Decompress)
             {
@@ -146,16 +146,18 @@ namespace DiscUtils.Compression
                     }
                 }
 
-                _deflateStream.Close();
+                _deflateStream.Dispose();
             }
             else
             {
-                _deflateStream.Close();
+                _deflateStream.Dispose();
 
                 byte[] footerBuffer = new byte[4];
                 Utilities.WriteBytesBigEndian(_adler32.Value, footerBuffer, 0);
                 _stream.Write(footerBuffer, 0, 4);
             }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>

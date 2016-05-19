@@ -163,7 +163,7 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Target indicated failure during logout: " + resp.Response);
             }
 
-            _stream.Close();
+            _stream.Dispose();
         }
 
         /// <summary>

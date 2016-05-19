@@ -61,7 +61,7 @@ namespace DiscUtils.Nfs
 
             if (_socket != null)
             {
-                _socket.Close();
+                _socket.Dispose();
                 _socket = null;
             }
         }
@@ -87,13 +87,13 @@ namespace DiscUtils.Nfs
                     {
                         if (_tcpStream != null)
                         {
-                            _tcpStream.Close();
+                            _tcpStream.Dispose();
                             _tcpStream = null;
                         }
 
                         if (_socket != null)
                         {
-                            _socket.Close();
+                            _socket.Dispose();
                             _socket = null;
                         }
 
@@ -146,9 +146,9 @@ namespace DiscUtils.Nfs
                     {
                         lastException = sendReceiveException;
 
-                        _tcpStream.Close();
+                        _tcpStream.Dispose();
                         _tcpStream = null;
-                        _socket.Close();
+                        _socket.Dispose();
                         _socket = null;
                     }
 
