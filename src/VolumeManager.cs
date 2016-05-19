@@ -36,7 +36,10 @@ namespace DiscUtils
     /// cases a logical volume manager / logical disk manager may be used, to combine disk regions in multiple
     /// ways for data redundancy or other purposes.</para>
     /// </remarks>
-    public sealed class VolumeManager : MarshalByRefObject
+    public sealed class VolumeManager
+#if !NETCORE
+        : MarshalByRefObject
+#endif
     {
         private static List<LogicalVolumeFactory> s_logicalVolumeFactories;
         private List<VirtualDisk> _disks;

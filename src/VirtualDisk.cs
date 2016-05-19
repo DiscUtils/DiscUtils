@@ -31,7 +31,11 @@ namespace DiscUtils
     /// <summary>
     /// Base class representing virtual hard disks.
     /// </summary>
-    public abstract class VirtualDisk : MarshalByRefObject, IDisposable
+    public abstract class VirtualDisk :
+#if !NETCORE
+        MarshalByRefObject, 
+#endif
+        IDisposable
     {
         private static Dictionary<string, VirtualDiskFactory> s_extensionMap;
         private static Dictionary<string, VirtualDiskFactory> s_typeMap;
