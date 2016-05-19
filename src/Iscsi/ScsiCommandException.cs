@@ -23,13 +23,17 @@
 namespace DiscUtils.Iscsi
 {
     using System;
+#if !NETCORE
     using System.Runtime.Serialization;
     using System.Security.Permissions;
+#endif
 
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public class ScsiCommandException : IscsiException
     {
         private ScsiStatus _status;
@@ -109,6 +113,7 @@ namespace DiscUtils.Iscsi
             _status = status;
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
@@ -120,6 +125,7 @@ namespace DiscUtils.Iscsi
             _status = (ScsiStatus)info.GetByte("status");
             _senseData = (byte[])info.GetValue("senseData", typeof(byte[]));
         }
+#endif
 
         /// <summary>
         /// Gets the SCSI status associated with this exception.
@@ -129,6 +135,7 @@ namespace DiscUtils.Iscsi
             get { return _status; }
         }
 
+#if !NETCORE
         /// <summary>
         /// Gets the serialized state of this exception.
         /// </summary>
@@ -141,6 +148,7 @@ namespace DiscUtils.Iscsi
             info.AddValue("status", (byte)_status);
             info.AddValue("senseData", _senseData);
         }
+#endif
 
         /// <summary>
         /// Gets the SCSI sense data (if any) associated with this exception.

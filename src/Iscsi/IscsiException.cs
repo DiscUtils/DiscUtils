@@ -24,12 +24,16 @@ namespace DiscUtils.Iscsi
 {
     using System;
     using System.IO;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Base exception for any iSCSI-related failures.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public class IscsiException : IOException
     {
         /// <summary>
@@ -58,6 +62,7 @@ namespace DiscUtils.Iscsi
         {
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the IscsiException class.
         /// </summary>
@@ -67,5 +72,6 @@ namespace DiscUtils.Iscsi
             : base(info, context)
         {
         }
+#endif
     }
 }

@@ -23,12 +23,16 @@
 namespace DiscUtils.Iscsi
 {
     using System;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public class InvalidProtocolException : IscsiException
     {
         /// <summary>
@@ -57,6 +61,7 @@ namespace DiscUtils.Iscsi
         {
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the InvalidProtocolException class.
         /// </summary>
@@ -66,5 +71,6 @@ namespace DiscUtils.Iscsi
             : base(info, context)
         {
         }
+#endif
     }
 }
