@@ -76,7 +76,12 @@ namespace DiscUtils.Iscsi
             _session = session;
             _authenticators = authenticators;
 
+#if NETCORE
+            TcpClient client = new TcpClient();
+            client.ConnectAsync(address.NetworkAddress, address.NetworkPort).Wait();
+#else
             TcpClient client = new TcpClient(address.NetworkAddress, address.NetworkPort);
+#endif
             client.NoDelay = true;
             _stream = client.GetStream();
 
@@ -93,7 +98,7 @@ namespace DiscUtils.Iscsi
             NegotiateFeatures();
         }
 
-        #region Protocol Features
+#region Protocol Features
         [ProtocolKey("HeaderDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
         public Digest HeaderDigest { get; set; }
 
@@ -105,7 +110,7 @@ namespace DiscUtils.Iscsi
 
         [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Target, KeyType.Declarative)]
         internal int MaxTargetReceiveDataSegmentLength { get; set; }
-        #endregion
+#endregion
 
         internal ushort Id
         {
@@ -619,7 +624,7 @@ namespace DiscUtils.Iscsi
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var propInfo in properties)
             {
-                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null)
                 {
                     object value = propInfo.GetGetMethod(true).Invoke(this, null);
@@ -638,7 +643,7 @@ namespace DiscUtils.Iscsi
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var propInfo in properties)
             {
-                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null && (attr.Sender & KeySender.Target) != 0)
                 {
                     if (inParameters[attr.Name] != null)

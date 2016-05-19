@@ -34,7 +34,9 @@ namespace DiscUtils
         internal static Dictionary<string, object> Parse(Stream stream)
         {
             XmlDocument xmlDoc = new XmlDocument();
+#if !NETCORE
             xmlDoc.XmlResolver = null;
+#endif
             xmlDoc.Load(stream);
 
             var root = xmlDoc.DocumentElement;
@@ -49,12 +51,17 @@ namespace DiscUtils
         internal static void Write(Stream stream, Dictionary<string, object> plist)
         {
             XmlDocument xmlDoc = new XmlDocument();
+#if !NETCORE
             xmlDoc.XmlResolver = null;
+#endif
 
             XmlDeclaration xmlDecl = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
             xmlDoc.AppendChild(xmlDecl);
+
+#if !NETCORE
             XmlDocumentType xmlDocType = xmlDoc.CreateDocumentType("plist", "-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", null);
             xmlDoc.AppendChild(xmlDocType);
+#endif
 
             XmlElement rootElement = xmlDoc.CreateElement("plist");
             rootElement.SetAttribute("Version", "1.0");
@@ -68,7 +75,7 @@ namespace DiscUtils
             settings.Indent = true;
             settings.Encoding = Encoding.UTF8;
 
-            using (XmlWriter xw = XmlTextWriter.Create(stream, settings))
+            using (XmlWriter xw = XmlWriter.Create(stream, settings))
             {
                 xmlDoc.Save(xw);
             }

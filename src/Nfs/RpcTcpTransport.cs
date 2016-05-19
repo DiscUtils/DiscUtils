@@ -61,7 +61,11 @@ namespace DiscUtils.Nfs
 
             if (_socket != null)
             {
+#if NETCORE
                 _socket.Dispose();
+#else
+                _socket.Close();
+#endif
                 _socket = null;
             }
         }
@@ -93,7 +97,11 @@ namespace DiscUtils.Nfs
 
                         if (_socket != null)
                         {
+#if NETCORE
                             _socket.Dispose();
+#else
+                            _socket.Close();
+#endif
                             _socket = null;
                         }
 
@@ -148,7 +156,11 @@ namespace DiscUtils.Nfs
 
                         _tcpStream.Dispose();
                         _tcpStream = null;
+#if NETCORE
                         _socket.Dispose();
+#else
+                        _socket.Close();
+#endif
                         _socket = null;
                     }
 
