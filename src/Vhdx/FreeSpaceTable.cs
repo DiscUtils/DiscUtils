@@ -33,10 +33,12 @@ namespace DiscUtils.Vhdx
 
         public FreeSpaceTable(long fileSize)
         {
-            if (fileSize % Sizes.OneMiB != 0)
-            {
-                throw new ArgumentException("VHDX space must be allocated on 1MB boundaries", "fileSize");
-            }
+            // There used to be a check here that the file size is a multiple of 1 MB.
+            // However, the
+            // VHDX Format Specification 1.00 25-August-2012 only states this:
+            //     "the only restriction being that all objects have 1 MB alignment within the file"
+            // Which does not mean the file size has to be multiple of 1MiB.
+            // (The last extent can be less than 1MiB and still all extent have 1 MiB alignment.)
 
             _freeExtents = new List<StreamExtent>();
             _freeExtents.Add(new StreamExtent(0, fileSize));
