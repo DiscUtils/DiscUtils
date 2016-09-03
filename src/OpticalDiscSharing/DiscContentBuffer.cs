@@ -173,7 +173,7 @@ namespace DiscUtils.OpticalDiscSharing
 
                     _authHeader = "Digest username=\"" + _userName + "\", realm=\"ODS\", nonce=\"" + authParams["nonce"] + "\", uri=\"" + wr.RequestUri.AbsolutePath + "\", response=\"" + resp + "\"";
 
-                    wresp.Dispose();
+                    (wresp as IDisposable).Dispose();
 
                     wr = wrc();
                     wr.Headers["Authorization"] = _authHeader;
