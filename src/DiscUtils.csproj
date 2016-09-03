@@ -133,6 +133,7 @@
     <Compile Include="CircularStream.cs" />
     <Compile Include="Compression\SizedDeflateStream.cs" />
     <Compile Include="Compression\ZlibBuffer.cs" />
+    <Compile Include="CoreCompat\ReflectionHelper.cs" />
     <Compile Include="Crc32.cs" />
     <Compile Include="Crc32BigEndian.cs" />
     <Compile Include="Crc32Algorithm.cs" />
@@ -880,6 +881,7 @@
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProgramFiles)\MSBuild\Microsoft\StyleCop\v4.4\Microsoft.StyleCop.targets" Condition="Exists('$(ProgramFiles)\MSBuild\Microsoft\StyleCop\v4.4\Microsoft.StyleCop.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
