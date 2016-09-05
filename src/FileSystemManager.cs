@@ -56,7 +56,7 @@ namespace DiscUtils
             {
                 if (s_detectedFactories == null)
                 {
-                    s_detectedFactories = DetectFactories(typeof(FileSystemManager).Assembly);
+                    s_detectedFactories = DetectFactories(ReflectionHelper.GetAssembly(typeof(FileSystemManager)));
                 }
 
                 return s_detectedFactories;
@@ -134,7 +134,7 @@ namespace DiscUtils
 
             foreach (var type in assembly.GetTypes())
             {
-                foreach (VfsFileSystemFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(VfsFileSystemFactoryAttribute), false))
+                foreach (VfsFileSystemFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(VfsFileSystemFactoryAttribute), false))
                 {
                     factories.Add((VfsFileSystemFactory)Activator.CreateInstance(type));
                 }

@@ -25,6 +25,7 @@ namespace DiscUtils
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Reflection;
 
     /// <summary>
     /// Base class for all disk image builders.
@@ -127,10 +128,10 @@ namespace DiscUtils
         private static void InitializeMaps()
         {
             Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
-
-            foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+            
+            foreach (var type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
             {
-                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)Attribute.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
+                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)ReflectionHelper.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
                 if (attr != null)
                 {
                     VirtualDiskFactory factory = (VirtualDiskFactory)Activator.CreateInstance(type);

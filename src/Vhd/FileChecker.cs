@@ -24,7 +24,9 @@ namespace DiscUtils.Vhd
 {
     using System;
     using System.IO;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// VHD file format verifier, that identifies corrupt VHD files.
@@ -410,7 +412,9 @@ namespace DiscUtils.Vhd
             }
         }
 
+#if !NETCORE
         [Serializable]
+#endif
         private sealed class AbortException : InvalidFileSystemException
         {
             public AbortException()
@@ -418,10 +422,12 @@ namespace DiscUtils.Vhd
             {
             }
 
+#if !NETCORE
             private AbortException(SerializationInfo info, StreamingContext ctxt)
                 : base(info, ctxt)
             {
             }
+#endif
         }
     }
 }

@@ -23,12 +23,16 @@
 namespace DiscUtils.Iscsi
 {
     using System;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Exception thrown when an authentication exception occurs.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public class LoginException : IscsiException
     {
         /// <summary>
@@ -67,6 +71,7 @@ namespace DiscUtils.Iscsi
         {
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the LoginException class.
         /// </summary>
@@ -76,5 +81,6 @@ namespace DiscUtils.Iscsi
             : base(info, context)
         {
         }
+#endif
     }
 }

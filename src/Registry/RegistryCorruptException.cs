@@ -23,12 +23,16 @@
 namespace DiscUtils.Registry
 {
     using System;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Exception thrown when some corruption is found in the registry hive.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public class RegistryCorruptException : Exception
     {
         /// <summary>
@@ -57,6 +61,7 @@ namespace DiscUtils.Registry
         {
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
@@ -66,5 +71,6 @@ namespace DiscUtils.Registry
             : base(info, context)
         {
         }
+#endif
     }
 }

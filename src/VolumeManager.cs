@@ -26,6 +26,7 @@ namespace DiscUtils
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Reflection;
     using DiscUtils.Partitions;
 
     /// <summary>
@@ -36,7 +37,10 @@ namespace DiscUtils
     /// cases a logical volume manager / logical disk manager may be used, to combine disk regions in multiple
     /// ways for data redundancy or other purposes.</para>
     /// </remarks>
-    public sealed class VolumeManager : MarshalByRefObject
+    public sealed class VolumeManager
+#if !NETCORE
+        : MarshalByRefObject
+#endif
     {
         private static List<LogicalVolumeFactory> s_logicalVolumeFactories;
         private List<VirtualDisk> _disks;
@@ -83,9 +87,9 @@ namespace DiscUtils
                 {
                     List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
 
-                    foreach (var type in typeof(VolumeManager).Assembly.GetTypes())
+                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
                     {
-                        foreach (LogicalVolumeFactoryAttribute attr in Attribute.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
+                        foreach (LogicalVolumeFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
                         {
                             factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
                         }

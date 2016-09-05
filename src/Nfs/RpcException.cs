@@ -25,12 +25,16 @@ namespace DiscUtils.Nfs
     using System;
     using System.Globalization;
     using System.IO;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public sealed class RpcException : IOException
     {
         /// <summary>
@@ -68,6 +72,7 @@ namespace DiscUtils.Nfs
         {
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the RpcException class.
         /// </summary>
@@ -77,6 +82,7 @@ namespace DiscUtils.Nfs
             : base(info, context)
         {
         }
+#endif
 
         private static string GenerateMessage(RpcReplyHeader reply)
         {

@@ -24,12 +24,16 @@ namespace DiscUtils
 {
     using System;
     using System.IO;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
+#if !NETCORE
     [Serializable]
+#endif
     public class InvalidFileSystemException : IOException
     {
         /// <summary>
@@ -58,6 +62,7 @@ namespace DiscUtils
         {
         }
 
+#if !NETCORE
         /// <summary>
         /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
@@ -67,5 +72,6 @@ namespace DiscUtils
             : base(info, context)
         {
         }
+#endif
     }
 }

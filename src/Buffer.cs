@@ -28,7 +28,11 @@ namespace DiscUtils
     /// <summary>
     /// Abstract base class for implementations of IBuffer.
     /// </summary>
-    public abstract class Buffer : MarshalByRefObject, IBuffer
+    public abstract class Buffer :
+#if !NETCORE
+        MarshalByRefObject, 
+#endif
+        IBuffer
     {
         /// <summary>
         /// Gets a value indicating whether this buffer can be read.

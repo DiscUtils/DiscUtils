@@ -76,7 +76,12 @@ namespace DiscUtils.Iscsi
             _session = session;
             _authenticators = authenticators;
 
+#if NETCORE
+            TcpClient client = new TcpClient();
+            client.ConnectAsync(address.NetworkAddress, address.NetworkPort).Wait();
+#else
             TcpClient client = new TcpClient(address.NetworkAddress, address.NetworkPort);
+#endif
             client.NoDelay = true;
             _stream = client.GetStream();
 
@@ -93,7 +98,7 @@ namespace DiscUtils.Iscsi
             NegotiateFeatures();
         }
 
-        #region Protocol Features
+#region Protocol Features
         [ProtocolKey("HeaderDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
         public Digest HeaderDigest { get; set; }
 
@@ -105,7 +110,7 @@ namespace DiscUtils.Iscsi
 
         [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Target, KeyType.Declarative)]
         internal int MaxTargetReceiveDataSegmentLength { get; set; }
-        #endregion
+#endregion
 
         internal ushort Id
         {
@@ -163,7 +168,7 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Target indicated failure during logout: " + resp.Response);
             }
 
-            _stream.Close();
+            _stream.Dispose();
         }
 
         /// <summary>
@@ -246,7 +251,7 @@ namespace DiscUtils.Iscsi
 
                     if (resp.ReadData != null)
                     {
-                        Array.Copy(resp.ReadData, 0, inBuffer, inBufferOffset + resp.BufferOffset, resp.ReadData.Length);
+                        Array.Copy(resp.ReadData, 0, inBuffer, (int)(inBufferOffset + resp.BufferOffset), resp.ReadData.Length);
                         numRead += resp.ReadData.Length;
                     }
 
@@ -397,7 +402,7 @@ namespace DiscUtils.Iscsi
                     ms.Write(resp.TextData, 0, resp.TextData.Length);
                 }
 
-                settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
             }
             else if (resp.TextData != null)
             {
@@ -468,7 +473,7 @@ namespace DiscUtils.Iscsi
                             ms.Write(resp.TextData, 0, resp.TextData.Length);
                         }
 
-                        settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                        settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
                     }
                     else
                     {
@@ -530,7 +535,7 @@ namespace DiscUtils.Iscsi
                     ms.Write(resp.TextData, 0, resp.TextData.Length);
                 }
 
-                settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
             }
             else if (resp.TextData != null)
             {
@@ -580,7 +585,7 @@ namespace DiscUtils.Iscsi
                             ms.Write(resp.TextData, 0, resp.TextData.Length);
                         }
 
-                        settings.ReadFrom(ms.GetBuffer(), 0, (int)ms.Length);
+                        settings.ReadFrom(ms.ToArray(), 0, (int)ms.Length);
                     }
                     else
                     {
@@ -619,7 +624,7 @@ namespace DiscUtils.Iscsi
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var propInfo in properties)
             {
-                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null)
                 {
                     object value = propInfo.GetGetMethod(true).Invoke(this, null);
@@ -638,7 +643,7 @@ namespace DiscUtils.Iscsi
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var propInfo in properties)
             {
-                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)Attribute.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
+                ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null && (attr.Sender & KeySender.Target) != 0)
                 {
                     if (inParameters[attr.Name] != null)

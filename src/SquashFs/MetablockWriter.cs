@@ -84,7 +84,7 @@ namespace DiscUtils.SquashFs
                 NextBlock();
             }
 
-            output.Write(_buffer.GetBuffer(), 0, (int)_buffer.Length);
+            output.Write(_buffer.ToArray(), 0, (int)_buffer.Length);
         }
 
         internal long DistanceFrom(MetadataRef startPos)
@@ -105,7 +105,7 @@ namespace DiscUtils.SquashFs
             ushort writeLen;
             if (compressed.Length < _currentOffset)
             {
-                writeData = compressed.GetBuffer();
+                writeData = compressed.ToArray();
                 writeLen = (ushort)compressed.Length;
             }
             else

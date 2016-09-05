@@ -138,7 +138,7 @@ namespace DiscUtils.Wim
             }
 
             int numToRead = (int)Math.Min(count, _bufferCount - _position);
-            Array.Copy(_buffer, _position, buffer, offset, numToRead);
+            Array.Copy(_buffer, (int)_position, buffer, offset, numToRead);
             _position += numToRead;
             return numToRead;
         }

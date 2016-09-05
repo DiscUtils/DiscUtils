@@ -26,8 +26,10 @@ namespace DiscUtils.Ntfs
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-    using System.Runtime.Serialization;
     using System.Text;
+#if !NETCORE
+    using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Class that checks NTFS file system integrity.
@@ -601,7 +603,9 @@ namespace DiscUtils.Ntfs
             }
         }
 
+#if !NETCORE
         [Serializable]
+#endif
         private sealed class AbortException : InvalidFileSystemException
         {
             public AbortException()
@@ -609,10 +613,12 @@ namespace DiscUtils.Ntfs
             {
             }
 
+#if !NETCORE
             private AbortException(SerializationInfo info, StreamingContext ctxt)
                 : base(info, ctxt)
             {
             }
+#endif
         }
     }
 }

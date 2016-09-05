@@ -74,7 +74,7 @@ namespace DiscUtils.Udf
                 }
 
                 int toCopy = (int)Math.Min(srcBuffer.Length - pos, count);
-                Array.Copy(srcBuffer, pos, buffer, offset, toCopy);
+                Array.Copy(srcBuffer, (int)pos, buffer, offset, toCopy);
                 return toCopy;
             }
             else

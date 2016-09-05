@@ -78,7 +78,7 @@ namespace DiscUtils.Fat
             }
         }
 
-        public override void Close()
+        protected override void Dispose(bool disposing)
         {
             if (_dir.FileSystem.CanWrite)
             {
@@ -98,7 +98,7 @@ namespace DiscUtils.Fat
                 }
                 finally
                 {
-                    base.Close();
+                    base.Dispose(disposing);
                 }
             }
         }

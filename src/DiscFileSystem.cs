@@ -28,7 +28,11 @@ namespace DiscUtils
     /// <summary>
     /// Provides the base class for all file systems.
     /// </summary>
-    public abstract class DiscFileSystem : MarshalByRefObject, IFileSystem, IDisposable
+    public abstract class DiscFileSystem :
+#if !NETCORE
+        MarshalByRefObject, 
+#endif
+        IFileSystem, IDisposable
     {
         private DiscFileSystemOptions _options;
 
@@ -475,7 +479,7 @@ namespace DiscUtils
             return null;
         }
 
-        #region IDisposable Members
+#region IDisposable Members
 
         /// <summary>
         /// Disposes of this instance, releasing all resources.
@@ -494,6 +498,6 @@ namespace DiscUtils
         {
         }
 
-        #endregion
+#endregion
     }
 }

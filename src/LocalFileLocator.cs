@@ -54,7 +54,11 @@ namespace DiscUtils
             string combinedPath = Path.Combine(_dir, path);
             if (string.IsNullOrEmpty(combinedPath))
             {
+#if NETCORE
+                return Directory.GetCurrentDirectory();
+#else
                 return Environment.CurrentDirectory;
+#endif
             }
             else
             {

@@ -98,7 +98,7 @@ namespace DiscUtils.Xva
             }
 
             int numToRead = (int)Math.Min(count, Length - _position);
-            Array.Copy(_data, _position, buffer, offset, numToRead);
+            Array.Copy(_data, (int)_position, buffer, offset, numToRead);
             return numToRead;
         }
 

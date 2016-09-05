@@ -200,7 +200,7 @@ namespace DiscUtils.Registry
                 for (int i = 0; i < name.Length; ++i)
                 {
                     hash *= 37;
-                    hash += char.ToUpper(name[i], CultureInfo.InvariantCulture);
+                    hash += char.ToUpperInvariant(name[i]);
                 }
             }
             else

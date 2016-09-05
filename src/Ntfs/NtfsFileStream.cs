@@ -106,17 +106,18 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public override void Close()
+        protected override void Dispose(bool disposing)
         {
             if (_baseStream == null)
             {
+                base.Dispose(disposing);
                 return;
             }
 
             using (new NtfsTransaction())
             {
-                base.Close();
-                _baseStream.Close();
+                base.Dispose(disposing);
+                _baseStream.Dispose();
 
                 UpdateMetadata();
 

@@ -510,7 +510,7 @@ namespace DiscUtils.Vhd
 
                         if (newFile.UniqueId != file.ParentUniqueId)
                         {
-                            throw new IOException(string.Format(CultureInfo.InstalledUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
+                            throw new IOException(string.Format(CultureInfo.CurrentUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
                         }
 
                         file = newFile;

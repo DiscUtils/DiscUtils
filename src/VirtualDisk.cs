@@ -26,12 +26,17 @@ namespace DiscUtils
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Reflection;
     using DiscUtils.Partitions;
 
     /// <summary>
     /// Base class representing virtual hard disks.
     /// </summary>
-    public abstract class VirtualDisk : MarshalByRefObject, IDisposable
+    public abstract class VirtualDisk :
+#if !NETCORE
+        MarshalByRefObject, 
+#endif
+        IDisposable
     {
         private static Dictionary<string, VirtualDiskFactory> s_extensionMap;
         private static Dictionary<string, VirtualDiskFactory> s_typeMap;
@@ -271,10 +276,10 @@ namespace DiscUtils
                 if (s_diskTransports == null)
                 {
                     Dictionary<string, Type> transports = new Dictionary<string, Type>();
-
-                    foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+                    
+                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
                     {
-                        foreach (VirtualDiskTransportAttribute attr in Attribute.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
+                        foreach (VirtualDiskTransportAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
                         {
                             transports.Add(attr.Scheme.ToUpperInvariant(), type);
                         }
@@ -714,10 +719,10 @@ namespace DiscUtils
         {
             Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
             Dictionary<string, VirtualDiskFactory> extensionMap = new Dictionary<string, VirtualDiskFactory>();
-
-            foreach (var type in typeof(VirtualDisk).Assembly.GetTypes())
+            
+            foreach (var type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
             {
-                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)Attribute.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
+                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)ReflectionHelper.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
                 if (attr != null)
                 {
                     VirtualDiskFactory factory = (VirtualDiskFactory)Activator.CreateInstance(type);
