@@ -221,7 +221,7 @@ namespace DiscUtils.Ntfs
                     long lcn = runIdx == 0 ? 0 : _cookedRuns[runIdx - 1].StartLcn;
                     foreach (var allocation in alloced)
                     {
-#if !NETCORE
+#if NET20
                         runs.Add(new DataRun(allocation.First - lcn, allocation.Second, false));
                         lcn = allocation.First;
 #else

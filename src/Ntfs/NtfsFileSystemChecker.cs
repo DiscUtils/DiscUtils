@@ -27,7 +27,9 @@ namespace DiscUtils.Ntfs
     using System.Globalization;
     using System.IO;
     using System.Text;
+#if !NETCORE
     using System.Runtime.Serialization;
+#endif
 
     /// <summary>
     /// Class that checks NTFS file system integrity.
