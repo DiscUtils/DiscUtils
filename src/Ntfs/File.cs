@@ -1199,7 +1199,7 @@ namespace DiscUtils.Ntfs
 
             protected override void Dispose(bool disposing)
             {
-                base.Dispose();
+                base.Dispose(disposing);
                 _wrapped.Dispose();
             }
 
