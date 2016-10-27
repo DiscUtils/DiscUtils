@@ -111,7 +111,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override Geometry Geometry
         {
-            get { return _files[_files.Count - 1].First.Geometry; }
+            get { return _files[_files.Count - 1].Item1.Geometry; }
         }
 
         /// <summary>
@@ -121,9 +121,9 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                DiskImageFile file = _files[_files.Count - 1].First as DiskImageFile;
+                DiskImageFile file = _files[_files.Count - 1].Item1 as DiskImageFile;
                 Geometry result = (file != null) ? file.BiosGeometry : null;
-                return result ?? Geometry.MakeBiosSafe(_files[_files.Count - 1].First.Geometry, Capacity);
+                return result ?? Geometry.MakeBiosSafe(_files[_files.Count - 1].Item1.Geometry, Capacity);
             }
         }
 
@@ -140,7 +140,7 @@ namespace DiscUtils.Vmdk
         /// </summary>
         public override long Capacity
         {
-            get { return _files[0].First.Capacity; }
+            get { return _files[0].Item1.Capacity; }
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace DiscUtils.Vmdk
                     SparseStream stream = null;
                     for (int i = _files.Count - 1; i >= 0; --i)
                     {
-                        stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
+                        stream = _files[i].Item1.OpenContent(stream, Ownership.Dispose);
                     }
 
                     _content = stream;
@@ -176,7 +176,7 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                DiskImageFile file = (DiskImageFile) _files[_files.Count - 1].First;
+                DiskImageFile file = (DiskImageFile) _files[_files.Count - 1].Item1;
 
                 VirtualDiskParameters diskParams = new VirtualDiskParameters()
                 {
@@ -206,7 +206,7 @@ namespace DiscUtils.Vmdk
             {
                 foreach (var file in _files)
                 {
-                    yield return file.First as VirtualDiskLayer;
+                    yield return file.Item1 as VirtualDiskLayer;
                 }
             }
         }
@@ -218,7 +218,7 @@ namespace DiscUtils.Vmdk
         /// BIOS geometry is preserved in the disk file.</remarks>
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
-            get { return DiskFactory.MakeDiskTypeInfo(((DiskImageFile) _files[_files.Count - 1].First).CreateType); }
+            get { return DiskFactory.MakeDiskTypeInfo(((DiskImageFile) _files[_files.Count - 1].Item1).CreateType); }
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace DiscUtils.Vmdk
             {
                 foreach (var file in _files)
                 {
-                    yield return (DiskImageFile) file.First;
+                    yield return (DiskImageFile) file.Item1;
                 }
             }
         }
@@ -361,7 +361,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
-            return InitializeDifferencing(fileSystem, path, DiffDiskCreateType(_files[0].First), _path);
+            return InitializeDifferencing(fileSystem, path, DiffDiskCreateType(_files[0].Item1), _path);
         }
 
         /// <summary>
@@ -371,7 +371,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
-            var firstLayer = _files[0].First;
+            var firstLayer = _files[0].Item1;
             return InitializeDifferencing(path, DiffDiskCreateType(firstLayer),
                 firstLayer.RelativeFileLocator.GetFullPath(_path));
         }
@@ -399,9 +399,9 @@ namespace DiscUtils.Vmdk
 
                     foreach (var file in _files)
                     {
-                        if (file.Second == Ownership.Dispose)
+                        if (file.Item2 == Ownership.Dispose)
                         {
-                            file.First.Dispose();
+                            file.Item1.Dispose();
                         }
                     }
                 }
@@ -439,7 +439,7 @@ namespace DiscUtils.Vmdk
 
         private void ResolveFileChain()
         {
-            VirtualDiskLayer file = _files[_files.Count - 1].First;
+            VirtualDiskLayer file = _files[_files.Count - 1].Item1;
 
             while (file.NeedsParent)
             {

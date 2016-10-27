@@ -224,8 +224,8 @@ namespace DiscUtils.Ntfs
                     foreach (var allocation in alloced)
                     {
 #if NET20
-                        runs.Add(new DataRun(allocation.First - lcn, allocation.Second, false));
-                        lcn = allocation.First;
+                        runs.Add(new DataRun(allocation.Item1 - lcn, allocation.Item2, false));
+                        lcn = allocation.Item1;
 #else
                         runs.Add(new DataRun(allocation.Item1 - lcn, allocation.Item2, false));
                         lcn = allocation.Item1;

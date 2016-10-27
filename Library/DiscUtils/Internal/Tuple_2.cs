@@ -35,12 +35,12 @@ namespace DiscUtils
             _b = b;
         }
 
-        public A First
+        public A Item1
         {
             get { return _a; }
         }
 
-        public B Second
+        public B Item2
         {
             get { return _b; }
         }

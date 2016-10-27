@@ -53,7 +53,7 @@ namespace DiscUtils.Vhd
             _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream),
                 Ownership.Dispose));
 
-            if (_files[0].First.NeedsParent)
+            if (_files[0].Item1.NeedsParent)
             {
                 throw new NotSupportedException("Differencing disks cannot be opened from a stream");
             }
@@ -220,7 +220,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public override Geometry Geometry
         {
-            get { return _files[0].First.Geometry; }
+            get { return _files[0].Item1.Geometry; }
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public override long Capacity
         {
-            get { return _files[0].First.Capacity; }
+            get { return _files[0].Item1.Capacity; }
         }
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace DiscUtils.Vhd
                     SparseStream stream = null;
                     for (int i = _files.Count - 1; i >= 0; --i)
                     {
-                        stream = _files[i].First.OpenContent(stream, Ownership.Dispose);
+                        stream = _files[i].Item1.OpenContent(stream, Ownership.Dispose);
                     }
 
                     _content = stream;
@@ -303,7 +303,7 @@ namespace DiscUtils.Vhd
             {
                 foreach (var file in _files)
                 {
-                    yield return file.First as VirtualDiskLayer;
+                    yield return file.Item1 as VirtualDiskLayer;
                 }
             }
         }
@@ -315,7 +315,7 @@ namespace DiscUtils.Vhd
         /// BIOS geometry is preserved in the disk file.</remarks>
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
-            get { return DiskFactory.MakeDiskTypeInfo(_files[_files.Count - 1].First.IsSparse ? "dynamic" : "fixed"); }
+            get { return DiskFactory.MakeDiskTypeInfo(_files[_files.Count - 1].Item1.IsSparse ? "dynamic" : "fixed"); }
         }
 
         /// <summary>
@@ -436,7 +436,7 @@ namespace DiscUtils.Vhd
         public override VirtualDisk CreateDifferencingDisk(DiscFileSystem fileSystem, string path)
         {
             FileLocator locator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
-            DiskImageFile file = _files[0].First.CreateDifferencing(locator, Utilities.GetFileFromPath(path));
+            DiskImageFile file = _files[0].Item1.CreateDifferencing(locator, Utilities.GetFileFromPath(path));
             return new Disk(file, Ownership.Dispose);
         }
 
@@ -448,7 +448,7 @@ namespace DiscUtils.Vhd
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             FileLocator locator = new LocalFileLocator(Path.GetDirectoryName(path));
-            DiskImageFile file = _files[0].First.CreateDifferencing(locator, Path.GetFileName(path));
+            DiskImageFile file = _files[0].Item1.CreateDifferencing(locator, Path.GetFileName(path));
             return new Disk(file, Ownership.Dispose);
         }
 
@@ -485,9 +485,9 @@ namespace DiscUtils.Vhd
                     {
                         foreach (var record in _files)
                         {
-                            if (record.Second == Ownership.Dispose)
+                            if (record.Item2 == Ownership.Dispose)
                             {
-                                record.First.Dispose();
+                                record.Item1.Dispose();
                             }
                         }
 
@@ -503,7 +503,7 @@ namespace DiscUtils.Vhd
 
         private void ResolveFileChain()
         {
-            DiskImageFile file = _files[_files.Count - 1].First;
+            DiskImageFile file = _files[_files.Count - 1].Item1;
 
             while (file.NeedsParent)
             {

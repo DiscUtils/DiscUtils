@@ -151,7 +151,7 @@ namespace DiscUtils.Ntfs
             foreach (var run in runs)
             {
 #if NET20
-                _bitmap.MarkAbsentRange(run.First, run.Second);
+                _bitmap.MarkAbsentRange(run.Item1, run.Item2);
 #else
                 _bitmap.MarkAbsentRange(run.Item1, run.Item2);
 #endif
