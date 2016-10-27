@@ -3,6 +3,7 @@ obj/
 
 *.suo
 *.user
+*.lock.json
 
 .vs/
 
