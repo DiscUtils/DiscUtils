@@ -5,3 +5,6 @@ obj/
 *.user
 
 .vs/
+
+# Tests
+TestResult.xml
