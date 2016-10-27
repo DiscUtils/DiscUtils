@@ -41,12 +41,12 @@ namespace DiscUtils.Ntfs
 
             if (startVcn < 0)
             {
-                throw new ArgumentOutOfRangeException("startVcn", startVcn, "VCN must be >= 0");
+                throw new ArgumentOutOfRangeException(nameof(startVcn), startVcn, "VCN must be >= 0");
             }
 
             if (_startLcn < 0)
             {
-                throw new ArgumentOutOfRangeException("prevLcn", prevLcn, "LCN must be >= 0");
+                throw new ArgumentOutOfRangeException(nameof(prevLcn), prevLcn, "LCN must be >= 0");
             }
         }
 

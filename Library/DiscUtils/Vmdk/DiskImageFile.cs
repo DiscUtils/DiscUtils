@@ -112,7 +112,7 @@ namespace DiscUtils.Vmdk
             if (!createTypeIsSparse || _descriptor.Extents.Count != 1
                 || _descriptor.Extents[0].Type != ExtentType.Sparse || _descriptor.ParentContentId != uint.MaxValue)
             {
-                throw new ArgumentException("Only Monolithic Sparse and Streaming Optimized disks can be accessed via a stream", "stream");
+                throw new ArgumentException("Only Monolithic Sparse and Streaming Optimized disks can be accessed via a stream", nameof(stream));
             }
 
             _monolithicStream = stream;
@@ -417,7 +417,7 @@ namespace DiscUtils.Vmdk
         {
             if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
             {
-                throw new ArgumentException("Differencing disks must be sparse", "type");
+                throw new ArgumentException("Differencing disks must be sparse", nameof(type));
             }
 
             using (DiskImageFile parentFile = new DiskImageFile(parent, FileAccess.Read))
@@ -441,7 +441,7 @@ namespace DiscUtils.Vmdk
         {
             if (type != DiskCreateType.MonolithicSparse && type != DiskCreateType.TwoGbMaxExtentSparse && type != DiskCreateType.VmfsSparse)
             {
-                throw new ArgumentException("Differencing disks must be sparse", "type");
+                throw new ArgumentException("Differencing disks must be sparse", nameof(type));
             }
 
             string basePath = Utilities.GetDirectoryFromPath(path);
@@ -530,7 +530,7 @@ namespace DiscUtils.Vmdk
         {
             if (parameters.Capacity <= 0)
             {
-                throw new ArgumentException("Capacity must be greater than zero", "parameters");
+                throw new ArgumentException("Capacity must be greater than zero", nameof(parameters));
             }
 
             Geometry geometry = parameters.Geometry ?? DefaultGeometry(parameters.Capacity);

@@ -63,12 +63,12 @@ namespace DiscUtils
         {
             if (!toWrap.CanRead)
             {
-                throw new ArgumentException("The wrapped stream does not support reading", "toWrap");
+                throw new ArgumentException("The wrapped stream does not support reading", nameof(toWrap));
             }
 
             if (!toWrap.CanSeek)
             {
-                throw new ArgumentException("The wrapped stream does not support seeking", "toWrap");
+                throw new ArgumentException("The wrapped stream does not support seeking", nameof(toWrap));
             }
 
             _wrappedStream = toWrap;
@@ -77,7 +77,7 @@ namespace DiscUtils
 
             if (_settings.OptimumReadSize % _settings.BlockSize != 0)
             {
-                throw new ArgumentException("Invalid settings, OptimumReadSize must be a multiple of BlockSize", "settings");
+                throw new ArgumentException("Invalid settings, OptimumReadSize must be a multiple of BlockSize", nameof(settings));
             }
 
             _readBuffer = new byte[_settings.OptimumReadSize];

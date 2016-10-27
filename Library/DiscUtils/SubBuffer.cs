@@ -109,7 +109,7 @@ namespace DiscUtils
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to read negative bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to read negative bytes");
             }
 
             if (pos >= _length)
@@ -131,12 +131,12 @@ namespace DiscUtils
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to write negative bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to write negative bytes");
             }
 
             if (pos + count > _length)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to write beyond end of substream");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to write beyond end of substream");
             }
 
             _parent.Write(pos + _first, buffer, offset, count);

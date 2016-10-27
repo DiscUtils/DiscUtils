@@ -240,7 +240,7 @@ namespace DiscUtils.Vdi
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", count, "Attempt to write negative number of bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Attempt to write negative number of bytes");
             }
 
             if (_atEof || _position + count > _fileHeader.DiskSize)

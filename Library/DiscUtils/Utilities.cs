@@ -195,22 +195,22 @@ namespace DiscUtils
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", offset, "Offset is negative");
+                throw new ArgumentOutOfRangeException(nameof(offset), offset, "Offset is negative");
             }
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", count, "Count is negative");
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Count is negative");
             }
 
             if (buffer.Length < offset + count)
             {
-                throw new ArgumentException("buffer is too small", "buffer");
+                throw new ArgumentException("buffer is too small", nameof(buffer));
             }
         }
 
@@ -263,7 +263,7 @@ namespace DiscUtils
         {
             if (val == 0)
             {
-                throw new ArgumentException("Cannot calculate log of Zero", "val");
+                throw new ArgumentException("Cannot calculate log of Zero", nameof(val));
             }
 
             int result = 0;
@@ -279,7 +279,7 @@ namespace DiscUtils
             }
             else
             {
-                throw new ArgumentException("Input is not a power of Two", "val");
+                throw new ArgumentException("Input is not a power of Two", nameof(val));
             }
         }
 
@@ -287,7 +287,7 @@ namespace DiscUtils
         {
             if (val == 0)
             {
-                throw new ArgumentException("Cannot calculate log of Zero", "val");
+                throw new ArgumentException("Cannot calculate log of Zero", nameof(val));
             }
 
             int result = 0;
@@ -303,7 +303,7 @@ namespace DiscUtils
             }
             else
             {
-                throw new ArgumentException("Input is not a power of Two", "val");
+                throw new ArgumentException("Input is not a power of Two", nameof(val));
             }
         }
 

@@ -199,7 +199,7 @@ namespace DiscUtils.Partitions
         {
             if (size < _diskGeometry.BytesPerSector)
             {
-                throw new ArgumentOutOfRangeException("size", size, "size must be at least one sector");
+                throw new ArgumentOutOfRangeException(nameof(size), size, "size must be at least one sector");
             }
 
             long sectorLength = size / _diskGeometry.BytesPerSector;
@@ -262,7 +262,7 @@ namespace DiscUtils.Partitions
         {
             if (size < _diskGeometry.BytesPerSector)
             {
-                throw new ArgumentOutOfRangeException("size", size, "size must be at least one sector");
+                throw new ArgumentOutOfRangeException(nameof(size), size, "size must be at least one sector");
             }
 
             if (alignment % _diskGeometry.BytesPerSector != 0)

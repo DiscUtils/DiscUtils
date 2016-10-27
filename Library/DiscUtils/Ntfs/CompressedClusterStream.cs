@@ -86,7 +86,7 @@ namespace DiscUtils.Ntfs
         {
             if (buffer.Length < (count * _bytesPerCluster) + offset)
             {
-                throw new ArgumentException("Cluster buffer too small", "buffer");
+                throw new ArgumentException("Cluster buffer too small", nameof(buffer));
             }
 
             int totalRead = 0;
@@ -108,7 +108,7 @@ namespace DiscUtils.Ntfs
         {
             if (buffer.Length < (count * _bytesPerCluster) + offset)
             {
-                throw new ArgumentException("Cluster buffer too small", "buffer");
+                throw new ArgumentException("Cluster buffer too small", nameof(buffer));
             }
 
             int totalAllocated = 0;

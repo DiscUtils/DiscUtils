@@ -112,7 +112,7 @@ namespace DiscUtils.Registry
         {
             if (stream == null)
             {
-                throw new ArgumentNullException("stream", "Attempt to create registry hive in null stream");
+                throw new ArgumentNullException(nameof(stream), "Attempt to create registry hive in null stream");
             }
 
             // Construct a file with minimal structure - hive header, plus one (empty) bin
@@ -248,7 +248,7 @@ namespace DiscUtils.Registry
                 }
                 else
                 {
-                    throw new ArgumentException("Can't update cell, needs relocation but relocation disabled", "canRelocate");
+                    throw new ArgumentException("Can't update cell, needs relocation but relocation disabled", nameof(canRelocate));
                 }
             }
             else

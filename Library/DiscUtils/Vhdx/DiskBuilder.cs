@@ -55,7 +55,7 @@ namespace DiscUtils.Vhdx
             {
                 if (value % Sizes.OneMiB != 0)
                 {
-                    throw new ArgumentException("BlockSize must be a multiple of 1MB", "value");
+                    throw new ArgumentException("BlockSize must be a multiple of 1MB", nameof(value));
                 }
 
                 _blockSize = value;
@@ -73,7 +73,7 @@ namespace DiscUtils.Vhdx
         {
             if (string.IsNullOrEmpty(baseName))
             {
-                throw new ArgumentException("Invalid base file name", "baseName");
+                throw new ArgumentException("Invalid base file name", nameof(baseName));
             }
 
             if (Content == null)

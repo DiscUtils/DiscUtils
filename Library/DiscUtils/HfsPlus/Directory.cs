@@ -79,12 +79,12 @@ namespace DiscUtils.HfsPlus
         {
             if (name == null)
             {
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentException("Attempt to lookup empty file name", "name");
+                throw new ArgumentException("Attempt to lookup empty file name", nameof(name));
             }
 
             byte[] dirEntryData = Context.Catalog.Find(new CatalogKey(NodeId, name));

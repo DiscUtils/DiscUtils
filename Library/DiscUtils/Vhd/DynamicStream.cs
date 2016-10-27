@@ -48,22 +48,22 @@ namespace DiscUtils.Vhd
         {
             if (fileStream == null)
             {
-                throw new ArgumentNullException("fileStream");
+                throw new ArgumentNullException(nameof(fileStream));
             }
 
             if (dynamicHeader == null)
             {
-                throw new ArgumentNullException("dynamicHeader");
+                throw new ArgumentNullException(nameof(dynamicHeader));
             }
 
             if (parentStream == null)
             {
-                throw new ArgumentNullException("parentStream");
+                throw new ArgumentNullException(nameof(parentStream));
             }
 
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException("length", length, "Negative lengths not allowed");
+                throw new ArgumentOutOfRangeException(nameof(length), length, "Negative lengths not allowed");
             }
 
             _fileStream = fileStream;

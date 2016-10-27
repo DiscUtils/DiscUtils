@@ -36,7 +36,7 @@ namespace DiscUtils.SquashFs
             _dirInode = inode as IDirectoryInode;
             if (_dirInode == null)
             {
-                throw new ArgumentException("Inode is not a directory", "inode");
+                throw new ArgumentException("Inode is not a directory", nameof(inode));
             }
         }
 

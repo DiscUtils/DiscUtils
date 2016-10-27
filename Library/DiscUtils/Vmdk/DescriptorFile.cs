@@ -214,7 +214,7 @@ namespace DiscUtils.Vmdk
                 case "legacyESX":
                     return DiskAdapterType.LegacyEsx;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -231,7 +231,7 @@ namespace DiscUtils.Vmdk
                 case DiskAdapterType.LegacyEsx:
                     return "legacyESX";
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -264,7 +264,7 @@ namespace DiscUtils.Vmdk
                 case "streamOptimized":
                     return DiskCreateType.StreamOptimized;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -297,7 +297,7 @@ namespace DiscUtils.Vmdk
                 case DiskCreateType.StreamOptimized:
                     return "streamOptimized";
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), "value");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -307,7 +307,7 @@ namespace DiscUtils.Vmdk
             string[] bytesAsHex = value.Split(' ', '-');
             if (bytesAsHex.Length != 16)
             {
-                throw new ArgumentException("Invalid UUID", "value");
+                throw new ArgumentException("Invalid UUID", nameof(value));
             }
 
             for (int i = 0; i < 16; ++i)

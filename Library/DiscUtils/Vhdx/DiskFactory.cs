@@ -52,7 +52,7 @@ namespace DiscUtils.Vhdx
                     builder.DiskType = DiskType.Dynamic;
                     break;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), nameof(variant));
             }
 
             return builder;
@@ -67,7 +67,7 @@ namespace DiscUtils.Vhdx
                 case "dynamic":
                     return Disk.InitializeDynamic(locator, path, diskParameters.Capacity, FileParameters.DefaultDynamicBlockSize);
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), "variant");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), nameof(variant));
             }
         }
 

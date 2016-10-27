@@ -43,7 +43,7 @@ namespace DiscUtils
         {
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             _stream = stream as SparseStream;

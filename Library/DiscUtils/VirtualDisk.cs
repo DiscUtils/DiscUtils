@@ -611,11 +611,11 @@ namespace DiscUtils
         {
             if (data == null)
             {
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             }
             else if (data.Length != Sizes.Sector)
             {
-                throw new ArgumentException("The Master Boot Record must be exactly 512 bytes in length", "data");
+                throw new ArgumentException("The Master Boot Record must be exactly 512 bytes in length", nameof(data));
             }
 
             long oldPos = Content.Position;
@@ -679,7 +679,7 @@ namespace DiscUtils
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("Path must not be null or empty", "path");
+                throw new ArgumentException("Path must not be null or empty", nameof(path));
             }
 
             if (path.Contains("://"))

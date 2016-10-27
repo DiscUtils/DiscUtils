@@ -49,12 +49,12 @@ namespace DiscUtils.Vhdx
         {
             if (fileSize % Sizes.OneMiB != 0)
             {
-                throw new ArgumentException("VHDX space must be allocated on 1MB boundaries", "fileSize");
+                throw new ArgumentException("VHDX space must be allocated on 1MB boundaries", nameof(fileSize));
             }
 
             if (fileSize < _fileSize)
             {
-                throw new ArgumentOutOfRangeException("fileSize", "Attempt to extend file to smaller size", fileSize.ToString(CultureInfo.InvariantCulture));
+                throw new ArgumentOutOfRangeException(nameof(fileSize), "Attempt to extend file to smaller size", fileSize.ToString(CultureInfo.InvariantCulture));
             }
 
             _fileSize = fileSize;
@@ -86,7 +86,7 @@ namespace DiscUtils.Vhdx
         {
             if (length % Sizes.OneMiB != 0)
             {
-                throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", "length");
+                throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", nameof(length));
             }
 
             for (int i = 0; i < _freeExtents.Count; ++i)
@@ -114,12 +114,12 @@ namespace DiscUtils.Vhdx
         {
             if (start % Sizes.OneMiB != 0)
             {
-                throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", "start");
+                throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", nameof(start));
             }
 
             if (length % Sizes.OneMiB != 0)
             {
-                throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", "length");
+                throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", nameof(length));
             }
 
             if (start < 0 || start > _fileSize || length > _fileSize - start)

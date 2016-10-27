@@ -151,7 +151,7 @@ namespace DiscUtils.Ntfs
 
             if (run.IsSparse)
             {
-                throw new ArgumentException("Run is already sparse", "index");
+                throw new ArgumentException("Run is already sparse", nameof(index));
             }
 
             _runs[index] = new CookedDataRun(new DataRun(0, run.Length, true), run.StartVcn, prevLcn, run.AttributeExtent);
@@ -184,7 +184,7 @@ namespace DiscUtils.Ntfs
 
             if (!run.IsSparse)
             {
-                throw new ArgumentException("Run is already non-sparse", "index");
+                throw new ArgumentException("Run is already non-sparse", nameof(index));
             }
 
             _runs.RemoveAt(index);
@@ -239,7 +239,7 @@ namespace DiscUtils.Ntfs
 
             if (run.StartVcn >= vcn || run.StartVcn + run.Length <= vcn)
             {
-                throw new ArgumentException("Attempt to split run outside of it's range", "vcn");
+                throw new ArgumentException("Attempt to split run outside of it's range", nameof(vcn));
             }
 
             long distance = vcn - run.StartVcn;

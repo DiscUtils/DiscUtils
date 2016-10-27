@@ -96,7 +96,7 @@ namespace DiscUtils
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException("value", "Attempt to move beyond end of stream");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Attempt to move beyond end of stream");
                 }
             }
         }
@@ -131,7 +131,7 @@ namespace DiscUtils
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to read negative bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to read negative bytes");
             }
 
             if (_position > _length)
@@ -159,7 +159,7 @@ namespace DiscUtils
 
             if (absNewPos < 0)
             {
-                throw new ArgumentOutOfRangeException("offset", "Attempt to move before start of stream");
+                throw new ArgumentOutOfRangeException(nameof(offset), "Attempt to move before start of stream");
             }
 
             _position = absNewPos;
@@ -175,12 +175,12 @@ namespace DiscUtils
         {
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to write negative bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to write negative bytes");
             }
 
             if (_position + count > _length)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to write beyond end of substream");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to write beyond end of substream");
             }
 
             _parent.Position = _first + _position;

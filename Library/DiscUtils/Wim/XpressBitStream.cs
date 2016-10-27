@@ -56,7 +56,7 @@ namespace DiscUtils.Wim
         {
             if (count > 16)
             {
-                throw new ArgumentOutOfRangeException("count", count, "Maximum 16 bits can be read");
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Maximum 16 bits can be read");
             }
 
             EnsureBufferFilled();

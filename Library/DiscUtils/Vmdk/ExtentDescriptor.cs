@@ -129,7 +129,7 @@ namespace DiscUtils.Vmdk
             }
             else
             {
-                throw new ArgumentException("Unknown access type", "access");
+                throw new ArgumentException("Unknown access type", nameof(access));
             }
         }
 
@@ -144,7 +144,7 @@ namespace DiscUtils.Vmdk
                 case ExtentAccess.ReadWrite:
                     return "RW";
                 default:
-                    throw new ArgumentException("Unknown access type", "access");
+                    throw new ArgumentException("Unknown access type", nameof(access));
             }
         }
 
@@ -180,7 +180,7 @@ namespace DiscUtils.Vmdk
             }
             else
             {
-                throw new ArgumentException("Unknown extent type", "type");
+                throw new ArgumentException("Unknown extent type", nameof(type));
             }
         }
 
@@ -203,7 +203,7 @@ namespace DiscUtils.Vmdk
                 case ExtentType.VmfsRaw:
                     return "VMFSRAW";
                 default:
-                    throw new ArgumentException("Unknown extent type", "type");
+                    throw new ArgumentException("Unknown extent type", nameof(type));
             }
         }
 

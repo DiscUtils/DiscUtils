@@ -62,17 +62,17 @@ namespace DiscUtils.Compression
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (offset < 0 || offset > buffer.Length)
             {
-                throw new ArgumentException("Offset outside of array bounds", "offset");
+                throw new ArgumentException("Offset outside of array bounds", nameof(offset));
             }
 
             if (count < 0 || offset + count > buffer.Length)
             {
-                throw new ArgumentException("Array index out of bounds", "count");
+                throw new ArgumentException("Array index out of bounds", nameof(count));
             }
 
             int processed = 0;

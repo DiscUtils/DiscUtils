@@ -251,7 +251,7 @@ namespace DiscUtils.Raw
                 case FloppyDiskType.Extended:
                     return Sizes.Sector * 5760;
                 default:
-                    throw new ArgumentException("Invalid floppy disk type", "type");
+                    throw new ArgumentException("Invalid floppy disk type", nameof(type));
             }
         }
     }

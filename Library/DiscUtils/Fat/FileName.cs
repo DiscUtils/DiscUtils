@@ -55,7 +55,7 @@ namespace DiscUtils.Fat
                 byte b = bytes[nameIdx++];
                 if (b < 0x20 || Contains(InvalidBytes, b))
                 {
-                    throw new ArgumentException("Invalid character in file name '" + (char)b + "'", "name");
+                    throw new ArgumentException("Invalid character in file name '" + (char)b + "'", nameof(name));
                 }
 
                 _raw[rawIdx++] = b;
@@ -63,11 +63,11 @@ namespace DiscUtils.Fat
 
             if (rawIdx > 8)
             {
-                throw new ArgumentException("File name too long '" + name + "'", "name");
+                throw new ArgumentException("File name too long '" + name + "'", nameof(name));
             }
             else if (rawIdx == 0)
             {
-                throw new ArgumentException("File name too short '" + name + "'", "name");
+                throw new ArgumentException("File name too short '" + name + "'", nameof(name));
             }
 
             while (rawIdx < 8)
@@ -85,7 +85,7 @@ namespace DiscUtils.Fat
                 byte b = bytes[nameIdx++];
                 if (b < 0x20 || Contains(InvalidBytes, b))
                 {
-                    throw new ArgumentException("Invalid character in file extension '" + (char)b + "'", "name");
+                    throw new ArgumentException("Invalid character in file extension '" + (char)b + "'", nameof(name));
                 }
 
                 _raw[rawIdx++] = b;
@@ -98,7 +98,7 @@ namespace DiscUtils.Fat
 
             if (nameIdx != bytes.Length)
             {
-                throw new ArgumentException("File extension too long '" + name + "'", "name");
+                throw new ArgumentException("File extension too long '" + name + "'", nameof(name));
             }
         }
 

@@ -355,27 +355,27 @@ namespace DiscUtils
         {
             if (cylinder < 0)
             {
-                throw new ArgumentOutOfRangeException("cylinder", cylinder, "cylinder number is negative");
+                throw new ArgumentOutOfRangeException(nameof(cylinder), cylinder, "cylinder number is negative");
             }
 
             if (head >= _headsPerCylinder)
             {
-                throw new ArgumentOutOfRangeException("head", head, "head number is larger than disk geometry");
+                throw new ArgumentOutOfRangeException(nameof(head), head, "head number is larger than disk geometry");
             }
 
             if (head < 0)
             {
-                throw new ArgumentOutOfRangeException("head", head, "head number is negative");
+                throw new ArgumentOutOfRangeException(nameof(head), head, "head number is negative");
             }
 
             if (sector > _sectorsPerTrack)
             {
-                throw new ArgumentOutOfRangeException("sector", sector, "sector number is larger than disk geometry");
+                throw new ArgumentOutOfRangeException(nameof(sector), sector, "sector number is larger than disk geometry");
             }
 
             if (sector < 1)
             {
-                throw new ArgumentOutOfRangeException("sector", sector, "sector number is less than one (sectors are 1-based)");
+                throw new ArgumentOutOfRangeException(nameof(sector), sector, "sector number is less than one (sectors are 1-based)");
             }
 
             return (((cylinder * (long)_headsPerCylinder) + head) * _sectorsPerTrack) + sector - 1;
@@ -390,7 +390,7 @@ namespace DiscUtils
         {
             if (logicalBlockAddress < 0)
             {
-                throw new ArgumentOutOfRangeException("logicalBlockAddress", logicalBlockAddress, "Logical Block Address is negative");
+                throw new ArgumentOutOfRangeException(nameof(logicalBlockAddress), logicalBlockAddress, "Logical Block Address is negative");
             }
 
             int cylinder = (int)(logicalBlockAddress / (_headsPerCylinder * _sectorsPerTrack));
@@ -446,7 +446,7 @@ namespace DiscUtils
                     return Geometry.LargeBiosGeometry(this);
 
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Translation mode '{0}' not yet implemented", translation), "translation");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Translation mode '{0}' not yet implemented", translation), nameof(translation));
             }
         }
 

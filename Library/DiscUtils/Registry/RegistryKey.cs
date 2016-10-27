@@ -436,7 +436,7 @@ namespace DiscUtils.Registry
 
             if (throwOnMissingValue && !foundValue)
             {
-                throw new ArgumentException("No such value: " + name, "name");
+                throw new ArgumentException("No such value: " + name, nameof(name));
             }
         }
 
@@ -594,7 +594,7 @@ namespace DiscUtils.Registry
         {
             if (string.IsNullOrEmpty(subkey))
             {
-                throw new ArgumentException("Invalid SubKey", "subkey");
+                throw new ArgumentException("Invalid SubKey", nameof(subkey));
             }
 
             string[] split = subkey.Split(new char[] { '\\' }, 2);
@@ -604,7 +604,7 @@ namespace DiscUtils.Registry
             {
                 if (throwOnMissingSubKey)
                 {
-                    throw new ArgumentException("No such SubKey", "subkey");
+                    throw new ArgumentException("No such SubKey", nameof(subkey));
                 }
                 else
                 {

@@ -73,7 +73,7 @@ namespace DiscUtils.Partitions
         {
             if (bootSectors == null)
             {
-                throw new ArgumentNullException("bootSectors");
+                throw new ArgumentNullException(nameof(bootSectors));
             }
 
             _capacity = capacity;
@@ -96,7 +96,7 @@ namespace DiscUtils.Partitions
         {
             if (sourceDisk == null)
             {
-                throw new ArgumentNullException("sourceDisk");
+                throw new ArgumentNullException(nameof(sourceDisk));
             }
 
             _capacity = sourceDisk.Capacity;

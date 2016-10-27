@@ -107,7 +107,7 @@ namespace DiscUtils
             VirtualDiskFactory factory;
             if (!TypeMap.TryGetValue(type, out factory))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown disk type '{0}'", type), "type");
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown disk type '{0}'", type), nameof(type));
             }
 
             return factory.GetImageBuilder(variant);

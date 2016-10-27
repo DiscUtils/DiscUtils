@@ -150,7 +150,7 @@ namespace DiscUtils.Compression
         {
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (buffer.Length < offset + count)
@@ -160,12 +160,12 @@ namespace DiscUtils.Compression
 
             if (offset < 0)
             {
-                throw new ArgumentException("Offset less than zero", "offset");
+                throw new ArgumentException("Offset less than zero", nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new ArgumentException("Count less than zero", "count");
+                throw new ArgumentException("Count less than zero", nameof(count));
             }
 
             if (_eof)

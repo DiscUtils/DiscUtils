@@ -177,7 +177,7 @@ namespace DiscUtils.Ntfs
             int idx = _dataRuns.IndexOf(oldRun);
             if (idx < 0)
             {
-                throw new ArgumentException("Attempt to replace non-existant run", "oldRun");
+                throw new ArgumentException("Attempt to replace non-existant run", nameof(oldRun));
             }
 
             _dataRuns[idx] = newRun;
@@ -188,7 +188,7 @@ namespace DiscUtils.Ntfs
             int idx = _dataRuns.IndexOf(run);
             if (idx < 0)
             {
-                throw new ArgumentException("Attempt to remove non-existant run", "run");
+                throw new ArgumentException("Attempt to remove non-existant run", nameof(run));
             }
 
             _dataRuns.RemoveAt(idx);
@@ -200,7 +200,7 @@ namespace DiscUtils.Ntfs
             int idx = _dataRuns.IndexOf(existingRun);
             if (idx < 0)
             {
-                throw new ArgumentException("Attempt to replace non-existant run", "existingRun");
+                throw new ArgumentException("Attempt to replace non-existant run", nameof(existingRun));
             }
 
             _dataRuns.Insert(idx + 1, newRun);

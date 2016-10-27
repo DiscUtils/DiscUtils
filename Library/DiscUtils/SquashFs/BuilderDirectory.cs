@@ -47,7 +47,7 @@ namespace DiscUtils.SquashFs
         {
             if (name.Contains(@"\\"))
             {
-                throw new ArgumentException("Single level of path must be provided", "name");
+                throw new ArgumentException("Single level of path must be provided", nameof(name));
             }
 
             if (_index.ContainsKey(name))

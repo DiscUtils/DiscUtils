@@ -509,7 +509,7 @@ namespace DiscUtils.Vhdx
         {
             if (blockSize < Sizes.OneMiB || blockSize > Sizes.OneMiB * 256 || !Utilities.IsPowerOfTwo(blockSize))
             {
-                throw new ArgumentOutOfRangeException("blockSize", blockSize, "BlockSize must be a power of 2 between 1MB and 256MB");
+                throw new ArgumentOutOfRangeException(nameof(blockSize), blockSize, "BlockSize must be a power of 2 between 1MB and 256MB");
             }
 
             int logicalSectorSize = 512;

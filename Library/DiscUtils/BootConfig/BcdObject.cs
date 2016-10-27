@@ -233,7 +233,7 @@ namespace DiscUtils.BootConfig
         {
             if (type == ObjectType.Inherit)
             {
-                throw new ArgumentException("Can not test inheritability by inherit objects", "type");
+                throw new ArgumentException("Can not test inheritability by inherit objects", nameof(type));
             }
 
             if (ObjectType != ObjectType.Inherit)

@@ -75,7 +75,7 @@ namespace DiscUtils
         {
             if (!toWrap.CanSeek)
             {
-                throw new ArgumentException("Wrapped stream must support seeking", "toWrap");
+                throw new ArgumentException("Wrapped stream must support seeking", nameof(toWrap));
             }
 
             _common = new CommonState

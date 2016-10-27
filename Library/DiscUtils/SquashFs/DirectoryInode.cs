@@ -47,7 +47,7 @@ namespace DiscUtils.SquashFs
             {
                 if (value > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException("value", value, "File size greater than " + ushort.MaxValue);
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "File size greater than " + ushort.MaxValue);
                 }
 
                 _fileSize = (ushort)value;

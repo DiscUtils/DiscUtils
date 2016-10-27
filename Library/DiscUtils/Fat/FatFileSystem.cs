@@ -447,7 +447,7 @@ namespace DiscUtils.Fat
             }
             else
             {
-                throw new ArgumentException("Unrecognised Floppy Disk type", "type");
+                throw new ArgumentException("Unrecognised Floppy Disk type", nameof(type));
             }
 
             stream.Write(bpb, 0, bpb.Length);
@@ -1371,7 +1371,7 @@ namespace DiscUtils.Fat
             {
                 if (destinationDirectoryName == null)
                 {
-                    throw new ArgumentNullException("destinationDirectoryName");
+                    throw new ArgumentNullException(nameof(destinationDirectoryName));
                 }
                 else
                 {

@@ -270,12 +270,12 @@ namespace DiscUtils
             {
                 if (x == null)
                 {
-                    throw new ArgumentNullException("x");
+                    throw new ArgumentNullException(nameof(x));
                 }
 
                 if (y == null)
                 {
-                    throw new ArgumentNullException("y");
+                    throw new ArgumentNullException(nameof(y));
                 }
 
                 if (x.Start + x.Length <= y.Start)
@@ -300,12 +300,12 @@ namespace DiscUtils
             {
                 if (x == null)
                 {
-                    throw new ArgumentNullException("x");
+                    throw new ArgumentNullException(nameof(x));
                 }
 
                 if (y == null)
                 {
-                    throw new ArgumentNullException("y");
+                    throw new ArgumentNullException(nameof(y));
                 }
 
                 long val = x.Start - y.Start;

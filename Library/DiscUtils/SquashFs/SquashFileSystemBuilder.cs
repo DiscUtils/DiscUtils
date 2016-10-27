@@ -256,17 +256,17 @@ namespace DiscUtils.SquashFs
         {
             if (output == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException(nameof(output));
             }
 
             if (!output.CanWrite)
             {
-                throw new ArgumentException("Output stream must be writable", "output");
+                throw new ArgumentException("Output stream must be writable", nameof(output));
             }
 
             if (!output.CanSeek)
             {
-                throw new ArgumentException("Output stream must support seeking", "output");
+                throw new ArgumentException("Output stream must support seeking", nameof(output));
             }
 
             _context = new BuilderContext()

@@ -237,7 +237,7 @@ namespace DiscUtils.Registry
         {
             if (valueType == RegistryValueType.None)
             {
-                throw new ArgumentException("Specific registry value type must be specified", "valueType");
+                throw new ArgumentException("Specific registry value type must be specified", nameof(valueType));
             }
 
             byte[] data;

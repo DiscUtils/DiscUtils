@@ -324,7 +324,7 @@ namespace DiscUtils.Iscsi
 
         private static void ThrowInvalidURI(string uri)
         {
-            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Not a valid iSCSI URI: {0}", uri), "uri");
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Not a valid iSCSI URI: {0}", uri), nameof(uri));
         }
     }
 }

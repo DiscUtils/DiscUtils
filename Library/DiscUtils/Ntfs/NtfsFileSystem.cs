@@ -1039,7 +1039,7 @@ namespace DiscUtils.Ntfs
 
                 if ((changedAttribs & NonSettableFileAttributes) != 0)
                 {
-                    throw new ArgumentException("Attempt to change attributes that are read-only", "newValue");
+                    throw new ArgumentException("Attempt to change attributes that are read-only", nameof(newValue));
                 }
 
                 File file = GetFile(dirEntry.Reference);
@@ -1048,19 +1048,19 @@ namespace DiscUtils.Ntfs
                 {
                     if (dirEntry.IsDirectory)
                     {
-                        throw new ArgumentException("Attempt to change sparse attribute on a directory", "newValue");
+                        throw new ArgumentException("Attempt to change sparse attribute on a directory", nameof(newValue));
                     }
 
                     if ((newValue & FileAttributes.SparseFile) == 0)
                     {
-                        throw new ArgumentException("Attempt to remove sparse attribute from file", "newValue");
+                        throw new ArgumentException("Attempt to remove sparse attribute from file", nameof(newValue));
                     }
                     else
                     {
                         NtfsAttribute ntfsAttr = file.GetAttribute(AttributeType.Data, null);
                         if ((ntfsAttr.Flags & AttributeFlags.Compressed) != 0)
                         {
-                            throw new ArgumentException("Attempt to mark compressed file as sparse", "newValue");
+                            throw new ArgumentException("Attempt to mark compressed file as sparse", nameof(newValue));
                         }
 
                         ntfsAttr.Flags |= AttributeFlags.Sparse;
@@ -1077,14 +1077,14 @@ namespace DiscUtils.Ntfs
                 {
                     if ((newValue & FileAttributes.Compressed) == 0)
                     {
-                        throw new ArgumentException("Attempt to remove compressed attribute from file", "newValue");
+                        throw new ArgumentException("Attempt to remove compressed attribute from file", nameof(newValue));
                     }
                     else
                     {
                         NtfsAttribute ntfsAttr = file.GetAttribute(AttributeType.Data, null);
                         if ((ntfsAttr.Flags & AttributeFlags.Sparse) != 0)
                         {
-                            throw new ArgumentException("Attempt to mark sparse file as compressed", "newValue");
+                            throw new ArgumentException("Attempt to mark sparse file as compressed", nameof(newValue));
                         }
 
                         ntfsAttr.Flags |= AttributeFlags.Compressed;
@@ -1665,7 +1665,7 @@ namespace DiscUtils.Ntfs
         {
             if (!Utilities.Is8Dot3(shortName))
             {
-                throw new ArgumentException("Short name is not a valid 8.3 file name", "shortName");
+                throw new ArgumentException("Short name is not a valid 8.3 file name", nameof(shortName));
             }
 
             using (new NtfsTransaction())

@@ -42,7 +42,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             if (drive == null)
             {
                 WriteError(new ErrorRecord(
-                    new ArgumentNullException("drive"),
+                    new ArgumentNullException(nameof(drive)),
                     "NullDrive",
                     ErrorCategory.InvalidArgument,
                     null));
@@ -115,7 +115,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
             if (drive == null)
             {
                 WriteError(new ErrorRecord(
-                    new ArgumentNullException("drive"),
+                    new ArgumentNullException(nameof(drive)),
                     "NullDrive",
                     ErrorCategory.InvalidArgument,
                     null));

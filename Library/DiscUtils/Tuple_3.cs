@@ -61,7 +61,7 @@ namespace DiscUtils
                     case 0: return _a;
                     case 1: return _b;
                     case 2: return _c;
-                    default: throw new ArgumentOutOfRangeException("i", i, "Invalid index");
+                    default: throw new ArgumentOutOfRangeException(nameof(i), i, "Invalid index");
                 }
             }
         }

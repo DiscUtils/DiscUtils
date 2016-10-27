@@ -238,7 +238,7 @@ namespace DiscUtils.Iso9660
         {
             if (!source.CanSeek)
             {
-                throw new ArgumentException("source doesn't support seeking", "source");
+                throw new ArgumentException("source doesn't support seeking", nameof(source));
             }
 
             string[] nameElements = name.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);

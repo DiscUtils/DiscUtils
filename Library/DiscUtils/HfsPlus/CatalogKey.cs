@@ -78,7 +78,7 @@ namespace DiscUtils.HfsPlus
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             if (_nodeId != other._nodeId)

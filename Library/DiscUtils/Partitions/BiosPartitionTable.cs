@@ -320,7 +320,7 @@ namespace DiscUtils.Partitions
         {
             if (size < _diskGeometry.BytesPerSector)
             {
-                throw new ArgumentOutOfRangeException("size", size, "size must be at least one sector");
+                throw new ArgumentOutOfRangeException(nameof(size), size, "size must be at least one sector");
             }
 
             if (alignment % _diskGeometry.BytesPerSector != 0)
@@ -362,7 +362,7 @@ namespace DiscUtils.Partitions
         {
             if (first < 0)
             {
-                throw new ArgumentOutOfRangeException("first", first, "First cylinder must be Zero or greater");
+                throw new ArgumentOutOfRangeException(nameof(first), first, "First cylinder must be Zero or greater");
             }
 
             if (last <= first)
@@ -393,7 +393,7 @@ namespace DiscUtils.Partitions
 
             if ((last + 1) * _diskGeometry.BytesPerSector > _diskData.Length)
             {
-                throw new ArgumentOutOfRangeException("last", last, "The last sector extends beyond the end of the disk");
+                throw new ArgumentOutOfRangeException(nameof(last), last, "The last sector extends beyond the end of the disk");
             }
 
             BiosPartitionRecord[] existing = GetPrimaryRecords();
@@ -579,7 +579,7 @@ namespace DiscUtils.Partitions
                 case WellKnownPartitionType.LinuxLvm:
                     return BiosPartitionTypes.LinuxLvm;
                 default:
-                    throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Unrecognized partition type: '{0}'", type), "type");
+                    throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Unrecognized partition type: '{0}'", type), nameof(type));
             }
         }
 

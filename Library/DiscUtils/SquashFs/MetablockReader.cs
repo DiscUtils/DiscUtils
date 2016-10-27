@@ -47,7 +47,7 @@ namespace DiscUtils.SquashFs
         {
             if (blockOffset < 0 || blockOffset >= VfsSquashFileSystemReader.MetadataBufferSize)
             {
-                throw new ArgumentOutOfRangeException("blockOffset", blockOffset, "Offset must be positive and less than block size");
+                throw new ArgumentOutOfRangeException(nameof(blockOffset), blockOffset, "Offset must be positive and less than block size");
             }
 
             _currentBlockStart = blockStart;

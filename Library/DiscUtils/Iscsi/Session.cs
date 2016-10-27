@@ -373,12 +373,12 @@ namespace DiscUtils.Iscsi
         {
             if (outBuffer == null && outBufferLength != 0)
             {
-                throw new ArgumentException("outBufferLength must be 0 if outBuffer null", "outBufferLength");
+                throw new ArgumentException("outBufferLength must be 0 if outBuffer null", nameof(outBufferLength));
             }
 
             if (inBuffer == null && inBufferLength != 0)
             {
-                throw new ArgumentException("inBufferLength must be 0 if inBuffer null", "inBufferLength");
+                throw new ArgumentException("inBufferLength must be 0 if inBuffer null", nameof(inBufferLength));
             }
 
             ScsiRawCommand cmd = new ScsiRawCommand((ulong)lun, command, 0, command.Length);

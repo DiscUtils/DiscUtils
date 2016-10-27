@@ -107,7 +107,7 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException("value", "Attempt to move before beginning of stream");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Attempt to move before beginning of stream");
                 }
             }
         }
@@ -131,7 +131,7 @@ namespace DiscUtils.Fat
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", "Attempt to read negative number of bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), "Attempt to read negative number of bytes");
             }
 
             int target = count;
@@ -258,7 +258,7 @@ namespace DiscUtils.Fat
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count", count, "Attempting to write negative number of bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Attempting to write negative number of bytes");
             }
 
             if (offset > buffer.Length || (offset + count) > buffer.Length)

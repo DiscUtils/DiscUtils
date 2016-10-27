@@ -51,12 +51,12 @@ namespace DiscUtils
             {
                 if (stream.CanRead != _canRead || stream.CanWrite != _canWrite)
                 {
-                    throw new ArgumentException("All striped streams must have the same read/write permissions", "wrapped");
+                    throw new ArgumentException("All striped streams must have the same read/write permissions", nameof(wrapped));
                 }
 
                 if (stream.Length != subStreamLength)
                 {
-                    throw new ArgumentException("All striped streams must have the same length", "wrapped");
+                    throw new ArgumentException("All striped streams must have the same length", nameof(wrapped));
                 }
             }
 

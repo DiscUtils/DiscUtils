@@ -47,7 +47,7 @@ namespace DiscUtils.Wim
             ShortResourceHeader metaDataFileInfo = _file.LocateImage(index);
             if (metaDataFileInfo == null)
             {
-                throw new ArgumentException("No such image: " + index, "index");
+                throw new ArgumentException("No such image: " + index, nameof(index));
             }
 
             _metaDataStream = _file.OpenResourceStream(metaDataFileInfo);

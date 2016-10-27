@@ -76,7 +76,7 @@ namespace DiscUtils.HfsPlus
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
 
             // Sort by file id, fork type, then starting block

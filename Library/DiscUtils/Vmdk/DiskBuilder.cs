@@ -105,7 +105,7 @@ namespace DiscUtils.Vmdk
         {
             if (string.IsNullOrEmpty(baseName))
             {
-                throw new ArgumentException("Invalid base file name", "baseName");
+                throw new ArgumentException("Invalid base file name", nameof(baseName));
             }
 
             if (Content == null)

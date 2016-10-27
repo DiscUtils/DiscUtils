@@ -56,7 +56,7 @@ namespace DiscUtils.Fat
         {
             if (offset + ClusterSize > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset", "buffer is too small - cluster would overflow buffer");
+                throw new ArgumentOutOfRangeException(nameof(offset), "buffer is too small - cluster would overflow buffer");
             }
 
             uint firstSector = (uint)(((cluster - 2) * _sectorsPerCluster) + _firstDataSector);
@@ -72,7 +72,7 @@ namespace DiscUtils.Fat
         {
             if (offset + ClusterSize > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException("offset", "buffer is too small - cluster would overflow buffer");
+                throw new ArgumentOutOfRangeException(nameof(offset), "buffer is too small - cluster would overflow buffer");
             }
 
             uint firstSector = (uint)(((cluster - 2) * _sectorsPerCluster) + _firstDataSector);

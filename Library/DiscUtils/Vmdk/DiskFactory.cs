@@ -95,7 +95,7 @@ namespace DiscUtils.Vmdk
                 case "vmfsdynamic":
                     return DiskCreateType.VmfsSparse;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), "variant");
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), nameof(variant));
             }
         }
 

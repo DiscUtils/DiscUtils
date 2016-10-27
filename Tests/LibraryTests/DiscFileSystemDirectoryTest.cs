@@ -31,7 +31,7 @@ namespace DiscUtils
     [TestFixture]
     public class DiscFileSystemDirectoryTest
     {
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Create(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -42,7 +42,7 @@ namespace DiscUtils
             Assert.AreEqual(1, fs.Root.GetDirectories().Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void CreateRecursive(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -55,7 +55,7 @@ namespace DiscUtils
             Assert.AreEqual("CHILDDIR", fs.GetDirectoryInfo(@"SOMEDIR").GetDirectories()[0].Name);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void CreateExisting(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -67,7 +67,7 @@ namespace DiscUtils
             Assert.AreEqual(1, fs.Root.GetDirectories().Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         [Category("ThrowsException")]
         public void CreateInvalid_Long(NewFileSystemDelegate fsFactory)
         {
@@ -77,7 +77,7 @@ namespace DiscUtils
             Assert.Throws<IOException>(() => dirInfo.Create());
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         [Category("ThrowsException")]
         public void CreateInvalid_Characters(NewFileSystemDelegate fsFactory)
         {
@@ -87,7 +87,7 @@ namespace DiscUtils
             Assert.Throws<IOException>(() => dirInfo.Create());
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Exists(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -103,7 +103,7 @@ namespace DiscUtils
             Assert.IsFalse(fs.GetDirectoryInfo(@"SOMEDIR\NONDIR").Exists);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void FullName(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -113,7 +113,7 @@ namespace DiscUtils
             Assert.AreEqual(@"SOMEDIR\CHILDDIR\", fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").FullName);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Delete(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -125,7 +125,7 @@ namespace DiscUtils
             Assert.AreEqual(0, fs.Root.GetDirectories().Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void DeleteRecursive(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -137,7 +137,7 @@ namespace DiscUtils
             Assert.AreEqual(0, fs.Root.GetDirectories().Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         [Category("ThrowsException")]
         public void DeleteRoot(NewFileSystemDelegate fsFactory)
         {
@@ -146,7 +146,7 @@ namespace DiscUtils
             Assert.Throws<IOException>(() => fs.Root.Delete());
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         [Category("ThrowsException")]
         public void DeleteNonEmpty_NonRecursive(NewFileSystemDelegate fsFactory)
         {
@@ -156,7 +156,7 @@ namespace DiscUtils
             Assert.Throws<IOException>(() => fs.Root.GetDirectories(@"Fred")[0].Delete());
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "QuickReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.QuickReadWriteFileSystems))]
         [Category("SlowTest")]
         public void CreateDeleteLeakTest(NewFileSystemDelegate fsFactory)
         {
@@ -179,7 +179,7 @@ namespace DiscUtils
             }
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Move(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -191,7 +191,7 @@ namespace DiscUtils
             Assert.AreEqual(0, fs.Root.GetDirectories("SOMEDIR")[0].GetDirectories().Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Extension(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -200,7 +200,7 @@ namespace DiscUtils
             Assert.AreEqual("", fs.GetDirectoryInfo("fred").Extension);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void GetDirectories(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -228,7 +228,7 @@ namespace DiscUtils
             Assert.AreEqual(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void GetDirectories_BadPath(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -236,7 +236,7 @@ namespace DiscUtils
             Assert.Throws<DirectoryNotFoundException>(() => fs.GetDirectories(@"\baddir"));
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void GetFiles(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -257,7 +257,7 @@ namespace DiscUtils
             Assert.AreEqual(0, fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories).Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void GetFileSystemInfos(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -275,7 +275,7 @@ namespace DiscUtils
             Assert.AreEqual(2, fs.Root.GetFileSystemInfos("*.?XT").Length);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Parent(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -285,7 +285,7 @@ namespace DiscUtils
             Assert.AreEqual(fs.Root, fs.Root.GetDirectories("SOMEDIR")[0].Parent);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Parent_Root(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -293,7 +293,7 @@ namespace DiscUtils
             Assert.IsNull(fs.Root.Parent);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void CreationTimeUtc(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -304,7 +304,7 @@ namespace DiscUtils
             Assert.LessOrEqual(DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(10)), fs.Root.GetDirectories("DIR")[0].CreationTimeUtc);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void CreationTime(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -315,7 +315,7 @@ namespace DiscUtils
             Assert.LessOrEqual(DateTime.Now.Subtract(TimeSpan.FromSeconds(10)), fs.Root.GetDirectories("DIR")[0].CreationTime);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void LastAccessTime(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -331,7 +331,7 @@ namespace DiscUtils
             Assert.Less(baseTime, di.LastAccessTime);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void LastWriteTime(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -347,7 +347,7 @@ namespace DiscUtils
             Assert.Less(baseTime, di.LastWriteTime);
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void Equals(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
@@ -355,7 +355,7 @@ namespace DiscUtils
             Assert.AreEqual(fs.GetDirectoryInfo("foo"), fs.GetDirectoryInfo("foo"));
         }
 
-        [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
+        [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
         public void RootBehaviour(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();

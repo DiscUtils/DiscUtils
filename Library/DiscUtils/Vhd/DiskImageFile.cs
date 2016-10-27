@@ -498,7 +498,7 @@ namespace DiscUtils.Vhd
         {
             if (blockSize > uint.MaxValue || blockSize < 0)
             {
-                throw new ArgumentOutOfRangeException("blockSize", "Must be in the range 0 to uint.MaxValue");
+                throw new ArgumentOutOfRangeException(nameof(blockSize), "Must be in the range 0 to uint.MaxValue");
             }
 
             if (geometry == null)

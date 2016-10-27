@@ -49,12 +49,12 @@ namespace DiscUtils
             {
                 if (stream.CanRead != _canRead || stream.CanWrite != _canWrite || stream.CanSeek != _canSeek)
                 {
-                    throw new ArgumentException("All mirrored streams must have the same read/write/seek permissions", "wrapped");
+                    throw new ArgumentException("All mirrored streams must have the same read/write/seek permissions", nameof(wrapped));
                 }
 
                 if (stream.Length != _length)
                 {
-                    throw new ArgumentException("All mirrored streams must have the same length", "wrapped");
+                    throw new ArgumentException("All mirrored streams must have the same length", nameof(wrapped));
                 }
             }
         }
