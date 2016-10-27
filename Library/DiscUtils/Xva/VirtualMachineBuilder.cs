@@ -29,7 +29,7 @@ namespace DiscUtils.Xva
     using System.Security.Cryptography;
     using System.Text;
     using DiscUtils.Archives;
-    using DiskRecord = DiscUtils.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
+    using DiskRecord = Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
 
     /// <summary>
     /// A class that can be used to create Xen Virtual Appliance (XVA) files.

@@ -20,11 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Vmdk
 {
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a VMDK-backed disk.
     /// </summary>
@@ -36,7 +37,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// The list of files that make up the disk.
         /// </summary>
-        private List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>> _files;
+        private List<Tuple<VirtualDiskLayer, Ownership>> _files;
 
         /// <summary>
         /// The stream representing the content of this disk.
@@ -65,9 +66,9 @@ namespace DiscUtils.Vmdk
         {
             _path = path;
             FileLocator fileLocator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
-            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
+            _files = new List<Tuple<VirtualDiskLayer, Ownership>>();
             _files.Add(
-                new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(
+                new Tuple<VirtualDiskLayer, Ownership>(
                     new DiskImageFile(fileLocator, Utilities.GetFileFromPath(path), access), Ownership.Dispose));
             ResolveFileChain();
         }
@@ -85,23 +86,23 @@ namespace DiscUtils.Vmdk
                 _path = fileStream.Name;
             }
 
-            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(stream, ownsStream),
+            _files = new List<Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(stream, ownsStream),
                 Ownership.Dispose));
         }
 
         internal Disk(DiskImageFile file, Ownership ownsStream)
         {
-            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(file, ownsStream));
+            _files = new List<Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new Tuple<VirtualDiskLayer, Ownership>(file, ownsStream));
             ResolveFileChain();
         }
 
         internal Disk(FileLocator layerLocator, string path, FileAccess access)
         {
             _path = path;
-            _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(layerLocator, path, access),
+            _files = new List<Tuple<VirtualDiskLayer, Ownership>>();
+            _files.Add(new Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(layerLocator, path, access),
                 Ownership.Dispose));
             ResolveFileChain();
         }
@@ -451,7 +452,7 @@ namespace DiscUtils.Vmdk
                     if (locator.Exists(posParent))
                     {
                         file = VirtualDisk.OpenDiskLayer(file.RelativeFileLocator, posParent, FileAccess.Read);
-                        _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(file, Ownership.Dispose));
+                        _files.Add(new Tuple<VirtualDiskLayer, Ownership>(file, Ownership.Dispose));
                         foundParent = true;
                         break;
                     }

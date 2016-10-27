@@ -20,7 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+#if NET20
+// ReSharper disable once CheckNamespace
+namespace System
 {
     internal class Tuple<A, B>
     {
@@ -61,3 +63,4 @@ namespace DiscUtils
         }
     }
 }
+#endif
