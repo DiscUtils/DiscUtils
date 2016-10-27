@@ -22,6 +22,10 @@
 
 namespace DiscUtils
 {
+#if !NETCORE
+    using System;
+#endif
+
     using System.Collections.Generic;
 
     /// <summary>

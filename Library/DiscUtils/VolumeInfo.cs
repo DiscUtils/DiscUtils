@@ -22,6 +22,10 @@
 
 namespace DiscUtils
 {
+#if !NETCORE
+    using System;
+#endif
+
     /// <summary>
     /// Base class that holds information about a disk volume.
     /// </summary>
