@@ -22,27 +22,15 @@
 
 namespace DiscUtils
 {
-    using System;
-
     internal class Tuple<A, B> : Tuple
     {
-        private A _a;
-        private B _b;
+        public A Item1 { get; }
+        public B Item2 { get; }
 
-        public Tuple(A a, B b)
+        public Tuple(A item1, B item2)
         {
-            _a = a;
-            _b = b;
-        }
-
-        public A Item1
-        {
-            get { return _a; }
-        }
-
-        public B Item2
-        {
-            get { return _b; }
+            Item1 = item1;
+            Item2 = item2;
         }
         
         public override bool Equals(object obj)
@@ -53,12 +41,12 @@ namespace DiscUtils
                 return false;
             }
 
-            return Equals(_a, asType._a) && Equals(_b, asType._b);
+            return Equals(Item1, asType.Item1) && Equals(Item2, asType.Item2);
         }
 
         public override int GetHashCode()
         {
-            return ((_a == null) ? 0x14AB32BC : _a.GetHashCode()) ^ ((_b == null) ? 0x65BC32DE : _b.GetHashCode());
+            return ((Item1 == null) ? 0x14AB32BC : Item1.GetHashCode()) ^ ((Item2 == null) ? 0x65BC32DE : Item2.GetHashCode());
         }
     }
 }
