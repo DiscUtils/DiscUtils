@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System.IO;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     /// <summary>
     /// Class for reading little-endian data from a stream.
     /// </summary>

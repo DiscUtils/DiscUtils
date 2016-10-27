@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System.Collections.Generic;
+using System.Collections.Generic;
 
+namespace DiscUtils.Internal
+{
     internal class BlockCache<T>
         where T : Block, new()
     {

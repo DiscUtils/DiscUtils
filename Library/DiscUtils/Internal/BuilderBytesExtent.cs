@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System;
+using System;
 
+namespace DiscUtils.Internal
+{
     internal class BuilderBytesExtent : BuilderExtent
     {
         protected byte[] _data;

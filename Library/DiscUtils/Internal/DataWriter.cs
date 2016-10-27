@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System.IO;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     internal abstract class DataWriter
     {
         protected Stream _stream;

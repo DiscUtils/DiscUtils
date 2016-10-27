@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     /// <summary>
     /// A stream that returns Zero's.
     /// </summary>

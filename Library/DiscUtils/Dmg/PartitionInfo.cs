@@ -22,6 +22,7 @@
 
 using DiscUtils.Partitions;
 using System;
+using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {

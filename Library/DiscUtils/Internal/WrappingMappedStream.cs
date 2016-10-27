@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System.Collections.Generic;
-    using System.IO;
+using System.Collections.Generic;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     /// <summary>
     /// Base class for streams that wrap another stream.
     /// </summary>

@@ -1,5 +1,6 @@
 ﻿using DiscUtils.Vfs;
 using System.IO;
+using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {

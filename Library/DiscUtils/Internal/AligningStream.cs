@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System;
-    using System.IO;
+using System;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     /// <summary>
     /// Aligns I/O to a given block size.
     /// </summary>

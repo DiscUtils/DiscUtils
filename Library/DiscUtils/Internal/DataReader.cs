@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System.IO;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     /// <summary>
     /// Base class for reading binary data from a stream.
     /// </summary>

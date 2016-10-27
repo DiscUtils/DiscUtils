@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System;
-    using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
+namespace DiscUtils.Internal
+{
     internal abstract class BuilderExtent : IDisposable
     {
         private long _start;

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System;
+using System;
 
+namespace DiscUtils.Internal
+{
     /// <summary>
     /// Represents a stream that is circular, so reads and writes off the end of the stream wrap.
     /// </summary>

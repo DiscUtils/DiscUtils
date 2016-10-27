@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
-    using System.Collections.Generic;
-    using System.IO;
+using System.Collections.Generic;
+using System.IO;
 
+namespace DiscUtils.Internal
+{
     internal class PassthroughStreamBuilder : StreamBuilder
     {
         private Stream _stream;
