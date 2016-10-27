@@ -1,0 +1,219 @@
+{
+  "locked": false,
+  "version": 2,
+  "targets": {
+    ".NETFramework,Version=v4.0": {
+      "NUnit/2.5.10.11092": {
+        "type": "package",
+        "compile": {
+          "lib/nunit.framework.dll": {},
+          "lib/nunit.mocks.dll": {},
+          "lib/pnunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/nunit.framework.dll": {},
+          "lib/nunit.mocks.dll": {},
+          "lib/pnunit.framework.dll": {}
+        }
+      },
+      "NUnit.Runners/2.6.0.12051": {
+        "type": "package"
+      },
+      "DiscUtils/1.0.3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.0",
+        "frameworkAssemblies": [
+          "System.Xml"
+        ],
+        "compile": {
+          "net40/DiscUtils.dll": {}
+        },
+        "runtime": {
+          "net40/DiscUtils.dll": {}
+        }
+      },
+      "DiscUtils.Common/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.0",
+        "dependencies": {
+          "DiscUtils": "1.0.0"
+        },
+        "compile": {
+          "net40/DiscUtils.Common.dll": {}
+        },
+        "runtime": {
+          "net40/DiscUtils.Common.dll": {}
+        }
+      },
+      "DiscUtils.Diagnostics/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.0",
+        "dependencies": {
+          "DiscUtils": "1.0.0",
+          "DiscUtils.Common": "1.0.0"
+        },
+        "compile": {
+          "net40/DiscUtils.Diagnostics.dll": {}
+        },
+        "runtime": {
+          "net40/DiscUtils.Diagnostics.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "NUnit/2.5.10.11092": {
+      "sha512": "v2YKO25a8nnqunCr/XSV4LrCO3/86NV8QkA94Upkjgzg09kxTXzfSAFeEY1VIS+FfRvbw5cwVatoRvzFG6Px5A==",
+      "type": "package",
+      "path": "NUnit/2.5.10.11092",
+      "files": [
+        "Logo.ico",
+        "NUnit.2.5.10.11092.nupkg.sha512",
+        "NUnit.nuspec",
+        "NUnitFitTests.html",
+        "fit-license.txt",
+        "lib/nunit.framework.dll",
+        "lib/nunit.framework.xml",
+        "lib/nunit.mocks.dll",
+        "lib/pnunit.framework.dll",
+        "license.txt",
+        "tools/NUnitTests.VisualState.xml",
+        "tools/NUnitTests.config",
+        "tools/NUnitTests.nunit",
+        "tools/TestResult.xml",
+        "tools/agent.conf",
+        "tools/agent.log.conf",
+        "tools/launcher.log.conf",
+        "tools/lib/Failure.png",
+        "tools/lib/Ignored.png",
+        "tools/lib/Inconclusive.png",
+        "tools/lib/Skipped.png",
+        "tools/lib/Success.png",
+        "tools/lib/fit.dll",
+        "tools/lib/log4net.dll",
+        "tools/lib/nunit-console-runner.dll",
+        "tools/lib/nunit-gui-runner.dll",
+        "tools/lib/nunit.core.dll",
+        "tools/lib/nunit.core.interfaces.dll",
+        "tools/lib/nunit.fixtures.dll",
+        "tools/lib/nunit.uiexception.dll",
+        "tools/lib/nunit.uikit.dll",
+        "tools/lib/nunit.util.dll",
+        "tools/nunit-agent-x86.exe",
+        "tools/nunit-agent-x86.exe.config",
+        "tools/nunit-agent.exe",
+        "tools/nunit-agent.exe.config",
+        "tools/nunit-console-x86.exe",
+        "tools/nunit-console-x86.exe.config",
+        "tools/nunit-console.exe",
+        "tools/nunit-console.exe.config",
+        "tools/nunit-x86.exe",
+        "tools/nunit-x86.exe.config",
+        "tools/nunit.exe",
+        "tools/nunit.exe.config",
+        "tools/nunit.framework.dll",
+        "tools/pnunit-agent.exe",
+        "tools/pnunit-agent.exe.config",
+        "tools/pnunit-launcher.exe",
+        "tools/pnunit-launcher.exe.config",
+        "tools/pnunit.framework.dll",
+        "tools/pnunit.tests.dll",
+        "tools/runFile.exe",
+        "tools/runFile.exe.config",
+        "tools/runpnunit.bat",
+        "tools/test.conf"
+      ]
+    },
+    "NUnit.Runners/2.6.0.12051": {
+      "sha512": "84E9sprWDPKz54IE63NJ9BprB+WGtwVdda4gBo0SzuHMa13WAL8dEgr0bUzK5u/dcnJgGjOXi+0lp9/9nxkDrA==",
+      "type": "package",
+      "path": "NUnit.Runners/2.6.0.12051",
+      "files": [
+        "Logo.ico",
+        "NUnit.Runners.2.6.0.12051.nupkg.sha512",
+        "NUnit.Runners.nuspec",
+        "license.txt",
+        "tools/agent.conf",
+        "tools/agent.log.conf",
+        "tools/launcher.log.conf",
+        "tools/lib/Images/Tree/Circles/Failure.jpg",
+        "tools/lib/Images/Tree/Circles/Ignored.jpg",
+        "tools/lib/Images/Tree/Circles/Inconclusive.jpg",
+        "tools/lib/Images/Tree/Circles/Skipped.jpg",
+        "tools/lib/Images/Tree/Circles/Success.jpg",
+        "tools/lib/Images/Tree/Classic/Failure.jpg",
+        "tools/lib/Images/Tree/Classic/Ignored.jpg",
+        "tools/lib/Images/Tree/Classic/Inconclusive.jpg",
+        "tools/lib/Images/Tree/Classic/Skipped.jpg",
+        "tools/lib/Images/Tree/Classic/Success.jpg",
+        "tools/lib/Images/Tree/Default/Failure.png",
+        "tools/lib/Images/Tree/Default/Ignored.png",
+        "tools/lib/Images/Tree/Default/Inconclusive.png",
+        "tools/lib/Images/Tree/Default/Skipped.png",
+        "tools/lib/Images/Tree/Default/Success.png",
+        "tools/lib/Images/Tree/Visual Studio/Failure.png",
+        "tools/lib/Images/Tree/Visual Studio/Ignored.png",
+        "tools/lib/Images/Tree/Visual Studio/Inconclusive.png",
+        "tools/lib/Images/Tree/Visual Studio/SeriousWarning.png",
+        "tools/lib/Images/Tree/Visual Studio/Skipped.png",
+        "tools/lib/Images/Tree/Visual Studio/Success.png",
+        "tools/lib/log4net.dll",
+        "tools/lib/nunit-console-runner.dll",
+        "tools/lib/nunit-gui-runner.dll",
+        "tools/lib/nunit.core.dll",
+        "tools/lib/nunit.core.interfaces.dll",
+        "tools/lib/nunit.uiexception.dll",
+        "tools/lib/nunit.uikit.dll",
+        "tools/lib/nunit.util.dll",
+        "tools/nunit-agent-x86.exe",
+        "tools/nunit-agent-x86.exe.config",
+        "tools/nunit-agent.exe",
+        "tools/nunit-agent.exe.config",
+        "tools/nunit-console-x86.exe",
+        "tools/nunit-console-x86.exe.config",
+        "tools/nunit-console.exe",
+        "tools/nunit-console.exe.config",
+        "tools/nunit-editor.exe",
+        "tools/nunit-x86.exe",
+        "tools/nunit-x86.exe.config",
+        "tools/nunit.exe",
+        "tools/nunit.exe.config",
+        "tools/nunit.framework.dll",
+        "tools/pnunit-agent.exe",
+        "tools/pnunit-agent.exe.config",
+        "tools/pnunit-launcher.exe",
+        "tools/pnunit-launcher.exe.config",
+        "tools/pnunit.framework.dll",
+        "tools/pnunit.tests.dll",
+        "tools/runpnunit.bat",
+        "tools/test.conf"
+      ]
+    },
+    "DiscUtils/1.0.3": {
+      "type": "project",
+      "path": "../../Library/DiscUtils/project.json",
+      "msbuildProject": "../../Library/DiscUtils/DiscUtils.xproj"
+    },
+    "DiscUtils.Common/1.0.0": {
+      "type": "project",
+      "path": "../../Utilities/DiscUtils.Common/project.json",
+      "msbuildProject": "../../Utilities/DiscUtils.Common/DiscUtils.Common.xproj"
+    },
+    "DiscUtils.Diagnostics/1.0.0": {
+      "type": "project",
+      "path": "../../Utilities/DiscUtils.Diagnostics/project.json",
+      "msbuildProject": "../../Utilities/DiscUtils.Diagnostics/DiscUtils.Diagnostics.xproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "DiscUtils >= 1.*",
+      "DiscUtils.Diagnostics >= 1.0.0-*",
+      "NUnit >= 2.5.10.11092",
+      "NUnit.Runners >= 2.6.0.12051"
+    ],
+    ".NETFramework,Version=v4.0": []
+  },
+  "tools": {},
+  "projectFileToolGroups": {}
+}

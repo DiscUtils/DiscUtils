@@ -1,0 +1,78 @@
+{
+  "locked": false,
+  "version": 2,
+  "targets": {
+    ".NETFramework,Version=v4.0": {
+      "System.Management.Automation/6.1.7601.17515": {
+        "type": "package",
+        "compile": {
+          "lib/net40/System.Management.Automation.dll": {}
+        },
+        "runtime": {
+          "lib/net40/System.Management.Automation.dll": {}
+        }
+      },
+      "DiscUtils/1.0.3": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.0",
+        "frameworkAssemblies": [
+          "System.Xml"
+        ],
+        "compile": {
+          "net40/DiscUtils.dll": {}
+        },
+        "runtime": {
+          "net40/DiscUtils.dll": {}
+        }
+      },
+      "DiscUtils.Common/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.0",
+        "dependencies": {
+          "DiscUtils": "1.0.0"
+        },
+        "compile": {
+          "net40/DiscUtils.Common.dll": {}
+        },
+        "runtime": {
+          "net40/DiscUtils.Common.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "System.Management.Automation/6.1.7601.17515": {
+      "sha512": "mOqRM+nD607Cw+2seNWfayjtsae41rcarVHgJ5aHIn2y2RF5N6z71bIOqrpITomKzi7R0msz5gUOco041+aDTw==",
+      "type": "package",
+      "path": "System.Management.Automation/6.1.7601.17515",
+      "files": [
+        "System.Management.Automation.6.1.7601.17515.nupkg.sha512",
+        "System.Management.Automation.nuspec",
+        "lib/net40/System.Management.Automation.dll",
+        "lib/net45/System.Management.Automation.dll"
+      ]
+    },
+    "DiscUtils/1.0.3": {
+      "type": "project",
+      "path": "../../Library/DiscUtils/project.json",
+      "msbuildProject": "../../Library/DiscUtils/DiscUtils.xproj"
+    },
+    "DiscUtils.Common/1.0.0": {
+      "type": "project",
+      "path": "../DiscUtils.Common/project.json",
+      "msbuildProject": "../DiscUtils.Common/DiscUtils.Common.xproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "DiscUtils >= 1.*",
+      "DiscUtils.Common >= 1.0.0-*",
+      "System.Management.Automation >= 6.1.7601.17515"
+    ],
+    ".NETFramework,Version=v4.0": [
+      "System.Configuration.Install >= 4.0.0"
+    ]
+  },
+  "tools": {},
+  "projectFileToolGroups": {}
+}

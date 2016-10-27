@@ -1,0 +1,15 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+  },
+
+  "dependencies": {
+    "DiscUtils": "1.*",
+    "DiscUtils.Common": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "net40": {
+    }
+  }
+}

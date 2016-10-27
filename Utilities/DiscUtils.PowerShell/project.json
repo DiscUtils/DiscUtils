@@ -1,0 +1,19 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+  },
+
+  "dependencies": {
+    "DiscUtils": "1.*",
+    "DiscUtils.Common": "1.0.0-*",
+    "System.Management.Automation": "6.1.7601.17515"
+  },
+
+  "frameworks": {
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Configuration.Install": "4.0.0.0"
+      }
+    }
+  }
+}

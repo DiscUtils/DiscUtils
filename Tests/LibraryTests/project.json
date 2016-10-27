@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "debugType": "portable"
+  },
+  "dependencies": {
+    "NUnit": "2.5.10.11092",
+    "NUnit.Runners": "2.6.0.12051",
+    "DiscUtils": "1.*",
+    "DiscUtils.Diagnostics": "1.0.0-*"
+  },
+  "frameworks": {
+    "net40": {
+    }
+  }
+}
