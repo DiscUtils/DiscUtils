@@ -24,8 +24,6 @@ namespace DiscUtils
 {
     internal abstract class Tuple
     {
-        public abstract object this[int i] { get; }
-
         protected static bool Equals<V>(V a, V b)
         {
             if (a == null && b == null)

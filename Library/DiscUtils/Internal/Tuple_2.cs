@@ -44,23 +44,7 @@ namespace DiscUtils
         {
             get { return _b; }
         }
-
-        public override object this[int i]
-        {
-            get
-            {
-                switch (i)
-                {
-                    case 0:
-                        return _a;
-                    case 1:
-                        return _b;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(i), i, "Invalid index");
-                }
-            }
-        }
-
+        
         public override bool Equals(object obj)
         {
             Tuple<A, B> asType = obj as Tuple<A, B>;
