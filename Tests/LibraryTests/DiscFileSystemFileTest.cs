@@ -201,10 +201,7 @@ namespace DiscUtils
             fs.CreateDirectory("FOO.TXT");
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
-            using (Stream s = di.Open(FileMode.Create))
-            {
-                Assert.Throws<IOException>(() => s.WriteByte(1));
-            }
+            Assert.Throws<IOException>(() => di.Open(FileMode.Create));
         }
 
         [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
@@ -226,7 +223,6 @@ namespace DiscUtils
 
                 Assert.AreEqual(1, s.ReadByte());
             }
-            Assert.Throws<FileNotFoundException>(() => { });
         }
 
         [TestCaseSource(typeof(FileSystemSource), nameof(FileSystemSource.ReadWriteFileSystems))]
@@ -416,7 +412,7 @@ namespace DiscUtils
         public void Delete_NoFile(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
-            
+
             Assert.Throws<FileNotFoundException>(() => fs.GetFileInfo("foo.txt").Delete());
         }
 
