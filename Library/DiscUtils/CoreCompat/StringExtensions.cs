@@ -1,7 +1,7 @@
 ﻿#if NETCORE
 using System.Globalization;
 
-namespace System
+namespace DiscUtils.CoreCompat
 {
     internal static class StringExtensions
     {

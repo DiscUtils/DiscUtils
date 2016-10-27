@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using DiscUtils.CoreCompat;
+
 namespace DiscUtils {
     using System;
     using System.Reflection;

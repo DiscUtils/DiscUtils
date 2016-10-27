@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.CoreCompat;
+
 namespace DiscUtils.Partitions
 {
     using System;

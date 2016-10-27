@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.CoreCompat;
+
 namespace DiscUtils.Iso9660
 {
     using System;

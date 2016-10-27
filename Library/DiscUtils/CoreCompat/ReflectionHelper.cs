@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace DiscUtils
+namespace DiscUtils.CoreCompat
 {
     internal static class ReflectionHelper
     {
