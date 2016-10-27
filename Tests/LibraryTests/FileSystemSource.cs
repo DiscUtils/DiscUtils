@@ -29,13 +29,9 @@ namespace DiscUtils
 {
     public delegate DiscFileSystem NewFileSystemDelegate();
 
-    public class FileSystemSource
+    public static class FileSystemSource
     {
-        public FileSystemSource()
-        {
-        }
-
-        public IEnumerable<TestCaseData> ReadWriteFileSystems
+        public static IEnumerable<TestCaseData> ReadWriteFileSystems
         {
             get
             {
@@ -49,7 +45,7 @@ namespace DiscUtils
         }
 
 
-        public IEnumerable<TestCaseData> QuickReadWriteFileSystems
+        public static IEnumerable<TestCaseData> QuickReadWriteFileSystems
         {
             get
             {
@@ -81,7 +77,7 @@ namespace DiscUtils
             return discFs;
         }
 
-        public Ntfs.NtfsFileSystem NtfsFileSystem()
+        public static Ntfs.NtfsFileSystem NtfsFileSystem()
         {
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();

@@ -33,7 +33,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void AclInheritance()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             RawSecurityDescriptor sd = new RawSecurityDescriptor("O:BAG:BAD:(A;OICINP;GA;;;BA)");
             ntfs.CreateDirectory("dir");
@@ -54,7 +54,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void ReparsePoints_Empty()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.CreateDirectory("dir");
             ntfs.SetReparsePoint("dir", new ReparsePoint(12345, new byte[0]));
@@ -69,7 +69,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void ReparsePoints_NonEmpty()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.CreateDirectory("dir");
             ntfs.SetReparsePoint("dir", new ReparsePoint(123, new byte[] { 4, 5, 6 }));
@@ -108,7 +108,7 @@ namespace DiscUtils.Ntfs
         public void ClusterInfo()
         {
             // 'Big' files have clusters
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
             using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
             {
                 s.Write(new byte[(int)ntfs.ClusterSize], 0, (int)ntfs.ClusterSize);
@@ -180,7 +180,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void ManyAttributes()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
             using (Stream s = ntfs.OpenFile(@"file", FileMode.Create, FileAccess.ReadWrite))
             {
                 s.WriteByte(32);
@@ -218,7 +218,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void ShortNames()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             // Check we can find a short name in the same directory
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) {}
@@ -248,7 +248,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void HardLinkCount()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
             Assert.AreEqual(1, ntfs.GetHardLinkCount("ALongFileName.txt"));
@@ -268,7 +268,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void HasHardLink()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
             Assert.IsFalse(ntfs.HasHardLinks("ALongFileName.txt"));
@@ -286,7 +286,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void MoveLongName()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
 
@@ -308,7 +308,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void OpenRawStream()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
 #pragma warning disable 618
             Assert.Null(ntfs.OpenRawStream(@"$Extend\$ObjId", AttributeType.Data, null, FileAccess.Read));
@@ -318,7 +318,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void GetAlternateDataStreams()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.OpenFile("AFILE.TXT", FileMode.Create).Close();
             Assert.AreEqual(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
@@ -331,7 +331,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void DeleteAlternateDataStreams()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.OpenFile("AFILE.TXT", FileMode.Create).Close();
             ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Close();
@@ -345,7 +345,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void DeleteShortNameDir()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.CreateDirectory(@"\TestLongName1\TestLongName2");
             ntfs.SetShortName(@"\TestLongName1\TestLongName2", "TESTLO~1");
@@ -361,7 +361,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void GetFileLength()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.OpenFile(@"AFILE.TXT", FileMode.Create).Close();
             Assert.AreEqual(0, ntfs.GetFileLength("AFILE.TXT"));
@@ -398,7 +398,7 @@ namespace DiscUtils.Ntfs
         [Test]
         public void Fragmented()
         {
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.CreateDirectory(@"DIR");
 
@@ -459,7 +459,7 @@ namespace DiscUtils.Ntfs
         {
             int fileSize = 1 * 1024 * 1024;
 
-            NtfsFileSystem ntfs = new FileSystemSource().NtfsFileSystem();
+            NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             byte[] data = new byte[fileSize];
             for (int i = 0; i < fileSize; i++)
