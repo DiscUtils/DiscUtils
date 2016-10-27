@@ -84,7 +84,7 @@ namespace DiscUtils.ApplePartitionMap
 
         public override SparseStream Open()
         {
-            return new SubStream(_diskStream, PhysicalBlockStart * 512, PhysicalBlocks * 512);
+            return new SubStream(_diskStream, PhysicalBlockStart*512, PhysicalBlocks*512);
         }
 
         public int ReadFrom(byte[] buffer, int offset)

@@ -63,18 +63,18 @@ namespace DiscUtils.Wim
 
             _bufferAvailable -= count;
 
-            uint mask = (uint)((1 << count) - 1);
+            uint mask = (uint) ((1 << count) - 1);
 
-            return (uint)((_buffer >> _bufferAvailable) & mask);
+            return (uint) ((_buffer >> _bufferAvailable) & mask);
         }
 
         public override uint Peek(int count)
         {
             EnsureBufferFilled();
 
-            uint mask = (uint)((1 << count) - 1);
+            uint mask = (uint) ((1 << count) - 1);
 
-            return (uint)((_buffer >> (_bufferAvailable - count)) & mask);
+            return (uint) ((_buffer >> (_bufferAvailable - count)) & mask);
         }
 
         public override void Consume(int count)
@@ -92,7 +92,7 @@ namespace DiscUtils.Wim
                 _readBuffer[1] = 0;
                 _byteStream.Read(_readBuffer, 0, 2);
 
-                _buffer = (uint)((uint)(_buffer << 16) | (uint)(_readBuffer[1] << 8) | (uint)_readBuffer[0]);
+                _buffer = (uint) ((uint) (_buffer << 16) | (uint) (_readBuffer[1] << 8) | (uint) _readBuffer[0]);
                 _bufferAvailable += 16;
             }
         }

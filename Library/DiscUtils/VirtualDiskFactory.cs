@@ -33,13 +33,15 @@ namespace DiscUtils
 
         public abstract DiskImageBuilder GetImageBuilder(string variant);
 
-        public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters);
+        public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
+            VirtualDiskParameters diskParameters);
 
         public abstract VirtualDisk OpenDisk(string path, FileAccess access);
 
         public abstract VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access);
 
-        public virtual VirtualDisk OpenDisk(FileLocator locator, string path, string extraInfo, Dictionary<string, string> parameters, FileAccess access)
+        public virtual VirtualDisk OpenDisk(FileLocator locator, string path, string extraInfo,
+            Dictionary<string, string> parameters, FileAccess access)
         {
             return OpenDisk(locator, path, access);
         }

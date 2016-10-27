@@ -33,20 +33,20 @@ namespace DiscUtils
         {
             Tables = new uint[4][];
 
-            Tables[(int)Crc32Algorithm.Common] = CalcTable(0xEDB88320);
-            Tables[(int)Crc32Algorithm.Castagnoli] = CalcTable(0x82F63B78);
-            Tables[(int)Crc32Algorithm.Koopman] = CalcTable(0xEB31D82E);
-            Tables[(int)Crc32Algorithm.Aeronautical] = CalcTable(0xD5828281);
+            Tables[(int) Crc32Algorithm.Common] = CalcTable(0xEDB88320);
+            Tables[(int) Crc32Algorithm.Castagnoli] = CalcTable(0x82F63B78);
+            Tables[(int) Crc32Algorithm.Koopman] = CalcTable(0xEB31D82E);
+            Tables[(int) Crc32Algorithm.Aeronautical] = CalcTable(0xD5828281);
         }
 
         public Crc32LittleEndian(Crc32Algorithm algorithm)
-            : base(Tables[(int)algorithm])
+            : base(Tables[(int) algorithm])
         {
         }
 
         public static uint Compute(Crc32Algorithm algorithm, byte[] buffer, int offset, int count)
         {
-            return Process(Tables[(int)algorithm], 0xFFFFFFFF, buffer, offset, count) ^ 0xFFFFFFFF;
+            return Process(Tables[(int) algorithm], 0xFFFFFFFF, buffer, offset, count) ^ 0xFFFFFFFF;
         }
 
         public override void Process(byte[] buffer, int offset, int count)

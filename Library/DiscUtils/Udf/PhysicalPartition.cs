@@ -33,7 +33,8 @@ namespace DiscUtils.Udf
         {
             _partitionNumber = descriptor.PartitionNumber;
             _parentBuffer = buffer;
-            _contentBuffer = new SubBuffer(_parentBuffer, descriptor.PartitionStartingLocation * (long)sectorSize, descriptor.PartitionLength * (long)sectorSize);
+            _contentBuffer = new SubBuffer(_parentBuffer, descriptor.PartitionStartingLocation*(long) sectorSize,
+                descriptor.PartitionLength*(long) sectorSize);
             _descriptor = descriptor;
         }
 

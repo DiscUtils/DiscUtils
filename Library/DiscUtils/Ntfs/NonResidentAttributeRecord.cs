@@ -47,16 +47,17 @@ namespace DiscUtils.Ntfs
             Read(buffer, offset, out length);
         }
 
-        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags,
+            long firstCluster, ulong numClusters, uint bytesPerCluster)
             : base(type, name, id, flags)
         {
             _nonResidentFlag = 1;
             _dataRuns = new List<DataRun>();
-            _dataRuns.Add(new DataRun(firstCluster, (long)numClusters, false));
+            _dataRuns.Add(new DataRun(firstCluster, (long) numClusters, false));
             _lastVCN = numClusters - 1;
-            _dataAllocatedSize = bytesPerCluster * numClusters;
-            _dataRealSize = bytesPerCluster * numClusters;
-            _initializedDataSize = bytesPerCluster * numClusters;
+            _dataAllocatedSize = bytesPerCluster*numClusters;
+            _dataRealSize = bytesPerCluster*numClusters;
+            _initializedDataSize = bytesPerCluster*numClusters;
 
             if ((flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
@@ -64,12 +65,13 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags, long startVcn, List<DataRun> dataRuns)
+        public NonResidentAttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags,
+            long startVcn, List<DataRun> dataRuns)
             : base(type, name, id, flags)
         {
             _nonResidentFlag = 1;
             _dataRuns = dataRuns;
-            _startingVCN = (ulong)startVcn;
+            _startingVCN = (ulong) startVcn;
 
             if ((flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
@@ -81,7 +83,7 @@ namespace DiscUtils.Ntfs
                 _lastVCN = _startingVCN;
                 foreach (var run in dataRuns)
                 {
-                    _lastVCN += (ulong)run.RunLength;
+                    _lastVCN += (ulong) run.RunLength;
                 }
 
                 _lastVCN -= 1;
@@ -93,8 +95,8 @@ namespace DiscUtils.Ntfs
         /// </summary>
         public override long AllocatedLength
         {
-            get { return (long)_dataAllocatedSize; }
-            set { _dataAllocatedSize = (ulong)value; }
+            get { return (long) _dataAllocatedSize; }
+            set { _dataAllocatedSize = (ulong) value; }
         }
 
         /// <summary>
@@ -102,8 +104,8 @@ namespace DiscUtils.Ntfs
         /// </summary>
         public override long DataLength
         {
-            get { return (long)_dataRealSize; }
-            set { _dataRealSize = (ulong)value; }
+            get { return (long) _dataRealSize; }
+            set { _dataRealSize = (ulong) value; }
         }
 
         /// <summary>
@@ -111,25 +113,25 @@ namespace DiscUtils.Ntfs
         /// </summary>
         public override long InitializedDataLength
         {
-            get { return (long)_initializedDataSize; }
-            set { _initializedDataSize = (ulong)value; }
+            get { return (long) _initializedDataSize; }
+            set { _initializedDataSize = (ulong) value; }
         }
 
         public long CompressedDataSize
         {
-            get { return (long)_compressedSize; }
-            set { _compressedSize = (ulong)value; }
+            get { return (long) _compressedSize; }
+            set { _compressedSize = (ulong) value; }
         }
 
         public override long StartVcn
         {
-            get { return (long)_startingVCN; }
+            get { return (long) _startingVCN; }
         }
 
         public long LastVcn
         {
-            get { return (long)_lastVCN; }
-            set { _lastVCN = (ulong)value; }
+            get { return (long) _lastVCN; }
+            set { _lastVCN = (ulong) value; }
         }
 
         /// <summary>
@@ -138,7 +140,7 @@ namespace DiscUtils.Ntfs
         public int CompressionUnitSize
         {
             get { return 1 << _compressionUnitSize; }
-            set { _compressionUnitSize = (ushort)Utilities.Log2(value); }
+            set { _compressionUnitSize = (ushort) Utilities.Log2(value); }
         }
 
         public List<DataRun> DataRuns
@@ -151,13 +153,14 @@ namespace DiscUtils.Ntfs
             get
             {
                 byte nameLength = 0;
-                ushort nameOffset = (ushort)(((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0) ? 0x48 : 0x40);
+                ushort nameOffset =
+                    (ushort) (((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0) ? 0x48 : 0x40);
                 if (Name != null)
                 {
-                    nameLength = (byte)Name.Length;
+                    nameLength = (byte) Name.Length;
                 }
 
-                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + (nameLength * 2), 8);
+                ushort dataOffset = (ushort) Utilities.RoundUp(nameOffset + (nameLength*2), 8);
 
                 // Write out data first, since we know where it goes...
                 int dataLen = 0;
@@ -246,10 +249,10 @@ namespace DiscUtils.Ntfs
             ushort nameOffset = headerLength;
             if (Name != null)
             {
-                nameLength = (byte)Name.Length;
+                nameLength = (byte) Name.Length;
             }
 
-            ushort dataOffset = (ushort)Utilities.RoundUp(headerLength + (nameLength * 2), 8);
+            ushort dataOffset = (ushort) Utilities.RoundUp(headerLength + (nameLength*2), 8);
 
             // Write out data first, since we know where it goes...
             int dataLen = 0;
@@ -261,21 +264,21 @@ namespace DiscUtils.Ntfs
             buffer[offset + dataOffset + dataLen] = 0; // NULL terminator
             dataLen++;
 
-            int length = (int)Utilities.RoundUp(dataOffset + dataLen, 8);
+            int length = (int) Utilities.RoundUp(dataOffset + dataLen, 8);
 
-            Utilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian((uint) _type, buffer, offset + 0x00);
             Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x04);
             buffer[offset + 0x08] = _nonResidentFlag;
             buffer[offset + 0x09] = nameLength;
             Utilities.WriteBytesLittleEndian(nameOffset, buffer, offset + 0x0A);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
+            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x0C);
             Utilities.WriteBytesLittleEndian(_attributeId, buffer, offset + 0x0E);
 
             Utilities.WriteBytesLittleEndian(_startingVCN, buffer, offset + 0x10);
             Utilities.WriteBytesLittleEndian(_lastVCN, buffer, offset + 0x18);
             Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x20);
             Utilities.WriteBytesLittleEndian(_compressionUnitSize, buffer, offset + 0x22);
-            Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 0x24); // Padding
+            Utilities.WriteBytesLittleEndian((uint) 0, buffer, offset + 0x24); // Padding
             Utilities.WriteBytesLittleEndian(_dataAllocatedSize, buffer, offset + 0x28);
             Utilities.WriteBytesLittleEndian(_dataRealSize, buffer, offset + 0x30);
             Utilities.WriteBytesLittleEndian(_initializedDataSize, buffer, offset + 0x38);
@@ -286,7 +289,7 @@ namespace DiscUtils.Ntfs
 
             if (Name != null)
             {
-                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength * 2);
+                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength*2);
             }
 
             return length;
@@ -297,14 +300,14 @@ namespace DiscUtils.Ntfs
             int splitIdx;
             if (suggestedSplitIdx <= 0 || suggestedSplitIdx >= _dataRuns.Count)
             {
-                splitIdx = _dataRuns.Count / 2;
+                splitIdx = _dataRuns.Count/2;
             }
             else
             {
                 splitIdx = suggestedSplitIdx;
             }
 
-            long splitVcn = (long)_startingVCN;
+            long splitVcn = (long) _startingVCN;
             long splitLcn = 0;
             for (int i = 0; i < splitIdx; ++i)
             {
@@ -333,7 +336,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            _lastVCN = (ulong)splitVcn - 1;
+            _lastVCN = (ulong) splitVcn - 1;
 
             return new NonResidentAttributeRecord(_type, _name, 0, _flags, splitVcn, newRecordRuns);
         }

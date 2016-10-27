@@ -67,28 +67,13 @@ namespace DiscUtils.Ntfs
             set { _attributeId = value; }
         }
 
-        public abstract long AllocatedLength
-        {
-            get;
-            set;
-        }
+        public abstract long AllocatedLength { get; set; }
 
-        public abstract long StartVcn
-        {
-            get;
-        }
+        public abstract long StartVcn { get; }
 
-        public abstract long DataLength
-        {
-            get;
-            set;
-        }
+        public abstract long DataLength { get; set; }
 
-        public abstract long InitializedDataLength
-        {
-            get;
-            set;
-        }
+        public abstract long InitializedDataLength { get; set; }
 
         public bool IsNonResident
         {
@@ -147,7 +132,7 @@ namespace DiscUtils.Ntfs
 
         public int CompareTo(AttributeRecord other)
         {
-            int val = ((int)_type) - (int)other._type;
+            int val = ((int) _type) - (int) other._type;
             if (val != 0)
             {
                 return val;
@@ -159,7 +144,7 @@ namespace DiscUtils.Ntfs
                 return val;
             }
 
-            return ((int)_attributeId) - (int)other._attributeId;
+            return ((int) _attributeId) - (int) other._attributeId;
         }
 
         public abstract int Write(byte[] buffer, int offset);
@@ -176,13 +161,13 @@ namespace DiscUtils.Ntfs
 
         protected virtual void Read(byte[] buffer, int offset, out int length)
         {
-            _type = (AttributeType)Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+            _type = (AttributeType) Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
             length = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
 
             _nonResidentFlag = buffer[offset + 0x08];
             byte nameLength = buffer[offset + 0x09];
             ushort nameOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = (AttributeFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            _flags = (AttributeFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
             _attributeId = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0E);
 
             if (nameLength != 0x00)
@@ -192,7 +177,7 @@ namespace DiscUtils.Ntfs
                     throw new IOException("Corrupt attribute, name outside of attribute");
                 }
 
-                _name = Encoding.Unicode.GetString(buffer, offset + nameOffset, nameLength * 2);
+                _name = Encoding.Unicode.GetString(buffer, offset + nameOffset, nameLength*2);
             }
         }
     }

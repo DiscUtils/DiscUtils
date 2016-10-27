@@ -41,7 +41,7 @@ namespace DiscUtils
         public StreamPump()
         {
             SparseChunkSize = 512;
-            BufferSize = (int)(512 * Sizes.OneKiB);
+            BufferSize = (int) (512*Sizes.OneKiB);
             SparseCopy = true;
         }
 
@@ -56,7 +56,7 @@ namespace DiscUtils
             InputStream = inStream;
             OutputStream = outStream;
             SparseChunkSize = sparseChunkSize;
-            BufferSize = (int)(512 * Sizes.OneKiB);
+            BufferSize = (int) (512*Sizes.OneKiB);
             SparseCopy = true;
         }
 
@@ -186,7 +186,7 @@ namespace DiscUtils
                 inStream = SparseStream.FromStream(InputStream, Ownership.None);
             }
 
-            if (BufferSize > SparseChunkSize && (BufferSize % SparseChunkSize) != 0)
+            if (BufferSize > SparseChunkSize && (BufferSize%SparseChunkSize) != 0)
             {
                 throw new InvalidOperationException("Buffer size is not a multiple of the sparse chunk size");
             }
@@ -203,7 +203,7 @@ namespace DiscUtils
                 long extentOffset = 0;
                 while (extentOffset < extent.Length)
                 {
-                    int toRead = (int)Math.Min(copyBuffer.Length, extent.Length - extentOffset);
+                    int toRead = (int) Math.Min(copyBuffer.Length, extent.Length - extentOffset);
                     int numRead = Utilities.ReadFully(inStream, copyBuffer, 0, toRead);
                     BytesRead += numRead;
 
@@ -248,7 +248,7 @@ namespace DiscUtils
                 if (b >= 0)
                 {
                     OutputStream.Position = inStream.Length - 1;
-                    OutputStream.WriteByte((byte)b);
+                    OutputStream.WriteByte((byte) b);
                 }
             }
         }

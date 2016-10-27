@@ -45,7 +45,8 @@ namespace DiscUtils.Iscsi
 
             if (Header.OpCode != OpCode.ReadyToTransfer)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ReadyToTransfer + " was " + Header.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ReadyToTransfer +
+                                                   " was " + Header.OpCode);
             }
 
             Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);

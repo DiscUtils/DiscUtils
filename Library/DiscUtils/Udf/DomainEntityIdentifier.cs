@@ -37,10 +37,11 @@ namespace DiscUtils.Udf
 
         public override string ToString()
         {
-            string major = ((uint)Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
-            string minor = ((uint)Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
-            DomainFlags flags = (DomainFlags)Suffix[2];
-            return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : Flags {3}]", Identifier, major, minor, flags);
+            string major = ((uint) Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
+            string minor = ((uint) Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
+            DomainFlags flags = (DomainFlags) Suffix[2];
+            return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : Flags {3}]", Identifier, major, minor,
+                flags);
         }
     }
 }

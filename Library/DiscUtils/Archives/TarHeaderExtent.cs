@@ -33,7 +33,8 @@ namespace DiscUtils.Archives
         private int _groupId;
         private DateTime _modificationTime;
 
-        public TarHeaderExtent(long start, string fileName, long fileLength, UnixFilePermissions mode, int ownerId, int groupId, DateTime modificationTime)
+        public TarHeaderExtent(long start, string fileName, long fileLength, UnixFilePermissions mode, int ownerId,
+            int groupId, DateTime modificationTime)
             : base(start, 512)
         {
             _fileName = fileName;

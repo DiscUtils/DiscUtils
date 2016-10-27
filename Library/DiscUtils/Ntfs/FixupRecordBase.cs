@@ -68,15 +68,12 @@ namespace DiscUtils.Ntfs
 
         public int UpdateSequenceSize
         {
-            get { return _updateSequenceCount * 2; }
+            get { return _updateSequenceCount*2; }
         }
 
         public int Size
         {
-            get
-            {
-                return CalcSize();
-            }
+            get { return CalcSize(); }
         }
 
         public void FromBytes(byte[] buffer, int offset)
@@ -111,7 +108,8 @@ namespace DiscUtils.Ntfs
             _updateSequenceArray = new ushort[_updateSequenceCount - 1];
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + _updateSequenceOffset + (2 * (i + 1)));
+                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer,
+                    offset + _updateSequenceOffset + (2*(i + 1)));
             }
 
             UnprotectBuffer(buffer, offset);
@@ -132,7 +130,8 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + _updateSequenceOffset);
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + _updateSequenceOffset + (2 * (i + 1)));
+                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer,
+                    offset + _updateSequenceOffset + (2*(i + 1)));
             }
         }
 
@@ -140,7 +139,7 @@ namespace DiscUtils.Ntfs
         {
             _magic = magic;
             _sectorSize = sectorSize;
-            _updateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, Sizes.Sector));
+            _updateSequenceCount = (ushort) (1 + Utilities.Ceil(recordLength, Sizes.Sector));
             _updateSequenceNumber = 1;
             _updateSequenceArray = new ushort[_updateSequenceCount - 1];
         }
@@ -156,7 +155,7 @@ namespace DiscUtils.Ntfs
             // First do validation check - make sure the USN matches on all sectors)
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                if (_updateSequenceNumber != Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector * (i + 1)) - 2))
+                if (_updateSequenceNumber != Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector*(i + 1)) - 2))
                 {
                     throw new IOException("Corrupt file system record found");
                 }
@@ -165,7 +164,7 @@ namespace DiscUtils.Ntfs
             // Now replace the USNs with the actual data from the sequence array
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + (Sizes.Sector * (i + 1)) - 2);
+                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + (Sizes.Sector*(i + 1)) - 2);
             }
         }
 
@@ -176,13 +175,13 @@ namespace DiscUtils.Ntfs
             // Read in the bytes that are replaced by the USN
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector * (i + 1)) - 2);
+                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector*(i + 1)) - 2);
             }
 
             // Overwrite the bytes that are replaced with the USN
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + (Sizes.Sector * (i + 1)) - 2);
+                Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + (Sizes.Sector*(i + 1)) - 2);
             }
         }
     }

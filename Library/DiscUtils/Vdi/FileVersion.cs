@@ -33,12 +33,12 @@ namespace DiscUtils.Vdi
 
         public int Major
         {
-            get { return (int)(_value >> 16); }
+            get { return (int) (_value >> 16); }
         }
 
         public int Minor
         {
-            get { return (int)(_value & 0xFFFF); }
+            get { return (int) (_value & 0xFFFF); }
         }
 
         public uint Value

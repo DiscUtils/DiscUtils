@@ -40,10 +40,7 @@ namespace DiscUtils.Registry
             set { _index = value; }
         }
 
-        public abstract int Size
-        {
-            get;
-        }
+        public abstract int Size { get; }
 
         public abstract int ReadFrom(byte[] buffer, int offset);
 

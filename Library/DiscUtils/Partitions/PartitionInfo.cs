@@ -71,10 +71,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Gets the physical volume type for this type of partition.
         /// </summary>
-        internal abstract PhysicalVolumeType VolumeType
-        {
-            get;
-        }
+        internal abstract PhysicalVolumeType VolumeType { get; }
 
         /// <summary>
         /// Opens a stream that accesses the partition's contents.
@@ -88,7 +85,8 @@ namespace DiscUtils.Partitions
         /// <returns>A string representation of the partition information.</returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.InvariantCulture, "0x{0:X} - 0x{1:X} ({2})", FirstSector, LastSector, TypeAsString);
+            return String.Format(CultureInfo.InvariantCulture, "0x{0:X} - 0x{1:X} ({2})", FirstSector, LastSector,
+                TypeAsString);
         }
     }
 }

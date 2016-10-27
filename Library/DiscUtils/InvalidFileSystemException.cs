@@ -24,6 +24,7 @@ namespace DiscUtils
 {
     using System;
     using System.IO;
+
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -63,11 +64,11 @@ namespace DiscUtils
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Initializes a new instance of the InvalidFileSystemException class.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">The streaming context.</param>
+/// <summary>
+/// Initializes a new instance of the InvalidFileSystemException class.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">The streaming context.</param>
         protected InvalidFileSystemException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

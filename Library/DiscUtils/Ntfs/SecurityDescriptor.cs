@@ -46,10 +46,7 @@ namespace DiscUtils.Ntfs
 
         public int Size
         {
-            get
-            {
-                return _securityDescriptor.BinaryLength;
-            }
+            get { return _securityDescriptor.BinaryLength; }
         }
 
         public uint CalcHash()
@@ -57,9 +54,9 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[Size];
             WriteTo(buffer, 0);
             uint hash = 0;
-            for (int i = 0; i < buffer.Length / 4; ++i)
+            for (int i = 0; i < buffer.Length/4; ++i)
             {
-                hash = Utilities.ToUInt32LittleEndian(buffer, i * 4) + ((hash << 3) | (hash >> 29));
+                hash = Utilities.ToUInt32LittleEndian(buffer, i*4) + ((hash << 3) | (hash >> 29));
             }
 
             return hash;
@@ -79,7 +76,7 @@ namespace DiscUtils.Ntfs
             ControlFlags controlFlags = _securityDescriptor.ControlFlags;
             buffer[offset + 0x00] = 1;
             buffer[offset + 0x01] = _securityDescriptor.ResourceManagerControl;
-            Utilities.WriteBytesLittleEndian((ushort)controlFlags, buffer, offset + 0x02);
+            Utilities.WriteBytesLittleEndian((ushort) controlFlags, buffer, offset + 0x02);
 
             // Blank out offsets, will fill later
             for (int i = 0x04; i < 0x14; ++i)
@@ -98,7 +95,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 0x10);
+                Utilities.WriteBytesLittleEndian((int) 0, buffer, offset + 0x10);
             }
 
             RawAcl sysAcl = _securityDescriptor.SystemAcl;
@@ -110,7 +107,7 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 0x0C);
+                Utilities.WriteBytesLittleEndian((int) 0, buffer, offset + 0x0C);
             }
 
             Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x04);
@@ -157,7 +154,8 @@ namespace DiscUtils.Ntfs
                         AceFlags newFlags = ace.AceFlags;
                         if ((newFlags & AceFlags.NoPropagateInherit) != 0)
                         {
-                            newFlags &= ~(AceFlags.ContainerInherit | AceFlags.ObjectInherit | AceFlags.NoPropagateInherit);
+                            newFlags &=
+                                ~(AceFlags.ContainerInherit | AceFlags.ObjectInherit | AceFlags.NoPropagateInherit);
                         }
 
                         newFlags &= ~AceFlags.InheritOnly;

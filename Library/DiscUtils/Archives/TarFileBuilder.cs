@@ -61,7 +61,8 @@ namespace DiscUtils.Archives
         /// <param name="groupId">The gid of the owner.</param>
         /// <param name="modificationTime">The modification time for the file.</param>
         public void AddFile(
-            string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+            string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId,
+            DateTime modificationTime)
         {
             _files.Add(new UnixBuildFileRecord(name, buffer, fileMode, ownerId, groupId, modificationTime));
         }
@@ -86,14 +87,15 @@ namespace DiscUtils.Archives
         /// <param name="groupId">The gid of the owner.</param>
         /// <param name="modificationTime">The modification time for the file.</param>
         public void AddFile(
-            string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+            string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId,
+            DateTime modificationTime)
         {
             _files.Add(new UnixBuildFileRecord(name, stream, fileMode, ownerId, groupId, modificationTime));
         }
 
         internal override List<BuilderExtent> FixExtents(out long totalLength)
         {
-            List<BuilderExtent> result = new List<BuilderExtent>((_files.Count * 2) + 2);
+            List<BuilderExtent> result = new List<BuilderExtent>((_files.Count*2) + 2);
             long pos = 0;
 
             foreach (UnixBuildFileRecord file in _files)
@@ -101,7 +103,8 @@ namespace DiscUtils.Archives
                 BuilderExtent fileContentExtent = file.Fix(pos + TarHeader.Length);
 
                 result.Add(new TarHeaderExtent(
-                    pos, file.Name, fileContentExtent.Length, file.FileMode, file.OwnerId, file.GroupId, file.ModificationTime));
+                    pos, file.Name, fileContentExtent.Length, file.FileMode, file.OwnerId, file.GroupId,
+                    file.ModificationTime));
                 pos += TarHeader.Length;
 
                 result.Add(fileContentExtent);

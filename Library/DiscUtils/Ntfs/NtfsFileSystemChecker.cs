@@ -27,6 +27,7 @@ namespace DiscUtils.Ntfs
     using System.Globalization;
     using System.IO;
     using System.Text;
+
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -231,7 +232,8 @@ namespace DiscUtils.Ntfs
                             }
                             else if (objIdRec.MftReference != f.MftReference)
                             {
-                                ReportError("ObjectId {0} for file {1} points to {2}", objId.Id, f.BestName, objIdRec.MftReference);
+                                ReportError("ObjectId {0} for file {1} points to {2}", objId.Id, f.BestName,
+                                    objIdRec.MftReference);
                             }
                         }
                     }
@@ -242,7 +244,8 @@ namespace DiscUtils.Ntfs
             {
                 if (_context.Mft.GetRecord(objIdRec.Value.MftReference) == null)
                 {
-                    ReportError("ObjectId {0} refers to non-existant file {1}", objIdRec.Key, objIdRec.Value.MftReference);
+                    ReportError("ObjectId {0} refers to non-existant file {1}", objIdRec.Key,
+                        objIdRec.Value.MftReference);
                 }
             }
         }
@@ -261,7 +264,8 @@ namespace DiscUtils.Ntfs
                 {
                     if (stream.AttributeType == AttributeType.IndexRoot && stream.Name == "$I30")
                     {
-                        IndexView<FileNameRecord, FileRecordReference> dir = new IndexView<FileNameRecord, FileRecordReference>(f.GetIndex("$I30"));
+                        IndexView<FileNameRecord, FileRecordReference> dir =
+                            new IndexView<FileNameRecord, FileRecordReference>(f.GetIndex("$I30"));
                         foreach (var entry in dir.Entries)
                         {
                             FileRecord refFile = _context.Mft.GetRecord(entry.Value);
@@ -274,7 +278,8 @@ namespace DiscUtils.Ntfs
 
                             File referencedFile = new File(_context, refFile);
                             StandardInformation si = referencedFile.StandardInformation;
-                            if (si.CreationTime != entry.Key.CreationTime || si.MftChangedTime != entry.Key.MftChangedTime
+                            if (si.CreationTime != entry.Key.CreationTime ||
+                                si.MftChangedTime != entry.Key.MftChangedTime
                                 || si.ModificationTime != entry.Key.ModificationTime)
                             {
                                 ReportInfo("Directory entry {0} in {1} is out of date", entry.Key, f);
@@ -309,7 +314,7 @@ namespace DiscUtils.Ntfs
             byte[] rootBuffer;
             using (Stream s = file.OpenStream(AttributeType.IndexRoot, name, FileAccess.Read))
             {
-                rootBuffer = Utilities.ReadFully(s, (int)s.Length);
+                rootBuffer = Utilities.ReadFully(s, (int) s.Length);
             }
 
             Bitmap indexBitmap = null;
@@ -320,15 +325,18 @@ namespace DiscUtils.Ntfs
 
             if (!SelfCheckIndexNode(rootBuffer, IndexRoot.HeaderOffset, indexBitmap, root, file.BestName, name))
             {
-                ReportError("Index {0} in file {1} (MFT:{2}) has corrupt IndexRoot attribute", name, file.BestName, file.IndexInMft);
+                ReportError("Index {0} in file {1} (MFT:{2}) has corrupt IndexRoot attribute", name, file.BestName,
+                    file.IndexInMft);
             }
             else
             {
-                ReportInfo("Self-check of index {0} in file {1} (MFT:{2}) complete", name, file.BestName, file.IndexInMft);
+                ReportInfo("Self-check of index {0} in file {1} (MFT:{2}) complete", name, file.BestName,
+                    file.IndexInMft);
             }
         }
 
-        private bool SelfCheckIndexNode(byte[] buffer, int offset, Bitmap bitmap, IndexRoot root, string fileName, string indexName)
+        private bool SelfCheckIndexNode(byte[] buffer, int offset, Bitmap bitmap, IndexRoot root, string fileName,
+            string indexName)
         {
             bool ok = true;
 
@@ -338,7 +346,7 @@ namespace DiscUtils.Ntfs
 
             IComparer<byte[]> collator = root.GetCollator(_context.UpperCase);
 
-            int pos = (int)header.OffsetToFirstEntry;
+            int pos = (int) header.OffsetToFirstEntry;
             while (pos < header.TotalSizeOfEntries)
             {
                 IndexEntry entry = new IndexEntry(indexName == "$I30");
@@ -347,10 +355,14 @@ namespace DiscUtils.Ntfs
 
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    long bitmapIdx = entry.ChildrenVirtualCluster / Utilities.Ceil(root.IndexAllocationSize, _context.BiosParameterBlock.SectorsPerCluster * _context.BiosParameterBlock.BytesPerSector);
+                    long bitmapIdx = entry.ChildrenVirtualCluster/
+                                     Utilities.Ceil(root.IndexAllocationSize,
+                                         _context.BiosParameterBlock.SectorsPerCluster*
+                                         _context.BiosParameterBlock.BytesPerSector);
                     if (!bitmap.IsPresent(bitmapIdx))
                     {
-                        ReportError("Index entry {0} is non-leaf, but child vcn {1} is not in bitmap at index {2}", Index.EntryAsString(entry, fileName, indexName), entry.ChildrenVirtualCluster, bitmapIdx);
+                        ReportError("Index entry {0} is non-leaf, but child vcn {1} is not in bitmap at index {2}",
+                            Index.EntryAsString(entry, fileName, indexName), entry.ChildrenVirtualCluster, bitmapIdx);
                     }
                 }
 
@@ -358,14 +370,17 @@ namespace DiscUtils.Ntfs
                 {
                     if (pos != header.TotalSizeOfEntries)
                     {
-                        ReportError("Found END index entry {0}, but not at end of node", Index.EntryAsString(entry, fileName, indexName));
+                        ReportError("Found END index entry {0}, but not at end of node",
+                            Index.EntryAsString(entry, fileName, indexName));
                         ok = false;
                     }
                 }
 
                 if (lastEntry != null && collator.Compare(lastEntry.KeyBuffer, entry.KeyBuffer) >= 0)
                 {
-                    ReportError("Found entries out of order {0} was before {1}", Index.EntryAsString(lastEntry, fileName, indexName), Index.EntryAsString(entry, fileName, indexName));
+                    ReportError("Found entries out of order {0} was before {1}",
+                        Index.EntryAsString(lastEntry, fileName, indexName),
+                        Index.EntryAsString(entry, fileName, indexName));
                     ok = false;
                 }
 
@@ -414,7 +429,8 @@ namespace DiscUtils.Ntfs
                     {
                         if (bitmap.IsPresent(index))
                         {
-                            ReportError("Invalid MFT record magic at index {0} - was ({2},{3},{4},{5}) \"{1}\"", index, magic.Trim('\0'), (int)magic[0], (int)magic[1], (int)magic[2], (int)magic[3]);
+                            ReportError("Invalid MFT record magic at index {0} - was ({2},{3},{4},{5}) \"{1}\"", index,
+                                magic.Trim('\0'), (int) magic[0], (int) magic[1], (int) magic[2], (int) magic[3]);
                         }
                     }
                     else
@@ -462,7 +478,9 @@ namespace DiscUtils.Ntfs
                                 string existingKey;
                                 if (clusterMap.TryGetValue(cluster, out existingKey))
                                 {
-                                    ReportError("Two attributes referencing cluster {0} (0x{0:X16}) - {1} and {2} (as MftIndex:AttrId)", cluster, existingKey, attrKey);
+                                    ReportError(
+                                        "Two attributes referencing cluster {0} (0x{0:X16}) - {1} and {2} (as MftIndex:AttrId)",
+                                        cluster, existingKey, attrKey);
                                 }
                             }
                         }
@@ -498,7 +516,7 @@ namespace DiscUtils.Ntfs
 
                     if (ar.IsNonResident)
                     {
-                        NonResidentAttributeRecord nrr = (NonResidentAttributeRecord)ar;
+                        NonResidentAttributeRecord nrr = (NonResidentAttributeRecord) ar;
                         if (nrr.DataRuns.Count > 0)
                         {
                             long totalVcn = 0;
@@ -533,17 +551,19 @@ namespace DiscUtils.Ntfs
             bool inUse = (record.Flags & FileRecordFlags.InUse) != 0;
             if (inUse != presentInBitmap)
             {
-                ReportError("MFT bitmap and record in-use flag don't agree.  Mft={0}, Record={1}", presentInBitmap ? "InUse" : "Free", inUse ? "InUse" : "Free");
+                ReportError("MFT bitmap and record in-use flag don't agree.  Mft={0}, Record={1}",
+                    presentInBitmap ? "InUse" : "Free", inUse ? "InUse" : "Free");
                 ok = false;
             }
 
             if (record.Size != record.RealSize)
             {
-                ReportError("MFT record real size is different to calculated size.  Stored in MFT={0}, Calculated={1}", record.RealSize, record.Size);
+                ReportError("MFT record real size is different to calculated size.  Stored in MFT={0}, Calculated={1}",
+                    record.RealSize, record.Size);
                 ok = false;
             }
 
-            if (Utilities.ToUInt32LittleEndian(recordData, (int)record.RealSize - 8) != uint.MaxValue)
+            if (Utilities.ToUInt32LittleEndian(recordData, (int) record.RealSize - 8) != uint.MaxValue)
             {
                 ReportError("MFT record is not correctly terminated with 0xFFFFFFFF");
                 ok = false;
@@ -567,7 +587,7 @@ namespace DiscUtils.Ntfs
                 ok = false;
             }
 
-            if ((range.Offset + range.Count) * _context.BiosParameterBlock.BytesPerCluster > _context.RawStream.Length)
+            if ((range.Offset + range.Count)*_context.BiosParameterBlock.BytesPerCluster > _context.RawStream.Length)
             {
                 ReportError("Invalid cluster range {0} - beyond end of disk", range);
                 ok = false;
@@ -606,6 +626,7 @@ namespace DiscUtils.Ntfs
 #if !NETCORE
         [Serializable]
 #endif
+
         private sealed class AbortException : InvalidFileSystemException
         {
             public AbortException()

@@ -28,7 +28,7 @@ namespace DiscUtils.Nfs
     {
         public Nfs3ReadDirPlusResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status)reader.ReadInt32();
+            Status = (Nfs3Status) reader.ReadInt32();
             if (reader.ReadBool())
             {
                 DirAttributes = new Nfs3FileAttributes(reader);

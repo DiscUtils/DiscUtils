@@ -61,7 +61,8 @@ namespace DiscUtils.Raw
         /// <param name="path">The path to the disk image.</param>
         public Disk(string path)
         {
-            _file = new DiskImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, null);
+            _file = new DiskImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None),
+                Ownership.Dispose, null);
         }
 
         /// <summary>

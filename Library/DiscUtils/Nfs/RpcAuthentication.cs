@@ -39,7 +39,7 @@ namespace DiscUtils.Nfs
 
         public RpcAuthentication(XdrDataReader reader)
         {
-            _flavour = (RpcAuthFlavour)reader.ReadInt32();
+            _flavour = (RpcAuthFlavour) reader.ReadInt32();
             _body = reader.ReadBuffer(400);
         }
 
@@ -60,7 +60,7 @@ namespace DiscUtils.Nfs
 
         public void Write(XdrDataWriter writer)
         {
-            writer.Write((int)_flavour);
+            writer.Write((int) _flavour);
             writer.WriteBuffer(_body);
         }
     }

@@ -58,12 +58,12 @@ namespace DiscUtils.SquashFs
 
         protected void FillCommonInodeData(BuilderContext context)
         {
-            Inode.Mode = (ushort)Mode;
+            Inode.Mode = (ushort) Mode;
             Inode.UidKey = context.AllocateId(UserId);
             Inode.GidKey = context.AllocateId(GroupId);
             Inode.ModificationTime = ModificationTime;
-            InodeNumber = (int)context.AllocateInode();
-            Inode.InodeNumber = (uint)InodeNumber;
+            InodeNumber = (int) context.AllocateInode();
+            Inode.InodeNumber = (uint) InodeNumber;
             Inode.NumLinks = NumLinks;
         }
     }

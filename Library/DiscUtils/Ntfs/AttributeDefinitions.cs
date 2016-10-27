@@ -34,9 +34,11 @@ namespace DiscUtils.Ntfs
         {
             _attrDefs = new Dictionary<AttributeType, AttributeDefinitionRecord>();
 
-            Add(AttributeType.StandardInformation, "$STANDARD_INFORMATION", AttributeTypeFlags.MustBeResident, 0x30, 0x48);
+            Add(AttributeType.StandardInformation, "$STANDARD_INFORMATION", AttributeTypeFlags.MustBeResident, 0x30,
+                0x48);
             Add(AttributeType.AttributeList, "$ATTRIBUTE_LIST", AttributeTypeFlags.CanBeNonResident, 0, -1);
-            Add(AttributeType.FileName, "$FILE_NAME", AttributeTypeFlags.Indexed | AttributeTypeFlags.MustBeResident, 0x44, 0x242);
+            Add(AttributeType.FileName, "$FILE_NAME", AttributeTypeFlags.Indexed | AttributeTypeFlags.MustBeResident,
+                0x44, 0x242);
             Add(AttributeType.ObjectId, "$OBJECT_ID", AttributeTypeFlags.MustBeResident, 0, 0x100);
             Add(AttributeType.SecurityDescriptor, "$SECURITY_DESCRIPTOR", AttributeTypeFlags.CanBeNonResident, 0x0, -1);
             Add(AttributeType.VolumeName, "$VOLUME_NAME", AttributeTypeFlags.MustBeResident, 0x2, 0x100);
@@ -46,9 +48,11 @@ namespace DiscUtils.Ntfs
             Add(AttributeType.IndexAllocation, "$INDEX_ALLOCATION", AttributeTypeFlags.CanBeNonResident, 0, -1);
             Add(AttributeType.Bitmap, "$BITMAP", AttributeTypeFlags.CanBeNonResident, 0, -1);
             Add(AttributeType.ReparsePoint, "$REPARSE_POINT", AttributeTypeFlags.CanBeNonResident, 0, 0x4000);
-            Add(AttributeType.ExtendedAttributesInformation, "$EA_INFORMATION", AttributeTypeFlags.MustBeResident, 0x8, 0x8);
+            Add(AttributeType.ExtendedAttributesInformation, "$EA_INFORMATION", AttributeTypeFlags.MustBeResident, 0x8,
+                0x8);
             Add(AttributeType.ExtendedAttributes, "$EA", AttributeTypeFlags.None, 0, 0x10000);
-            Add(AttributeType.LoggedUtilityStream, "$LOGGED_UTILITY_STREAM", AttributeTypeFlags.CanBeNonResident, 0, 0x10000);
+            Add(AttributeType.LoggedUtilityStream, "$LOGGED_UTILITY_STREAM", AttributeTypeFlags.CanBeNonResident, 0,
+                0x10000);
         }
 
         public AttributeDefinitions(File file)
@@ -129,7 +133,8 @@ namespace DiscUtils.Ntfs
             return false;
         }
 
-        private void Add(AttributeType attributeType, string name, AttributeTypeFlags attributeTypeFlags, int minSize, int maxSize)
+        private void Add(AttributeType attributeType, string name, AttributeTypeFlags attributeTypeFlags, int minSize,
+            int maxSize)
         {
             AttributeDefinitionRecord adr = new AttributeDefinitionRecord();
             adr.Type = attributeType;

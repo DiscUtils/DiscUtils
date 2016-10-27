@@ -51,8 +51,8 @@ namespace DiscUtils.Dmg
 
             if (_udifHeader.SignatureValid)
             {
-                stream.Position = (long)_udifHeader.XmlOffset;
-                byte[] xmlData = Utilities.ReadFully(stream, (int)_udifHeader.XmlLength);
+                stream.Position = (long) _udifHeader.XmlOffset;
+                byte[] xmlData = Utilities.ReadFully(stream, (int) _udifHeader.XmlLength);
                 var plist = Plist.Parse(new MemoryStream(xmlData));
 
                 _resources = ResourceFork.FromPlist(plist);

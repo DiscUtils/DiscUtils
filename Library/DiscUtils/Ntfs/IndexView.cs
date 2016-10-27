@@ -54,15 +54,9 @@ namespace DiscUtils.Ntfs
 
         public D this[K key]
         {
-            get
-            {
-                return Convert<D>(_index[Unconvert(key)]);
-            }
+            get { return Convert<D>(_index[Unconvert(key)]); }
 
-            set
-            {
-                _index[Unconvert(key)] = Unconvert<D>(value);
-            }
+            set { _index[Unconvert(key)] = Unconvert<D>(value); }
         }
 
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<byte[]> query)

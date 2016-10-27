@@ -54,10 +54,7 @@ namespace DiscUtils.HfsPlus
 
         public string CompressionMagic
         {
-            get
-            {
-                return Encoding.ASCII.GetString(BitConverter.GetBytes(this._compressionMagic));
-            }
+            get { return Encoding.ASCII.GetString(BitConverter.GetBytes(this._compressionMagic)); }
         }
 
         public static int Size
@@ -72,7 +69,7 @@ namespace DiscUtils.HfsPlus
 
         public uint CompressionType
         {
-            get { return _compressionType; } 
+            get { return _compressionType; }
         }
 
         public uint UncompressedSize

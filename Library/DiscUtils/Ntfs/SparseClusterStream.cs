@@ -61,7 +61,7 @@ namespace DiscUtils.Ntfs
             _rawStream.TruncateToClusters(alignedNum);
             if (alignedNum != numVirtualClusters)
             {
-                _rawStream.ReleaseClusters(numVirtualClusters, (int)(alignedNum - numVirtualClusters));
+                _rawStream.ReleaseClusters(numVirtualClusters, (int) (alignedNum - numVirtualClusters));
             }
         }
 

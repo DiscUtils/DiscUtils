@@ -98,7 +98,8 @@ namespace DiscUtils
         /// <returns>An array of child directories.</returns>
         public DiscDirectoryInfo[] GetDirectories()
         {
-            return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path), (p) => new DiscDirectoryInfo(FileSystem, p));
+            return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path),
+                (p) => new DiscDirectoryInfo(FileSystem, p));
         }
 
         /// <summary>
@@ -124,7 +125,8 @@ namespace DiscUtils
         /// children, or all children are returned.</remarks>
         public DiscDirectoryInfo[] GetDirectories(string pattern, SearchOption searchOption)
         {
-            return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path, pattern, searchOption), (p) => new DiscDirectoryInfo(FileSystem, p));
+            return Utilities.Map<string, DiscDirectoryInfo>(FileSystem.GetDirectories(Path, pattern, searchOption),
+                (p) => new DiscDirectoryInfo(FileSystem, p));
         }
 
         /// <summary>
@@ -159,7 +161,8 @@ namespace DiscUtils
         /// children, or all children are returned.</remarks>
         public DiscFileInfo[] GetFiles(string pattern, SearchOption searchOption)
         {
-            return Utilities.Map<string, DiscFileInfo>(FileSystem.GetFiles(Path, pattern, searchOption), (p) => new DiscFileInfo(FileSystem, p));
+            return Utilities.Map<string, DiscFileInfo>(FileSystem.GetFiles(Path, pattern, searchOption),
+                (p) => new DiscFileInfo(FileSystem, p));
         }
 
         /// <summary>
@@ -168,7 +171,8 @@ namespace DiscUtils
         /// <returns>An array of files and directories.</returns>
         public DiscFileSystemInfo[] GetFileSystemInfos()
         {
-            return Utilities.Map<string, DiscFileSystemInfo>(FileSystem.GetFileSystemEntries(Path), (p) => new DiscFileSystemInfo(FileSystem, p));
+            return Utilities.Map<string, DiscFileSystemInfo>(FileSystem.GetFileSystemEntries(Path),
+                (p) => new DiscFileSystemInfo(FileSystem, p));
         }
 
         /// <summary>
@@ -180,7 +184,8 @@ namespace DiscUtils
         /// and ? (matching 1 character).</remarks>
         public DiscFileSystemInfo[] GetFileSystemInfos(string pattern)
         {
-            return Utilities.Map<string, DiscFileSystemInfo>(FileSystem.GetFileSystemEntries(Path, pattern), (p) => new DiscFileSystemInfo(FileSystem, p));
+            return Utilities.Map<string, DiscFileSystemInfo>(FileSystem.GetFileSystemEntries(Path, pattern),
+                (p) => new DiscFileSystemInfo(FileSystem, p));
         }
     }
 }

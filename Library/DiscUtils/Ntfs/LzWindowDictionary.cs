@@ -69,7 +69,7 @@ namespace DiscUtils.Ntfs
         {
             RemoveOldEntries(decompressedData[decompressedDataOffset + index]); // Remove old entries for this index 
 
-            int[] match = new int[] { 0, 0 };
+            int[] match = new int[] {0, 0};
 
             if (index < 1 || length - index < MinMatchAmount)
             {
@@ -87,8 +87,11 @@ namespace DiscUtils.Ntfs
                     break;
                 }
 
-                int maxMatchSize = (int)Math.Min(Math.Min(MaxMatchAmount, BlockSize), Math.Min(length - index, length - matchStart));
-                while (matchSize < maxMatchSize && decompressedData[decompressedDataOffset + index + matchSize] == decompressedData[decompressedDataOffset + matchStart + matchSize])
+                int maxMatchSize =
+                    (int) Math.Min(Math.Min(MaxMatchAmount, BlockSize), Math.Min(length - index, length - matchStart));
+                while (matchSize < maxMatchSize &&
+                       decompressedData[decompressedDataOffset + index + matchSize] ==
+                       decompressedData[decompressedDataOffset + matchStart + matchSize])
                 {
                     matchSize++;
                 }
@@ -96,7 +99,7 @@ namespace DiscUtils.Ntfs
                 if (matchSize >= MinMatchAmount && matchSize > match[1])
                 {
                     // This is a good match 
-                    match = new int[] { (int)(index - matchStart), matchSize };
+                    match = new int[] {(int) (index - matchStart), matchSize};
 
                     if (matchSize == MaxMatchAmount)
                     {

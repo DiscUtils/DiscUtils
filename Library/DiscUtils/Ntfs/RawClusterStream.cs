@@ -90,7 +90,8 @@ namespace DiscUtils.Ntfs
                         long startPos = cookedRun.StartVcn;
                         if (lastVcnRange != null && lastVcnRange.Offset + lastVcnRange.Count == startPos)
                         {
-                            lastVcnRange = new Range<long, long>(lastVcnRange.Offset, lastVcnRange.Count + cookedRun.Length);
+                            lastVcnRange = new Range<long, long>(lastVcnRange.Offset,
+                                lastVcnRange.Count + cookedRun.Length);
                             ranges[ranges.Count - 1] = lastVcnRange;
                         }
                         else
@@ -150,7 +151,7 @@ namespace DiscUtils.Ntfs
 
             if (allocate)
             {
-                AllocateClusters(totalVirtualClusters, (int)(numVirtualClusters - totalVirtualClusters));
+                AllocateClusters(totalVirtualClusters, (int) (numVirtualClusters - totalVirtualClusters));
             }
         }
 
@@ -158,7 +159,7 @@ namespace DiscUtils.Ntfs
         {
             if (numVirtualClusters < _cookedRuns.NextVirtualCluster)
             {
-                ReleaseClusters(numVirtualClusters, (int)(_cookedRuns.NextVirtualCluster - numVirtualClusters));
+                ReleaseClusters(numVirtualClusters, (int) (_cookedRuns.NextVirtualCluster - numVirtualClusters));
 
                 int runIdx = _cookedRuns.FindDataRun(numVirtualClusters, 0);
 
@@ -214,7 +215,8 @@ namespace DiscUtils.Ntfs
                         }
                     }
 
-                    var alloced = _context.ClusterBitmap.AllocateClusters(numClusters, nextCluster, _isMft, AllocatedClusterCount);
+                    var alloced = _context.ClusterBitmap.AllocateClusters(numClusters, nextCluster, _isMft,
+                        AllocatedClusterCount);
 
                     List<DataRun> runs = new List<DataRun>();
 
@@ -232,7 +234,7 @@ namespace DiscUtils.Ntfs
 
                     _cookedRuns.MakeNonSparse(runIdx, runs);
 
-                    totalAllocated += (int)numClusters;
+                    totalAllocated += (int) numClusters;
                     focus += numClusters;
                 }
                 else
@@ -278,7 +280,7 @@ namespace DiscUtils.Ntfs
 
                     _context.ClusterBitmap.FreeClusters(new Range<long, long>(run.StartLcn, run.Length));
                     _cookedRuns.MakeSparse(runIdx);
-                    totalReleased += (int)run.Length;
+                    totalReleased += (int) run.Length;
 
                     focus += numClusters;
                 }
@@ -289,7 +291,7 @@ namespace DiscUtils.Ntfs
 
         public override void ReadClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            Utilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
+            Utilities.AssertBufferParameters(buffer, offset, count*_bytesPerCluster);
 
             int runIdx = 0;
             int totalRead = 0;
@@ -300,20 +302,22 @@ namespace DiscUtils.Ntfs
                 runIdx = _cookedRuns.FindDataRun(focusVcn, runIdx);
                 CookedDataRun run = _cookedRuns[runIdx];
 
-                int toRead = (int)Math.Min(count - totalRead, run.Length - (focusVcn - run.StartVcn));
+                int toRead = (int) Math.Min(count - totalRead, run.Length - (focusVcn - run.StartVcn));
 
                 if (run.IsSparse)
                 {
-                    Array.Clear(buffer, offset + (totalRead * _bytesPerCluster), toRead * _bytesPerCluster);
+                    Array.Clear(buffer, offset + (totalRead*_bytesPerCluster), toRead*_bytesPerCluster);
                 }
                 else
                 {
                     long lcn = _cookedRuns[runIdx].StartLcn + (focusVcn - run.StartVcn);
-                    _fsStream.Position = lcn * _bytesPerCluster;
-                    int numRead = Utilities.ReadFully(_fsStream, buffer, offset + (totalRead * _bytesPerCluster), toRead * _bytesPerCluster);
-                    if (numRead != toRead * _bytesPerCluster)
+                    _fsStream.Position = lcn*_bytesPerCluster;
+                    int numRead = Utilities.ReadFully(_fsStream, buffer, offset + (totalRead*_bytesPerCluster),
+                        toRead*_bytesPerCluster);
+                    if (numRead != toRead*_bytesPerCluster)
                     {
-                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "Short read, reading {0} clusters starting at LCN {1}", toRead, lcn));
+                        throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                            "Short read, reading {0} clusters starting at LCN {1}", toRead, lcn));
                     }
                 }
 
@@ -323,7 +327,7 @@ namespace DiscUtils.Ntfs
 
         public override int WriteClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            Utilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
+            Utilities.AssertBufferParameters(buffer, offset, count*_bytesPerCluster);
 
             int runIdx = 0;
             int totalWritten = 0;
@@ -339,11 +343,11 @@ namespace DiscUtils.Ntfs
                     throw new NotImplementedException("Writing to sparse datarun");
                 }
 
-                int toWrite = (int)Math.Min(count - totalWritten, run.Length - (focusVcn - run.StartVcn));
+                int toWrite = (int) Math.Min(count - totalWritten, run.Length - (focusVcn - run.StartVcn));
 
                 long lcn = _cookedRuns[runIdx].StartLcn + (focusVcn - run.StartVcn);
-                _fsStream.Position = lcn * _bytesPerCluster;
-                _fsStream.Write(buffer, offset + (totalWritten * _bytesPerCluster), toWrite * _bytesPerCluster);
+                _fsStream.Position = lcn*_bytesPerCluster;
+                _fsStream.Write(buffer, offset + (totalWritten*_bytesPerCluster), toWrite*_bytesPerCluster);
 
                 totalWritten += toWrite;
             }
@@ -353,7 +357,7 @@ namespace DiscUtils.Ntfs
 
         public override int ClearClusters(long startVcn, int count)
         {
-            byte[] zeroBuffer = new byte[16 * _bytesPerCluster];
+            byte[] zeroBuffer = new byte[16*_bytesPerCluster];
 
             int clustersAllocated = 0;
 

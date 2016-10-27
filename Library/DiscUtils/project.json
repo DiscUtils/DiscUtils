@@ -3,12 +3,13 @@
 
   "name": "Quamotion.DiscUtils",
   "title": "DiscUtils (for .NET and .NET Core)",
-  "description": "Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. VHD, XVA, VMDK and VDI disk formats are implemented, as well as read/write Registry support. The library also includes a simple iSCSI initiator, for accessing disks via iSCSI and an NFS client implementation.",
-  "authors": [ "Kenneth Bell", "Quamotion" ],
+  "description":
+    "Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. VHD, XVA, VMDK and VDI disk formats are implemented, as well as read/write Registry support. The library also includes a simple iSCSI initiator, for accessing disks via iSCSI and an NFS client implementation.",
+  "authors": ["Kenneth Bell", "Quamotion"],
 
   "packOptions": {
-    "owners": [ "Quamotion" ],
-    "tags": [ "DiscUtils", "VHD", "VDI", "XVA", "VMDK", "ISO", "NTFS", "EXT2FS" ],
+    "owners": ["Quamotion"],
+    "tags": ["DiscUtils", "VHD", "VDI", "XVA", "VMDK", "ISO", "NTFS", "EXT2FS"],
     "projectUrl": "https://github.com/quamotion/discutils",
     "licenseUrl": "https://github.com/quamotion/discutils/blob/master/LICENSE.txt",
     "repository": {
@@ -18,6 +19,7 @@
   },
 
   "dependencies": {
+  
   },
 
   "buildOptions": {
@@ -64,7 +66,7 @@
         "System.Runtime.InteropServices": "4.1.0"
       },
       "buildOptions": {
-        "define": [ "NETCORE" ]
+        "define": ["NETCORE"]
       }
     },
     "net20": {
@@ -72,7 +74,7 @@
         "System.Xml": "2.0.0.0"
       },
       "buildOptions": {
-        "define": [ "NET20" ]
+        "define": ["NET20"]
       }
     },
     "net40": {

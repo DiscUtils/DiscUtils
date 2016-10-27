@@ -43,41 +43,23 @@ namespace DiscUtils.SquashFs
 
         public DateTime LastAccessTimeUtc
         {
-            get
-            {
-                return _inode.ModificationTime;
-            }
+            get { return _inode.ModificationTime; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get
-            {
-                return _inode.ModificationTime;
-            }
+            get { return _inode.ModificationTime; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
-            get
-            {
-                return _inode.ModificationTime;
-            }
+            get { return _inode.ModificationTime; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public FileAttributes FileAttributes
@@ -88,10 +70,7 @@ namespace DiscUtils.SquashFs
                 return Utilities.FileAttributesFromUnixFileType(fileType);
             }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public long FileLength
@@ -105,7 +84,7 @@ namespace DiscUtils.SquashFs
             {
                 if (_content == null)
                 {
-                    _content = new FileContentBuffer(_context, (RegularInode)_inode, _inodeRef);
+                    _content = new FileContentBuffer(_context, (RegularInode) _inode, _inodeRef);
                 }
 
                 return _content;

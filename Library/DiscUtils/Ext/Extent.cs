@@ -33,7 +33,7 @@ namespace DiscUtils.Ext
 
         public ulong FirstPhysicalBlock
         {
-            get { return FirstPhysicalBlockLow | (((ulong)FirstPhysicalBlockHi) << 32); }
+            get { return FirstPhysicalBlockLow | (((ulong) FirstPhysicalBlockHi) << 32); }
         }
 
         public int Size

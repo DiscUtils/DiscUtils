@@ -33,8 +33,8 @@ namespace DiscUtils.Vhdx
 
         public PayloadBlockStatus PayloadBlockStatus
         {
-            get { return (PayloadBlockStatus)(_value & 0x7); }
-            set { _value = (_value & ~0x7ul) | (ulong)value; }
+            get { return (PayloadBlockStatus) (_value & 0x7); }
+            set { _value = (_value & ~0x7ul) | (ulong) value; }
         }
 
         public bool BitmapBlockPresent
@@ -45,8 +45,8 @@ namespace DiscUtils.Vhdx
 
         public long FileOffsetMB
         {
-            get { return (long)(_value >> 20) & 0xFFFFFFFFFFFL; }
-            set { _value = (_value & 0xFFFFF) | ((ulong)value) << 20; }
+            get { return (long) (_value >> 20) & 0xFFFFFFFFFFFL; }
+            set { _value = (_value & 0xFFFFF) | ((ulong) value) << 20; }
         }
 
         public int Size

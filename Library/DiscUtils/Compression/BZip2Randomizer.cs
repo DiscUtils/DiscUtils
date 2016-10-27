@@ -84,7 +84,7 @@ namespace DiscUtils.Compression
             920, 176, 193, 713, 857, 265, 203, 50, 668, 108,
             645, 990, 626, 197, 510, 357, 358, 850, 858, 364,
             936, 638
-            };
+        };
 
         protected override bool BuffersMustNotOverlap
         {

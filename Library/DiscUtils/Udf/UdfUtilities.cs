@@ -70,7 +70,7 @@ namespace DiscUtils.Udf
 
             for (int i = 0; i < length; ++i)
             {
-                result = (ushort)(CrcTable[(result >> 8 ^ buffer[offset + i]) & 0xFF] ^ (result << 8));
+                result = (ushort) (CrcTable[(result >> 8 ^ buffer[offset + i]) & 0xFF] ^ (result << 8));
             }
 
             return result;
@@ -115,7 +115,8 @@ namespace DiscUtils.Udf
 
             try
             {
-                DateTime baseTime = new DateTime(year, month, day, hour, min, sec, (10 * csec) + (hmsec / 10), DateTimeKind.Utc);
+                DateTime baseTime = new DateTime(year, month, day, hour, min, sec, (10*csec) + (hmsec/10),
+                    DateTimeKind.Utc);
                 return baseTime - TimeSpan.FromMinutes(minutesWest);
             }
             catch (ArgumentOutOfRangeException)
@@ -153,13 +154,13 @@ namespace DiscUtils.Udf
 
                 if (alg == 16)
                 {
-                    ch = (char)(buffer[offset + pos] << 8);
+                    ch = (char) (buffer[offset + pos] << 8);
                     pos++;
                 }
 
                 if (pos < count)
                 {
-                    ch |= (char)buffer[offset + pos];
+                    ch |= (char) buffer[offset + pos];
                     pos++;
                 }
 
@@ -172,8 +173,8 @@ namespace DiscUtils.Udf
         public static byte[] ReadExtent(UdfContext context, LongAllocationDescriptor extent)
         {
             LogicalPartition partition = context.LogicalPartitions[extent.ExtentLocation.Partition];
-            long pos = extent.ExtentLocation.LogicalBlock * partition.LogicalBlockSize;
-            return Utilities.ReadFully(partition.Content, pos, (int)extent.ExtentLength);
+            long pos = extent.ExtentLocation.LogicalBlock*partition.LogicalBlockSize;
+            return Utilities.ReadFully(partition.Content, pos, (int) extent.ExtentLength);
         }
 
         private static short ForceRange(short min, short max, short val)

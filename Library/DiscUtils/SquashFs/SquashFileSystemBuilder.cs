@@ -43,8 +43,11 @@ namespace DiscUtils.SquashFs
         /// </summary>
         public SquashFileSystemBuilder()
         {
-            DefaultFilePermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite;
-            DefaultDirectoryPermissions = UnixFilePermissions.OwnerAll | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupExecute | UnixFilePermissions.OthersRead | UnixFilePermissions.OthersExecute;
+            DefaultFilePermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite |
+                                     UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite;
+            DefaultDirectoryPermissions = UnixFilePermissions.OwnerAll | UnixFilePermissions.GroupRead |
+                                          UnixFilePermissions.GroupExecute | UnixFilePermissions.OthersRead |
+                                          UnixFilePermissions.OthersExecute;
             DefaultUser = 0;
             DefaultGroup = 0;
         }
@@ -52,38 +55,22 @@ namespace DiscUtils.SquashFs
         /// <summary>
         /// Gets or sets the default permissions used for new files.
         /// </summary>
-        public UnixFilePermissions DefaultFilePermissions
-        {
-            get;
-            set;
-        }
+        public UnixFilePermissions DefaultFilePermissions { get; set; }
 
         /// <summary>
         /// Gets or sets the default permissions used for new directories.
         /// </summary>
-        public UnixFilePermissions DefaultDirectoryPermissions
-        {
-            get;
-            set;
-        }
+        public UnixFilePermissions DefaultDirectoryPermissions { get; set; }
 
         /// <summary>
         /// Gets or sets the default user id used for new files and directories.
         /// </summary>
-        public int DefaultUser
-        {
-            get;
-            set;
-        }
+        public int DefaultUser { get; set; }
 
         /// <summary>
         /// Gets or sets the default group id used for new files and directories.
         /// </summary>
-        public int DefaultGroup
-        {
-            get;
-            set;
-        }
+        public int DefaultGroup { get; set; }
 
         /// <summary>
         /// Adds a file to the file system.
@@ -128,7 +115,8 @@ namespace DiscUtils.SquashFs
         /// <para>Any missing parent directories will be created with the specified owner and group,
         /// default directory permissions and the current time as the modification time.</para>
         /// </remarks>
-        public void AddFile(string path, Stream content, int user, int group, UnixFilePermissions permissions, DateTime modificationTime)
+        public void AddFile(string path, Stream content, int user, int group, UnixFilePermissions permissions,
+            DateTime modificationTime)
         {
             BuilderFile file = new BuilderFile(content);
             file.UserId = user;
@@ -157,7 +145,8 @@ namespace DiscUtils.SquashFs
         /// <para>Any missing parent directories will be created with the specified owner and group,
         /// default directory permissions and the current time as the modification time.</para>
         /// </remarks>
-        public void AddFile(string path, string contentPath, int user, int group, UnixFilePermissions permissions, DateTime modificationTime)
+        public void AddFile(string path, string contentPath, int user, int group, UnixFilePermissions permissions,
+            DateTime modificationTime)
         {
             BuilderFile file = new BuilderFile(contentPath);
             file.UserId = user;
@@ -201,7 +190,8 @@ namespace DiscUtils.SquashFs
         /// created with the specified owner, group, and directory permissions.  The current time
         /// will be used as the modification time.</para>
         /// </remarks>
-        public void AddDirectory(string path, int user, int group, UnixFilePermissions permissions, DateTime modificationTime)
+        public void AddDirectory(string path, int user, int group, UnixFilePermissions permissions,
+            DateTime modificationTime)
         {
             BuilderDirectory dir = new BuilderDirectory();
             dir.UserId = user;
@@ -228,7 +218,8 @@ namespace DiscUtils.SquashFs
         /// </remarks>
         public Stream Build()
         {
-            Stream stream = new FileStream(Path.GetTempFileName(), FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 1024 * 1024, FileOptions.DeleteOnClose);
+            Stream stream = new FileStream(Path.GetTempFileName(), FileMode.CreateNew, FileAccess.ReadWrite,
+                FileShare.None, 1024*1024, FileOptions.DeleteOnClose);
             try
             {
                 Build(stream);
@@ -292,9 +283,9 @@ namespace DiscUtils.SquashFs
             SuperBlock superBlock = new SuperBlock();
             superBlock.Magic = SuperBlock.SquashFsMagic;
             superBlock.CreationTime = DateTime.Now;
-            superBlock.BlockSize = (uint)_context.DataBlockSize;
+            superBlock.BlockSize = (uint) _context.DataBlockSize;
             superBlock.Compression = 1; // DEFLATE
-            superBlock.BlockSizeLog2 = (ushort)Utilities.Log2(superBlock.BlockSize);
+            superBlock.BlockSizeLog2 = (ushort) Utilities.Log2(superBlock.BlockSize);
             superBlock.MajorVersion = 4;
             superBlock.MinorVersion = 0;
 
@@ -305,8 +296,8 @@ namespace DiscUtils.SquashFs
             fragWriter.Flush();
             superBlock.RootInode = GetRoot().InodeRef;
             superBlock.InodesCount = _nextInode - 1;
-            superBlock.FragmentsCount = (uint)fragWriter.FragmentCount;
-            superBlock.UidGidCount = (ushort)idWriter.IdCount;
+            superBlock.FragmentsCount = (uint) fragWriter.FragmentCount;
+            superBlock.UidGidCount = (ushort) idWriter.IdCount;
 
             superBlock.InodeTableStart = output.Position;
             inodeWriter.Persist(output);
@@ -321,10 +312,10 @@ namespace DiscUtils.SquashFs
             superBlock.BytesUsed = output.Position;
 
             // Pad to 4KB
-            long end = Utilities.RoundUp(output.Position, 4 * Sizes.OneKiB);
+            long end = Utilities.RoundUp(output.Position, 4*Sizes.OneKiB);
             if (end != output.Position)
             {
-                byte[] padding = new byte[(int)(end - output.Position)];
+                byte[] padding = new byte[(int) (end - output.Position)];
                 output.Write(padding, 0, padding.Length);
             }
 
@@ -382,7 +373,7 @@ namespace DiscUtils.SquashFs
             {
                 writeData = compressed.ToArray();
                 writeOffset = 0;
-                writeLen = (int)compressed.Length;
+                writeLen = (int) compressed.Length;
             }
             else
             {
@@ -393,7 +384,7 @@ namespace DiscUtils.SquashFs
 
             _context.RawStream.Write(writeData, writeOffset, writeLen & 0xFFFFFF);
 
-            return (uint)writeLen;
+            return (uint) writeLen;
         }
 
         /// <summary>
@@ -415,7 +406,7 @@ namespace DiscUtils.SquashFs
         private BuilderDirectory CreateDirectory(string path, int user, int group, UnixFilePermissions permissions)
         {
             BuilderDirectory currentDir = GetRoot();
-            string[] elems = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = path.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < elems.Length; ++i)
             {
@@ -436,7 +427,8 @@ namespace DiscUtils.SquashFs
                 }
                 else if (nextDir == null)
                 {
-                    throw new FileNotFoundException("Found " + nextDirAsNode.Inode.Type + ", expecting Directory", string.Join("\\", elems, 0, i + 1));
+                    throw new FileNotFoundException("Found " + nextDirAsNode.Inode.Type + ", expecting Directory",
+                        string.Join("\\", elems, 0, i + 1));
                 }
 
                 currentDir = nextDir;

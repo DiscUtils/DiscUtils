@@ -143,7 +143,7 @@ namespace DiscUtils.Nfs
                     try
                     {
                         byte[] header = new byte[4];
-                        Utilities.WriteBytesBigEndian((uint)(0x80000000 | (uint)message.Length), header, 0);
+                        Utilities.WriteBytesBigEndian((uint) (0x80000000 | (uint) message.Length), header, 0);
                         _tcpStream.Write(header, 0, 4);
                         _tcpStream.Write(message, 0, message.Length);
                         _tcpStream.Flush();
@@ -170,7 +170,9 @@ namespace DiscUtils.Nfs
 
             if (response == null)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to send RPC message to {0}:{1}", _address, _port), lastException);
+                throw new IOException(
+                    string.Format(CultureInfo.InvariantCulture, "Unable to send RPC message to {0}:{1}", _address, _port),
+                    lastException);
             }
 
             return response;
@@ -187,7 +189,7 @@ namespace DiscUtils.Nfs
                 uint headerVal = Utilities.ToUInt32BigEndian(header, 0);
 
                 lastFragFound = (headerVal & 0x80000000) != 0;
-                byte[] frag = Utilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
+                byte[] frag = Utilities.ReadFully(_tcpStream, (int) (headerVal & 0x7FFFFFFF));
 
                 if (ms != null)
                 {

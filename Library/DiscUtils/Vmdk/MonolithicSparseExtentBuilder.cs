@@ -48,9 +48,9 @@ namespace DiscUtils.Vmdk
             // of grain size
             const int GtesPerGt = 512;
             long grainSize = 128;
-            int numGrainTables = (int)Utilities.Ceil(_content.Length, grainSize * GtesPerGt * Sizes.Sector);
+            int numGrainTables = (int) Utilities.Ceil(_content.Length, grainSize*GtesPerGt*Sizes.Sector);
 
-            long descriptorLength = 10 * Sizes.OneKiB; // Utilities.RoundUp(descriptorStream.Length, Sizes.Sector);
+            long descriptorLength = 10*Sizes.OneKiB; // Utilities.RoundUp(descriptorStream.Length, Sizes.Sector);
             long descriptorStart = 0;
             if (descriptorLength != 0)
             {
@@ -58,26 +58,28 @@ namespace DiscUtils.Vmdk
             }
 
             long redundantGrainDirStart = Math.Max(descriptorStart, 1) + Utilities.Ceil(descriptorLength, Sizes.Sector);
-            long redundantGrainDirLength = numGrainTables * 4;
+            long redundantGrainDirLength = numGrainTables*4;
 
-            long redundantGrainTablesStart = redundantGrainDirStart + Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
-            long redundantGrainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+            long redundantGrainTablesStart = redundantGrainDirStart +
+                                             Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
+            long redundantGrainTablesLength = numGrainTables*Utilities.RoundUp(GtesPerGt*4, Sizes.Sector);
 
             long grainDirStart = redundantGrainTablesStart + Utilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
-            long grainDirLength = numGrainTables * 4;
+            long grainDirLength = numGrainTables*4;
 
             long grainTablesStart = grainDirStart + Utilities.Ceil(grainDirLength, Sizes.Sector);
-            long grainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+            long grainTablesLength = numGrainTables*Utilities.RoundUp(GtesPerGt*4, Sizes.Sector);
 
-            long dataStart = Utilities.RoundUp(grainTablesStart + Utilities.Ceil(grainTablesLength, Sizes.Sector), grainSize);
+            long dataStart = Utilities.RoundUp(grainTablesStart + Utilities.Ceil(grainTablesLength, Sizes.Sector),
+                grainSize);
 
             // Generate the header, and write it
             HostedSparseExtentHeader header = new HostedSparseExtentHeader();
             header.Flags = HostedSparseExtentFlags.ValidLineDetectionTest | HostedSparseExtentFlags.RedundantGrainTable;
-            header.Capacity = Utilities.RoundUp(_content.Length, grainSize * Sizes.Sector) / Sizes.Sector;
+            header.Capacity = Utilities.RoundUp(_content.Length, grainSize*Sizes.Sector)/Sizes.Sector;
             header.GrainSize = grainSize;
             header.DescriptorOffset = descriptorStart;
-            header.DescriptorSize = descriptorLength / Sizes.Sector;
+            header.DescriptorSize = descriptorLength/Sizes.Sector;
             header.NumGTEsPerGT = GtesPerGt;
             header.RgdOffset = redundantGrainDirStart;
             header.GdOffset = grainDirStart;
@@ -88,41 +90,46 @@ namespace DiscUtils.Vmdk
             // The descriptor extent
             if (descriptorLength > 0)
             {
-                extents.Add(new BuilderStreamExtent(descriptorStart * Sizes.Sector, descriptorStream));
+                extents.Add(new BuilderStreamExtent(descriptorStart*Sizes.Sector, descriptorStream));
             }
 
             // The grain directory extents
-            extents.Add(new GrainDirectoryExtent(redundantGrainDirStart * Sizes.Sector, redundantGrainTablesStart, numGrainTables, GtesPerGt));
-            extents.Add(new GrainDirectoryExtent(grainDirStart * Sizes.Sector, grainTablesStart, numGrainTables, GtesPerGt));
+            extents.Add(new GrainDirectoryExtent(redundantGrainDirStart*Sizes.Sector, redundantGrainTablesStart,
+                numGrainTables, GtesPerGt));
+            extents.Add(new GrainDirectoryExtent(grainDirStart*Sizes.Sector, grainTablesStart, numGrainTables, GtesPerGt));
 
             // For each graintable span that's present...
             long dataSectorsUsed = 0;
-            long gtSpan = GtesPerGt * grainSize * Sizes.Sector;
-            foreach (var gtRange in StreamExtent.Blocks(_content.Extents, grainSize * GtesPerGt * Sizes.Sector))
+            long gtSpan = GtesPerGt*grainSize*Sizes.Sector;
+            foreach (var gtRange in StreamExtent.Blocks(_content.Extents, grainSize*GtesPerGt*Sizes.Sector))
             {
                 for (long i = 0; i < gtRange.Count; ++i)
                 {
-                    int gt = (int)(gtRange.Offset + i);
+                    int gt = (int) (gtRange.Offset + i);
 
-                    SubStream gtStream = new SubStream(_content, gt * gtSpan, Math.Min(gtSpan, _content.Length - (gt * gtSpan)));
+                    SubStream gtStream = new SubStream(_content, gt*gtSpan,
+                        Math.Min(gtSpan, _content.Length - (gt*gtSpan)));
 
-                    GrainTableDataExtent dataExtent = new GrainTableDataExtent((dataStart + dataSectorsUsed) * Sizes.Sector, gtStream, grainSize);
+                    GrainTableDataExtent dataExtent =
+                        new GrainTableDataExtent((dataStart + dataSectorsUsed)*Sizes.Sector, gtStream, grainSize);
                     extents.Add(dataExtent);
 
-                    extents.Add(new GrainTableExtent(GrainTablePosition(redundantGrainTablesStart, gt, GtesPerGt), gtStream, dataStart + dataSectorsUsed, GtesPerGt, grainSize));
-                    extents.Add(new GrainTableExtent(GrainTablePosition(grainTablesStart, gt, GtesPerGt), gtStream, dataStart + dataSectorsUsed, GtesPerGt, grainSize));
+                    extents.Add(new GrainTableExtent(GrainTablePosition(redundantGrainTablesStart, gt, GtesPerGt),
+                        gtStream, dataStart + dataSectorsUsed, GtesPerGt, grainSize));
+                    extents.Add(new GrainTableExtent(GrainTablePosition(grainTablesStart, gt, GtesPerGt), gtStream,
+                        dataStart + dataSectorsUsed, GtesPerGt, grainSize));
 
-                    dataSectorsUsed += dataExtent.Length / Sizes.Sector;
+                    dataSectorsUsed += dataExtent.Length/Sizes.Sector;
                 }
             }
 
-            totalLength = (dataStart + dataSectorsUsed) * Sizes.Sector;
+            totalLength = (dataStart + dataSectorsUsed)*Sizes.Sector;
             return extents;
         }
 
         private static long GrainTablePosition(long grainTablesStart, long grainTable, int gtesPerGt)
         {
-            return (grainTablesStart * Sizes.Sector) + (grainTable * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector));
+            return (grainTablesStart*Sizes.Sector) + (grainTable*Utilities.RoundUp(gtesPerGt*4, Sizes.Sector));
         }
 
         private class GrainDirectoryExtent : BuilderBytesExtent
@@ -132,7 +139,7 @@ namespace DiscUtils.Vmdk
             private int _gtesPerGt;
 
             public GrainDirectoryExtent(long start, long grainTablesStart, int numGrainTables, int gtesPerGt)
-                : base(start, Utilities.RoundUp(numGrainTables * 4, Sizes.Sector))
+                : base(start, Utilities.RoundUp(numGrainTables*4, Sizes.Sector))
             {
                 _grainTablesStart = grainTablesStart;
                 _numGrainTables = numGrainTables;
@@ -144,7 +151,8 @@ namespace DiscUtils.Vmdk
                 _data = new byte[Length];
                 for (int i = 0; i < _numGrainTables; ++i)
                 {
-                    Utilities.WriteBytesLittleEndian((uint)(_grainTablesStart + (i * Utilities.Ceil(_gtesPerGt * 4, Sizes.Sector))), _data, i * 4);
+                    Utilities.WriteBytesLittleEndian(
+                        (uint) (_grainTablesStart + (i*Utilities.Ceil(_gtesPerGt*4, Sizes.Sector))), _data, i*4);
                 }
             }
 
@@ -162,7 +170,7 @@ namespace DiscUtils.Vmdk
             private long _dataStart;
 
             public GrainTableExtent(long start, SparseStream content, long dataStart, int gtesPerGt, long grainSize)
-                : base(start, gtesPerGt * 4)
+                : base(start, gtesPerGt*4)
             {
                 _content = content;
                 _grainSize = grainSize;
@@ -172,16 +180,17 @@ namespace DiscUtils.Vmdk
 
             internal override void PrepareForRead()
             {
-                _data = new byte[_gtesPerGt * 4];
+                _data = new byte[_gtesPerGt*4];
 
-                long gtSpan = _gtesPerGt * _grainSize * Sizes.Sector;
+                long gtSpan = _gtesPerGt*_grainSize*Sizes.Sector;
                 long sectorsAllocated = 0;
 
-                foreach (var block in StreamExtent.Blocks(_content.Extents, _grainSize * Sizes.Sector))
+                foreach (var block in StreamExtent.Blocks(_content.Extents, _grainSize*Sizes.Sector))
                 {
                     for (int i = 0; i < block.Count; ++i)
                     {
-                        Utilities.WriteBytesLittleEndian((uint)(_dataStart + sectorsAllocated), _data, (int)((block.Offset + i) * 4));
+                        Utilities.WriteBytesLittleEndian((uint) (_dataStart + sectorsAllocated), _data,
+                            (int) ((block.Offset + i)*4));
                         sectorsAllocated += _grainSize;
                     }
                 }
@@ -207,7 +216,7 @@ namespace DiscUtils.Vmdk
             }
 
             public GrainTableDataExtent(long start, SparseStream content, Ownership contentOwnership, long grainSize)
-                : base(start, SectorsPresent(content, grainSize) * Sizes.Sector)
+                : base(start, SectorsPresent(content, grainSize)*Sizes.Sector)
             {
                 _content = content;
                 _contentOwnership = contentOwnership;
@@ -227,9 +236,9 @@ namespace DiscUtils.Vmdk
             {
                 long outputGrain = 0;
 
-                _grainMapOffsets = new int[Length / (_grainSize * Sizes.Sector)];
+                _grainMapOffsets = new int[Length/(_grainSize*Sizes.Sector)];
                 _grainMapRanges = new Range<long, long>[_grainMapOffsets.Length];
-                foreach (var grainRange in StreamExtent.Blocks(_content.Extents, _grainSize * Sizes.Sector))
+                foreach (var grainRange in StreamExtent.Blocks(_content.Extents, _grainSize*Sizes.Sector))
                 {
                     for (int i = 0; i < grainRange.Count; ++i)
                     {
@@ -243,16 +252,16 @@ namespace DiscUtils.Vmdk
             internal override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 long start = diskOffset - Start;
-                long grainSizeBytes = _grainSize * Sizes.Sector;
+                long grainSizeBytes = _grainSize*Sizes.Sector;
 
-                long outputGrain = start / grainSizeBytes;
-                long outputGrainOffset = start % grainSizeBytes;
+                long outputGrain = start/grainSizeBytes;
+                long outputGrainOffset = start%grainSizeBytes;
 
-                long grainStart = (_grainMapRanges[outputGrain].Offset + _grainMapOffsets[outputGrain]) * grainSizeBytes;
-                long maxRead = (_grainMapRanges[outputGrain].Count - _grainMapOffsets[outputGrain]) * grainSizeBytes;
+                long grainStart = (_grainMapRanges[outputGrain].Offset + _grainMapOffsets[outputGrain])*grainSizeBytes;
+                long maxRead = (_grainMapRanges[outputGrain].Count - _grainMapOffsets[outputGrain])*grainSizeBytes;
 
                 long readStart = grainStart + outputGrainOffset;
-                int toRead = (int)Math.Min(count, maxRead - outputGrainOffset);
+                int toRead = (int) Math.Min(count, maxRead - outputGrainOffset);
 
                 if (readStart > _content.Length)
                 {
@@ -276,9 +285,9 @@ namespace DiscUtils.Vmdk
             {
                 long total = 0;
 
-                foreach (var grainRange in StreamExtent.Blocks(content.Extents, grainSize * Sizes.Sector))
+                foreach (var grainRange in StreamExtent.Blocks(content.Extents, grainSize*Sizes.Sector))
                 {
-                    total += grainRange.Count * grainSize;
+                    total += grainRange.Count*grainSize;
                 }
 
                 return total;

@@ -101,7 +101,8 @@ namespace DiscUtils
             while (totalRead < count && _position < _length)
             {
                 // If current region is outside the area of interest, clean it up
-                if (_currentExtent != null && (_position < _currentExtent.Start || _position >= _currentExtent.Start + _currentExtent.Length))
+                if (_currentExtent != null &&
+                    (_position < _currentExtent.Start || _position >= _currentExtent.Start + _currentExtent.Length))
                 {
                     _currentExtent.DisposeReadState();
                     _currentExtent = null;
@@ -131,7 +132,8 @@ namespace DiscUtils
                     BuilderExtent nextExtent = FindNext(_position);
                     if (nextExtent != null)
                     {
-                        numRead = _baseStream.Read(buffer, offset + totalRead, (int)Math.Min(count - totalRead, nextExtent.Start - _position));
+                        numRead = _baseStream.Read(buffer, offset + totalRead,
+                            (int) Math.Min(count - totalRead, nextExtent.Start - _position));
                     }
                     else
                     {
@@ -218,7 +220,7 @@ namespace DiscUtils
                     return _extents[min];
                 }
 
-                int mid = (max + min) / 2;
+                int mid = (max + min)/2;
                 if (_extents[mid].Start < pos)
                 {
                     min = mid + 1;

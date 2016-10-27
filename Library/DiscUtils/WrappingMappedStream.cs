@@ -67,7 +67,7 @@ namespace DiscUtils
                     }
                     else
                     {
-                        return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
+                        return new StreamExtent[] {new StreamExtent(0, _wrapped.Length)};
                     }
                 }
             }
@@ -113,7 +113,7 @@ namespace DiscUtils
             }
             else
             {
-                return new StreamExtent[] { new StreamExtent(start, length) };
+                return new StreamExtent[] {new StreamExtent(start, length)};
             }
         }
 

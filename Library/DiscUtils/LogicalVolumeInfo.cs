@@ -57,7 +57,8 @@ namespace DiscUtils
         private LogicalVolumeStatus _status;
         private byte _biosType;
 
-        internal LogicalVolumeInfo(Guid guid, PhysicalVolumeInfo physicalVolume, SparseStreamOpenDelegate opener, long length, byte biosType, LogicalVolumeStatus status)
+        internal LogicalVolumeInfo(Guid guid, PhysicalVolumeInfo physicalVolume, SparseStreamOpenDelegate opener,
+            long length, byte biosType, LogicalVolumeStatus status)
         {
             _guid = guid;
             _physicalVol = physicalVolume;

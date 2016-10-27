@@ -36,7 +36,7 @@ namespace DiscUtils.Nfs
 
         public RpcReplyHeader(XdrDataReader reader)
         {
-            Status = (RpcReplyStatus)reader.ReadInt32();
+            Status = (RpcReplyStatus) reader.ReadInt32();
             if (Status == RpcReplyStatus.Accepted)
             {
                 AcceptReply = new RpcAcceptedReplyHeader(reader);

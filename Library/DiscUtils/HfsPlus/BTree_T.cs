@@ -66,7 +66,7 @@ namespace DiscUtils.HfsPlus
 
         internal BTreeKeyedNode<TKey> GetKeyedNode(uint nodeId)
         {
-            byte[] nodeData = Utilities.ReadFully(_data, (int)nodeId * _header.NodeSize, _header.NodeSize);
+            byte[] nodeData = Utilities.ReadFully(_data, (int) nodeId*_header.NodeSize, _header.NodeSize);
 
             BTreeKeyedNode<TKey> node = BTreeNode.ReadNode<TKey>(this, nodeData, 0) as BTreeKeyedNode<TKey>;
             node.ReadFrom(nodeData, 0);

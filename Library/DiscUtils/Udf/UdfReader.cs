@@ -164,7 +164,7 @@ namespace DiscUtils.Udf
                 : base(null)
             {
                 _data = data;
-                _sectorSize = (uint)sectorSize;
+                _sectorSize = (uint) sectorSize;
 
                 if (!UdfReader.Detect(data))
                 {
@@ -191,10 +191,12 @@ namespace DiscUtils.Udf
                 File file = GetFile(path);
                 foreach (var record in file.ExtendedAttributes)
                 {
-                    ImplementationUseExtendedAttributeRecord implRecord = record as ImplementationUseExtendedAttributeRecord;
+                    ImplementationUseExtendedAttributeRecord implRecord =
+                        record as ImplementationUseExtendedAttributeRecord;
                     if (implRecord != null)
                     {
-                        result.Add(new ExtendedAttribute(implRecord.ImplementationIdentifier.Identifier, implRecord.ImplementationUseData));
+                        result.Add(new ExtendedAttribute(implRecord.ImplementationIdentifier.Identifier,
+                            implRecord.ImplementationUseData));
                     }
                 }
 
@@ -211,7 +213,7 @@ namespace DiscUtils.Udf
                 Context = new UdfContext()
                 {
                     PhysicalPartitions = new Dictionary<ushort, PhysicalPartition>(),
-                    PhysicalSectorSize = (int)_sectorSize,
+                    PhysicalSectorSize = (int) _sectorSize,
                     LogicalPartitions = new List<LogicalPartition>(),
                 };
 
@@ -223,7 +225,7 @@ namespace DiscUtils.Udf
                 bool terminatorFound = false;
                 while (!terminatorFound)
                 {
-                    _data.Position = sector * (long)_sectorSize;
+                    _data.Position = sector*(long) _sectorSize;
 
                     DescriptorTag dt;
                     if (!DescriptorTag.TryFromStream(_data, out dt))
@@ -248,7 +250,8 @@ namespace DiscUtils.Udf
                                 throw new IOException("Duplicate partition number reading UDF Partition Descriptor");
                             }
 
-                            Context.PhysicalPartitions[pd.PartitionNumber] = new PhysicalPartition(pd, dataBuffer, _sectorSize);
+                            Context.PhysicalPartitions[pd.PartitionNumber] = new PhysicalPartition(pd, dataBuffer,
+                                _sectorSize);
                             break;
 
                         case TagIdentifier.LogicalVolumeDescriptor:
@@ -280,18 +283,18 @@ namespace DiscUtils.Udf
                 if (DescriptorTag.IsValid(fsdBuffer, 0))
                 {
                     FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
-                    RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);
+                    RootDirectory = (Directory) File.FromDescriptor(Context, fsd.RootDirectoryIcb);
                 }
             }
 
             private bool ProbeSectorSize(int size)
             {
-                if (_data.Length < 257 * (long)size)
+                if (_data.Length < 257*(long) size)
                 {
                     return false;
                 }
 
-                _data.Position = 256 * (long)size;
+                _data.Position = 256*(long) size;
 
                 DescriptorTag dt;
                 if (!DescriptorTag.TryFromStream(_data, out dt))
@@ -300,7 +303,7 @@ namespace DiscUtils.Udf
                 }
 
                 return dt.TagIdentifier == TagIdentifier.AnchorVolumeDescriptorPointer
-                    && dt.TagLocation == 256;
+                       && dt.TagLocation == 256;
             }
         }
     }

@@ -99,7 +99,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public long AllocatedSize
         {
-            get { return (long)_fnr.AllocatedSize; }
+            get { return (long) _fnr.AllocatedSize; }
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public long RealSize
         {
-            get { return (long)_fnr.RealSize; }
+            get { return (long) _fnr.RealSize; }
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public NtfsFileAttributes FileAttributes
         {
-            get { return (NtfsFileAttributes)_fnr.Flags; }
+            get { return (NtfsFileAttributes) _fnr.Flags; }
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public long ExtendedAttributesSizeOrReparsePointTag
         {
-            get { return (long)_fnr.EASizeOrReparsePointTag; }
+            get { return (long) _fnr.EASizeOrReparsePointTag; }
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public NtfsNamespace FileNameNamespace
         {
-            get { return (NtfsNamespace)_fnr.FileNameNamespace; }
+            get { return (NtfsNamespace) _fnr.FileNameNamespace; }
         }
 
         /// <summary>

@@ -32,7 +32,7 @@ namespace DiscUtils.Registry
     /// </summary>
     public sealed class RegistryHive : IDisposable
     {
-        private const long BinStart = 4 * Sizes.OneKiB;
+        private const long BinStart = 4*Sizes.OneKiB;
 
         private Stream _fileStream;
         private Ownership _ownsStream;
@@ -118,7 +118,7 @@ namespace DiscUtils.Registry
             // Construct a file with minimal structure - hive header, plus one (empty) bin
             BinHeader binHeader = new BinHeader();
             binHeader.FileOffset = 0;
-            binHeader.BinSize = (int)(4 * Sizes.OneKiB);
+            binHeader.BinSize = (int) (4*Sizes.OneKiB);
 
             HiveHeader hiveHeader = new HiveHeader();
             hiveHeader.Length = binHeader.BinSize;
@@ -199,7 +199,7 @@ namespace DiscUtils.Registry
 
             if (bin != null)
             {
-                return (K)bin.TryGetCell(index);
+                return (K) bin.TryGetCell(index);
             }
             else
             {
@@ -248,7 +248,8 @@ namespace DiscUtils.Registry
                 }
                 else
                 {
-                    throw new ArgumentException("Can't update cell, needs relocation but relocation disabled", nameof(canRelocate));
+                    throw new ArgumentException("Can't update cell, needs relocation but relocation disabled",
+                        nameof(canRelocate));
                 }
             }
             else
@@ -341,7 +342,7 @@ namespace DiscUtils.Registry
 
             BinHeader newBinHeader = new BinHeader();
             newBinHeader.FileOffset = lastBin.FileOffset + lastBin.BinSize;
-            newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4 * (int)Sizes.OneKiB);
+            newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4*(int) Sizes.OneKiB);
 
             byte[] buffer = new byte[newBinHeader.Size];
             newBinHeader.WriteTo(buffer, 0);

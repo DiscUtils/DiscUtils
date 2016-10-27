@@ -49,13 +49,13 @@ namespace DiscUtils.Dmg
 
             foreach (var resource in _resources.GetAllResources("blkx"))
             {
-                _blocks.Add(((BlkxResource)resource).Block);
+                _blocks.Add(((BlkxResource) resource).Block);
             }
         }
 
         public List<CompressedBlock> Blocks
         {
-            get { return this._blocks;  }
+            get { return this._blocks; }
         }
 
         public override bool CanRead
@@ -70,7 +70,7 @@ namespace DiscUtils.Dmg
 
         public override long Capacity
         {
-            get { return _sectorCount * Sizes.Sector; }
+            get { return _sectorCount*Sizes.Sector; }
         }
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
@@ -82,8 +82,8 @@ namespace DiscUtils.Dmg
             {
                 LoadRun(currentPos);
 
-                int bufferOffset = (int)(currentPos - (_activeRunOffset + (_activeRun.SectorStart * Sizes.Sector)));
-                int toCopy = (int)Math.Min((_activeRun.SectorCount * Sizes.Sector) - bufferOffset, count - totalCopied);
+                int bufferOffset = (int) (currentPos - (_activeRunOffset + (_activeRun.SectorStart*Sizes.Sector)));
+                int toCopy = (int) Math.Min((_activeRun.SectorCount*Sizes.Sector) - bufferOffset, count - totalCopied);
 
                 switch (_activeRun.Type)
                 {
@@ -129,13 +129,13 @@ namespace DiscUtils.Dmg
 
             foreach (var block in _blocks)
             {
-                if ((block.FirstSector + block.SectorCount) * Sizes.Sector < start)
+                if ((block.FirstSector + block.SectorCount)*Sizes.Sector < start)
                 {
                     // Skip blocks before start of range
                     continue;
                 }
 
-                if (block.FirstSector * Sizes.Sector > start + count)
+                if (block.FirstSector*Sizes.Sector > start + count)
                 {
                     // Skip blocks after end of range
                     continue;
@@ -145,8 +145,8 @@ namespace DiscUtils.Dmg
                 {
                     if (run.SectorCount > 0 && run.Type != RunType.Zeros)
                     {
-                        long thisRunStart = (block.FirstSector + run.SectorStart) * Sizes.Sector;
-                        long thisRunEnd = thisRunStart + (run.SectorCount * Sizes.Sector);
+                        long thisRunStart = (block.FirstSector + run.SectorStart)*Sizes.Sector;
+                        long thisRunEnd = thisRunStart + (run.SectorCount*Sizes.Sector);
 
                         thisRunStart = Math.Max(thisRunStart, start);
                         thisRunEnd = Math.Min(thisRunEnd, start + count);
@@ -179,7 +179,8 @@ namespace DiscUtils.Dmg
             }
         }
 
-        private static int ADCDecompress(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        private static int ADCDecompress(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer,
+            int outputOffset)
         {
             int consumed = 0;
             int written = 0;
@@ -204,7 +205,8 @@ namespace DiscUtils.Dmg
 
                     for (int i = 0; i < chunkSize; ++i)
                     {
-                        outputBuffer[outputOffset + written + i] = outputBuffer[(outputOffset + written + i - offset) - 1];
+                        outputBuffer[outputOffset + written + i] =
+                            outputBuffer[(outputOffset + written + i - offset) - 1];
                     }
 
                     consumed += 3;
@@ -218,7 +220,8 @@ namespace DiscUtils.Dmg
 
                     for (int i = 0; i < chunkSize; ++i)
                     {
-                        outputBuffer[outputOffset + written + i] = outputBuffer[(outputOffset + written + i - offset) - 1];
+                        outputBuffer[outputOffset + written + i] =
+                            outputBuffer[(outputOffset + written + i - offset) - 1];
                     }
 
                     consumed += 2;
@@ -232,34 +235,36 @@ namespace DiscUtils.Dmg
         private void LoadRun(long pos)
         {
             if (_activeRun != null
-                && pos >= _activeRunOffset + (_activeRun.SectorStart * Sizes.Sector)
-                && pos < _activeRunOffset + ((_activeRun.SectorStart + _activeRun.SectorCount) * Sizes.Sector))
+                && pos >= _activeRunOffset + (_activeRun.SectorStart*Sizes.Sector)
+                && pos < _activeRunOffset + ((_activeRun.SectorStart + _activeRun.SectorCount)*Sizes.Sector))
             {
                 return;
             }
 
-            long findSector = pos / 512;
+            long findSector = pos/512;
             foreach (var block in _blocks)
             {
                 if (block.FirstSector <= findSector && (block.FirstSector + block.SectorCount) > findSector)
                 {
                     // Make sure the decompression buffer is big enough
-                    if (_decompBuffer == null || _decompBuffer.Length < block.DecompressBufferRequested * Sizes.Sector)
+                    if (_decompBuffer == null || _decompBuffer.Length < block.DecompressBufferRequested*Sizes.Sector)
                     {
-                        _decompBuffer = new byte[block.DecompressBufferRequested * Sizes.Sector];
+                        _decompBuffer = new byte[block.DecompressBufferRequested*Sizes.Sector];
                     }
 
                     foreach (var run in block.Runs)
                     {
-                        if ((block.FirstSector + run.SectorStart) <= findSector && ((block.FirstSector + run.SectorStart) + run.SectorCount) > findSector)
+                        if ((block.FirstSector + run.SectorStart) <= findSector &&
+                            ((block.FirstSector + run.SectorStart) + run.SectorCount) > findSector)
                         {
                             LoadRun(run);
-                            _activeRunOffset = block.FirstSector * Sizes.Sector;
+                            _activeRunOffset = block.FirstSector*Sizes.Sector;
                             return;
                         }
                     }
 
-                    throw new IOException("No run for sector " + findSector + " in block starting at " + block.FirstSector);
+                    throw new IOException("No run for sector " + findSector + " in block starting at " +
+                                          block.FirstSector);
                 }
             }
 
@@ -268,7 +273,7 @@ namespace DiscUtils.Dmg
 
         private void LoadRun(CompressedRun run)
         {
-            int toCopy = (int)(run.SectorCount * Sizes.Sector);
+            int toCopy = (int) (run.SectorCount*Sizes.Sector);
 
             switch (run.Type)
             {
@@ -283,7 +288,7 @@ namespace DiscUtils.Dmg
 
                 case RunType.AdcCompressed:
                     _stream.Position = run.CompOffset;
-                    byte[] compressed = Utilities.ReadFully(_stream, (int)run.CompLength);
+                    byte[] compressed = Utilities.ReadFully(_stream, (int) run.CompLength);
                     if (ADCDecompress(compressed, 0, compressed.Length, _decompBuffer, 0) != toCopy)
                     {
                         throw new InvalidDataException("Run too short when decompressed");
@@ -292,7 +297,10 @@ namespace DiscUtils.Dmg
                     break;
 
                 case RunType.BZlibCompressed:
-                    using (BZip2DecoderStream ds = new BZip2DecoderStream(new SubStream(_stream, run.CompOffset, run.CompLength), Ownership.None))
+                    using (
+                        BZip2DecoderStream ds =
+                            new BZip2DecoderStream(new SubStream(_stream, run.CompOffset, run.CompLength),
+                                Ownership.None))
                     {
                         Utilities.ReadFully(ds, _decompBuffer, 0, toCopy);
                     }

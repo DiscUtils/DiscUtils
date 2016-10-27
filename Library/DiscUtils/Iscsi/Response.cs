@@ -43,12 +43,13 @@ namespace DiscUtils.Iscsi
 
             if (Header.OpCode != OpCode.ScsiResponse)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiResponse + " was " + Header.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiResponse +
+                                                   " was " + Header.OpCode);
             }
 
             ResponseCode = headerData[headerOffset + 2];
             StatusPresent = true;
-            Status = (ScsiStatus)headerData[headerOffset + 3];
+            Status = (ScsiStatus) headerData[headerOffset + 3];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);

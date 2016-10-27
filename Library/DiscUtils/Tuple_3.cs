@@ -58,10 +58,14 @@ namespace DiscUtils
             {
                 switch (i)
                 {
-                    case 0: return _a;
-                    case 1: return _b;
-                    case 2: return _c;
-                    default: throw new ArgumentOutOfRangeException(nameof(i), i, "Invalid index");
+                    case 0:
+                        return _a;
+                    case 1:
+                        return _b;
+                    case 2:
+                        return _c;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(i), i, "Invalid index");
                 }
             }
         }
@@ -80,8 +84,8 @@ namespace DiscUtils
         public override int GetHashCode()
         {
             return ((_a == null) ? 0x14AB32BC : _a.GetHashCode())
-                ^ ((_b == null) ? 0x65BC32DE : _b.GetHashCode())
-                ^ ((_c == null) ? 0x2D4C25CF : _b.GetHashCode());
+                   ^ ((_b == null) ? 0x65BC32DE : _b.GetHashCode())
+                   ^ ((_c == null) ? 0x2D4C25CF : _b.GetHashCode());
         }
     }
 }

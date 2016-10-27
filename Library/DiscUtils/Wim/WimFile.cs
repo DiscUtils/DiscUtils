@@ -66,7 +66,7 @@ namespace DiscUtils.Wim
         /// </summary>
         public int ImageCount
         {
-            get { return (int)_fileHeader.ImageCount; }
+            get { return (int) _fileHeader.ImageCount; }
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace DiscUtils.Wim
         /// </summary>
         public int BootImage
         {
-            get { return (int)_fileHeader.BootIndex; }
+            get { return (int) _fileHeader.BootIndex; }
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace DiscUtils.Wim
         /// </summary>
         public int FileFormatVersion
         {
-            get { return (int)_fileHeader.Version; }
+            get { return (int) _fileHeader.Version; }
         }
 
         /// <summary>
@@ -171,13 +171,15 @@ namespace DiscUtils.Wim
 
         internal SparseStream OpenResourceStream(ShortResourceHeader hdr)
         {
-            SparseStream fileSectionStream = new SubStream(_fileStream, Ownership.None, hdr.FileOffset, hdr.CompressedSize);
+            SparseStream fileSectionStream = new SubStream(_fileStream, Ownership.None, hdr.FileOffset,
+                hdr.CompressedSize);
             if ((hdr.Flags & ResourceFlags.Compressed) == 0)
             {
                 return fileSectionStream;
             }
 
-            return new FileResourceStream(fileSectionStream, hdr, (_fileHeader.Flags & FileFlags.LzxCompression) != 0, _fileHeader.CompressionSize);
+            return new FileResourceStream(fileSectionStream, hdr, (_fileHeader.Flags & FileFlags.LzxCompression) != 0,
+                _fileHeader.CompressionSize);
         }
 
         private void ReadResourceTable()

@@ -30,18 +30,12 @@ namespace DiscUtils
         /// <summary>
         /// Gets the size (in bytes) of each cluster.
         /// </summary>
-        long ClusterSize
-        {
-            get;
-        }
+        long ClusterSize { get; }
 
         /// <summary>
         /// Gets the total number of clusters managed by the file system.
         /// </summary>
-        long TotalClusters
-        {
-            get;
-        }
+        long TotalClusters { get; }
 
         /// <summary>
         /// Converts a cluster (index) into an absolute byte position in the underlying stream.

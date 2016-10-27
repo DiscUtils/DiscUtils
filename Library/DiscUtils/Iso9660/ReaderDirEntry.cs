@@ -66,11 +66,13 @@ namespace DiscUtils.Iso9660
 
                 // If this is a Rock Ridge child link, replace the dir record with that from the 'self' record
                 // in the child directory.
-                ChildLinkSystemUseEntry clEntry = _suspRecords.GetEntry<ChildLinkSystemUseEntry>(_context.RockRidgeIdentifier, "CL");
+                ChildLinkSystemUseEntry clEntry =
+                    _suspRecords.GetEntry<ChildLinkSystemUseEntry>(_context.RockRidgeIdentifier, "CL");
                 if (clEntry != null)
                 {
-                    _context.DataStream.Position = clEntry.ChildDirLocation * _context.VolumeDescriptor.LogicalBlockSize;
-                    byte[] firstSector = Utilities.ReadFully(_context.DataStream, _context.VolumeDescriptor.LogicalBlockSize);
+                    _context.DataStream.Position = clEntry.ChildDirLocation*_context.VolumeDescriptor.LogicalBlockSize;
+                    byte[] firstSector = Utilities.ReadFully(_context.DataStream,
+                        _context.VolumeDescriptor.LogicalBlockSize);
 
                     DirectoryRecord.ReadFrom(firstSector, 0, _context.VolumeDescriptor.CharacterEncoding, out _record);
                     if (_record.SystemUseData != null)
@@ -86,7 +88,8 @@ namespace DiscUtils.Iso9660
 
             if (!string.IsNullOrEmpty(_context.RockRidgeIdentifier))
             {
-                FileTimeSystemUseEntry tfEntry = _suspRecords.GetEntry<FileTimeSystemUseEntry>(_context.RockRidgeIdentifier, "TF");
+                FileTimeSystemUseEntry tfEntry =
+                    _suspRecords.GetEntry<FileTimeSystemUseEntry>(_context.RockRidgeIdentifier, "TF");
 
                 if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Access) != 0)
                 {
@@ -117,10 +120,7 @@ namespace DiscUtils.Iso9660
 
         public override bool IsDirectory
         {
-            get
-            {
-                return (_record.Flags & FileFlags.Directory) != 0;
-            }
+            get { return (_record.Flags & FileFlags.Directory) != 0; }
         }
 
         public override bool IsSymlink
@@ -162,15 +162,16 @@ namespace DiscUtils.Iso9660
         {
             get
             {
-                FileAttributes attrs = (FileAttributes)0;
+                FileAttributes attrs = (FileAttributes) 0;
 
                 if (!string.IsNullOrEmpty(_context.RockRidgeIdentifier))
                 {
                     // If Rock Ridge PX info is present, derive the attributes from the RR info.
-                    PosixFileInfoSystemUseEntry pfi = _suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
+                    PosixFileInfoSystemUseEntry pfi =
+                        _suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
                     if (pfi != null)
                     {
-                        attrs = Utilities.FileAttributesFromUnixFileType((UnixFileType)((pfi.FileMode >> 12) & 0xF));
+                        attrs = Utilities.FileAttributesFromUnixFileType((UnixFileType) ((pfi.FileMode >> 12) & 0xF));
                     }
 
                     if (_fileName.StartsWith(".", StringComparison.Ordinal))
@@ -197,7 +198,7 @@ namespace DiscUtils.Iso9660
 
         public override long UniqueCacheId
         {
-            get { return (((long)_record.LocationOfExtent) << 32) | _record.DataLength; }
+            get { return (((long) _record.LocationOfExtent) << 32) | _record.DataLength; }
         }
     }
 }

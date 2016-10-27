@@ -60,7 +60,7 @@ namespace DiscUtils.Wim
                 throw new NotImplementedException("Large files >4GB");
             }
 
-            int numChunks = (int)Utilities.Ceil(header.OriginalSize, _chunkSize);
+            int numChunks = (int) Utilities.Ceil(header.OriginalSize, _chunkSize);
 
             _chunkOffsets = new long[numChunks];
             _chunkLength = new long[numChunks];
@@ -98,23 +98,14 @@ namespace DiscUtils.Wim
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
-            set
-            {
-                _position = value;
-            }
+            set { _position = value; }
         }
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get
-            {
-                return new StreamExtent[] { new StreamExtent(0, Length) };
-            }
+            get { return new StreamExtent[] {new StreamExtent(0, Length)}; }
         }
 
         public override void Flush()
@@ -128,13 +119,13 @@ namespace DiscUtils.Wim
                 return 0;
             }
 
-            int maxToRead = (int)Math.Min(Length - _position, count);
+            int maxToRead = (int) Math.Min(Length - _position, count);
 
             int totalRead = 0;
             while (totalRead < maxToRead)
             {
-                int chunk = (int)(_position / _chunkSize);
-                int chunkOffset = (int)(_position % _chunkSize);
+                int chunk = (int) (_position/_chunkSize);
+                int chunkOffset = (int) (_position%_chunkSize);
                 int numToRead = Math.Min(maxToRead - totalRead, _chunkSize - chunkOffset);
 
                 if (_currentChunk != chunk)
@@ -177,7 +168,7 @@ namespace DiscUtils.Wim
             int targetUncompressed = _chunkSize;
             if (chunk == _chunkLength.Length - 1)
             {
-                targetUncompressed = (int)(Length - _position);
+                targetUncompressed = (int) (Length - _position);
             }
 
             Stream rawChunkStream = new SubStream(_baseStream, _offsetDelta + _chunkOffsets[chunk], _chunkLength[chunk]);

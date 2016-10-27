@@ -51,7 +51,7 @@ namespace DiscUtils.BootConfig
                 record.DiskIdentity = new byte[4];
                 Utilities.WriteBytesLittleEndian(pvi.DiskSignature, record.DiskIdentity, 0);
                 record.PartitionIdentity = new byte[8];
-                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector * 512, record.PartitionIdentity, 0);
+                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector*512, record.PartitionIdentity, 0);
             }
             else if (pvi.VolumeType == PhysicalVolumeType.GptPartition)
             {
@@ -63,7 +63,8 @@ namespace DiscUtils.BootConfig
             }
             else
             {
-                throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture, "Unknown how to convert volume type {0} to a Device element", pvi.VolumeType));
+                throw new NotImplementedException(string.Format(CultureInfo.InvariantCulture,
+                    "Unknown how to convert volume type {0} to a Device element", pvi.VolumeType));
             }
 
             _record = record;

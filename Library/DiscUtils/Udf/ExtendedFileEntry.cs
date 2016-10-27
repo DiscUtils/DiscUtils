@@ -41,7 +41,7 @@ namespace DiscUtils.Udf
             InformationControlBlock = Utilities.ToStruct<InformationControlBlock>(buffer, offset + 16);
             Uid = Utilities.ToUInt32LittleEndian(buffer, offset + 36);
             Gid = Utilities.ToUInt32LittleEndian(buffer, offset + 40);
-            Permissions = (FilePermissions)Utilities.ToUInt32LittleEndian(buffer, offset + 44);
+            Permissions = (FilePermissions) Utilities.ToUInt32LittleEndian(buffer, offset + 44);
             FileLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 48);
             RecordFormat = buffer[offset + 50];
             RecordDisplayAttributes = buffer[offset + 51];
@@ -60,12 +60,13 @@ namespace DiscUtils.Udf
             UniqueId = Utilities.ToUInt64LittleEndian(buffer, offset + 200);
             ExtendedAttributesLength = Utilities.ToInt32LittleEndian(buffer, offset + 208);
             AllocationDescriptorsLength = Utilities.ToInt32LittleEndian(buffer, offset + 212);
-            AllocationDescriptors = Utilities.ToByteArray(buffer, offset + 216 + ExtendedAttributesLength, AllocationDescriptorsLength);
+            AllocationDescriptors = Utilities.ToByteArray(buffer, offset + 216 + ExtendedAttributesLength,
+                AllocationDescriptorsLength);
 
             byte[] eaData = Utilities.ToByteArray(buffer, offset + 216, ExtendedAttributesLength);
             ExtendedAttributes = ReadExtendedAttributes(eaData);
 
-            return (int)(216 + ExtendedAttributesLength + AllocationDescriptorsLength);
+            return (int) (216 + ExtendedAttributesLength + AllocationDescriptorsLength);
         }
 
         public override void WriteTo(byte[] buffer, int offset)

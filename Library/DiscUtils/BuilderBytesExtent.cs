@@ -49,7 +49,7 @@ namespace DiscUtils
 
         internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
-            int start = (int)Math.Min(diskOffset - Start, _data.Length);
+            int start = (int) Math.Min(diskOffset - Start, _data.Length);
             int numRead = Math.Min(count, _data.Length - start);
 
             Array.Copy(_data, start, block, offset, numRead);

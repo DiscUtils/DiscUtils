@@ -249,7 +249,8 @@ namespace DiscUtils.Vhd
         /// <param name="capacity">The desired capacity of the new disk.</param>
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
         /// <returns>An object that accesses the stream as a VHD file.</returns>
-        public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
+        public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity,
+            Geometry geometry)
         {
             InitializeFixedInternal(stream, capacity, geometry);
             return new DiskImageFile(stream, ownsStream);
@@ -275,7 +276,8 @@ namespace DiscUtils.Vhd
         /// <param name="capacity">The desired capacity of the new disk.</param>
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
         /// <returns>An object that accesses the stream as a VHD file.</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
+        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity,
+            Geometry geometry)
         {
             return InitializeDynamic(stream, ownsStream, capacity, geometry, DynamicHeader.DefaultBlockSize);
         }
@@ -302,7 +304,8 @@ namespace DiscUtils.Vhd
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
         /// <param name="blockSize">The size of each block (unit of allocation).</param>
         /// <returns>An object that accesses the stream as a VHD file.</returns>
-        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity, Geometry geometry, long blockSize)
+        public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity,
+            Geometry geometry, long blockSize)
         {
             InitializeDynamicInternal(stream, capacity, geometry, blockSize);
 
@@ -327,7 +330,8 @@ namespace DiscUtils.Vhd
             string parentRelativePath,
             DateTime parentModificationTimeUtc)
         {
-            InitializeDifferencingInternal(stream, parent, parentAbsolutePath, parentRelativePath, parentModificationTimeUtc);
+            InitializeDifferencingInternal(stream, parent, parentAbsolutePath, parentRelativePath,
+                parentModificationTimeUtc);
 
             return new DiskImageFile(stream, ownsStream);
         }
@@ -384,7 +388,8 @@ namespace DiscUtils.Vhd
             return result;
         }
 
-        internal static DiskImageFile InitializeDynamic(FileLocator locator, string path, long capacity, Geometry geometry, long blockSize)
+        internal static DiskImageFile InitializeDynamic(FileLocator locator, string path, long capacity,
+            Geometry geometry, long blockSize)
         {
             DiskImageFile result = null;
             Stream stream = locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
@@ -436,7 +441,8 @@ namespace DiscUtils.Vhd
                     parent.Dispose();
                 }
 
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
+                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize,
+                    new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
             }
             else
             {
@@ -512,12 +518,13 @@ namespace DiscUtils.Vhd
             byte[] footerBlock = new byte[512];
             footer.ToBytes(footerBlock, 0);
 
-            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, (uint)blockSize, capacity);
+            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, (uint) blockSize, capacity);
             dynamicHeader.UpdateChecksum();
             byte[] dynamicHeaderBlock = new byte[1024];
             dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
 
-            int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
+            int batSize = (((dynamicHeader.MaxTableEntries*4) + Utilities.SectorSize - 1)/Utilities.SectorSize)*
+                          Utilities.SectorSize;
             byte[] bat = new byte[batSize];
             for (int i = 0; i < bat.Length; ++i)
             {
@@ -531,7 +538,8 @@ namespace DiscUtils.Vhd
             stream.Write(footerBlock, 0, 512);
         }
 
-        private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent, string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+        private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent,
+            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
             Footer footer = new Footer(parent.Geometry, parent._footer.CurrentSize, FileType.Differencing);
             footer.DataOffset = 512; // Offset of Dynamic Header
@@ -542,20 +550,23 @@ namespace DiscUtils.Vhd
 
             long tableOffset = 512 + 1024; // Footer + Header
 
-            uint blockSize = (parent._dynamicHeader == null) ? DynamicHeader.DefaultBlockSize : parent._dynamicHeader.BlockSize;
+            uint blockSize = (parent._dynamicHeader == null)
+                ? DynamicHeader.DefaultBlockSize
+                : parent._dynamicHeader.BlockSize;
 
             DynamicHeader dynamicHeader = new DynamicHeader(-1, tableOffset, blockSize, footer.CurrentSize);
-            int batSize = (((dynamicHeader.MaxTableEntries * 4) + Utilities.SectorSize - 1) / Utilities.SectorSize) * Utilities.SectorSize;
+            int batSize = (((dynamicHeader.MaxTableEntries*4) + Utilities.SectorSize - 1)/Utilities.SectorSize)*
+                          Utilities.SectorSize;
             dynamicHeader.ParentUniqueId = parent.UniqueId;
             dynamicHeader.ParentTimestamp = parentModificationTimeUtc;
             dynamicHeader.ParentUnicodeName = Utilities.GetFileFromPath(parentAbsolutePath);
             dynamicHeader.ParentLocators[7].PlatformCode = ParentLocator.PlatformCodeWindowsAbsoluteUnicode;
             dynamicHeader.ParentLocators[7].PlatformDataSpace = 512;
-            dynamicHeader.ParentLocators[7].PlatformDataLength = parentAbsolutePath.Length * 2;
+            dynamicHeader.ParentLocators[7].PlatformDataLength = parentAbsolutePath.Length*2;
             dynamicHeader.ParentLocators[7].PlatformDataOffset = tableOffset + batSize;
             dynamicHeader.ParentLocators[6].PlatformCode = ParentLocator.PlatformCodeWindowsRelativeUnicode;
             dynamicHeader.ParentLocators[6].PlatformDataSpace = 512;
-            dynamicHeader.ParentLocators[6].PlatformDataLength = parentRelativePath.Length * 2;
+            dynamicHeader.ParentLocators[6].PlatformDataLength = parentRelativePath.Length*2;
             dynamicHeader.ParentLocators[6].PlatformDataOffset = tableOffset + batSize + 512;
             dynamicHeader.UpdateChecksum();
             byte[] dynamicHeaderBlock = new byte[1024];
@@ -655,7 +666,8 @@ namespace DiscUtils.Vhd
                 _footer = Footer.FromBytes(sector, 0);
                 if (!_footer.IsValid())
                 {
-                    throw new IOException("Failed to find a valid VHD footer at start or end of file - VHD file is corrupt");
+                    throw new IOException(
+                        "Failed to find a valid VHD footer at start or end of file - VHD file is corrupt");
                 }
             }
         }

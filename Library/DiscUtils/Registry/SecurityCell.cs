@@ -106,7 +106,8 @@ namespace DiscUtils.Registry
 
         public override string ToString()
         {
-            return "SecDesc:" + _secDesc.GetSecurityDescriptorSddlForm(AccessControlSections.All) + " (refCount:" + _usageCount + ")";
+            return "SecDesc:" + _secDesc.GetSecurityDescriptorSddlForm(AccessControlSections.All) + " (refCount:" +
+                   _usageCount + ")";
         }
     }
 }

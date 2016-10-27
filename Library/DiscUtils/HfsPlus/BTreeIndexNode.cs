@@ -61,7 +61,7 @@ namespace DiscUtils.HfsPlus
                 else if (nextResult > 0)
                 {
                     // Next record's key is too big, so worth looking at children
-                    BTreeKeyedNode<TKey> child = ((BTree<TKey>)Tree).GetKeyedNode(_records[idx].ChildId);
+                    BTreeKeyedNode<TKey> child = ((BTree<TKey>) Tree).GetKeyedNode(_records[idx].ChildId);
                     return child.FindKey(key);
                 }
 
@@ -98,7 +98,7 @@ namespace DiscUtils.HfsPlus
                 else if (nextResult >= 0)
                 {
                     // Next record's key isn't too small, so worth looking at children
-                    BTreeKeyedNode<TKey> child = ((BTree<TKey>)Tree).GetKeyedNode(_records[idx].ChildId);
+                    BTreeKeyedNode<TKey> child = ((BTree<TKey>) Tree).GetKeyedNode(_records[idx].ChildId);
                     child.VisitRange(visitor);
                 }
 
@@ -117,7 +117,7 @@ namespace DiscUtils.HfsPlus
 
             for (int i = 0; i < numRecords; ++i)
             {
-                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - ((i + 2) * 2));
+                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - ((i + 2)*2));
 
                 _records[i] = new BTreeIndexRecord<TKey>(end - start);
                 _records[i].ReadFrom(buffer, offset + start);

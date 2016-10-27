@@ -65,13 +65,13 @@ namespace DiscUtils.Compression
 
         private void Initialize(int maxSymbols)
         {
-            int numTrees = (int)_bitstream.Read(3);
+            int numTrees = (int) _bitstream.Read(3);
             if (numTrees < 2 || numTrees > 6)
             {
                 throw new InvalidDataException("Invalid number of tables");
             }
 
-            int numSelectors = (int)_bitstream.Read(15);
+            int numSelectors = (int) _bitstream.Read(15);
             if (numSelectors < 1)
             {
                 throw new InvalidDataException("Invalid number of selectors");

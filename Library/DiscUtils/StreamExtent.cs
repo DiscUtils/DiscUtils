@@ -135,8 +135,7 @@ namespace DiscUtils
                             streamsValid[i] = enums[i].MoveNext();
                         }
                     }
-                }
-                while (foundIntersection && validStreamsRemaining > 0);
+                } while (foundIntersection && validStreamsRemaining > 0);
 
                 // Return the discovered extent
                 yield return new StreamExtent(extentStart, extentEnd - extentStart);
@@ -203,7 +202,7 @@ namespace DiscUtils
                 {
                     // Move stream on past all extents that are earlier than our candidate start point
                     while (enums[i].Current.Length == 0
-                        || enums[i].Current.Start + enums[i].Current.Length <= extentStart)
+                           || enums[i].Current.Start + enums[i].Current.Length <= extentStart)
                     {
                         if (!enums[i].MoveNext())
                         {
@@ -246,7 +245,7 @@ namespace DiscUtils
         /// <returns>The subtraction of <c>other</c> from <c>extents</c>.</returns>
         public static IEnumerable<StreamExtent> Subtract(IEnumerable<StreamExtent> extents, StreamExtent other)
         {
-            return Subtract(extents, new StreamExtent[] { other });
+            return Subtract(extents, new StreamExtent[] {other});
         }
 
         /// <summary>
@@ -328,7 +327,7 @@ namespace DiscUtils
             {
                 if (extent.Length > 0)
                 {
-                    long extentStartBlock = extent.Start / blockSize;
+                    long extentStartBlock = extent.Start/blockSize;
                     long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
 
                     long extentNumBlocks = extentNextBlock - extentStartBlock;
@@ -363,13 +362,13 @@ namespace DiscUtils
             {
                 if (extent.Length > 0)
                 {
-                    long extentStartBlock = extent.Start / blockSize;
+                    long extentStartBlock = extent.Start/blockSize;
                     long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
 
                     if (rangeStart != null && extentStartBlock > rangeStart + rangeLength)
                     {
                         // This extent is non-contiguous (in terms of blocks), so write out the last range and start new
-                        yield return new Range<long, long>((long)rangeStart, rangeLength);
+                        yield return new Range<long, long>((long) rangeStart, rangeLength);
                         rangeStart = extentStartBlock;
                     }
                     else if (rangeStart == null)
@@ -379,14 +378,14 @@ namespace DiscUtils
                     }
 
                     // Set the length of the current range, based on the end of this extent
-                    rangeLength = extentNextBlock - (long)rangeStart;
+                    rangeLength = extentNextBlock - (long) rangeStart;
                 }
             }
 
             // Final range (if any ranges at all) hasn't been returned yet, so do that now
             if (rangeStart != null)
             {
-                yield return new Range<long, long>((long)rangeStart, rangeLength);
+                yield return new Range<long, long>((long) rangeStart, rangeLength);
             }
         }
 

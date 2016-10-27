@@ -52,17 +52,19 @@ namespace DiscUtils.Iso9660
         {
             int nameBytes = enc.GetByteCount(DirectoryIdentifier);
 
-            buffer[offset + 0] = (byte)nameBytes;
+            buffer[offset + 0] = (byte) nameBytes;
             buffer[offset + 1] = 0; // ExtendedAttributeRecordLength;
-            IsoUtilities.ToBytesFromUInt32(buffer, offset + 2, byteSwap ? Utilities.BitSwap(LocationOfExtent) : LocationOfExtent);
-            IsoUtilities.ToBytesFromUInt16(buffer, offset + 6, byteSwap ? Utilities.BitSwap(ParentDirectoryNumber) : ParentDirectoryNumber);
+            IsoUtilities.ToBytesFromUInt32(buffer, offset + 2,
+                byteSwap ? Utilities.BitSwap(LocationOfExtent) : LocationOfExtent);
+            IsoUtilities.ToBytesFromUInt16(buffer, offset + 6,
+                byteSwap ? Utilities.BitSwap(ParentDirectoryNumber) : ParentDirectoryNumber);
             IsoUtilities.WriteString(buffer, offset + 8, nameBytes, false, DirectoryIdentifier, enc);
             if ((nameBytes & 1) == 1)
             {
                 buffer[offset + 8 + nameBytes] = 0;
             }
 
-            return (int)(8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0));
+            return (int) (8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0));
         }
     }
 }

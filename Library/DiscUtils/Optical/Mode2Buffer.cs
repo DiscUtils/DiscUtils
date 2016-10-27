@@ -56,7 +56,7 @@ namespace DiscUtils.Optical
 
         public long Capacity
         {
-            get { return (_wrapped.Capacity / DiscImageFile.Mode2SectorSize) * DiscImageFile.Mode1SectorSize; }
+            get { return (_wrapped.Capacity/DiscImageFile.Mode2SectorSize)*DiscImageFile.Mode1SectorSize; }
         }
 
         public IEnumerable<StreamExtent> Extents
@@ -66,16 +66,17 @@ namespace DiscUtils.Optical
 
         public int Read(long pos, byte[] buffer, int offset, int count)
         {
-            int totalToRead = (int)Math.Min(Capacity - pos, count);
+            int totalToRead = (int) Math.Min(Capacity - pos, count);
             int totalRead = 0;
 
             while (totalRead < totalToRead)
             {
                 long thisPos = pos + totalRead;
-                long sector = thisPos / DiscImageFile.Mode1SectorSize;
-                int sectorOffset = (int)(thisPos - (sector * DiscImageFile.Mode1SectorSize));
+                long sector = thisPos/DiscImageFile.Mode1SectorSize;
+                int sectorOffset = (int) (thisPos - (sector*DiscImageFile.Mode1SectorSize));
 
-                int numRead = Utilities.ReadFully(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0, DiscImageFile.Mode2SectorSize);
+                int numRead = Utilities.ReadFully(_wrapped, sector*DiscImageFile.Mode2SectorSize, _iobuffer, 0,
+                    DiscImageFile.Mode2SectorSize);
                 if (numRead < DiscImageFile.Mode2SectorSize)
                 {
                     throw new IOException("Failed to read entire sector");

@@ -50,7 +50,8 @@ namespace DiscUtils.Vhd
 
             DynamicHeader dynHeader = new DynamicHeader(-1, FooterSize + DynHeaderSize, _blockSize, _footer.CurrentSize);
 
-            BlockAllocationTableExtent batExtent = new BlockAllocationTableExtent(FooterSize + DynHeaderSize, dynHeader.MaxTableEntries);
+            BlockAllocationTableExtent batExtent = new BlockAllocationTableExtent(FooterSize + DynHeaderSize,
+                dynHeader.MaxTableEntries);
 
             long streamPos = batExtent.Start + batExtent.Length;
 
@@ -59,11 +60,12 @@ namespace DiscUtils.Vhd
                 for (int i = 0; i < blockRange.Count; ++i)
                 {
                     long block = blockRange.Offset + i;
-                    long blockStart = block * _blockSize;
-                    DataBlockExtent dataExtent = new DataBlockExtent(streamPos, new SubStream(_content, blockStart, Math.Min(_blockSize, _content.Length - blockStart)));
+                    long blockStart = block*_blockSize;
+                    DataBlockExtent dataExtent = new DataBlockExtent(streamPos,
+                        new SubStream(_content, blockStart, Math.Min(_blockSize, _content.Length - blockStart)));
                     extents.Add(dataExtent);
 
-                    batExtent.SetEntry((int)block, (uint)(streamPos / Sizes.Sector));
+                    batExtent.SetEntry((int) block, (uint) (streamPos/Sizes.Sector));
 
                     streamPos += dataExtent.Length;
                 }
@@ -95,9 +97,9 @@ namespace DiscUtils.Vhd
             private MemoryStream _dataStream;
 
             public BlockAllocationTableExtent(long start, int maxEntries)
-                : base(start, Utilities.RoundUp(maxEntries * 4, 512))
+                : base(start, Utilities.RoundUp(maxEntries*4, 512))
             {
-                _entries = new uint[Length / 4];
+                _entries = new uint[Length/4];
                 for (int i = 0; i < _entries.Length; ++i)
                 {
                     _entries[i] = 0xFFFFFFFF;
@@ -124,7 +126,7 @@ namespace DiscUtils.Vhd
 
                 for (int i = 0; i < _entries.Length; ++i)
                 {
-                    Utilities.WriteBytesBigEndian(_entries[i], buffer, i * 4);
+                    Utilities.WriteBytesBigEndian(_entries[i], buffer, i*4);
                 }
 
                 _dataStream = new MemoryStream(buffer, false);
@@ -158,7 +160,10 @@ namespace DiscUtils.Vhd
             }
 
             public DataBlockExtent(long start, SparseStream content, Ownership ownership)
-                : base(start, Utilities.RoundUp(Utilities.Ceil(content.Length, Sizes.Sector) / 8, Sizes.Sector) + Utilities.RoundUp(content.Length, Sizes.Sector))
+                : base(
+                    start,
+                    Utilities.RoundUp(Utilities.Ceil(content.Length, Sizes.Sector)/8, Sizes.Sector) +
+                    Utilities.RoundUp(content.Length, Sizes.Sector))
             {
                 _content = content;
                 _ownership = ownership;
@@ -181,14 +186,15 @@ namespace DiscUtils.Vhd
 
             internal override void PrepareForRead()
             {
-                byte[] bitmap = new byte[Utilities.RoundUp(Utilities.Ceil(_content.Length, Sizes.Sector) / 8, Sizes.Sector)];
+                byte[] bitmap =
+                    new byte[Utilities.RoundUp(Utilities.Ceil(_content.Length, Sizes.Sector)/8, Sizes.Sector)];
 
                 foreach (var range in StreamExtent.Blocks(_content.Extents, Sizes.Sector))
                 {
                     for (int i = 0; i < range.Count; ++i)
                     {
-                        byte mask = (byte)(1 << (7 - ((int)(range.Offset + i) % 8)));
-                        bitmap[(range.Offset + i) / 8] |= mask;
+                        byte mask = (byte) (1 << (7 - ((int) (range.Offset + i)%8)));
+                        bitmap[(range.Offset + i)/8] |= mask;
                     }
                 }
 

@@ -56,7 +56,7 @@ namespace DiscUtils.Iscsi
 
             byte[] buffer = new byte[Utilities.RoundUp(48 + count, 4)];
             _basicHeader.WriteTo(buffer, 0);
-            buffer[1] |= (byte)(_continue ? 0x40 : 0x00);
+            buffer[1] |= (byte) (_continue ? 0x40 : 0x00);
             Utilities.WriteBytesBigEndian(lun, buffer, 8);
             Utilities.WriteBytesBigEndian(_targetTransferTag, buffer, 20);
             Utilities.WriteBytesBigEndian(_commandSequenceNumber, buffer, 24);

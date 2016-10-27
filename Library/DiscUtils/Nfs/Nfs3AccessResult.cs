@@ -26,13 +26,13 @@ namespace DiscUtils.Nfs
     {
         public Nfs3AccessResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status)reader.ReadInt32();
+            Status = (Nfs3Status) reader.ReadInt32();
             if (reader.ReadBool())
             {
                 ObjectAttributes = new Nfs3FileAttributes(reader);
             }
 
-            Access = (Nfs3AccessPermissions)reader.ReadInt32();
+            Access = (Nfs3AccessPermissions) reader.ReadInt32();
         }
 
         public Nfs3FileAttributes ObjectAttributes { get; set; }

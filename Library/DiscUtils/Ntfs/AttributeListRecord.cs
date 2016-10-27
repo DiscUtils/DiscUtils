@@ -41,7 +41,8 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return Utilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)), 8);
+                return Utilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)),
+                    8);
             }
         }
 
@@ -58,7 +59,7 @@ namespace DiscUtils.Ntfs
 
             if (attr.IsNonResident)
             {
-                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr).StartVcn;
+                newRecord.StartVcn = (ulong) ((NonResidentAttributeRecord) attr).StartVcn;
             }
 
             return newRecord;
@@ -66,7 +67,7 @@ namespace DiscUtils.Ntfs
 
         public int ReadFrom(byte[] data, int offset)
         {
-            Type = (AttributeType)Utilities.ToUInt32LittleEndian(data, offset + 0x00);
+            Type = (AttributeType) Utilities.ToUInt32LittleEndian(data, offset + 0x00);
             RecordLength = Utilities.ToUInt16LittleEndian(data, offset + 0x04);
             NameLength = data[offset + 0x06];
             NameOffset = data[offset + 0x07];
@@ -76,7 +77,7 @@ namespace DiscUtils.Ntfs
 
             if (NameLength > 0)
             {
-                Name = Encoding.Unicode.GetString(data, offset + NameOffset, NameLength * 2);
+                Name = Encoding.Unicode.GetString(data, offset + NameOffset, NameLength*2);
             }
             else
             {
@@ -100,12 +101,12 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                NameLength = (byte)(Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset) / 2);
+                NameLength = (byte) (Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset)/2);
             }
 
-            RecordLength = (ushort)Utilities.RoundUp(NameOffset + (NameLength * 2), 8);
+            RecordLength = (ushort) Utilities.RoundUp(NameOffset + (NameLength*2), 8);
 
-            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset);
+            Utilities.WriteBytesLittleEndian((uint) Type, buffer, offset);
             Utilities.WriteBytesLittleEndian(RecordLength, buffer, offset + 0x04);
             buffer[offset + 0x06] = NameLength;
             buffer[offset + 0x07] = NameOffset;
@@ -116,7 +117,7 @@ namespace DiscUtils.Ntfs
 
         public int CompareTo(AttributeListRecord other)
         {
-            int val = ((int)Type) - (int)other.Type;
+            int val = ((int) Type) - (int) other.Type;
             if (val != 0)
             {
                 return val;
@@ -128,7 +129,7 @@ namespace DiscUtils.Ntfs
                 return val;
             }
 
-            return ((int)StartVcn) - (int)other.StartVcn;
+            return ((int) StartVcn) - (int) other.StartVcn;
         }
 
         public void Dump(TextWriter writer, string indent)

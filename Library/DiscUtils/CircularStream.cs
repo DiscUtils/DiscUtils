@@ -38,7 +38,7 @@ namespace DiscUtils
         {
             WrapPosition();
 
-            int read = base.Read(buffer, offset, (int)Math.Min(Length - Position, count));
+            int read = base.Read(buffer, offset, (int) Math.Min(Length - Position, count));
 
             WrapPosition();
 
@@ -52,7 +52,7 @@ namespace DiscUtils
             int totalWritten = 0;
             while (totalWritten < count)
             {
-                int toWrite = (int)Math.Min(count - totalWritten, Length - Position);
+                int toWrite = (int) Math.Min(count - totalWritten, Length - Position);
 
                 base.Write(buffer, offset + totalWritten, toWrite);
 
@@ -69,7 +69,7 @@ namespace DiscUtils
 
             if (pos >= length)
             {
-                Position = pos % length;
+                Position = pos%length;
             }
         }
     }

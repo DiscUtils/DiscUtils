@@ -99,11 +99,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return ((NoParamFn)(object)new LongNoParamFn(() => { return 1; }))();
+                return ((NoParamFn) (object) new LongNoParamFn(() => { return 1; }))();
             }
             else if (typeof(T) == typeof(int))
             {
-                return ((NoParamFn)(object)new IntNoParamFn(() => { return 1; }))();
+                return ((NoParamFn) (object) new IntNoParamFn(() => { return 1; }))();
             }
             else
             {
@@ -115,11 +115,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (ConvertLongFn)(object)new LongConvertLongFn((long x) => { return x; });
+                return (ConvertLongFn) (object) new LongConvertLongFn((long x) => { return x; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (ConvertLongFn)(object)new IntConvertLongFn((long x) => { return (int)x; });
+                return (ConvertLongFn) (object) new IntConvertLongFn((long x) => { return (int) x; });
             }
             else
             {
@@ -131,11 +131,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (ConvertIntFn)(object)new LongConvertIntFn((int x) => { return x; });
+                return (ConvertIntFn) (object) new LongConvertIntFn((int x) => { return x; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (ConvertIntFn)(object)new IntConvertIntFn((int x) => { return x; });
+                return (ConvertIntFn) (object) new IntConvertIntFn((int x) => { return x; });
             }
             else
             {
@@ -147,11 +147,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return a + b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a + b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return a + b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a + b; });
             }
             else
             {
@@ -163,11 +163,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return a - b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a - b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return a - b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a - b; });
             }
             else
             {
@@ -179,11 +179,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return a * b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a*b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return a * b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a*b; });
             }
             else
             {
@@ -195,11 +195,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return a / b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a/b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return a / b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a/b; });
             }
             else
             {
@@ -211,11 +211,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return ((a + b - 1) / b) * b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return ((a + b - 1)/b)*b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return ((a + b - 1) / b) * b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return ((a + b - 1)/b)*b; });
             }
             else
             {
@@ -227,11 +227,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return (a / b) * b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return (a/b)*b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return (a / b) * b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return (a/b)*b; });
             }
             else
             {
@@ -243,11 +243,11 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn)(object)new LongDualParamFn((long a, long b) => { return (a + b - 1) / b; });
+                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return (a + b - 1)/b; });
             }
             else if (typeof(T) == typeof(int))
             {
-                return (DualParamFn)(object)new IntDualParamFn((int a, int b) => { return (a + b - 1) / b; });
+                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return (a + b - 1)/b; });
             }
             else
             {

@@ -24,10 +24,7 @@ namespace DiscUtils.Iscsi
 {
     internal abstract class Authenticator
     {
-        public abstract string Identifier
-        {
-            get;
-        }
+        public abstract string Identifier { get; }
 
         public abstract bool GetParameters(TextBuffer textBuffer);
 

@@ -56,7 +56,8 @@ namespace DiscUtils.LogicalDiskManager
         {
             writer.WriteLine(linePrefix + "DISK GROUP (" + _record.Name + ")");
             writer.WriteLine(linePrefix + "  Name: " + _record.Name);
-            writer.WriteLine(linePrefix + "  Flags: 0x" + (_record.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+            writer.WriteLine(linePrefix + "  Flags: 0x" +
+                             (_record.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
             writer.WriteLine(linePrefix + "  Database Id: " + _record.Id);
             writer.WriteLine(linePrefix + "  Guid: " + _record.GroupGuidString);
             writer.WriteLine();
@@ -66,7 +67,8 @@ namespace DiscUtils.LogicalDiskManager
             {
                 writer.WriteLine(linePrefix + "    DISK (" + disk.Name + ")");
                 writer.WriteLine(linePrefix + "      Name: " + disk.Name);
-                writer.WriteLine(linePrefix + "      Flags: 0x" + (disk.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                writer.WriteLine(linePrefix + "      Flags: 0x" +
+                                 (disk.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
                 writer.WriteLine(linePrefix + "      Database Id: " + disk.Id);
                 writer.WriteLine(linePrefix + "      Guid: " + disk.DiskGuidString);
 
@@ -83,8 +85,11 @@ namespace DiscUtils.LogicalDiskManager
             {
                 writer.WriteLine(linePrefix + "    VOLUME (" + vol.Name + ")");
                 writer.WriteLine(linePrefix + "      Name: " + vol.Name);
-                writer.WriteLine(linePrefix + "      BIOS Type: " + vol.BiosType.ToString("X2", CultureInfo.InvariantCulture) + " [" + BiosPartitionTypes.ToString(vol.BiosType) + "]");
-                writer.WriteLine(linePrefix + "      Flags: 0x" + (vol.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                writer.WriteLine(linePrefix + "      BIOS Type: " +
+                                 vol.BiosType.ToString("X2", CultureInfo.InvariantCulture) + " [" +
+                                 BiosPartitionTypes.ToString(vol.BiosType) + "]");
+                writer.WriteLine(linePrefix + "      Flags: 0x" +
+                                 (vol.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
                 writer.WriteLine(linePrefix + "      Database Id: " + vol.Id);
                 writer.WriteLine(linePrefix + "      Guid: " + vol.VolumeGuid);
                 writer.WriteLine(linePrefix + "      State: " + vol.ActiveString);
@@ -97,7 +102,8 @@ namespace DiscUtils.LogicalDiskManager
                 {
                     writer.WriteLine(linePrefix + "        COMPONENT (" + cmpnt.Name + ")");
                     writer.WriteLine(linePrefix + "          Name: " + cmpnt.Name);
-                    writer.WriteLine(linePrefix + "          Flags: 0x" + (cmpnt.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                    writer.WriteLine(linePrefix + "          Flags: 0x" +
+                                     (cmpnt.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
                     writer.WriteLine(linePrefix + "          Database Id: " + cmpnt.Id);
                     writer.WriteLine(linePrefix + "          State: " + cmpnt.StatusString);
                     writer.WriteLine(linePrefix + "          Mode: " + cmpnt.MergeType);
@@ -111,10 +117,13 @@ namespace DiscUtils.LogicalDiskManager
                     {
                         writer.WriteLine(linePrefix + "            EXTENT (" + extent.Name + ")");
                         writer.WriteLine(linePrefix + "              Name: " + extent.Name);
-                        writer.WriteLine(linePrefix + "              Flags: 0x" + (extent.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
+                        writer.WriteLine(linePrefix + "              Flags: 0x" +
+                                         (extent.Flags & 0xFFF0).ToString("X4", CultureInfo.InvariantCulture));
                         writer.WriteLine(linePrefix + "              Database Id: " + extent.Id);
-                        writer.WriteLine(linePrefix + "              Disk Offset: " + extent.DiskOffsetLba + " (Sectors)");
-                        writer.WriteLine(linePrefix + "              Volume Offset: " + extent.OffsetInVolumeLba + " (Sectors)");
+                        writer.WriteLine(linePrefix + "              Disk Offset: " + extent.DiskOffsetLba +
+                                         " (Sectors)");
+                        writer.WriteLine(linePrefix + "              Volume Offset: " + extent.OffsetInVolumeLba +
+                                         " (Sectors)");
                         writer.WriteLine(linePrefix + "              Size: " + extent.SizeLba + " (Sectors)");
                         writer.WriteLine(linePrefix + "              Component Id: " + extent.ComponentId);
                         writer.WriteLine(linePrefix + "              Disk Id: " + extent.DiskId);
@@ -124,6 +133,7 @@ namespace DiscUtils.LogicalDiskManager
                 }
             }
         }
+
         #endregion
 
         internal DynamicVolume[] GetVolumes()
@@ -182,7 +192,7 @@ namespace DiscUtils.LogicalDiskManager
 
         private static LogicalVolumeStatus WorstOf(LogicalVolumeStatus x, LogicalVolumeStatus y)
         {
-            return (LogicalVolumeStatus)Math.Max((int)x, (int)y);
+            return (LogicalVolumeStatus) Math.Max((int) x, (int) y);
         }
 
         private LogicalVolumeStatus GetVolumeStatus(VolumeRecord volume)
@@ -242,7 +252,8 @@ namespace DiscUtils.LogicalDiskManager
 
             DynamicDisk diskObj = _disks[new Guid(disk.DiskGuidString)];
 
-            return new SubStream(diskObj.Content, Ownership.None, (diskObj.DataOffset + extent.DiskOffsetLba) * Sizes.Sector, extent.SizeLba * Sizes.Sector);
+            return new SubStream(diskObj.Content, Ownership.None,
+                (diskObj.DataOffset + extent.DiskOffsetLba)*Sizes.Sector, extent.SizeLba*Sizes.Sector);
         }
 
         private SparseStream OpenComponent(ComponentRecord component)
@@ -283,7 +294,7 @@ namespace DiscUtils.LogicalDiskManager
                     streams.Add(OpenExtent(extent));
                 }
 
-                return new StripedStream(component.StripeSizeSectors * Sizes.Sector, Ownership.Dispose, streams.ToArray());
+                return new StripedStream(component.StripeSizeSectors*Sizes.Sector, Ownership.Dispose, streams.ToArray());
             }
             else
             {

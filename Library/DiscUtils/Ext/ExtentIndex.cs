@@ -32,7 +32,7 @@ namespace DiscUtils.Ext
 
         public long LeafPhysicalBlock
         {
-            get { return LeafPhysicalBlockLo | (((long)LeafPhysicalBlockHi) << 32); }
+            get { return LeafPhysicalBlockLo | (((long) LeafPhysicalBlockHi) << 32); }
         }
 
         public int Size

@@ -65,7 +65,8 @@ namespace DiscUtils.Ntfs
             foreach (var entry in _index.Entries)
             {
                 writer.WriteLine(indent + "  REPARSE POINT INDEX ENTRY");
-                writer.WriteLine(indent + "            Tag: " + entry.Key.Tag.ToString("x", CultureInfo.InvariantCulture));
+                writer.WriteLine(indent + "            Tag: " +
+                                 entry.Key.Tag.ToString("x", CultureInfo.InvariantCulture));
                 writer.WriteLine(indent + "  MFT Reference: " + entry.Key.File);
             }
         }

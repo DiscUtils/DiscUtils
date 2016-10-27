@@ -37,7 +37,7 @@ namespace DiscUtils.Iscsi
 
         public OpCode OpCode
         {
-            get { return (OpCode)(_headerData[0] & 0x3F); }
+            get { return (OpCode) (_headerData[0] & 0x3F); }
         }
 
         public byte[] HeaderData
@@ -80,7 +80,7 @@ namespace DiscUtils.Iscsi
                 }
             }
 
-            int rem = 4 - (numRead % 4);
+            int rem = 4 - (numRead%4);
             if (rem != 4)
             {
                 Utilities.ReadFully(stream, rem);

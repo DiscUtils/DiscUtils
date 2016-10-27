@@ -138,9 +138,9 @@ namespace DiscUtils
 
             while (totalRead < count && pos < _capacity)
             {
-                int chunk = (int)(pos / _chunkSize);
-                int chunkOffset = (int)(pos % _chunkSize);
-                int numToRead = (int)Math.Min(Math.Min(_chunkSize - chunkOffset, _capacity - pos), count - totalRead);
+                int chunk = (int) (pos/_chunkSize);
+                int chunkOffset = (int) (pos%_chunkSize);
+                int numToRead = (int) Math.Min(Math.Min(_chunkSize - chunkOffset, _capacity - pos), count - totalRead);
 
                 byte[] chunkBuffer;
                 if (!_buffers.TryGetValue(chunk, out chunkBuffer))
@@ -172,9 +172,9 @@ namespace DiscUtils
 
             while (totalWritten < count)
             {
-                int chunk = (int)(pos / _chunkSize);
-                int chunkOffset = (int)(pos % _chunkSize);
-                int numToWrite = (int)Math.Min(_chunkSize - chunkOffset, count - totalWritten);
+                int chunk = (int) (pos/_chunkSize);
+                int chunkOffset = (int) (pos%_chunkSize);
+                int numToWrite = (int) Math.Min(_chunkSize - chunkOffset, count - totalWritten);
 
                 byte[] chunkBuffer;
                 if (!_buffers.TryGetValue(chunk, out chunkBuffer))
@@ -215,7 +215,7 @@ namespace DiscUtils
             long end = start + count;
             foreach (var chunk in AllocatedChunks)
             {
-                long chunkStart = chunk * (long)_chunkSize;
+                long chunkStart = chunk*(long) _chunkSize;
                 long chunkEnd = chunkStart + _chunkSize;
                 if (chunkEnd > start && chunkStart < end)
                 {

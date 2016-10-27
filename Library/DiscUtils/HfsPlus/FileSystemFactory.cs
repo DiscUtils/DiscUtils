@@ -32,7 +32,7 @@ namespace DiscUtils.HfsPlus
         {
             if (HfsPlusFileSystem.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("HFS+", "Apple HFS+", Open) };
+                return new DiscUtils.FileSystemInfo[] {new VfsFileSystemInfo("HFS+", "Apple HFS+", Open)};
             }
 
             return new DiscUtils.FileSystemInfo[0];

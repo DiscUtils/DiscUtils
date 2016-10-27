@@ -79,7 +79,7 @@ namespace DiscUtils.Wim
             }
             else if (id >= 0 && id < _securityDescriptors.Count)
             {
-                return _securityDescriptors[(int)id];
+                return _securityDescriptors[(int) id];
             }
             else
             {
@@ -117,7 +117,7 @@ namespace DiscUtils.Wim
             {
                 byte[] buffer = new byte[s.Length];
                 s.Read(buffer, 0, buffer.Length);
-                return new ReparsePoint((int)dirEntry.ReparseTag, buffer);
+                return new ReparsePoint((int) dirEntry.ReparseTag, buffer);
             }
         }
 
@@ -180,7 +180,9 @@ namespace DiscUtils.Wim
             {
                 CreationTime = DateTime.FromFileTimeUtc(dirEntry.CreationTime),
                 LastAccessTime = DateTime.FromFileTimeUtc(dirEntry.LastAccessTime),
-                ChangeTime = DateTime.FromFileTimeUtc(Math.Max(dirEntry.LastWriteTime, Math.Max(dirEntry.CreationTime, dirEntry.LastAccessTime))),
+                ChangeTime =
+                    DateTime.FromFileTimeUtc(Math.Max(dirEntry.LastWriteTime,
+                        Math.Max(dirEntry.CreationTime, dirEntry.LastAccessTime))),
                 LastWriteTime = DateTime.FromFileTimeUtc(dirEntry.LastWriteTime),
                 FileAttributes = dirEntry.Attributes
             };
@@ -236,7 +238,7 @@ namespace DiscUtils.Wim
         public long GetFileId(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
-            return dirEntry.HardLink == 0 ? -1 : (long)dirEntry.HardLink;
+            return dirEntry.HardLink == 0 ? -1 : (long) dirEntry.HardLink;
         }
 
         /// <summary>
@@ -316,7 +318,8 @@ namespace DiscUtils.Wim
             DirectoryEntry parentDirEntry = GetEntry(path);
             if (parentDirEntry == null)
             {
-                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture,
+                    "The directory '{0}' does not exist", path));
             }
 
             List<DirectoryEntry> parentDir = GetDirectory(parentDirEntry.SubdirOffset);
@@ -338,7 +341,8 @@ namespace DiscUtils.Wim
             DirectoryEntry parentDirEntry = GetEntry(path);
             if (parentDirEntry == null)
             {
-                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' does not exist", path));
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture,
+                    "The directory '{0}' does not exist", path));
             }
 
             List<DirectoryEntry> parentDir = GetDirectory(parentDirEntry.SubdirOffset);
@@ -569,15 +573,15 @@ namespace DiscUtils.Wim
                 sdLengths[i] = reader.ReadUInt64();
             }
 
-            _securityDescriptors = new List<RawSecurityDescriptor>((int)numEntries);
+            _securityDescriptors = new List<RawSecurityDescriptor>((int) numEntries);
             for (uint i = 0; i < numEntries; ++i)
             {
-                _securityDescriptors.Add(new RawSecurityDescriptor(reader.ReadBytes((int)sdLengths[i]), 0));
+                _securityDescriptors.Add(new RawSecurityDescriptor(reader.ReadBytes((int) sdLengths[i]), 0));
             }
 
             if (reader.Position < startPos + totalLength)
             {
-                reader.Skip((int)(startPos + totalLength - reader.Position));
+                reader.Skip((int) (startPos + totalLength - reader.Position));
             }
 
             _rootDirPos = Utilities.RoundUp(startPos + totalLength, 8);
@@ -610,7 +614,9 @@ namespace DiscUtils.Wim
                 foreach (var entry in currentDir)
                 {
                     if (path[i].Equals(entry.FileName, StringComparison.OrdinalIgnoreCase)
-                        || (!string.IsNullOrEmpty(entry.ShortName) && path[i].Equals(entry.ShortName, StringComparison.OrdinalIgnoreCase)))
+                        ||
+                        (!string.IsNullOrEmpty(entry.ShortName) &&
+                         path[i].Equals(entry.ShortName, StringComparison.OrdinalIgnoreCase)))
                     {
                         nextEntry = entry;
                         break;

@@ -59,7 +59,8 @@ namespace DiscUtils.HfsPlus
 
         public static BTreeNode ReadNode(BTree tree, byte[] buffer, int offset)
         {
-            BTreeNodeDescriptor descriptor = (BTreeNodeDescriptor)Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
+            BTreeNodeDescriptor descriptor =
+                (BTreeNodeDescriptor) Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
 
             switch (descriptor.Kind)
             {
@@ -76,7 +77,8 @@ namespace DiscUtils.HfsPlus
         public static BTreeNode ReadNode<TKey>(BTree tree, byte[] buffer, int offset)
             where TKey : BTreeKey, new()
         {
-            BTreeNodeDescriptor descriptor = (BTreeNodeDescriptor)Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
+            BTreeNodeDescriptor descriptor =
+                (BTreeNodeDescriptor) Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
 
             switch (descriptor.Kind)
             {

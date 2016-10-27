@@ -62,11 +62,11 @@ namespace DiscUtils.Optical
 
             if (format == OpticalFormat.None)
             {
-                if ((stream.Length % Mode1SectorSize) == 0 && (stream.Length % Mode2SectorSize) != 0)
+                if ((stream.Length%Mode1SectorSize) == 0 && (stream.Length%Mode2SectorSize) != 0)
                 {
                     _format = OpticalFormat.Mode1;
                 }
-                else if ((stream.Length % Mode1SectorSize) != 0 && (stream.Length % Mode2SectorSize) == 0)
+                else if ((stream.Length%Mode1SectorSize) != 0 && (stream.Length%Mode2SectorSize) == 0)
                 {
                     _format = OpticalFormat.Mode2;
                 }

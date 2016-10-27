@@ -58,7 +58,9 @@ namespace DiscUtils.Ntfs
 
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "[Data-MftRef:{0},BirthVolId:{1},BirthObjId:{2},BirthDomId:{3}]", MftReference, BirthVolumeId, BirthObjectId, BirthDomainId);
+            return string.Format(CultureInfo.InvariantCulture,
+                "[Data-MftRef:{0},BirthVolId:{1},BirthObjId:{2},BirthDomId:{3}]", MftReference, BirthVolumeId,
+                BirthObjectId, BirthDomainId);
         }
     }
 }

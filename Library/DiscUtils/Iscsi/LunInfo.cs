@@ -145,7 +145,8 @@ namespace DiscUtils.Iscsi
         private string _productId;
         private string _productRevision;
 
-        internal LunInfo(TargetInfo targetInfo, long lun, LunClass type, bool removable, string vendor, string product, string revision)
+        internal LunInfo(TargetInfo targetInfo, long lun, LunClass type, bool removable, string vendor, string product,
+            string revision)
         {
             _targetInfo = targetInfo;
             _lun = lun;
@@ -201,10 +202,7 @@ namespace DiscUtils.Iscsi
         /// </summary>
         public string ProductId
         {
-            get
-            {
-                return _productId;
-            }
+            get { return _productId; }
         }
 
         /// <summary>
@@ -273,7 +271,8 @@ namespace DiscUtils.Iscsi
                 ThrowInvalidURI(uri.OriginalString);
             }
 
-            TargetInfo targetInfo = new TargetInfo(targetName, new TargetAddress[] { new TargetAddress(address, port, targetGroupTag) });
+            TargetInfo targetInfo = new TargetInfo(targetName,
+                new TargetAddress[] {new TargetAddress(address, port, targetGroupTag)});
 
             foreach (var queryElem in uri.Query.Substring(1).Split('&'))
             {
@@ -282,12 +281,12 @@ namespace DiscUtils.Iscsi
                     lun = ulong.Parse(queryElem.Substring(4), CultureInfo.InvariantCulture);
                     if (lun < 256)
                     {
-                        lun = lun << (6 * 8);
+                        lun = lun << (6*8);
                     }
                 }
             }
 
-            return new LunInfo(targetInfo, (long)lun, LunClass.Unknown, false, string.Empty, string.Empty, string.Empty);
+            return new LunInfo(targetInfo, (long) lun, LunClass.Unknown, false, string.Empty, string.Empty, string.Empty);
         }
 
         /// <summary>
@@ -296,9 +295,9 @@ namespace DiscUtils.Iscsi
         /// <returns>The LUN in string form.</returns>
         public override string ToString()
         {
-            if ((((ulong)_lun) & 0xFF00000000000000) == 0)
+            if ((((ulong) _lun) & 0xFF00000000000000) == 0)
             {
-                return (_lun >> (6 * 8)).ToString(CultureInfo.InvariantCulture);
+                return (_lun >> (6*8)).ToString(CultureInfo.InvariantCulture);
             }
             else
             {
@@ -324,7 +323,8 @@ namespace DiscUtils.Iscsi
 
         private static void ThrowInvalidURI(string uri)
         {
-            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Not a valid iSCSI URI: {0}", uri), nameof(uri));
+            throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Not a valid iSCSI URI: {0}", uri),
+                nameof(uri));
         }
     }
 }

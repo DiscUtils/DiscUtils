@@ -62,10 +62,7 @@ namespace DiscUtils
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
             set
             {
@@ -110,7 +107,7 @@ namespace DiscUtils
                 }
             }
 
-            int numToClear = (int)Math.Min(count, _length - _position);
+            int numToClear = (int) Math.Min(count, _length - _position);
             Array.Clear(buffer, offset, numToClear);
             _position += numToClear;
 

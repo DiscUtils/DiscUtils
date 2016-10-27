@@ -41,7 +41,7 @@ namespace DiscUtils.SquashFs
             DirectoryRecord result = new DirectoryRecord();
             result.Offset = reader.ReadUShort();
             result.InodeNumber = reader.ReadShort();
-            result.Type = (InodeType)reader.ReadUShort();
+            result.Type = (InodeType) reader.ReadUShort();
             ushort size = reader.ReadUShort();
             result.Name = reader.ReadString(size + 1);
 
@@ -57,8 +57,8 @@ namespace DiscUtils.SquashFs
         {
             Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 2);
-            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian((ushort)(Name.Length - 1), buffer, offset + 6);
+            Utilities.WriteBytesLittleEndian((ushort) Type, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian((ushort) (Name.Length - 1), buffer, offset + 6);
             Utilities.StringToBytes(Name, buffer, offset + 8, Name.Length);
         }
     }

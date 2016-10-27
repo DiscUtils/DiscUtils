@@ -56,7 +56,7 @@ namespace DiscUtils.Iso9660
                 ushort total = 0;
                 for (int i = 0; i < 16; ++i)
                 {
-                    total += Utilities.ToUInt16LittleEndian(_data, i * 2);
+                    total += Utilities.ToUInt16LittleEndian(_data, i*2);
                 }
 
                 return total == 0;
@@ -79,10 +79,10 @@ namespace DiscUtils.Iso9660
             ushort total = 0;
             for (int i = 0; i < 16; ++i)
             {
-                total += Utilities.ToUInt16LittleEndian(buffer, offset + (i * 2));
+                total += Utilities.ToUInt16LittleEndian(buffer, offset + (i*2));
             }
 
-            return (ushort)(0 - total);
+            return (ushort) (0 - total);
         }
     }
 }

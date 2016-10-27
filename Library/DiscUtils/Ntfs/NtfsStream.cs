@@ -62,14 +62,14 @@ namespace DiscUtils.Ntfs
             byte[] buffer;
             using (Stream s = Open(FileAccess.Read))
             {
-                buffer = Utilities.ReadFully(s, (int)s.Length);
+                buffer = Utilities.ReadFully(s, (int) s.Length);
             }
 
             T value = new T();
             value.ReadFrom(buffer, 0);
             return value;
         }
-        
+
         /// <summary>
         /// Sets the content of a stream.
         /// </summary>
@@ -107,7 +107,7 @@ namespace DiscUtils.Ntfs
                 Range<long, long>[] clusters = _attr.GetClusters();
                 foreach (var clusterRange in clusters)
                 {
-                    result.Add(new StreamExtent(clusterRange.Offset * clusterSize, clusterRange.Count * clusterSize));
+                    result.Add(new StreamExtent(clusterRange.Offset*clusterSize, clusterRange.Count*clusterSize));
                 }
             }
             else

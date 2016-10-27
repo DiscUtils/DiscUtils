@@ -30,7 +30,7 @@ namespace DiscUtils.Optical
     {
         public override string[] Variants
         {
-            get { return new string[] { }; }
+            get { return new string[] {}; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -43,7 +43,8 @@ namespace DiscUtils.Optical
             throw new NotSupportedException();
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
+            VirtualDiskParameters diskParameters)
         {
             throw new NotSupportedException();
         }
@@ -55,7 +56,9 @@ namespace DiscUtils.Optical
 
         public override VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access)
         {
-            OpticalFormat format = path.EndsWith(".bin", StringComparison.OrdinalIgnoreCase) ? OpticalFormat.Mode2 : OpticalFormat.Mode1;
+            OpticalFormat format = path.EndsWith(".bin", StringComparison.OrdinalIgnoreCase)
+                ? OpticalFormat.Mode2
+                : OpticalFormat.Mode1;
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new Disc(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose, format);
         }

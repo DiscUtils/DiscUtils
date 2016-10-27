@@ -36,14 +36,11 @@ namespace DiscUtils.HfsPlus
         public UnixFileSystemInfo FileSystemInfo;
         public uint UnixSpecialField;
 
-        public abstract int Size
-        {
-            get;
-        }
+        public abstract int Size { get; }
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            RecordType = (CatalogRecordType)Utilities.ToInt16BigEndian(buffer, offset + 0);
+            RecordType = (CatalogRecordType) Utilities.ToInt16BigEndian(buffer, offset + 0);
             FileId = Utilities.ToUInt32BigEndian(buffer, offset + 8);
             CreateTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 12);
             ContentModifyTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 16);

@@ -61,12 +61,12 @@ namespace DiscUtils.Ext
             uint blockSize = _context.SuperBlock.BlockSize;
 
             int totalRead = 0;
-            int totalBytesRemaining = (int)Math.Min(count, _inode.FileSize - pos);
+            int totalBytesRemaining = (int) Math.Min(count, _inode.FileSize - pos);
 
             while (totalBytesRemaining > 0)
             {
-                uint logicalBlock = (uint)((pos + totalRead) / blockSize);
-                int blockOffset = (int)((pos + totalRead) - (logicalBlock * (long)blockSize));
+                uint logicalBlock = (uint) ((pos + totalRead)/blockSize);
+                int blockOffset = (int) ((pos + totalRead) - (logicalBlock*(long) blockSize));
 
                 uint physicalBlock = 0;
                 if (logicalBlock < 12)
@@ -76,29 +76,31 @@ namespace DiscUtils.Ext
                 else
                 {
                     logicalBlock -= 12;
-                    if (logicalBlock < blockSize / 4)
+                    if (logicalBlock < blockSize/4)
                     {
                         if (_inode.IndirectBlock != 0)
                         {
-                            _context.RawStream.Position = (_inode.IndirectBlock * (long)blockSize) + (logicalBlock * 4);
+                            _context.RawStream.Position = (_inode.IndirectBlock*(long) blockSize) + (logicalBlock*4);
                             byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
                             physicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
                         }
                     }
                     else
                     {
-                        logicalBlock -= blockSize / 4;
-                        if (logicalBlock < (blockSize / 4) * (blockSize / 4))
+                        logicalBlock -= blockSize/4;
+                        if (logicalBlock < (blockSize/4)*(blockSize/4))
                         {
                             if (_inode.DoubleIndirectBlock != 0)
                             {
-                                _context.RawStream.Position = (_inode.DoubleIndirectBlock * (long)blockSize) + ((logicalBlock / (blockSize / 4)) * 4);
+                                _context.RawStream.Position = (_inode.DoubleIndirectBlock*(long) blockSize) +
+                                                              ((logicalBlock/(blockSize/4))*4);
                                 byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
                                 uint indirectBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
 
                                 if (indirectBlock != 0)
                                 {
-                                    _context.RawStream.Position = (indirectBlock * (long)blockSize) + ((logicalBlock % (blockSize / 4)) * 4);
+                                    _context.RawStream.Position = (indirectBlock*(long) blockSize) +
+                                                                  ((logicalBlock%(blockSize/4))*4);
                                     Utilities.ReadFully(_context.RawStream, indirectData, 0, 4);
                                     physicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
                                 }
@@ -111,7 +113,7 @@ namespace DiscUtils.Ext
                     }
                 }
 
-                int toRead = (int)Math.Min(totalBytesRemaining, blockSize - blockOffset);
+                int toRead = (int) Math.Min(totalBytesRemaining, blockSize - blockOffset);
                 int numRead;
                 if (physicalBlock == 0)
                 {
@@ -120,7 +122,7 @@ namespace DiscUtils.Ext
                 }
                 else
                 {
-                    _context.RawStream.Position = (physicalBlock * (long)blockSize) + blockOffset;
+                    _context.RawStream.Position = (physicalBlock*(long) blockSize) + blockOffset;
                     numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
                 }
 
@@ -144,7 +146,7 @@ namespace DiscUtils.Ext
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             return StreamExtent.Intersect(
-                new StreamExtent[] { new StreamExtent(0, Capacity) },
+                new StreamExtent[] {new StreamExtent(0, Capacity)},
                 new StreamExtent(start, count));
         }
     }

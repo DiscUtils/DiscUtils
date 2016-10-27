@@ -50,7 +50,7 @@ namespace DiscUtils.Ntfs
             Stream stream = index.AllocationStream;
             _streamPosition = index.IndexBlockVcnToPosition(parentEntry.ChildrenVirtualCluster);
             stream.Position = _streamPosition;
-            byte[] buffer = Utilities.ReadFully(stream, (int)index.IndexBufferSize);
+            byte[] buffer = Utilities.ReadFully(stream, (int) index.IndexBufferSize);
             FromBytes(buffer, 0);
         }
 
@@ -60,11 +60,12 @@ namespace DiscUtils.Ntfs
             _index = index;
             _isRoot = isRoot;
 
-            _indexBlockVcn = (ulong)vcn;
+            _indexBlockVcn = (ulong) vcn;
 
-            _streamPosition = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
+            _streamPosition = vcn*bpb.BytesPerSector*bpb.SectorsPerCluster;
 
-            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, isRoot, (uint)bpb.IndexBufferSize - FieldSize);
+            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, isRoot,
+                (uint) bpb.IndexBufferSize - FieldSize);
 
             WriteToDisk();
         }
@@ -102,7 +103,7 @@ namespace DiscUtils.Ntfs
         {
             Utilities.WriteBytesLittleEndian(_logSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(_indexBlockVcn, buffer, offset + 0x10);
-            return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize));
+            return (ushort) (FieldSize + Node.WriteTo(buffer, offset + FieldSize));
         }
 
         protected override int CalcSize()

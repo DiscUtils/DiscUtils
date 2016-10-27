@@ -74,7 +74,8 @@ namespace DiscUtils.Ntfs
         public void AlignVirtualClusterCount()
         {
             _file.MarkMftRecordDirty();
-            _activeStream.ExpandToClusters(Utilities.Ceil(_attribute.Length, _bytesPerCluster), (NonResidentAttributeRecord)_attribute.LastExtent, false);
+            _activeStream.ExpandToClusters(Utilities.Ceil(_attribute.Length, _bytesPerCluster),
+                (NonResidentAttributeRecord) _attribute.LastExtent, false);
         }
 
         public override void SetCapacity(long value)
@@ -99,9 +100,9 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                _activeStream.ExpandToClusters(newClusterCount, (NonResidentAttributeRecord)_attribute.LastExtent, true);
+                _activeStream.ExpandToClusters(newClusterCount, (NonResidentAttributeRecord) _attribute.LastExtent, true);
 
-                PrimaryAttributeRecord.AllocatedLength = _cookedRuns.NextVirtualCluster * _bytesPerCluster;
+                PrimaryAttributeRecord.AllocatedLength = _cookedRuns.NextVirtualCluster*_bytesPerCluster;
             }
 
             PrimaryAttributeRecord.DataLength = value;
@@ -142,17 +143,17 @@ namespace DiscUtils.Ntfs
             long focusPos = pos;
             while (focusPos < pos + count)
             {
-                long vcn = focusPos / _bytesPerCluster;
+                long vcn = focusPos/_bytesPerCluster;
                 long remaining = (pos + count) - focusPos;
-                long clusterOffset = focusPos - (vcn * _bytesPerCluster);
+                long clusterOffset = focusPos - (vcn*_bytesPerCluster);
 
-                if (vcn * _bytesPerCluster != focusPos || remaining < _bytesPerCluster)
+                if (vcn*_bytesPerCluster != focusPos || remaining < _bytesPerCluster)
                 {
                     // Unaligned or short write
-                    int toWrite = (int)Math.Min(remaining, _bytesPerCluster - clusterOffset);
+                    int toWrite = (int) Math.Min(remaining, _bytesPerCluster - clusterOffset);
 
                     _activeStream.ReadClusters(vcn, 1, _ioBuffer, 0);
-                    Array.Copy(buffer, (int)(offset + (focusPos - pos)), _ioBuffer, (int)clusterOffset, toWrite);
+                    Array.Copy(buffer, (int) (offset + (focusPos - pos)), _ioBuffer, (int) clusterOffset, toWrite);
                     allocatedClusters += _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
 
                     focusPos += toWrite;
@@ -160,10 +161,11 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     // Aligned, full cluster writes...
-                    int fullClusters = (int)(remaining / _bytesPerCluster);
-                    allocatedClusters += _activeStream.WriteClusters(vcn, fullClusters, buffer, (int)(offset + (focusPos - pos)));
+                    int fullClusters = (int) (remaining/_bytesPerCluster);
+                    allocatedClusters += _activeStream.WriteClusters(vcn, fullClusters, buffer,
+                        (int) (offset + (focusPos - pos)));
 
-                    focusPos += fullClusters * _bytesPerCluster;
+                    focusPos += fullClusters*_bytesPerCluster;
                 }
             }
 
@@ -183,7 +185,7 @@ namespace DiscUtils.Ntfs
 
             if ((_attribute.Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
-                PrimaryAttributeRecord.CompressedDataSize += allocatedClusters * _bytesPerCluster;
+                PrimaryAttributeRecord.CompressedDataSize += allocatedClusters*_bytesPerCluster;
             }
 
             _cookedRuns.CollapseRuns();
@@ -219,19 +221,19 @@ namespace DiscUtils.Ntfs
             long focusPos = pos;
             while (focusPos < pos + count)
             {
-                long vcn = focusPos / _bytesPerCluster;
+                long vcn = focusPos/_bytesPerCluster;
                 long remaining = (pos + count) - focusPos;
-                long clusterOffset = focusPos - (vcn * _bytesPerCluster);
+                long clusterOffset = focusPos - (vcn*_bytesPerCluster);
 
-                if (vcn * _bytesPerCluster != focusPos || remaining < _bytesPerCluster)
+                if (vcn*_bytesPerCluster != focusPos || remaining < _bytesPerCluster)
                 {
                     // Unaligned or short write
-                    int toClear = (int)Math.Min(remaining, _bytesPerCluster - clusterOffset);
+                    int toClear = (int) Math.Min(remaining, _bytesPerCluster - clusterOffset);
 
                     if (_activeStream.IsClusterStored(vcn))
                     {
                         _activeStream.ReadClusters(vcn, 1, _ioBuffer, 0);
-                        Array.Clear(_ioBuffer, (int)clusterOffset, toClear);
+                        Array.Clear(_ioBuffer, (int) clusterOffset, toClear);
                         releasedClusters -= _activeStream.WriteClusters(vcn, 1, _ioBuffer, 0);
                     }
 
@@ -240,10 +242,10 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     // Aligned, full cluster clears...
-                    int fullClusters = (int)(remaining / _bytesPerCluster);
+                    int fullClusters = (int) (remaining/_bytesPerCluster);
                     releasedClusters += _activeStream.ClearClusters(vcn, fullClusters);
 
-                    focusPos += fullClusters * _bytesPerCluster;
+                    focusPos += fullClusters*_bytesPerCluster;
                 }
             }
 
@@ -259,7 +261,7 @@ namespace DiscUtils.Ntfs
 
             if ((_attribute.Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
-                PrimaryAttributeRecord.CompressedDataSize -= releasedClusters * _bytesPerCluster;
+                PrimaryAttributeRecord.CompressedDataSize -= releasedClusters*_bytesPerCluster;
             }
 
             _cookedRuns.CollapseRuns();
@@ -291,11 +293,11 @@ namespace DiscUtils.Ntfs
 
             while (initDataLen < pos)
             {
-                long vcn = initDataLen / _bytesPerCluster;
-                if (initDataLen % _bytesPerCluster != 0 || pos - initDataLen < _bytesPerCluster)
+                long vcn = initDataLen/_bytesPerCluster;
+                if (initDataLen%_bytesPerCluster != 0 || pos - initDataLen < _bytesPerCluster)
                 {
-                    int clusterOffset = (int)(initDataLen - (vcn * _bytesPerCluster));
-                    int toClear = (int)Math.Min(_bytesPerCluster - clusterOffset, pos - initDataLen);
+                    int clusterOffset = (int) (initDataLen - (vcn*_bytesPerCluster));
+                    int toClear = (int) Math.Min(_bytesPerCluster - clusterOffset, pos - initDataLen);
 
                     if (_activeStream.IsClusterStored(vcn))
                     {
@@ -308,10 +310,10 @@ namespace DiscUtils.Ntfs
                 }
                 else
                 {
-                    int numClusters = (int)((pos / _bytesPerCluster) - vcn);
+                    int numClusters = (int) ((pos/_bytesPerCluster) - vcn);
                     clustersAllocated -= _activeStream.ClearClusters(vcn, numClusters);
 
-                    initDataLen += numClusters * _bytesPerCluster;
+                    initDataLen += numClusters*_bytesPerCluster;
                 }
             }
 
@@ -319,7 +321,7 @@ namespace DiscUtils.Ntfs
 
             if ((_attribute.Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
-                PrimaryAttributeRecord.CompressedDataSize += clustersAllocated * _bytesPerCluster;
+                PrimaryAttributeRecord.CompressedDataSize += clustersAllocated*_bytesPerCluster;
             }
         }
 
@@ -331,19 +333,20 @@ namespace DiscUtils.Ntfs
             _activeStream.TruncateToClusters(endVcn);
 
             // First, remove any extents that are now redundant.
-            Dictionary<AttributeReference, AttributeRecord> extentCache = new Dictionary<AttributeReference, AttributeRecord>(_attribute.Extents);
+            Dictionary<AttributeReference, AttributeRecord> extentCache =
+                new Dictionary<AttributeReference, AttributeRecord>(_attribute.Extents);
             foreach (var extent in extentCache)
             {
                 if (extent.Value.StartVcn >= endVcn)
                 {
-                    NonResidentAttributeRecord record = (NonResidentAttributeRecord)extent.Value;
+                    NonResidentAttributeRecord record = (NonResidentAttributeRecord) extent.Value;
                     _file.RemoveAttributeExtent(extent.Key);
                     _attribute.RemoveExtentCacheSafe(extent.Key);
                 }
             }
 
             PrimaryAttributeRecord.LastVcn = Math.Max(0, endVcn - 1);
-            PrimaryAttributeRecord.AllocatedLength = endVcn * _bytesPerCluster;
+            PrimaryAttributeRecord.AllocatedLength = endVcn*_bytesPerCluster;
             PrimaryAttributeRecord.DataLength = value;
             PrimaryAttributeRecord.InitializedDataLength = Math.Min(PrimaryAttributeRecord.InitializedDataLength, value);
 

@@ -32,7 +32,8 @@ namespace DiscUtils.Ext
         {
             if (ExtFileSystem.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("ext", "Linux ext family filesystem", Open) };
+                return new DiscUtils.FileSystemInfo[]
+                    {new VfsFileSystemInfo("ext", "Linux ext family filesystem", Open)};
             }
 
             return new DiscUtils.FileSystemInfo[0];

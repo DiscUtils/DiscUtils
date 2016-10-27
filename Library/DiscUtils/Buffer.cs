@@ -54,10 +54,7 @@ namespace DiscUtils
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
         public virtual IEnumerable<StreamExtent> Extents
         {
-            get
-            {
-                return GetExtentsInRange(0, Capacity);
-            }
+            get { return GetExtentsInRange(0, Capacity); }
         }
 
         /// <summary>

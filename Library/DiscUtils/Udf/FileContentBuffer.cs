@@ -54,7 +54,7 @@ namespace DiscUtils.Udf
 
         public long Capacity
         {
-            get { return (long)_fileEntry.InformationLength; }
+            get { return (long) _fileEntry.InformationLength; }
         }
 
         public IEnumerable<StreamExtent> Extents
@@ -72,8 +72,8 @@ namespace DiscUtils.Udf
                     return 0;
                 }
 
-                int toCopy = (int)Math.Min(srcBuffer.Length - pos, count);
-                Array.Copy(srcBuffer, (int)pos, buffer, offset, toCopy);
+                int toCopy = (int) Math.Min(srcBuffer.Length - pos, count);
+                Array.Copy(srcBuffer, (int) pos, buffer, offset, toCopy);
                 return toCopy;
             }
             else
@@ -127,14 +127,15 @@ namespace DiscUtils.Udf
 
                     if (sad.Flags != ShortAllocationFlags.RecordedAndAllocated)
                     {
-                        throw new NotImplementedException("Extents that are not 'recorded and allocated' not implemented");
+                        throw new NotImplementedException(
+                            "Extents that are not 'recorded and allocated' not implemented");
                     }
 
                     CookedExtent newExtent = new CookedExtent
                     {
                         FileContentOffset = filePos,
                         Partition = int.MaxValue,
-                        StartPos = sad.ExtentLocation * (long)_blockSize,
+                        StartPos = sad.ExtentLocation*(long) _blockSize,
                         Length = sad.ExtentLength
                     };
                     _extents.Add(newExtent);
@@ -164,7 +165,7 @@ namespace DiscUtils.Udf
                     {
                         FileContentOffset = filePos,
                         Partition = lad.ExtentLocation.Partition,
-                        StartPos = lad.ExtentLocation.LogicalBlock * (long)_blockSize,
+                        StartPos = lad.ExtentLocation.LogicalBlock*(long) _blockSize,
                         Length = lad.ExtentLength
                     };
                     _extents.Add(newExtent);
@@ -175,13 +176,14 @@ namespace DiscUtils.Udf
             }
             else
             {
-                throw new NotImplementedException("Allocation Type: " + _fileEntry.InformationControlBlock.AllocationType);
+                throw new NotImplementedException("Allocation Type: " +
+                                                  _fileEntry.InformationControlBlock.AllocationType);
             }
         }
 
         private int ReadFromExtents(long pos, byte[] buffer, int offset, int count)
         {
-            int totalToRead = (int)Math.Min(Capacity - pos, count);
+            int totalToRead = (int) Math.Min(Capacity - pos, count);
             int totalRead = 0;
 
             while (totalRead < totalToRead)
@@ -189,7 +191,7 @@ namespace DiscUtils.Udf
                 CookedExtent extent = FindExtent(pos + totalRead);
 
                 long extentOffset = (pos + totalRead) - extent.FileContentOffset;
-                int toRead = (int)Math.Min(totalToRead - totalRead, extent.Length - extentOffset);
+                int toRead = (int) Math.Min(totalToRead - totalRead, extent.Length - extentOffset);
 
                 Partition part;
                 if (extent.Partition != int.MaxValue)

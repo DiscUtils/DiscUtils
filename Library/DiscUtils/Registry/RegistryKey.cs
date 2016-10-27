@@ -154,11 +154,11 @@ namespace DiscUtils.Registry
             {
                 if (_cell.NumValues != 0)
                 {
-                    byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+                    byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
 
                     for (int i = 0; i < _cell.NumValues; ++i)
                     {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
                         yield return new RegistryValue(_hive, _hive.GetCell<ValueCell>(valueIndex));
                     }
                 }
@@ -337,9 +337,10 @@ namespace DiscUtils.Registry
             RegistryValue regVal = GetRegistryValue(name);
             if (regVal != null)
             {
-                if (regVal.DataType == RegistryValueType.ExpandString && (options & Microsoft.Win32.RegistryValueOptions.DoNotExpandEnvironmentNames) == 0)
+                if (regVal.DataType == RegistryValueType.ExpandString &&
+                    (options & Microsoft.Win32.RegistryValueOptions.DoNotExpandEnvironmentNames) == 0)
                 {
-                    return Environment.ExpandEnvironmentVariables((string)regVal.Value);
+                    return Environment.ExpandEnvironmentVariables((string) regVal.Value);
                 }
                 else
                 {
@@ -397,12 +398,12 @@ namespace DiscUtils.Registry
 
             if (_cell.NumValues != 0)
             {
-                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
 
                 int i = 0;
                 while (i < _cell.NumValues)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
                     ValueCell valueCell = _hive.GetCell<ValueCell>(valueIndex);
                     if (string.Compare(valueCell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -421,13 +422,13 @@ namespace DiscUtils.Registry
                 {
                     while (i < _cell.NumValues)
                     {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, (i + 1) * 4);
-                        Utilities.WriteBytesLittleEndian(valueIndex, valueList, i * 4);
+                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, (i + 1)*4);
+                        Utilities.WriteBytesLittleEndian(valueIndex, valueList, i*4);
 
                         ++i;
                     }
 
-                    _hive.WriteRawCellData(_cell.ValueListIndex, valueList, 0, _cell.NumValues * 4);
+                    _hive.WriteRawCellData(_cell.ValueListIndex, valueList, 0, _cell.NumValues*4);
                 }
 
                 // TODO: Update maxbytes for value name and value content if this was the largest value for either.
@@ -483,7 +484,7 @@ namespace DiscUtils.Registry
                 return this;
             }
 
-            string[] split = subkey.Split(new char[] { '\\' }, 2);
+            string[] split = subkey.Split(new char[] {'\\'}, 2);
             int cellIndex = FindSubKeyCell(split[0]);
 
             if (cellIndex < 0)
@@ -530,7 +531,7 @@ namespace DiscUtils.Registry
                 return this;
             }
 
-            string[] split = path.Split(new char[] { '\\' }, 2);
+            string[] split = path.Split(new char[] {'\\'}, 2);
             int cellIndex = FindSubKeyCell(split[0]);
 
             if (cellIndex < 0)
@@ -597,7 +598,7 @@ namespace DiscUtils.Registry
                 throw new ArgumentException("Invalid SubKey", nameof(subkey));
             }
 
-            string[] split = subkey.Split(new char[] { '\\' }, 2);
+            string[] split = subkey.Split(new char[] {'\\'}, 2);
 
             int subkeyCellIndex = FindSubKeyCell(split[0]);
             if (subkeyCellIndex < 0)
@@ -663,11 +664,11 @@ namespace DiscUtils.Registry
 
             if (_cell.NumValues != 0)
             {
-                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
 
                 for (int i = 0; i < _cell.NumValues; ++i)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
                     ValueCell cell = _hive.GetCell<ValueCell>(valueIndex);
                     if (string.Compare(cell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -681,7 +682,7 @@ namespace DiscUtils.Registry
 
         private RegistryValue AddRegistryValue(string name)
         {
-            byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
+            byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
             if (valueList == null)
             {
                 valueList = new byte[0];
@@ -690,7 +691,7 @@ namespace DiscUtils.Registry
             int insertIdx = 0;
             while (insertIdx < _cell.NumValues)
             {
-                int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx * 4);
+                int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx*4);
                 ValueCell cell = _hive.GetCell<ValueCell>(valueCellIndex);
                 if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
                 {
@@ -705,11 +706,12 @@ namespace DiscUtils.Registry
             _hive.UpdateCell(valueCell, true);
 
             // Update the value list, re-allocating if necessary
-            byte[] newValueList = new byte[(_cell.NumValues * 4) + 4];
-            Array.Copy(valueList, 0, newValueList, 0, insertIdx * 4);
-            Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
-            Array.Copy(valueList, insertIdx * 4, newValueList, (insertIdx * 4) + 4, (_cell.NumValues - insertIdx) * 4);
-            if (_cell.ValueListIndex == -1 || !_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
+            byte[] newValueList = new byte[(_cell.NumValues*4) + 4];
+            Array.Copy(valueList, 0, newValueList, 0, insertIdx*4);
+            Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx*4);
+            Array.Copy(valueList, insertIdx*4, newValueList, (insertIdx*4) + 4, (_cell.NumValues - insertIdx)*4);
+            if (_cell.ValueListIndex == -1 ||
+                !_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
             {
                 int newListCellIndex = _hive.AllocateRawCell(Utilities.RoundUp(newValueList.Length, 8));
                 _hive.WriteRawCellData(newListCellIndex, newValueList, 0, newValueList.Length);
@@ -811,11 +813,11 @@ namespace DiscUtils.Registry
         {
             if (cell.NumValues != 0 && cell.ValueListIndex != -1)
             {
-                byte[] valueList = _hive.RawCellData(cell.ValueListIndex, cell.NumValues * 4);
+                byte[] valueList = _hive.RawCellData(cell.ValueListIndex, cell.NumValues*4);
 
                 for (int i = 0; i < cell.NumValues; ++i)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
                     _hive.FreeCell(valueIndex);
                 }
 

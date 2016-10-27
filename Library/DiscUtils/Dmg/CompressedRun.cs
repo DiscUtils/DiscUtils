@@ -39,7 +39,7 @@ namespace DiscUtils.Dmg
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Type = (RunType)Utilities.ToUInt32BigEndian(buffer, offset + 0);
+            Type = (RunType) Utilities.ToUInt32BigEndian(buffer, offset + 0);
             SectorStart = Utilities.ToInt64BigEndian(buffer, offset + 8);
             SectorCount = Utilities.ToInt64BigEndian(buffer, offset + 16);
             CompOffset = Utilities.ToInt64BigEndian(buffer, offset + 24);

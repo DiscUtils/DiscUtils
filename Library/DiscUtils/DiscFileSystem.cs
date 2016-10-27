@@ -72,10 +72,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets a friendly description of the file system type.
         /// </summary>
-        public abstract string FriendlyName
-        {
-            get;
-        }
+        public abstract string FriendlyName { get; }
 
         /// <summary>
         /// Gets a value indicating whether the file system is read-only or read-write.
@@ -479,7 +476,7 @@ namespace DiscUtils
             return null;
         }
 
-#region IDisposable Members
+        #region IDisposable Members
 
         /// <summary>
         /// Disposes of this instance, releasing all resources.
@@ -498,6 +495,6 @@ namespace DiscUtils
         {
         }
 
-#endregion
+        #endregion
     }
 }

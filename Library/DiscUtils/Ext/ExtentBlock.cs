@@ -33,7 +33,7 @@ namespace DiscUtils.Ext
 
         public int Size
         {
-            get { return 12 + (Header.MaxEntries * 12); }
+            get { return 12 + (Header.MaxEntries*12); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -50,7 +50,7 @@ namespace DiscUtils.Ext
                 Extents = new Extent[Header.Entries];
                 for (int i = 0; i < Extents.Length; ++i)
                 {
-                    Extents[i] = Utilities.ToStruct<Extent>(buffer, offset + 12 + (i * 12));
+                    Extents[i] = Utilities.ToStruct<Extent>(buffer, offset + 12 + (i*12));
                 }
             }
             else
@@ -59,11 +59,11 @@ namespace DiscUtils.Ext
                 Index = new ExtentIndex[Header.Entries];
                 for (int i = 0; i < Index.Length; ++i)
                 {
-                    Index[i] = Utilities.ToStruct<ExtentIndex>(buffer, offset + 12 + (i * 12));
+                    Index[i] = Utilities.ToStruct<ExtentIndex>(buffer, offset + 12 + (i*12));
                 }
             }
 
-            return 12 + (Header.MaxEntries * 12);
+            return 12 + (Header.MaxEntries*12);
         }
 
         public void WriteTo(byte[] buffer, int offset)

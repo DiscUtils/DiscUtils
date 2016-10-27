@@ -82,7 +82,7 @@ namespace DiscUtils.SquashFs
             get
             {
                 UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(_record.Type);
-                return Utilities.FileAttributesFromUnixFileType(fileType); 
+                return Utilities.FileAttributesFromUnixFileType(fileType);
             }
         }
 

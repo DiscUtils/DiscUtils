@@ -106,7 +106,7 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            TagIdentifier = (TagIdentifier)Utilities.ToUInt16LittleEndian(buffer, offset);
+            TagIdentifier = (TagIdentifier) Utilities.ToUInt16LittleEndian(buffer, offset);
             DescriptorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
             TagChecksum = buffer[offset + 4];
             TagSerialNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 6);

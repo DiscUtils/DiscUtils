@@ -63,7 +63,7 @@ namespace DiscUtils.Nfs
 
             XdrDataReader reader = new XdrDataReader(new MemoryStream(buffer));
             RpcMessageHeader header = new RpcMessageHeader(reader);
-            return new RpcReply() { Header = header, BodyReader = reader };
+            return new RpcReply() {Header = header, BodyReader = reader};
         }
 
         protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, uint procedure)
@@ -71,16 +71,16 @@ namespace DiscUtils.Nfs
             XdrDataWriter writer = new XdrDataWriter(ms);
 
             writer.Write(_client.NextTransactionId());
-            writer.Write((int)RpcMessageType.Call);
+            writer.Write((int) RpcMessageType.Call);
 
             RpcCallHeader hdr = new RpcCallHeader();
             hdr.RpcVersion = RpcVersion;
-            hdr.Program = (uint)Identifier;
-            hdr.Version = (uint)Version;
+            hdr.Program = (uint) Identifier;
+            hdr.Version = (uint) Version;
             hdr.Proc = procedure;
             hdr.Credentials = new RpcAuthentication(credentials ?? new RpcNullCredentials());
             hdr.Verifier = RpcAuthentication.Null();
-            hdr.Write(writer); 
+            hdr.Write(writer);
 
             return writer;
         }

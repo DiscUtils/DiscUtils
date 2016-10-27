@@ -72,10 +72,7 @@ namespace DiscUtils.Nfs
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get
-            {
-                return new StreamExtent[] { new StreamExtent(0, Length) };
-            }
+            get { return new StreamExtent[] {new StreamExtent(0, Length)}; }
         }
 
         public override void Flush()
@@ -84,7 +81,7 @@ namespace DiscUtils.Nfs
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int numToRead = (int)Math.Min((long)_client.FileSystemInfo.ReadMaxBytes, count);
+            int numToRead = (int) Math.Min((long) _client.FileSystemInfo.ReadMaxBytes, count);
             Nfs3ReadResult readResult = _client.Read(_handle, _position, numToRead);
 
             int toCopy = Math.Min(count, readResult.Count);
@@ -120,7 +117,7 @@ namespace DiscUtils.Nfs
         {
             if (CanWrite)
             {
-                _client.SetAttributes(_handle, new Nfs3SetAttributes() { SetSize = true, Size = value });
+                _client.SetAttributes(_handle, new Nfs3SetAttributes() {SetSize = true, Size = value});
                 _length = value;
             }
             else
@@ -135,7 +132,7 @@ namespace DiscUtils.Nfs
 
             while (totalWritten < count)
             {
-                int numToWrite = (int)Math.Min(_client.FileSystemInfo.WriteMaxBytes, (uint)(count - totalWritten));
+                int numToWrite = (int) Math.Min(_client.FileSystemInfo.WriteMaxBytes, (uint) (count - totalWritten));
 
                 int numWritten = _client.Write(_handle, _position, buffer, offset + totalWritten, numToWrite);
 

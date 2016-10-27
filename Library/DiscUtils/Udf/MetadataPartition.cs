@@ -30,13 +30,14 @@ namespace DiscUtils.Udf
         private MetadataPartitionMap _partitionMap;
         private File _metadataFile;
 
-        public MetadataPartition(UdfContext context, LogicalVolumeDescriptor volumeDescriptor, MetadataPartitionMap partitionMap)
+        public MetadataPartition(UdfContext context, LogicalVolumeDescriptor volumeDescriptor,
+            MetadataPartitionMap partitionMap)
             : base(context, volumeDescriptor)
         {
             _partitionMap = partitionMap;
 
             PhysicalPartition physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
-            long fileEntryPos = partitionMap.MetadataFileLocation * (long)volumeDescriptor.LogicalBlockSize;
+            long fileEntryPos = partitionMap.MetadataFileLocation*(long) volumeDescriptor.LogicalBlockSize;
 
             byte[] entryData = Utilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
             if (!DescriptorTag.IsValid(entryData, 0))

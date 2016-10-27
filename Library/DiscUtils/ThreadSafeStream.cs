@@ -165,15 +165,9 @@ namespace DiscUtils
         /// </summary>
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
-            set
-            {
-                _position = value;
-            }
+            set { _position = value; }
         }
 
         private SparseStream Wrapped

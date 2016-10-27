@@ -45,7 +45,7 @@ namespace DiscUtils.LogicalDiskManager
             Id = ReadVarULong(buffer, ref pos);
             Name = ReadVarString(buffer, ref pos);
             StatusString = ReadVarString(buffer, ref pos);
-            MergeType = (ExtentMergeType)ReadByte(buffer, ref pos);
+            MergeType = (ExtentMergeType) ReadByte(buffer, ref pos);
             Unknown1 = ReadUInt(buffer, ref pos); // Zero
             NumExtents = ReadVarULong(buffer, ref pos);
             Unknown2 = ReadUInt(buffer, ref pos);

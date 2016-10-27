@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs
 
         public int BytesPerCluster
         {
-            get { return ((int)BytesPerSector) * ((int)SectorsPerCluster); }
+            get { return ((int) BytesPerSector)*((int) SectorsPerCluster); }
         }
 
         public void Dump(TextWriter writer, string linePrefix)
@@ -77,7 +77,8 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(linePrefix + "                # FATs: " + NumFats);
             writer.WriteLine(linePrefix + "    # FAT Root Entries: " + FatRootEntriesCount);
             writer.WriteLine(linePrefix + "   Total Sectors (16b): " + TotalSectors16);
-            writer.WriteLine(linePrefix + "                 Media: " + Media.ToString("X", CultureInfo.InvariantCulture) + "h");
+            writer.WriteLine(linePrefix + "                 Media: " + Media.ToString("X", CultureInfo.InvariantCulture) +
+                             "h");
             writer.WriteLine(linePrefix + "        FAT size (16b): " + FatSize16);
             writer.WriteLine(linePrefix + "     Sectors per Track: " + SectorsPerTrack);
             writer.WriteLine(linePrefix + "               # Heads: " + NumHeads);
@@ -92,20 +93,21 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(linePrefix + "  Volume Serial Number: " + VolumeSerialNumber);
         }
 
-        internal static BiosParameterBlock Initialized(Geometry diskGeometry, int clusterSize, uint partitionStartLba, long partitionSizeLba, int mftRecordSize, int indexBufferSize)
+        internal static BiosParameterBlock Initialized(Geometry diskGeometry, int clusterSize, uint partitionStartLba,
+            long partitionSizeLba, int mftRecordSize, int indexBufferSize)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
             bpb.OemId = "NTFS    ";
             bpb.BytesPerSector = Sizes.Sector;
-            bpb.SectorsPerCluster = (byte)(clusterSize / bpb.BytesPerSector);
+            bpb.SectorsPerCluster = (byte) (clusterSize/bpb.BytesPerSector);
             bpb.ReservedSectors = 0;
             bpb.NumFats = 0;
             bpb.FatRootEntriesCount = 0;
             bpb.TotalSectors16 = 0;
             bpb.Media = 0xF8;
             bpb.FatSize16 = 0;
-            bpb.SectorsPerTrack = (ushort)diskGeometry.SectorsPerTrack;
-            bpb.NumHeads = (ushort)diskGeometry.HeadsPerCylinder;
+            bpb.SectorsPerTrack = (ushort) diskGeometry.SectorsPerTrack;
+            bpb.NumHeads = (ushort) diskGeometry.HeadsPerCylinder;
             bpb.HiddenSectors = partitionStartLba;
             bpb.TotalSectors32 = 0;
             bpb.BiosDriveNumber = 0x80;
@@ -181,11 +183,11 @@ namespace DiscUtils.Ntfs
         {
             if ((rawSize & 0x80) != 0)
             {
-                return 1 << (-(sbyte)rawSize);
+                return 1 << (-(sbyte) rawSize);
             }
             else
             {
-                return rawSize * SectorsPerCluster * BytesPerSector;
+                return rawSize*SectorsPerCluster*BytesPerSector;
             }
         }
 
@@ -201,7 +203,7 @@ namespace DiscUtils.Ntfs
         {
             if (size >= BytesPerCluster)
             {
-                return (byte)(size / BytesPerCluster);
+                return (byte) (size/BytesPerCluster);
             }
             else
             {
@@ -212,7 +214,7 @@ namespace DiscUtils.Ntfs
                     val++;
                 }
 
-                return (byte)-val;
+                return (byte) -val;
             }
         }
     }

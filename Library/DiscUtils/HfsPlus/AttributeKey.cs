@@ -97,6 +97,5 @@ namespace DiscUtils.HfsPlus
         {
             return _name + " (" + _fileId + ")";
         }
-
     }
 }

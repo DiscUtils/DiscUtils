@@ -66,7 +66,9 @@ namespace DiscUtils.Vmdk
             _path = path;
             FileLocator fileLocator = new DiscFileLocator(fileSystem, Utilities.GetDirectoryFromPath(path));
             _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(fileLocator, Utilities.GetFileFromPath(path), access), Ownership.Dispose));
+            _files.Add(
+                new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(
+                    new DiskImageFile(fileLocator, Utilities.GetFileFromPath(path), access), Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -84,7 +86,8 @@ namespace DiscUtils.Vmdk
             }
 
             _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(stream, ownsStream),
+                Ownership.Dispose));
         }
 
         internal Disk(DiskImageFile file, Ownership ownsStream)
@@ -98,7 +101,8 @@ namespace DiscUtils.Vmdk
         {
             _path = path;
             _files = new List<DiscUtils.Tuple<VirtualDiskLayer, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(layerLocator, path, access), Ownership.Dispose));
+            _files.Add(new DiscUtils.Tuple<VirtualDiskLayer, Ownership>(new DiskImageFile(layerLocator, path, access),
+                Ownership.Dispose));
             ResolveFileChain();
         }
 
@@ -172,7 +176,7 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                DiskImageFile file = (DiskImageFile)_files[_files.Count - 1].First;
+                DiskImageFile file = (DiskImageFile) _files[_files.Count - 1].First;
 
                 VirtualDiskParameters diskParams = new VirtualDiskParameters()
                 {
@@ -180,7 +184,10 @@ namespace DiscUtils.Vmdk
                     Capacity = Capacity,
                     Geometry = Geometry,
                     BiosGeometry = BiosGeometry,
-                    AdapterType = file.AdapterType == DiskAdapterType.Ide ? GenericDiskAdapterType.Ide : GenericDiskAdapterType.Scsi
+                    AdapterType =
+                        file.AdapterType == DiskAdapterType.Ide
+                            ? GenericDiskAdapterType.Ide
+                            : GenericDiskAdapterType.Scsi
                 };
 
                 diskParams.ExtendedParameters[ExtendedParameterKeyAdapterType] = file.AdapterType.ToString();
@@ -211,7 +218,7 @@ namespace DiscUtils.Vmdk
         /// BIOS geometry is preserved in the disk file.</remarks>
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
-            get { return DiskFactory.MakeDiskTypeInfo(((DiskImageFile)_files[_files.Count - 1].First).CreateType); }
+            get { return DiskFactory.MakeDiskTypeInfo(((DiskImageFile) _files[_files.Count - 1].First).CreateType); }
         }
 
         /// <summary>
@@ -223,7 +230,7 @@ namespace DiscUtils.Vmdk
             {
                 foreach (var file in _files)
                 {
-                    yield return (DiskImageFile)file.First;
+                    yield return (DiskImageFile) file.First;
                 }
             }
         }
@@ -299,7 +306,8 @@ namespace DiscUtils.Vmdk
         /// <param name="type">The type of virtual disk to create.</param>
         /// <param name="adapterType">The type of virtual disk adapter.</param>
         /// <returns>The newly created disk image.</returns>
-        public static Disk Initialize(string path, long capacity, Geometry geometry, DiskCreateType type, DiskAdapterType adapterType)
+        public static Disk Initialize(string path, long capacity, Geometry geometry, DiskCreateType type,
+            DiskAdapterType adapterType)
         {
             return new Disk(DiskImageFile.Initialize(path, capacity, geometry, type, adapterType), Ownership.Dispose);
         }
@@ -313,7 +321,8 @@ namespace DiscUtils.Vmdk
         /// <param name="type">The type of virtual disk to create.</param>
         /// <param name="adapterType">The type of virtual disk adapter.</param>
         /// <returns>The newly created disk image.</returns>
-        public static Disk Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type, DiskAdapterType adapterType)
+        public static Disk Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type,
+            DiskAdapterType adapterType)
         {
             return new Disk(DiskImageFile.Initialize(fileSystem, path, capacity, type, adapterType), Ownership.Dispose);
         }
@@ -338,7 +347,8 @@ namespace DiscUtils.Vmdk
         /// <param name="type">The type of disk to create.</param>
         /// <param name="parentPath">The path to the parent disk.</param>
         /// <returns>The new disk.</returns>
-        public static Disk InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type, string parentPath)
+        public static Disk InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type,
+            string parentPath)
         {
             return new Disk(DiskImageFile.InitializeDifferencing(fileSystem, path, type, parentPath), Ownership.Dispose);
         }
@@ -362,7 +372,8 @@ namespace DiscUtils.Vmdk
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
             var firstLayer = _files[0].First;
-            return InitializeDifferencing(path, DiffDiskCreateType(firstLayer), firstLayer.RelativeFileLocator.GetFullPath(_path));
+            return InitializeDifferencing(path, DiffDiskCreateType(firstLayer),
+                firstLayer.RelativeFileLocator.GetFullPath(_path));
         }
 
         internal static Disk Initialize(FileLocator fileLocator, string path, DiskParameters parameters)

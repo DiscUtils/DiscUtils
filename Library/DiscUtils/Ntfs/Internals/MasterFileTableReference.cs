@@ -88,7 +88,7 @@ namespace DiscUtils.Ntfs.Internals
                 return false;
             }
 
-            return _ref == ((MasterFileTableReference)obj)._ref;
+            return _ref == ((MasterFileTableReference) obj)._ref;
         }
 
         /// <summary>

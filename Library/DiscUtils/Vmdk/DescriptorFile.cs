@@ -46,7 +46,7 @@ namespace DiscUtils.Vmdk
         private const string DiskDbHardwareVersion = "ddb.virtualHWVersion";
         private const string DiskDbUuid = "ddb.uuid";
 
-        private const long MaxSize = 20 * Sizes.OneKiB;
+        private const long MaxSize = 20*Sizes.OneKiB;
 
         private List<DescriptorFileEntry> _header;
         private List<ExtentDescriptor> _descriptors;
@@ -76,13 +76,24 @@ namespace DiscUtils.Vmdk
         public uint ContentId
         {
             get { return uint.Parse(GetHeader(HeaderContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
-            set { SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture), DescriptorFileEntryType.Plain); }
+            set
+            {
+                SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture),
+                    DescriptorFileEntryType.Plain);
+            }
         }
 
         public uint ParentContentId
         {
-            get { return uint.Parse(GetHeader(HeaderParentContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
-            set { SetHeader(HeaderParentContentId, value.ToString("x8", CultureInfo.InvariantCulture), DescriptorFileEntryType.Plain); }
+            get
+            {
+                return uint.Parse(GetHeader(HeaderParentContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+            set
+            {
+                SetHeader(HeaderParentContentId, value.ToString("x8", CultureInfo.InvariantCulture),
+                    DescriptorFileEntryType.Plain);
+            }
         }
 
         public DiskCreateType CreateType
@@ -109,7 +120,8 @@ namespace DiscUtils.Vmdk
                 string cylStr = GetDiskDatabase(DiskDbCylinders);
                 string headsStr = GetDiskDatabase(DiskDbHeads);
                 string sectorsStr = GetDiskDatabase(DiskDbSectors);
-                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) && !string.IsNullOrEmpty(sectorsStr))
+                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) &&
+                    !string.IsNullOrEmpty(sectorsStr))
                 {
                     return new Geometry(
                         int.Parse(cylStr, CultureInfo.InvariantCulture),
@@ -135,7 +147,8 @@ namespace DiscUtils.Vmdk
                 string cylStr = GetDiskDatabase(DiskDbBiosCylinders);
                 string headsStr = GetDiskDatabase(DiskDbBiosHeads);
                 string sectorsStr = GetDiskDatabase(DiskDbBiosSectors);
-                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) && !string.IsNullOrEmpty(sectorsStr))
+                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) &&
+                    !string.IsNullOrEmpty(sectorsStr))
                 {
                     return new Geometry(
                         int.Parse(cylStr, CultureInfo.InvariantCulture),
@@ -214,7 +227,8 @@ namespace DiscUtils.Vmdk
                 case "legacyESX":
                     return DiskAdapterType.LegacyEsx;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -231,7 +245,8 @@ namespace DiscUtils.Vmdk
                 case DiskAdapterType.LegacyEsx:
                     return "legacyESX";
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -264,7 +279,8 @@ namespace DiscUtils.Vmdk
                 case "streamOptimized":
                     return DiskCreateType.StreamOptimized;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -297,7 +313,8 @@ namespace DiscUtils.Vmdk
                 case DiskCreateType.StreamOptimized:
                     return "streamOptimized";
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
             }
         }
 
@@ -400,7 +417,8 @@ namespace DiscUtils.Vmdk
         {
             if (source.Length - source.Position > MaxSize)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Invalid VMDK descriptor file, more than {0} bytes in length", MaxSize));
+                throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                    "Invalid VMDK descriptor file, more than {0} bytes in length", MaxSize));
             }
 
             StreamReader reader = new StreamReader(source);

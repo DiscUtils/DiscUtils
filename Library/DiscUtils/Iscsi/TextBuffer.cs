@@ -36,10 +36,7 @@ namespace DiscUtils.Iscsi
 
         public IEnumerable<KeyValuePair<string, string>> Lines
         {
-            get
-            {
-                return _records;
-            }
+            get { return _records; }
         }
 
         public int Size
@@ -142,7 +139,7 @@ namespace DiscUtils.Iscsi
             foreach (var entry in _records)
             {
                 i += Encoding.ASCII.GetBytes(entry.Key, 0, entry.Key.Length, buffer, i);
-                buffer[i++] = (byte)'=';
+                buffer[i++] = (byte) '=';
                 i += Encoding.ASCII.GetBytes(entry.Value, 0, entry.Value.Length, buffer, i);
                 buffer[i++] = 0;
             }

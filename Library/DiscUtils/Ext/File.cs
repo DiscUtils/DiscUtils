@@ -42,54 +42,30 @@ namespace DiscUtils.Ext
 
         public DateTime LastAccessTimeUtc
         {
-            get
-            {
-                return Utilities.DateTimeFromUnix(_inode.AccessTime);
-            }
+            get { return Utilities.DateTimeFromUnix(_inode.AccessTime); }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set { throw new NotImplementedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get
-            {
-                return Utilities.DateTimeFromUnix(_inode.ModificationTime);
-            }
+            get { return Utilities.DateTimeFromUnix(_inode.ModificationTime); }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set { throw new NotImplementedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
-            get
-            {
-                return Utilities.DateTimeFromUnix(_inode.CreationTime);
-            }
+            get { return Utilities.DateTimeFromUnix(_inode.CreationTime); }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set { throw new NotImplementedException(); }
         }
 
         public FileAttributes FileAttributes
         {
-            get
-            {
-                return FromMode(_inode.Mode);
-            }
+            get { return FromMode(_inode.Mode); }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
+            set { throw new NotImplementedException(); }
         }
 
         public long FileLength
@@ -127,7 +103,7 @@ namespace DiscUtils.Ext
 
         private static FileAttributes FromMode(uint mode)
         {
-            return Utilities.FileAttributesFromUnixFileType((UnixFileType)((mode >> 12) & 0xF));
+            return Utilities.FileAttributesFromUnixFileType((UnixFileType) ((mode >> 12) & 0xF));
         }
     }
 }

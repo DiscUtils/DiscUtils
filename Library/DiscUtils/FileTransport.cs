@@ -44,7 +44,8 @@ namespace DiscUtils
 
             if (!Directory.Exists(Path.GetDirectoryName(_path)))
             {
-                throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such file '{0}'", uri.OriginalString), _path);
+                throw new FileNotFoundException(
+                    string.Format(CultureInfo.InvariantCulture, "No such file '{0}'", uri.OriginalString), _path);
             }
         }
 

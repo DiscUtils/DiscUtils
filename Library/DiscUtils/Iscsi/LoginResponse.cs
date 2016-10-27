@@ -57,7 +57,8 @@ namespace DiscUtils.Iscsi
 
             if (_headerSegment.OpCode != OpCode.LoginResponse)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LoginResponse + " was " + _headerSegment.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LoginResponse +
+                                                   " was " + _headerSegment.OpCode);
             }
 
             UnpackState(headerData[headerOffset + 1]);
@@ -69,7 +70,7 @@ namespace DiscUtils.Iscsi
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
             StatusClass = headerData[headerOffset + 36];
-            StatusCode = (LoginStatusCode)Utilities.ToUInt16BigEndian(headerData, headerOffset + 36);
+            StatusCode = (LoginStatusCode) Utilities.ToUInt16BigEndian(headerData, headerOffset + 36);
 
             TextData = bodyData;
         }
@@ -78,8 +79,8 @@ namespace DiscUtils.Iscsi
         {
             Transit = (value & 0x80) != 0;
             Continue = (value & 0x40) != 0;
-            CurrentStage = (LoginStages)((value >> 2) & 0x3);
-            NextStage = (LoginStages)(value & 0x3);
+            CurrentStage = (LoginStages) ((value >> 2) & 0x3);
+            NextStage = (LoginStages) (value & 0x3);
         }
     }
 }

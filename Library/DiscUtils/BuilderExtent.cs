@@ -42,10 +42,7 @@ namespace DiscUtils
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
         public virtual IEnumerable<StreamExtent> StreamExtents
         {
-            get
-            {
-                return new StreamExtent[] { new StreamExtent(Start, Length) };
-            }
+            get { return new StreamExtent[] {new StreamExtent(Start, Length)}; }
         }
 
         internal long Start

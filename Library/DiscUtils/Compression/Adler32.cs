@@ -45,7 +45,7 @@ namespace DiscUtils.Compression
         /// </summary>
         public int Value
         {
-            get { return (int)(_b << 16 | _a); }
+            get { return (int) (_b << 16 | _a); }
         }
 
         /// <summary>

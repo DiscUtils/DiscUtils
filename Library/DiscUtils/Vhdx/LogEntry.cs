@@ -28,7 +28,7 @@ namespace DiscUtils.Vhdx
 
     internal sealed class LogEntry
     {
-        public const int LogSectorSize = (int)(4 * Sizes.OneKiB);
+        public const int LogSectorSize = (int) (4*Sizes.OneKiB);
 
         private LogEntryHeader _header;
         private List<Descriptor> _descriptors = new List<Descriptor>();
@@ -115,19 +115,20 @@ namespace DiscUtils.Vhdx
 
             Utilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
 
-            Utilities.WriteBytesLittleEndian((int)0, logEntryBuffer, 4);
-            if (header.Checksum != Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int)header.EntryLength))
+            Utilities.WriteBytesLittleEndian((int) 0, logEntryBuffer, 4);
+            if (header.Checksum !=
+                Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int) header.EntryLength))
             {
                 entry = null;
                 return false;
             }
 
-            int dataPos = Utilities.RoundUp(((int)header.DescriptorCount * 32) + 64, LogSectorSize);
+            int dataPos = Utilities.RoundUp(((int) header.DescriptorCount*32) + 64, LogSectorSize);
 
             List<Descriptor> descriptors = new List<Descriptor>();
             for (int i = 0; i < header.DescriptorCount; ++i)
             {
-                int offset = (i * 32) + 64;
+                int offset = (i*32) + 64;
                 Descriptor descriptor;
 
                 uint descriptorSig = Utilities.ToUInt32LittleEndian(logEntryBuffer, offset);
@@ -247,9 +248,11 @@ namespace DiscUtils.Vhdx
             public override bool IsValid(ulong sequenceNumber)
             {
                 return SequenceNumber == sequenceNumber
-                    && _offset + LogSectorSize <= _data.Length
-                    && Utilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) == (sequenceNumber & 0xFFFFFFFF)
-                    && Utilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
+                       && _offset + LogSectorSize <= _data.Length
+                       &&
+                       Utilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
+                       (sequenceNumber & 0xFFFFFFFF)
+                       && Utilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
             }
         }
     }

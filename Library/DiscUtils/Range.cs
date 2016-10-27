@@ -84,7 +84,8 @@ namespace DiscUtils
                     T rangeStart = Numbers<T>.RoundDown(range.Offset, chunkSize);
                     T rangeNext = Numbers<T>.RoundUp(Numbers<T>.Add(range.Offset, range.Count), chunkSize);
 
-                    if (chunkStart.HasValue && Numbers<T>.GreaterThan(rangeStart, Numbers<T>.Add(chunkStart.Value, chunkLength)))
+                    if (chunkStart.HasValue &&
+                        Numbers<T>.GreaterThan(rangeStart, Numbers<T>.Add(chunkStart.Value, chunkLength)))
                     {
                         // This extent is non-contiguous (in terms of blocks), so write out the last range and start new
                         yield return new Range<T, T>(chunkStart.Value, chunkLength);

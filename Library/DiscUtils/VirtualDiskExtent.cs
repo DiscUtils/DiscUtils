@@ -37,26 +37,17 @@ namespace DiscUtils
         /// <summary>
         /// Gets a value indicating whether the extent only stores meaningful sectors.
         /// </summary>
-        public abstract bool IsSparse
-        {
-            get;
-        }
+        public abstract bool IsSparse { get; }
 
         /// <summary>
         /// Gets the capacity of the extent (in bytes).
         /// </summary>
-        public abstract long Capacity
-        {
-            get;
-        }
+        public abstract long Capacity { get; }
 
         /// <summary>
         /// Gets the size of the extent (in bytes) on underlying storage.
         /// </summary>
-        public abstract long StoredSize
-        {
-            get;
-        }
+        public abstract long StoredSize { get; }
 
         /// <summary>
         /// Gets the content of this extent.

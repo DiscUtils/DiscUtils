@@ -83,10 +83,7 @@ namespace DiscUtils
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
             set
             {
@@ -112,14 +109,14 @@ namespace DiscUtils
                 }
                 else
                 {
-                    return new StreamExtent[] { new StreamExtent(0, _length) };
+                    return new StreamExtent[] {new StreamExtent(0, _length)};
                 }
             }
         }
 
         public override IEnumerable<StreamExtent> MapContent(long start, long length)
         {
-            return new StreamExtent[] { new StreamExtent(start + _first, length) };
+            return new StreamExtent[] {new StreamExtent(start + _first, length)};
         }
 
         public override void Flush()
@@ -140,7 +137,8 @@ namespace DiscUtils
             }
 
             _parent.Position = _first + _position;
-            int numRead = _parent.Read(buffer, offset, (int)Math.Min(count, Math.Min(_length - _position, int.MaxValue)));
+            int numRead = _parent.Read(buffer, offset,
+                (int) Math.Min(count, Math.Min(_length - _position, int.MaxValue)));
             _position += numRead;
             return numRead;
         }

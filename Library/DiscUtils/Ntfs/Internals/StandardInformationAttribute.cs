@@ -81,7 +81,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public NtfsFileAttributes FileAttributes
         {
-            get { return (NtfsFileAttributes)_si.FileAttributes; }
+            get { return (NtfsFileAttributes) _si.FileAttributes; }
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public long QuotaCharged
         {
-            get { return (long)_si.QuotaCharged; }
+            get { return (long) _si.QuotaCharged; }
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public long JournalSequenceNumber
         {
-            get { return (long)_si.UpdateSequenceNumber; }
+            get { return (long) _si.UpdateSequenceNumber; }
         }
     }
 }

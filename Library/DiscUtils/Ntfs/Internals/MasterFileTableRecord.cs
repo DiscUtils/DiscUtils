@@ -36,7 +36,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public long JournalSequenceNumber
         {
-            get { return (long)_fileRecord.LogFileSequenceNumber; }
+            get { return (long) _fileRecord.LogFileSequenceNumber; }
         }
 
         public int SequenceNumber
@@ -51,7 +51,7 @@ namespace DiscUtils.Ntfs.Internals
 
         public MasterFileTableRecordFlags Flags
         {
-            get { return (MasterFileTableRecordFlags)_fileRecord.Flags; }
+            get { return (MasterFileTableRecordFlags) _fileRecord.Flags; }
         }
 
         public MasterFileTableReference BaseRecordReference

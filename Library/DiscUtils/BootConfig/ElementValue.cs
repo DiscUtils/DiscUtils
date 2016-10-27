@@ -79,7 +79,7 @@ namespace DiscUtils.BootConfig
         /// <returns>The value as an object.</returns>
         public static ElementValue ForInteger(long value)
         {
-            return new IntegerElementValue((ulong)value);
+            return new IntegerElementValue((ulong) value);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace DiscUtils.BootConfig
             ulong[] ulValues = new ulong[values.Length];
             for (int i = 0; i < values.Length; ++i)
             {
-                ulValues[i] = (ulong)values[i];
+                ulValues[i] = (ulong) values[i];
             }
 
             return new IntegerListElementValue(ulValues);

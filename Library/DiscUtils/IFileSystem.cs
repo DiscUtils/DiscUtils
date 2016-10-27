@@ -39,10 +39,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the root directory of the file system.
         /// </summary>
-        DiscDirectoryInfo Root
-        {
-            get;
-        }
+        DiscDirectoryInfo Root { get; }
 
         /// <summary>
         /// Gets a value indicating whether the file system is thread-safe.

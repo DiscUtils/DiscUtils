@@ -76,13 +76,16 @@ namespace DiscUtils.Vhd
                 byte[] footerSector = new byte[Sizes.Sector];
                 footer.ToBytes(footerSector, 0);
 
-                SparseStream footerStream = SparseStream.FromStream(new MemoryStream(footerSector, false), Ownership.None);
+                SparseStream footerStream = SparseStream.FromStream(new MemoryStream(footerSector, false),
+                    Ownership.None);
                 Stream imageStream = new ConcatStream(Ownership.None, Content, footerStream);
-                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd", new PassthroughStreamBuilder(imageStream)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd",
+                    new PassthroughStreamBuilder(imageStream)));
             }
             else if (_diskType == FileType.Dynamic)
             {
-                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd",  new DynamicDiskBuilder(Content, footer, (uint)Sizes.OneMiB * 2)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd",
+                    new DynamicDiskBuilder(Content, footer, (uint) Sizes.OneMiB*2)));
             }
             else
             {

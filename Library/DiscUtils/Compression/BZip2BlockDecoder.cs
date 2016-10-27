@@ -52,12 +52,13 @@ namespace DiscUtils.Compression
             }
 
             bool rand = bitstream.Read(1) != 0;
-            int origPtr = (int)bitstream.Read(24);
+            int origPtr = (int) bitstream.Read(24);
 
             int thisBlockSize = ReadBuffer(bitstream, outputBuffer, outputBufferOffset);
 
             _inverseBurrowsWheeler.OriginalIndex = origPtr;
-            _inverseBurrowsWheeler.Process(outputBuffer, outputBufferOffset, thisBlockSize, outputBuffer, outputBufferOffset);
+            _inverseBurrowsWheeler.Process(outputBuffer, outputBufferOffset, thisBlockSize, outputBuffer,
+                outputBufferOffset);
 
             if (rand)
             {
@@ -81,11 +82,11 @@ namespace DiscUtils.Compression
 
             for (int i = 0; i < 256; ++i)
             {
-                if (inUseGroups[i / 16])
+                if (inUseGroups[i/16])
                 {
                     if (bitstream.Read(1) != 0)
                     {
-                        moveFrontTransform.Set(numInUse, (byte)i);
+                        moveFrontTransform.Set(numInUse, (byte) i);
                         numInUse++;
                     }
                 }
@@ -125,7 +126,7 @@ namespace DiscUtils.Compression
                 if (symbol <= numInUse)
                 {
                     // Single byte
-                    byte b = moveFrontTransform.GetAndMove((int)symbol - 1);
+                    byte b = moveFrontTransform.GetAndMove((int) symbol - 1);
                     buffer[offset + readBytes] = b;
                     ++readBytes;
                 }

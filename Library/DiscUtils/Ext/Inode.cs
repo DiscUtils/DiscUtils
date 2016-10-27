@@ -56,7 +56,7 @@ namespace DiscUtils.Ext
 
         public UnixFileType FileType
         {
-            get { return (UnixFileType)((Mode >> 12) & 0xff); }
+            get { return (UnixFileType) ((Mode >> 12) & 0xff); }
         }
 
         public int Size
@@ -76,7 +76,7 @@ namespace DiscUtils.Ext
             GroupIdLow = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
             LinksCount = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
             BlocksCount = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
-            Flags = (InodeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 32);
+            Flags = (InodeFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 32);
 
             FastSymlink = null;
             Extents = null;
@@ -95,7 +95,7 @@ namespace DiscUtils.Ext
                 DirectBlocks = new uint[12];
                 for (int i = 0; i < 12; ++i)
                 {
-                    DirectBlocks[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 40 + (i * 4));
+                    DirectBlocks[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 40 + (i*4));
                 }
 
                 IndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 88);

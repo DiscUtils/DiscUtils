@@ -41,7 +41,9 @@ namespace DiscUtils.Iso9660
             uint rootDirDataLength,
             DateTime buildTime,
             Encoding enc)
-            : base(VolumeDescriptorType.Supplementary, 1, volumeSpaceSize, pathTableSize, typeLPathTableLocation, typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, enc)
+            : base(
+                VolumeDescriptorType.Supplementary, 1, volumeSpaceSize, pathTableSize, typeLPathTableLocation,
+                typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, enc)
         {
         }
 
@@ -67,7 +69,8 @@ namespace DiscUtils.Iso9660
             IsoUtilities.WriteA1Chars(buffer, offset + 574, 129, ApplicationIdentifier, CharacterEncoding);
             IsoUtilities.WriteD1Chars(buffer, offset + 702, 37, CopyrightFileIdentifier, CharacterEncoding); // FIXME!!
             IsoUtilities.WriteD1Chars(buffer, offset + 739, 37, AbstractFileIdentifier, CharacterEncoding); // FIXME!!
-            IsoUtilities.WriteD1Chars(buffer, offset + 776, 37, BibliographicFileIdentifier, CharacterEncoding); // FIXME!!
+            IsoUtilities.WriteD1Chars(buffer, offset + 776, 37, BibliographicFileIdentifier, CharacterEncoding);
+                // FIXME!!
             IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 813, CreationDateAndTime);
             IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 830, ModificationDateAndTime);
             IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 847, ExpirationDateAndTime);

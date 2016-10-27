@@ -52,15 +52,15 @@ namespace DiscUtils.Ntfs
 
         public bool IsPresent(long index)
         {
-            long byteIdx = index / 8;
-            int mask = 1 << (int)(index % 8);
+            long byteIdx = index/8;
+            int mask = 1 << (int) (index%8);
             return (GetByte(byteIdx) & mask) != 0;
         }
 
         public void MarkPresent(long index)
         {
-            long byteIdx = index / 8;
-            byte mask = (byte)(1 << (byte)(index % 8));
+            long byteIdx = index/8;
+            byte mask = (byte) (1 << (byte) (index%8));
 
             if (byteIdx >= _bitmap.Length)
             {
@@ -68,7 +68,7 @@ namespace DiscUtils.Ntfs
                 _bitmap.WriteByte(0);
             }
 
-            SetByte(byteIdx, (byte)(GetByte(byteIdx) | mask));
+            SetByte(byteIdx, (byte) (GetByte(byteIdx) | mask));
         }
 
         public void MarkPresentRange(long index, long count)
@@ -78,8 +78,8 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            long firstByte = index / 8;
-            long lastByte = (index + count - 1) / 8;
+            long firstByte = index/8;
+            long lastByte = (index + count - 1)/8;
 
             if (lastByte >= _bitmap.Length)
             {
@@ -96,8 +96,8 @@ namespace DiscUtils.Ntfs
 
             for (long i = index; i < index + count; ++i)
             {
-                long byteIdx = (i / 8) - firstByte;
-                byte mask = (byte)(1 << (byte)(i % 8));
+                long byteIdx = (i/8) - firstByte;
+                byte mask = (byte) (1 << (byte) (i%8));
 
                 buffer[byteIdx] |= mask;
             }
@@ -107,12 +107,12 @@ namespace DiscUtils.Ntfs
 
         public void MarkAbsent(long index)
         {
-            long byteIdx = index / 8;
-            byte mask = (byte)(1 << (byte)(index % 8));
+            long byteIdx = index/8;
+            byte mask = (byte) (1 << (byte) (index%8));
 
             if (byteIdx < _stream.Length)
             {
-                SetByte(byteIdx, (byte)(GetByte(byteIdx) & ~mask));
+                SetByte(byteIdx, (byte) (GetByte(byteIdx) & ~mask));
             }
 
             if (index < _nextAvailable)
@@ -128,8 +128,8 @@ namespace DiscUtils.Ntfs
                 return;
             }
 
-            long firstByte = index / 8;
-            long lastByte = (index + count - 1) / 8;
+            long firstByte = index/8;
+            long lastByte = (index + count - 1)/8;
             if (lastByte >= _bitmap.Length)
             {
                 _bitmap.Position = Utilities.RoundUp(lastByte + 1, 8) - 1;
@@ -145,10 +145,10 @@ namespace DiscUtils.Ntfs
 
             for (long i = index; i < index + count; ++i)
             {
-                long byteIdx = (i / 8) - firstByte;
-                byte mask = (byte)(1 << (byte)(i % 8));
+                long byteIdx = (i/8) - firstByte;
+                byte mask = (byte) (1 << (byte) (i%8));
 
-                buffer[byteIdx] &= (byte)(~mask);
+                buffer[byteIdx] &= (byte) (~mask);
             }
 
             SetBytes(firstByte, buffer);
@@ -183,7 +183,7 @@ namespace DiscUtils.Ntfs
         {
             long length = Utilities.RoundUp(Utilities.Ceil(numEntries, 8), 8);
             _stream.SetLength(length);
-            return length * 8;
+            return length*8;
         }
 
         private byte GetByte(long index)
@@ -207,7 +207,7 @@ namespace DiscUtils.Ntfs
 
         private void SetByte(long index, byte value)
         {
-            byte[] buffer = new byte[] { value };
+            byte[] buffer = new byte[] {value};
             _bitmap.Position = index;
             _bitmap.Write(buffer, 0, 1);
             _bitmap.Flush();

@@ -28,12 +28,12 @@ namespace DiscUtils.Wim
     internal enum FileFlags
     {
         Compression = 0x00000002,
-        ReadOnly    = 0x00000004,
-        Spanned     = 0x00000008,
+        ReadOnly = 0x00000004,
+        Spanned = 0x00000008,
         ResourceOnly = 0x00000010,
-        MetaDataOnly    = 0x00000020,
+        MetaDataOnly = 0x00000020,
         WriteInProgress = 0x00000040,
-        ReparsePointFix   = 0x00000080,
+        ReparsePointFix = 0x00000080,
         XpressCompression = 0x00020000,
         LzxCompression = 0x00040000
     }
@@ -60,7 +60,7 @@ namespace DiscUtils.Wim
             Tag = Utilities.BytesToString(buffer, offset, 8);
             HeaderSize = Utilities.ToUInt32LittleEndian(buffer, 8);
             Version = Utilities.ToUInt32LittleEndian(buffer, 12);
-            Flags = (FileFlags)Utilities.ToUInt32LittleEndian(buffer, 16);
+            Flags = (FileFlags) Utilities.ToUInt32LittleEndian(buffer, 16);
             CompressionSize = Utilities.ToInt32LittleEndian(buffer, 20);
             WimGuid = Utilities.ToGuidLittleEndian(buffer, 24);
             PartNumber = Utilities.ToUInt16LittleEndian(buffer, 40);

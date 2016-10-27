@@ -80,7 +80,7 @@ namespace DiscUtils.Registry
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            Flags = (RegistryKeyFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
+            Flags = (RegistryKeyFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x04));
             ParentIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
             NumSubKeys = Utilities.ToInt32LittleEndian(buffer, offset + 0x14);
@@ -103,7 +103,7 @@ namespace DiscUtils.Registry
         public override void WriteTo(byte[] buffer, int offset)
         {
             Utilities.StringToBytes("nk", buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x02);
+            Utilities.WriteBytesLittleEndian((ushort) Flags, buffer, offset + 0x02);
             Utilities.WriteBytesLittleEndian(Timestamp.ToFileTimeUtc(), buffer, offset + 0x04);
             Utilities.WriteBytesLittleEndian(ParentIndex, buffer, offset + 0x10);
             Utilities.WriteBytesLittleEndian(NumSubKeys, buffer, offset + 0x14);
@@ -113,7 +113,7 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(SecurityIndex, buffer, offset + 0x2C);
             Utilities.WriteBytesLittleEndian(ClassNameIndex, buffer, offset + 0x30);
             Utilities.WriteBytesLittleEndian(IndexInParent, buffer, offset + 0x44);
-            Utilities.WriteBytesLittleEndian((ushort)Name.Length, buffer, offset + 0x48);
+            Utilities.WriteBytesLittleEndian((ushort) Name.Length, buffer, offset + 0x48);
             Utilities.WriteBytesLittleEndian(ClassNameLength, buffer, offset + 0x4A);
             Utilities.StringToBytes(Name, buffer, offset + 0x4C, Name.Length);
         }

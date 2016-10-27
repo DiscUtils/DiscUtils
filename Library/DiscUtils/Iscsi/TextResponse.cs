@@ -41,7 +41,8 @@ namespace DiscUtils.Iscsi
 
             if (_headerSegment.OpCode != OpCode.TextResponse)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.TextResponse + " was " + _headerSegment.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.TextResponse +
+                                                   " was " + _headerSegment.OpCode);
             }
 
             Continue = (headerData[headerOffset + 1] & 0x40) != 0;

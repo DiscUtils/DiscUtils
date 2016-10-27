@@ -117,7 +117,7 @@ namespace DiscUtils.Iso9660
             if (numBytes == 1)
             {
                 chars = new char[1];
-                chars[0] = (char)buffer[offset];
+                chars[0] = (char) buffer[offset];
             }
             else
             {
@@ -168,16 +168,19 @@ namespace DiscUtils.Iso9660
             return WriteString(buffer, offset, numBytes, pad, str, enc, false);
         }
 
-        internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, string str, Encoding enc, bool canTruncate)
+        internal static int WriteString(byte[] buffer, int offset, int numBytes, bool pad, string str, Encoding enc,
+            bool canTruncate)
         {
             Encoder encoder = enc.GetEncoder();
 
-            string paddedString = pad ? str + new string(' ', numBytes) : str; // Assumption: never less than one byte per character
+            string paddedString = pad ? str + new string(' ', numBytes) : str;
+                // Assumption: never less than one byte per character
 
             int charsUsed;
             int bytesUsed;
             bool completed;
-            encoder.Convert(paddedString.ToCharArray(), 0, paddedString.Length, buffer, offset, numBytes, false, out charsUsed, out bytesUsed, out completed);
+            encoder.Convert(paddedString.ToCharArray(), 0, paddedString.Length, buffer, offset, numBytes, false,
+                out charsUsed, out bytesUsed, out completed);
 
             if (!canTruncate && charsUsed < str.Length)
             {
@@ -228,7 +231,9 @@ namespace DiscUtils.Iso9660
         {
             for (int i = 0; i < str.Length; ++i)
             {
-                if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'A' && str[i] <= 'Z') || (str[i] == '_') || (str[i] == '.') || (str[i] == ';')))
+                if (
+                    !((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'A' && str[i] <= 'Z') || (str[i] == '_') ||
+                      (str[i] == '.') || (str[i] == ';')))
                 {
                     return false;
                 }
@@ -257,7 +262,7 @@ namespace DiscUtils.Iso9660
 
         internal static string[] SplitFileName(string name)
         {
-            string[] parts = new string[] { name, string.Empty, "1" };
+            string[] parts = new string[] {name, string.Empty, "1"};
 
             if (name.Contains("."))
             {
@@ -313,7 +318,7 @@ namespace DiscUtils.Iso9660
                     data[offset + 4],
                     data[offset + 5],
                     DateTimeKind.Utc);
-                return relTime - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 6]);
+                return relTime - TimeSpan.FromMinutes(15*(sbyte) data[offset + 6]);
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -335,12 +340,12 @@ namespace DiscUtils.Iso9660
                     throw new IOException("Year is out of range");
                 }
 
-                data[offset] = (byte)(dateTime.Year - 1900);
-                data[offset + 1] = (byte)dateTime.Month;
-                data[offset + 2] = (byte)dateTime.Day;
-                data[offset + 3] = (byte)dateTime.Hour;
-                data[offset + 4] = (byte)dateTime.Minute;
-                data[offset + 5] = (byte)dateTime.Second;
+                data[offset] = (byte) (dateTime.Year - 1900);
+                data[offset + 1] = (byte) dateTime.Month;
+                data[offset + 2] = (byte) dateTime.Day;
+                data[offset + 3] = (byte) dateTime.Hour;
+                data[offset + 4] = (byte) dateTime.Minute;
+                data[offset + 5] = (byte) dateTime.Second;
                 data[offset + 6] = 0;
             }
         }
@@ -350,7 +355,7 @@ namespace DiscUtils.Iso9660
             bool allNull = true;
             for (int i = 0; i < 16; ++i)
             {
-                if (data[offset + i] != (byte)'0' && data[offset + i] != 0)
+                if (data[offset + i] != (byte) '0' && data[offset + i] != 0)
                 {
                     allNull = false;
                     break;
@@ -377,8 +382,8 @@ namespace DiscUtils.Iso9660
 
             try
             {
-                DateTime time = new DateTime(year, month, day, hour, min, sec, hundredths * 10, DateTimeKind.Utc);
-                return time - TimeSpan.FromMinutes(15 * (sbyte)data[offset + 16]);
+                DateTime time = new DateTime(year, month, day, hour, min, sec, hundredths*10, DateTimeKind.Utc);
+                return time - TimeSpan.FromMinutes(15*(sbyte) data[offset + 16]);
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -392,7 +397,7 @@ namespace DiscUtils.Iso9660
             {
                 for (int i = offset; i < offset + 16; ++i)
                 {
-                    buffer[i] = (byte)'0';
+                    buffer[i] = (byte) '0';
                 }
 
                 buffer[offset + 16] = 0;

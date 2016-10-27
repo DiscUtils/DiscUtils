@@ -54,7 +54,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public int Checksum
         {
-            get { return (int)_header.Checksum; }
+            get { return (int) _header.Checksum; }
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace DiscUtils.Vhdx
         /// </remarks>
         public long SequenceNumber
         {
-            get { return (long)_header.SequenceNumber; }
+            get { return (long) _header.SequenceNumber; }
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public long LogOffset
         {
-            get { return (long)_header.LogOffset; }
+            get { return (long) _header.LogOffset; }
         }
     }
 }

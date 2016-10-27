@@ -30,16 +30,8 @@ namespace DiscUtils.Iso9660
             UseJoliet = true;
         }
 
-        public bool UseJoliet
-        {
-            get;
-            set;
-        }
+        public bool UseJoliet { get; set; }
 
-        public string VolumeIdentifier
-        {
-            get;
-            set;
-        }
+        public string VolumeIdentifier { get; set; }
     }
 }

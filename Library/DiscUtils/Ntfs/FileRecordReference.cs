@@ -35,7 +35,8 @@ namespace DiscUtils.Ntfs
 
         public FileRecordReference(long mftIndex, ushort sequenceNumber)
         {
-            _val = (ulong)(mftIndex & 0x0000FFFFFFFFFFFFL) | ((ulong)((ulong)sequenceNumber << 48) & 0xFFFF000000000000L);
+            _val = (ulong) (mftIndex & 0x0000FFFFFFFFFFFFL) |
+                   ((ulong) ((ulong) sequenceNumber << 48) & 0xFFFF000000000000L);
         }
 
         public ulong Value
@@ -45,12 +46,12 @@ namespace DiscUtils.Ntfs
 
         public long MftIndex
         {
-            get { return (long)(_val & 0x0000FFFFFFFFFFFFL); }
+            get { return (long) (_val & 0x0000FFFFFFFFFFFFL); }
         }
 
         public ushort SequenceNumber
         {
-            get { return (ushort)((_val >> 48) & 0xFFFF); }
+            get { return (ushort) ((_val >> 48) & 0xFFFF); }
         }
 
         public int Size
@@ -91,7 +92,7 @@ namespace DiscUtils.Ntfs
                 return false;
             }
 
-            return _val == ((FileRecordReference)obj)._val;
+            return _val == ((FileRecordReference) obj)._val;
         }
 
         public override int GetHashCode()

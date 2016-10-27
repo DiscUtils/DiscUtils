@@ -50,7 +50,7 @@ namespace DiscUtils.Registry
 
         public override int Size
         {
-            get { return 0x4 + (_numElements * 0x8); }
+            get { return 0x4 + (_numElements*0x8); }
         }
 
         internal override int Count
@@ -67,11 +67,11 @@ namespace DiscUtils.Registry
             _nameHashes = new List<uint>(_numElements);
             for (int i = 0; i < _numElements; ++i)
             {
-                _subKeyIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8)));
-                _nameHashes.Add(Utilities.ToUInt32LittleEndian(buffer, offset + 0x4 + (i * 0x8) + 0x4));
+                _subKeyIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i*0x8)));
+                _nameHashes.Add(Utilities.ToUInt32LittleEndian(buffer, offset + 0x4 + (i*0x8) + 0x4));
             }
 
-            return 0x4 + (_numElements * 0x8);
+            return 0x4 + (_numElements*0x8);
         }
 
         public override void WriteTo(byte[] buffer, int offset)
@@ -80,8 +80,8 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(_numElements, buffer, offset + 0x2);
             for (int i = 0; i < _numElements; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_subKeyIndexes[i], buffer, offset + 0x4 + (i * 0x8));
-                Utilities.WriteBytesLittleEndian(_nameHashes[i], buffer, offset + 0x4 + (i * 0x8) + 0x4);
+                Utilities.WriteBytesLittleEndian(_subKeyIndexes[i], buffer, offset + 0x4 + (i*0x8));
+                Utilities.WriteBytesLittleEndian(_nameHashes[i], buffer, offset + 0x4 + (i*0x8) + 0x4);
             }
         }
 
@@ -207,7 +207,7 @@ namespace DiscUtils.Registry
                 string hashStr = name + "\0\0\0\0";
                 for (int i = 0; i < 4; ++i)
                 {
-                    hash |= (uint)((hashStr[i] & 0xFF) << (i * 8));
+                    hash |= (uint) ((hashStr[i] & 0xFF) << (i*8));
                 }
             }
 
@@ -230,7 +230,7 @@ namespace DiscUtils.Registry
             }
 
             cellIndex = _subKeyIndexes[listIndex];
-            return string.Compare(name, ((KeyNodeCell)cell).Name, StringComparison.OrdinalIgnoreCase);
+            return string.Compare(name, ((KeyNodeCell) cell).Name, StringComparison.OrdinalIgnoreCase);
         }
 
         private IEnumerable<int> Find(string name, int start)
@@ -270,7 +270,7 @@ namespace DiscUtils.Registry
 
                 for (int j = 0; j < 4; ++j)
                 {
-                    char ch = (char)((hash >> (j * 8)) & 0xFF);
+                    char ch = (char) ((hash >> (j*8)) & 0xFF);
                     if (char.ToUpperInvariant(ch) != compStr[j])
                     {
                         match = false;
@@ -304,7 +304,7 @@ namespace DiscUtils.Registry
             {
                 // TODO: Be more efficient at ruling out no-hopes by using the hash values
                 KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(x);
-                int result = string.Compare(((KeyNodeCell)cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
+                int result = string.Compare(((KeyNodeCell) cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
                 if (result == 0)
                 {
                     CellIndex = x;

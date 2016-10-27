@@ -35,10 +35,7 @@ namespace DiscUtils.SquashFs
         public uint InodeNumber;
         public int NumLinks;
 
-        public abstract int Size
-        {
-            get;
-        }
+        public abstract int Size { get; }
 
         public virtual long FileSize
         {
@@ -54,7 +51,7 @@ namespace DiscUtils.SquashFs
                 throw new IOException("Unable to read Inode type");
             }
 
-            InodeType type = (InodeType)Utilities.ToUInt16LittleEndian(typeData, 0);
+            InodeType type = (InodeType) Utilities.ToUInt16LittleEndian(typeData, 0);
             Inode inode = InstantiateType(type);
 
             byte[] inodeData = new byte[inode.Size];
@@ -73,7 +70,7 @@ namespace DiscUtils.SquashFs
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            Type = (InodeType)Utilities.ToUInt16LittleEndian(buffer, offset + 0);
+            Type = (InodeType) Utilities.ToUInt16LittleEndian(buffer, offset + 0);
             Mode = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
             UidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             GidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
@@ -84,7 +81,7 @@ namespace DiscUtils.SquashFs
 
         public virtual void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian((ushort) Type, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
             Utilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
             Utilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);

@@ -50,7 +50,7 @@ namespace DiscUtils.Archives
             {
                 FileRecord record = new FileRecord(hdr.FileName, _fileStream.Position, hdr.FileLength);
                 _files.Add(record.Name, record);
-                _fileStream.Position += ((hdr.FileLength + 511) / 512) * 512;
+                _fileStream.Position += ((hdr.FileLength + 511)/512)*512;
 
                 hdrBuf = Utilities.ReadFully(_fileStream, TarHeader.Length);
                 hdr.ReadFrom(hdrBuf, 0);

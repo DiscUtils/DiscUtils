@@ -55,8 +55,8 @@ namespace DiscUtils
 
         internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
-            int startOffset = (int)(diskOffset - Start);
-            int numBytes = (int)Math.Min(Length - startOffset, count);
+            int startOffset = (int) (diskOffset - Start);
+            int numBytes = (int) Math.Min(Length - startOffset, count);
             Array.Copy(_buffer, startOffset, block, offset, numBytes);
             return numBytes;
         }

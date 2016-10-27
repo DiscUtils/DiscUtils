@@ -50,13 +50,14 @@ namespace DiscUtils.Iscsi
 
             if (Header.OpCode != OpCode.ScsiDataIn)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiDataIn + " was " + Header.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.ScsiDataIn + " was " +
+                                                   Header.OpCode);
             }
 
             UnpackFlags(headerData[headerOffset + 1]);
             if (StatusPresent)
             {
-                Status = (ScsiStatus)headerData[headerOffset + 3];
+                Status = (ScsiStatus) headerData[headerOffset + 3];
             }
 
             Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);

@@ -36,7 +36,8 @@ namespace DiscUtils.Iscsi
             _lun = lun;
         }
 
-        public byte[] GetBytes(byte[] data, int offset, int count, bool isFinalData, int dataSeqNumber, uint bufferOffset, uint targetTransferTag)
+        public byte[] GetBytes(byte[] data, int offset, int count, bool isFinalData, int dataSeqNumber,
+            uint bufferOffset, uint targetTransferTag)
         {
             BasicHeaderSegment _basicHeader = new BasicHeaderSegment();
             _basicHeader.Immediate = false;
@@ -48,7 +49,7 @@ namespace DiscUtils.Iscsi
 
             byte[] buffer = new byte[48 + Utilities.RoundUp(count, 4)];
             _basicHeader.WriteTo(buffer, 0);
-            buffer[1] = (byte)(isFinalData ? 0x80 : 0x00);
+            buffer[1] = (byte) (isFinalData ? 0x80 : 0x00);
             Utilities.WriteBytesBigEndian(_lun, buffer, 8);
             Utilities.WriteBytesBigEndian(targetTransferTag, buffer, 20);
             Utilities.WriteBytesBigEndian(_connection.ExpectedStatusSequenceNumber, buffer, 28);

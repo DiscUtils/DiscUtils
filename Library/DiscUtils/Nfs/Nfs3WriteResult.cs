@@ -26,7 +26,7 @@ namespace DiscUtils.Nfs
     {
         public Nfs3WriteResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status)reader.ReadInt32();
+            Status = (Nfs3Status) reader.ReadInt32();
             CacheConsistency = new Nfs3WeakCacheConsistency(reader);
             if (Status == Nfs3Status.Ok)
             {

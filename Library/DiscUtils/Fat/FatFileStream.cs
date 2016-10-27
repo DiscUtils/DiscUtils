@@ -40,7 +40,7 @@ namespace DiscUtils.Fat
             _dirId = fileId;
 
             DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
-            _stream = new ClusterStream(fileSystem, access, (uint)dirEntry.FirstCluster, (uint)dirEntry.FileSize);
+            _stream = new ClusterStream(fileSystem, access, (uint) dirEntry.FirstCluster, (uint) dirEntry.FileSize);
             _stream.FirstClusterChanged += FirstClusterAllocatedHandler;
         }
 
@@ -72,10 +72,7 @@ namespace DiscUtils.Fat
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get
-            {
-                return new StreamExtent[] { new StreamExtent(0, Length) };
-            }
+            get { return new StreamExtent[] {new StreamExtent(0, Length)}; }
         }
 
         protected override void Dispose(bool disposing)
@@ -90,7 +87,7 @@ namespace DiscUtils.Fat
                     dirEntry.LastAccessTime = now;
                     if (didWrite)
                     {
-                        dirEntry.FileSize = (int)_stream.Length;
+                        dirEntry.FileSize = (int) _stream.Length;
                         dirEntry.LastWriteTime = now;
                     }
 

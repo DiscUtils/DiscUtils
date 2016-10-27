@@ -41,8 +41,8 @@ namespace DiscUtils.Nfs
 
         public Nfs3FileAttributes(XdrDataReader reader)
         {
-            Type = (Nfs3FileType)reader.ReadInt32();
-            Mode = (UnixFilePermissions)reader.ReadInt32();
+            Type = (Nfs3FileType) reader.ReadInt32();
+            Mode = (UnixFilePermissions) reader.ReadInt32();
             LinkCount = reader.ReadUInt32();
             Uid = reader.ReadUInt32();
             Gid = reader.ReadUInt32();

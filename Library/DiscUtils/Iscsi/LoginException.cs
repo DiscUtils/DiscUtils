@@ -23,6 +23,7 @@
 namespace DiscUtils.Iscsi
 {
     using System;
+
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -72,11 +73,11 @@ namespace DiscUtils.Iscsi
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Initializes a new instance of the LoginException class.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">Ther context.</param>
+/// <summary>
+/// Initializes a new instance of the LoginException class.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">Ther context.</param>
         protected LoginException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

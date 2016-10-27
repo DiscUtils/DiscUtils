@@ -58,7 +58,7 @@ namespace DiscUtils.Dmg
             int numRuns = Utilities.ToInt32BigEndian(buffer, offset + 200);
             for (int i = 0; i < numRuns; ++i)
             {
-                Runs.Add(Utilities.ToStruct<CompressedRun>(buffer, offset + 204 + (i * 40)));
+                Runs.Add(Utilities.ToStruct<CompressedRun>(buffer, offset + 204 + (i*40)));
             }
 
             return 0;

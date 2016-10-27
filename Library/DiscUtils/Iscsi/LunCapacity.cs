@@ -65,7 +65,7 @@ namespace DiscUtils.Iscsi
         /// <returns>A string containing an integer.</returns>
         public override string ToString()
         {
-            return (_blockSize * _logicalBlockCount).ToString(CultureInfo.InvariantCulture);
+            return (_blockSize*_logicalBlockCount).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

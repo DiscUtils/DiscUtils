@@ -93,10 +93,7 @@ namespace DiscUtils.Fat
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
             set
             {
@@ -137,7 +134,7 @@ namespace DiscUtils.Fat
             int target = count;
             if (_length - _position < count)
             {
-                target = (int)(_length - _position);
+                target = (int) (_length - _position);
             }
 
             if (!TryLoadCurrentCluster())
@@ -156,7 +153,7 @@ namespace DiscUtils.Fat
             int numRead = 0;
             while (numRead < target)
             {
-                int clusterOffset = (int)(_position % _reader.ClusterSize);
+                int clusterOffset = (int) (_position%_reader.ClusterSize);
                 int toCopy = Math.Min(_reader.ClusterSize - clusterOffset, target - numRead);
                 Array.Copy(_clusterBuffer, clusterOffset, buffer, offset + numRead, toCopy);
 
@@ -200,8 +197,8 @@ namespace DiscUtils.Fat
 
         public override void SetLength(long value)
         {
-            long desiredNumClusters = (value + _reader.ClusterSize - 1) / _reader.ClusterSize;
-            long actualNumClusters = (_length + _reader.ClusterSize - 1) / _reader.ClusterSize;
+            long desiredNumClusters = (value + _reader.ClusterSize - 1)/_reader.ClusterSize;
+            long actualNumClusters = (_length + _reader.ClusterSize - 1)/_reader.ClusterSize;
 
             if (desiredNumClusters < actualNumClusters)
             {
@@ -239,7 +236,7 @@ namespace DiscUtils.Fat
 
             if (_length != value)
             {
-                _length = (uint)value;
+                _length = (uint) value;
                 if (_position > _length)
                 {
                     _position = _length;
@@ -258,7 +255,8 @@ namespace DiscUtils.Fat
 
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(count), count, "Attempting to write negative number of bytes");
+                throw new ArgumentOutOfRangeException(nameof(count), count,
+                    "Attempting to write negative number of bytes");
             }
 
             if (offset > buffer.Length || (offset + count) > buffer.Length)
@@ -281,13 +279,14 @@ namespace DiscUtils.Fat
 
                     // Fill this cluster with as much data as we can (WriteToCluster preserves existing cluster
                     // data, if necessary)
-                    int numWritten = WriteToCluster(cluster, (int)(_position % _reader.ClusterSize), buffer, offset, bytesRemaining);
+                    int numWritten = WriteToCluster(cluster, (int) (_position%_reader.ClusterSize), buffer, offset,
+                        bytesRemaining);
                     offset += numWritten;
                     bytesRemaining -= numWritten;
                     _position += numWritten;
                 }
 
-                _length = (uint)Math.Max(_length, _position);
+                _length = (uint) Math.Max(_length, _position);
             }
             finally
             {
@@ -324,7 +323,7 @@ namespace DiscUtils.Fat
                 // Partial cluster, so need to read existing cluster data first
                 LoadCluster(cluster);
 
-                int copyLength = Math.Min(count, (int)(_reader.ClusterSize - (pos % _reader.ClusterSize)));
+                int copyLength = Math.Min(count, (int) (_reader.ClusterSize - (pos%_reader.ClusterSize)));
                 Array.Copy(buffer, offset, _clusterBuffer, pos, copyLength);
 
                 WriteCurrentCluster();
@@ -417,7 +416,7 @@ namespace DiscUtils.Fat
 
         private bool TryGetClusterByPosition(long pos, out uint cluster)
         {
-            int index = (int)(pos / _reader.ClusterSize);
+            int index = (int) (pos/_reader.ClusterSize);
 
             if (_knownClusters.Count <= index)
             {
@@ -435,7 +434,7 @@ namespace DiscUtils.Fat
                 return false;
             }
 
-            cluster = _knownClusters[(int)index];
+            cluster = _knownClusters[(int) index];
 
             // This is the 'special' End-of-chain cluster identifer, so the stream position
             // is greater than the actual file length.
@@ -469,7 +468,7 @@ namespace DiscUtils.Fat
                 }
             }
 
-            return (uint)((long)(_knownClusters.Count - 1) * (long)_reader.ClusterSize);
+            return (uint) ((long) (_knownClusters.Count - 1)*(long) _reader.ClusterSize);
         }
     }
 }

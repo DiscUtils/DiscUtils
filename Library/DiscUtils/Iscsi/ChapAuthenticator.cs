@@ -104,10 +104,10 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Invalid value in CHAP exchange");
             }
 
-            byte[] data = new byte[(p.Length - 2) / 2];
+            byte[] data = new byte[(p.Length - 2)/2];
             for (int i = 0; i < data.Length; ++i)
             {
-                data[i] = byte.Parse(p.Substring(2 + (i * 2), 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                data[i] = byte.Parse(p.Substring(2 + (i*2), 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
             }
 
             return data;

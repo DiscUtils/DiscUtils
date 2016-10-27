@@ -41,7 +41,7 @@ namespace DiscUtils.Iscsi
 
         public override uint NeededDataLength
         {
-            get { return (_availableLuns * 8) + 8; }
+            get { return (_availableLuns*8) + 8; }
         }
 
         public override void ReadFrom(byte[] buffer, int offset, int count)
@@ -58,7 +58,7 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Data truncated too far");
             }
 
-            _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset) / 8;
+            _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset)/8;
             int pos = 8;
             while (pos <= count - 8 && _luns.Count < _availableLuns)
             {

@@ -35,7 +35,7 @@ namespace DiscUtils.Nfs
             DirectoryPreferredBytes = reader.ReadUInt32();
             MaxFileSize = reader.ReadInt64();
             TimePrecision = new Nfs3FileTime(reader);
-            FileSystemProperties = (Nfs3FileSystemProperties)reader.ReadInt32();
+            FileSystemProperties = (Nfs3FileSystemProperties) reader.ReadInt32();
         }
 
         public uint ReadMaxBytes { get; set; }

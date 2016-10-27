@@ -45,7 +45,7 @@ namespace DiscUtils.SquashFs
         {
             Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(CompressedSize, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian((int)0, buffer, offset + 12);
+            Utilities.WriteBytesLittleEndian((int) 0, buffer, offset + 12);
         }
     }
 }

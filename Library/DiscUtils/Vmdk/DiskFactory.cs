@@ -31,7 +31,7 @@ namespace DiscUtils.Vmdk
     {
         public override string[] Variants
         {
-            get { return new string[] { "fixed", "dynamic", "vmfsfixed", "vmfsdynamic" }; }
+            get { return new string[] {"fixed", "dynamic", "vmfsfixed", "vmfsdynamic"}; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -46,7 +46,8 @@ namespace DiscUtils.Vmdk
             return builder;
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
+            VirtualDiskParameters diskParameters)
         {
             DiskParameters vmdkParams = new DiskParameters(diskParameters);
             vmdkParams.CreateType = VariantToCreateType(variant);
@@ -94,7 +95,9 @@ namespace DiscUtils.Vmdk
                 case "vmfsdynamic":
                     return DiskCreateType.VmfsSparse;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant), nameof(variant));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown VMDK disk variant '{0}'", variant),
+                        nameof(variant));
             }
         }
 

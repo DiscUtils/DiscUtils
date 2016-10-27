@@ -50,12 +50,12 @@ namespace DiscUtils.Partitions
 
             _status = data[offset];
             _startHead = data[offset + 1];
-            _startSector = (byte)(data[offset + 2] & 0x3F);
-            _startCylinder = (ushort)(data[offset + 3] | ((data[offset + 2] & 0xC0) << 2));
+            _startSector = (byte) (data[offset + 2] & 0x3F);
+            _startCylinder = (ushort) (data[offset + 3] | ((data[offset + 2] & 0xC0) << 2));
             _type = data[offset + 4];
             _endHead = data[offset + 5];
-            _endSector = (byte)(data[offset + 6] & 0x3F);
-            _endCylinder = (ushort)(data[offset + 7] | ((data[offset + 6] & 0xC0) << 2));
+            _endSector = (byte) (data[offset + 6] & 0x3F);
+            _endCylinder = (ushort) (data[offset + 7] | ((data[offset + 6] & 0xC0) << 2));
             _lbaStart = Utilities.ToUInt32LittleEndian(data, offset + 8);
             _lbaLength = Utilities.ToUInt32LittleEndian(data, offset + 12);
             _index = index;
@@ -63,10 +63,7 @@ namespace DiscUtils.Partitions
 
         public bool IsValid
         {
-            get
-            {
-                return _endHead != 0 || _endSector != 0 || _endCylinder != 0 || _lbaLength != 0;
-            }
+            get { return _endHead != 0 || _endSector != 0 || _endCylinder != 0 || _lbaLength != 0; }
         }
 
         public byte Status
@@ -153,14 +150,14 @@ namespace DiscUtils.Partitions
         {
             buffer[offset] = _status;
             buffer[offset + 1] = _startHead;
-            buffer[offset + 2] = (byte)((_startSector & 0x3F) | ((_startCylinder >> 2) & 0xC0));
-            buffer[offset + 3] = (byte)_startCylinder;
+            buffer[offset + 2] = (byte) ((_startSector & 0x3F) | ((_startCylinder >> 2) & 0xC0));
+            buffer[offset + 3] = (byte) _startCylinder;
             buffer[offset + 4] = _type;
             buffer[offset + 5] = _endHead;
-            buffer[offset + 6] = (byte)((_endSector & 0x3F) | ((_endCylinder >> 2) & 0xC0));
-            buffer[offset + 7] = (byte)_endCylinder;
-            Utilities.WriteBytesLittleEndian((uint)_lbaStart, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian((uint)_lbaLength, buffer, offset + 12);
+            buffer[offset + 6] = (byte) ((_endSector & 0x3F) | ((_endCylinder >> 2) & 0xC0));
+            buffer[offset + 7] = (byte) _endCylinder;
+            Utilities.WriteBytesLittleEndian((uint) _lbaStart, buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian((uint) _lbaLength, buffer, offset + 12);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace DiscUtils.Vhdx
             Guid = Utilities.ToGuidLittleEndian(buffer, offset + 0);
             FileOffset = Utilities.ToInt64LittleEndian(buffer, offset + 16);
             Length = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            Flags = (RegionFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            Flags = (RegionFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
         }
@@ -54,7 +54,7 @@ namespace DiscUtils.Vhdx
             Utilities.WriteBytesLittleEndian(Guid, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(Length, buffer, offset + 24);
-            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 28);
+            Utilities.WriteBytesLittleEndian((uint) Flags, buffer, offset + 28);
         }
     }
 }

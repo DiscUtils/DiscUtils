@@ -48,7 +48,7 @@ namespace DiscUtils.LogicalDiskManager
 
         public long Length
         {
-            get { return Record.Size * Sizes.Sector; }
+            get { return Record.Size*Sizes.Sector; }
         }
 
         public LogicalVolumeStatus Status

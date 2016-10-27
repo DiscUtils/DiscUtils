@@ -52,7 +52,7 @@ namespace DiscUtils.Nfs
         public byte[] ReadBuffer()
         {
             uint length = ReadUInt32();
-            return ReadBytes((int)length);
+            return ReadBytes((int) length);
         }
 
         public byte[] ReadBuffer(uint maxLength)
@@ -60,7 +60,7 @@ namespace DiscUtils.Nfs
             uint length = ReadUInt32();
             if (length <= maxLength)
             {
-                return ReadBytes((int)length);
+                return ReadBytes((int) length);
             }
 
             throw new IOException("Attempt to read buffer that is too long");

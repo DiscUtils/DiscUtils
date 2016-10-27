@@ -76,7 +76,7 @@ namespace DiscUtils.HfsPlus
         {
             Signature = Utilities.ToUInt16BigEndian(buffer, offset + 0);
             Version = Utilities.ToUInt16BigEndian(buffer, offset + 2);
-            Attributes = (VolumeAttributes)Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            Attributes = (VolumeAttributes) Utilities.ToUInt32BigEndian(buffer, offset + 4);
             LastMountedVersion = Utilities.ToUInt32BigEndian(buffer, offset + 8);
             JournalInfoBlock = Utilities.ToUInt32BigEndian(buffer, offset + 12);
 
@@ -103,14 +103,14 @@ namespace DiscUtils.HfsPlus
             FinderInfo = new uint[8];
             for (int i = 0; i < 8; ++i)
             {
-                FinderInfo[i] = Utilities.ToUInt32BigEndian(buffer, offset + 80 + (i * 4));
+                FinderInfo[i] = Utilities.ToUInt32BigEndian(buffer, offset + 80 + (i*4));
             }
 
-            AllocationFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 112);
-            ExtentsFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 192);
-            CatalogFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 272);
-            AttributesFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 352);
-            StartupFile = (ForkData)Utilities.ToStruct<ForkData>(buffer, offset + 432);
+            AllocationFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 112);
+            ExtentsFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 192);
+            CatalogFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 272);
+            AttributesFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 352);
+            StartupFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 432);
 
             return 512;
         }

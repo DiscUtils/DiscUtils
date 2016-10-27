@@ -123,15 +123,9 @@ namespace DiscUtils
         /// </summary>
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
-            set
-            {
-                _position = value;
-            }
+            set { _position = value; }
         }
 
         /// <summary>
@@ -144,7 +138,7 @@ namespace DiscUtils
                 SparseStream sparseBase = _baseStream as SparseStream;
                 if (sparseBase == null)
                 {
-                    return new StreamExtent[] { new StreamExtent(0, Length) };
+                    return new StreamExtent[] {new StreamExtent(0, Length)};
                 }
                 else
                 {
@@ -223,7 +217,7 @@ namespace DiscUtils
                 int totalRead = 0;
                 while (totalRead < extent.Length)
                 {
-                    int toRead = (int)Math.Min(extent.Length - totalRead, buffer.Length);
+                    int toRead = (int) Math.Min(extent.Length - totalRead, buffer.Length);
 
                     int read = _diffStream.Read(buffer, 0, toRead);
                     _baseStream.Write(buffer, 0, read);
@@ -269,13 +263,13 @@ namespace DiscUtils
                     throw new IOException("Attempt to read beyond end of file");
                 }
 
-                int toRead = (int)Math.Min(count, _diffStream.Length - _position);
+                int toRead = (int) Math.Min(count, _diffStream.Length - _position);
 
                 // If the read is within the base stream's range, then touch it first to get the
                 // (potentially) stale data.
                 if (_position < _baseStream.Length)
                 {
-                    int baseToRead = (int)Math.Min(toRead, _baseStream.Length - _position);
+                    int baseToRead = (int) Math.Min(toRead, _baseStream.Length - _position);
                     _baseStream.Position = _position;
 
                     int totalBaseRead = 0;
@@ -286,7 +280,8 @@ namespace DiscUtils
                 }
 
                 // Now overlay any data from the overlay stream (if any)
-                IEnumerable<StreamExtent> overlayExtents = StreamExtent.Intersect(_diffExtents, new StreamExtent(_position, toRead));
+                IEnumerable<StreamExtent> overlayExtents = StreamExtent.Intersect(_diffExtents,
+                    new StreamExtent(_position, toRead));
                 foreach (var extent in overlayExtents)
                 {
                     _diffStream.Position = extent.Start;
@@ -295,8 +290,8 @@ namespace DiscUtils
                     {
                         overlayNumRead += _diffStream.Read(
                             buffer,
-                            (int)(offset + (extent.Start - _position) + overlayNumRead),
-                            (int)(extent.Length - overlayNumRead));
+                            (int) (offset + (extent.Start - _position) + overlayNumRead),
+                            (int) (extent.Length - overlayNumRead));
                     }
                 }
 
@@ -374,7 +369,8 @@ namespace DiscUtils
 
                 // Beware of Linq's delayed model - force execution now by placing into a list.
                 // Without this, large execution chains can build up (v. slow) and potential for stack overflow.
-                _diffExtents = new List<StreamExtent>(StreamExtent.Union(_diffExtents, new StreamExtent(_position, count)));
+                _diffExtents =
+                    new List<StreamExtent>(StreamExtent.Union(_diffExtents, new StreamExtent(_position, count)));
 
                 _position += count;
             }

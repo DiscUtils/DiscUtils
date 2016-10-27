@@ -36,7 +36,7 @@ namespace DiscUtils.Nfs
         {
             _serverAddress = address;
             _credential = credential;
-            _nextTransaction = (uint)new Random().Next();
+            _nextTransaction = (uint) new Random().Next();
             _transports[PortMapper.ProgramIdentifier] = new RpcTcpTransport(address, 111);
         }
 

@@ -56,8 +56,8 @@ namespace DiscUtils.Ntfs
             _entries = new List<IndexEntry>();
             _entries.Add(endEntry);
 
-            _header.OffsetToFirstEntry = (uint)(IndexHeader.Size + storeOverhead);
-            _header.TotalSizeOfEntries = (uint)(_header.OffsetToFirstEntry + endEntry.Size);
+            _header.OffsetToFirstEntry = (uint) (IndexHeader.Size + storeOverhead);
+            _header.TotalSizeOfEntries = (uint) (_header.OffsetToFirstEntry + endEntry.Size);
         }
 
         public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, bool isRoot, byte[] buffer, int offset)
@@ -70,7 +70,7 @@ namespace DiscUtils.Ntfs
             _totalSpaceAvailable = _header.AllocatedSizeOfEntries;
 
             _entries = new List<IndexEntry>();
-            int pos = (int)_header.OffsetToFirstEntry;
+            int pos = (int) _header.OffsetToFirstEntry;
             while (pos < _header.TotalSizeOfEntries)
             {
                 IndexEntry entry = new IndexEntry(index.IsFileIndex);
@@ -192,16 +192,16 @@ namespace DiscUtils.Ntfs
             uint totalEntriesSize = 0;
             foreach (var entry in _entries)
             {
-                totalEntriesSize += (uint)entry.Size;
+                totalEntriesSize += (uint) entry.Size;
                 haveSubNodes |= (entry.Flags & IndexEntryFlags.Node) != 0;
             }
 
-            _header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+            _header.OffsetToFirstEntry = (uint) Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
             _header.TotalSizeOfEntries = totalEntriesSize + _header.OffsetToFirstEntry;
-            _header.HasChildNodes = (byte)(haveSubNodes ? 1 : 0);
+            _header.HasChildNodes = (byte) (haveSubNodes ? 1 : 0);
             _header.WriteTo(buffer, offset + 0);
 
-            int pos = (int)_header.OffsetToFirstEntry;
+            int pos = (int) _header.OffsetToFirstEntry;
             foreach (var entry in _entries)
             {
                 entry.WriteTo(buffer, offset + pos);
@@ -387,7 +387,8 @@ namespace DiscUtils.Ntfs
                 if (childNode._entries.Count == 1)
                 {
                     long freeBlock = _entries[entryIndex].ChildrenVirtualCluster;
-                    _entries[entryIndex].Flags = (_entries[entryIndex].Flags & ~IndexEntryFlags.Node) | (childNode._entries[0].Flags & IndexEntryFlags.Node);
+                    _entries[entryIndex].Flags = (_entries[entryIndex].Flags & ~IndexEntryFlags.Node) |
+                                                 (childNode._entries[0].Flags & IndexEntryFlags.Node);
                     _entries[entryIndex].ChildrenVirtualCluster = childNode._entries[0].ChildrenVirtualCluster;
 
                     _index.FreeBlock(freeBlock);
@@ -404,7 +405,7 @@ namespace DiscUtils.Ntfs
             }
 
             return null;
-         }
+        }
 
         private IndexEntry PopulateEnd()
         {
@@ -520,7 +521,7 @@ namespace DiscUtils.Ntfs
         /// <returns>An entry that needs to be promoted to the parent node (if any).</returns>
         private IndexEntry Divide()
         {
-            int midEntryIdx = _entries.Count / 2;
+            int midEntryIdx = _entries.Count/2;
             IndexEntry midEntry = _entries[midEntryIdx];
 
             // The terminating entry (aka end) for the new node

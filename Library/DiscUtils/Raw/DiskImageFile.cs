@@ -203,15 +203,15 @@ namespace DiscUtils.Raw
             long capacity = disk.Length;
 
             // First, check for floppy disk capacities - these have well-defined geometries
-            if (capacity == Sizes.Sector * 1440)
+            if (capacity == Sizes.Sector*1440)
             {
                 return new Geometry(80, 2, 9);
             }
-            else if (capacity == Sizes.Sector * 2880)
+            else if (capacity == Sizes.Sector*2880)
             {
                 return new Geometry(80, 2, 18);
             }
-            else if (capacity == Sizes.Sector * 5760)
+            else if (capacity == Sizes.Sector*5760)
             {
                 return new Geometry(80, 2, 36);
             }
@@ -228,9 +228,9 @@ namespace DiscUtils.Raw
         /// <returns>The disk type.</returns>
         private static VirtualDiskClass DetectDiskType(long capacity)
         {
-            if (capacity == Sizes.Sector * 1440
-                || capacity == Sizes.Sector * 2880
-                || capacity == Sizes.Sector * 5760)
+            if (capacity == Sizes.Sector*1440
+                || capacity == Sizes.Sector*2880
+                || capacity == Sizes.Sector*5760)
             {
                 return VirtualDiskClass.FloppyDisk;
             }
@@ -245,11 +245,11 @@ namespace DiscUtils.Raw
             switch (type)
             {
                 case FloppyDiskType.DoubleDensity:
-                    return Sizes.Sector * 1440;
+                    return Sizes.Sector*1440;
                 case FloppyDiskType.HighDensity:
-                    return Sizes.Sector * 2880;
+                    return Sizes.Sector*2880;
                 case FloppyDiskType.Extended:
-                    return Sizes.Sector * 5760;
+                    return Sizes.Sector*5760;
                 default:
                     throw new ArgumentException("Invalid floppy disk type", nameof(type));
             }

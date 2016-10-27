@@ -60,7 +60,7 @@ namespace DiscUtils.Vhd
             Utilities.StringToBytes(PlatformCode, data, offset, 4);
             Utilities.WriteBytesBigEndian(PlatformDataSpace, data, offset + 4);
             Utilities.WriteBytesBigEndian(PlatformDataLength, data, offset + 8);
-            Utilities.WriteBytesBigEndian((uint)0, data, offset + 12);
+            Utilities.WriteBytesBigEndian((uint) 0, data, offset + 12);
             Utilities.WriteBytesBigEndian(PlatformDataOffset, data, offset + 16);
         }
     }

@@ -55,27 +55,28 @@ namespace DiscUtils.Ext
 
             if ((superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures) != 0)
             {
-                throw new IOException("Incompatible ext features present: " + (superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures));
+                throw new IOException("Incompatible ext features present: " +
+                                      (superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures));
             }
 
             Context = new Context()
             {
                 RawStream = stream,
                 SuperBlock = superblock,
-                Options = (ExtFileSystemOptions)Options
+                Options = (ExtFileSystemOptions) Options
             };
 
             uint numGroups = Utilities.Ceil(superblock.BlocksCount, superblock.BlocksPerGroup);
-            long blockDescStart = (superblock.FirstDataBlock + 1) * (long)superblock.BlockSize;
+            long blockDescStart = (superblock.FirstDataBlock + 1)*(long) superblock.BlockSize;
 
             stream.Position = blockDescStart;
-            byte[] blockDescData = Utilities.ReadFully(stream, (int)numGroups * BlockGroup.DescriptorSize);
+            byte[] blockDescData = Utilities.ReadFully(stream, (int) numGroups*BlockGroup.DescriptorSize);
 
             _blockGroups = new BlockGroup[numGroups];
             for (int i = 0; i < numGroups; ++i)
             {
                 BlockGroup bg = new BlockGroup();
-                bg.ReadFrom(blockDescData, i * BlockGroup.DescriptorSize);
+                bg.ReadFrom(blockDescData, i*BlockGroup.DescriptorSize);
                 _blockGroups[i] = bg;
             }
 
@@ -97,7 +98,7 @@ namespace DiscUtils.Ext
             File file = GetFile(path);
             Inode inode = file.Inode;
 
-            UnixFileType fileType = (UnixFileType)((inode.Mode >> 12) & 0xff);
+            UnixFileType fileType = (UnixFileType) ((inode.Mode >> 12) & 0xff);
 
             uint deviceId = 0;
             if (fileType == UnixFileType.Character || fileType == UnixFileType.Block)
@@ -115,9 +116,9 @@ namespace DiscUtils.Ext
             return new UnixFileSystemInfo()
             {
                 FileType = fileType,
-                Permissions = (UnixFilePermissions)(inode.Mode & 0xfff),
-                UserId = (((int)inode.UserIdHigh) << 16) | inode.UserIdLow,
-                GroupId = (((int)inode.GroupIdHigh) << 16) | inode.GroupIdLow,
+                Permissions = (UnixFilePermissions) (inode.Mode & 0xfff),
+                UserId = (((int) inode.UserIdHigh) << 16) | inode.UserIdLow,
+                GroupId = (((int) inode.GroupIdHigh) << 16) | inode.GroupIdLow,
                 Inode = file.InodeNumber,
                 LinkCount = inode.LinksCount,
                 DeviceId = deviceId
@@ -147,15 +148,16 @@ namespace DiscUtils.Ext
 
             SuperBlock superBlock = Context.SuperBlock;
 
-            uint group = index / superBlock.InodesPerGroup;
-            uint groupOffset = index - (group * superBlock.InodesPerGroup);
+            uint group = index/superBlock.InodesPerGroup;
+            uint groupOffset = index - (group*superBlock.InodesPerGroup);
             BlockGroup inodeBlockGroup = GetBlockGroup(group);
 
-            uint inodesPerBlock = superBlock.BlockSize / superBlock.InodeSize;
-            uint block = groupOffset / inodesPerBlock;
-            uint blockOffset = groupOffset - (block * inodesPerBlock);
+            uint inodesPerBlock = superBlock.BlockSize/superBlock.InodeSize;
+            uint block = groupOffset/inodesPerBlock;
+            uint blockOffset = groupOffset - (block*inodesPerBlock);
 
-            Context.RawStream.Position = ((inodeBlockGroup.InodeTableBlock + block) * (long)superBlock.BlockSize) + (blockOffset * superBlock.InodeSize);
+            Context.RawStream.Position = ((inodeBlockGroup.InodeTableBlock + block)*(long) superBlock.BlockSize) +
+                                         (blockOffset*superBlock.InodeSize);
             byte[] inodeData = Utilities.ReadFully(Context.RawStream, superBlock.InodeSize);
 
             return Utilities.ToStruct<Inode>(inodeData, 0);

@@ -45,7 +45,7 @@ namespace DiscUtils.HfsPlus
             Extents = new ExtentDescriptor[8];
             for (int i = 0; i < 8; ++i)
             {
-                Extents[i] = Utilities.ToStruct<ExtentDescriptor>(buffer, offset + 16 + (i * 8));
+                Extents[i] = Utilities.ToStruct<ExtentDescriptor>(buffer, offset + 16 + (i*8));
             }
 
             return StructSize;

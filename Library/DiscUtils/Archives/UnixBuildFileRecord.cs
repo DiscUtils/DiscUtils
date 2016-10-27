@@ -45,18 +45,21 @@ namespace DiscUtils.Archives
         }
 
         public UnixBuildFileRecord(
-            string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+            string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId,
+            DateTime modificationTime)
             : this(name, new BuilderBufferExtentSource(buffer), fileMode, ownerId, groupId, modificationTime)
         {
         }
 
         public UnixBuildFileRecord(
-            string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+            string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId,
+            DateTime modificationTime)
             : this(name, new BuilderStreamExtentSource(stream), fileMode, ownerId, groupId, modificationTime)
         {
         }
 
-        public UnixBuildFileRecord(string name, BuilderExtentSource fileSource, UnixFilePermissions fileMode, int ownerId, int groupId, DateTime modificationTime)
+        public UnixBuildFileRecord(string name, BuilderExtentSource fileSource, UnixFilePermissions fileMode,
+            int ownerId, int groupId, DateTime modificationTime)
         {
             _name = name;
             _source = fileSource;

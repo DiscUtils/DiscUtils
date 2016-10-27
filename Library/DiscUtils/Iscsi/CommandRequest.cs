@@ -45,7 +45,8 @@ namespace DiscUtils.Iscsi
             _lun = lun;
         }
 
-        public byte[] GetBytes(ScsiCommand cmd, byte[] immediateData, int offset, int count, bool isFinalData, bool willRead, bool willWrite, uint expected)
+        public byte[] GetBytes(ScsiCommand cmd, byte[] immediateData, int offset, int count, bool isFinalData,
+            bool willRead, bool willWrite, uint expected)
         {
             BasicHeaderSegment _basicHeader = new BasicHeaderSegment();
             _basicHeader.Immediate = cmd.ImmediateDelivery;
@@ -72,7 +73,8 @@ namespace DiscUtils.Iscsi
             return buffer;
         }
 
-        private static byte PackAttrByte(bool isFinalData, bool expectReadFromTarget, bool expectWriteToTarget, TaskAttributes taskAttr)
+        private static byte PackAttrByte(bool isFinalData, bool expectReadFromTarget, bool expectWriteToTarget,
+            TaskAttributes taskAttr)
         {
             byte value = 0;
 
@@ -91,7 +93,7 @@ namespace DiscUtils.Iscsi
                 value |= 0x20;
             }
 
-            value |= (byte)((int)taskAttr & 0x3);
+            value |= (byte) ((int) taskAttr & 0x3);
 
             return value;
         }

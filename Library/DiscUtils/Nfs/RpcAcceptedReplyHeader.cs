@@ -40,7 +40,7 @@ namespace DiscUtils.Nfs
         public RpcAcceptedReplyHeader(XdrDataReader reader)
         {
             Verifier = new RpcAuthentication(reader);
-            AcceptStatus = (RpcAcceptStatus)reader.ReadInt32();
+            AcceptStatus = (RpcAcceptStatus) reader.ReadInt32();
             if (AcceptStatus == RpcAcceptStatus.ProgramVersionMismatch)
             {
                 MismatchInfo = new RpcMismatchInfo(reader);

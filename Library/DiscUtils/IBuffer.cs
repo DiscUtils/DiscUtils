@@ -47,19 +47,13 @@ namespace DiscUtils
         /// <summary>
         /// Gets the current capacity of the buffer, in bytes.
         /// </summary>
-        long Capacity
-        {
-            get;
-        }
+        long Capacity { get; }
 
         /// <summary>
         /// Gets the parts of the buffer that are stored.
         /// </summary>
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        IEnumerable<StreamExtent> Extents
-        {
-            get;
-        }
+        IEnumerable<StreamExtent> Extents { get; }
 
         /// <summary>
         /// Reads from the buffer into a byte array.

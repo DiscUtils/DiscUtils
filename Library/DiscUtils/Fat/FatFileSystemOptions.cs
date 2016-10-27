@@ -54,10 +54,7 @@ namespace DiscUtils.Fat
         /// </summary>
         public Encoding FileNameEncoding
         {
-            get
-            {
-                return _encoding;
-            }
+            get { return _encoding; }
 
             set
             {

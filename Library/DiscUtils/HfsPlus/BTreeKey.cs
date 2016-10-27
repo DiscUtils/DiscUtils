@@ -26,10 +26,7 @@ namespace DiscUtils.HfsPlus
 
     internal abstract class BTreeKey : IByteArraySerializable, IComparable<BTreeKey>
     {
-        public abstract int Size
-        {
-            get;
-        }
+        public abstract int Size { get; }
 
         public abstract int ReadFrom(byte[] buffer, int offset);
 

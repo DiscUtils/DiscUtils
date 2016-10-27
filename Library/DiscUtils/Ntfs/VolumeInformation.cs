@@ -52,7 +52,7 @@ namespace DiscUtils.Ntfs
 
         public int Version
         {
-            get { return ((int)_majorVersion) << 8 | _minorVersion; }
+            get { return ((int) _majorVersion) << 8 | _minorVersion; }
         }
 
         public int Size
@@ -64,16 +64,16 @@ namespace DiscUtils.Ntfs
         {
             _majorVersion = buffer[offset + 0x08];
             _minorVersion = buffer[offset + 0x09];
-            _flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            _flags = (VolumeInformationFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
             return 0x0C;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian((ulong)0, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian((ulong) 0, buffer, offset + 0x00);
             buffer[offset + 0x08] = _majorVersion;
             buffer[offset + 0x09] = _minorVersion;
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0A);
+            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x0A);
         }
 
         public void Dump(TextWriter writer, string indent)

@@ -97,7 +97,7 @@ namespace DiscUtils.BootConfig
             RegistryKey descKey = _rootKey.OpenSubKey(path);
 
             object val = descKey.GetValue("Type");
-            return (int)val;
+            return (int) val;
         }
 
         public override bool HasValue(Guid obj, int element)

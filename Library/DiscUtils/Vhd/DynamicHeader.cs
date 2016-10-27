@@ -55,7 +55,7 @@ namespace DiscUtils.Vhd
             TableOffset = tableOffset;
             HeaderVersion = Version1;
             BlockSize = blockSize;
-            MaxTableEntries = (int)((diskSize + blockSize - 1) / blockSize);
+            MaxTableEntries = (int) ((diskSize + blockSize - 1)/blockSize);
             ParentTimestamp = Footer.EpochUtc;
             ParentUnicodeName = string.Empty;
             ParentLocators = new ParentLocator[8];
@@ -101,7 +101,7 @@ namespace DiscUtils.Vhd
             result.ParentLocators = new ParentLocator[8];
             for (int i = 0; i < 8; ++i)
             {
-                result.ParentLocators[i] = ParentLocator.FromBytes(data, offset + 576 + (i * 24));
+                result.ParentLocators[i] = ParentLocator.FromBytes(data, offset + 576 + (i*24));
             }
 
             return result;
@@ -117,14 +117,14 @@ namespace DiscUtils.Vhd
             Utilities.WriteBytesBigEndian(BlockSize, data, offset + 32);
             Utilities.WriteBytesBigEndian(Checksum, data, offset + 36);
             Utilities.WriteBytesBigEndian(ParentUniqueId, data, offset + 40);
-            Utilities.WriteBytesBigEndian((uint)(ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
-            Utilities.WriteBytesBigEndian((uint)0, data, offset + 60);
+            Utilities.WriteBytesBigEndian((uint) (ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
+            Utilities.WriteBytesBigEndian((uint) 0, data, offset + 60);
             Array.Clear(data, offset + 64, 512);
             Encoding.BigEndianUnicode.GetBytes(ParentUnicodeName, 0, ParentUnicodeName.Length, data, offset + 64);
 
             for (int i = 0; i < 8; ++i)
             {
-                ParentLocators[i].ToBytes(data, offset + 576 + (i * 24));
+                ParentLocators[i].ToBytes(data, offset + 576 + (i*24));
             }
 
             Array.Clear(data, offset + 1024 - 256, 256);
@@ -133,8 +133,8 @@ namespace DiscUtils.Vhd
         public bool IsValid()
         {
             return (Cookie == HeaderCookie)
-                && IsChecksumValid()
-                && HeaderVersion == Version1;
+                   && IsChecksumValid()
+                   && HeaderVersion == Version1;
         }
 
         public bool IsChecksumValid()

@@ -41,10 +41,7 @@ namespace DiscUtils.HfsPlus
 
         public static int Size
         {
-            get
-            {
-                return 16;
-            }
+            get { return 16; }
         }
 
         public uint HeaderSize

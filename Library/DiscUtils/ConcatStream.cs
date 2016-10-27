@@ -160,8 +160,7 @@ namespace DiscUtils
 
                 totalRead += numRead;
                 _position += numRead;
-            }
-            while (numRead != 0);
+            } while (numRead != 0);
 
             return totalRead;
         }
@@ -199,7 +198,8 @@ namespace DiscUtils
             int lastStream = GetStream(Length, out lastStreamOffset);
             if (value < lastStreamOffset)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to reduce stream length to less than {0}", lastStreamOffset));
+                throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                    "Unable to reduce stream length to less than {0}", lastStreamOffset));
             }
 
             _streams[lastStream].SetLength(value - lastStreamOffset);
@@ -229,7 +229,7 @@ namespace DiscUtils
                 }
                 else
                 {
-                    numToWrite = (int)Math.Min(count - totalWritten, _streams[streamIdx].Length - streamPos);
+                    numToWrite = (int) Math.Min(count - totalWritten, _streams[streamIdx].Length - streamPos);
                 }
 
                 _streams[streamIdx].Write(buffer, offset + totalWritten, numToWrite);

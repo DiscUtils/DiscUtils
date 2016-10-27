@@ -33,9 +33,11 @@ namespace DiscUtils.Nfs
         public NfsFileSystemOptions()
         {
             NewFilePermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite
-                | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite;
-            NewDirectoryPermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite | UnixFilePermissions.OwnerExecute
-                | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite | UnixFilePermissions.GroupExecute;
+                                 | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite;
+            NewDirectoryPermissions = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite |
+                                      UnixFilePermissions.OwnerExecute
+                                      | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite |
+                                      UnixFilePermissions.GroupExecute;
         }
 
         /// <summary>

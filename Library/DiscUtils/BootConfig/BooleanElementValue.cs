@@ -48,7 +48,7 @@ namespace DiscUtils.BootConfig
 
         internal byte[] GetBytes()
         {
-            return new byte[] { (_value ? (byte)1 : (byte)0) };
+            return new byte[] {(_value ? (byte) 1 : (byte) 0)};
         }
     }
 }

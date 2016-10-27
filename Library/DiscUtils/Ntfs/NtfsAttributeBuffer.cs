@@ -49,27 +49,28 @@ namespace DiscUtils.Ntfs
 
         public override long Capacity
         {
-            get
-            {
-                return _attribute.PrimaryRecord.DataLength;
-            }
+            get { return _attribute.PrimaryRecord.DataLength; }
         }
 
         public long MapPosition(long pos)
         {
             if (_attribute.IsNonResident)
             {
-                return ((IMappedBuffer)_attribute.RawBuffer).MapPosition(pos);
+                return ((IMappedBuffer) _attribute.RawBuffer).MapPosition(pos);
             }
             else
             {
-                AttributeReference attrRef = new AttributeReference(_file.MftReference, _attribute.PrimaryRecord.AttributeId);
-                ResidentAttributeRecord attrRecord = (ResidentAttributeRecord)_file.GetAttribute(attrRef).PrimaryRecord;
+                AttributeReference attrRef = new AttributeReference(_file.MftReference,
+                    _attribute.PrimaryRecord.AttributeId);
+                ResidentAttributeRecord attrRecord = (ResidentAttributeRecord) _file.GetAttribute(attrRef).PrimaryRecord;
 
                 long attrStart = _file.GetAttributeOffset(attrRef);
                 long mftPos = attrStart + attrRecord.DataOffset + pos;
 
-                return _file.Context.GetFileByIndex(MasterFileTable.MftIndex).GetAttribute(AttributeType.Data, null).OffsetToAbsolutePos(mftPos);
+                return
+                    _file.Context.GetFileByIndex(MasterFileTable.MftIndex)
+                        .GetAttribute(AttributeType.Data, null)
+                        .OffsetToAbsolutePos(mftPos);
             }
         }
 
@@ -90,7 +91,7 @@ namespace DiscUtils.Ntfs
             }
 
             // Limit read to length of attribute
-            int totalToRead = (int)Math.Min(count, Capacity - pos);
+            int totalToRead = (int) Math.Min(count, Capacity - pos);
             int toRead = totalToRead;
 
             // Handle uninitialized bytes at end of attribute
@@ -106,8 +107,9 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     // Partial read of uninitialized area
-                    Array.Clear(buffer, offset + (int)(record.InitializedDataLength - pos), (int)((pos + toRead) - record.InitializedDataLength));
-                    toRead = (int)(record.InitializedDataLength - pos);
+                    Array.Clear(buffer, offset + (int) (record.InitializedDataLength - pos),
+                        (int) ((pos + toRead) - record.InitializedDataLength));
+                    toRead = (int) (record.InitializedDataLength - pos);
                 }
             }
 
@@ -192,7 +194,8 @@ namespace DiscUtils.Ntfs
 
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
-            return StreamExtent.Intersect(_attribute.RawBuffer.GetExtentsInRange(start, count), new StreamExtent(0, Capacity));
+            return StreamExtent.Intersect(_attribute.RawBuffer.GetExtentsInRange(start, count),
+                new StreamExtent(0, Capacity));
         }
     }
 }

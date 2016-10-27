@@ -30,10 +30,10 @@ namespace DiscUtils.BootConfig
 
         public IntegerListElementValue(byte[] value)
         {
-            _values = new ulong[value.Length / 8];
+            _values = new ulong[value.Length/8];
             for (int i = 0; i < _values.Length; ++i)
             {
-                _values[i] = Utilities.ToUInt64LittleEndian(value, i * 8);
+                _values[i] = Utilities.ToUInt64LittleEndian(value, i*8);
             }
         }
 
@@ -70,10 +70,10 @@ namespace DiscUtils.BootConfig
 
         internal byte[] GetBytes()
         {
-            byte[] bytes = new byte[_values.Length * 8];
+            byte[] bytes = new byte[_values.Length*8];
             for (int i = 0; i < _values.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_values[i], bytes, i * 8);
+                Utilities.WriteBytesLittleEndian(_values[i], bytes, i*8);
             }
 
             return bytes;

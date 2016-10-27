@@ -282,7 +282,7 @@ namespace DiscUtils.Nfs
             MemoryStream ms = new MemoryStream();
             XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 4);
             handle.Write(writer);
-            writer.Write((int)requested);
+            writer.Write((int) requested);
 
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
@@ -321,7 +321,7 @@ namespace DiscUtils.Nfs
             handle.Write(writer);
             writer.Write(position);
             writer.Write(count);
-            writer.Write((int)0); // UNSTABLE
+            writer.Write((int) 0); // UNSTABLE
             writer.WriteBuffer(buffer, bufferOffset, count);
 
             RpcReply reply = DoSend(ms);
@@ -335,13 +335,14 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, bool createNew, Nfs3SetAttributes attributes)
+        public Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, bool createNew,
+            Nfs3SetAttributes attributes)
         {
             MemoryStream ms = new MemoryStream();
             XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 8);
             dirHandle.Write(writer);
             writer.Write(name);
-            writer.Write((int)(createNew ? 1 : 0));
+            writer.Write((int) (createNew ? 1 : 0));
             attributes.Write(writer);
 
             RpcReply reply = DoSend(ms);
@@ -410,7 +411,8 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3RenameResult Rename(Nfs3FileHandle fromDirHandle, string fromName, Nfs3FileHandle toDirHandle, string toName)
+        public Nfs3RenameResult Rename(Nfs3FileHandle fromDirHandle, string fromName, Nfs3FileHandle toDirHandle,
+            string toName)
         {
             MemoryStream ms = new MemoryStream();
             XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 14);
@@ -430,7 +432,8 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, byte[] cookieVerifier, uint dirCount, uint maxCount)
+        public Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, byte[] cookieVerifier, uint dirCount,
+            uint maxCount)
         {
             MemoryStream ms = new MemoryStream();
             XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 17);

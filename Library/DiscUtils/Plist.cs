@@ -108,11 +108,11 @@ namespace DiscUtils
         {
             if (obj is Dictionary<string, object>)
             {
-                return CreateDictionary(xmlDoc, (Dictionary<string, object>)obj);
+                return CreateDictionary(xmlDoc, (Dictionary<string, object>) obj);
             }
             else if (obj is string)
             {
-                XmlText text = xmlDoc.CreateTextNode((string)obj);
+                XmlText text = xmlDoc.CreateTextNode((string) obj);
                 XmlElement node = xmlDoc.CreateElement("string");
                 node.AppendChild(text);
                 return node;
@@ -125,7 +125,7 @@ namespace DiscUtils
 
         private static XmlNode CreateDictionary(XmlDocument xmlDoc, Dictionary<string, object> dict)
         {
-            XmlElement dictNode = (XmlElement)xmlDoc.CreateElement("dict");
+            XmlElement dictNode = (XmlElement) xmlDoc.CreateElement("dict");
 
             foreach (var entry in dict)
             {

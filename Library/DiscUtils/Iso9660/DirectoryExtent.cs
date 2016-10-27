@@ -34,7 +34,8 @@ namespace DiscUtils.Iso9660
 
         private byte[] _readCache;
 
-        public DirectoryExtent(BuildDirectoryInfo dirInfo, Dictionary<BuildDirectoryMember, uint> locationTable, Encoding enc, long start)
+        public DirectoryExtent(BuildDirectoryInfo dirInfo, Dictionary<BuildDirectoryMember, uint> locationTable,
+            Encoding enc, long start)
             : base(start, dirInfo.GetDataSize(enc))
         {
             _dirInfo = dirInfo;
@@ -56,9 +57,9 @@ namespace DiscUtils.Iso9660
         {
             long relPos = diskOffset - Start;
 
-            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
+            int numRead = (int) Math.Min(count, _readCache.Length - relPos);
 
-            Array.Copy(_readCache, (int)relPos, buffer, offset, numRead);
+            Array.Copy(_readCache, (int) relPos, buffer, offset, numRead);
 
             return numRead;
         }

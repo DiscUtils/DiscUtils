@@ -53,7 +53,7 @@ namespace DiscUtils.Compression
                 }
             }
 
-            _numBits = (int)maxLength;
+            _numBits = (int) maxLength;
             _buffer = new uint[1 << _numBits];
 
             Build();
@@ -61,10 +61,7 @@ namespace DiscUtils.Compression
 
         public uint[] Lengths
         {
-            get
-            {
-                return _lengths;
-            }
+            get { return _lengths; }
         }
 
         public uint NextSymbol(BitStream bitStream)
@@ -72,7 +69,7 @@ namespace DiscUtils.Compression
             uint symbol = _buffer[bitStream.Peek(_numBits)];
 
             // We may have over-read, reset bitstream position
-            bitStream.Consume((int)_lengths[symbol]);
+            bitStream.Consume((int) _lengths[symbol]);
 
             return symbol;
         }

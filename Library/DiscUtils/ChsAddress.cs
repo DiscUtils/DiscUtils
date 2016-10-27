@@ -86,7 +86,7 @@ namespace DiscUtils
                 return false;
             }
 
-            ChsAddress other = (ChsAddress)obj;
+            ChsAddress other = (ChsAddress) obj;
 
             return _cylinder == other._cylinder && _head == other._head && _sector == other._sector;
         }

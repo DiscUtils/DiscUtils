@@ -49,7 +49,8 @@ namespace DiscUtils
             {
                 if (stream.CanRead != _canRead || stream.CanWrite != _canWrite || stream.CanSeek != _canSeek)
                 {
-                    throw new ArgumentException("All mirrored streams must have the same read/write/seek permissions", nameof(wrapped));
+                    throw new ArgumentException("All mirrored streams must have the same read/write/seek permissions",
+                        nameof(wrapped));
                 }
 
                 if (stream.Length != _length)
@@ -81,15 +82,9 @@ namespace DiscUtils
 
         public override long Position
         {
-            get
-            {
-                return _wrapped[0].Position;
-            }
+            get { return _wrapped[0].Position; }
 
-            set
-            {
-                _wrapped[0].Position = value;
-            }
+            set { _wrapped[0].Position = value; }
         }
 
         public override IEnumerable<StreamExtent> Extents

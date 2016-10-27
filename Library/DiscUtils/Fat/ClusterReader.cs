@@ -44,7 +44,7 @@ namespace DiscUtils.Fat
             _sectorsPerCluster = sectorsPerCluster;
             _bytesPerSector = bytesPerSector;
 
-            _clusterSize = _sectorsPerCluster * _bytesPerSector;
+            _clusterSize = _sectorsPerCluster*_bytesPerSector;
         }
 
         public int ClusterSize
@@ -56,12 +56,13 @@ namespace DiscUtils.Fat
         {
             if (offset + ClusterSize > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(offset), "buffer is too small - cluster would overflow buffer");
+                throw new ArgumentOutOfRangeException(nameof(offset),
+                    "buffer is too small - cluster would overflow buffer");
             }
 
-            uint firstSector = (uint)(((cluster - 2) * _sectorsPerCluster) + _firstDataSector);
+            uint firstSector = (uint) (((cluster - 2)*_sectorsPerCluster) + _firstDataSector);
 
-            _stream.Position = firstSector * _bytesPerSector;
+            _stream.Position = firstSector*_bytesPerSector;
             if (Utilities.ReadFully(_stream, buffer, offset, _clusterSize) != _clusterSize)
             {
                 throw new IOException("Failed to read cluster " + cluster);
@@ -72,21 +73,22 @@ namespace DiscUtils.Fat
         {
             if (offset + ClusterSize > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(offset), "buffer is too small - cluster would overflow buffer");
+                throw new ArgumentOutOfRangeException(nameof(offset),
+                    "buffer is too small - cluster would overflow buffer");
             }
 
-            uint firstSector = (uint)(((cluster - 2) * _sectorsPerCluster) + _firstDataSector);
+            uint firstSector = (uint) (((cluster - 2)*_sectorsPerCluster) + _firstDataSector);
 
-            _stream.Position = firstSector * _bytesPerSector;
+            _stream.Position = firstSector*_bytesPerSector;
 
             _stream.Write(buffer, offset, _clusterSize);
         }
 
         internal void WipeCluster(uint cluster)
         {
-            uint firstSector = (uint)(((cluster - 2) * _sectorsPerCluster) + _firstDataSector);
+            uint firstSector = (uint) (((cluster - 2)*_sectorsPerCluster) + _firstDataSector);
 
-            _stream.Position = firstSector * _bytesPerSector;
+            _stream.Position = firstSector*_bytesPerSector;
 
             _stream.Write(new byte[_clusterSize], 0, _clusterSize);
         }

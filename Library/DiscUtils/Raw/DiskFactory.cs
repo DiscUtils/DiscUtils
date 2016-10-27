@@ -30,7 +30,7 @@ namespace DiscUtils.Raw
     {
         public override string[] Variants
         {
-            get { return new string[] { }; }
+            get { return new string[] {}; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -43,9 +43,11 @@ namespace DiscUtils.Raw
             throw new NotSupportedException();
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
+            VirtualDiskParameters diskParameters)
         {
-            return Disk.Initialize(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, diskParameters.Capacity, diskParameters.Geometry);
+            return Disk.Initialize(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None),
+                Ownership.Dispose, diskParameters.Capacity, diskParameters.Geometry);
         }
 
         public override VirtualDisk OpenDisk(string path, FileAccess access)

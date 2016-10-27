@@ -39,54 +39,30 @@ namespace DiscUtils.Iso9660
 
         public DateTime LastAccessTimeUtc
         {
-            get
-            {
-                return _dirEntry.LastAccessTimeUtc;
-            }
+            get { return _dirEntry.LastAccessTimeUtc; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get
-            {
-                return _dirEntry.LastWriteTimeUtc;
-            }
+            get { return _dirEntry.LastWriteTimeUtc; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
-            get
-            {
-                return _dirEntry.CreationTimeUtc;
-            }
+            get { return _dirEntry.CreationTimeUtc; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public FileAttributes FileAttributes
         {
-            get
-            {
-                return _dirEntry.FileAttributes;
-            }
+            get { return _dirEntry.FileAttributes; }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public long FileLength
@@ -98,7 +74,8 @@ namespace DiscUtils.Iso9660
         {
             get
             {
-                ExtentStream es = new ExtentStream(_context.DataStream, _dirEntry.Record.LocationOfExtent, _dirEntry.Record.DataLength, _dirEntry.Record.FileUnitSize, _dirEntry.Record.InterleaveGapSize);
+                ExtentStream es = new ExtentStream(_context.DataStream, _dirEntry.Record.LocationOfExtent,
+                    _dirEntry.Record.DataLength, _dirEntry.Record.FileUnitSize, _dirEntry.Record.InterleaveGapSize);
                 return new StreamBuffer(es, Ownership.Dispose);
             }
         }
@@ -119,17 +96,18 @@ namespace DiscUtils.Iso9660
 
                 SuspRecords suspRecords = new SuspRecords(_context, SystemUseData, 0);
 
-                PosixFileInfoSystemUseEntry pfi = suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
+                PosixFileInfoSystemUseEntry pfi =
+                    suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
                 if (pfi != null)
                 {
                     return new UnixFileSystemInfo()
                     {
-                        FileType = (UnixFileType)((pfi.FileMode >> 12) & 0xff),
-                        Permissions = (UnixFilePermissions)(pfi.FileMode & 0xfff),
-                        UserId = (int)pfi.UserId,
-                        GroupId = (int)pfi.GroupId,
+                        FileType = (UnixFileType) ((pfi.FileMode >> 12) & 0xff),
+                        Permissions = (UnixFilePermissions) (pfi.FileMode & 0xfff),
+                        UserId = (int) pfi.UserId,
+                        GroupId = (int) pfi.GroupId,
                         Inode = pfi.Inode,
-                        LinkCount = (int)pfi.NumLinks
+                        LinkCount = (int) pfi.NumLinks
                     };
                 }
 

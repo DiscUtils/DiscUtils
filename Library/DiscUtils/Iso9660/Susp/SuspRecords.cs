@@ -35,8 +35,9 @@ namespace DiscUtils.Iso9660
             ContinuationSystemUseEntry contEntry = Parse(context, data, offset + context.SuspSkipBytes);
             while (contEntry != null)
             {
-                context.DataStream.Position = (contEntry.Block * (long)context.VolumeDescriptor.LogicalBlockSize) + contEntry.BlockOffset;
-                byte[] contData = Utilities.ReadFully(context.DataStream, (int)contEntry.Length);
+                context.DataStream.Position = (contEntry.Block*(long) context.VolumeDescriptor.LogicalBlockSize) +
+                                              contEntry.BlockOffset;
+                byte[] contData = Utilities.ReadFully(context.DataStream, (int) contEntry.Length);
 
                 contEntry = Parse(context, contData, 0);
             }
@@ -50,11 +51,11 @@ namespace DiscUtils.Iso9660
             }
 
             return data[offset] == 83
-                && data[offset + 1] == 80
-                && data[offset + 2] == 7
-                && data[offset + 3] == 1
-                && data[offset + 4] == 0xBE
-                && data[offset + 5] == 0xEF;
+                   && data[offset + 1] == 80
+                   && data[offset + 2] == 7
+                   && data[offset + 3] == 1
+                   && data[offset + 4] == 0xBE
+                   && data[offset + 5] == 0xEF;
         }
 
         public List<SystemUseEntry> GetEntries(string extension, string name)
@@ -116,7 +117,8 @@ namespace DiscUtils.Iso9660
             while (data.Length - pos > 4)
             {
                 int len;
-                SystemUseEntry entry = SystemUseEntry.Parse(data, pos, context.VolumeDescriptor.CharacterEncoding, extension, out len);
+                SystemUseEntry entry = SystemUseEntry.Parse(data, pos, context.VolumeDescriptor.CharacterEncoding,
+                    extension, out len);
                 pos += len;
 
                 if (entry == null)
@@ -132,11 +134,11 @@ namespace DiscUtils.Iso9660
                         return contEntry;
 
                     case "CE":
-                        contEntry = (ContinuationSystemUseEntry)entry;
+                        contEntry = (ContinuationSystemUseEntry) entry;
                         break;
 
                     case "ES":
-                        ExtensionSelectSystemUseEntry esEntry = (ExtensionSelectSystemUseEntry)entry;
+                        ExtensionSelectSystemUseEntry esEntry = (ExtensionSelectSystemUseEntry) entry;
                         extension = context.SuspExtensions[esEntry.SelectedExtension];
                         break;
 

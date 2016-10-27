@@ -32,7 +32,7 @@ namespace DiscUtils.Ntfs
         {
             if (NtfsFileSystem.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("NTFS", "Microsoft NTFS", Open) };
+                return new DiscUtils.FileSystemInfo[] {new VfsFileSystemInfo("NTFS", "Microsoft NTFS", Open)};
             }
 
             return new DiscUtils.FileSystemInfo[0];

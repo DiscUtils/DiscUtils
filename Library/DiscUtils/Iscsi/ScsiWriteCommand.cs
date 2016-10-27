@@ -43,10 +43,7 @@ namespace DiscUtils.Iscsi
 
         public override TaskAttributes TaskAttributes
         {
-            get
-            {
-                return TaskAttributes.Simple;
-            }
+            get { return TaskAttributes.Simple; }
         }
 
         public override int Size

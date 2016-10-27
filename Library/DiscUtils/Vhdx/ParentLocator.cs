@@ -68,7 +68,7 @@ namespace DiscUtils.Vhdx
             Count = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
             for (ushort i = 0; i < Count; ++i)
             {
-                int kvOffset = offset + 20 + (i * 12);
+                int kvOffset = offset + 20 + (i*12);
                 int keyOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 0);
                 int valueOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 4);
                 int keyLength = Utilities.ToUInt16LittleEndian(buffer, kvOffset + 8);
@@ -90,7 +90,7 @@ namespace DiscUtils.Vhdx
                 throw new NotImplementedException();
             }
 
-            Count = (ushort)Entries.Count;
+            Count = (ushort) Entries.Count;
 
             Utilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);

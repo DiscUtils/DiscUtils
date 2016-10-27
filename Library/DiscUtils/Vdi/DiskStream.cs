@@ -28,8 +28,8 @@ namespace DiscUtils.Vdi
 
     internal class DiskStream : SparseStream
     {
-        private const uint BlockFree = unchecked((uint)(int)(~0));
-        private const uint BlockZero = unchecked((uint)(int)(~1));
+        private const uint BlockFree = unchecked((uint) (int) (~0));
+        private const uint BlockZero = unchecked((uint) (int) (~1));
 
         private Stream _fileStream;
         private Ownership _ownsStream;
@@ -133,7 +133,7 @@ namespace DiscUtils.Vdi
 
                     if (start != i)
                     {
-                        extents.Add(new StreamExtent(start * blockSize, (i - start) * blockSize));
+                        extents.Add(new StreamExtent(start*blockSize, (i - start)*blockSize));
                     }
                 }
 
@@ -162,13 +162,13 @@ namespace DiscUtils.Vdi
                 return 0;
             }
 
-            int maxToRead = (int)Math.Min(count, _fileHeader.DiskSize - _position);
+            int maxToRead = (int) Math.Min(count, _fileHeader.DiskSize - _position);
             int numRead = 0;
 
             while (numRead < maxToRead)
             {
-                int block = (int)(_position / _fileHeader.BlockSize);
-                int offsetInBlock = (int)(_position % _fileHeader.BlockSize);
+                int block = (int) (_position/_fileHeader.BlockSize);
+                int offsetInBlock = (int) (_position%_fileHeader.BlockSize);
 
                 int toRead = Math.Min(maxToRead - numRead, _fileHeader.BlockSize - offsetInBlock);
 
@@ -183,8 +183,9 @@ namespace DiscUtils.Vdi
                 }
                 else
                 {
-                    long blockOffset = ((long)_blockTable[block]) * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
-                    long filePos = ((long)_fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset + offsetInBlock;
+                    long blockOffset = ((long) _blockTable[block])*(_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
+                    long filePos = ((long) _fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset +
+                                   offsetInBlock;
                     _fileStream.Position = filePos;
                     Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead);
                 }
@@ -260,8 +261,8 @@ namespace DiscUtils.Vdi
             int numWritten = 0;
             while (numWritten < count)
             {
-                int block = (int)(_position / _fileHeader.BlockSize);
-                int offsetInBlock = (int)(_position % _fileHeader.BlockSize);
+                int block = (int) (_position/_fileHeader.BlockSize);
+                int offsetInBlock = (int) (_position%_fileHeader.BlockSize);
 
                 int toWrite = Math.Min(count - numWritten, _fileHeader.BlockSize - offsetInBlock);
 
@@ -295,13 +296,14 @@ namespace DiscUtils.Vdi
                         writeBufferOffset = 0;
                     }
 
-                    long blockOffset = ((long)_fileHeader.BlocksAllocated) * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
-                    long filePos = ((long)_fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset;
+                    long blockOffset = ((long) _fileHeader.BlocksAllocated)*
+                                       (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
+                    long filePos = ((long) _fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset;
 
                     _fileStream.Position = filePos;
                     _fileStream.Write(writeBuffer, writeBufferOffset, _fileHeader.BlockSize);
 
-                    _blockTable[block] = (uint)_fileHeader.BlocksAllocated;
+                    _blockTable[block] = (uint) _fileHeader.BlocksAllocated;
 
                     // Update the file header on disk, to indicate where the next free block is
                     _fileHeader.BlocksAllocated++;
@@ -314,8 +316,9 @@ namespace DiscUtils.Vdi
                 else
                 {
                     // Existing block, simply overwrite the existing data
-                    long blockOffset = ((long)_blockTable[block]) * (_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
-                    long filePos = ((long)_fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset + offsetInBlock;
+                    long blockOffset = ((long) _blockTable[block])*(_fileHeader.BlockSize + _fileHeader.BlockExtraSize);
+                    long filePos = ((long) _fileHeader.DataOffset) + _fileHeader.BlockExtraSize + blockOffset +
+                                   offsetInBlock;
                     _fileStream.Position = filePos;
                     _fileStream.Write(buffer, offset + numWritten, toWrite);
                 }
@@ -355,12 +358,12 @@ namespace DiscUtils.Vdi
         {
             _fileStream.Position = _fileHeader.BlocksOffset;
 
-            byte[] buffer = Utilities.ReadFully(_fileStream, (int)(_fileHeader.BlockCount * 4));
+            byte[] buffer = Utilities.ReadFully(_fileStream, (int) (_fileHeader.BlockCount*4));
 
             _blockTable = new uint[_fileHeader.BlockCount];
             for (int i = 0; i < _fileHeader.BlockCount; ++i)
             {
-                _blockTable[i] = Utilities.ToUInt32LittleEndian(buffer, i * 4);
+                _blockTable[i] = Utilities.ToUInt32LittleEndian(buffer, i*4);
             }
         }
 
@@ -369,7 +372,7 @@ namespace DiscUtils.Vdi
             byte[] buffer = new byte[4];
             Utilities.WriteBytesLittleEndian(_blockTable[block], buffer, 0);
 
-            _fileStream.Position = _fileHeader.BlocksOffset + (block * 4);
+            _fileStream.Position = _fileHeader.BlocksOffset + (block*4);
             _fileStream.Write(buffer, 0, 4);
         }
 

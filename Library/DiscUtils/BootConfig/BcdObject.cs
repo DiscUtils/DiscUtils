@@ -186,7 +186,7 @@ namespace DiscUtils.BootConfig
         /// </summary>
         public ObjectType ObjectType
         {
-            get { return (ObjectType)((_type >> 28) & 0xF); }
+            get { return (ObjectType) ((_type >> 28) & 0xF); }
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace DiscUtils.BootConfig
         /// </summary>
         public ApplicationImageType ApplicationImageType
         {
-            get { return IsApplication ? (ApplicationImageType)((_type & 0x00F00000) >> 20) : 0; }
+            get { return IsApplication ? (ApplicationImageType) ((_type & 0x00F00000) >> 20) : 0; }
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace DiscUtils.BootConfig
         /// </summary>
         public ApplicationType ApplicationType
         {
-            get { return IsApplication ? (ApplicationType)(_type & 0xFFFFF) : 0; }
+            get { return IsApplication ? (ApplicationType) (_type & 0xFFFFF) : 0; }
         }
 
         /// <summary>
@@ -241,11 +241,11 @@ namespace DiscUtils.BootConfig
                 return false;
             }
 
-            InheritType setting = (InheritType)((_type & 0x00F00000) >> 20);
+            InheritType setting = (InheritType) ((_type & 0x00F00000) >> 20);
 
             return setting == InheritType.AnyObject
-                || (setting == InheritType.ApplicationObjects && type == ObjectType.Application)
-                || (setting == InheritType.DeviceObjects && type == ObjectType.Device);
+                   || (setting == InheritType.ApplicationObjects && type == ObjectType.Application)
+                   || (setting == InheritType.DeviceObjects && type == ObjectType.Device);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace DiscUtils.BootConfig
         /// <returns><c>true</c> if present, else <c>false</c>.</returns>
         public bool HasElement(WellKnownElement id)
         {
-            return HasElement((int)id);
+            return HasElement((int) id);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace DiscUtils.BootConfig
         /// <returns>The element object.</returns>
         public Element GetElement(WellKnownElement id)
         {
-            return GetElement((int)id);
+            return GetElement((int) id);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace DiscUtils.BootConfig
         /// <returns>The element object.</returns>
         public Element AddElement(WellKnownElement id, ElementValue initialValue)
         {
-            return AddElement((int)id, initialValue);
+            return AddElement((int) id, initialValue);
         }
 
         /// <summary>
@@ -333,7 +333,7 @@ namespace DiscUtils.BootConfig
         /// <param name="id">The element to remove.</param>
         public void RemoveElement(WellKnownElement id)
         {
-            RemoveElement((int)id);
+            RemoveElement((int) id);
         }
 
         /// <summary>
@@ -347,12 +347,12 @@ namespace DiscUtils.BootConfig
 
         internal static int MakeApplicationType(ApplicationImageType imageType, ApplicationType appType)
         {
-            return 0x10000000 | (((int)imageType << 20) & 0x00F00000) | ((int)appType & 0x0000FFFF);
+            return 0x10000000 | (((int) imageType << 20) & 0x00F00000) | ((int) appType & 0x0000FFFF);
         }
 
         internal static int MakeInheritType(InheritType inheritType)
         {
-            return 0x20000000 | (((int)inheritType << 20) & 0x00F00000);
+            return 0x20000000 | (((int) inheritType << 20) & 0x00F00000);
         }
 
         private static void AddMapping(string name, string id)

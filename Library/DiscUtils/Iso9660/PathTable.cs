@@ -35,7 +35,8 @@ namespace DiscUtils.Iso9660
 
         private byte[] _readCache;
 
-        public PathTable(bool byteSwap, Encoding enc, List<BuildDirectoryInfo> dirs, Dictionary<BuildDirectoryMember, uint> locations, long start)
+        public PathTable(bool byteSwap, Encoding enc, List<BuildDirectoryInfo> dirs,
+            Dictionary<BuildDirectoryMember, uint> locations, long start)
             : base(start, CalcLength(enc, dirs))
         {
             _byteSwap = byteSwap;
@@ -74,9 +75,9 @@ namespace DiscUtils.Iso9660
         {
             long relPos = diskOffset - Start;
 
-            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
+            int numRead = (int) Math.Min(count, _readCache.Length - relPos);
 
-            Array.Copy(_readCache, (int)relPos, buffer, offset, numRead);
+            Array.Copy(_readCache, (int) relPos, buffer, offset, numRead);
 
             return numRead;
         }

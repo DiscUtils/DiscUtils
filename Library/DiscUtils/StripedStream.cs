@@ -51,7 +51,8 @@ namespace DiscUtils
             {
                 if (stream.CanRead != _canRead || stream.CanWrite != _canWrite)
                 {
-                    throw new ArgumentException("All striped streams must have the same read/write permissions", nameof(wrapped));
+                    throw new ArgumentException("All striped streams must have the same read/write permissions",
+                        nameof(wrapped));
                 }
 
                 if (stream.Length != subStreamLength)
@@ -60,7 +61,7 @@ namespace DiscUtils
                 }
             }
 
-            _length = subStreamLength * wrapped.Length;
+            _length = subStreamLength*wrapped.Length;
         }
 
         public override bool CanRead
@@ -85,15 +86,9 @@ namespace DiscUtils
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
-            set
-            {
-                _position = value;
-            }
+            set { _position = value; }
         }
 
         public override IEnumerable<StreamExtent> Extents
@@ -121,20 +116,20 @@ namespace DiscUtils
                 throw new InvalidOperationException("Attempt to read to non-readable stream");
             }
 
-            int maxToRead = (int)Math.Min(_length - _position, count);
+            int maxToRead = (int) Math.Min(_length - _position, count);
 
             int totalRead = 0;
             while (totalRead < maxToRead)
             {
-                long stripe = _position / _stripeSize;
-                long stripeOffset = _position % _stripeSize;
-                int stripeToRead = (int)Math.Min(maxToRead - totalRead, _stripeSize - stripeOffset);
+                long stripe = _position/_stripeSize;
+                long stripeOffset = _position%_stripeSize;
+                int stripeToRead = (int) Math.Min(maxToRead - totalRead, _stripeSize - stripeOffset);
 
-                int streamIdx = (int)(stripe % _wrapped.Count);
-                long streamStripe = stripe / _wrapped.Count;
+                int streamIdx = (int) (stripe%_wrapped.Count);
+                long streamStripe = stripe/_wrapped.Count;
 
                 Stream targetStream = _wrapped[streamIdx];
-                targetStream.Position = (streamStripe * _stripeSize) + stripeOffset;
+                targetStream.Position = (streamStripe*_stripeSize) + stripeOffset;
 
                 int numRead = targetStream.Read(buffer, offset + totalRead, stripeToRead);
                 _position += numRead;
@@ -190,15 +185,15 @@ namespace DiscUtils
             int totalWritten = 0;
             while (totalWritten < count)
             {
-                long stripe = _position / _stripeSize;
-                long stripeOffset = _position % _stripeSize;
-                int stripeToWrite = (int)Math.Min(count - totalWritten, _stripeSize - stripeOffset);
+                long stripe = _position/_stripeSize;
+                long stripeOffset = _position%_stripeSize;
+                int stripeToWrite = (int) Math.Min(count - totalWritten, _stripeSize - stripeOffset);
 
-                int streamIdx = (int)(stripe % _wrapped.Count);
-                long streamStripe = stripe / _wrapped.Count;
+                int streamIdx = (int) (stripe%_wrapped.Count);
+                long streamStripe = stripe/_wrapped.Count;
 
                 Stream targetStream = _wrapped[streamIdx];
-                targetStream.Position = (streamStripe * _stripeSize) + stripeOffset;
+                targetStream.Position = (streamStripe*_stripeSize) + stripeOffset;
                 targetStream.Write(buffer, offset + totalWritten, stripeToWrite);
 
                 _position += stripeToWrite;

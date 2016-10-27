@@ -51,7 +51,8 @@ namespace DiscUtils.Vdi
         {
         }
 
-        public static HeaderRecord Initialized(ImageType type, ImageFlags flags, long size, int blockSize, int blockExtra)
+        public static HeaderRecord Initialized(ImageType type, ImageFlags flags, long size, int blockSize,
+            int blockExtra)
         {
             HeaderRecord result = new HeaderRecord();
 
@@ -64,11 +65,11 @@ namespace DiscUtils.Vdi
             result.DiskSize = size;
             result.BlockSize = blockSize;
             result.BlockExtraSize = blockExtra;
-            result.BlockCount = (int)((size + blockSize - 1) / blockSize);
+            result.BlockCount = (int) ((size + blockSize - 1)/blockSize);
             result.BlocksAllocated = 0;
 
-            result.BlocksOffset = ((PreHeaderRecord.Size + result.HeaderSize + 511) / 512) * 512;
-            result.DataOffset = (uint)(((result.BlocksOffset + (result.BlockCount * 4) + 511) / 512) * 512);
+            result.BlocksOffset = ((PreHeaderRecord.Size + result.HeaderSize + 511)/512)*512;
+            result.DataOffset = (uint) (((result.BlocksOffset + (result.BlockCount*4) + 511)/512)*512);
 
             result.UniqueId = Guid.NewGuid();
             result.ModificationId = Guid.NewGuid();
@@ -104,9 +105,9 @@ namespace DiscUtils.Vdi
         {
             if (version.Major == 0)
             {
-                ImageType = (ImageType)Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-                Flags = (ImageFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-                Comment = Utilities.BytesToString(buffer, offset + 8, 256).TrimEnd(new char[] { '\0' });
+                ImageType = (ImageType) Utilities.ToUInt32LittleEndian(buffer, offset + 0);
+                Flags = (ImageFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 4);
+                Comment = Utilities.BytesToString(buffer, offset + 8, 256).TrimEnd(new char[] {'\0'});
                 LegacyGeometry = new GeometryRecord();
                 LegacyGeometry.Read(buffer, offset + 264);
                 DiskSize = Utilities.ToInt64LittleEndian(buffer, offset + 280);
@@ -118,16 +119,16 @@ namespace DiscUtils.Vdi
                 ParentId = Utilities.ToGuidLittleEndian(buffer, offset + 332);
                 HeaderSize = 348;
                 BlocksOffset = HeaderSize + PreHeaderRecord.Size;
-                DataOffset = (uint)(BlocksOffset + (BlockCount * 4));
+                DataOffset = (uint) (BlocksOffset + (BlockCount*4));
                 BlockExtraSize = 0;
                 ParentModificationId = Guid.Empty;
             }
             else if (version.Major == 1 && version.Minor == 1)
             {
                 HeaderSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-                ImageType = (ImageType)Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-                Flags = (ImageFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-                Comment = Utilities.BytesToString(buffer, offset + 12, 256).TrimEnd(new char[] { '\0' });
+                ImageType = (ImageType) Utilities.ToUInt32LittleEndian(buffer, offset + 4);
+                Flags = (ImageFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 8);
+                Comment = Utilities.BytesToString(buffer, offset + 12, 256).TrimEnd(new char[] {'\0'});
                 BlocksOffset = Utilities.ToUInt32LittleEndian(buffer, offset + 268);
                 DataOffset = Utilities.ToUInt32LittleEndian(buffer, offset + 272);
                 LegacyGeometry = new GeometryRecord();
@@ -153,7 +154,7 @@ namespace DiscUtils.Vdi
                 throw new IOException("Unrecognized file version: " + version);
             }
 
-            return (int)HeaderSize;
+            return (int) HeaderSize;
         }
 
         public void Write(Stream s)
@@ -167,8 +168,8 @@ namespace DiscUtils.Vdi
         {
             if (_fileVersion.Major == 0)
             {
-                Utilities.WriteBytesLittleEndian((uint)ImageType, buffer, offset + 0);
-                Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 4);
+                Utilities.WriteBytesLittleEndian((uint) ImageType, buffer, offset + 0);
+                Utilities.WriteBytesLittleEndian((uint) Flags, buffer, offset + 4);
                 Utilities.StringToBytes(Comment, buffer, offset + 8, 256);
                 LegacyGeometry.Write(buffer, offset + 264);
                 Utilities.WriteBytesLittleEndian(DiskSize, buffer, offset + 280);
@@ -182,8 +183,8 @@ namespace DiscUtils.Vdi
             else if (_fileVersion.Major == 1 && _fileVersion.Minor == 1)
             {
                 Utilities.WriteBytesLittleEndian(HeaderSize, buffer, offset + 0);
-                Utilities.WriteBytesLittleEndian((uint)ImageType, buffer, offset + 4);
-                Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 8);
+                Utilities.WriteBytesLittleEndian((uint) ImageType, buffer, offset + 4);
+                Utilities.WriteBytesLittleEndian((uint) Flags, buffer, offset + 8);
                 Utilities.StringToBytes(Comment, buffer, offset + 12, 256);
                 Utilities.WriteBytesLittleEndian(BlocksOffset, buffer, offset + 268);
                 Utilities.WriteBytesLittleEndian(DataOffset, buffer, offset + 272);
@@ -208,7 +209,7 @@ namespace DiscUtils.Vdi
                 throw new IOException("Unrecognized file version: " + _fileVersion);
             }
 
-            return (int)HeaderSize;
+            return (int) HeaderSize;
         }
     }
 }

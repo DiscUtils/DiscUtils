@@ -24,6 +24,7 @@ namespace DiscUtils.Iscsi
 {
     using System;
     using System.IO;
+
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -63,11 +64,11 @@ namespace DiscUtils.Iscsi
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Initializes a new instance of the IscsiException class.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">Ther context.</param>
+/// <summary>
+/// Initializes a new instance of the IscsiException class.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">Ther context.</param>
         protected IscsiException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

@@ -48,10 +48,7 @@ namespace DiscUtils.Vhdx
 
         public bool IsValid
         {
-            get
-            {
-                return Signature == LogEntrySignature;
-            }
+            get { return Signature == LogEntrySignature; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)

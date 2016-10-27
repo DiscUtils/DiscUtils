@@ -35,12 +35,12 @@ namespace DiscUtils
         /// <summary>
         /// Unknown, or unspecified role.
         /// </summary>
-        None     = 0x00,
+        None = 0x00,
 
         /// <summary>
         /// Cluster is free.
         /// </summary>
-        Free     = 0x01,
+        Free = 0x01,
 
         /// <summary>
         /// Cluster is in use by a normal file.
@@ -68,7 +68,7 @@ namespace DiscUtils
         /// <summary>
         /// Cluster is marked bad.
         /// </summary>
-        Bad      = 0x20,
+        Bad = 0x20,
     }
 
     /// <summary>
@@ -80,7 +80,8 @@ namespace DiscUtils
         private object[] _clusterToFileId;
         private Dictionary<object, string[]> _fileIdToPaths;
 
-        internal ClusterMap(ClusterRoles[] clusterToRole, object[] clusterToFileId, Dictionary<object, string[]> fileIdToPaths)
+        internal ClusterMap(ClusterRoles[] clusterToRole, object[] clusterToFileId,
+            Dictionary<object, string[]> fileIdToPaths)
         {
             _clusterToRole = clusterToRole;
             _clusterToFileId = clusterToFileId;

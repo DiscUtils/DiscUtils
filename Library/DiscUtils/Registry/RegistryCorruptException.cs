@@ -23,6 +23,7 @@
 namespace DiscUtils.Registry
 {
     using System;
+
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -62,11 +63,11 @@ namespace DiscUtils.Registry
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Initializes a new instance of the RegistryCorruptException class.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">The streaming context.</param>
+/// <summary>
+/// Initializes a new instance of the RegistryCorruptException class.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">The streaming context.</param>
         protected RegistryCorruptException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

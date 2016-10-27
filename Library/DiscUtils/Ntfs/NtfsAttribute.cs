@@ -45,10 +45,7 @@ namespace DiscUtils.Ntfs
 
         public AttributeReference Reference
         {
-            get
-            {
-                return new AttributeReference(_containingFile, _primaryRecord.AttributeId);
-            }
+            get { return new AttributeReference(_containingFile, _primaryRecord.AttributeId); }
         }
 
         public AttributeType Type
@@ -63,10 +60,7 @@ namespace DiscUtils.Ntfs
 
         public AttributeFlags Flags
         {
-            get
-            {
-                return _primaryRecord.Flags;
-            }
+            get { return _primaryRecord.Flags; }
 
             set
             {
@@ -87,10 +81,7 @@ namespace DiscUtils.Ntfs
 
         public AttributeRecord PrimaryRecord
         {
-            get
-            {
-                return _primaryRecord;
-            }
+            get { return _primaryRecord; }
         }
 
         public int CompressionUnitSize
@@ -165,7 +156,7 @@ namespace DiscUtils.Ntfs
                     }
                     else
                     {
-                        _cachedRawBuffer = ((ResidentAttributeRecord)_primaryRecord).DataBuffer;
+                        _cachedRawBuffer = ((ResidentAttributeRecord) _primaryRecord).DataBuffer;
                     }
                 }
 

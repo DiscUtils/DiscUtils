@@ -71,7 +71,7 @@ namespace DiscUtils.Wim
 
             DirectoryEntry result = new DirectoryEntry();
             result.Length = length;
-            result.Attributes = (FileAttributes)reader.ReadUInt32();
+            result.Attributes = (FileAttributes) reader.ReadUInt32();
             result.SecurityId = reader.ReadUInt32();
             result.SubdirOffset = reader.ReadInt64();
             reader.Skip(16);
@@ -106,7 +106,7 @@ namespace DiscUtils.Wim
 
             if (startPos + length > reader.Position)
             {
-                int toRead = (int)(startPos + length - reader.Position);
+                int toRead = (int) (startPos + length - reader.Position);
                 reader.Skip(toRead);
             }
 
@@ -155,7 +155,9 @@ namespace DiscUtils.Wim
                 return streamEntry.Length;
             }
 
-            throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "No such alternate stream '{0}' in file '{1}'", streamName, FileName), FileName + ":" + streamName);
+            throw new FileNotFoundException(
+                string.Format(CultureInfo.InvariantCulture, "No such alternate stream '{0}' in file '{1}'", streamName,
+                    FileName), FileName + ":" + streamName);
         }
     }
 }

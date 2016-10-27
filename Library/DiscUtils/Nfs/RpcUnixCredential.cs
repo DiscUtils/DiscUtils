@@ -51,7 +51,7 @@ namespace DiscUtils.Nfs
         /// <param name="user">The user's unique id (UID).</param>
         /// <param name="primaryGroup">The user's primary group id (GID).</param>
         public RpcUnixCredential(int user, int primaryGroup)
-            : this(user, primaryGroup, new int[] { })
+            : this(user, primaryGroup, new int[] {})
         {
         }
 
@@ -76,13 +76,13 @@ namespace DiscUtils.Nfs
 
         internal override void Write(XdrDataWriter writer)
         {
-            writer.Write((int)0);
+            writer.Write((int) 0);
             writer.Write(_machineName);
             writer.Write(_uid);
             writer.Write(_gid);
             if (_gids == null)
             {
-                writer.Write((int)0);
+                writer.Write((int) 0);
             }
             else
             {

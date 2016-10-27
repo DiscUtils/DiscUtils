@@ -50,12 +50,16 @@ namespace DiscUtils.Vmdk
 
         public override bool IsSparse
         {
-            get { return _descriptor.Type == ExtentType.Sparse || _descriptor.Type == ExtentType.VmfsSparse || _descriptor.Type == ExtentType.Zero; }
+            get
+            {
+                return _descriptor.Type == ExtentType.Sparse || _descriptor.Type == ExtentType.VmfsSparse ||
+                       _descriptor.Type == ExtentType.Zero;
+            }
         }
 
         public override long Capacity
         {
-            get { return _descriptor.SizeInSectors * Sizes.Sector; }
+            get { return _descriptor.SizeInSectors*Sizes.Sector; }
         }
 
         public override long StoredSize
@@ -68,7 +72,9 @@ namespace DiscUtils.Vmdk
                 }
                 else
                 {
-                    using (Stream s = _fileLocator.Open(_descriptor.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (
+                        Stream s = _fileLocator.Open(_descriptor.FileName, FileMode.Open, FileAccess.Read,
+                            FileShare.Read))
                     {
                         return s.Length;
                     }
@@ -86,7 +92,8 @@ namespace DiscUtils.Vmdk
                 share = FileShare.None;
             }
 
-            if (_descriptor.Type != ExtentType.Sparse && _descriptor.Type != ExtentType.VmfsSparse && _descriptor.Type != ExtentType.Zero)
+            if (_descriptor.Type != ExtentType.Sparse && _descriptor.Type != ExtentType.VmfsSparse &&
+                _descriptor.Type != ExtentType.Zero)
             {
                 if (ownsParent == Ownership.Dispose && parent != null)
                 {
@@ -95,7 +102,7 @@ namespace DiscUtils.Vmdk
             }
             else if (parent == null)
             {
-                parent = new ZeroStream(_descriptor.SizeInSectors * Sizes.Sector);
+                parent = new ZeroStream(_descriptor.SizeInSectors*Sizes.Sector);
             }
 
             if (_monolithicStream != null)
@@ -119,7 +126,7 @@ namespace DiscUtils.Vmdk
                             Ownership.Dispose);
 
                     case ExtentType.Zero:
-                        return new ZeroStream(_descriptor.SizeInSectors * Utilities.SectorSize);
+                        return new ZeroStream(_descriptor.SizeInSectors*Utilities.SectorSize);
 
                     case ExtentType.Sparse:
                         return new HostedSparseExtentStream(

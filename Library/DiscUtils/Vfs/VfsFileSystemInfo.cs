@@ -31,7 +31,8 @@ namespace DiscUtils.Vfs
     /// <param name="volumeInfo">Optional, information about the volume the file system is on.</param>
     /// <param name="parameters">Parameters for the file system.</param>
     /// <returns>A file system implementation.</returns>
-    public delegate DiscFileSystem VfsFileSystemOpener(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters);
+    public delegate DiscFileSystem VfsFileSystemOpener(
+        Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters);
 
     /// <summary>
     /// Class holding information about a file system.

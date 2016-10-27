@@ -91,7 +91,7 @@ namespace DiscUtils.Partitions
         /// </summary>
         public long Attributes
         {
-            get { return (long)_entry.Attributes; }
+            get { return (long) _entry.Attributes; }
         }
 
         /// <summary>

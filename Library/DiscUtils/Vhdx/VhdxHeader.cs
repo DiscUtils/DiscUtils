@@ -62,7 +62,7 @@ namespace DiscUtils.Vhdx
 
         public int Size
         {
-            get { return (int)(4 * Sizes.OneKiB); }
+            get { return (int) (4*Sizes.OneKiB); }
         }
 
         public bool IsValid
@@ -76,7 +76,7 @@ namespace DiscUtils.Vhdx
 
                 byte[] checkData = new byte[4096];
                 Array.Copy(_data, checkData, 4096);
-                Utilities.WriteBytesLittleEndian((uint)0, checkData, 4);
+                Utilities.WriteBytesLittleEndian((uint) 0, checkData, 4);
                 return Checksum == Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, checkData, 0, 4096);
             }
         }
@@ -110,7 +110,7 @@ namespace DiscUtils.Vhdx
         public void WriteTo(byte[] buffer, int offset)
         {
             RefreshData();
-            Array.Copy(_data, 0, buffer, offset, (int)(4 * Sizes.OneKiB));
+            Array.Copy(_data, 0, buffer, offset, (int) (4*Sizes.OneKiB));
         }
 
         private void RefreshData()

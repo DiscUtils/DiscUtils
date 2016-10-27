@@ -56,10 +56,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         public bool HasBootImage
         {
-            get
-            {
-                return GetRealFileSystem<VfsCDReader>().HasBootImage;
-            }
+            get { return GetRealFileSystem<VfsCDReader>().HasBootImage; }
         }
 
         /// <summary>
@@ -67,10 +64,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         public BootDeviceEmulation BootEmulation
         {
-            get
-            {
-                return GetRealFileSystem<VfsCDReader>().BootEmulation;
-            }
+            get { return GetRealFileSystem<VfsCDReader>().BootEmulation; }
         }
 
         /// <summary>
@@ -78,10 +72,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         public int BootLoadSegment
         {
-            get
-            {
-                return GetRealFileSystem<VfsCDReader>().BootLoadSegment;
-            }
+            get { return GetRealFileSystem<VfsCDReader>().BootLoadSegment; }
         }
 
         /// <summary>
@@ -89,10 +80,7 @@ namespace DiscUtils.Iso9660
         /// </summary>
         public long BootImageStart
         {
-            get
-            {
-                return GetRealFileSystem<VfsCDReader>().BootImageStart;
-            }
+            get { return GetRealFileSystem<VfsCDReader>().BootImageStart; }
         }
 
         /// <summary>

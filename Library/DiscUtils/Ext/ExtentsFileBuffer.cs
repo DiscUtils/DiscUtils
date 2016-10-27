@@ -62,14 +62,14 @@ namespace DiscUtils.Ext
             long blockSize = _context.SuperBlock.BlockSize;
 
             int totalRead = 0;
-            int totalBytesRemaining = (int)Math.Min(count, _inode.FileSize - pos);
+            int totalBytesRemaining = (int) Math.Min(count, _inode.FileSize - pos);
 
             ExtentBlock extents = _inode.Extents;
 
             while (totalBytesRemaining > 0)
             {
-                uint logicalBlock = (uint)((pos + totalRead) / blockSize);
-                int blockOffset = (int)((pos + totalRead) - (logicalBlock * blockSize));
+                uint logicalBlock = (uint) ((pos + totalRead)/blockSize);
+                int blockOffset = (int) ((pos + totalRead) - (logicalBlock*blockSize));
 
                 int numRead = 0;
 
@@ -80,15 +80,21 @@ namespace DiscUtils.Ext
                 }
                 else if (extent.FirstLogicalBlock > logicalBlock)
                 {
-                    numRead = (int)Math.Min(totalBytesRemaining, ((extent.FirstLogicalBlock - logicalBlock) * blockSize) - blockOffset);
+                    numRead =
+                        (int)
+                        Math.Min(totalBytesRemaining,
+                            ((extent.FirstLogicalBlock - logicalBlock)*blockSize) - blockOffset);
                     Array.Clear(buffer, offset + totalRead, numRead);
                 }
                 else
                 {
-                    long physicalBlock = (logicalBlock - extent.FirstLogicalBlock) + (long)extent.FirstPhysicalBlock;
-                    int toRead = (int)Math.Min(totalBytesRemaining, ((extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock)) * blockSize) - blockOffset);
+                    long physicalBlock = (logicalBlock - extent.FirstLogicalBlock) + (long) extent.FirstPhysicalBlock;
+                    int toRead =
+                        (int)
+                        Math.Min(totalBytesRemaining,
+                            ((extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock))*blockSize) - blockOffset);
 
-                    _context.RawStream.Position = (physicalBlock * blockSize) + blockOffset;
+                    _context.RawStream.Position = (physicalBlock*blockSize) + blockOffset;
                     numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
                 }
 
@@ -112,7 +118,7 @@ namespace DiscUtils.Ext
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             return StreamExtent.Intersect(
-                new StreamExtent[] { new StreamExtent(0, Capacity) },
+                new StreamExtent[] {new StreamExtent(0, Capacity)},
                 new StreamExtent(start, count));
         }
 
@@ -190,8 +196,8 @@ namespace DiscUtils.Ext
         private ExtentBlock LoadExtentBlock(ExtentIndex idxEntry)
         {
             uint blockSize = _context.SuperBlock.BlockSize;
-            _context.RawStream.Position = idxEntry.LeafPhysicalBlock * blockSize;
-            byte[] buffer = Utilities.ReadFully(_context.RawStream, (int)blockSize);
+            _context.RawStream.Position = idxEntry.LeafPhysicalBlock*blockSize;
+            byte[] buffer = Utilities.ReadFully(_context.RawStream, (int) blockSize);
             ExtentBlock subBlock = Utilities.ToStruct<ExtentBlock>(buffer, 0);
             return subBlock;
         }

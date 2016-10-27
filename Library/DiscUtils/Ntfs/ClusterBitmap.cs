@@ -39,7 +39,8 @@ namespace DiscUtils.Ntfs
             _file = file;
             _bitmap = new Bitmap(
                 _file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite),
-                Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64, file.Context.BiosParameterBlock.SectorsPerCluster));
+                Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64,
+                    file.Context.BiosParameterBlock.SectorsPerCluster));
         }
 
         public void Dispose()
@@ -65,7 +66,7 @@ namespace DiscUtils.Ntfs
 
             long numFound = 0;
 
-            long totalClusters = _file.Context.RawStream.Length / _file.Context.BiosParameterBlock.BytesPerCluster;
+            long totalClusters = _file.Context.RawStream.Length/_file.Context.BiosParameterBlock.BytesPerCluster;
 
             if (isMft)
             {
@@ -97,27 +98,29 @@ namespace DiscUtils.Ntfs
                 // Try to find a contiguous range
                 if (numFound < count && !_fragmentedDiskMode)
                 {
-                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, true, total / 4);
+                    numFound += FindClusters(count - numFound, result, totalClusters/8, totalClusters, isMft, true,
+                        total/4);
                 }
 
                 if (numFound < count)
                 {
-                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, false, 0);
+                    numFound += FindClusters(count - numFound, result, totalClusters/8, totalClusters, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, isMft, false, 0);
+                    numFound = FindClusters(count - numFound, result, totalClusters/16, totalClusters/8, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, isMft, false, 0);
+                    numFound = FindClusters(count - numFound, result, totalClusters/32, totalClusters/16, isMft, false,
+                        0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, isMft, false, 0);
+                    numFound = FindClusters(count - numFound, result, 0, totalClusters/32, isMft, false, 0);
                 }
             }
 
@@ -132,7 +135,7 @@ namespace DiscUtils.Ntfs
             // switch back if we found a resonable quantity in a single span.
             if ((numFound > 4 && result.Count == 1) || result.Count > 1)
             {
-                _fragmentedDiskMode = (numFound / result.Count) < 4;
+                _fragmentedDiskMode = (numFound/result.Count) < 4;
             }
 
             return result.ToArray();
@@ -209,7 +212,8 @@ namespace DiscUtils.Ntfs
         /// <param name="contiguous">Indicates if contiguous clusters are required.</param>
         /// <param name="headroom">Indicates how many clusters to skip before next allocation, to prevent fragmentation.</param>
         /// <returns>The number of clusters found in the range.</returns>
-        private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, bool isMft, bool contiguous, long headroom)
+        private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, bool isMft,
+            bool contiguous, long headroom)
         {
             long numFound = 0;
 

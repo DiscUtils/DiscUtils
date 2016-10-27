@@ -74,7 +74,7 @@ namespace DiscUtils
         /// <param name="bytesPerSector">The number of bytes per sector of the disk.</param>
         public Geometry(long capacity, int headsPerCylinder, int sectorsPerTrack, int bytesPerSector)
         {
-            _cylinders = (int)(capacity / (headsPerCylinder * (long)sectorsPerTrack * bytesPerSector));
+            _cylinders = (int) (capacity/(headsPerCylinder*(long) sectorsPerTrack*bytesPerSector));
             _headsPerCylinder = headsPerCylinder;
             _sectorsPerTrack = sectorsPerTrack;
             _bytesPerSector = bytesPerSector;
@@ -126,7 +126,7 @@ namespace DiscUtils
         [Obsolete("Use TotalSectorsLong instead, to support very large disks.")]
         public int TotalSectors
         {
-            get { return Cylinders * HeadsPerCylinder * SectorsPerTrack; }
+            get { return Cylinders*HeadsPerCylinder*SectorsPerTrack; }
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace DiscUtils
         /// </summary>
         public long TotalSectorsLong
         {
-            get { return (long)Cylinders * (long)HeadsPerCylinder * (long)SectorsPerTrack; }
+            get { return (long) Cylinders*(long) HeadsPerCylinder*(long) SectorsPerTrack; }
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace DiscUtils
         /// </summary>
         public long Capacity
         {
-            get { return TotalSectorsLong * (long)BytesPerSector; }
+            get { return TotalSectorsLong*(long) BytesPerSector; }
         }
 
         /// <summary>
@@ -205,19 +205,19 @@ namespace DiscUtils
         public static Geometry LbaAssistedBiosGeometry(long capacity)
         {
             int heads;
-            if (capacity <= 504 * Sizes.OneMiB)
+            if (capacity <= 504*Sizes.OneMiB)
             {
                 heads = 16;
             }
-            else if (capacity <= 1008 * Sizes.OneMiB)
+            else if (capacity <= 1008*Sizes.OneMiB)
             {
                 heads = 32;
             }
-            else if (capacity <= 2016 * Sizes.OneMiB)
+            else if (capacity <= 2016*Sizes.OneMiB)
             {
                 heads = 64;
             }
-            else if (capacity <= 4032 * Sizes.OneMiB)
+            else if (capacity <= 4032*Sizes.OneMiB)
             {
                 heads = 128;
             }
@@ -227,7 +227,7 @@ namespace DiscUtils
             }
 
             int sectors = 63;
-            int cylinders = (int)Math.Min(1024, capacity / (sectors * (long)heads * Sizes.Sector));
+            int cylinders = (int) Math.Min(1024, capacity/(sectors*(long) heads*Sizes.Sector));
             return new Geometry(cylinders, heads, sectors, Sizes.Sector);
         }
 
@@ -284,20 +284,20 @@ namespace DiscUtils
             int sectorsPerTrack;
 
             // If more than ~128GB truncate at ~128GB
-            if (capacity > 65535 * (long)16 * 255 * sectorSize)
+            if (capacity > 65535*(long) 16*255*sectorSize)
             {
-                totalSectors = 65535 * 16 * 255;
+                totalSectors = 65535*16*255;
             }
             else
             {
-                totalSectors = (int)(capacity / sectorSize);
+                totalSectors = (int) (capacity/sectorSize);
             }
 
             // If more than ~32GB, break partition table compatibility.
             // Partition table has max 63 sectors per track.  Otherwise
             // we're looking for a geometry that's valid for both BIOS
             // and ATA.
-            if (totalSectors > 65535 * 16 * 63)
+            if (totalSectors > 65535*16*63)
             {
                 sectorsPerTrack = 255;
                 headsPerCylinder = 16;
@@ -305,8 +305,8 @@ namespace DiscUtils
             else
             {
                 sectorsPerTrack = 17;
-                int cylindersTimesHeads = totalSectors / sectorsPerTrack;
-                headsPerCylinder = (cylindersTimesHeads + 1023) / 1024;
+                int cylindersTimesHeads = totalSectors/sectorsPerTrack;
+                headsPerCylinder = (cylindersTimesHeads + 1023)/1024;
 
                 if (headsPerCylinder < 4)
                 {
@@ -314,22 +314,22 @@ namespace DiscUtils
                 }
 
                 // If we need more than 1023 cylinders, or 16 heads, try more sectors per track
-                if (cylindersTimesHeads >= (headsPerCylinder * 1024U) || headsPerCylinder > 16)
+                if (cylindersTimesHeads >= (headsPerCylinder*1024U) || headsPerCylinder > 16)
                 {
                     sectorsPerTrack = 31;
                     headsPerCylinder = 16;
-                    cylindersTimesHeads = totalSectors / sectorsPerTrack;
+                    cylindersTimesHeads = totalSectors/sectorsPerTrack;
                 }
 
                 // We need 63 sectors per track to keep the cylinder count down
-                if (cylindersTimesHeads >= (headsPerCylinder * 1024U))
+                if (cylindersTimesHeads >= (headsPerCylinder*1024U))
                 {
                     sectorsPerTrack = 63;
                     headsPerCylinder = 16;
                 }
             }
 
-            cylinders = (totalSectors / sectorsPerTrack) / headsPerCylinder;
+            cylinders = (totalSectors/sectorsPerTrack)/headsPerCylinder;
 
             return new Geometry(cylinders, headsPerCylinder, sectorsPerTrack, sectorSize);
         }
@@ -370,15 +370,17 @@ namespace DiscUtils
 
             if (sector > _sectorsPerTrack)
             {
-                throw new ArgumentOutOfRangeException(nameof(sector), sector, "sector number is larger than disk geometry");
+                throw new ArgumentOutOfRangeException(nameof(sector), sector,
+                    "sector number is larger than disk geometry");
             }
 
             if (sector < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(sector), sector, "sector number is less than one (sectors are 1-based)");
+                throw new ArgumentOutOfRangeException(nameof(sector), sector,
+                    "sector number is less than one (sectors are 1-based)");
             }
 
-            return (((cylinder * (long)_headsPerCylinder) + head) * _sectorsPerTrack) + sector - 1;
+            return (((cylinder*(long) _headsPerCylinder) + head)*_sectorsPerTrack) + sector - 1;
         }
 
         /// <summary>
@@ -390,13 +392,14 @@ namespace DiscUtils
         {
             if (logicalBlockAddress < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(logicalBlockAddress), logicalBlockAddress, "Logical Block Address is negative");
+                throw new ArgumentOutOfRangeException(nameof(logicalBlockAddress), logicalBlockAddress,
+                    "Logical Block Address is negative");
             }
 
-            int cylinder = (int)(logicalBlockAddress / (_headsPerCylinder * _sectorsPerTrack));
-            int temp = (int)(logicalBlockAddress % (_headsPerCylinder * _sectorsPerTrack));
-            int head = temp / _sectorsPerTrack;
-            int sector = (temp % _sectorsPerTrack) + 1;
+            int cylinder = (int) (logicalBlockAddress/(_headsPerCylinder*_sectorsPerTrack));
+            int temp = (int) (logicalBlockAddress%(_headsPerCylinder*_sectorsPerTrack));
+            int head = temp/_sectorsPerTrack;
+            int sector = (temp%_sectorsPerTrack) + 1;
 
             return new ChsAddress(cylinder, head, sector);
         }
@@ -421,7 +424,7 @@ namespace DiscUtils
         {
             if (capacity <= 0)
             {
-                capacity = TotalSectorsLong * 512L;
+                capacity = TotalSectorsLong*512L;
             }
 
             switch (translation)
@@ -446,7 +449,9 @@ namespace DiscUtils
                     return Geometry.LargeBiosGeometry(this);
 
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Translation mode '{0}' not yet implemented", translation), nameof(translation));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Translation mode '{0}' not yet implemented",
+                            translation), nameof(translation));
             }
         }
 
@@ -462,10 +467,10 @@ namespace DiscUtils
                 return false;
             }
 
-            Geometry other = (Geometry)obj;
+            Geometry other = (Geometry) obj;
 
             return _cylinders == other._cylinders && _headsPerCylinder == other._headsPerCylinder
-                && _sectorsPerTrack == other._sectorsPerTrack && _bytesPerSector == other._bytesPerSector;
+                   && _sectorsPerTrack == other._sectorsPerTrack && _bytesPerSector == other._bytesPerSector;
         }
 
         /// <summary>
@@ -475,7 +480,7 @@ namespace DiscUtils
         public override int GetHashCode()
         {
             return _cylinders.GetHashCode() ^ _headsPerCylinder.GetHashCode()
-                ^ _sectorsPerTrack.GetHashCode() ^ _bytesPerSector.GetHashCode();
+                   ^ _sectorsPerTrack.GetHashCode() ^ _bytesPerSector.GetHashCode();
         }
 
         /// <summary>

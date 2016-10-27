@@ -26,15 +26,9 @@ namespace DiscUtils.Ntfs
 
     internal abstract class ClusterStream
     {
-        public abstract long AllocatedClusterCount
-        {
-            get;
-        }
+        public abstract long AllocatedClusterCount { get; }
 
-        public abstract IEnumerable<Range<long, long>> StoredClusters
-        {
-            get;
-        }
+        public abstract IEnumerable<Range<long, long>> StoredClusters { get; }
 
         public abstract bool IsClusterStored(long vcn);
 

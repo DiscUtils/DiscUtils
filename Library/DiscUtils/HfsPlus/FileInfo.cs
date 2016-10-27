@@ -40,7 +40,7 @@ namespace DiscUtils.HfsPlus
         {
             FileType = Utilities.ToUInt32BigEndian(buffer, offset + 0);
             FileCreator = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            FinderFlags = (FinderFlags)Utilities.ToUInt16BigEndian(buffer, offset + 8);
+            FinderFlags = (FinderFlags) Utilities.ToUInt16BigEndian(buffer, offset + 8);
             Point = Utilities.ToStruct<Point>(buffer, offset + 10);
 
             return 16;

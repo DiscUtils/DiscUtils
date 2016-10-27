@@ -48,8 +48,8 @@ namespace DiscUtils.Ntfs
         public void WriteTo(byte[] buffer, int offset)
         {
             Utilities.WriteBytesLittleEndian(Tag, buffer, offset);
-            Utilities.WriteBytesLittleEndian((ushort)Content.Length, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 6);
+            Utilities.WriteBytesLittleEndian((ushort) Content.Length, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 6);
             Array.Copy(Content, 0, buffer, offset + 8, Content.Length);
         }
 

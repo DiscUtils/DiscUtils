@@ -40,7 +40,7 @@ namespace DiscUtils.HfsPlus
             _keyLength = 10;
             _nodeId = cnid;
             _startBlock = startBlock;
-            _forkType = (byte)(resource_fork ? 0xff : 0x00);
+            _forkType = (byte) (resource_fork ? 0xff : 0x00);
         }
 
         public CatalogNodeId NodeId

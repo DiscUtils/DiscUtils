@@ -26,7 +26,7 @@ namespace DiscUtils.Nfs
     {
         public Nfs3RenameResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status)reader.ReadInt32();
+            Status = (Nfs3Status) reader.ReadInt32();
             FromDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);
             ToDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);
         }

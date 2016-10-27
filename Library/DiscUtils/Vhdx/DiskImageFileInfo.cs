@@ -37,7 +37,8 @@ namespace DiscUtils.Vhdx
         private Metadata _metadata;
         private LogSequence _activeLogSequence;
 
-        internal DiskImageFileInfo(FileHeader fileHeader, VhdxHeader vhdxHeader1, VhdxHeader vhdxHeader2, RegionTable regions, Metadata metadata, LogSequence activeLogSequence)
+        internal DiskImageFileInfo(FileHeader fileHeader, VhdxHeader vhdxHeader1, VhdxHeader vhdxHeader2,
+            RegionTable regions, Metadata metadata, LogSequence activeLogSequence)
         {
             _fileHeader = fileHeader;
             _vhdxHeader1 = vhdxHeader1;
@@ -97,7 +98,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public long DiskSize
         {
-            get { return (long)_metadata.DiskSize; }
+            get { return (long) _metadata.DiskSize; }
         }
 
         /// <summary>
@@ -129,7 +130,12 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public IDictionary<string, string> ParentLocatorEntries
         {
-            get { return (_metadata.ParentLocator != null) ? _metadata.ParentLocator.Entries : new Dictionary<string, string>(); }
+            get
+            {
+                return (_metadata.ParentLocator != null)
+                    ? _metadata.ParentLocator.Entries
+                    : new Dictionary<string, string>();
+            }
         }
 
         /// <summary>
@@ -172,7 +178,10 @@ namespace DiscUtils.Vhdx
                 }
                 else
                 {
-                    return new HeaderInfo((_vhdxHeader1.SequenceNumber > _vhdxHeader2.SequenceNumber) ? _vhdxHeader1 : _vhdxHeader2);
+                    return
+                        new HeaderInfo((_vhdxHeader1.SequenceNumber > _vhdxHeader2.SequenceNumber)
+                            ? _vhdxHeader1
+                            : _vhdxHeader2);
                 }
             }
         }

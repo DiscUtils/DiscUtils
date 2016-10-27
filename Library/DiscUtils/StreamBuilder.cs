@@ -49,7 +49,7 @@ namespace DiscUtils
         {
             using (Stream src = Build())
             {
-                byte[] buffer = new byte[64 * 1024];
+                byte[] buffer = new byte[64*1024];
                 int numRead = src.Read(buffer, 0, buffer.Length);
                 while (numRead != 0)
                 {

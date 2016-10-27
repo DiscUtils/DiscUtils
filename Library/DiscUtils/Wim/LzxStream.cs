@@ -51,7 +51,7 @@ namespace DiscUtils.Wim
         private HuffmanTree _mainTree = null;
         private HuffmanTree _lengthTree = null;
         private HuffmanTree _alignedOffsetTree = null;
-        private uint[] _repeatedOffsets = new uint[] { 1, 1, 1 };
+        private uint[] _repeatedOffsets = new uint[] {1, 1, 1};
 
         static LzxStream()
         {
@@ -64,8 +64,8 @@ namespace DiscUtils.Wim
             {
                 s_extraBits[i] = numBits;
                 s_extraBits[i + 1] = numBits;
-                s_positionSlots[i] = s_positionSlots[i - 1] + (uint)(1 << (int)s_extraBits[i - 1]);
-                s_positionSlots[i + 1] = s_positionSlots[i] + (uint)(1 << (int)numBits);
+                s_positionSlots[i] = s_positionSlots[i - 1] + (uint) (1 << (int) s_extraBits[i - 1]);
+                s_positionSlots[i + 1] = s_positionSlots[i] + (uint) (1 << (int) numBits);
 
                 if (numBits < 17)
                 {
@@ -79,7 +79,7 @@ namespace DiscUtils.Wim
             _bitStream = new LzxBitStream(new BufferedStream(stream, 8192));
             _windowBits = windowBits;
             _fileSize = fileSize;
-            _numPositionSlots = _windowBits * 2;
+            _numPositionSlots = _windowBits*2;
             _buffer = new byte[1 << windowBits];
 
             ReadBlocks();
@@ -115,15 +115,9 @@ namespace DiscUtils.Wim
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
 
-            set
-            {
-                _position = value;
-            }
+            set { _position = value; }
         }
 
         public override void Flush()
@@ -137,8 +131,8 @@ namespace DiscUtils.Wim
                 return 0;
             }
 
-            int numToRead = (int)Math.Min(count, _bufferCount - _position);
-            Array.Copy(_buffer, (int)_position, buffer, offset, numToRead);
+            int numToRead = (int) Math.Min(count, _bufferCount - _position);
+            Array.Copy(_buffer, (int) _position, buffer, offset, numToRead);
             _position += numToRead;
             return numToRead;
         }
@@ -160,14 +154,14 @@ namespace DiscUtils.Wim
 
         private void ReadBlocks()
         {
-            BlockType blockType = (BlockType)_bitStream.Read(3);
+            BlockType blockType = (BlockType) _bitStream.Read(3);
 
             _buffer = new byte[32768];
             _bufferCount = 0;
 
             while (blockType != BlockType.None)
             {
-                int blockSize = (_bitStream.Read(1) == 1) ? (1 << 15) : (int)_bitStream.Read(16);
+                int blockSize = (_bitStream.Read(1) == 1) ? (1 << 15) : (int) _bitStream.Read(16);
 
                 if (blockType == BlockType.Uncompressed)
                 {
@@ -177,11 +171,11 @@ namespace DiscUtils.Wim
                 {
                     DecodeCompressedBlock(blockType, blockSize);
 
-                    _bufferCount += (int)blockSize;
+                    _bufferCount += (int) blockSize;
                 }
 
                 // Read start of next block (if any)
-                blockType = (BlockType)_bitStream.Read(3);
+                blockType = (BlockType) _bitStream.Read(3);
             }
 
             FixupBlockBuffer();
@@ -252,15 +246,15 @@ namespace DiscUtils.Wim
 
             ReadMainTree();
             ReadLengthTree();
-            
+
             uint numRead = 0;
-            while (numRead < (uint)blockSize)
+            while (numRead < (uint) blockSize)
             {
                 uint symbol = _mainTree.NextSymbol(_bitStream);
 
                 if (symbol < 256)
                 {
-                    _buffer[_bufferCount + numRead++] = (byte)symbol;
+                    _buffer[_bufferCount + numRead++] = (byte) symbol;
                 }
                 else
                 {
@@ -287,7 +281,7 @@ namespace DiscUtils.Wim
                     }
                     else
                     {
-                        int extra = (int)s_extraBits[positionSlot];
+                        int extra = (int) s_extraBits[positionSlot];
 
                         uint formattedOffset;
 
@@ -322,8 +316,8 @@ namespace DiscUtils.Wim
                         _repeatedOffsets[0] = matchOffset;
                     }
 
-                    int destOffset = _bufferCount + (int)numRead;
-                    int srcOffset = destOffset - (int)matchOffset;
+                    int destOffset = _bufferCount + (int) numRead;
+                    int srcOffset = destOffset - (int) matchOffset;
                     for (int i = 0; i < matchLength; ++i)
                     {
                         _buffer[destOffset + i] = _buffer[srcOffset + i];
@@ -340,7 +334,7 @@ namespace DiscUtils.Wim
 
             if (_mainTree == null)
             {
-                lengths = new uint[256 + (8 * _numPositionSlots)];
+                lengths = new uint[256 + (8*_numPositionSlots)];
             }
             else
             {
@@ -350,7 +344,7 @@ namespace DiscUtils.Wim
             HuffmanTree preTree = ReadFixedHuffmanTree(20, 4);
             ReadLengths(preTree, lengths, 0, 256);
             preTree = ReadFixedHuffmanTree(20, 4);
-            ReadLengths(preTree, lengths, 256, 8 * _numPositionSlots);
+            ReadLengths(preTree, lengths, 256, 8*_numPositionSlots);
 
             _mainTree = new HuffmanTree(lengths);
         }
@@ -378,7 +372,7 @@ namespace DiscUtils.Wim
 
             if (oldTree == null)
             {
-                lengths = new uint[256 + (8 * _numPositionSlots)];
+                lengths = new uint[256 + (8*_numPositionSlots)];
             }
             else
             {
@@ -426,7 +420,7 @@ namespace DiscUtils.Wim
                         throw new InvalidDataException("Invalid table encoding");
                     }
 
-                    uint symbol = (17 + lengths[offset + i] - value) % 17;
+                    uint symbol = (17 + lengths[offset + i] - value)%17;
                     for (uint j = 0; j < 4 + same; ++j)
                     {
                         lengths[offset + i] = symbol;
@@ -435,7 +429,7 @@ namespace DiscUtils.Wim
                 }
                 else
                 {
-                    lengths[offset + i] = (17 + lengths[offset + i] - value) % 17;
+                    lengths[offset + i] = (17 + lengths[offset + i] - value)%17;
                     ++i;
                 }
             }

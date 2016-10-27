@@ -132,7 +132,7 @@ namespace DiscUtils
         /// </summary>
         public override byte BiosType
         {
-            get { return (_partitionInfo == null) ? (byte)0 : _partitionInfo.BiosType; }
+            get { return (_partitionInfo == null) ? (byte) 0 : _partitionInfo.BiosType; }
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace DiscUtils
         /// </summary>
         public override long Length
         {
-            get { return (_partitionInfo == null) ? _disk.Capacity : _partitionInfo.SectorCount * _disk.SectorSize; }
+            get { return (_partitionInfo == null) ? _disk.Capacity : _partitionInfo.SectorCount*_disk.SectorSize; }
         }
 
         /// <summary>
@@ -168,7 +168,9 @@ namespace DiscUtils
                             break;
                         case PhysicalVolumeType.BiosPartition:
                         case PhysicalVolumeType.ApplePartition:
-                            partId = "PO" + (_partitionInfo.FirstSector * _disk.SectorSize).ToString("X", CultureInfo.InvariantCulture);
+                            partId = "PO" +
+                                     (_partitionInfo.FirstSector*_disk.SectorSize).ToString("X",
+                                         CultureInfo.InvariantCulture);
                             break;
                         default:
                             partId = "P*";

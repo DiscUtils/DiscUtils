@@ -80,7 +80,7 @@ namespace DiscUtils.Nfs
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                Nfs3Status status = (Nfs3Status)reply.BodyReader.ReadInt32();
+                Nfs3Status status = (Nfs3Status) reply.BodyReader.ReadInt32();
                 if (status == Nfs3Status.Ok)
                 {
                     return new Nfs3MountResult(reply.BodyReader);

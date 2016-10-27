@@ -40,8 +40,8 @@ namespace DiscUtils.Ntfs
 
         public static Quotas Initialize(File file)
         {
-            Index ownerIndex = file.CreateIndex("$O", (AttributeType)0, AttributeCollationRule.Sid);
-            Index quotaIndox = file.CreateIndex("$Q", (AttributeType)0, AttributeCollationRule.UnsignedLong);
+            Index ownerIndex = file.CreateIndex("$O", (AttributeType) 0, AttributeCollationRule.Sid);
+            Index quotaIndox = file.CreateIndex("$Q", (AttributeType) 0, AttributeCollationRule.UnsignedLong);
 
             IndexView<OwnerKey, OwnerRecord> ownerIndexView = new IndexView<OwnerKey, OwnerRecord>(ownerIndex);
             IndexView<OwnerRecord, QuotaRecord> quotaIndexView = new IndexView<OwnerRecord, QuotaRecord>(quotaIndox);
@@ -220,7 +220,8 @@ namespace DiscUtils.Ntfs
 
             public override string ToString()
             {
-                return "[V:" + Version + ",F:" + Flags + ",BU:" + BytesUsed + ",CT:" + ChangeTime + ",WL:" + WarningLimit + ",HL:" + HardLimit + ",ET:" + ExceededTime + ",SID:" + Sid + "]";
+                return "[V:" + Version + ",F:" + Flags + ",BU:" + BytesUsed + ",CT:" + ChangeTime + ",WL:" +
+                       WarningLimit + ",HL:" + HardLimit + ",ET:" + ExceededTime + ",SID:" + Sid + "]";
             }
         }
     }

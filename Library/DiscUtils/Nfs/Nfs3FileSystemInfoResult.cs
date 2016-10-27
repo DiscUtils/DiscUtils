@@ -26,7 +26,7 @@ namespace DiscUtils.Nfs
     {
         public Nfs3FileSystemInfoResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status)reader.ReadInt32();
+            Status = (Nfs3Status) reader.ReadInt32();
             if (reader.ReadBool())
             {
                 PostOpAttributes = new Nfs3FileAttributes(reader);

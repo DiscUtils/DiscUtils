@@ -52,7 +52,7 @@ namespace DiscUtils.Vhdx
                 return true;
             }
 
-            if (((object)x == null) || ((object)y == null))
+            if (((object) x == null) || ((object) y == null))
             {
                 return false;
             }

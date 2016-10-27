@@ -63,16 +63,16 @@ namespace DiscUtils.Compression
 
             // The Magic BZh
             byte[] magic = new byte[3];
-            magic[0] = (byte)_bitstream.Read(8);
-            magic[1] = (byte)_bitstream.Read(8);
-            magic[2] = (byte)_bitstream.Read(8);
+            magic[0] = (byte) _bitstream.Read(8);
+            magic[1] = (byte) _bitstream.Read(8);
+            magic[2] = (byte) _bitstream.Read(8);
             if (magic[0] != 0x42 || magic[1] != 0x5A || magic[2] != 0x68)
             {
                 throw new InvalidDataException("Bad magic at start of stream");
             }
 
             // The size of the decompression blocks in multiples of 100,000
-            int blockSize = (int)_bitstream.Read(8) - 0x30;
+            int blockSize = (int) _bitstream.Read(8) - 0x30;
             if (blockSize < 1 || blockSize > 9)
             {
                 throw new InvalidDataException("Unexpected block size in header: " + blockSize);

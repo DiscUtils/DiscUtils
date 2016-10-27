@@ -73,8 +73,8 @@ namespace DiscUtils.Ntfs
 
         public static SecurityDescriptors Initialize(File file)
         {
-            file.CreateIndex("$SDH", (AttributeType)0, AttributeCollationRule.SecurityHash);
-            file.CreateIndex("$SII", (AttributeType)0, AttributeCollationRule.UnsignedLong);
+            file.CreateIndex("$SDH", (AttributeType) 0, AttributeCollationRule.SecurityHash);
+            file.CreateIndex("$SII", (AttributeType) 0, AttributeCollationRule.UnsignedLong);
             file.CreateStream(AttributeType.Data, "$SDS");
 
             return new SecurityDescriptors(file);
@@ -122,9 +122,9 @@ namespace DiscUtils.Ntfs
 
             // If we'd overflow into our duplicate block, skip over it to the
             // start of the next block
-            if (((offset + record.Size) / BlockSize) % 2 == 1)
+            if (((offset + record.Size)/BlockSize)%2 == 1)
             {
-                _nextSpace = Utilities.RoundUp(offset, BlockSize * 2);
+                _nextSpace = Utilities.RoundUp(offset, BlockSize*2);
                 offset = _nextSpace;
             }
 
@@ -150,7 +150,7 @@ namespace DiscUtils.Ntfs
             hashIndexData.Hash = record.Hash;
             hashIndexData.Id = record.Id;
             hashIndexData.SdsOffset = record.OffsetInFile;
-            hashIndexData.SdsLength = (int)record.EntrySize;
+            hashIndexData.SdsLength = (int) record.EntrySize;
 
             HashIndexKey hashIndexKey = new HashIndexKey();
             hashIndexKey.Hash = record.Hash;
@@ -162,7 +162,7 @@ namespace DiscUtils.Ntfs
             idIndexData.Hash = record.Hash;
             idIndexData.Id = record.Id;
             idIndexData.SdsOffset = record.OffsetInFile;
-            idIndexData.SdsLength = (int)record.EntrySize;
+            idIndexData.SdsLength = (int) record.EntrySize;
 
             IdIndexKey idIndexKey = new IdIndexKey();
             idIndexKey.Id = record.Id;
@@ -180,11 +180,11 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
-                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = Utilities.ReadFully(s, (int) s.Length);
 
                 foreach (var entry in _idIndex.Entries)
                 {
-                    int pos = (int)entry.Value.SdsOffset;
+                    int pos = (int) entry.Value.SdsOffset;
 
                     SecurityDescriptorRecord rec = new SecurityDescriptorRecord();
                     if (!rec.Read(buffer, pos))
@@ -232,7 +232,8 @@ namespace DiscUtils.Ntfs
 
             public override string ToString()
             {
-                return string.Format(CultureInfo.InvariantCulture, "[Data-Hash:{0},Id:{1},SdsOffset:{2},SdsLength:{3}]", Hash, Id, SdsOffset, SdsLength);
+                return string.Format(CultureInfo.InvariantCulture, "[Data-Hash:{0},Id:{1},SdsOffset:{2},SdsLength:{3}]",
+                    Hash, Id, SdsOffset, SdsLength);
             }
         }
 

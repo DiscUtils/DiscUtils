@@ -37,10 +37,7 @@ namespace DiscUtils.HfsPlus
 
         public static int Size
         {
-            get
-            {
-                return 8;
-            }
+            get { return 8; }
         }
 
         public uint Offset

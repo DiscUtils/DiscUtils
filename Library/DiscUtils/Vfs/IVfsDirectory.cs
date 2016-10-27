@@ -41,10 +41,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets a self-reference, if available.
         /// </summary>
-        TDirEntry Self
-        {
-            get;
-        }
+        TDirEntry Self { get; }
 
         /// <summary>
         /// Gets a specific directory entry, by name.

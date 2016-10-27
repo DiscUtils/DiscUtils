@@ -48,10 +48,11 @@ namespace DiscUtils.Iscsi
 
             if (_headerSegment.OpCode != OpCode.LogoutResponse)
             {
-                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LogoutResponse + " was " + _headerSegment.OpCode);
+                throw new InvalidProtocolException("Invalid opcode in response, expected " + OpCode.LogoutResponse +
+                                                   " was " + _headerSegment.OpCode);
             }
 
-            Response = (LogoutResponseCode)headerData[headerOffset + 2];
+            Response = (LogoutResponseCode) headerData[headerOffset + 2];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);

@@ -43,7 +43,7 @@ namespace DiscUtils.Vhdx
         /// to fully recreate the state of the VHDX file's metadata.</remarks>
         public int Tail
         {
-            get { return (int)_entry.Tail; }
+            get { return (int) _entry.Tail; }
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace DiscUtils.Vhdx
         /// <remarks>Consecutively numbered log entries form a sequence.</remarks>
         public long SequenceNumber
         {
-            get { return (long)_entry.SequenceNumber; }
+            get { return (long) _entry.SequenceNumber; }
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace DiscUtils.Vhdx
         /// <remarks>When shrinking a VHDX file this field is used to indicate the new (smaller) size.</remarks>
         public long FlushedFileOffset
         {
-            get { return (long)_entry.FlushedFileOffset; }
+            get { return (long) _entry.FlushedFileOffset; }
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public long LastFileOffset
         {
-            get { return (long)_entry.LastFileOffset; }
+            get { return (long) _entry.LastFileOffset; }
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace DiscUtils.Vhdx
             {
                 foreach (var range in _entry.ModifiedExtents)
                 {
-                    yield return new Range<long, long>((long)range.Offset, (long)range.Count);
+                    yield return new Range<long, long>((long) range.Offset, (long) range.Count);
                 }
             }
         }

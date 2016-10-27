@@ -23,6 +23,7 @@
 namespace DiscUtils.Iscsi
 {
     using System;
+
 #if !NETCORE
     using System.Runtime.Serialization;
     using System.Security.Permissions;
@@ -114,11 +115,11 @@ namespace DiscUtils.Iscsi
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Initializes a new instance of the ScsiCommandException class.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">Ther context.</param>
+/// <summary>
+/// Initializes a new instance of the ScsiCommandException class.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">Ther context.</param>
         protected ScsiCommandException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -136,11 +137,11 @@ namespace DiscUtils.Iscsi
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Gets the serialized state of this exception.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">The serialization context.</param>
+/// <summary>
+/// Gets the serialized state of this exception.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">The serialization context.</param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

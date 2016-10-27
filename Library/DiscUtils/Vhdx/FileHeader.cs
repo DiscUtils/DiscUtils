@@ -34,7 +34,7 @@ namespace DiscUtils.Vhdx
 
         public int Size
         {
-            get { return (int)(64 * Sizes.OneKiB); }
+            get { return (int) (64*Sizes.OneKiB); }
         }
 
         public bool IsValid
@@ -45,7 +45,7 @@ namespace DiscUtils.Vhdx
         public int ReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.ToUInt64LittleEndian(buffer, offset + 0);
-            Creator = Encoding.Unicode.GetString(buffer, offset + 8, 256 * 2).TrimEnd('\0');
+            Creator = Encoding.Unicode.GetString(buffer, offset + 8, 256*2).TrimEnd('\0');
 
             return Size;
         }

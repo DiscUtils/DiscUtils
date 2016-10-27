@@ -35,7 +35,7 @@ namespace DiscUtils.Udf
 
         public static T FromStream(Stream stream, uint sector, uint sectorSize)
         {
-            stream.Position = sector * (long)sectorSize;
+            stream.Position = sector*(long) sectorSize;
             byte[] buffer = Utilities.ReadFully(stream, 512);
 
             T result = new T();
@@ -43,7 +43,9 @@ namespace DiscUtils.Udf
             if (result.Tag.TagIdentifier != result.RequiredTagIdentifier
                 || result.Tag.TagLocation != sector)
             {
-                throw new InvalidDataException(string.Format(CultureInfo.InvariantCulture, "Corrupt UDF file system, unable to read {0} tag at sector {1}", result.RequiredTagIdentifier, sector));
+                throw new InvalidDataException(string.Format(CultureInfo.InvariantCulture,
+                    "Corrupt UDF file system, unable to read {0} tag at sector {1}", result.RequiredTagIdentifier,
+                    sector));
             }
 
             return result;

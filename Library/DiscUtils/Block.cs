@@ -27,7 +27,7 @@ namespace DiscUtils
         public Block()
         {
         }
-        
+
         public long Position { get; set; }
 
         public byte[] Data { get; set; }

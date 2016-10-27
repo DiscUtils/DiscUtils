@@ -39,7 +39,7 @@ namespace DiscUtils.LogicalDiskManager
 
             TocBlock toc = GetTableOfContents();
 
-            long dbStart = (_header.ConfigurationStartLba * 512) + (toc.Item1Start * 512);
+            long dbStart = (_header.ConfigurationStartLba*512) + (toc.Item1Start*512);
             _disk.Content.Position = dbStart;
             _database = new Database(_disk.Content);
         }
@@ -72,7 +72,8 @@ namespace DiscUtils.LogicalDiskManager
         public void Dump(TextWriter writer, string linePrefix)
         {
             writer.WriteLine(linePrefix + "DISK (" + _header.DiskId + ")");
-            writer.WriteLine(linePrefix + "      Metadata Version: " + ((_header.Version >> 16) & 0xFFFF) + "." + (_header.Version & 0xFFFF));
+            writer.WriteLine(linePrefix + "      Metadata Version: " + ((_header.Version >> 16) & 0xFFFF) + "." +
+                             (_header.Version & 0xFFFF));
             writer.WriteLine(linePrefix + "             Timestamp: " + _header.Timestamp);
             writer.WriteLine(linePrefix + "               Disk Id: " + _header.DiskId);
             writer.WriteLine(linePrefix + "               Host Id: " + _header.HostId);
@@ -106,7 +107,7 @@ namespace DiscUtils.LogicalDiskManager
                     {
                         if (part.GuidType == GuidPartitionTypes.WindowsLdmMetadata)
                         {
-                            headerPos = part.LastSector * Sizes.Sector;
+                            headerPos = part.LastSector*Sizes.Sector;
                         }
                     }
                 }
@@ -128,8 +129,8 @@ namespace DiscUtils.LogicalDiskManager
 
         private TocBlock GetTableOfContents()
         {
-            byte[] buffer = new byte[_header.TocSizeLba * 512];
-            _disk.Content.Position = (_header.ConfigurationStartLba * 512) + (1 * _header.TocSizeLba * 512);
+            byte[] buffer = new byte[_header.TocSizeLba*512];
+            _disk.Content.Position = (_header.ConfigurationStartLba*512) + (1*_header.TocSizeLba*512);
 
             _disk.Content.Read(buffer, 0, buffer.Length);
             TocBlock tocBlock = new TocBlock();

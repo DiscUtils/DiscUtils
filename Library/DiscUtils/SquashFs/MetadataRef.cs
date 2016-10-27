@@ -33,7 +33,7 @@ namespace DiscUtils.SquashFs
 
         public MetadataRef(long block, int offset)
         {
-            _value = (block << 16) | (uint)(offset & 0xFFFF);
+            _value = (block << 16) | (uint) (offset & 0xFFFF);
         }
 
         public long Block
@@ -43,7 +43,7 @@ namespace DiscUtils.SquashFs
 
         public int Offset
         {
-            get { return (int)(_value & 0xFFFF); }
+            get { return (int) (_value & 0xFFFF); }
         }
 
         public long Value

@@ -83,10 +83,7 @@ namespace DiscUtils
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
         public override IEnumerable<StreamExtent> Extents
         {
-            get
-            {
-                return OffsetExtents(_parent.GetExtentsInRange(_first, _length));
-            }
+            get { return OffsetExtents(_parent.GetExtentsInRange(_first, _length)); }
         }
 
         /// <summary>
@@ -117,7 +114,8 @@ namespace DiscUtils
                 return 0;
             }
 
-            return _parent.Read(pos + _first, buffer, offset, (int)Math.Min(count, Math.Min(_length - pos, int.MaxValue)));
+            return _parent.Read(pos + _first, buffer, offset,
+                (int) Math.Min(count, Math.Min(_length - pos, int.MaxValue)));
         }
 
         /// <summary>

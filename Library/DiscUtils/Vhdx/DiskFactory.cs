@@ -31,7 +31,7 @@ namespace DiscUtils.Vhdx
     {
         public override string[] Variants
         {
-            get { return new string[] { "fixed", "dynamic" }; }
+            get { return new string[] {"fixed", "dynamic"}; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -52,22 +52,28 @@ namespace DiscUtils.Vhdx
                     builder.DiskType = DiskType.Dynamic;
                     break;
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), nameof(variant));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant),
+                        nameof(variant));
             }
 
             return builder;
         }
 
-        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path, VirtualDiskParameters diskParameters)
+        public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
+            VirtualDiskParameters diskParameters)
         {
             switch (variant)
             {
                 case "fixed":
                     return Disk.InitializeFixed(locator, path, diskParameters.Capacity, diskParameters.Geometry);
                 case "dynamic":
-                    return Disk.InitializeDynamic(locator, path, diskParameters.Capacity, FileParameters.DefaultDynamicBlockSize);
+                    return Disk.InitializeDynamic(locator, path, diskParameters.Capacity,
+                        FileParameters.DefaultDynamicBlockSize);
                 default:
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant), nameof(variant));
+                    throw new ArgumentException(
+                        string.Format(CultureInfo.InvariantCulture, "Unknown VHD disk variant '{0}'", variant),
+                        nameof(variant));
             }
         }
 

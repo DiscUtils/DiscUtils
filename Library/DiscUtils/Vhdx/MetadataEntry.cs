@@ -42,7 +42,7 @@ namespace DiscUtils.Vhdx
             ItemId = Utilities.ToGuidLittleEndian(buffer, offset + 0);
             Offset = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             Length = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            Flags = (MetadataEntryFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 24);
+            Flags = (MetadataEntryFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 24);
             Reserved = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
@@ -53,7 +53,7 @@ namespace DiscUtils.Vhdx
             Utilities.WriteBytesLittleEndian(ItemId, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(Length, buffer, offset + 20);
-            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 24);
+            Utilities.WriteBytesLittleEndian((uint) Flags, buffer, offset + 24);
             Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 28);
         }
     }

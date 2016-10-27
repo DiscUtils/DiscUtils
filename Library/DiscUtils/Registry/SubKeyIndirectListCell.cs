@@ -49,7 +49,7 @@ namespace DiscUtils.Registry
 
         public override int Size
         {
-            get { return 4 + (_listIndexes.Count * 4); }
+            get { return 4 + (_listIndexes.Count*4); }
         }
 
         internal override int Count
@@ -83,19 +83,19 @@ namespace DiscUtils.Registry
 
             for (int i = 0; i < numElements; ++i)
             {
-                _listIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i * 0x4)));
+                _listIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i*0x4)));
             }
 
-            return 4 + (_listIndexes.Count * 4);
+            return 4 + (_listIndexes.Count*4);
         }
 
         public override void WriteTo(byte[] buffer, int offset)
         {
             Utilities.StringToBytes(_listType, buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian((ushort)_listIndexes.Count, buffer, offset + 2);
+            Utilities.WriteBytesLittleEndian((ushort) _listIndexes.Count, buffer, offset + 2);
             for (int i = 0; i < _listIndexes.Count; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_listIndexes[i], buffer, offset + 4 + (i * 4));
+                Utilities.WriteBytesLittleEndian(_listIndexes[i], buffer, offset + 4 + (i*4));
             }
         }
 
@@ -138,7 +138,7 @@ namespace DiscUtils.Registry
                 }
                 else
                 {
-                    names.Add(((KeyNodeCell)cell).Name);
+                    names.Add(((KeyNodeCell) cell).Name);
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace DiscUtils.Registry
                 }
                 else
                 {
-                    yield return (KeyNodeCell)cell;
+                    yield return (KeyNodeCell) cell;
                 }
             }
         }
@@ -257,7 +257,7 @@ namespace DiscUtils.Registry
             }
 
             cellIndex = _listIndexes[listIndex];
-            return string.Compare(name, ((KeyNodeCell)cell).Name, StringComparison.OrdinalIgnoreCase);
+            return string.Compare(name, ((KeyNodeCell) cell).Name, StringComparison.OrdinalIgnoreCase);
         }
 
         private class KeyFinder : IComparer<int>
@@ -294,7 +294,7 @@ namespace DiscUtils.Registry
                 }
                 else
                 {
-                    result = string.Compare(((KeyNodeCell)cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
+                    result = string.Compare(((KeyNodeCell) cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
                     if (result == 0)
                     {
                         CellIndex = x;

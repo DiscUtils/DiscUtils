@@ -71,7 +71,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </remarks>
         public long FirstFileCluster
         {
-            get { return (long)_record.StartVcn; }
+            get { return (long) _record.StartVcn; }
         }
 
         /// <summary>

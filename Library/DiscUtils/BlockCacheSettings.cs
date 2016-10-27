@@ -32,10 +32,10 @@ namespace DiscUtils
         /// </summary>
         public BlockCacheSettings()
         {
-            this.BlockSize = (int)(4 * Sizes.OneKiB);
-            this.ReadCacheSize = 4 * Sizes.OneMiB;
-            this.LargeReadSize = 64 * Sizes.OneKiB;
-            this.OptimumReadSize = (int)(64 * Sizes.OneKiB);
+            this.BlockSize = (int) (4*Sizes.OneKiB);
+            this.ReadCacheSize = 4*Sizes.OneMiB;
+            this.LargeReadSize = 64*Sizes.OneKiB;
+            this.OptimumReadSize = (int) (64*Sizes.OneKiB);
         }
 
         /// <summary>

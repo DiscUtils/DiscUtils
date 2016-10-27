@@ -34,7 +34,9 @@ namespace DiscUtils.Partitions
     /// streams only when a client of this class tries to read from
     /// that partition.
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "SparseMemoryStream holds no resources")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+         "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable",
+         Justification = "SparseMemoryStream holds no resources")]
     public class BiosPartitionedDiskBuilder : StreamBuilder
     {
         private long _capacity;
@@ -67,7 +69,8 @@ namespace DiscUtils.Partitions
         /// <param name="capacity">The capacity of the disk (in bytes).</param>
         /// <param name="bootSectors">The boot sector(s) of the disk.</param>
         /// <param name="biosGeometry">The BIOS geometry of the disk.</param>
-        [Obsolete("Use the variant that takes VirtualDisk, this method breaks for disks with extended partitions", false)]
+        [Obsolete("Use the variant that takes VirtualDisk, this method breaks for disks with extended partitions", false
+         )]
         public BiosPartitionedDiskBuilder(long capacity, byte[] bootSectors, Geometry biosGeometry)
         {
             if (bootSectors == null)
@@ -107,7 +110,7 @@ namespace DiscUtils.Partitions
             foreach (var extent in new BiosPartitionTable(sourceDisk).GetMetadataDiskExtents())
             {
                 sourceDisk.Content.Position = extent.Start;
-                byte[] buffer = Utilities.ReadFully(sourceDisk.Content, (int)extent.Length);
+                byte[] buffer = Utilities.ReadFully(sourceDisk.Content, (int) extent.Length);
                 _bootSectors.Position = extent.Start;
                 _bootSectors.Write(buffer, 0, buffer.Length);
             }
@@ -132,7 +135,8 @@ namespace DiscUtils.Partitions
         /// <param name="stream">The stream with the contents of the partition.</param>
         public void SetPartitionContent(int index, SparseStream stream)
         {
-            _partitionContents[index] = new BuilderSparseStreamExtent(_partitionTable[index].FirstSector * Sizes.Sector, stream);
+            _partitionContents[index] = new BuilderSparseStreamExtent(_partitionTable[index].FirstSector*Sizes.Sector,
+                stream);
         }
 
         /// <summary>
@@ -156,7 +160,7 @@ namespace DiscUtils.Partitions
             foreach (var extent in _partitionTable.GetMetadataDiskExtents())
             {
                 _bootSectors.Position = extent.Start;
-                byte[] buffer = Utilities.ReadFully(_bootSectors, (int)extent.Length);
+                byte[] buffer = Utilities.ReadFully(_bootSectors, (int) extent.Length);
 
                 extents.Add(new BuilderBufferExtent(extent.Start, buffer));
             }

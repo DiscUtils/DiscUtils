@@ -55,7 +55,7 @@ namespace DiscUtils.HfsPlus
             rootThread.ReadFrom(rootThreadData, 0);
             byte[] rootDirEntryData = Context.Catalog.Find(new CatalogKey(rootThread.ParentId, rootThread.Name));
             DirEntry rootDirEntry = new DirEntry(rootThread.Name, rootDirEntryData);
-            RootDirectory = (Directory)GetFile(rootDirEntry);
+            RootDirectory = (Directory) GetFile(rootDirEntry);
         }
 
         public override string VolumeLabel

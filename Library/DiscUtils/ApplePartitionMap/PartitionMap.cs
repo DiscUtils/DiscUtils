@@ -52,13 +52,13 @@ namespace DiscUtils.ApplePartitionMap
             PartitionMapEntry initialPart = new PartitionMapEntry(_stream);
             initialPart.ReadFrom(initialBytes, 512);
 
-            byte[] partTableData = Utilities.ReadFully(stream, (int)(initialPart.MapEntries - 1) * 512);
+            byte[] partTableData = Utilities.ReadFully(stream, (int) (initialPart.MapEntries - 1)*512);
 
             _partitions = new PartitionMapEntry[initialPart.MapEntries - 1];
             for (uint i = 0; i < initialPart.MapEntries - 1; ++i)
             {
                 _partitions[i] = new PartitionMapEntry(_stream);
-                _partitions[i].ReadFrom(partTableData, (int)(512 * i));
+                _partitions[i].ReadFrom(partTableData, (int) (512*i));
             }
         }
 

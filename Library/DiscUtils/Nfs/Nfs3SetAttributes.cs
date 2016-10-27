@@ -60,7 +60,7 @@ namespace DiscUtils.Nfs
             writer.Write(SetMode);
             if (SetMode)
             {
-                writer.Write((int)Mode);
+                writer.Write((int) Mode);
             }
 
             writer.Write(SetUid);
@@ -81,13 +81,13 @@ namespace DiscUtils.Nfs
                 writer.Write(Size);
             }
 
-            writer.Write((int)SetAccessTime);
+            writer.Write((int) SetAccessTime);
             if (SetAccessTime == Nfs3SetTimeMethod.ClientTime)
             {
                 AccessTime.Write(writer);
             }
 
-            writer.Write((int)SetModifyTime);
+            writer.Write((int) SetModifyTime);
             if (SetModifyTime == Nfs3SetTimeMethod.ClientTime)
             {
                 ModifyTime.Write(writer);

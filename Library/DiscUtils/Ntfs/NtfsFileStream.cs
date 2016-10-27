@@ -35,7 +35,8 @@ namespace DiscUtils.Ntfs
 
         private bool _isDirty;
 
-        public NtfsFileStream(NtfsFileSystem fileSystem, DirectoryEntry entry, AttributeType attrType, string attrName, FileAccess access)
+        public NtfsFileStream(NtfsFileSystem fileSystem, DirectoryEntry entry, AttributeType attrType, string attrName,
+            FileAccess access)
         {
             _entry = entry;
 

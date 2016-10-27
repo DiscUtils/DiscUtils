@@ -50,7 +50,8 @@ namespace DiscUtils.Vhd
         public Disk(Stream stream, Ownership ownsStream)
         {
             _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream),
+                Ownership.Dispose));
 
             if (_files[0].First.NeedsParent)
             {
@@ -117,18 +118,21 @@ namespace DiscUtils.Vhd
                 throw new ArgumentException("Final image file needs a parent");
             }
 
-            List<DiscUtils.Tuple<DiskImageFile, Ownership>> tempList = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>(files.Count);
+            List<DiscUtils.Tuple<DiskImageFile, Ownership>> tempList =
+                new List<DiscUtils.Tuple<DiskImageFile, Ownership>>(files.Count);
             for (int i = 0; i < files.Count - 1; ++i)
             {
                 if (!files[i].NeedsParent)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} does not have a parent disk", i));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
+                        "File at index {0} does not have a parent disk", i));
                 }
 
                 // Note: Can't do timestamp check, not a property on DiskImageFile.
                 if (files[i].Information.DynamicParentUniqueId != files[i + 1].UniqueId)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
+                        "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
                 }
 
                 tempList.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(files[i], ownsFiles));
@@ -418,7 +422,8 @@ namespace DiscUtils.Vhd
             string parentRelativePath,
             DateTime parentModificationTime)
         {
-            DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath, parentRelativePath, parentModificationTime);
+            DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath,
+                parentRelativePath, parentModificationTime);
             return new Disk(file, Ownership.Dispose, parent, ownsParent);
         }
 
@@ -452,9 +457,11 @@ namespace DiscUtils.Vhd
             return new Disk(DiskImageFile.InitializeFixed(fileLocator, path, capacity, geometry), Ownership.Dispose);
         }
 
-        internal static Disk InitializeDynamic(FileLocator fileLocator, string path, long capacity, Geometry geometry, long blockSize)
+        internal static Disk InitializeDynamic(FileLocator fileLocator, string path, long capacity, Geometry geometry,
+            long blockSize)
         {
-            return new Disk(DiskImageFile.InitializeDynamic(fileLocator, path, capacity, geometry, blockSize), Ownership.Dispose);
+            return new Disk(DiskImageFile.InitializeDynamic(fileLocator, path, capacity, geometry, blockSize),
+                Ownership.Dispose);
         }
 
         /// <summary>
@@ -510,7 +517,9 @@ namespace DiscUtils.Vhd
 
                         if (newFile.UniqueId != file.ParentUniqueId)
                         {
-                            throw new IOException(string.Format(CultureInfo.CurrentUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
+                            throw new IOException(string.Format(CultureInfo.CurrentUICulture,
+                                "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}",
+                                file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
                         }
 
                         file = newFile;
@@ -522,7 +531,8 @@ namespace DiscUtils.Vhd
 
                 if (!found)
                 {
-                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Failed to find parent for disk '{0}'", file.FullPath));
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                        "Failed to find parent for disk '{0}'", file.FullPath));
                 }
             }
         }

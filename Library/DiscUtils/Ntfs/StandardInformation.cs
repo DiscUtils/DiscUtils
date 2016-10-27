@@ -69,7 +69,7 @@ namespace DiscUtils.Ntfs
             ModificationTime = ReadDateTime(buffer, 0x08);
             MftChangedTime = ReadDateTime(buffer, 0x10);
             LastAccessTime = ReadDateTime(buffer, 0x18);
-            FileAttributes = (FileAttributeFlags)Utilities.ToUInt32LittleEndian(buffer, 0x20);
+            FileAttributes = (FileAttributeFlags) Utilities.ToUInt32LittleEndian(buffer, 0x20);
             MaxVersions = Utilities.ToUInt32LittleEndian(buffer, 0x24);
             Version = Utilities.ToUInt32LittleEndian(buffer, 0x28);
             ClassId = Utilities.ToUInt32LittleEndian(buffer, 0x2C);
@@ -96,7 +96,7 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(ModificationTime.ToFileTimeUtc(), buffer, 0x08);
             Utilities.WriteBytesLittleEndian(MftChangedTime.ToFileTimeUtc(), buffer, 0x10);
             Utilities.WriteBytesLittleEndian(LastAccessTime.ToFileTimeUtc(), buffer, 0x18);
-            Utilities.WriteBytesLittleEndian((uint)FileAttributes, buffer, 0x20);
+            Utilities.WriteBytesLittleEndian((uint) FileAttributes, buffer, 0x20);
             Utilities.WriteBytesLittleEndian(MaxVersions, buffer, 0x24);
             Utilities.WriteBytesLittleEndian(Version, buffer, 0x28);
             Utilities.WriteBytesLittleEndian(ClassId, buffer, 0x2C);
@@ -127,7 +127,7 @@ namespace DiscUtils.Ntfs
 
         internal static FileAttributes ConvertFlags(FileAttributeFlags flags, bool isDirectory)
         {
-            FileAttributes result = (FileAttributes)(((uint)flags) & 0xFFFF);
+            FileAttributes result = (FileAttributes) (((uint) flags) & 0xFFFF);
 
             if (isDirectory)
             {
@@ -139,7 +139,7 @@ namespace DiscUtils.Ntfs
 
         internal static FileAttributeFlags SetFileAttributes(FileAttributes newAttributes, FileAttributeFlags existing)
         {
-            return (FileAttributeFlags)(((uint)existing & 0xFFFF0000) | ((uint)newAttributes & 0xFFFF));
+            return (FileAttributeFlags) (((uint) existing & 0xFFFF0000) | ((uint) newAttributes & 0xFFFF));
         }
 
         private static DateTime ReadDateTime(byte[] buffer, int offset)

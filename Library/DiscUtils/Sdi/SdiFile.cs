@@ -61,8 +61,8 @@ namespace DiscUtils.Sdi
             _header = new FileHeader();
             _header.ReadFrom(page, 0);
 
-            _stream.Position = _header.PageAlignment * 512;
-            byte[] toc = Utilities.ReadFully(_stream, (int)(_header.PageAlignment * 512));
+            _stream.Position = _header.PageAlignment*512;
+            byte[] toc = Utilities.ReadFully(_stream, (int) (_header.PageAlignment*512));
 
             _sections = new List<SectionRecord>();
             int pos = 0;

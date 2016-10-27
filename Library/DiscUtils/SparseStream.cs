@@ -39,10 +39,7 @@ namespace DiscUtils
         /// Gets the parts of the stream that are stored.
         /// </summary>
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public abstract IEnumerable<StreamExtent> Extents
-        {
-            get;
-        }
+        public abstract IEnumerable<StreamExtent> Extents { get; }
 
         /// <summary>
         /// Converts any stream into a sparse stream.
@@ -134,7 +131,7 @@ namespace DiscUtils
         /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public virtual IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
-            return StreamExtent.Intersect(Extents, new StreamExtent[] { new StreamExtent(start, count) });
+            return StreamExtent.Intersect(Extents, new StreamExtent[] {new StreamExtent(start, count)});
         }
 
         private class SparseReadOnlyWrapperStream : SparseStream
@@ -170,15 +167,9 @@ namespace DiscUtils
 
             public override long Position
             {
-                get
-                {
-                    return _wrapped.Position;
-                }
+                get { return _wrapped.Position; }
 
-                set
-                {
-                    _wrapped.Position = value;
-                }
+                set { _wrapped.Position = value; }
             }
 
             public override IEnumerable<StreamExtent> Extents
@@ -265,15 +256,9 @@ namespace DiscUtils
 
             public override long Position
             {
-                get
-                {
-                    return _wrapped.Position;
-                }
+                get { return _wrapped.Position; }
 
-                set
-                {
-                    _wrapped.Position = value;
-                }
+                set { _wrapped.Position = value; }
             }
 
             public override IEnumerable<StreamExtent> Extents
@@ -293,7 +278,7 @@ namespace DiscUtils
                         }
                         else
                         {
-                            return new StreamExtent[] { new StreamExtent(0, _wrapped.Length) };
+                            return new StreamExtent[] {new StreamExtent(0, _wrapped.Length)};
                         }
                     }
                 }

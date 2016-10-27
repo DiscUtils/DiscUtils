@@ -65,13 +65,13 @@ namespace DiscUtils.SquashFs
                 _currentOffset = 0;
             }
 
-            offset = (uint)_currentOffset;
+            offset = (uint) _currentOffset;
             Array.Copy(_context.IoBuffer, 0, _currentBlock, _currentOffset, length);
             _currentOffset += length;
 
             ++_fragmentCount;
 
-            return (uint)_fragmentBlocks.Count;
+            return (uint) _fragmentBlocks.Count;
         }
 
         internal long Persist()
@@ -81,7 +81,7 @@ namespace DiscUtils.SquashFs
                 return -1;
             }
 
-            if (_fragmentBlocks.Count * FragmentRecord.RecordSize > _context.DataBlockSize)
+            if (_fragmentBlocks.Count*FragmentRecord.RecordSize > _context.DataBlockSize)
             {
                 throw new NotImplementedException("Large numbers of fragments");
             }
@@ -89,10 +89,10 @@ namespace DiscUtils.SquashFs
             // Persist the table that references the block containing the fragment records
             long blockPos = _context.RawStream.Position;
             int recordSize = FragmentRecord.RecordSize;
-            byte[] buffer = new byte[_fragmentBlocks.Count * recordSize];
+            byte[] buffer = new byte[_fragmentBlocks.Count*recordSize];
             for (int i = 0; i < _fragmentBlocks.Count; ++i)
             {
-                _fragmentBlocks[i].WriteTo(buffer, i * recordSize);
+                _fragmentBlocks[i].WriteTo(buffer, i*recordSize);
             }
 
             MetablockWriter writer = new MetablockWriter();
@@ -115,7 +115,7 @@ namespace DiscUtils.SquashFs
             FragmentRecord blockRecord = new FragmentRecord()
             {
                 StartBlock = position,
-                CompressedSize = (int)writeLen
+                CompressedSize = (int) writeLen
             };
 
             _fragmentBlocks.Add(blockRecord);

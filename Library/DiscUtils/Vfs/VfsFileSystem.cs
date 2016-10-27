@@ -65,10 +65,7 @@ namespace DiscUtils.Vfs
         /// <summary>
         /// Gets the volume label.
         /// </summary>
-        public override abstract string VolumeLabel
-        {
-            get;
-        }
+        public override abstract string VolumeLabel { get; }
 
         /// <summary>
         /// Gets or sets the global shared state.
@@ -213,7 +210,8 @@ namespace DiscUtils.Vfs
             }
 
             TDirectory parentDir = GetDirectory(fullPath);
-            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries, (m) => Utilities.CombinePaths(fullPath, FormatFileName(m.FileName)));
+            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries,
+                (m) => Utilities.CombinePaths(fullPath, FormatFileName(m.FileName)));
         }
 
         /// <summary>
@@ -360,7 +358,8 @@ namespace DiscUtils.Vfs
                     }
                     else
                     {
-                        throw new NotSupportedException("Attempt to open a file stream on a file system that doesn't support them");
+                        throw new NotSupportedException(
+                            "Attempt to open a file stream on a file system that doesn't support them");
                     }
                 }
 
@@ -574,7 +573,7 @@ namespace DiscUtils.Vfs
                 throw new DirectoryNotFoundException("No such directory: " + path);
             }
 
-            return (TDirectory)GetFile(dirEntry);
+            return (TDirectory) GetFile(dirEntry);
         }
 
         internal TDirEntry GetDirectoryEntry(string path)
@@ -667,7 +666,7 @@ namespace DiscUtils.Vfs
 
         private TDirEntry GetDirectoryEntry(TDirectory dir, string path)
         {
-            string[] pathElements = path.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] pathElements = path.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries);
             return GetDirectoryEntry(dir, pathElements, 0);
         }
 
@@ -690,11 +689,12 @@ namespace DiscUtils.Vfs
                     }
                     else if (entry.IsDirectory)
                     {
-                        return GetDirectoryEntry((TDirectory)ConvertDirEntryToFile(entry), pathEntries, pathOffset + 1);
+                        return GetDirectoryEntry((TDirectory) ConvertDirEntryToFile(entry), pathEntries, pathOffset + 1);
                     }
                     else
                     {
-                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "{0} is a file, not a directory", pathEntries[pathOffset]));
+                        throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                            "{0} is a file, not a directory", pathEntries[pathOffset]));
                     }
                 }
                 else
@@ -709,7 +709,8 @@ namespace DiscUtils.Vfs
             TDirectory parentDir = GetDirectory(path);
             if (parentDir == null)
             {
-                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture, "The directory '{0}' was not found", path));
+                throw new DirectoryNotFoundException(string.Format(CultureInfo.InvariantCulture,
+                    "The directory '{0}' was not found", path));
             }
 
             string resultPrefixPath = path;
@@ -722,7 +723,7 @@ namespace DiscUtils.Vfs
             {
                 TDirEntry entry = de;
 
-                if(entry.IsSymlink)
+                if (entry.IsSymlink)
                 {
                     entry = ResolveSymlink(entry, path + "\\" + entry.FileName);
                 }
@@ -739,7 +740,8 @@ namespace DiscUtils.Vfs
 
                 if (subFolders && isDir)
                 {
-                    DoSearch(results, Utilities.CombinePaths(resultPrefixPath, FormatFileName(entry.FileName)), regex, subFolders, dirs, files);
+                    DoSearch(results, Utilities.CombinePaths(resultPrefixPath, FormatFileName(entry.FileName)), regex,
+                        subFolders, dirs, files);
                 }
             }
         }

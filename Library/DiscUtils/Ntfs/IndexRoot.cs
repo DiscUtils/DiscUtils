@@ -86,7 +86,7 @@ namespace DiscUtils.Ntfs
         public int ReadFrom(byte[] buffer, int offset)
         {
             _attrType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
-            _collationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, 0x04);
+            _collationRule = (AttributeCollationRule) Utilities.ToUInt32LittleEndian(buffer, 0x04);
             _indexAllocationEntrySize = Utilities.ToUInt32LittleEndian(buffer, 0x08);
             _rawClustersPerIndexRecord = buffer[0x0C];
             return 16;
@@ -95,7 +95,7 @@ namespace DiscUtils.Ntfs
         public void WriteTo(byte[] buffer, int offset)
         {
             Utilities.WriteBytesLittleEndian(_attrType, buffer, 0);
-            Utilities.WriteBytesLittleEndian((uint)_collationRule, buffer, 0x04);
+            Utilities.WriteBytesLittleEndian((uint) _collationRule, buffer, 0x04);
             Utilities.WriteBytesLittleEndian(_indexAllocationEntrySize, buffer, 0x08);
             Utilities.WriteBytesLittleEndian(_rawClustersPerIndexRecord, buffer, 0x0C);
         }
@@ -191,7 +191,7 @@ namespace DiscUtils.Ntfs
         {
             public int Compare(byte[] x, byte[] y)
             {
-                for (int i = 0; i < x.Length / 4; ++i)
+                for (int i = 0; i < x.Length/4; ++i)
                 {
                     if (x == null && y == null)
                     {
@@ -206,8 +206,8 @@ namespace DiscUtils.Ntfs
                         return 1;
                     }
 
-                    uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
-                    uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);
+                    uint xVal = Utilities.ToUInt32LittleEndian(x, i*4);
+                    uint yVal = Utilities.ToUInt32LittleEndian(y, i*4);
 
                     if (xVal < yVal)
                     {
@@ -250,7 +250,7 @@ namespace DiscUtils.Ntfs
                 byte xFnLen = x[0x40];
                 byte yFnLen = y[0x40];
 
-                return _stringComparer.Compare(x, 0x42, xFnLen * 2, y, 0x42, yFnLen * 2);
+                return _stringComparer.Compare(x, 0x42, xFnLen*2, y, 0x42, yFnLen*2);
             }
         }
 
@@ -274,7 +274,7 @@ namespace DiscUtils.Ntfs
                 int toComp = Math.Min(x.Length, y.Length);
                 for (int i = 0; i < toComp; ++i)
                 {
-                    int val = ((int)x[i]) - ((int)y[i]);
+                    int val = ((int) x[i]) - ((int) y[i]);
                     if (val != 0)
                     {
                         return val;

@@ -56,13 +56,13 @@ namespace DiscUtils.Nfs
             XdrDataWriter writer = StartCallMessage(ms, null, 3);
             writer.Write(program);
             writer.Write(version);
-            writer.Write((uint)protocol);
-            writer.Write((uint)0);
+            writer.Write((uint) protocol);
+            writer.Write((uint) 0);
 
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                return (int)reply.BodyReader.ReadUInt32();
+                return (int) reply.BodyReader.ReadUInt32();
             }
             else
             {

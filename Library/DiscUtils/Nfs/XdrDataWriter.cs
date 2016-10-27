@@ -34,7 +34,7 @@ namespace DiscUtils.Nfs
 
         public void Write(bool value)
         {
-            Write((int)(value ? 1 : 0));
+            Write((int) (value ? 1 : 0));
         }
 
         public override void WriteBytes(byte[] buffer, int offset, int count)
@@ -56,7 +56,7 @@ namespace DiscUtils.Nfs
         {
             if (buffer == null || count == 0)
             {
-                Write((int)0);
+                Write((int) 0);
             }
             else
             {

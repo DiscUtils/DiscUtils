@@ -84,17 +84,14 @@ namespace DiscUtils.Udf
                 }
             }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public FileAttributes FileAttributes
         {
             get
             {
-                FileAttributes attribs = (FileAttributes)0;
+                FileAttributes attribs = (FileAttributes) 0;
                 InformationControlBlockFlags flags = _fileEntry.InformationControlBlock.Flags;
 
                 if (_fileEntry.InformationControlBlock.FileType == FileType.Directory)
@@ -102,10 +99,10 @@ namespace DiscUtils.Udf
                     attribs |= FileAttributes.Directory;
                 }
                 else if (_fileEntry.InformationControlBlock.FileType == FileType.Fifo
-                    || _fileEntry.InformationControlBlock.FileType == FileType.Socket
-                    || _fileEntry.InformationControlBlock.FileType == FileType.SpecialBlockDevice
-                    || _fileEntry.InformationControlBlock.FileType == FileType.SpecialCharacterDevice
-                    || _fileEntry.InformationControlBlock.FileType == FileType.TerminalEntry)
+                         || _fileEntry.InformationControlBlock.FileType == FileType.Socket
+                         || _fileEntry.InformationControlBlock.FileType == FileType.SpecialBlockDevice
+                         || _fileEntry.InformationControlBlock.FileType == FileType.SpecialCharacterDevice
+                         || _fileEntry.InformationControlBlock.FileType == FileType.TerminalEntry)
                 {
                     attribs |= FileAttributes.Device;
                 }
@@ -120,7 +117,7 @@ namespace DiscUtils.Udf
                     attribs |= FileAttributes.System | FileAttributes.Hidden;
                 }
 
-                if ((int)attribs == 0)
+                if ((int) attribs == 0)
                 {
                     attribs = FileAttributes.Normal;
                 }
@@ -128,15 +125,12 @@ namespace DiscUtils.Udf
                 return attribs;
             }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public long FileLength
         {
-            get { return (long)_fileEntry.InformationLength; }
+            get { return (long) _fileEntry.InformationLength; }
         }
 
         public List<ExtendedAttributeRecord> ExtendedAttributes
@@ -160,7 +154,7 @@ namespace DiscUtils.Udf
                 }
                 else
                 {
-                    return new File(context, partition, fileEntry, (uint)partition.LogicalBlockSize);
+                    return new File(context, partition, fileEntry, (uint) partition.LogicalBlockSize);
                 }
             }
             else if (rootDirTag.TagIdentifier == TagIdentifier.FileEntry)
@@ -172,7 +166,7 @@ namespace DiscUtils.Udf
                 }
                 else
                 {
-                    return new File(context, partition, fileEntry, (uint)partition.LogicalBlockSize);
+                    return new File(context, partition, fileEntry, (uint) partition.LogicalBlockSize);
                 }
             }
             else

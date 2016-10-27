@@ -75,15 +75,16 @@ namespace DiscUtils
             _ownWrapped = ownership;
             _settings = new BlockCacheSettings(settings);
 
-            if (_settings.OptimumReadSize % _settings.BlockSize != 0)
+            if (_settings.OptimumReadSize%_settings.BlockSize != 0)
             {
-                throw new ArgumentException("Invalid settings, OptimumReadSize must be a multiple of BlockSize", nameof(settings));
+                throw new ArgumentException("Invalid settings, OptimumReadSize must be a multiple of BlockSize",
+                    nameof(settings));
             }
 
             _readBuffer = new byte[_settings.OptimumReadSize];
-            _blocksInReadBuffer = _settings.OptimumReadSize / _settings.BlockSize;
+            _blocksInReadBuffer = _settings.OptimumReadSize/_settings.BlockSize;
 
-            int totalBlocks = (int)(_settings.ReadCacheSize / _settings.BlockSize);
+            int totalBlocks = (int) (_settings.ReadCacheSize/_settings.BlockSize);
 
             _cache = new BlockCache<Block>(_settings.BlockSize, totalBlocks);
             _stats = new BlockCacheStatistics();
@@ -228,10 +229,10 @@ namespace DiscUtils
             bool servicedOutsideCache = false;
             int blockSize = _settings.BlockSize;
 
-            long firstBlock = _position / blockSize;
-            int offsetInNextBlock = (int)(_position % blockSize);
+            long firstBlock = _position/blockSize;
+            int offsetInNextBlock = (int) (_position%blockSize);
             long endBlock = Utilities.Ceil(Math.Min(_position + count, Length), blockSize);
-            int numBlocks = (int)(endBlock - firstBlock);
+            int numBlocks = (int) (endBlock - firstBlock);
 
             if (offsetInNextBlock != 0)
             {
@@ -265,15 +266,15 @@ namespace DiscUtils
                     // Figure out how many blocks to read from the wrapped stream
                     int blocksToRead = 0;
                     while (blocksRead + blocksToRead < numBlocks
-                        && blocksToRead < _blocksInReadBuffer
-                        && !_cache.ContainsBlock(firstBlock + blocksRead + blocksToRead))
+                           && blocksToRead < _blocksInReadBuffer
+                           && !_cache.ContainsBlock(firstBlock + blocksRead + blocksToRead))
                     {
                         ++blocksToRead;
                     }
 
                     // Allow for the end of the stream not being block-aligned
-                    long readPosition = (firstBlock + blocksRead) * (long)blockSize;
-                    int bytesToRead = (int)Math.Min(blocksToRead * (long)blockSize, Length - readPosition);
+                    long readPosition = (firstBlock + blocksRead)*(long) blockSize;
+                    int bytesToRead = (int) Math.Min(blocksToRead*(long) blockSize, Length - readPosition);
 
                     // Do the read
                     _stats.TotalReadsOut++;
@@ -287,14 +288,14 @@ namespace DiscUtils
                     // Cache the read blocks
                     for (int i = 0; i < blocksToRead; ++i)
                     {
-                        int copyBytes = Math.Min(blockSize, bytesToRead - (i * blockSize));
+                        int copyBytes = Math.Min(blockSize, bytesToRead - (i*blockSize));
                         block = _cache.GetBlock(firstBlock + blocksRead + i);
-                        Array.Copy(_readBuffer, i * blockSize, block.Data, 0, copyBytes);
+                        Array.Copy(_readBuffer, i*blockSize, block.Data, 0, copyBytes);
                         block.Available = copyBytes;
 
                         if (copyBytes < blockSize)
                         {
-                            Array.Clear(_readBuffer, (i * blockSize) + copyBytes, blockSize - copyBytes);
+                            Array.Clear(_readBuffer, (i*blockSize) + copyBytes, blockSize - copyBytes);
                         }
                     }
 
@@ -392,9 +393,9 @@ namespace DiscUtils
             _stats.TotalWritesIn++;
 
             int blockSize = _settings.BlockSize;
-            long firstBlock = _position / blockSize;
+            long firstBlock = _position/blockSize;
             long endBlock = Utilities.Ceil(Math.Min(_position + count, Length), blockSize);
-            int numBlocks = (int)(endBlock - firstBlock);
+            int numBlocks = (int) (endBlock - firstBlock);
 
             try
             {
@@ -407,7 +408,7 @@ namespace DiscUtils
                 throw;
             }
 
-            int offsetInNextBlock = (int)(_position % blockSize);
+            int offsetInNextBlock = (int) (_position%blockSize);
             if (offsetInNextBlock != 0)
             {
                 _stats.UnalignedWritesIn++;

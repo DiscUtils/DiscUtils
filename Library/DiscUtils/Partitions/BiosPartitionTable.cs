@@ -126,8 +126,8 @@ namespace DiscUtils.Partitions
 
                     if (maxHead > 0 && maxSector > 0)
                     {
-                        int cylSize = (maxHead + 1) * maxSector * 512;
-                        return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
+                        int cylSize = (maxHead + 1)*maxSector*512;
+                        return new Geometry((int) Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
                     }
                 }
             }
@@ -160,14 +160,16 @@ namespace DiscUtils.Partitions
             foreach (var record in ReadPrimaryRecords(bootSector))
             {
                 // If the partition extends beyond the end of the disk, this is probably an invalid partition table
-                if (record.LBALength != 0xFFFFFFFF && (record.LBAStart + (long)record.LBALength) * Sizes.Sector > disk.Length)
+                if (record.LBALength != 0xFFFFFFFF &&
+                    (record.LBAStart + (long) record.LBALength)*Sizes.Sector > disk.Length)
                 {
                     return false;
                 }
 
                 if (record.LBALength > 0)
                 {
-                    StreamExtent[] thisPartitionExtents = new StreamExtent[] { new StreamExtent(record.LBAStart, record.LBALength) };
+                    StreamExtent[] thisPartitionExtents = new StreamExtent[]
+                        {new StreamExtent(record.LBAStart, record.LBALength)};
 
                     // If the partition intersects another partition, this is probably an invalid partition table
                     foreach (var overlap in StreamExtent.Intersect(knownPartitions, thisPartitionExtents))
@@ -227,7 +229,7 @@ namespace DiscUtils.Partitions
             }
 
             // Wipe all four 16-byte partition table entries
-            Array.Clear(bootSector, 0x01BE, 16 * 4);
+            Array.Clear(bootSector, 0x01BE, 16*4);
 
             // Marker bytes
             bootSector[510] = 0x55;
@@ -249,7 +251,8 @@ namespace DiscUtils.Partitions
         /// otherwise IOException is thrown.</remarks>
         public override int Create(WellKnownPartitionType type, bool active)
         {
-            Geometry allocationGeometry = new Geometry(_diskData.Length, _diskGeometry.HeadsPerCylinder, _diskGeometry.SectorsPerTrack, _diskGeometry.BytesPerSector);
+            Geometry allocationGeometry = new Geometry(_diskData.Length, _diskGeometry.HeadsPerCylinder,
+                _diskGeometry.SectorsPerTrack, _diskGeometry.BytesPerSector);
 
             ChsAddress start = new ChsAddress(0, 1, 1);
             ChsAddress last = allocationGeometry.LastSector;
@@ -257,7 +260,8 @@ namespace DiscUtils.Partitions
             long startLba = allocationGeometry.ToLogicalBlockAddress(start);
             long lastLba = allocationGeometry.ToLogicalBlockAddress(last);
 
-            return CreatePrimaryByCylinder(0, allocationGeometry.Cylinders - 1, ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
+            return CreatePrimaryByCylinder(0, allocationGeometry.Cylinders - 1,
+                ConvertType(type, (lastLba - startLba)*Utilities.SectorSize), active);
         }
 
         /// <summary>
@@ -269,12 +273,14 @@ namespace DiscUtils.Partitions
         /// <returns>The index of the new partition.</returns>
         public override int Create(long size, WellKnownPartitionType type, bool active)
         {
-            int cylinderCapacity = _diskGeometry.SectorsPerTrack * _diskGeometry.HeadsPerCylinder * _diskGeometry.BytesPerSector;
-            int numCylinders = (int)(size / cylinderCapacity);
+            int cylinderCapacity = _diskGeometry.SectorsPerTrack*_diskGeometry.HeadsPerCylinder*
+                                   _diskGeometry.BytesPerSector;
+            int numCylinders = (int) (size/cylinderCapacity);
 
             int startCylinder = FindCylinderGap(numCylinders);
 
-            return CreatePrimaryByCylinder(startCylinder, startCylinder + numCylinders - 1, ConvertType(type, size), active);
+            return CreatePrimaryByCylinder(startCylinder, startCylinder + numCylinders - 1, ConvertType(type, size),
+                active);
         }
 
         /// <summary>
@@ -293,14 +299,18 @@ namespace DiscUtils.Partitions
         /// </remarks>
         public override int CreateAligned(WellKnownPartitionType type, bool active, int alignment)
         {
-            Geometry allocationGeometry = new Geometry(_diskData.Length, _diskGeometry.HeadsPerCylinder, _diskGeometry.SectorsPerTrack, _diskGeometry.BytesPerSector);
+            Geometry allocationGeometry = new Geometry(_diskData.Length, _diskGeometry.HeadsPerCylinder,
+                _diskGeometry.SectorsPerTrack, _diskGeometry.BytesPerSector);
 
             ChsAddress start = new ChsAddress(0, 1, 1);
 
-            long startLba = Utilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start), alignment / _diskGeometry.BytesPerSector);
-            long lastLba = Utilities.RoundDown(_diskData.Length / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
+            long startLba = Utilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start),
+                alignment/_diskGeometry.BytesPerSector);
+            long lastLba = Utilities.RoundDown(_diskData.Length/_diskGeometry.BytesPerSector,
+                alignment/_diskGeometry.BytesPerSector);
 
-            return CreatePrimaryBySector(startLba, lastLba - 1, ConvertType(type, (lastLba - startLba) * _diskGeometry.BytesPerSector), active);
+            return CreatePrimaryBySector(startLba, lastLba - 1,
+                ConvertType(type, (lastLba - startLba)*_diskGeometry.BytesPerSector), active);
         }
 
         /// <summary>
@@ -323,20 +333,21 @@ namespace DiscUtils.Partitions
                 throw new ArgumentOutOfRangeException(nameof(size), size, "size must be at least one sector");
             }
 
-            if (alignment % _diskGeometry.BytesPerSector != 0)
+            if (alignment%_diskGeometry.BytesPerSector != 0)
             {
                 throw new ArgumentException("Alignment is not a multiple of the sector size");
             }
 
-            if (size % alignment != 0)
+            if (size%alignment != 0)
             {
                 throw new ArgumentException("Size is not a multiple of the alignment");
             }
 
-            long sectorLength = size / _diskGeometry.BytesPerSector;
-            long start = FindGap(size / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
+            long sectorLength = size/_diskGeometry.BytesPerSector;
+            long start = FindGap(size/_diskGeometry.BytesPerSector, alignment/_diskGeometry.BytesPerSector);
 
-            return CreatePrimaryBySector(start, start + sectorLength - 1, ConvertType(type, sectorLength * Utilities.SectorSize), active);
+            return CreatePrimaryBySector(start, start + sectorLength - 1,
+                ConvertType(type, sectorLength*Utilities.SectorSize), active);
         }
 
         /// <summary>
@@ -370,8 +381,11 @@ namespace DiscUtils.Partitions
                 throw new ArgumentException("Last cylinder must be greater than first");
             }
 
-            long lbaStart = (first == 0) ? _diskGeometry.ToLogicalBlockAddress(0, 1, 1) : _diskGeometry.ToLogicalBlockAddress(first, 0, 1);
-            long lbaLast = _diskGeometry.ToLogicalBlockAddress(last, _diskGeometry.HeadsPerCylinder - 1, _diskGeometry.SectorsPerTrack);
+            long lbaStart = (first == 0)
+                ? _diskGeometry.ToLogicalBlockAddress(0, 1, 1)
+                : _diskGeometry.ToLogicalBlockAddress(first, 0, 1);
+            long lbaLast = _diskGeometry.ToLogicalBlockAddress(last, _diskGeometry.HeadsPerCylinder - 1,
+                _diskGeometry.SectorsPerTrack);
 
             return CreatePrimaryBySector(lbaStart, lbaLast, type, markActive);
         }
@@ -391,9 +405,10 @@ namespace DiscUtils.Partitions
                 throw new ArgumentException("The first sector in a partition must be before the last");
             }
 
-            if ((last + 1) * _diskGeometry.BytesPerSector > _diskData.Length)
+            if ((last + 1)*_diskGeometry.BytesPerSector > _diskData.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(last), last, "The last sector extends beyond the end of the disk");
+                throw new ArgumentOutOfRangeException(nameof(last), last,
+                    "The last sector extends beyond the end of the disk");
             }
 
             BiosPartitionRecord[] existing = GetPrimaryRecords();
@@ -414,21 +429,22 @@ namespace DiscUtils.Partitions
                 endAddr = new ChsAddress(1023, 254, 63);
             }
 
-            newRecord.StartCylinder = (ushort)startAddr.Cylinder;
-            newRecord.StartHead = (byte)startAddr.Head;
-            newRecord.StartSector = (byte)startAddr.Sector;
-            newRecord.EndCylinder = (ushort)endAddr.Cylinder;
-            newRecord.EndHead = (byte)endAddr.Head;
-            newRecord.EndSector = (byte)endAddr.Sector;
-            newRecord.LBAStart = (uint)first;
-            newRecord.LBALength = (uint)(last - first + 1);
+            newRecord.StartCylinder = (ushort) startAddr.Cylinder;
+            newRecord.StartHead = (byte) startAddr.Head;
+            newRecord.StartSector = (byte) startAddr.Sector;
+            newRecord.EndCylinder = (ushort) endAddr.Cylinder;
+            newRecord.EndHead = (byte) endAddr.Head;
+            newRecord.EndSector = (byte) endAddr.Sector;
+            newRecord.LBAStart = (uint) first;
+            newRecord.LBALength = (uint) (last - first + 1);
             newRecord.PartitionType = type;
-            newRecord.Status = (byte)(markActive ? 0x80 : 0x00);
+            newRecord.Status = (byte) (markActive ? 0x80 : 0x00);
 
             // First check for overlap with existing partition...
             foreach (var r in existing)
             {
-                if (Utilities.RangesOverlap((uint)first, (uint)last + 1, r.LBAStartAbsolute, r.LBAStartAbsolute + r.LBALength))
+                if (Utilities.RangesOverlap((uint) first, (uint) last + 1, r.LBAStartAbsolute,
+                    r.LBAStartAbsolute + r.LBALength))
                 {
                     throw new IOException("New partition overlaps with existing partition");
                 }
@@ -458,7 +474,7 @@ namespace DiscUtils.Partitions
 
             for (int i = 0; i < records.Count; ++i)
             {
-                records[i].Status = (i == index) ? (byte)0x80 : (byte)0x00;
+                records[i].Status = (i == index) ? (byte) 0x80 : (byte) 0x00;
                 WriteRecord(i, records[i]);
             }
         }
@@ -479,7 +495,8 @@ namespace DiscUtils.Partitions
                 {
                     if (IsExtendedPartition(primaryRecord))
                     {
-                        extents.AddRange(new BiosExtendedPartitionTable(_diskData, primaryRecord.LBAStart).GetMetadataDiskExtents());
+                        extents.AddRange(
+                            new BiosExtendedPartitionTable(_diskData, primaryRecord.LBAStart).GetMetadataDiskExtents());
                     }
                 }
             }
@@ -516,12 +533,12 @@ namespace DiscUtils.Partitions
                         newEndAddress = new ChsAddress(1023, geometry.HeadsPerCylinder - 1, geometry.SectorsPerTrack);
                     }
 
-                    record.StartCylinder = (ushort)newStartAddress.Cylinder;
-                    record.StartHead = (byte)newStartAddress.Head;
-                    record.StartSector = (byte)newStartAddress.Sector;
-                    record.EndCylinder = (ushort)newEndAddress.Cylinder;
-                    record.EndHead = (byte)newEndAddress.Head;
-                    record.EndSector = (byte)newEndAddress.Sector;
+                    record.StartCylinder = (ushort) newStartAddress.Cylinder;
+                    record.StartHead = (byte) newStartAddress.Head;
+                    record.StartSector = (byte) newStartAddress.Sector;
+                    record.EndCylinder = (ushort) newEndAddress.Cylinder;
+                    record.EndHead = (byte) newEndAddress.Head;
+                    record.EndSector = (byte) newEndAddress.Sector;
 
                     WriteRecord(i, record);
                 }
@@ -532,7 +549,9 @@ namespace DiscUtils.Partitions
 
         internal SparseStream Open(BiosPartitionRecord record)
         {
-            return new SubStream(_diskData, Ownership.None, ((long)record.LBAStartAbsolute) * _diskGeometry.BytesPerSector, ((long)record.LBALength) * _diskGeometry.BytesPerSector);
+            return new SubStream(_diskData, Ownership.None,
+                ((long) record.LBAStartAbsolute)*_diskGeometry.BytesPerSector,
+                ((long) record.LBALength)*_diskGeometry.BytesPerSector);
         }
 
         private static BiosPartitionRecord[] ReadPrimaryRecords(byte[] bootSector)
@@ -540,7 +559,7 @@ namespace DiscUtils.Partitions
             BiosPartitionRecord[] records = new BiosPartitionRecord[4];
             for (int i = 0; i < 4; ++i)
             {
-                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + (i * 0x10), 0, i);
+                records[i] = new BiosPartitionRecord(bootSector, 0x01BE + (i*0x10), 0, i);
             }
 
             return records;
@@ -556,11 +575,11 @@ namespace DiscUtils.Partitions
             switch (type)
             {
                 case WellKnownPartitionType.WindowsFat:
-                    if (size < 512 * Sizes.OneMiB)
+                    if (size < 512*Sizes.OneMiB)
                     {
                         return BiosPartitionTypes.Fat16;
                     }
-                    else if (size < 1023 * (long)254 * 63 * 512)
+                    else if (size < 1023*(long) 254*63*512)
                     {
                         // Max BIOS size
                         return BiosPartitionTypes.Fat32;
@@ -579,7 +598,9 @@ namespace DiscUtils.Partitions
                 case WellKnownPartitionType.LinuxLvm:
                     return BiosPartitionTypes.LinuxLvm;
                 default:
-                    throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, "Unrecognized partition type: '{0}'", type), nameof(type));
+                    throw new ArgumentException(
+                        String.Format(CultureInfo.InvariantCulture, "Unrecognized partition type: '{0}'", type),
+                        nameof(type));
             }
         }
 
@@ -622,14 +643,15 @@ namespace DiscUtils.Partitions
         {
             _diskData.Position = 0;
             byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
-            newRecord.WriteTo(bootSector, 0x01BE + (i * 16));
+            newRecord.WriteTo(bootSector, 0x01BE + (i*16));
             _diskData.Position = 0;
             _diskData.Write(bootSector, 0, bootSector.Length);
         }
 
         private int FindCylinderGap(int numCylinders)
         {
-            var list = Utilities.Filter<List<BiosPartitionRecord>, BiosPartitionRecord>(GetPrimaryRecords(), (r) => r.IsValid);
+            var list = Utilities.Filter<List<BiosPartitionRecord>, BiosPartitionRecord>(GetPrimaryRecords(),
+                (r) => r.IsValid);
             list.Sort();
 
             int startCylinder = 0;
@@ -642,15 +664,17 @@ namespace DiscUtils.Partitions
                 // appears the CHS address has been truncated.
                 if (r.LBAStart > _diskGeometry.ToLogicalBlockAddress(r.StartCylinder, r.StartHead, r.StartSector))
                 {
-                    existingStart = _diskGeometry.ToChsAddress((int)r.LBAStart).Cylinder;
+                    existingStart = _diskGeometry.ToChsAddress((int) r.LBAStart).Cylinder;
                 }
 
-                if (r.LBAStart + r.LBALength > _diskGeometry.ToLogicalBlockAddress(r.EndCylinder, r.EndHead, r.EndSector))
+                if (r.LBAStart + r.LBALength >
+                    _diskGeometry.ToLogicalBlockAddress(r.EndCylinder, r.EndHead, r.EndSector))
                 {
-                    existingEnd = _diskGeometry.ToChsAddress((int)(r.LBAStart + r.LBALength)).Cylinder;
+                    existingEnd = _diskGeometry.ToChsAddress((int) (r.LBAStart + r.LBALength)).Cylinder;
                 }
 
-                if (!Utilities.RangesOverlap(startCylinder, startCylinder + numCylinders - 1, existingStart, existingEnd))
+                if (
+                    !Utilities.RangesOverlap(startCylinder, startCylinder + numCylinders - 1, existingStart, existingEnd))
                 {
                     break;
                 }
@@ -665,7 +689,8 @@ namespace DiscUtils.Partitions
 
         private long FindGap(long numSectors, long alignmentSectors)
         {
-            var list = Utilities.Filter<List<BiosPartitionRecord>, BiosPartitionRecord>(GetPrimaryRecords(), (r) => r.IsValid);
+            var list = Utilities.Filter<List<BiosPartitionRecord>, BiosPartitionRecord>(GetPrimaryRecords(),
+                (r) => r.IsValid);
             list.Sort();
 
             long startSector = Utilities.RoundUp(_diskGeometry.ToLogicalBlockAddress(0, 1, 1), alignmentSectors);
@@ -680,7 +705,8 @@ namespace DiscUtils.Partitions
                     entry = list[idx];
                 }
 
-                if (Utilities.RangesOverlap(startSector, startSector + numSectors, entry.LBAStartAbsolute, entry.LBAStartAbsolute + entry.LBALength))
+                if (Utilities.RangesOverlap(startSector, startSector + numSectors, entry.LBAStartAbsolute,
+                    entry.LBAStartAbsolute + entry.LBALength))
                 {
                     startSector = Utilities.RoundUp(entry.LBAStartAbsolute + entry.LBALength, alignmentSectors);
                 }
@@ -690,7 +716,8 @@ namespace DiscUtils.Partitions
 
             if (_diskGeometry.TotalSectorsLong - startSector < numSectors)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to find free space of {0} sectors", numSectors));
+                throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                    "Unable to find free space of {0} sectors", numSectors));
             }
 
             return startSector;

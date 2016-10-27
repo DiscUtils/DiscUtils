@@ -102,6 +102,7 @@ namespace DiscUtils.Vhd
         }
 
         #region Marshalling
+
         public static Footer FromBytes(byte[] buffer, int offset)
         {
             Footer result = new Footer();
@@ -116,7 +117,7 @@ namespace DiscUtils.Vhd
             result.OriginalSize = Utilities.ToInt64BigEndian(buffer, offset + 40);
             result.CurrentSize = Utilities.ToInt64BigEndian(buffer, offset + 48);
             result.Geometry = new Geometry(Utilities.ToUInt16BigEndian(buffer, offset + 56), buffer[58], buffer[59]);
-            result.DiskType = (FileType)Utilities.ToUInt32BigEndian(buffer, offset + 60);
+            result.DiskType = (FileType) Utilities.ToUInt32BigEndian(buffer, offset + 60);
             result.Checksum = Utilities.ToUInt32BigEndian(buffer, offset + 64);
             result.UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 68);
             result.SavedState = buffer[84];
@@ -130,29 +131,30 @@ namespace DiscUtils.Vhd
             Utilities.WriteBytesBigEndian(Features, buffer, offset + 8);
             Utilities.WriteBytesBigEndian(FileFormatVersion, buffer, offset + 12);
             Utilities.WriteBytesBigEndian(DataOffset, buffer, offset + 16);
-            Utilities.WriteBytesBigEndian((uint)(Timestamp - EpochUtc).TotalSeconds, buffer, offset + 24);
+            Utilities.WriteBytesBigEndian((uint) (Timestamp - EpochUtc).TotalSeconds, buffer, offset + 24);
             Utilities.StringToBytes(CreatorApp, buffer, offset + 28, 4);
             Utilities.WriteBytesBigEndian(CreatorVersion, buffer, offset + 32);
             Utilities.StringToBytes(CreatorHostOS, buffer, offset + 36, 4);
             Utilities.WriteBytesBigEndian(OriginalSize, buffer, offset + 40);
             Utilities.WriteBytesBigEndian(CurrentSize, buffer, offset + 48);
-            Utilities.WriteBytesBigEndian((ushort)Geometry.Cylinders, buffer, offset + 56);
-            buffer[offset + 58] = (byte)Geometry.HeadsPerCylinder;
-            buffer[offset + 59] = (byte)Geometry.SectorsPerTrack;
-            Utilities.WriteBytesBigEndian((uint)DiskType, buffer, offset + 60);
+            Utilities.WriteBytesBigEndian((ushort) Geometry.Cylinders, buffer, offset + 56);
+            buffer[offset + 58] = (byte) Geometry.HeadsPerCylinder;
+            buffer[offset + 59] = (byte) Geometry.SectorsPerTrack;
+            Utilities.WriteBytesBigEndian((uint) DiskType, buffer, offset + 60);
             Utilities.WriteBytesBigEndian(Checksum, buffer, offset + 64);
             Utilities.WriteBytesBigEndian(UniqueId, buffer, offset + 68);
             buffer[84] = SavedState;
             Array.Clear(buffer, 85, 427);
         }
+
         #endregion
 
         public bool IsValid()
         {
             return (Cookie == FileCookie)
-                && IsChecksumValid()
-                ////&& ((Features & FeatureReservedMustBeSet) != 0)
-                && FileFormatVersion == Version1;
+                   && IsChecksumValid()
+                   ////&& ((Features & FeatureReservedMustBeSet) != 0)
+                   && FileFormatVersion == Version1;
         }
 
         public bool IsChecksumValid()

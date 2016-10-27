@@ -136,7 +136,11 @@ namespace DiscUtils.Ntfs
 
         public bool IsMftRecord
         {
-            get { return MasterFileTableIndex == MasterFileTable.MftIndex || (_baseFile.MftIndex == MasterFileTable.MftIndex && _baseFile.SequenceNumber != 0); }
+            get
+            {
+                return MasterFileTableIndex == MasterFileTable.MftIndex ||
+                       (_baseFile.MftIndex == MasterFileTable.MftIndex && _baseFile.SequenceNumber != 0);
+            }
         }
 
         public static FileAttributeFlags ConvertFlags(FileRecordFlags source)
@@ -166,7 +170,7 @@ namespace DiscUtils.Ntfs
             Initialize("FILE", sectorSize, recordLength);
             _sequenceNumber++;
             _flags = FileRecordFlags.None;
-            _recordAllocatedSize = (uint)recordLength;
+            _recordAllocatedSize = (uint) recordLength;
             _nextAttributeId = 0;
             _index = index;
             _hardLinkCount = 0;
@@ -229,7 +233,9 @@ namespace DiscUtils.Ntfs
             {
                 if (attr.AttributeType == AttributeType.FileName)
                 {
-                    StructuredNtfsAttribute<FileNameRecord> fnAttr = (StructuredNtfsAttribute<FileNameRecord>)NtfsAttribute.FromRecord(null, new FileRecordReference(0), attr);
+                    StructuredNtfsAttribute<FileNameRecord> fnAttr =
+                        (StructuredNtfsAttribute<FileNameRecord>)
+                        NtfsAttribute.FromRecord(null, new FileRecordReference(0), attr);
                     return fnAttr.Content.FileName;
                 }
             }
@@ -291,7 +297,8 @@ namespace DiscUtils.Ntfs
         /// <param name="numClusters">The number of sequential clusters to assign to the attribute.</param>
         /// <param name="bytesPerCluster">The number of bytes in each cluster.</param>
         /// <returns>The id of the new attribute.</returns>
-        public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags, long firstCluster, ulong numClusters, uint bytesPerCluster)
+        public ushort CreateNonResidentAttribute(AttributeType type, string name, AttributeFlags flags,
+            long firstCluster, ulong numClusters, uint bytesPerCluster)
         {
             ushort id = _nextAttributeId++;
             _attributes.Add(
@@ -348,7 +355,7 @@ namespace DiscUtils.Ntfs
 
         internal long GetAttributeOffset(ushort id)
         {
-            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
+            int firstAttrPos = (ushort) Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
 
             int offset = firstAttrPos;
             foreach (var attr in _attributes)
@@ -389,7 +396,7 @@ namespace DiscUtils.Ntfs
             _sequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
             _hardLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x12);
             _firstAttributeOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x14);
-            _flags = (FileRecordFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x16);
+            _flags = (FileRecordFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x16);
             _recordRealSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x18);
             _recordAllocatedSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x1C);
             _baseFile = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x20));
@@ -413,22 +420,22 @@ namespace DiscUtils.Ntfs
                 }
 
                 _attributes.Add(attr);
-                focus += (int)length;
+                focus += (int) length;
             }
         }
 
         protected override ushort Write(byte[] buffer, int offset)
         {
-            ushort headerEnd = (ushort)(_haveIndex ? 0x30 : 0x2A);
+            ushort headerEnd = (ushort) (_haveIndex ? 0x30 : 0x2A);
 
-            _firstAttributeOffset = (ushort)Utilities.RoundUp(headerEnd + UpdateSequenceSize, 0x08);
-            _recordRealSize = (uint)CalcSize();
+            _firstAttributeOffset = (ushort) Utilities.RoundUp(headerEnd + UpdateSequenceSize, 0x08);
+            _recordRealSize = (uint) CalcSize();
 
             Utilities.WriteBytesLittleEndian(_logFileSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(_sequenceNumber, buffer, offset + 0x10);
             Utilities.WriteBytesLittleEndian(_hardLinkCount, buffer, offset + 0x12);
             Utilities.WriteBytesLittleEndian(_firstAttributeOffset, buffer, offset + 0x14);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x16);
+            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x16);
             Utilities.WriteBytesLittleEndian(_recordRealSize, buffer, offset + 0x18);
             Utilities.WriteBytesLittleEndian(_recordAllocatedSize, buffer, offset + 0x1C);
             Utilities.WriteBytesLittleEndian(_baseFile.Value, buffer, offset + 0x20);
@@ -436,7 +443,7 @@ namespace DiscUtils.Ntfs
 
             if (_haveIndex)
             {
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x2A); // Alignment field
+                Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 0x2A); // Alignment field
                 Utilities.WriteBytesLittleEndian(_index, buffer, offset + 0x2C);
             }
 
@@ -453,7 +460,7 @@ namespace DiscUtils.Ntfs
 
         protected override int CalcSize()
         {
-            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
+            int firstAttrPos = (ushort) Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
 
             int size = firstAttrPos;
             foreach (var attr in _attributes)

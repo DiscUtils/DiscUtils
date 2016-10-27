@@ -36,7 +36,7 @@ namespace DiscUtils.Ext
             get
             {
                 IBuffer content = FileContent;
-                byte[] data = Utilities.ReadFully(content, 0, (int)content.Capacity);
+                byte[] data = Utilities.ReadFully(content, 0, (int) content.Capacity);
                 return Utilities.BytesToZString(data, 0, data.Length).Replace('/', '\\');
             }
         }

@@ -76,7 +76,7 @@ namespace DiscUtils.HfsPlus
 
             for (int i = 0; i < numRecords; ++i)
             {
-                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - ((i + 2) * 2));
+                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - ((i + 2)*2));
 
                 _records[i] = new BTreeLeafRecord<TKey>(end - start);
                 _records[i].ReadFrom(buffer, offset + start);

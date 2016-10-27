@@ -38,11 +38,11 @@ namespace DiscUtils.Vhdx
         public int ContiguousSectors(int first, out bool state)
         {
             int matched = 0;
-            int bitPos = first % 8;
-            int bytePos = first / 8;
+            int bitPos = first%8;
+            int bytePos = first/8;
 
             state = (_data[_offset + bytePos] & (1 << bitPos)) != 0;
-            byte matchByte = state ? (byte)0xFF : (byte)0;
+            byte matchByte = state ? (byte) 0xFF : (byte) 0;
 
             while (bytePos < _length)
             {
@@ -75,8 +75,8 @@ namespace DiscUtils.Vhdx
         {
             bool changed = false;
             int marked = 0;
-            int bitPos = first % 8;
-            int bytePos = first / 8;
+            int bitPos = first%8;
+            int bytePos = first/8;
 
             while (marked < count)
             {
@@ -95,7 +95,7 @@ namespace DiscUtils.Vhdx
                 {
                     if ((_data[_offset + bytePos] & (1 << bitPos)) == 0)
                     {
-                        _data[_offset + bytePos] |= (byte)(1 << bitPos);
+                        _data[_offset + bytePos] |= (byte) (1 << bitPos);
                         changed = true;
                     }
 

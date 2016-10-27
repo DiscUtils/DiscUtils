@@ -75,7 +75,7 @@ namespace DiscUtils.Udf
                 pmOffset += PartitionMaps[i].Size;
             }
 
-            return 440 + (int)MapTableLength;
+            return 440 + (int) MapTableLength;
         }
     }
 }

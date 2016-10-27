@@ -25,6 +25,7 @@ namespace DiscUtils.Nfs
     using System;
     using System.Globalization;
     using System.IO;
+
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -73,11 +74,11 @@ namespace DiscUtils.Nfs
         }
 
 #if !NETCORE
-        /// <summary>
-        /// Initializes a new instance of the RpcException class.
-        /// </summary>
-        /// <param name="info">The serialization info.</param>
-        /// <param name="context">The streaming context.</param>
+/// <summary>
+/// Initializes a new instance of the RpcException class.
+/// </summary>
+/// <param name="info">The serialization info.</param>
+/// <param name="context">The streaming context.</param>
         private RpcException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -97,11 +98,14 @@ namespace DiscUtils.Nfs
                     case RpcAcceptStatus.ProgramVersionMismatch:
                         if (reply.AcceptReply.MismatchInfo.Low == reply.AcceptReply.MismatchInfo.High)
                         {
-                            return "RPC program version mismatch, server supports version " + reply.AcceptReply.MismatchInfo.Low;
+                            return "RPC program version mismatch, server supports version " +
+                                   reply.AcceptReply.MismatchInfo.Low;
                         }
                         else
                         {
-                            return "RPC program version mismatch, server supports versions " + reply.AcceptReply.MismatchInfo.Low + " through " + reply.AcceptReply.MismatchInfo.High;
+                            return "RPC program version mismatch, server supports versions " +
+                                   reply.AcceptReply.MismatchInfo.Low + " through " +
+                                   reply.AcceptReply.MismatchInfo.High;
                         }
 
                     case RpcAcceptStatus.ProcedureUnavailable:
@@ -136,7 +140,9 @@ namespace DiscUtils.Nfs
                 {
                     if (reply.RejectedReply.MismatchInfo != null)
                     {
-                        return string.Format(CultureInfo.InvariantCulture, "RPC protocol version mismatch, server supports versions {0} through {1}", reply.RejectedReply.MismatchInfo.Low, reply.RejectedReply.MismatchInfo.High);
+                        return string.Format(CultureInfo.InvariantCulture,
+                            "RPC protocol version mismatch, server supports versions {0} through {1}",
+                            reply.RejectedReply.MismatchInfo.Low, reply.RejectedReply.MismatchInfo.High);
                     }
                     else
                     {

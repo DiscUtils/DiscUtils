@@ -23,8 +23,8 @@
 namespace DiscUtils.Dmg
 {
     using System;
-using System.Collections.Generic;
-using System.IO;
+    using System.Collections.Generic;
+    using System.IO;
 
     /// <summary>
     /// Represents a DMG (aka UDIF) backed disk.
@@ -91,10 +91,7 @@ using System.IO;
 
         public override Partitions.PartitionTable Partitions
         {
-            get
-            {
-                return new UdifPartitionTable(this, this._file.Buffer);
-            }
+            get { return new UdifPartitionTable(this, this._file.Buffer); }
         }
 
         /// <summary>
@@ -102,7 +99,7 @@ using System.IO;
         /// </summary>
         public override IEnumerable<VirtualDiskLayer> Layers
         {
-            get { return new VirtualDiskLayer[] { _file }; }
+            get { return new VirtualDiskLayer[] {_file}; }
         }
 
         /// <summary>

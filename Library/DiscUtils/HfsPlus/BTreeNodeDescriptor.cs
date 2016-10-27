@@ -42,7 +42,7 @@ namespace DiscUtils.HfsPlus
         {
             ForwardLink = Utilities.ToUInt32BigEndian(buffer, offset + 0);
             BackwardLink = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            Kind = (BTreeNodeKind)buffer[offset + 8];
+            Kind = (BTreeNodeKind) buffer[offset + 8];
             Height = buffer[offset + 9];
             NumRecords = Utilities.ToUInt16BigEndian(buffer, offset + 10);
             Reserved = Utilities.ToUInt16BigEndian(buffer, offset + 12);

@@ -94,7 +94,8 @@ namespace DiscUtils.BootConfig
                 {
                     Guid diskGuid = Utilities.ToGuidLittleEndian(DiskIdentity, 0);
                     Guid partitionGuid = Utilities.ToGuidLittleEndian(PartitionIdentity, 0);
-                    return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid, partitionGuid);
+                    return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid,
+                        partitionGuid);
                 }
             }
             else if (Type == 8)

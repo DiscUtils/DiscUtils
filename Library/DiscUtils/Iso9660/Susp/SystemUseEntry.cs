@@ -31,7 +31,8 @@ namespace DiscUtils.Iso9660
         public string Name;
         public byte Version;
 
-        public static SystemUseEntry Parse(byte[] data, int offset, Encoding encoding, SuspExtension extension, out int length)
+        public static SystemUseEntry Parse(byte[] data, int offset, Encoding encoding, SuspExtension extension,
+            out int length)
         {
             string name = Utilities.BytesToString(data, offset, 2);
             length = data[offset + 2];

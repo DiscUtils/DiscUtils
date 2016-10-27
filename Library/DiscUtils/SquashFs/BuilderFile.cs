@@ -25,7 +25,9 @@ namespace DiscUtils.SquashFs
     using System.Collections.Generic;
     using System.IO;
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "FileStream instance is correctly disposed")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+         "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable",
+         Justification = "FileStream instance is correctly disposed")]
     internal sealed class BuilderFile : BuilderNode
     {
         private Stream _source;
@@ -96,7 +98,7 @@ namespace DiscUtils.SquashFs
                     _inode.StartBlock = 0xFFFFFFFF;
 
                     _inode.FragmentKey = context.WriteFragment(bufferedBytes, out _inode.FragmentOffset);
-                    _inode.FileSize = (uint)bufferedBytes;
+                    _inode.FileSize = (uint) bufferedBytes;
                 }
                 else
                 {
@@ -104,13 +106,13 @@ namespace DiscUtils.SquashFs
                     _inode.FragmentKey = 0xFFFFFFFF;
 
                     _lengths = new List<uint>();
-                    _inode.StartBlock = (uint)startPos;
+                    _inode.StartBlock = (uint) startPos;
                     _inode.FileSize = bufferedBytes;
                     while (bufferedBytes > 0)
                     {
                         _lengths.Add(context.WriteDataBlock(context.IoBuffer, 0, bufferedBytes));
                         bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
-                        _inode.FileSize += (uint)bufferedBytes;
+                        _inode.FileSize += (uint) bufferedBytes;
                     }
                 }
             }
@@ -141,10 +143,10 @@ namespace DiscUtils.SquashFs
             {
                 for (int i = 0; i < _lengths.Count; ++i)
                 {
-                    Utilities.WriteBytesLittleEndian(_lengths[i], context.IoBuffer, _inode.Size + (i * 4));
+                    Utilities.WriteBytesLittleEndian(_lengths[i], context.IoBuffer, _inode.Size + (i*4));
                 }
 
-                totalSize += _lengths.Count * 4;
+                totalSize += _lengths.Count*4;
             }
 
             context.InodeWriter.Write(context.IoBuffer, 0, totalSize);

@@ -48,10 +48,7 @@ namespace DiscUtils.Iscsi
 
         #region IByteArraySerializable Members
 
-        public abstract int Size
-        {
-            get;
-        }
+        public abstract int Size { get; }
 
         public abstract int ReadFrom(byte[] buffer, int offset);
 

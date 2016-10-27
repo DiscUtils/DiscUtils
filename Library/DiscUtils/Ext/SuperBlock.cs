@@ -98,7 +98,7 @@ namespace DiscUtils.Ext
 
         public uint BlockSize
         {
-            get { return (uint)(1024 << (int)LogBlockSize); }
+            get { return (uint) (1024 << (int) LogBlockSize); }
         }
 
         public int Size
@@ -137,9 +137,10 @@ namespace DiscUtils.Ext
             FirstInode = Utilities.ToUInt32LittleEndian(buffer, offset + 84);
             InodeSize = Utilities.ToUInt16LittleEndian(buffer, offset + 88);
             BlockGroupNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 90);
-            CompatibleFeatures = (CompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 92);
-            IncompatibleFeatures = (IncompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 96);
-            ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 100);
+            CompatibleFeatures = (CompatibleFeatures) Utilities.ToUInt32LittleEndian(buffer, offset + 92);
+            IncompatibleFeatures = (IncompatibleFeatures) Utilities.ToUInt32LittleEndian(buffer, offset + 96);
+            ReadOnlyCompatibleFeatures =
+                (ReadOnlyCompatibleFeatures) Utilities.ToUInt32LittleEndian(buffer, offset + 100);
             UniqueId = Utilities.ToGuidLittleEndian(buffer, offset + 104);
             VolumeName = Utilities.BytesToZString(buffer, offset + 120, 16);
             LastMountPoint = Utilities.BytesToZString(buffer, offset + 136, 64);
@@ -166,7 +167,7 @@ namespace DiscUtils.Ext
             JournalBackup = new uint[17];
             for (int i = 0; i < 17; ++i)
             {
-                JournalBackup[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 268 + (4 * i));
+                JournalBackup[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 268 + (4*i));
             }
 
             BlocksCountHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 336);

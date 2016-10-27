@@ -86,7 +86,7 @@ namespace DiscUtils.Iscsi
                     _capacity = _session.GetCapacity(_lun);
                 }
 
-                return _capacity.BlockSize * _capacity.LogicalBlockCount;
+                return _capacity.BlockSize*_capacity.LogicalBlockCount;
             }
         }
 
@@ -140,14 +140,14 @@ namespace DiscUtils.Iscsi
             get
             {
                 return new VirtualDiskTypeInfo()
-                    {
-                        Name = "iSCSI",
-                        Variant = string.Empty,
-                        CanBeHardDisk = true,
-                        DeterministicGeometry = false,
-                        PreservesBiosGeometry = false,
-                        CalcGeometry = c => Geometry.FromCapacity(c)
-                    };
+                {
+                    Name = "iSCSI",
+                    Variant = string.Empty,
+                    CanBeHardDisk = true,
+                    DeterministicGeometry = false,
+                    PreservesBiosGeometry = false,
+                    CalcGeometry = c => Geometry.FromCapacity(c)
+                };
             }
         }
 

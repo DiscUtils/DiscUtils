@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            EntrySize = (uint)Size;
+            EntrySize = (uint) Size;
 
             Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
             Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);

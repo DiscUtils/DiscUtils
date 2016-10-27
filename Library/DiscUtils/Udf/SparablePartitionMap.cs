@@ -46,7 +46,7 @@ namespace DiscUtils.Udf
             LocationsOfSparingTables = new uint[NumSparingTables];
             for (int i = 0; i < NumSparingTables; ++i)
             {
-                LocationsOfSparingTables[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 48 + (4 * i));
+                LocationsOfSparingTables[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 48 + (4*i));
             }
 
             return 64;

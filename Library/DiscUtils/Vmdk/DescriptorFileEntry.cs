@@ -58,7 +58,7 @@ namespace DiscUtils.Vmdk
 
         public static DescriptorFileEntry Parse(string value)
         {
-            string[] parts = value.Split(new char[] { '=' }, 2);
+            string[] parts = value.Split(new char[] {'='}, 2);
 
             for (int i = 0; i < parts.Length; ++i)
             {
@@ -101,7 +101,8 @@ namespace DiscUtils.Vmdk
                 case DescriptorFileEntryType.Quoted:
                     return _key + sep + "=" + sep + "\"" + _value + "\"";
                 default:
-                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", _type));
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}",
+                        _type));
             }
         }
     }

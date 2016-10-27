@@ -27,7 +27,7 @@ namespace DiscUtils.Vhdx
 
     internal sealed class MetadataTable : IByteArraySerializable
     {
-        public const int FixedSize = (int)(64 * Sizes.OneKiB);
+        public const int FixedSize = (int) (64*Sizes.OneKiB);
         public const ulong MetadataTableSignature = 0x617461646174656D;
 
         public static readonly Guid FileParametersGuid = new Guid("CAA16737-FA36-4D43-B3B6-33F0AA44E76B");
@@ -91,7 +91,7 @@ namespace DiscUtils.Vhdx
             {
                 for (int i = 0; i < EntryCount; ++i)
                 {
-                    MetadataEntry entry = Utilities.ToStruct<MetadataEntry>(buffer, offset + 32 + (i * 32));
+                    MetadataEntry entry = Utilities.ToStruct<MetadataEntry>(buffer, offset + 32 + (i*32));
                     Entries[MetadataEntryKey.FromEntry(entry)] = entry;
                 }
             }
@@ -101,7 +101,7 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            EntryCount = (ushort)Entries.Count;
+            EntryCount = (ushort) Entries.Count;
             Utilities.WriteBytesLittleEndian(Signature, _headerData, 0);
             Utilities.WriteBytesLittleEndian(EntryCount, _headerData, 10);
 

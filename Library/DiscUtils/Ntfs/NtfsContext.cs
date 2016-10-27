@@ -38,95 +38,41 @@ namespace DiscUtils.Ntfs
 
     internal interface INtfsContext
     {
-        Stream RawStream
-        {
-            get;
-        }
+        Stream RawStream { get; }
 
-        AttributeDefinitions AttributeDefinitions
-        {
-            get;
-        }
+        AttributeDefinitions AttributeDefinitions { get; }
 
-        UpperCase UpperCase
-        {
-            get;
-        }
+        UpperCase UpperCase { get; }
 
-        BiosParameterBlock BiosParameterBlock
-        {
-            get;
-        }
+        BiosParameterBlock BiosParameterBlock { get; }
 
-        MasterFileTable Mft
-        {
-            get;
-        }
+        MasterFileTable Mft { get; }
 
-        ClusterBitmap ClusterBitmap
-        {
-            get;
-        }
+        ClusterBitmap ClusterBitmap { get; }
 
-        SecurityDescriptors SecurityDescriptors
-        {
-            get;
-        }
+        SecurityDescriptors SecurityDescriptors { get; }
 
-        ObjectIds ObjectIds
-        {
-            get;
-        }
+        ObjectIds ObjectIds { get; }
 
-        ReparsePoints ReparsePoints
-        {
-            get;
-        }
+        ReparsePoints ReparsePoints { get; }
 
-        Quotas Quotas
-        {
-            get;
-        }
+        Quotas Quotas { get; }
 
-        NtfsOptions Options
-        {
-            get;
-        }
+        NtfsOptions Options { get; }
 
-        GetFileByIndexFn GetFileByIndex
-        {
-            get;
-        }
+        GetFileByIndexFn GetFileByIndex { get; }
 
-        GetFileByRefFn GetFileByRef
-        {
-            get;
-        }
+        GetFileByRefFn GetFileByRef { get; }
 
-        GetDirectoryByIndexFn GetDirectoryByIndex
-        {
-            get;
-        }
+        GetDirectoryByIndexFn GetDirectoryByIndex { get; }
 
-        GetDirectoryByRefFn GetDirectoryByRef
-        {
-            get;
-        }
+        GetDirectoryByRefFn GetDirectoryByRef { get; }
 
-        AllocateFileFn AllocateFile
-        {
-            get;
-        }
+        AllocateFileFn AllocateFile { get; }
 
-        ForgetFileFn ForgetFile
-        {
-            get;
-        }
+        ForgetFileFn ForgetFile { get; }
 
-        bool ReadOnly
-        {
-            get;
-        }
+        bool ReadOnly { get; }
     }
 
     internal sealed class NtfsContext : INtfsContext

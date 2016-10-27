@@ -42,7 +42,7 @@ namespace DiscUtils.Ntfs
 
         protected override void Read(byte[] buffer, int offset)
         {
-            _content = new byte[(UpdateSequenceCount - 1) * _bytesPerSector];
+            _content = new byte[(UpdateSequenceCount - 1)*_bytesPerSector];
             Array.Copy(buffer, offset, _content, 0, _content.Length);
         }
 

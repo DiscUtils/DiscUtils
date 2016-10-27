@@ -50,10 +50,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the geometry of the virtual disk layer.
         /// </summary>
-        public abstract Geometry Geometry
-        {
-            get;
-        }
+        public abstract Geometry Geometry { get; }
 
         /// <summary>
         /// Gets and sets the logical extents that make up this layer.
@@ -66,18 +63,12 @@ namespace DiscUtils
         /// <summary>
         /// Gets a value indicating whether the layer only stores meaningful sectors.
         /// </summary>
-        public abstract bool IsSparse
-        {
-            get;
-        }
+        public abstract bool IsSparse { get; }
 
         /// <summary>
         /// Gets a value indicating whether this is a differential disk.
         /// </summary>
-        public abstract bool NeedsParent
-        {
-            get;
-        }
+        public abstract bool NeedsParent { get; }
 
         /// <summary>
         /// Gets the full path to this disk layer, or empty string.
@@ -90,10 +81,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
-        internal abstract long Capacity
-        {
-            get;
-        }
+        internal abstract long Capacity { get; }
 
         /// <summary>
         /// Gets a <c>FileLocator</c> that can resolve relative paths, or <c>null</c>.
@@ -101,10 +89,7 @@ namespace DiscUtils
         /// <remarks>
         /// Typically used to locate parent disks.
         /// </remarks>
-        internal abstract FileLocator RelativeFileLocator
-        {
-            get;
-        }
+        internal abstract FileLocator RelativeFileLocator { get; }
 
         /// <summary>
         /// Gets the content of this layer.

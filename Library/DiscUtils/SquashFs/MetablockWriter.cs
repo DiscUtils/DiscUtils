@@ -37,16 +37,13 @@ namespace DiscUtils.SquashFs
 
         public MetablockWriter()
         {
-            _currentBlock = new byte[8 * 1024];
+            _currentBlock = new byte[8*1024];
             _buffer = new MemoryStream();
         }
 
         public MetadataRef Position
         {
-            get
-            {
-                return new MetadataRef(_currentBlockNum, _currentOffset);
-            }
+            get { return new MetadataRef(_currentBlockNum, _currentOffset); }
         }
 
         public void Dispose()
@@ -84,13 +81,13 @@ namespace DiscUtils.SquashFs
                 NextBlock();
             }
 
-            output.Write(_buffer.ToArray(), 0, (int)_buffer.Length);
+            output.Write(_buffer.ToArray(), 0, (int) _buffer.Length);
         }
 
         internal long DistanceFrom(MetadataRef startPos)
         {
-            return ((_currentBlockNum - startPos.Block) * VfsSquashFileSystemReader.MetadataBufferSize)
-                + (_currentOffset - startPos.Offset);
+            return ((_currentBlockNum - startPos.Block)*VfsSquashFileSystemReader.MetadataBufferSize)
+                   + (_currentOffset - startPos.Offset);
         }
 
         private void NextBlock()
@@ -106,12 +103,12 @@ namespace DiscUtils.SquashFs
             if (compressed.Length < _currentOffset)
             {
                 writeData = compressed.ToArray();
-                writeLen = (ushort)compressed.Length;
+                writeLen = (ushort) compressed.Length;
             }
             else
             {
                 writeData = _currentBlock;
-                writeLen = (ushort)(_currentOffset | 0x8000);
+                writeLen = (ushort) (_currentOffset | 0x8000);
             }
 
             byte[] header = new byte[2];

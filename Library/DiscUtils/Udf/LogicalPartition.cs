@@ -40,7 +40,8 @@ namespace DiscUtils.Udf
             get { return _volumeDescriptor.LogicalBlockSize; }
         }
 
-        public static LogicalPartition FromDescriptor(UdfContext context, LogicalVolumeDescriptor volumeDescriptor, int index)
+        public static LogicalPartition FromDescriptor(UdfContext context, LogicalVolumeDescriptor volumeDescriptor,
+            int index)
         {
             PartitionMap map = volumeDescriptor.PartitionMaps[index];
 

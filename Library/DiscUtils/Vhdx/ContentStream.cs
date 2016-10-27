@@ -42,7 +42,8 @@ namespace DiscUtils.Vhdx
         private long _position;
         private bool _atEof;
 
-        public ContentStream(SparseStream fileStream, bool? canWrite, Stream batStream, FreeSpaceTable freeSpaceTable, Metadata metadata, long length, SparseStream parentStream, Ownership ownsParent)
+        public ContentStream(SparseStream fileStream, bool? canWrite, Stream batStream, FreeSpaceTable freeSpaceTable,
+            Metadata metadata, long length, SparseStream parentStream, Ownership ownsParent)
         {
             _fileStream = fileStream;
             _canWrite = canWrite;
@@ -141,7 +142,10 @@ namespace DiscUtils.Vhdx
         {
             CheckDisposed();
 
-            return StreamExtent.Intersect(StreamExtent.Union(GetExtentsRaw(start, count), _parentStream.GetExtentsInRange(start, count)), new StreamExtent(start, count));
+            return
+                StreamExtent.Intersect(
+                    StreamExtent.Union(GetExtentsRaw(start, count), _parentStream.GetExtentsInRange(start, count)),
+                    new StreamExtent(start, count));
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -160,12 +164,12 @@ namespace DiscUtils.Vhdx
                 return 0;
             }
 
-            if (_position % _metadata.LogicalSectorSize != 0 || count % _metadata.LogicalSectorSize != 0)
+            if (_position%_metadata.LogicalSectorSize != 0 || count%_metadata.LogicalSectorSize != 0)
             {
                 throw new IOException("Unaligned read");
             }
 
-            int totalToRead = (int)Math.Min(_length - _position, count);
+            int totalToRead = (int) Math.Min(_length - _position, count);
             int totalRead = 0;
 
             while (totalRead < totalToRead)
@@ -175,14 +179,15 @@ namespace DiscUtils.Vhdx
                 int sectorIndex;
                 Chunk chunk = GetChunk(_position + totalRead, out chunkIndex, out blockIndex, out sectorIndex);
 
-                int blockOffset = (int)(sectorIndex * _metadata.LogicalSectorSize);
-                int blockBytesRemaining = (int)(_fileParameters.BlockSize - blockOffset);
+                int blockOffset = (int) (sectorIndex*_metadata.LogicalSectorSize);
+                int blockBytesRemaining = (int) (_fileParameters.BlockSize - blockOffset);
 
                 PayloadBlockStatus blockStatus = chunk.GetBlockStatus(blockIndex);
                 if (blockStatus == PayloadBlockStatus.FullyPresent)
                 {
                     _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
-                    int read = Utilities.ReadFully(_fileStream, buffer, offset + totalRead, Math.Min(blockBytesRemaining, totalToRead - totalRead));
+                    int read = Utilities.ReadFully(_fileStream, buffer, offset + totalRead,
+                        Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
                     totalRead += read;
                 }
@@ -192,7 +197,7 @@ namespace DiscUtils.Vhdx
 
                     bool present;
                     int numSectors = bitmap.ContiguousSectors(sectorIndex, out present);
-                    int toRead = (int)Math.Min(numSectors * _metadata.LogicalSectorSize, totalToRead - totalRead);
+                    int toRead = (int) Math.Min(numSectors*_metadata.LogicalSectorSize, totalToRead - totalRead);
                     int read;
 
                     if (present)
@@ -211,7 +216,8 @@ namespace DiscUtils.Vhdx
                 else if (blockStatus == PayloadBlockStatus.NotPresent)
                 {
                     _parentStream.Position = _position + totalRead;
-                    int read = Utilities.ReadFully(_parentStream, buffer, offset + totalRead, Math.Min(blockBytesRemaining, totalToRead - totalRead));
+                    int read = Utilities.ReadFully(_parentStream, buffer, offset + totalRead,
+                        Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
                     totalRead += read;
                 }
@@ -270,7 +276,7 @@ namespace DiscUtils.Vhdx
                 throw new InvalidOperationException("Attempt to write to read-only VHDX");
             }
 
-            if (_position % _metadata.LogicalSectorSize != 0 || count % _metadata.LogicalSectorSize != 0)
+            if (_position%_metadata.LogicalSectorSize != 0 || count%_metadata.LogicalSectorSize != 0)
             {
                 throw new IOException("Unaligned read");
             }
@@ -284,8 +290,8 @@ namespace DiscUtils.Vhdx
                 int sectorIndex;
                 Chunk chunk = GetChunk(_position + totalWritten, out chunkIndex, out blockIndex, out sectorIndex);
 
-                int blockOffset = (int)(sectorIndex * _metadata.LogicalSectorSize);
-                int blockBytesRemaining = (int)(_fileParameters.BlockSize - blockOffset);
+                int blockOffset = (int) (sectorIndex*_metadata.LogicalSectorSize);
+                int blockBytesRemaining = (int) (_fileParameters.BlockSize - blockOffset);
 
                 PayloadBlockStatus blockStatus = chunk.GetBlockStatus(blockIndex);
                 if (blockStatus != PayloadBlockStatus.FullyPresent && blockStatus != PayloadBlockStatus.PartiallyPresent)
@@ -300,7 +306,7 @@ namespace DiscUtils.Vhdx
                 if (blockStatus == PayloadBlockStatus.PartiallyPresent)
                 {
                     BlockBitmap bitmap = chunk.GetBlockBitmap(blockIndex);
-                    bool changed = bitmap.MarkSectorsPresent(sectorIndex, (int)(toWrite / _metadata.LogicalSectorSize));
+                    bool changed = bitmap.MarkSectorsPresent(sectorIndex, (int) (toWrite/_metadata.LogicalSectorSize));
 
                     if (changed)
                     {
@@ -312,7 +318,7 @@ namespace DiscUtils.Vhdx
             }
 
             _position += totalWritten;
-         }
+        }
 
         protected override void Dispose(bool disposing)
         {
@@ -336,8 +342,8 @@ namespace DiscUtils.Vhdx
 
         private IEnumerable<StreamExtent> GetExtentsRaw(long start, long count)
         {
-            long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
-            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
+            long chunkSize = (1L << 23)*_metadata.LogicalSectorSize;
+            int chunkRatio = (int) (chunkSize/_metadata.FileParameters.BlockSize);
 
             long pos = Utilities.RoundDown(start, chunkSize);
 
@@ -359,7 +365,9 @@ namespace DiscUtils.Vhdx
                         case PayloadBlockStatus.Zero:
                             break;
                         default:
-                            yield return new StreamExtent(pos + (i * _metadata.FileParameters.BlockSize), _metadata.FileParameters.BlockSize);
+                            yield return
+                                new StreamExtent(pos + (i*_metadata.FileParameters.BlockSize),
+                                    _metadata.FileParameters.BlockSize);
                             break;
                     }
                 }
@@ -370,16 +378,16 @@ namespace DiscUtils.Vhdx
 
         private Chunk GetChunk(long position, out int chunk, out int block, out int sector)
         {
-            long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
-            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
+            long chunkSize = (1L << 23)*_metadata.LogicalSectorSize;
+            int chunkRatio = (int) (chunkSize/_metadata.FileParameters.BlockSize);
 
-            chunk = (int)(position / chunkSize);
-            long chunkOffset = position % chunkSize;
+            chunk = (int) (position/chunkSize);
+            long chunkOffset = position%chunkSize;
 
-            block = (int)(chunkOffset / _fileParameters.BlockSize);
-            int blockOffset = (int)(chunkOffset % _fileParameters.BlockSize);
+            block = (int) (chunkOffset/_fileParameters.BlockSize);
+            int blockOffset = (int) (chunkOffset%_fileParameters.BlockSize);
 
-            sector = (int)(blockOffset / _metadata.LogicalSectorSize);
+            sector = (int) (blockOffset/_metadata.LogicalSectorSize);
 
             Chunk result = _chunks[chunk];
             if (result == null)

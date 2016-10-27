@@ -55,7 +55,7 @@ namespace DiscUtils.SquashFs
                 throw new IOException("The directory entry '" + name + "' already exists");
             }
 
-            Entry newEntry = new Entry() { Name = name, Node = node };
+            Entry newEntry = new Entry() {Name = name, Node = node};
             _children.Add(newEntry);
             _index.Add(name, newEntry);
         }
@@ -115,8 +115,8 @@ namespace DiscUtils.SquashFs
 
                 int count = 1;
                 while (currentChild + count < _children.Count
-                    && _children[currentChild + count].Node.InodeRef.Block == thisBlock
-                    && _children[currentChild + count].Node.InodeNumber - firstInode < 0x7FFF)
+                       && _children[currentChild + count].Node.InodeRef.Block == thisBlock
+                       && _children[currentChild + count].Node.InodeNumber - firstInode < 0x7FFF)
                 {
                     ++count;
                 }
@@ -125,7 +125,7 @@ namespace DiscUtils.SquashFs
                 {
                     Count = count - 1,
                     InodeNumber = firstInode,
-                    StartBlock = (int)thisBlock
+                    StartBlock = (int) thisBlock
                 };
 
                 hdr.WriteTo(context.IoBuffer, 0);
@@ -136,8 +136,8 @@ namespace DiscUtils.SquashFs
                     Entry child = _children[currentChild + i];
                     DirectoryRecord record = new DirectoryRecord()
                     {
-                        Offset = (ushort)child.Node.InodeRef.Offset,
-                        InodeNumber = (short)(child.Node.InodeNumber - firstInode),
+                        Offset = (ushort) child.Node.InodeRef.Offset,
+                        InodeNumber = (short) (child.Node.InodeNumber - firstInode),
                         Type = child.Node.Inode.Type,
                         Name = child.Name
                     };
@@ -163,9 +163,9 @@ namespace DiscUtils.SquashFs
 
             NumLinks = numDirs + 2; // +1 for self, +1 for parent
 
-            _inode.StartBlock = (uint)startPos.Block;
-            _inode.Offset = (ushort)startPos.Offset;
-            _inode.FileSize = (uint)size + 3; // For some reason, always +3
+            _inode.StartBlock = (uint) startPos.Block;
+            _inode.Offset = (ushort) startPos.Offset;
+            _inode.FileSize = (uint) size + 3; // For some reason, always +3
         }
 
         private void WriteInode(BuilderContext context)

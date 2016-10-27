@@ -26,7 +26,7 @@ namespace DiscUtils.Nfs
     {
         public Nfs3CreateResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status)reader.ReadInt32();
+            Status = (Nfs3Status) reader.ReadInt32();
             if (Status == Nfs3Status.Ok)
             {
                 if (reader.ReadBool())

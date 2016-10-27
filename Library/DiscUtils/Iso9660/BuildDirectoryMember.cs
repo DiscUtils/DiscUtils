@@ -73,10 +73,7 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// Gets the parent directory, or <c>null</c> if this is the root directory.
         /// </summary>
-        public abstract BuildDirectoryInfo Parent
-        {
-            get;
-        }
+        public abstract BuildDirectoryInfo Parent { get; }
 
         /// <summary>
         /// Gets or sets the creation date for the file or directory, in UTC.

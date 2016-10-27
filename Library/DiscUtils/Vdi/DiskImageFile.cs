@@ -129,12 +129,12 @@ namespace DiscUtils.Vdi
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
-            HeaderRecord header = HeaderRecord.Initialized(ImageType.Fixed, ImageFlags.None, capacity, 1024 * 1024, 0);
+            HeaderRecord header = HeaderRecord.Initialized(ImageType.Fixed, ImageFlags.None, capacity, 1024*1024, 0);
 
-            byte[] blockTable = new byte[header.BlockCount * 4];
+            byte[] blockTable = new byte[header.BlockCount*4];
             for (int i = 0; i < header.BlockCount; ++i)
             {
-                Utilities.WriteBytesLittleEndian((uint)i, blockTable, i * 4);
+                Utilities.WriteBytesLittleEndian((uint) i, blockTable, i*4);
             }
 
             header.BlocksAllocated = header.BlockCount;
@@ -146,7 +146,7 @@ namespace DiscUtils.Vdi
             stream.Position = header.BlocksOffset;
             stream.Write(blockTable, 0, blockTable.Length);
 
-            long totalSize = header.DataOffset + ((long)header.BlockSize * (long)header.BlockCount);
+            long totalSize = header.DataOffset + ((long) header.BlockSize*(long) header.BlockCount);
             if (stream.Length < totalSize)
             {
                 stream.SetLength(totalSize);
@@ -165,9 +165,9 @@ namespace DiscUtils.Vdi
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
-            HeaderRecord header = HeaderRecord.Initialized(ImageType.Dynamic, ImageFlags.None, capacity, 1024 * 1024, 0);
+            HeaderRecord header = HeaderRecord.Initialized(ImageType.Dynamic, ImageFlags.None, capacity, 1024*1024, 0);
 
-            byte[] blockTable = new byte[header.BlockCount * 4];
+            byte[] blockTable = new byte[header.BlockCount*4];
             for (int i = 0; i < blockTable.Length; ++i)
             {
                 blockTable[i] = 0xFF;

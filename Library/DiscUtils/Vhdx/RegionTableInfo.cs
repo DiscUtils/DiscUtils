@@ -56,7 +56,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public int Checksum
         {
-            get { return (int)_table.Checksum; }
+            get { return (int) _table.Checksum; }
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public int Count
         {
-            get { return (int)_table.EntryCount; }
+            get { return (int) _table.EntryCount; }
         }
 
         /// <summary>

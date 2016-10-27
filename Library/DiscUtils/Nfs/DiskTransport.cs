@@ -69,7 +69,8 @@ namespace DiscUtils.Nfs
 
             if (bestRoot == null)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Unable to find an NFS export providing access to '{0}'", fsPath));
+                throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                    "Unable to find an NFS export providing access to '{0}'", fsPath));
             }
 
             _fileSystem = new NfsFileSystem(uri.Host, bestRoot);

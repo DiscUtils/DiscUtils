@@ -66,7 +66,7 @@ namespace DiscUtils
                 WeakReference wRef;
                 if (_entries.TryGetValue(key, out wRef))
                 {
-                    V val = (V)wRef.Target;
+                    V val = (V) wRef.Target;
                     if (val != null)
                     {
                         MakeMostRecent(key, val);

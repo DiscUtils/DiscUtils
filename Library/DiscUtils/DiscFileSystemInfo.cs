@@ -211,7 +211,8 @@ namespace DiscUtils
                 return false;
             }
 
-            return string.Compare(Path, asInfo.Path, StringComparison.Ordinal) == 0 && DiscFileSystem.Equals(FileSystem, asInfo.FileSystem);
+            return string.Compare(Path, asInfo.Path, StringComparison.Ordinal) == 0 &&
+                   DiscFileSystem.Equals(FileSystem, asInfo.FileSystem);
         }
 
         /// <summary>

@@ -124,7 +124,7 @@ namespace DiscUtils.Ntfs
             ushort dataLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             ushort length = Utilities.ToUInt16LittleEndian(buffer, offset + 0x08);
             ushort keyLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = (IndexEntryFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            _flags = (IndexEntryFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
 
             if ((_flags & IndexEntryFlags.End) == 0)
             {
@@ -152,11 +152,11 @@ namespace DiscUtils.Ntfs
 
         public virtual void WriteTo(byte[] buffer, int offset)
         {
-            ushort length = (ushort)Size;
+            ushort length = (ushort) Size;
 
             if ((_flags & IndexEntryFlags.End) == 0)
             {
-                ushort keyLength = (ushort)_keyBuffer.Length;
+                ushort keyLength = (ushort) _keyBuffer.Length;
 
                 if (IsFileIndexEntry)
                 {
@@ -164,8 +164,8 @@ namespace DiscUtils.Ntfs
                 }
                 else
                 {
-                    ushort dataOffset = (ushort)(IsFileIndexEntry ? 0 : (0x10 + keyLength));
-                    ushort dataLength = (ushort)_dataBuffer.Length;
+                    ushort dataOffset = (ushort) (IsFileIndexEntry ? 0 : (0x10 + keyLength));
+                    ushort dataLength = (ushort) _dataBuffer.Length;
 
                     Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x00);
                     Utilities.WriteBytesLittleEndian(dataLength, buffer, offset + 0x02);
@@ -177,13 +177,13 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x00); // dataOffset
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x02); // dataLength
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0A); // keyLength
+                Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 0x00); // dataOffset
+                Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 0x02); // dataLength
+                Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 0x0A); // keyLength
             }
 
             Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
+            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x0C);
             if ((_flags & IndexEntryFlags.Node) != 0)
             {
                 Utilities.WriteBytesLittleEndian(_vcn, buffer, offset + length - 8);

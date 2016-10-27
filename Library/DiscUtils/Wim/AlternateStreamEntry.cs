@@ -57,7 +57,7 @@ namespace DiscUtils.Wim
 
             if (startPos + length > reader.Position)
             {
-                int toRead = (int)(startPos + length - reader.Position);
+                int toRead = (int) (startPos + length - reader.Position);
                 reader.Skip(toRead);
             }
 

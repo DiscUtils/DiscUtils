@@ -255,7 +255,8 @@ namespace DiscUtils.Nfs
             Nfs3ReadDirPlusResult result;
             do
             {
-                result = _nfsClient.ReadDirPlus(parent, cookie, cookieVerifier, _fsInfo.DirectoryPreferredBytes, _fsInfo.ReadMaxBytes);
+                result = _nfsClient.ReadDirPlus(parent, cookie, cookieVerifier, _fsInfo.DirectoryPreferredBytes,
+                    _fsInfo.ReadMaxBytes);
 
                 if (result.Status == Nfs3Status.AccessDenied && silentFail)
                 {
@@ -274,8 +275,7 @@ namespace DiscUtils.Nfs
                 }
 
                 cookieVerifier = result.CookieVerifier;
-            }
-            while (!result.Eof);
+            } while (!result.Eof);
         }
     }
 }

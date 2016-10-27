@@ -54,7 +54,7 @@ namespace DiscUtils.Compression
                 byte[] headerBuffer = Utilities.ReadFully(stream, 2);
                 ushort header = Utilities.ToUInt16BigEndian(headerBuffer, 0);
 
-                if ((header % 31) != 0)
+                if ((header%31) != 0)
                 {
                     throw new IOException("Invalid Zlib header found");
                 }
@@ -72,10 +72,10 @@ namespace DiscUtils.Compression
             else
             {
                 ushort header =
-                    (8 << 8)    // DEFLATE
+                    (8 << 8) // DEFLATE
                     | (7 << 12) // 32K window size
-                    | 0x80;     // Default algorithm
-                header |= (ushort)(31 - (header % 31));
+                    | 0x80; // Default algorithm
+                header |= (ushort) (31 - (header%31));
 
                 byte[] headerBuffer = new byte[2];
                 Utilities.WriteBytesBigEndian(header, headerBuffer, 0);

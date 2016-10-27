@@ -38,19 +38,17 @@ namespace DiscUtils.SquashFs
 
         public override long FileSize
         {
-            get
-            {
-                return _fileSize;
-            }
+            get { return _fileSize; }
 
             set
             {
                 if (value > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "File size greater than " + ushort.MaxValue);
+                    throw new ArgumentOutOfRangeException(nameof(value), value,
+                        "File size greater than " + ushort.MaxValue);
                 }
 
-                _fileSize = (ushort)value;
+                _fileSize = (ushort) value;
             }
         }
 

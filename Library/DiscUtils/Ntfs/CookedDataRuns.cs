@@ -154,7 +154,8 @@ namespace DiscUtils.Ntfs
                 throw new ArgumentException("Run is already sparse", nameof(index));
             }
 
-            _runs[index] = new CookedDataRun(new DataRun(0, run.Length, true), run.StartVcn, prevLcn, run.AttributeExtent);
+            _runs[index] = new CookedDataRun(new DataRun(0, run.Length, true), run.StartVcn, prevLcn,
+                run.AttributeExtent);
             run.AttributeExtent.ReplaceRun(run.DataRun, _runs[index].DataRun);
 
             for (int i = index + 1; i < _runs.Count; ++i)
@@ -244,7 +245,8 @@ namespace DiscUtils.Ntfs
 
             long distance = vcn - run.StartVcn;
             long offset = run.IsSparse ? 0 : distance;
-            CookedDataRun newRun = new CookedDataRun(new DataRun(offset, run.Length - distance, run.IsSparse), vcn, run.StartLcn, run.AttributeExtent);
+            CookedDataRun newRun = new CookedDataRun(new DataRun(offset, run.Length - distance, run.IsSparse), vcn,
+                run.StartLcn, run.AttributeExtent);
 
             run.Length = distance;
 
@@ -289,7 +291,8 @@ namespace DiscUtils.Ntfs
                     _runs[i + 1].AttributeExtent.RemoveRun(_runs[i + 1].DataRun);
                     _runs.RemoveAt(i + 1);
                 }
-                else if (!_runs[i].IsSparse && !_runs[i].IsSparse && _runs[i].StartLcn + _runs[i].Length == _runs[i + 1].StartLcn)
+                else if (!_runs[i].IsSparse && !_runs[i].IsSparse &&
+                         _runs[i].StartLcn + _runs[i].Length == _runs[i + 1].StartLcn)
                 {
                     _runs[i].Length += _runs[i + 1].Length;
                     _runs[i + 1].AttributeExtent.RemoveRun(_runs[i + 1].DataRun);

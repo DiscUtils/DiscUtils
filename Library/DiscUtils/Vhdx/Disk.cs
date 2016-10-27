@@ -50,7 +50,8 @@ namespace DiscUtils.Vhdx
         public Disk(Stream stream, Ownership ownsStream)
         {
             _files = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>();
-            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream), Ownership.Dispose));
+            _files.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(new DiskImageFile(stream, ownsStream),
+                Ownership.Dispose));
 
             if (_files[0].First.NeedsParent)
             {
@@ -117,17 +118,20 @@ namespace DiscUtils.Vhdx
                 throw new ArgumentException("Final image file needs a parent");
             }
 
-            List<DiscUtils.Tuple<DiskImageFile, Ownership>> tempList = new List<DiscUtils.Tuple<DiskImageFile, Ownership>>(files.Count);
+            List<DiscUtils.Tuple<DiskImageFile, Ownership>> tempList =
+                new List<DiscUtils.Tuple<DiskImageFile, Ownership>>(files.Count);
             for (int i = 0; i < files.Count - 1; ++i)
             {
                 if (!files[i].NeedsParent)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} does not have a parent disk", i));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
+                        "File at index {0} does not have a parent disk", i));
                 }
 
                 if (files[i].ParentUniqueId != files[i + 1].UniqueId)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
+                        "File at index {0} is not the parent of file at index {1} - Unique Ids don't match", i + 1, i));
                 }
 
                 tempList.Add(new DiscUtils.Tuple<DiskImageFile, Ownership>(files[i], ownsFiles));
@@ -215,7 +219,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public override int BlockSize
         {
-            get { return (int)_files[0].First.LogicalSectorSize; }
+            get { return (int) _files[0].First.LogicalSectorSize; }
         }
 
         /// <summary>
@@ -382,7 +386,8 @@ namespace DiscUtils.Vhdx
             string parentRelativePath,
             DateTime parentModificationTime)
         {
-            DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath, parentRelativePath, parentModificationTime);
+            DiskImageFile file = DiskImageFile.InitializeDifferencing(stream, ownsStream, parent, parentAbsolutePath,
+                parentRelativePath, parentModificationTime);
             return new Disk(file, Ownership.Dispose, parent, ownsParent);
         }
 
@@ -474,7 +479,9 @@ namespace DiscUtils.Vhdx
 
                         if (newFile.UniqueId != file.ParentUniqueId)
                         {
-                            throw new IOException(string.Format(CultureInfo.CurrentUICulture, "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}", file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
+                            throw new IOException(string.Format(CultureInfo.CurrentUICulture,
+                                "Invalid disk chain found looking for parent with id {0}, found {1} with id {2}",
+                                file.ParentUniqueId, newFile.FullPath, newFile.UniqueId));
                         }
 
                         file = newFile;
@@ -486,7 +493,8 @@ namespace DiscUtils.Vhdx
 
                 if (!found)
                 {
-                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Failed to find parent for disk '{0}'", file.FullPath));
+                    throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                        "Failed to find parent for disk '{0}'", file.FullPath));
                 }
             }
         }

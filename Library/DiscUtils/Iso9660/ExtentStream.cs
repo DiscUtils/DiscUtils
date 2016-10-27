@@ -36,7 +36,8 @@ namespace DiscUtils.Iso9660
 
         private Stream _isoStream;
 
-        public ExtentStream(Stream isoStream, uint startBlock, uint dataLength, byte fileUnitSize, byte interleaveGapSize)
+        public ExtentStream(Stream isoStream, uint startBlock, uint dataLength, byte fileUnitSize,
+            byte interleaveGapSize)
         {
             _isoStream = isoStream;
             _startBlock = startBlock;
@@ -87,9 +88,9 @@ namespace DiscUtils.Iso9660
                 return 0;
             }
 
-            int toRead = (int)Math.Min((uint)count, _dataLength - _position);
+            int toRead = (int) Math.Min((uint) count, _dataLength - _position);
 
-            _isoStream.Position = _position + (_startBlock * (long)IsoUtilities.SectorSize);
+            _isoStream.Position = _position + (_startBlock*(long) IsoUtilities.SectorSize);
             int numRead = _isoStream.Read(buffer, offset, toRead);
             _position += numRead;
             return numRead;

@@ -56,7 +56,7 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
-                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = Utilities.ReadFully(s, (int) s.Length);
                 _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, buffer, IndexRoot.HeaderOffset);
 
                 // Give the attribute some room to breathe, so long as it doesn't squeeze others out
@@ -71,11 +71,13 @@ namespace DiscUtils.Ntfs
 
             if (_file.StreamExists(AttributeType.Bitmap, _name))
             {
-                _indexBitmap = new Bitmap(_file.OpenStream(AttributeType.Bitmap, _name, FileAccess.ReadWrite), long.MaxValue);
+                _indexBitmap = new Bitmap(_file.OpenStream(AttributeType.Bitmap, _name, FileAccess.ReadWrite),
+                    long.MaxValue);
             }
         }
 
-        private Index(AttributeType attrType, AttributeCollationRule collationRule, File file, string name, BiosParameterBlock bpb, UpperCase upCase)
+        private Index(AttributeType attrType, AttributeCollationRule collationRule, File file, string name,
+            BiosParameterBlock bpb, UpperCase upCase)
         {
             _file = file;
             _name = name;
@@ -88,9 +90,9 @@ namespace DiscUtils.Ntfs
 
             _root = new IndexRoot()
             {
-                AttributeType = (uint)attrType,
+                AttributeType = (uint) attrType,
                 CollationRule = collationRule,
-                IndexAllocationSize = (uint)bpb.IndexBufferSize,
+                IndexAllocationSize = (uint) bpb.IndexBufferSize,
                 RawClustersPerIndexRecord = bpb.RawIndexBufferSize
             };
 
@@ -158,7 +160,8 @@ namespace DiscUtils.Ntfs
             {
                 IndexEntry oldEntry;
                 IndexNode node;
-                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() +
+                                                _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
                 if (_rootNode.TryFindEntry(key, out oldEntry, out node))
                 {
                     node.UpdateEntry(key, value);
@@ -172,7 +175,8 @@ namespace DiscUtils.Ntfs
 
         public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
         {
-            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock, file.Context.UpperCase);
+            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock,
+                file.Context.UpperCase);
 
             idx.WriteRootNodeToDisk();
         }
@@ -202,7 +206,8 @@ namespace DiscUtils.Ntfs
 
         public bool Remove(byte[] key)
         {
-            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
+            _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() +
+                                            _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
 
             IndexEntry overflowEntry;
             bool found = _rootNode.RemoveEntry(key, out overflowEntry);
@@ -296,23 +301,26 @@ namespace DiscUtils.Ntfs
 
         internal long IndexBlockVcnToPosition(long vcn)
         {
-            if (vcn % _root.RawClustersPerIndexRecord != 0)
+            if (vcn%_root.RawClustersPerIndexRecord != 0)
             {
-                throw new NotSupportedException("Unexpected vcn (not a multiple of clusters-per-index-record): vcn=" + vcn + " rcpir=" + _root.RawClustersPerIndexRecord);
+                throw new NotSupportedException("Unexpected vcn (not a multiple of clusters-per-index-record): vcn=" +
+                                                vcn + " rcpir=" + _root.RawClustersPerIndexRecord);
             }
 
             if (_bpb.BytesPerCluster <= _root.IndexAllocationSize)
             {
-                return vcn * (long)_bpb.BytesPerCluster;
+                return vcn*(long) _bpb.BytesPerCluster;
             }
             else
             {
                 if (_root.RawClustersPerIndexRecord != 8)
                 {
-                    throw new NotSupportedException("Unexpected RawClustersPerIndexRecord (multiple index blocks per cluster): " + _root.RawClustersPerIndexRecord);
+                    throw new NotSupportedException(
+                        "Unexpected RawClustersPerIndexRecord (multiple index blocks per cluster): " +
+                        _root.RawClustersPerIndexRecord);
                 }
 
-                return (vcn / _root.RawClustersPerIndexRecord) * _root.IndexAllocationSize;
+                return (vcn/_root.RawClustersPerIndexRecord)*_root.IndexAllocationSize;
             }
         }
 
@@ -321,7 +329,8 @@ namespace DiscUtils.Ntfs
             if (_rootNode.Depose())
             {
                 WriteRootNodeToDisk();
-                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() + _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
+                _rootNode.TotalSpaceAvailable = _rootNode.CalcSize() +
+                                                _file.MftRecordFreeSpace(AttributeType.IndexRoot, _name);
                 return true;
             }
 
@@ -351,12 +360,15 @@ namespace DiscUtils.Ntfs
             if (_indexBitmap == null)
             {
                 _file.CreateStream(AttributeType.Bitmap, _name);
-                _indexBitmap = new Bitmap(_file.OpenStream(AttributeType.Bitmap, _name, FileAccess.ReadWrite), long.MaxValue);
+                _indexBitmap = new Bitmap(_file.OpenStream(AttributeType.Bitmap, _name, FileAccess.ReadWrite),
+                    long.MaxValue);
             }
 
             long idx = _indexBitmap.AllocateFirstAvailable(0);
 
-            parentEntry.ChildrenVirtualCluster = idx * Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
+            parentEntry.ChildrenVirtualCluster = idx*
+                                                 Utilities.Ceil(_bpb.IndexBufferSize,
+                                                     _bpb.SectorsPerCluster*_bpb.BytesPerSector);
             parentEntry.Flags |= IndexEntryFlags.Node;
 
             IndexBlock block = IndexBlock.Initialize(this, false, parentEntry, _bpb);
@@ -366,7 +378,7 @@ namespace DiscUtils.Ntfs
 
         internal void FreeBlock(long vcn)
         {
-            long idx = vcn / Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
+            long idx = vcn/Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster*_bpb.BytesPerSector);
             _indexBitmap.MarkAbsent(idx);
             _blockCache.Remove(vcn);
         }
@@ -449,7 +461,7 @@ namespace DiscUtils.Ntfs
 
         private void WriteRootNodeToDisk()
         {
-            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize();
+            _rootNode.Header.AllocatedSizeOfEntries = (uint) _rootNode.CalcSize();
             byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries + _root.Size];
             _root.WriteTo(buffer, 0);
             _rootNode.WriteTo(buffer, _root.Size);
@@ -474,10 +486,11 @@ namespace DiscUtils.Ntfs
                 {
                     writer.WriteLine(prefix + "      " + EntryAsString(entry, _file.BestName, _name));
                 }
-                
+
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    NodeAsString(writer, prefix + "        ", GetSubBlock(entry).Node, ":i" + entry.ChildrenVirtualCluster);
+                    NodeAsString(writer, prefix + "        ", GetSubBlock(entry).Node,
+                        ":i" + entry.ChildrenVirtualCluster);
                 }
             }
         }

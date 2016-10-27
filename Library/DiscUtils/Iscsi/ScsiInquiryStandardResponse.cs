@@ -81,7 +81,7 @@ namespace DiscUtils.Iscsi
                 return;
             }
 
-            _deviceType = (LunClass)(buffer[0] & 0x1F);
+            _deviceType = (LunClass) (buffer[0] & 0x1F);
             _removable = (buffer[1] & 0x80) != 0;
             _version = buffer[2];
 

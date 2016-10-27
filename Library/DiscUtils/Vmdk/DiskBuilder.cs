@@ -113,7 +113,8 @@ namespace DiscUtils.Vmdk
                 throw new InvalidOperationException("No content stream specified");
             }
 
-            if (_diskType != DiskCreateType.Vmfs && _diskType != DiskCreateType.VmfsSparse && _diskType != DiskCreateType.MonolithicSparse)
+            if (_diskType != DiskCreateType.Vmfs && _diskType != DiskCreateType.VmfsSparse &&
+                _diskType != DiskCreateType.MonolithicSparse)
             {
                 throw new NotImplementedException("Only MonolithicSparse, Vmfs and VmfsSparse disks implemented");
             }
@@ -123,35 +124,42 @@ namespace DiscUtils.Vmdk
             Geometry geometry = Geometry ?? DiskImageFile.DefaultGeometry(Content.Length);
             Geometry biosGeometry = BiosGeometry ?? Geometry.LbaAssistedBiosGeometry(Content.Length);
 
-            DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, biosGeometry, _diskType, _adapterType);
+            DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, biosGeometry, _diskType,
+                _adapterType);
 
             if (_diskType == DiskCreateType.Vmfs)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512, ExtentType.Vmfs, baseName + "-flat.vmdk", 0);
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length/512,
+                    ExtentType.Vmfs, baseName + "-flat.vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
 
                 MemoryStream ms = new MemoryStream();
                 baseDescriptor.Write(ms);
 
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
-                fileSpecs.Add(new DiskImageFileSpecification(baseName + "-flat.vmdk", new PassthroughStreamBuilder(Content)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + "-flat.vmdk",
+                    new PassthroughStreamBuilder(Content)));
             }
             else if (_diskType == DiskCreateType.VmfsSparse)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512, ExtentType.VmfsSparse, baseName + "-sparse.vmdk", 0);
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length/512,
+                    ExtentType.VmfsSparse, baseName + "-sparse.vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
 
                 MemoryStream ms = new MemoryStream();
                 baseDescriptor.Write(ms);
 
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new PassthroughStreamBuilder(ms)));
-                fileSpecs.Add(new DiskImageFileSpecification(baseName + "-sparse.vmdk", new VmfsSparseExtentBuilder(Content)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + "-sparse.vmdk",
+                    new VmfsSparseExtentBuilder(Content)));
             }
             else if (_diskType == DiskCreateType.MonolithicSparse)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512, ExtentType.Sparse, baseName + ".vmdk", 0);
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length/512,
+                    ExtentType.Sparse, baseName + ".vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
-                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk", new MonolithicSparseExtentBuilder(Content, baseDescriptor)));
+                fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk",
+                    new MonolithicSparseExtentBuilder(Content, baseDescriptor)));
             }
 
             return fileSpecs.ToArray();

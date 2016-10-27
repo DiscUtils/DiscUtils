@@ -70,12 +70,12 @@ namespace DiscUtils.Udf
             StrategyType = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             StrategyParameter = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
             MaxEntries = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
-            FileType = (FileType)buffer[offset + 11];
+            FileType = (FileType) buffer[offset + 11];
             ParentICBLocation = Utilities.ToStruct<LogicalBlockAddress>(buffer, offset + 12);
 
             ushort flagsField = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
-            AllocationType = (AllocationType)(flagsField & 0x3);
-            Flags = (InformationControlBlockFlags)(flagsField & 0xFFFC);
+            AllocationType = (AllocationType) (flagsField & 0x3);
+            Flags = (InformationControlBlockFlags) (flagsField & 0xFFFC);
 
             return 20;
         }

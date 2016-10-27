@@ -175,7 +175,7 @@ namespace DiscUtils.Registry
 
         internal int AllocateCell(int size)
         {
-            if (size < 8 || size % 8 != 0)
+            if (size < 8 || size%8 != 0)
             {
                 throw new ArgumentException("Invalid cell size");
             }

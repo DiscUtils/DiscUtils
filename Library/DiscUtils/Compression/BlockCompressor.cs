@@ -46,7 +46,8 @@ namespace DiscUtils.Compression
         /// <param name="compressedOffset">Offset for the output data in <c>compressed</c>.</param>
         /// <param name="compressedLength">The maximum size of the compressed data on input, and the actual size on output.</param>
         /// <returns>Indication of success, or indication the data could not compress into the requested space.</returns>
-        public abstract CompressionResult Compress(byte[] source, int sourceOffset, int sourceLength, byte[] compressed, int compressedOffset, ref int compressedLength);
+        public abstract CompressionResult Compress(byte[] source, int sourceOffset, int sourceLength, byte[] compressed,
+            int compressedOffset, ref int compressedLength);
 
         /// <summary>
         /// Decompresses some data.
@@ -57,6 +58,7 @@ namespace DiscUtils.Compression
         /// <param name="decompressed">The destination for the output decompressed data.</param>
         /// <param name="decompressedOffset">Offset for the output data in <c>decompressed</c>.</param>
         /// <returns>The amount of decompressed data.</returns>
-        public abstract int Decompress(byte[] source, int sourceOffset, int sourceLength, byte[] decompressed, int decompressedOffset);
+        public abstract int Decompress(byte[] source, int sourceOffset, int sourceLength, byte[] decompressed,
+            int decompressedOffset);
     }
 }

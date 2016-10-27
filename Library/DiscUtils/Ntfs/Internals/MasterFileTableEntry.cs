@@ -54,7 +54,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </remarks>
         public long LogFileSequenceNumber
         {
-            get { return (long)_fileRecord.LogFileSequenceNumber; }
+            get { return (long) _fileRecord.LogFileSequenceNumber; }
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public MasterFileTableEntryFlags Flags
         {
-            get { return (MasterFileTableEntryFlags)_fileRecord.Flags; }
+            get { return (MasterFileTableEntryFlags) _fileRecord.Flags; }
         }
 
         /// <summary>

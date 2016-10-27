@@ -96,7 +96,8 @@ namespace DiscUtils.Vmdk
             string[] elems = SplitQuotedString(descriptor);
             if (elems.Length < 4)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Invalid extent descriptor: {0}", descriptor));
+                throw new IOException(string.Format(CultureInfo.InvariantCulture, "Invalid extent descriptor: {0}",
+                    descriptor));
             }
 
             ExtentDescriptor result = new ExtentDescriptor();
@@ -209,7 +210,8 @@ namespace DiscUtils.Vmdk
 
         public override string ToString()
         {
-            string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" + _fileName + "\"";
+            string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" +
+                           _fileName + "\"";
             if (_type != ExtentType.Sparse && _type != ExtentType.VmfsSparse && _type != ExtentType.Zero)
             {
                 return basic + " " + _offset;

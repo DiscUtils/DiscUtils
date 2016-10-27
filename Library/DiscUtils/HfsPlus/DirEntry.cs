@@ -48,7 +48,7 @@ namespace DiscUtils.HfsPlus
             {
                 return
                     !IsDirectory
-                    && ((FileTypeFlags)((CatalogFileInfo)_info).FileInfo.FileType) == FileTypeFlags.SymLinkFileType;
+                    && ((FileTypeFlags) ((CatalogFileInfo) _info).FileInfo.FileType) == FileTypeFlags.SymLinkFileType;
             }
         }
 
@@ -104,13 +104,13 @@ namespace DiscUtils.HfsPlus
 
         internal static bool IsFileOrDirectory(byte[] dirEntryData)
         {
-            CatalogRecordType type = (CatalogRecordType)Utilities.ToInt16BigEndian(dirEntryData, 0);
+            CatalogRecordType type = (CatalogRecordType) Utilities.ToInt16BigEndian(dirEntryData, 0);
             return type == CatalogRecordType.FolderRecord || type == CatalogRecordType.FileRecord;
         }
 
         private static CommonCatalogFileInfo ParseDirEntryData(byte[] dirEntryData)
         {
-            CatalogRecordType type = (CatalogRecordType)Utilities.ToInt16BigEndian(dirEntryData, 0);
+            CatalogRecordType type = (CatalogRecordType) Utilities.ToInt16BigEndian(dirEntryData, 0);
 
             CommonCatalogFileInfo result = null;
             switch (type)

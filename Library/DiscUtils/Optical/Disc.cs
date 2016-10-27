@@ -60,7 +60,8 @@ namespace DiscUtils.Optical
         /// <param name="path">The path to the disc image.</param>
         public Disc(string path)
         {
-            _file = new DiscImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose, OpticalFormat.None);
+            _file = new DiscImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None),
+                Ownership.Dispose, OpticalFormat.None);
         }
 
         /// <summary>
@@ -71,7 +72,8 @@ namespace DiscUtils.Optical
         public Disc(string path, FileAccess access)
         {
             FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
-            _file = new DiscImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose, OpticalFormat.None);
+            _file = new DiscImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose,
+                OpticalFormat.None);
         }
 
         /// <summary>

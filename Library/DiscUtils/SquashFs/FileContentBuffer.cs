@@ -41,19 +41,19 @@ namespace DiscUtils.SquashFs
             context.InodeReader.SetPosition(inodeRef);
             context.InodeReader.Skip(_inode.Size);
 
-            int numBlocks = (int)(_inode.FileSize / _context.SuperBlock.BlockSize);
-            if (_inode.FileSize % _context.SuperBlock.BlockSize != 0 && _inode.FragmentKey == InvalidFragmentKey)
+            int numBlocks = (int) (_inode.FileSize/_context.SuperBlock.BlockSize);
+            if (_inode.FileSize%_context.SuperBlock.BlockSize != 0 && _inode.FragmentKey == InvalidFragmentKey)
             {
                 ++numBlocks;
             }
 
-            byte[] lengthData = new byte[numBlocks * 4];
+            byte[] lengthData = new byte[numBlocks*4];
             context.InodeReader.Read(lengthData, 0, lengthData.Length);
 
             _blockLengths = new int[numBlocks];
             for (int i = 0; i < numBlocks; ++i)
             {
-                _blockLengths[i] = Utilities.ToInt32LittleEndian(lengthData, i * 4);
+                _blockLengths[i] = Utilities.ToInt32LittleEndian(lengthData, i*4);
             }
         }
 
@@ -74,7 +74,7 @@ namespace DiscUtils.SquashFs
 
         public IEnumerable<StreamExtent> Extents
         {
-            get { return new StreamExtent[] { new StreamExtent(0, Capacity) }; }
+            get { return new StreamExtent[] {new StreamExtent(0, Capacity)}; }
         }
 
         public int Read(long pos, byte[] buffer, int offset, int count)
@@ -84,28 +84,29 @@ namespace DiscUtils.SquashFs
                 return 0;
             }
 
-            long startOfFragment = _blockLengths.Length * (long)_context.SuperBlock.BlockSize;
+            long startOfFragment = _blockLengths.Length*(long) _context.SuperBlock.BlockSize;
             long currentPos = pos;
             int totalRead = 0;
-            int totalToRead = (int)Math.Min(_inode.FileSize - pos, count);
+            int totalToRead = (int) Math.Min(_inode.FileSize - pos, count);
             int currentBlock = 0;
             long currentBlockDiskStart = _inode.StartBlock;
             while (totalRead < totalToRead)
             {
                 if (currentPos >= startOfFragment)
                 {
-                    int read = ReadFrag((int)(currentPos - startOfFragment), buffer, offset + totalRead, totalToRead - totalRead);
+                    int read = ReadFrag((int) (currentPos - startOfFragment), buffer, offset + totalRead,
+                        totalToRead - totalRead);
                     return totalRead + read;
                 }
 
-                int targetBlock = (int)(currentPos / _context.SuperBlock.BlockSize);
+                int targetBlock = (int) (currentPos/_context.SuperBlock.BlockSize);
                 while (currentBlock < targetBlock)
                 {
                     currentBlockDiskStart += _blockLengths[currentBlock] & 0x7FFFFF;
                     ++currentBlock;
                 }
 
-                int blockOffset = (int)(pos % _context.SuperBlock.BlockSize);
+                int blockOffset = (int) (pos%_context.SuperBlock.BlockSize);
 
                 Block block = _context.ReadBlock(currentBlockDiskStart, _blockLengths[currentBlock]);
 
@@ -144,9 +145,9 @@ namespace DiscUtils.SquashFs
 
         private int ReadFrag(int pos, byte[] buffer, int offset, int count)
         {
-            int fragRecordsPerBlock = 8192 / FragmentRecord.RecordSize;
-            int fragTable = (int)_inode.FragmentKey / fragRecordsPerBlock;
-            int recordOffset = (int)(_inode.FragmentKey % fragRecordsPerBlock) * FragmentRecord.RecordSize;
+            int fragRecordsPerBlock = 8192/FragmentRecord.RecordSize;
+            int fragTable = (int) _inode.FragmentKey/fragRecordsPerBlock;
+            int recordOffset = (int) (_inode.FragmentKey%fragRecordsPerBlock)*FragmentRecord.RecordSize;
 
             byte[] fragRecordData = new byte[FragmentRecord.RecordSize];
 
@@ -164,8 +165,8 @@ namespace DiscUtils.SquashFs
                 return 0;
             }
 
-            int toCopy = (int)Math.Min(frag.Available - (_inode.FragmentOffset + pos), count);
-            Array.Copy(frag.Data, (int)(_inode.FragmentOffset + pos), buffer, offset, toCopy);
+            int toCopy = (int) Math.Min(frag.Available - (_inode.FragmentOffset + pos), count);
+            Array.Copy(frag.Data, (int) (_inode.FragmentOffset + pos), buffer, offset, toCopy);
             return toCopy;
         }
     }

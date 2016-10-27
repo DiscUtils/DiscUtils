@@ -56,7 +56,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int Features
         {
-            get { return (int)_footer.Features; }
+            get { return (int) _footer.Features; }
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int FileFormatVersion
         {
-            get { return (int)_footer.FileFormatVersion; }
+            get { return (int) _footer.FileFormatVersion; }
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int CreatorVersion
         {
-            get { return (int)_footer.CreatorVersion; }
+            get { return (int) _footer.CreatorVersion; }
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int FooterChecksum
         {
-            get { return (int)_footer.Checksum; }
+            get { return (int) _footer.Checksum; }
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int DynamicHeaderVersion
         {
-            get { return (int)_header.HeaderVersion; }
+            get { return (int) _header.HeaderVersion; }
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int DynamicChecksum
         {
-            get { return (int)_header.Checksum; }
+            get { return (int) _header.Checksum; }
         }
 
         /// <summary>

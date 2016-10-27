@@ -42,10 +42,10 @@ namespace DiscUtils.Vmdk
         {
             MagicNumber = VmdkMagicNumber;
             Version = 1;
-            SingleEndLineChar = (byte)'\n';
-            NonEndLineChar = (byte)' ';
-            DoubleEndLineChar1 = (byte)'\r';
-            DoubleEndLineChar2 = (byte)'\n';
+            SingleEndLineChar = (byte) '\n';
+            NonEndLineChar = (byte) ' ';
+            DoubleEndLineChar1 = (byte) '\r';
+            DoubleEndLineChar2 = (byte) '\n';
         }
 
         public static HostedSparseExtentHeader Read(byte[] buffer, int offset)
@@ -53,7 +53,7 @@ namespace DiscUtils.Vmdk
             HostedSparseExtentHeader hdr = new HostedSparseExtentHeader();
             hdr.MagicNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             hdr.Version = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            hdr.Flags = (HostedSparseExtentFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 8);
+            hdr.Flags = (HostedSparseExtentFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 8);
             hdr.Capacity = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
             hdr.GrainSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x14);
             hdr.DescriptorOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x1C);
@@ -77,7 +77,7 @@ namespace DiscUtils.Vmdk
             byte[] buffer = new byte[Sizes.Sector];
             Utilities.WriteBytesLittleEndian(MagicNumber, buffer, 0x00);
             Utilities.WriteBytesLittleEndian(Version, buffer, 0x04);
-            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, 0x08);
+            Utilities.WriteBytesLittleEndian((uint) Flags, buffer, 0x08);
             Utilities.WriteBytesLittleEndian(Capacity, buffer, 0x0C);
             Utilities.WriteBytesLittleEndian(GrainSize, buffer, 0x14);
             Utilities.WriteBytesLittleEndian(DescriptorOffset, buffer, 0x1C);

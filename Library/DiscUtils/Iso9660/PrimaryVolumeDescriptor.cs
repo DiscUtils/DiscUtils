@@ -40,7 +40,9 @@ namespace DiscUtils.Iso9660
             uint rootDirExtentLocation,
             uint rootDirDataLength,
             DateTime buildTime)
-            : base(VolumeDescriptorType.Primary, 1, volumeSpaceSize, pathTableSize, typeLPathTableLocation, typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, Encoding.ASCII)
+            : base(
+                VolumeDescriptorType.Primary, 1, volumeSpaceSize, pathTableSize, typeLPathTableLocation,
+                typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, Encoding.ASCII)
         {
         }
 

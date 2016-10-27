@@ -32,7 +32,8 @@ namespace DiscUtils.Vfs
     /// <typeparam name="TFile">The concrete type representing files.</typeparam>
     /// <typeparam name="TDirectory">The concrete type representing directories.</typeparam>
     /// <typeparam name="TContext">The concrete type holding global state.</typeparam>
-    public abstract class VfsReadOnlyFileSystem<TDirEntry, TFile, TDirectory, TContext> : VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>
+    public abstract class VfsReadOnlyFileSystem<TDirEntry, TFile, TDirectory, TContext> :
+            VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>
         where TDirEntry : VfsDirEntry
         where TFile : IVfsFile
         where TDirectory : class, IVfsDirectory<TDirEntry, TFile>, TFile

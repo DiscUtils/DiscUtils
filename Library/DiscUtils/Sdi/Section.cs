@@ -58,7 +58,7 @@ namespace DiscUtils.Sdi
         /// </summary>
         public byte PartitionType
         {
-            get { return (byte)_record.PartitionType; }
+            get { return (byte) _record.PartitionType; }
         }
 
         /// <summary>

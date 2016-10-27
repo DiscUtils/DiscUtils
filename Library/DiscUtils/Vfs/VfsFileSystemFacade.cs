@@ -518,13 +518,14 @@ namespace DiscUtils.Vfs
         /// <typeparam name="TDirectory">The concrete type representing directories.</typeparam>
         /// <typeparam name="TContext">The concrete type holding global state.</typeparam>
         /// <returns>The actual file system instance.</returns>
-        protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem<TDirEntry, TFile, TDirectory, TContext>()
+        protected VfsFileSystem<TDirEntry, TFile, TDirectory, TContext> GetRealFileSystem
+            <TDirEntry, TFile, TDirectory, TContext>()
             where TDirEntry : VfsDirEntry
             where TFile : IVfsFile
             where TDirectory : class, IVfsDirectory<TDirEntry, TFile>, TFile
             where TContext : VfsContext
         {
-            return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>)_wrapped;
+            return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>) _wrapped;
         }
 
         /// <summary>
@@ -535,7 +536,7 @@ namespace DiscUtils.Vfs
         protected T GetRealFileSystem<T>()
             where T : DiscFileSystem
         {
-            return (T)_wrapped;
+            return (T) _wrapped;
         }
     }
 }

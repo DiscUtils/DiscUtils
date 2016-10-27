@@ -49,7 +49,7 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Type = (CharacterSetType)buffer[offset];
+            Type = (CharacterSetType) buffer[offset];
             Information = Utilities.ToByteArray(buffer, offset + 1, 63);
             return 64;
         }

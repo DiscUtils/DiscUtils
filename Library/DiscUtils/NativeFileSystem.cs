@@ -420,7 +420,8 @@ namespace DiscUtils
                 destinationDirectoryName = destinationDirectoryName.Substring(1);
             }
 
-            Directory.Move(Path.Combine(_basePath, sourceDirectoryName), Path.Combine(_basePath, destinationDirectoryName));
+            Directory.Move(Path.Combine(_basePath, sourceDirectoryName),
+                Path.Combine(_basePath, destinationDirectoryName));
         }
 
         /// <summary>
@@ -507,7 +508,8 @@ namespace DiscUtils
                 fileShare = FileShare.Read;
             }
 
-            return SparseStream.FromStream(File.Open(Path.Combine(_basePath, path), mode, access, fileShare), Ownership.Dispose);
+            return SparseStream.FromStream(File.Open(Path.Combine(_basePath, path), mode, access, fileShare),
+                Ownership.Dispose);
         }
 
         /// <summary>

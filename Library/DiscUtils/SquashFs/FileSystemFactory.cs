@@ -32,7 +32,7 @@ namespace DiscUtils.SquashFs
         {
             if (SquashFileSystemReader.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("SquashFS", "Squash Filesystem", Open) };
+                return new DiscUtils.FileSystemInfo[] {new VfsFileSystemInfo("SquashFS", "Squash Filesystem", Open)};
             }
 
             return new DiscUtils.FileSystemInfo[0];

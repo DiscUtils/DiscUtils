@@ -103,8 +103,8 @@ namespace DiscUtils.Iscsi
                 val |= 0x40;
             }
 
-            val |= (byte)(((int)_currentStage) << 2);
-            val |= (byte)_nextStage;
+            val |= (byte) (((int) _currentStage) << 2);
+            val |= (byte) _nextStage;
 
             return val;
         }

@@ -83,7 +83,7 @@ namespace DiscUtils.Iscsi
         /// <returns>The structured address.</returns>
         public static TargetAddress Parse(string address)
         {
-            int addrEnd = address.IndexOfAny(new char[] { ':', ',' });
+            int addrEnd = address.IndexOfAny(new char[] {':', ','});
             if (addrEnd == -1)
             {
                 return new TargetAddress(address, DefaultPort, string.Empty);

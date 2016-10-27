@@ -49,7 +49,7 @@ namespace DiscUtils.Iso9660
             bool longForm = (flags & 0x80) != 0;
             int fieldLen = longForm ? 17 : 7;
 
-            TimestampsPresent = (Timestamps)(flags & 0x7F);
+            TimestampsPresent = (Timestamps) (flags & 0x7F);
 
             int pos = offset + 5;
 

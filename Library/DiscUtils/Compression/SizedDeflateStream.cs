@@ -39,18 +39,12 @@ namespace DiscUtils.Compression
 
         public override long Length
         {
-            get
-            {
-                return this._length;
-            }
+            get { return this._length; }
         }
 
         public override long Position
         {
-            get
-            {
-                return _position;
-            }
+            get { return _position; }
             set
             {
                 if (value != this.Position)

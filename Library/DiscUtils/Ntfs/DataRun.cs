@@ -90,7 +90,7 @@ namespace DiscUtils.Ntfs
             int runLengthSize = WriteVarLong(buffer, offset + 1, _runLength);
             int runOffsetSize = _isSparse ? 0 : WriteVarLong(buffer, offset + 1 + runLengthSize, _runOffset);
 
-            buffer[offset] = (byte)((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
+            buffer[offset] = (byte) ((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
 
             return 1 + runLengthSize + runOffsetSize;
         }
@@ -103,7 +103,7 @@ namespace DiscUtils.Ntfs
             for (int i = 0; i < size; ++i)
             {
                 byte b = buffer[offset + i];
-                val = val | (((ulong)b) << (i * 8));
+                val = val | (((ulong) b) << (i*8));
                 signExtend = (b & 0x80) != 0;
             }
 
@@ -111,11 +111,11 @@ namespace DiscUtils.Ntfs
             {
                 for (int i = size; i < 8; ++i)
                 {
-                    val = val | (((ulong)0xFF) << (i * 8));
+                    val = val | (((ulong) 0xFF) << (i*8));
                 }
             }
 
-            return (long)val;
+            return (long) val;
         }
 
         private static int WriteVarLong(byte[] buffer, int offset, long val)
@@ -125,11 +125,10 @@ namespace DiscUtils.Ntfs
             int pos = 0;
             do
             {
-                buffer[offset + pos] = (byte)(val & 0xFF);
+                buffer[offset + pos] = (byte) (val & 0xFF);
                 val >>= 8;
                 pos++;
-            }
-            while (val != 0 && val != -1);
+            } while (val != 0 && val != -1);
 
             // Avoid appearing to have a negative number that is actually positive,
             // record an extra empty byte if needed.
@@ -158,8 +157,7 @@ namespace DiscUtils.Ntfs
                 lastByteHighBitSet = (val & 0x80) != 0;
                 val >>= 8;
                 len++;
-            }
-            while (val != 0 && val != -1);
+            } while (val != 0 && val != -1);
 
             if ((isPositive && lastByteHighBitSet) || (!isPositive && !lastByteHighBitSet))
             {

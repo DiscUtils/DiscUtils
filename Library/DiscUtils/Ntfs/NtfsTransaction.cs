@@ -26,8 +26,7 @@ namespace DiscUtils.Ntfs
 
     internal sealed class NtfsTransaction : IDisposable
     {
-        [ThreadStatic]
-        private static NtfsTransaction s_instance;
+        [ThreadStatic] private static NtfsTransaction s_instance;
 
         private bool _ownRecord;
 

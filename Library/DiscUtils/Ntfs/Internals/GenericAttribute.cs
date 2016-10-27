@@ -76,7 +76,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         public AttributeFlags Flags
         {
-            get { return (AttributeFlags)_record.Flags; }
+            get { return (AttributeFlags) _record.Flags; }
         }
 
         /// <summary>

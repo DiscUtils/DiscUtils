@@ -47,9 +47,10 @@ namespace DiscUtils.Vmdk
             BiosGeometry = genericParameters.BiosGeometry;
 
             string stringCreateType;
-            if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyCreateType, out stringCreateType))
+            if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyCreateType,
+                out stringCreateType))
             {
-                CreateType = (DiskCreateType)Enum.Parse(typeof(DiskCreateType), stringCreateType);
+                CreateType = (DiskCreateType) Enum.Parse(typeof(DiskCreateType), stringCreateType);
             }
             else
             {
@@ -63,9 +64,10 @@ namespace DiscUtils.Vmdk
             else
             {
                 string stringAdapterType;
-                if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyAdapterType, out stringAdapterType))
+                if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyAdapterType,
+                    out stringAdapterType))
                 {
-                    AdapterType = (DiskAdapterType)Enum.Parse(typeof(DiskAdapterType), stringAdapterType);
+                    AdapterType = (DiskAdapterType) Enum.Parse(typeof(DiskAdapterType), stringAdapterType);
 
                     // Don't refining sub-type of SCSI actually select IDE
                     if (AdapterType == DiskAdapterType.Ide)

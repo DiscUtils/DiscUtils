@@ -66,7 +66,7 @@ namespace DiscUtils.Ntfs
 
         public override long Capacity
         {
-            get { return VirtualClusterCount * _bytesPerCluster; }
+            get { return VirtualClusterCount*_bytesPerCluster; }
         }
 
         public long VirtualClusterCount
@@ -81,7 +81,7 @@ namespace DiscUtils.Ntfs
                 List<StreamExtent> extents = new List<StreamExtent>();
                 foreach (var range in _activeStream.StoredClusters)
                 {
-                    extents.Add(new StreamExtent(range.Offset * _bytesPerCluster, range.Count * _bytesPerCluster));
+                    extents.Add(new StreamExtent(range.Offset*_bytesPerCluster, range.Count*_bytesPerCluster));
                 }
 
                 return StreamExtent.Intersect(extents, new StreamExtent(0, Capacity));
@@ -95,7 +95,7 @@ namespace DiscUtils.Ntfs
 
         public long MapPosition(long pos)
         {
-            long vcn = pos / _bytesPerCluster;
+            long vcn = pos/_bytesPerCluster;
             int dataRunIdx = _cookedRuns.FindDataRun(vcn, 0);
 
             if (_cookedRuns[dataRunIdx].IsSparse)
@@ -104,7 +104,8 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                return (_cookedRuns[dataRunIdx].StartLcn * _bytesPerCluster) + (pos - (_cookedRuns[dataRunIdx].StartVcn * _bytesPerCluster));
+                return (_cookedRuns[dataRunIdx].StartLcn*_bytesPerCluster) +
+                       (pos - (_cookedRuns[dataRunIdx].StartVcn*_bytesPerCluster));
             }
         }
 
@@ -118,7 +119,7 @@ namespace DiscUtils.Ntfs
             Utilities.AssertBufferParameters(buffer, offset, count);
 
             // Limit read to length of attribute
-            int totalToRead = (int)Math.Min(count, Capacity - pos);
+            int totalToRead = (int) Math.Min(count, Capacity - pos);
             if (totalToRead <= 0)
             {
                 return 0;
@@ -127,28 +128,28 @@ namespace DiscUtils.Ntfs
             long focusPos = pos;
             while (focusPos < pos + totalToRead)
             {
-                long vcn = focusPos / _bytesPerCluster;
+                long vcn = focusPos/_bytesPerCluster;
                 long remaining = (pos + totalToRead) - focusPos;
-                long clusterOffset = focusPos - (vcn * _bytesPerCluster);
+                long clusterOffset = focusPos - (vcn*_bytesPerCluster);
 
-                if (vcn * _bytesPerCluster != focusPos || remaining < _bytesPerCluster)
+                if (vcn*_bytesPerCluster != focusPos || remaining < _bytesPerCluster)
                 {
                     // Unaligned or short read
                     _activeStream.ReadClusters(vcn, 1, _ioBuffer, 0);
 
-                    int toRead = (int)Math.Min(remaining, _bytesPerCluster - clusterOffset);
+                    int toRead = (int) Math.Min(remaining, _bytesPerCluster - clusterOffset);
 
-                    Array.Copy(_ioBuffer, (int)clusterOffset, buffer, (int)(offset + (focusPos - pos)), toRead);
+                    Array.Copy(_ioBuffer, (int) clusterOffset, buffer, (int) (offset + (focusPos - pos)), toRead);
 
                     focusPos += toRead;
                 }
                 else
                 {
                     // Aligned, full cluster reads...
-                    int fullClusters = (int)(remaining / _bytesPerCluster);
-                    _activeStream.ReadClusters(vcn, fullClusters, buffer, (int)(offset + (focusPos - pos)));
+                    int fullClusters = (int) (remaining/_bytesPerCluster);
+                    _activeStream.ReadClusters(vcn, fullClusters, buffer, (int) (offset + (focusPos - pos)));
 
-                    focusPos += fullClusters * _bytesPerCluster;
+                    focusPos += fullClusters*_bytesPerCluster;
                 }
             }
 

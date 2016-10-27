@@ -35,7 +35,7 @@ namespace DiscUtils.Nfs
         public RpcMessageHeader(XdrDataReader reader)
         {
             TransactionId = reader.ReadUInt32();
-            RpcMessageType type = (RpcMessageType)reader.ReadInt32();
+            RpcMessageType type = (RpcMessageType) reader.ReadInt32();
             if (type != RpcMessageType.Reply)
             {
                 throw new NotSupportedException("Parsing RPC call messages");
@@ -52,7 +52,8 @@ namespace DiscUtils.Nfs
         {
             get
             {
-                return ReplyHeader != null && ReplyHeader.Status == RpcReplyStatus.Accepted && ReplyHeader.AcceptReply.AcceptStatus == RpcAcceptStatus.Success;
+                return ReplyHeader != null && ReplyHeader.Status == RpcReplyStatus.Accepted &&
+                       ReplyHeader.AcceptReply.AcceptStatus == RpcAcceptStatus.Success;
             }
         }
     }

@@ -75,8 +75,8 @@ namespace DiscUtils.Registry
             int nameLen = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             _dataLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
             _dataIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
-            _type = (RegistryValueType)Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
-            _flags = (ValueFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
+            _type = (RegistryValueType) Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
+            _flags = (ValueFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
 
             if ((_flags & ValueFlags.Named) != 0)
             {
@@ -105,8 +105,8 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(nameLen, buffer, offset + 0x02);
             Utilities.WriteBytesLittleEndian(_dataLength, buffer, offset + 0x04);
             Utilities.WriteBytesLittleEndian(_dataIndex, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian((int)_type, buffer, offset + 0x0C);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian((int) _type, buffer, offset + 0x0C);
+            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x10);
             if (nameLen != 0)
             {
                 Utilities.StringToBytes(_name, buffer, offset + 0x14, nameLen);

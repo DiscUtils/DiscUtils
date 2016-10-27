@@ -51,9 +51,12 @@ namespace DiscUtils
             {
                 switch (i)
                 {
-                    case 0: return _a;
-                    case 1: return _b;
-                    default: throw new ArgumentOutOfRangeException(nameof(i), i, "Invalid index");
+                    case 0:
+                        return _a;
+                    case 1:
+                        return _b;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(i), i, "Invalid index");
                 }
             }
         }

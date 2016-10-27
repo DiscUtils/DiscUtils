@@ -27,7 +27,8 @@ namespace DiscUtils.Ntfs
     using System.Globalization;
     using System.IO;
     using System.Text;
-    using DirectoryIndexEntry = System.Collections.Generic.KeyValuePair<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileRecordReference>;
+    using DirectoryIndexEntry =
+        System.Collections.Generic.KeyValuePair<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileRecordReference>;
 
     internal class Directory : File
     {
@@ -95,7 +96,7 @@ namespace DiscUtils.Ntfs
 
         internal static new Directory CreateNew(INtfsContext context, FileAttributeFlags parentDirFlags)
         {
-            Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
+            Directory dir = (Directory) context.AllocateFile(FileRecordFlags.IsDirectory);
 
             StandardInformation.InitializeNewFile(
                 dir,
@@ -136,7 +137,7 @@ namespace DiscUtils.Ntfs
             {
                 throw new IOException("Invalid file name, more than 255 characters: " + name);
             }
-            else if (name.IndexOfAny(new char[] { '\0', '/' }) != -1)
+            else if (name.IndexOfAny(new char[] {'\0', '/'}) != -1)
             {
                 throw new IOException(@"Invalid file name, contains '\0' or '/': " + name);
             }
@@ -224,10 +225,10 @@ namespace DiscUtils.Ntfs
             do
             {
                 string suffix = string.Format(CultureInfo.InvariantCulture, "~{0}", i);
-                candidate = baseName.Substring(0, Math.Min(8 - suffix.Length, baseName.Length)) + suffix + (ext.Length > 0 ? "." + ext : string.Empty);
+                candidate = baseName.Substring(0, Math.Min(8 - suffix.Length, baseName.Length)) + suffix +
+                            (ext.Length > 0 ? "." + ext : string.Empty);
                 i++;
-            }
-            while (GetEntryByName(candidate) != null);
+            } while (GetEntryByName(candidate) != null);
 
             return candidate;
         }
@@ -284,7 +285,7 @@ namespace DiscUtils.Ntfs
                 // reasons, we don't want to decode the entire structure.  In fact can avoid the string
                 // conversion as well.
                 byte fnLen = buffer[0x40];
-                return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen * 2);
+                return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen*2);
             }
         }
     }

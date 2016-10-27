@@ -31,7 +31,7 @@ namespace DiscUtils.Udf
         private List<FileIdentifier> _entries;
 
         public Directory(UdfContext context, LogicalPartition partition, FileEntry fileEntry)
-            : base(context, partition, fileEntry, (uint)partition.LogicalBlockSize)
+            : base(context, partition, fileEntry, (uint) partition.LogicalBlockSize)
         {
             if (FileContent.Capacity > int.MaxValue)
             {
@@ -40,7 +40,7 @@ namespace DiscUtils.Udf
 
             _entries = new List<FileIdentifier>();
 
-            byte[] contentBytes = Utilities.ReadFully(FileContent, 0, (int)FileContent.Capacity);
+            byte[] contentBytes = Utilities.ReadFully(FileContent, 0, (int) FileContent.Capacity);
 
             int pos = 0;
             while (pos < contentBytes.Length)
@@ -59,10 +59,7 @@ namespace DiscUtils.Udf
 
         public ICollection<FileIdentifier> AllEntries
         {
-            get
-            {
-                return _entries;
-            }
+            get { return _entries; }
         }
 
         public FileIdentifier Self

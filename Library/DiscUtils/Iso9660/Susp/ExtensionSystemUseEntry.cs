@@ -49,7 +49,8 @@ namespace DiscUtils.Iso9660
 
             if (len < 8 + lenId + lenDescriptor + lenSource)
             {
-                throw new InvalidDataException("Invalid SUSP ER entry - too short, only " + len + " bytes - expected: " + (8 + lenId + lenDescriptor + lenSource));
+                throw new InvalidDataException("Invalid SUSP ER entry - too short, only " + len + " bytes - expected: " +
+                                               (8 + lenId + lenDescriptor + lenSource));
             }
 
             ExtensionIdentifier = IsoUtilities.ReadChars(data, offset + 8, lenId, encoding);

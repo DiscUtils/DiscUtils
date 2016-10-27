@@ -48,7 +48,7 @@ namespace DiscUtils.Dmg
 
         public override long SectorCount
         {
-            get { return _block.SectorCount;  }
+            get { return _block.SectorCount; }
         }
 
         internal override PhysicalVolumeType VolumeType
@@ -68,7 +68,7 @@ namespace DiscUtils.Dmg
 
         public override SparseStream Open()
         {
-            return new SubStream(_disk.Content, this.FirstSector * _disk.SectorSize, this.SectorCount * _disk.SectorSize);
+            return new SubStream(_disk.Content, this.FirstSector*_disk.SectorSize, this.SectorCount*_disk.SectorSize);
         }
 
         public override string TypeAsString

@@ -59,7 +59,8 @@ namespace DiscUtils
         /// <returns>A sparse stream.</returns>
         /// <remarks>The wrapped stream is assumed to be a linear stream (such that any byte range
         /// maps directly onto the parent stream).</remarks>
-        public static new MappedStream FromStream(Stream stream, Ownership takeOwnership, IEnumerable<StreamExtent> extents)
+        public static new MappedStream FromStream(Stream stream, Ownership takeOwnership,
+            IEnumerable<StreamExtent> extents)
         {
             return new WrappingMappedStream<Stream>(stream, takeOwnership, extents);
         }

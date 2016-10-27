@@ -31,14 +31,14 @@ namespace DiscUtils.Compression
 
         public int Process(byte[] input, int inputOffset, int inputCount, byte[] output, int outputOffset)
         {
-            if (output.Length < outputOffset + (long)MinOutputCount(inputCount))
+            if (output.Length < outputOffset + (long) MinOutputCount(inputCount))
             {
                 throw new ArgumentException(
                     string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Output buffer to small, must be at least {0} bytes may need to be {1} bytes",
-                    MinOutputCount(inputCount),
-                    MaxOutputCount(inputCount)));
+                        CultureInfo.InvariantCulture,
+                        "Output buffer to small, must be at least {0} bytes may need to be {1} bytes",
+                        MinOutputCount(inputCount),
+                        MaxOutputCount(inputCount)));
             }
 
             if (BuffersMustNotOverlap)
@@ -46,8 +46,8 @@ namespace DiscUtils.Compression
                 int maxOut = MaxOutputCount(inputCount);
 
                 if (input == output
-                    && (inputOffset + (long)inputCount > outputOffset)
-                    && (inputOffset <= outputOffset + (long)maxOut))
+                    && (inputOffset + (long) inputCount > outputOffset)
+                    && (inputOffset <= outputOffset + (long) maxOut))
                 {
                     byte[] tempBuffer = new byte[maxOut];
 
