@@ -22,7 +22,7 @@
 
 namespace DiscUtils
 {
-    internal class Tuple<A, B> : Tuple
+    internal class Tuple<A, B>
     {
         public A Item1 { get; }
         public B Item2 { get; }
@@ -32,7 +32,18 @@ namespace DiscUtils
             Item1 = item1;
             Item2 = item2;
         }
-        
+
+        protected static bool Equals<V>(V a, V b)
+        {
+            if (a == null && b == null)
+                return true;
+
+            if (a == null)
+                return false;
+
+            return a.Equals(b);
+        }
+
         public override bool Equals(object obj)
         {
             Tuple<A, B> asType = obj as Tuple<A, B>;
