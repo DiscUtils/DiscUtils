@@ -22,7 +22,6 @@
 
 namespace DiscUtils.Fat
 {
-    using System;
     using System.IO;
 
     internal class FileAllocationTable

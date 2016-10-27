@@ -23,8 +23,6 @@
 namespace DiscUtils.Udf
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     internal enum CharacterSetType : byte
     {

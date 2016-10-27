@@ -25,7 +25,6 @@ namespace DiscUtils.Ntfs
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using DiscUtils.Compression;
 
     internal class NonResidentDataBuffer : DiscUtils.Buffer, IMappedBuffer
     {

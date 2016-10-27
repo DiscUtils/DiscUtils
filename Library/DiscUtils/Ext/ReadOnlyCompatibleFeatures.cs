@@ -23,8 +23,6 @@
 namespace DiscUtils.Ext
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     /// <summary>
     /// Feature flags for features backwards compatible with read-only mounting.

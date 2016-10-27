@@ -22,9 +22,7 @@
 
 namespace DiscUtils.Udf
 {
-    using System;
     using System.Collections.Generic;
-    using System.Text;
     using DiscUtils.Vfs;
 
     internal class UdfContext : VfsContext

@@ -22,7 +22,6 @@
 
 namespace DiscUtils.Ntfs
 {
-    using System;
     using System.IO;
     using System.Text;
 

@@ -25,7 +25,6 @@ namespace DiscUtils.Vhdx
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Text;
 
     /// <summary>
     /// Creates new VHD disks by wrapping existing streams.

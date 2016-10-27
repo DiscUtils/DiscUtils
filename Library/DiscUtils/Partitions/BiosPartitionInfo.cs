@@ -23,7 +23,6 @@
 namespace DiscUtils.Partitions
 {
     using System;
-    using System.IO;
 
     /// <summary>
     /// Provides access to partition records in a BIOS (MBR) partition table.

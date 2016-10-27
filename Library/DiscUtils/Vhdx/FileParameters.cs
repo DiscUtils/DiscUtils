@@ -22,8 +22,6 @@
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     internal sealed class FileParameters : IByteArraySerializable
     {
         public const uint DefaultBlockSize = 32 * (uint)Sizes.OneMiB;

@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal abstract class Partition
     {
         public abstract IBuffer Content { get; }

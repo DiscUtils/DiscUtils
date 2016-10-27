@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal sealed class UnallocatedSpaceDescriptor : TaggedDescriptor<UnallocatedSpaceDescriptor>
     {
         public uint VolumeDescriptorSequenceNumber;

@@ -28,7 +28,6 @@ namespace DiscUtils.Partitions
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
-    using System.Reflection;
 
     /// <summary>
     /// Base class for classes which represent a disk partitioning scheme.

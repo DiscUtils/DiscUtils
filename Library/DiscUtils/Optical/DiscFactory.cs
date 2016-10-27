@@ -23,7 +23,6 @@
 namespace DiscUtils.Optical
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
 
     [VirtualDiskFactory("Optical", ".iso,.bin")]

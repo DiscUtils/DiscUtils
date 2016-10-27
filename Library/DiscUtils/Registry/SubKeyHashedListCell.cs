@@ -24,7 +24,6 @@ namespace DiscUtils.Registry
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
 
     internal sealed class SubKeyHashedListCell : ListCell
     {

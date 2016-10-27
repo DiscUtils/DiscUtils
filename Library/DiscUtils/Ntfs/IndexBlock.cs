@@ -23,7 +23,6 @@
 namespace DiscUtils.Ntfs
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
 
     internal class IndexBlock : FixupRecordBase

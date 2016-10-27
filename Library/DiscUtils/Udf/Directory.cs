@@ -24,7 +24,6 @@ namespace DiscUtils.Udf
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using DiscUtils.Vfs;
 
     internal class Directory : File, IVfsDirectory<FileIdentifier, File>

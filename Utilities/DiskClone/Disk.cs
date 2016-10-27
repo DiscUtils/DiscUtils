@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using DiscUtils;
 using Microsoft.Win32.SafeHandles;
 

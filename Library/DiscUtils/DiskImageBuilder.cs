@@ -27,7 +27,6 @@ namespace DiscUtils
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Reflection;
 
     /// <summary>
     /// Base class for all disk image builders.

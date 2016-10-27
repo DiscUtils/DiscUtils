@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.IO;
 
 namespace DiscUtils.Common
 {

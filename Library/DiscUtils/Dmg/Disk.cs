@@ -22,8 +22,7 @@
 
 namespace DiscUtils.Dmg
 {
-    using DiscUtils.Partitions;
-using System;
+    using System;
 using System.Collections.Generic;
 using System.IO;
 

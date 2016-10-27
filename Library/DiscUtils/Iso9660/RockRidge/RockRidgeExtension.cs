@@ -22,7 +22,6 @@
 
 namespace DiscUtils.Iso9660
 {
-    using System;
     using System.Text;
 
     internal sealed class RockRidgeExtension : SuspExtension

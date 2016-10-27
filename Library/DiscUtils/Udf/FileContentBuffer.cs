@@ -24,7 +24,6 @@ namespace DiscUtils.Udf
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
 
     internal class FileContentBuffer : IBuffer
     {

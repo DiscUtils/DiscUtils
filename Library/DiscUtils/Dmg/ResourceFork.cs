@@ -24,7 +24,6 @@ namespace DiscUtils.Dmg
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
 
     internal class ResourceFork
     {

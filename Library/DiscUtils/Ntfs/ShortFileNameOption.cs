@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Controls whether short file names are created automatically.
     /// </summary>

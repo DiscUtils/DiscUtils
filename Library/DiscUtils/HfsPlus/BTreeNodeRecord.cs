@@ -22,8 +22,6 @@
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal abstract class BTreeNodeRecord : IByteArraySerializable
     {
         public abstract int Size

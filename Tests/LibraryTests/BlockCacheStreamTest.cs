@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using NUnit.Framework;
 using System.IO;
 

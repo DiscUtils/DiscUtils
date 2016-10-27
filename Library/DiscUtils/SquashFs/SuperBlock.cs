@@ -23,7 +23,6 @@
 namespace DiscUtils.SquashFs
 {
     using System;
-    using System.IO;
 
     internal class SuperBlock : IByteArraySerializable
     {

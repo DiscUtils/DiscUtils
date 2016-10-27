@@ -22,10 +22,8 @@
 
 namespace DiscUtils.Ntfs
 {
-    using System;
     using System.IO;
     using System.Security.AccessControl;
-    using System.Security.Principal;
 
     internal sealed class SecurityDescriptor : IByteArraySerializable, IDiagnosticTraceable
     {

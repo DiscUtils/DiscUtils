@@ -20,10 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace DiscUtils.HfsPlus
 {
     internal class CompressionResourceBlockHead

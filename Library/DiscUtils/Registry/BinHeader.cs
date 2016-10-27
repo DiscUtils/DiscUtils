@@ -22,7 +22,6 @@
 
 namespace DiscUtils.Registry
 {
-    using System;
     using System.IO;
 
     internal sealed class BinHeader : IByteArraySerializable

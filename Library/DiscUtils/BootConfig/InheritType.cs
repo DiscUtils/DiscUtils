@@ -22,10 +22,6 @@
 
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Indicates the type of objects that can inherit from an object.
     /// </summary>

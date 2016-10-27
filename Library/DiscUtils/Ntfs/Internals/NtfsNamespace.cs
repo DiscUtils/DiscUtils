@@ -22,8 +22,6 @@
 
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     /// <summary>
     /// The known NTFS namespaces.
     /// </summary>

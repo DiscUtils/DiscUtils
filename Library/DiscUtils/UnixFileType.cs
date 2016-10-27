@@ -22,8 +22,6 @@
 
 namespace DiscUtils
 {
-    using System;
-
     /// <summary>
     /// Standard Unix-style file type.
     /// </summary>

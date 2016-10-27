@@ -23,7 +23,6 @@
 namespace DiscUtils.Ntfs
 {
     using System;
-    using System.Collections.Generic;
 
     internal class CookedDataRun
     {

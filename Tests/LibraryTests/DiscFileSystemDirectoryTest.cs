@@ -21,9 +21,7 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Vhd;
 using NUnit.Framework;
 
 namespace DiscUtils

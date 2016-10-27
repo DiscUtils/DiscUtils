@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using System.Security.AccessControl;
 using NUnit.Framework;
 
 namespace DiscUtils.Registry

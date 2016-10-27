@@ -22,9 +22,7 @@
 
 namespace DiscUtils
 {
-    using System;
     using System.Collections.Generic;
-    using System.Text;
 
     internal class BlockCache<T>
         where T : Block, new()

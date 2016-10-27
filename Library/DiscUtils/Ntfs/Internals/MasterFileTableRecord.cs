@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Ntfs.Internals
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-
     public sealed class MasterFileTableRecord
     {
         private FileRecord _fileRecord;

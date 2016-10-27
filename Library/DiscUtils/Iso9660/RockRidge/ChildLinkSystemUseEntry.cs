@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal sealed class ChildLinkSystemUseEntry : SystemUseEntry
     {
         public uint ChildDirLocation;

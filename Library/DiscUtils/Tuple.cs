@@ -22,8 +22,6 @@
 
 namespace DiscUtils
 {
-    using System;
-
     internal abstract class Tuple
     {
         public abstract object this[int i]

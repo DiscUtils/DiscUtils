@@ -24,7 +24,6 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
-using DiscUtils.Iscsi;
 
 namespace VolInfo
 {

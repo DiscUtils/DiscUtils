@@ -23,7 +23,6 @@
 namespace DiscUtils.Vhdx
 {
     using System;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Class representing an individual metadata item.

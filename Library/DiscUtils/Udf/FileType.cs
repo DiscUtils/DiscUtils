@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal enum FileType : byte
     {
         None = 0,

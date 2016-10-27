@@ -23,7 +23,6 @@
 namespace DiscUtils.Dmg
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
 
     [VirtualDiskFactory("DMG", ".dmg")]

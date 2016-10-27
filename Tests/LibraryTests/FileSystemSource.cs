@@ -20,9 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using NUnit.Framework;
 
 namespace DiscUtils

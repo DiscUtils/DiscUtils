@@ -22,8 +22,6 @@
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class FragmentRecord : IByteArraySerializable
     {
         public const int RecordSize = 16;

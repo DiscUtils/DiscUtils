@@ -24,7 +24,6 @@ namespace DiscUtils.Fat
 {
     using System;
     using System.IO;
-    using System.Text;
 
     internal class DirectoryEntry
     {

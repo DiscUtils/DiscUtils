@@ -22,10 +22,6 @@
 
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal class ServerSparseExtentHeader : CommonSparseExtentHeader
     {
         public const uint CowdMagicNumber = 0x44574f43;

@@ -22,8 +22,6 @@
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-
     internal class BootVolumeDescriptor : BaseVolumeDescriptor
     {
         public const string ElToritoSystemIdentifier = "EL TORITO SPECIFICATION";

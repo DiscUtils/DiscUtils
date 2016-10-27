@@ -28,7 +28,6 @@ namespace DiscUtils.Iso9660
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-    using System.Text;
     using DiscUtils.Vfs;
 
     internal class ReaderDirectory : File, IVfsDirectory<ReaderDirEntry, File>

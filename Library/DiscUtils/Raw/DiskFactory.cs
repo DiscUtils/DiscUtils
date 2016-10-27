@@ -23,7 +23,6 @@
 namespace DiscUtils.Raw
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
 
     [VirtualDiskFactory("RAW", ".img,.ima,.vfd,.flp,.bif")]

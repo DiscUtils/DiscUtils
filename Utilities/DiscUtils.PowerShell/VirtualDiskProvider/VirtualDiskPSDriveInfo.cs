@@ -22,7 +22,6 @@
 
 using System.Collections.Generic;
 using System.Management.Automation;
-using DiscUtils.Ntfs;
 
 namespace DiscUtils.PowerShell.VirtualDiskProvider
 {

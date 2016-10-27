@@ -22,7 +22,6 @@
 
 namespace DiscUtils
 {
-    using System.Collections.Generic;
     using System.IO;
 
     /// <summary>

@@ -22,7 +22,6 @@
 
 namespace DiscUtils.Ext
 {
-    using System;
     using System.Text;
 
     /// <summary>

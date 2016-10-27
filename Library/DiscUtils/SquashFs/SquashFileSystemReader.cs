@@ -22,7 +22,6 @@
 
 namespace DiscUtils.SquashFs
 {
-    using System;
     using System.IO;
     using DiscUtils.Vfs;
 

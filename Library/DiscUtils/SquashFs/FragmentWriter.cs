@@ -24,9 +24,6 @@ namespace DiscUtils.SquashFs
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.IO.Compression;
-    using DiscUtils.Compression;
 
     internal sealed class FragmentWriter
     {

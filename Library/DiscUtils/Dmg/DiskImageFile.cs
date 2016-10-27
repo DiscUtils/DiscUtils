@@ -23,8 +23,7 @@
 namespace DiscUtils.Dmg
 {
     using System;
-using System.Collections.Generic;
-using System.IO;
+    using System.IO;
 
     internal sealed class DiskImageFile : VirtualDiskLayer
     {

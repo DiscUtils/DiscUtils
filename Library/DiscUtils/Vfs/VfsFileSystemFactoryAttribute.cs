@@ -23,8 +23,6 @@
 namespace DiscUtils.Vfs
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     /// <summary>
     /// Attribute identifying file system factory classes.

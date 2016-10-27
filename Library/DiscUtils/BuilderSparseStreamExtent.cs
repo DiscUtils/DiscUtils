@@ -22,9 +22,7 @@
 
 namespace DiscUtils
 {
-    using System;
     using System.Collections.Generic;
-    using System.Text;
 
     internal class BuilderSparseStreamExtent : BuilderExtent
     {

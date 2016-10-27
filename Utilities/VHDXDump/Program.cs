@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Vhdx;
 using System;

@@ -23,7 +23,6 @@
 namespace DiscUtils.BootConfig
 {
     using System;
-    using System.Globalization;
 
     /// <summary>
     /// The value of an element.
