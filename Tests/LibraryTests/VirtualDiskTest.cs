@@ -73,25 +73,23 @@ namespace DiscUtils
 
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void TestMbr_Null()
         {
             MemoryStream ms = new MemoryStream();
             ms.SetLength(1024 * 1024);
 
             Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
-            rawDisk.SetMasterBootRecord(null);
+            Assert.Throws<ArgumentNullException>(() => rawDisk.SetMasterBootRecord(null));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void TestMbr_WrongSize()
         {
             MemoryStream ms = new MemoryStream();
             ms.SetLength(1024 * 1024);
 
             Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
-            rawDisk.SetMasterBootRecord(new byte[511]);
+            Assert.Throws<ArgumentException>(() => rawDisk.SetMasterBootRecord(new byte[511]));
         }
     }
 }

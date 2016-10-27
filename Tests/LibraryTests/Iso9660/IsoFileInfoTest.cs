@@ -47,7 +47,6 @@ namespace DiscUtils.Iso9660
         }
 
         [Test]
-        [ExpectedException(typeof(FileNotFoundException))]
         [Category("ThrowsException")]
         public void Open_FileNotFound()
         {
@@ -55,7 +54,12 @@ namespace DiscUtils.Iso9660
             CDReader fs = new CDReader(builder.Build(), false);
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
-            using (Stream s = di.Open(FileMode.Open)) { }
+            Assert.Throws<FileNotFoundException>(() =>
+            {
+                using (Stream s = di.Open(FileMode.Open))
+                {
+                }
+            });
         }
 
         [Test]

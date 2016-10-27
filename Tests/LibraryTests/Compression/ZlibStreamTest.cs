@@ -56,7 +56,6 @@ namespace DiscUtils.Compression
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidDataException))]
         public void TestInvalidChecksum()
         {
             byte[] testData = Encoding.ASCII.GetBytes("This is a test string");
@@ -72,15 +71,18 @@ namespace DiscUtils.Compression
             compressedStream.Write(new byte[] { 0, 0 }, 0, 2);
 
             compressedStream.Position = 0;
-            using (ZlibStream uzs = new ZlibStream(compressedStream, CompressionMode.Decompress, true))
+            Assert.Throws<InvalidDataException>(() =>
             {
-                byte[] outData = new byte[testData.Length];
-                uzs.Read(outData, 0, outData.Length);
-                Assert.AreEqual(testData, outData);
+                using (ZlibStream uzs = new ZlibStream(compressedStream, CompressionMode.Decompress, true))
+                {
+                    byte[] outData = new byte[testData.Length];
+                    uzs.Read(outData, 0, outData.Length);
+                    Assert.AreEqual(testData, outData);
 
-                // Should be end of stream
-                Assert.AreEqual(-1, uzs.ReadByte());
-            }
+                    // Should be end of stream
+                    Assert.AreEqual(-1, uzs.ReadByte());
+                }
+            });
         }
     }
 }

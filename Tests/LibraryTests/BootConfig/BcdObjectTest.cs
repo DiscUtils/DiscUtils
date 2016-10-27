@@ -45,14 +45,13 @@ namespace DiscUtils.BootConfig
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void AddElement_WrongType()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
             Store s = Store.Initialize(hive.Root);
             BcdObject obj = s.CreateInherit(InheritType.AnyObject);
 
-            obj.AddElement(WellKnownElement.LibraryApplicationDevice, ElementValue.ForString(@"\a\path\to\nowhere"));
+            Assert.Throws<ArgumentException>(() => obj.AddElement(WellKnownElement.LibraryApplicationDevice, ElementValue.ForString(@"\a\path\to\nowhere")));
         }
 
         [Test]

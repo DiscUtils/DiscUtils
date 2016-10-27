@@ -175,7 +175,6 @@ namespace DiscUtils.Fat
         }
 
         [Test]
-        [ExpectedException(typeof(DirectoryNotFoundException))]
         [Category("ThrowsException")]
         public void OpenFileAsDir()
         {
@@ -188,7 +187,7 @@ namespace DiscUtils.Fat
                 w.Flush();
             }
 
-            fs.GetFiles("FOO.TXT");
+            Assert.Throws<DirectoryNotFoundException>(() => fs.GetFiles("FOO.TXT"));
         }
 
         [Test]

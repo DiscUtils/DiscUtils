@@ -44,10 +44,9 @@ namespace DiscUtils.Registry
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Create_Null()
         {
-            RegistryHive hive = RegistryHive.Create((Stream)null);
+            Assert.Throws<ArgumentNullException>(() => RegistryHive.Create((Stream)null));
         }
 
     }

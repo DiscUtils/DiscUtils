@@ -46,14 +46,14 @@ namespace DiscUtils.Vhd
         }
 
         [Test]
-        [ExpectedException(typeof(ObjectDisposedException))]
         public void InitializeFixedOwnStream()
         {
             MemoryStream ms = new MemoryStream();
             using (Disk disk = Disk.InitializeFixed(ms, Ownership.Dispose, 8 * 1024 * 1024))
             {
             }
-            ms.ReadByte();
+
+            Assert.Throws<ObjectDisposedException>(() => ms.ReadByte());
         }
 
         [Test]
@@ -124,7 +124,7 @@ namespace DiscUtils.Vhd
             MemoryStream grandChildStream = new MemoryStream();
             DiskImageFile grandChildFile = DiskImageFile.InitializeDifferencing(grandChildStream, Ownership.Dispose, childFile, @"C:\temp\child1.vhd", @".\child1.vhd", DateTime.Now);
 
-            using (Disk disk = new Disk(new DiskImageFile[]{grandChildFile, childFile, baseFile}, Ownership.Dispose))
+            using (Disk disk = new Disk(new DiskImageFile[] { grandChildFile, childFile, baseFile }, Ownership.Dispose))
             {
                 Assert.IsNotNull(disk.Content);
             }

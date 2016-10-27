@@ -48,7 +48,7 @@ namespace DiscUtils.Vhdx
         }
 
         [Test]
-        [Ignore]
+        [Ignore("Ported from DiscUtils")]
         public void BuildFixed()
         {
             DiskBuilder builder = new DiskBuilder();

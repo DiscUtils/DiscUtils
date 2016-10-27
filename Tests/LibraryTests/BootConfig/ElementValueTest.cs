@@ -76,7 +76,8 @@ namespace DiscUtils.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationDevice);
 
-            Assert.IsNotNullOrEmpty(el.Value.ToString());
+            Assert.IsNotNull(el.Value.ToString());
+            Assert.IsNotEmpty(el.Value.ToString());
         }
 
         [Test]
@@ -96,7 +97,8 @@ namespace DiscUtils.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationDevice);
 
-            Assert.IsNotNullOrEmpty(el.Value.ToString());
+            Assert.IsNotNull(el.Value.ToString());
+            Assert.IsNotEmpty(el.Value.ToString());
         }
 
         [Test]
@@ -110,7 +112,8 @@ namespace DiscUtils.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationDevice);
 
-            Assert.IsNotNullOrEmpty(el.Value.ToString());
+            Assert.IsNotNull(el.Value.ToString());
+            Assert.IsNotEmpty(el.Value.ToString());
         }
 
         [Test]
@@ -171,7 +174,8 @@ namespace DiscUtils.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryBadMemoryList);
 
-            Assert.IsNotNullOrEmpty(el.Value.ToString());
+            Assert.IsNotNull(el.Value.ToString());
+            Assert.IsNotEmpty(el.Value.ToString());
         }
     }
 }

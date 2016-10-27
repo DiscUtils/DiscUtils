@@ -111,7 +111,7 @@ namespace DiscUtils.Registry
         [Test]
         public void SetStringArrayValue()
         {
-            hive.Root.SetValue("value", new string[] {"A", "B", "C"});
+            hive.Root.SetValue("value", new string[] { "A", "B", "C" });
             Assert.AreEqual(RegistryValueType.MultiString, hive.Root.GetValueType("value"));
             string[] readVal = (string[])hive.Root.GetValue("value");
             Assert.AreEqual(3, readVal.Length);
@@ -212,11 +212,10 @@ namespace DiscUtils.Registry
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void DeleteNonEmptyKey()
         {
             RegistryKey newKey = hive.Root.CreateSubKey(@"Child\Grandchild");
-            hive.Root.DeleteSubKey("Child");
+            Assert.Throws<InvalidOperationException>(() => hive.Root.DeleteSubKey("Child"));
         }
 
         [Test]

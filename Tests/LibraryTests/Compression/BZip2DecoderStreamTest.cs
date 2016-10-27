@@ -30,7 +30,7 @@ namespace DiscUtils.Compression
     [TestFixture]
     public class BZip2DecoderStreamTest
     {
-        private readonly byte[] ValidData = 
+        private readonly byte[] ValidData =
             {
                 0x42, 0x5A, 0x68, 0x39, 0x31, 0x41, 0x59, 0x26, 0x53, 0x59, 0xF7, 0x3C,
                 0x46, 0x3E, 0x00, 0x00, 0x02, 0x13, 0x80, 0x40, 0x00, 0x04, 0x00, 0x22,
@@ -39,7 +39,7 @@ namespace DiscUtils.Compression
                 0xA2, 0xEE, 0x48, 0xA7, 0x0A, 0x12, 0x1E, 0xE7, 0x88, 0xC7, 0xC0
             };
 
-        private readonly byte[] InvalidBlockCrcData = 
+        private readonly byte[] InvalidBlockCrcData =
             {
                 0x42, 0x5A, 0x68, 0x39, 0x31, 0x41, 0x59, 0x26, 0x53, 0x59, 0xFF, 0x3C,
                 0x46, 0x3E, 0x00, 0x00, 0x02, 0x13, 0x80, 0x40, 0x00, 0x04, 0x00, 0x22,
@@ -48,7 +48,7 @@ namespace DiscUtils.Compression
                 0xA2, 0xEE, 0x48, 0xA7, 0x0A, 0x12, 0x1E, 0xE7, 0x88, 0xC7, 0xC0
             };
 
-        private readonly byte[] InvalidCombinedCrcData = 
+        private readonly byte[] InvalidCombinedCrcData =
             {
                 0x42, 0x5A, 0x68, 0x39, 0x31, 0x41, 0x59, 0x26, 0x53, 0x59, 0xF7, 0x3C,
                 0x46, 0x3E, 0x00, 0x00, 0x02, 0x13, 0x80, 0x40, 0x00, 0x04, 0x00, 0x22,
@@ -71,33 +71,30 @@ namespace DiscUtils.Compression
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidDataException))]
         public void TestInvalidBlockCrcStream()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(InvalidBlockCrcData), Ownership.Dispose);
 
             byte[] buffer = new byte[1024];
-            int numRead = decoder.Read(buffer, 0, 1024);
+            Assert.Throws<InvalidDataException>(() => decoder.Read(buffer, 0, 1024));
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidDataException))]
         public void TestCombinedCrcStream()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(InvalidCombinedCrcData), Ownership.Dispose);
 
             byte[] buffer = new byte[1024];
-            int numRead = decoder.Read(buffer, 0, 1024);
+            Assert.Throws<InvalidDataException>(() => decoder.Read(buffer, 0, 1024));
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidDataException))]
         public void TestCombinedCrcStream_ExactLengthRead()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(InvalidCombinedCrcData), Ownership.Dispose);
 
             byte[] buffer = new byte[21];
-            int numRead = decoder.Read(buffer, 0, 21);
+            Assert.Throws<InvalidDataException>(() => decoder.Read(buffer, 0, 21));
         }
     }
 }

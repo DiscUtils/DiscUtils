@@ -68,25 +68,23 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
         public void CreateInvalid_Long(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
 
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo(new String('X', 256));
-            dirInfo.Create();
+            Assert.Throws<IOException>(() => dirInfo.Create());
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
         public void CreateInvalid_Characters(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
 
             DiscDirectoryInfo dirInfo = fs.GetDirectoryInfo("SOME\0DIR");
-            dirInfo.Create();
+            Assert.Throws<IOException>(() => dirInfo.Create());
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
@@ -140,24 +138,22 @@ namespace DiscUtils
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
         public void DeleteRoot(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
 
-            fs.Root.Delete();
+            Assert.Throws<IOException>(() => fs.Root.Delete());
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
-        [ExpectedException(typeof(IOException))]
         [Category("ThrowsException")]
         public void DeleteNonEmpty_NonRecursive(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
 
             fs.CreateDirectory(@"Fred\child");
-            fs.Root.GetDirectories(@"Fred")[0].Delete();
+            Assert.Throws<IOException>(() => fs.Root.GetDirectories(@"Fred")[0].Delete());
         }
 
         [TestCaseSource(typeof(FileSystemSource), "QuickReadWriteFileSystems")]
@@ -232,13 +228,12 @@ namespace DiscUtils
             Assert.AreEqual(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
         }
 
-        [ExpectedException(typeof(DirectoryNotFoundException))]
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]
         public void GetDirectories_BadPath(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
 
-            fs.GetDirectories(@"\baddir");
+            Assert.Throws<DirectoryNotFoundException>(() => fs.GetDirectories(@"\baddir"));
         }
 
         [TestCaseSource(typeof(FileSystemSource), "ReadWriteFileSystems")]

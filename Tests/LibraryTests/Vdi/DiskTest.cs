@@ -46,14 +46,13 @@ namespace DiscUtils.Vdi
         }
 
         [Test]
-        [ExpectedException(typeof(ObjectDisposedException))]
         public void InitializeFixedOwnStream()
         {
             MemoryStream ms = new MemoryStream();
             using (Disk disk = Disk.InitializeFixed(ms, Ownership.Dispose, 8 * 1024 * 1024))
             {
             }
-            ms.ReadByte();
+            Assert.Throws<ObjectDisposedException>(() => ms.ReadByte());
         }
 
         [Test]
