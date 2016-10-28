@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-/*
- * NOTE: Removed as XVA is not compiled in
-using System.IO;
-using NUnit.Framework;
 using System.Collections.Generic;
-using System;
+using System.IO;
+using DiscUtils;
+using DiscUtils.Xva;
+using NUnit.Framework;
 
-namespace DiscUtils.Xva
+namespace LibraryTests.Xva
 {
     [TestFixture]
     public class VirtualMachineBuilderTest
@@ -83,4 +82,3 @@ namespace DiscUtils.Xva
         }
     }
 }
-*/

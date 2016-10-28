@@ -64,3 +64,50 @@ namespace System
     }
 }
 #endif
+
+#if NET20
+// ReSharper disable once CheckNamespace
+namespace System
+{
+    internal class Tuple<A, B, C>
+    {
+        public A Item1 { get; }
+        public B Item2 { get; }
+        public C Item3 { get; }
+
+        public Tuple(A item1, B item2, C item3)
+        {
+            Item1 = item1;
+            Item2 = item2;
+            Item3 = item3;
+        }
+
+        protected static bool Equals<V>(V a, V b)
+        {
+            if (a == null && b == null)
+                return true;
+
+            if (a == null)
+                return false;
+
+            return a.Equals(b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            Tuple<A, B, C> asType = obj as Tuple<A, B, C>;
+            if (asType == null)
+            {
+                return false;
+            }
+
+            return Equals(Item1, asType.Item1) && Equals(Item2, asType.Item2) && Equals(Item3, asType.Item3);
+        }
+
+        public override int GetHashCode()
+        {
+            return ((Item1 == null) ? 0x14AB32BC : Item1.GetHashCode()) ^ ((Item2 == null) ? 0x65BC32DE : Item2.GetHashCode()) ^ ((Item3 == null) ? 0x2D4C25CF : Item3.GetHashCode());
+        }
+    }
+}
+#endif

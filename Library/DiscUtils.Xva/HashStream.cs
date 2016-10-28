@@ -25,8 +25,110 @@ namespace DiscUtils.Xva
     using System;
     using System.IO;
     using System.Security.Cryptography;
+    
+#if NETCORE
+    internal class HashStreamCore : Stream
+    {
+        private Stream _wrapped;
+        private Ownership _ownWrapped;
 
-    internal class HashStream : Stream
+        private IncrementalHash _hashAlg;
+
+        private long _hashPos;
+
+        public HashStreamCore(Stream wrapped, Ownership ownsWrapped, IncrementalHash hashAlg)
+        {
+            _wrapped = wrapped;
+            _ownWrapped = ownsWrapped;
+            _hashAlg = hashAlg;
+        }
+
+        public override bool CanRead
+        {
+            get { return _wrapped.CanRead; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return _wrapped.CanSeek; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return _wrapped.CanWrite; }
+        }
+
+        public override long Length
+        {
+            get { return _wrapped.Length; }
+        }
+
+        public override long Position
+        {
+            get
+            {
+                return _wrapped.Position;
+            }
+
+            set
+            {
+                _wrapped.Position = value;
+            }
+        }
+
+        public override void Flush()
+        {
+            _wrapped.Flush();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (Position != _hashPos)
+            {
+                throw new InvalidOperationException("Reads must be contiguous");
+            }
+
+            int numRead = _wrapped.Read(buffer, offset, count);
+
+            _hashAlg.AppendData(buffer, offset, numRead);
+            _hashPos += numRead;
+
+            return numRead;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return _wrapped.Seek(offset, origin);
+        }
+
+        public override void SetLength(long value)
+        {
+            _wrapped.SetLength(value);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            _wrapped.Write(buffer, offset, count);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing && _ownWrapped == Ownership.Dispose && _wrapped != null)
+                {
+                    _wrapped.Dispose();
+                    _wrapped = null;
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+    }
+#else
+    internal class HashStreamDotnet : Stream
     {
         private Stream _wrapped;
         private Ownership _ownWrapped;
@@ -35,7 +137,7 @@ namespace DiscUtils.Xva
 
         private long _hashPos;
 
-        public HashStream(Stream wrapped, Ownership ownsWrapped, HashAlgorithm hashAlg)
+        public HashStreamDotnet(Stream wrapped, Ownership ownsWrapped, HashAlgorithm hashAlg)
         {
             _wrapped = wrapped;
             _ownWrapped = ownsWrapped;
@@ -126,4 +228,5 @@ namespace DiscUtils.Xva
             }
         }
     }
+#endif
 }

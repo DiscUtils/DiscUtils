@@ -29,7 +29,8 @@ namespace DiscUtils.Xva
     using System.Security.Cryptography;
     using System.Text;
     using DiscUtils.Archives;
-    using DiskRecord = Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
+    using DiscUtils.Internal;
+    using DiskRecord = System.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
 
     /// <summary>
     /// A class that can be used to create Xen Virtual Appliance (XVA) files.
@@ -68,9 +69,9 @@ namespace DiscUtils.Xva
         {
             foreach (DiskRecord r in _disks)
             {
-                if (r.Third == Ownership.Dispose)
+                if (r.Item3 == Ownership.Dispose)
                 {
-                    r.Second.Dispose();
+                    r.Item2.Dispose();
                 }
             }
         }
@@ -113,7 +114,7 @@ namespace DiscUtils.Xva
             int diskIdx = 0;
             foreach (var diskRec in _disks)
             {
-                SparseStream diskStream = diskRec.Second;
+                SparseStream diskStream = diskRec.Item2;
                 List<StreamExtent> extents = new List<StreamExtent>(diskStream.Extents);
 
                 int lastChunkAdded = -1;
@@ -126,7 +127,6 @@ namespace DiscUtils.Xva
                     {
                         if (i != lastChunkAdded)
                         {
-                            HashAlgorithm hashAlg = new SHA1Managed();
                             Stream chunkStream;
 
                             long diskBytesLeft = diskStream.Length - (i * Sizes.OneMiB);
@@ -142,10 +142,29 @@ namespace DiscUtils.Xva
                                 chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
                             }
 
-                            HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
+
+                            Stream chunkHashStream;
+#if NETCORE
+                            IncrementalHash hashAlgCore = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
+                            chunkHashStream = new HashStreamCore(chunkStream, Ownership.Dispose, hashAlgCore);
+#else
+                            HashAlgorithm hashAlgDotnet = new SHA1Managed();
+                            chunkHashStream = new HashStreamDotnet(chunkStream, Ownership.Dispose, hashAlgDotnet);
+#endif
 
                             tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}", diskIds[diskIdx], i), chunkHashStream);
-                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}.checksum", diskIds[diskIdx], i), new ChecksumStream(hashAlg));
+
+                            byte[] hash;
+#if NETCORE
+                            hash = hashAlgCore.GetHashAndReset();
+#else
+                            hashAlgDotnet.TransformFinalBlock(new byte[0], 0, 0);
+                            hash = hashAlgDotnet.Hash;
+#endif
+
+                            string hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
+                            byte[] hashStringAscii = Encoding.ASCII.GetBytes(hashString);
+                            tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}.checksum", diskIds[diskIdx], i), hashStringAscii);
 
                             lastChunkAdded = i;
                         }
@@ -156,11 +175,30 @@ namespace DiscUtils.Xva
                 int lastActualChunk = (int)((diskStream.Length - 1) / Sizes.OneMiB);
                 if (lastChunkAdded < lastActualChunk)
                 {
-                    HashAlgorithm hashAlg = new SHA1Managed();
                     Stream chunkStream = new ZeroStream(Sizes.OneMiB);
-                    HashStream chunkHashStream = new HashStream(chunkStream, Ownership.Dispose, hashAlg);
+
+                    Stream chunkHashStream;
+#if NETCORE
+                    IncrementalHash hashAlgCore = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
+                    chunkHashStream = new HashStreamCore(chunkStream, Ownership.Dispose, hashAlgCore);
+#else
+                    HashAlgorithm hashAlgDotnet = new SHA1Managed();
+                    chunkHashStream = new HashStreamDotnet(chunkStream, Ownership.Dispose, hashAlgDotnet);
+#endif
+
                     tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}", diskIds[diskIdx], lastActualChunk), chunkHashStream);
-                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}.checksum", diskIds[diskIdx], lastActualChunk), new ChecksumStream(hashAlg));
+
+                    byte[] hash;
+#if NETCORE
+                    hash = hashAlgCore.GetHashAndReset();
+#else
+                    hashAlgDotnet.TransformFinalBlock(new byte[0], 0, 0);
+                    hash = hashAlgDotnet.Hash;
+#endif
+
+                    string hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
+                    byte[] hashStringAscii = Encoding.ASCII.GetBytes(hashString);
+                    tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}.checksum", diskIds[diskIdx], lastActualChunk), hashStringAscii);
                 }
 
                 ++diskIdx;
@@ -198,8 +236,8 @@ namespace DiscUtils.Xva
                 vbdIds[diskIdx] = id++;
                 vdiGuids[diskIdx] = Guid.NewGuid();
                 vdiIds[diskIdx] = id++;
-                vdiNames[diskIdx] = disk.First;
-                vdiSizes[diskIdx] = Utilities.RoundUp(disk.Second.Length, Sizes.OneMiB);
+                vdiNames[diskIdx] = disk.Item1;
+                vdiSizes[diskIdx] = Utilities.RoundUp(disk.Item2.Length, Sizes.OneMiB);
                 diskIdx++;
             }
 
