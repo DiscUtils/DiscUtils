@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
+using DiscUtils.Ntfs;
 using NUnit.Framework;
 
 namespace DiscUtils.Fat
@@ -65,7 +66,13 @@ namespace DiscUtils.Fat
                 Assert.AreEqual(1, fs.GetDirectories("").Length);
             }
 
-            DiscFileSystem fs2 = FileSystemManager.DetectDefaultFileSystems(ms)[0].Open(
+            FileSystemManager fsManager = new FileSystemManager();
+            fsManager.RegisterFileSystems(typeof(NtfsFileSystem).Assembly);
+            fsManager.RegisterFileSystems(typeof(FatFileSystem).Assembly);
+
+            FileSystemInfo[] detectDefaultFileSystems = fsManager.DetectFileSystems(ms);
+
+            DiscFileSystem fs2 = detectDefaultFileSystems[0].Open(
                 ms,
                 new FileSystemParameters { FileNameEncoding = Encoding.GetEncoding(855) });
 
