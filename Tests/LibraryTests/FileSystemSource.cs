@@ -47,11 +47,8 @@ namespace DiscUtils
         {
             get
             {
-                yield return new TestCaseData(
-                    new NewFileSystemDelegate(FatFileSystem)).SetName("FAT");
-
-                yield return new TestCaseData(
-                    new NewFileSystemDelegate(NtfsFileSystem)).SetName("NTFS");
+                yield return new TestCaseData(new NewFileSystemDelegate(FatFileSystem)).SetName("FAT");
+                yield return new TestCaseData(new NewFileSystemDelegate(NtfsFileSystem)).SetName("NTFS");
             }
         }
 
