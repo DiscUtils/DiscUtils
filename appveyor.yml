@@ -1,0 +1,67 @@
+version: 1.0.0.{build}
+build_script:
+- cmd: >-
+    REM Core
+    dotnet restore Library\DiscUtils
+    dotnet restore Library\DiscUtils.Fat
+    dotnet restore Library\DiscUtils.Ntfs
+    dotnet restore Library\DiscUtils.Vhd
+    dotnet restore Library\DiscUtils.Vhdx
+	
+    dotnet build -c Release Library\DiscUtils
+    dotnet build -c Release Library\DiscUtils.Fat
+    dotnet build -c Release Library\DiscUtils.Ntfs
+    dotnet build -c Release Library\DiscUtils.Vhd
+    dotnet build -c Release Library\DiscUtils.Vhdx
+	
+    REM Utilities
+    dotnet restore Utilities\BCDDump
+    dotnet restore Utilities\DiscUtils.Common
+    dotnet restore Utilities\DiscUtils.Diagnostics
+    dotnet restore Utilities\DiscUtils.PowerShell
+    dotnet restore Utilities\DiskClone
+    dotnet restore Utilities\DiskDump
+    dotnet restore Utilities\DmgExtract
+    dotnet restore Utilities\ExternalFileSystem
+    dotnet restore Utilities\FileExtract
+    dotnet restore Utilities\FileRecover
+    dotnet restore Utilities\iSCSIBrowse
+    dotnet restore Utilities\ISOCreate
+    REM dotnet restore Utilities\MSBuildTask
+    dotnet restore Utilities\NTFSDump
+    REM dotnet restore Utilities\ODSBrowse
+    dotnet restore Utilities\OSClone
+    dotnet restore Utilities\VHDCreate
+    dotnet restore Utilities\VHDDump
+    dotnet restore Utilities\VHDXDump
+    dotnet restore Utilities\VirtualDiskConvert
+    dotnet restore Utilities\VolInfo
+	
+    dotnet build -c Release Utilities\BCDDump
+    dotnet build -c Release Utilities\DiscUtils.Common
+    dotnet build -c Release Utilities\DiscUtils.Diagnostics
+    dotnet build -c Release Utilities\DiscUtils.PowerShell
+    dotnet build -c Release Utilities\DiskClone
+    dotnet build -c Release Utilities\DiskDump
+    dotnet build -c Release Utilities\DmgExtract
+    dotnet build -c Release Utilities\ExternalFileSystem
+    dotnet build -c Release Utilities\FileExtract
+    dotnet build -c Release Utilities\FileRecover
+    dotnet build -c Release Utilities\iSCSIBrowse
+    dotnet build -c Release Utilities\ISOCreate
+    REM dotnet build -c Release Utilities\MSBuildTask
+    dotnet build -c Release Utilities\NTFSDump
+    REM dotnet build -c Release Utilities\ODSBrowse
+    dotnet build -c Release Utilities\OSClone
+    dotnet build -c Release Utilities\VHDCreate
+    dotnet build -c Release Utilities\VHDDump
+    dotnet build -c Release Utilities\VHDXDump
+    dotnet build -c Release Utilities\VirtualDiskConvert
+    dotnet build -c Release Utilities\VolInfo
+	
+    REM Tests
+    dotnet restore Tests\LibraryTests
+	
+    dotnet build -c Release Tests\LibraryTests
+test_script:
+- cmd: dotnet test -c Release Tests\LibraryTests
