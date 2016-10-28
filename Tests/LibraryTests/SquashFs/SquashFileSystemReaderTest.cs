@@ -21,9 +21,10 @@
 //
 
 using System.IO;
+using DiscUtils.SquashFs;
 using NUnit.Framework;
 
-namespace DiscUtils.SquashFs
+namespace LibraryTests.SquashFs
 {
     [TestFixture]
     internal sealed class SquashFileSystemReaderTest

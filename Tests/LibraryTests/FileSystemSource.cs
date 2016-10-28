@@ -21,9 +21,11 @@
 //
 
 using System.Collections.Generic;
+using DiscUtils;
+using DiscUtils.Ntfs;
 using NUnit.Framework;
 
-namespace DiscUtils
+namespace LibraryTests
 {
     public delegate DiscFileSystem NewFileSystemDelegate();
 
@@ -57,7 +59,7 @@ namespace DiscUtils
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();
             Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            return Fat.FatFileSystem.FormatFloppy(ms, FloppyDiskType.Extended, null);
+            return DiscUtils.Fat.FatFileSystem.FormatFloppy(ms, FloppyDiskType.Extended, null);
         }
 
         public static DiscFileSystem DiagnosticNtfsFileSystem()
@@ -65,19 +67,19 @@ namespace DiscUtils
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();
             Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
-            var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<Ntfs.NtfsFileSystem, Ntfs.NtfsFileSystemChecker>(ms);
+            DiscUtils.Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
+            var discFs = new DiscUtils.Diagnostics.ValidatingFileSystem<NtfsFileSystem, NtfsFileSystemChecker>(ms);
             discFs.CheckpointInterval = 1;
             discFs.GlobalIOTraceCapturesStackTraces = false;
             return discFs;
         }
 
-        public static Ntfs.NtfsFileSystem NtfsFileSystem()
+        public static DiscUtils.Ntfs.NtfsFileSystem NtfsFileSystem()
         {
             SparseMemoryBuffer buffer = new SparseMemoryBuffer(4096);
             SparseMemoryStream ms = new SparseMemoryStream();
             Geometry diskGeometry = Geometry.FromCapacity(30 * 1024 * 1024);
-            return Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
+            return DiscUtils.Ntfs.NtfsFileSystem.Format(ms, "", diskGeometry, 0, diskGeometry.TotalSectorsLong);
         }
 
     }

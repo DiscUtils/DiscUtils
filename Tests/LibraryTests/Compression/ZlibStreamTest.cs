@@ -21,11 +21,12 @@
 //
 
 using System.IO;
-using NUnit.Framework;
-using System.Text;
 using System.IO.Compression;
+using System.Text;
+using DiscUtils.Compression;
+using NUnit.Framework;
 
-namespace DiscUtils.Compression
+namespace LibraryTests.Compression
 {
     [TestFixture]
     public class ZlibStreamTest

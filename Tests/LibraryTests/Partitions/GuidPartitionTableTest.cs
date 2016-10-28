@@ -21,10 +21,12 @@
 //
 
 using System.IO;
-using NUnit.Framework;
+using DiscUtils;
+using DiscUtils.Partitions;
 using DiscUtils.Vdi;
+using NUnit.Framework;
 
-namespace DiscUtils.Partitions
+namespace LibraryTests.Partitions
 {
     [TestFixture]
     public class GuidPartitionTableTest

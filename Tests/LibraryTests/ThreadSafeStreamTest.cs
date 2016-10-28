@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using NUnit.Framework;
-
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils;
+using NUnit.Framework;
 
-namespace DiscUtils
+namespace LibraryTests
 {
     [TestFixture]
     public class ThreadSafeStreamTest

@@ -21,12 +21,13 @@
 //
 
 using System.IO;
+using DiscUtils;
 using DiscUtils.Fat;
 using DiscUtils.Partitions;
 using DiscUtils.Vhd;
 using NUnit.Framework;
 
-namespace DiscUtils.Combined
+namespace LibraryTests.Combined
 {
     [TestFixture]
     public class CombinedTest

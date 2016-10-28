@@ -23,9 +23,10 @@
 using System;
 using System.IO;
 using System.Security.AccessControl;
+using DiscUtils.Registry;
 using NUnit.Framework;
 
-namespace DiscUtils.Registry
+namespace LibraryTests.Registry
 {
     [TestFixture]
     public class RegistryHiveTest

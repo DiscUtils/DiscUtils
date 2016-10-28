@@ -22,9 +22,10 @@
 
 using System;
 using System.IO;
+using DiscUtils.Registry;
 using NUnit.Framework;
 
-namespace DiscUtils.Registry
+namespace LibraryTests.Registry
 {
     [TestFixture]
     public class RegistryKeyTest

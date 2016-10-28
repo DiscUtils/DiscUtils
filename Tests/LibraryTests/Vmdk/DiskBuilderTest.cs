@@ -21,9 +21,11 @@
 //
 
 using System.IO;
+using DiscUtils;
+using DiscUtils.Vmdk;
 using NUnit.Framework;
 
-namespace DiscUtils.Vmdk
+namespace LibraryTests.Vmdk
 {
     [TestFixture]
     public class DiskBuilderTest
@@ -34,7 +36,7 @@ namespace DiscUtils.Vmdk
         public void Setup()
         {
             MemoryStream fileStream = new MemoryStream();
-            Vhd.Disk baseFile = Vhd.Disk.InitializeDynamic(fileStream, Ownership.Dispose, 16 * 1024L * 1024);
+            DiscUtils.Vhd.Disk baseFile = DiscUtils.Vhd.Disk.InitializeDynamic(fileStream, Ownership.Dispose, 16 * 1024L * 1024);
             for (int i = 0; i < 8; i += 1024 * 1024)
             {
                 baseFile.Content.Position = i;

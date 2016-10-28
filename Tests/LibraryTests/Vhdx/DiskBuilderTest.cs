@@ -20,9 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils;
+using DiscUtils.Vhdx;
 using NUnit.Framework;
 
-namespace DiscUtils.Vhdx
+namespace LibraryTests.Vhdx
 {
     [TestFixture]
     public class DiskBuilderTest

@@ -21,9 +21,10 @@
 //
 
 using System.IO;
+using DiscUtils.Iso9660;
 using NUnit.Framework;
 
-namespace DiscUtils.Iso9660
+namespace LibraryTests.Iso9660
 {
     [TestFixture]
     public class BuilderTest

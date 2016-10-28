@@ -22,9 +22,10 @@
 
 using System;
 using System.IO;
+using DiscUtils;
 using NUnit.Framework;
 
-namespace DiscUtils
+namespace LibraryTests
 {
     [TestFixture]
     public class DiscFileSystemDirectoryTest

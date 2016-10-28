@@ -22,10 +22,11 @@
 
 using System;
 using System.IO;
+using DiscUtils.BootConfig;
 using DiscUtils.Registry;
 using NUnit.Framework;
 
-namespace DiscUtils.BootConfig
+namespace LibraryTests.BootConfig
 {
     [TestFixture]
     public class BcdObjectTest

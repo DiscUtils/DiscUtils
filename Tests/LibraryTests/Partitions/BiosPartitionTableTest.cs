@@ -20,9 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils;
+using DiscUtils.Partitions;
 using NUnit.Framework;
 
-namespace DiscUtils.Partitions
+namespace LibraryTests.Partitions
 {
     [TestFixture]
     public class BiosPartitionTableTest

@@ -22,11 +22,13 @@
 
 using System;
 using System.IO;
+using DiscUtils;
+using DiscUtils.BootConfig;
 using DiscUtils.Partitions;
 using DiscUtils.Registry;
 using NUnit.Framework;
 
-namespace DiscUtils.BootConfig
+namespace LibraryTests.BootConfig
 {
     [TestFixture]
     public class ElementValueTest

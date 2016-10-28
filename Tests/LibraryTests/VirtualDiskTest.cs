@@ -20,11 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using NUnit.Framework;
 using System;
 using System.IO;
+using DiscUtils;
+using NUnit.Framework;
 
-namespace DiscUtils
+namespace LibraryTests
 {
     [TestFixture]
     public class VirtualDiskTest
@@ -35,7 +36,7 @@ namespace DiscUtils
             MemoryStream ms = new MemoryStream();
             ms.SetLength(1024 * 1024);
 
-            Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
+            DiscUtils.Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
             Assert.AreEqual(0, rawDisk.Signature);
             rawDisk.Signature = unchecked((int)0xDEADBEEF);
             Assert.AreEqual(unchecked((int)0xDEADBEEF), rawDisk.Signature);
@@ -53,7 +54,7 @@ namespace DiscUtils
                 newMbr[i] = (byte)i;
             }
 
-            Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
+            DiscUtils.Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
             rawDisk.SetMasterBootRecord(newMbr);
 
             byte[] readMbr = rawDisk.GetMasterBootRecord();
@@ -75,7 +76,7 @@ namespace DiscUtils
             MemoryStream ms = new MemoryStream();
             ms.SetLength(1024 * 1024);
 
-            Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
+            DiscUtils.Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
             Assert.Throws<ArgumentNullException>(() => rawDisk.SetMasterBootRecord(null));
         }
 
@@ -85,7 +86,7 @@ namespace DiscUtils
             MemoryStream ms = new MemoryStream();
             ms.SetLength(1024 * 1024);
 
-            Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
+            DiscUtils.Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
             Assert.Throws<ArgumentException>(() => rawDisk.SetMasterBootRecord(new byte[511]));
         }
     }

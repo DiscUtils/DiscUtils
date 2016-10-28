@@ -20,12 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.IO;
 using System.Security.AccessControl;
+using DiscUtils;
+using DiscUtils.Ntfs;
 using NUnit.Framework;
-using System.Collections.Generic;
 
-namespace DiscUtils.Ntfs
+namespace LibraryTests.Ntfs
 {
     [TestFixture]
     public class NtfsFileSystemTest

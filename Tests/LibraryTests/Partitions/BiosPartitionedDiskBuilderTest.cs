@@ -21,9 +21,11 @@
 //
 
 using System.IO;
+using DiscUtils;
+using DiscUtils.Partitions;
 using NUnit.Framework;
 
-namespace DiscUtils.Partitions
+namespace LibraryTests.Partitions
 {
     [TestFixture]
     public class BiosPartitionedDiskBuilderTest

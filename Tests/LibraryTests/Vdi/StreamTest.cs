@@ -22,9 +22,11 @@
 
 using System;
 using System.IO;
+using DiscUtils;
+using DiscUtils.Vdi;
 using NUnit.Framework;
 
-namespace DiscUtils.Vdi
+namespace LibraryTests.Vdi
 {
     [TestFixture]
     public class StreamTest

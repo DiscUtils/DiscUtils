@@ -23,10 +23,13 @@
 using System;
 using System.IO;
 using System.Text;
+using DiscUtils;
+using DiscUtils.Fat;
 using DiscUtils.Ntfs;
 using NUnit.Framework;
+using FileSystemInfo = DiscUtils.FileSystemInfo;
 
-namespace DiscUtils.Fat
+namespace LibraryTests.Fat
 {
     [TestFixture]
     public class FatFileSystemTest

@@ -23,9 +23,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils;
+using DiscUtils.Vmdk;
 using NUnit.Framework;
 
-namespace DiscUtils.Vmdk
+namespace LibraryTests.Vmdk
 {
     [TestFixture]
     public class DynamicStreamTest

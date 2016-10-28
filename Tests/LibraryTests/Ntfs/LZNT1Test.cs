@@ -23,9 +23,10 @@
 using System;
 using System.Runtime.InteropServices;
 using DiscUtils.Compression;
+using DiscUtils.Ntfs;
 using NUnit.Framework;
 
-namespace DiscUtils.Ntfs
+namespace LibraryTests.Ntfs
 {
     [TestFixture]
     public class LZNT1Test

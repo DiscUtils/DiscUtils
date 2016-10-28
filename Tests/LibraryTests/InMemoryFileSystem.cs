@@ -23,8 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils;
 
-namespace DiscUtils
+namespace LibraryTests
 {
     /// <summary>
     /// Minimal implementation of DiscFileSystem, sufficient to support unit-testing of disk formats.

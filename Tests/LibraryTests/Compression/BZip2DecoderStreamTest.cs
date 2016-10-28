@@ -21,10 +21,12 @@
 //
 
 using System.IO;
-using NUnit.Framework;
 using System.Text;
+using DiscUtils;
+using DiscUtils.Compression;
+using NUnit.Framework;
 
-namespace DiscUtils.Compression
+namespace LibraryTests.Compression
 {
     [TestFixture]
     public class BZip2DecoderStreamTest

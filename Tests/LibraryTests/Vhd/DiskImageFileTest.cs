@@ -22,9 +22,11 @@
 
 using System;
 using System.IO;
+using DiscUtils;
+using DiscUtils.Vhd;
 using NUnit.Framework;
 
-namespace DiscUtils.Vhd
+namespace LibraryTests.Vhd
 {
     [TestFixture]
     public class DiskImageFileTest

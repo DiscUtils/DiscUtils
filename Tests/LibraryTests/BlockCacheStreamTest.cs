@@ -20,10 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using NUnit.Framework;
 using System.IO;
+using DiscUtils;
+using NUnit.Framework;
 
-namespace DiscUtils
+namespace LibraryTests
 {
     [TestFixture]
     internal sealed class BlockCacheStreamTest
