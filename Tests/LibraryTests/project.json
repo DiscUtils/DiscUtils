@@ -10,7 +10,9 @@
     "DiscUtils": "1.*",
     "DiscUtils.Diagnostics": "1.0.0-*",
     "DiscUtils.Ntfs": "1.0.3",
-    "DiscUtils.Fat": "1.0.3"
+    "DiscUtils.Fat": "1.0.3",
+    "DiscUtils.Vhd": "1.0.3",
+    "DiscUtils.Vhdx": "1.0.3"
   },
   "frameworks": {
     "net451": {

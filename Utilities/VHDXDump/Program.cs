@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Common;
-using DiscUtils.Vhdx;
 using System;
 using System.IO;
+using DiscUtils.Common;
+using DiscUtils.Vhdx;
 
-namespace VHDDump
+namespace VHDXDump
 {
     class Program : ProgramBase
     {
