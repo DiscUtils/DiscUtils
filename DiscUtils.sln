@@ -60,6 +60,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "VolInfo", "Utilities\VolInf
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LibraryTests", "Tests\LibraryTests\LibraryTests.xproj", "{772C6E51-8C0F-4C8C-8025-DF81BF6FB06A}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Ntfs", "Library\DiscUtils.Ntfs\DiscUtils.Ntfs.xproj", "{9095333E-08E4-4C13-B556-20B5FDB9DB2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -158,6 +160,10 @@ Global
 		{772C6E51-8C0F-4C8C-8025-DF81BF6FB06A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{772C6E51-8C0F-4C8C-8025-DF81BF6FB06A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{772C6E51-8C0F-4C8C-8025-DF81BF6FB06A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9095333E-08E4-4C13-B556-20B5FDB9DB2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9095333E-08E4-4C13-B556-20B5FDB9DB2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9095333E-08E4-4C13-B556-20B5FDB9DB2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9095333E-08E4-4C13-B556-20B5FDB9DB2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -186,5 +192,6 @@ Global
 		{23C1D9EB-3708-4309-B0EC-90C0CFB4D02A} = {ACF7813E-5C0D-4900-BAD6-4169A2E013AE}
 		{29D2E28B-6EA6-4468-B7C8-C47BF9AB9A8B} = {ACF7813E-5C0D-4900-BAD6-4169A2E013AE}
 		{772C6E51-8C0F-4C8C-8025-DF81BF6FB06A} = {94C9C1CB-7CD2-4327-AEC0-DDE375C85CEF}
+		{9095333E-08E4-4C13-B556-20B5FDB9DB2A} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
 	EndGlobalSection
 EndGlobal
