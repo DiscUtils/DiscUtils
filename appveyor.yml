@@ -13,6 +13,10 @@ build_script:
 
     dotnet restore Library\DiscUtils.Vhdx
 
+    dotnet restore Library\DiscUtils.Wim
+
+    dotnet restore Library\DiscUtils.Xva
+
 
     dotnet build -c Release Library\DiscUtils
 
@@ -23,6 +27,10 @@ build_script:
     dotnet build -c Release Library\DiscUtils.Vhd
 
     dotnet build -c Release Library\DiscUtils.Vhdx
+
+    dotnet build -c Release Library\DiscUtils.Wim
+
+    dotnet build -c Release Library\DiscUtils.Xva
 
 
     REM Utilities
