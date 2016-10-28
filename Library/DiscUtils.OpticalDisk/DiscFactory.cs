@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Optical
-{
-    using System;
-    using System.IO;
+using System;
+using System.IO;
 
+namespace DiscUtils.OpticalDisk
+{
     [VirtualDiskFactory("Optical", ".iso,.bin")]
     internal sealed class DiscFactory : VirtualDiskFactory
     {

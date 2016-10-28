@@ -1,14 +1,14 @@
 ﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.Optical",
-  "title": "DiscUtils.Optical",
-  "description": "DiscUtils Optical",
+  "name": "DiscUtils.OpticalDisk",
+  "title": "DiscUtils.OpticalDisk",
+  "description": "DiscUtils OpticalDisk",
   "authors": [ "Kenneth Bell" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "Optical" ],
+    "tags": [ "DiscUtils", "Optical", "OpticalDisk" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {

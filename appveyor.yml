@@ -23,7 +23,7 @@ build_script:
 
     dotnet restore Library\DiscUtils.Udf
 
-    dotnet restore Library\DiscUtils.Optical
+    dotnet restore Library\DiscUtils.OpticalDisk
 
 
     dotnet build -c Release Library\DiscUtils
@@ -46,7 +46,7 @@ build_script:
 
     dotnet build -c Release Library\DiscUtils.Udf
 
-    dotnet build -c Release Library\DiscUtils.Optical
+    dotnet build -c Release Library\DiscUtils.OpticalDisk
 
 
     REM Utilities

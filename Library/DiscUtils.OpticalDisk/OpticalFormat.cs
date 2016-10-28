@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Optical
+namespace DiscUtils.OpticalDisk
 {
     /// <summary>
     /// The format of the optical image file.

@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Optical
-{
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Iso9660;
-    using DiscUtils.Udf;
-    using DiscUtils.Vfs;
+using System.Collections.Generic;
+using System.IO;
+using DiscUtils.Iso9660;
+using DiscUtils.Udf;
+using DiscUtils.Vfs;
 
+namespace DiscUtils.OpticalDisk
+{
     [VfsFileSystemFactory]
     internal class FileSystemFactory : VfsFileSystemFactory
     {
