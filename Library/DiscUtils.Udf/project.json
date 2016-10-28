@@ -8,7 +8,7 @@
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "UDF" ],
+    "tags": [ "DiscUtils", "Optical", "UDF" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {
