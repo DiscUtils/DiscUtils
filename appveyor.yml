@@ -17,6 +17,8 @@ build_script:
 
     dotnet restore Library\DiscUtils.Xva
 
+    dotnet restore Library\DiscUtils.Net
+
 
     dotnet build -c Release Library\DiscUtils
 
@@ -31,6 +33,8 @@ build_script:
     dotnet build -c Release Library\DiscUtils.Wim
 
     dotnet build -c Release Library\DiscUtils.Xva
+
+    dotnet build -c Release Library\DiscUtils.Net
 
 
     REM Utilities

@@ -28,9 +28,7 @@
     "compile": {
       "include": "**/*.cs",
       "exclude": [
-        "OpticalDiscSharing/**",
-        "Xva/**",
-        "Net/**"
+        "OpticalDiscSharing/**"
       ]
     }
   },
