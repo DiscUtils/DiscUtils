@@ -19,6 +19,7 @@
 
   "dependencies": {
     "DiscUtils": "1.0.3",
+    "DiscUtils.Iso9660": "1.0.3",
     "DiscUtils.Udf": "1.0.3"
   },
 

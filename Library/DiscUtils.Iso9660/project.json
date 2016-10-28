@@ -1,14 +1,14 @@
 ﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.Udf",
-  "title": "DiscUtils.Udf",
-  "description": "DiscUtils UDF",
+  "name": "DiscUtils.Iso9660",
+  "title": "DiscUtils.Iso9660",
+  "description": "DiscUtils Iso9660",
   "authors": [ "Kenneth Bell" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "Optical", "UDF" ],
+    "tags": [ "DiscUtils", "Optical", "Iso9660" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {
@@ -18,8 +18,7 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3",
-    "DiscUtils.Iso9660": "1.0.3"
+    "DiscUtils": "1.0.3"
   },
 
   "buildOptions": {
