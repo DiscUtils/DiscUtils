@@ -249,22 +249,22 @@ namespace DiscUtils.Xva
             string vbdRefs = string.Empty;
             for (int i = 0; i < _disks.Count; ++i)
             {
-                vbdRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vbdIds[i]);
+                vbdRefs += string.Format(CultureInfo.InvariantCulture, StaticStrings.XVA_ova_ref, "Ref:" + vbdIds[i]);
             }
 
             string vdiRefs = string.Empty;
             for (int i = 0; i < _disks.Count; ++i)
             {
-                vdiRefs += string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_ref, "Ref:" + vdiIds[i]);
+                vdiRefs += string.Format(CultureInfo.InvariantCulture, StaticStrings.XVA_ova_ref, "Ref:" + vdiIds[i]);
             }
 
             StringBuilder objectsString = new StringBuilder();
 
-            objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_vm, "Ref:" + vmId, vmGuid, vmName, vbdRefs));
+            objectsString.Append(string.Format(CultureInfo.InvariantCulture, StaticStrings.XVA_ova_vm, "Ref:" + vmId, vmGuid, vmName, vbdRefs));
 
             for (int i = 0; i < _disks.Count; ++i)
             {
-                objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_vbd, "Ref:" + vbdIds[i], vbdGuids[i], "Ref:" + vmId, "Ref:" + vdiIds[i], i));
+                objectsString.Append(string.Format(CultureInfo.InvariantCulture, StaticStrings.XVA_ova_vbd, "Ref:" + vbdIds[i], vbdGuids[i], "Ref:" + vmId, "Ref:" + vdiIds[i], i));
             }
 
             for (int i = 0; i < _disks.Count; ++i)
@@ -272,7 +272,7 @@ namespace DiscUtils.Xva
                 objectsString.Append(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        Resources.XVA_ova_vdi,
+                        StaticStrings.XVA_ova_vdi,
                         "Ref:" + vdiIds[i],
                         vdiGuids[i],
                         vdiNames[i],
@@ -281,10 +281,10 @@ namespace DiscUtils.Xva
                         vdiSizes[i]));
             }
 
-            objectsString.Append(string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_sr, "Ref:" + srId, srGuid, srName, vdiRefs));
+            objectsString.Append(string.Format(CultureInfo.InvariantCulture, StaticStrings.XVA_ova_sr, "Ref:" + srId, srGuid, srName, vdiRefs));
 
             diskIds = vdiIds;
-            return string.Format(CultureInfo.InvariantCulture, Resources.XVA_ova_base, objectsString.ToString());
+            return string.Format(CultureInfo.InvariantCulture, StaticStrings.XVA_ova_base, objectsString.ToString());
         }
     }
 }
