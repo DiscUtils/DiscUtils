@@ -1,6 +1,8 @@
+Note: this is a fork of https://github.com/quamotion/DiscUtils, which itself is a fork of https://discutils.codeplex.com/. 
+
 # Project Description
 
-[![Build status](https://ci.appveyor.com/api/projects/status/s8xnp94r6ywiwpp8?svg=true)](https://ci.appveyor.com/project/qmfrederik/discutils)
+[![Build status](https://ci.appveyor.com/api/projects/status/2w0s5arlk1dotwto?svg=true)](https://ci.appveyor.com/project/LordMike/discutils)
 
 DiscUtils is a .NET library to read and write ISO files and Virtual Machine disk files (VHD, VDI, XVA, VMDK, etc). DiscUtils is developed in C# with no native code (or P/Invoke).
 

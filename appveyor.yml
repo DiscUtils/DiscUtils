@@ -1,8 +1,0 @@
-build_script:
-  - cmd: cd src
-  - cmd: dotnet restore
-  - cmd: dotnet build
-  - cmd: dotnet pack --version-suffix r%APPVEYOR_BUILD_NUMBER%
-  
-on_success:
-  - ps: Push-AppveyorArtifact "bin\Debug\Quamotion.DiscUtils.r$($env:APPVEYOR_BUILD_NUMBER).nupkg"
