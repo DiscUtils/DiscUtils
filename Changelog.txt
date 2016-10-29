@@ -1,7 +1,7 @@
 
 
 
-- The FileSystemManager can no longer auto-detect some filesystems, as they have been separated into different assemblies
+- The FileSystemManager, VirtualDiskManager can no longer auto-detect some filesystems / vdi types, as they have been separated into different assemblies (See use of SetupHelper)
 - The DiscUtils.Xva library has been ported to .NET Core
 - DiscUtils.Net has been reintroduced, but not ported to .NET Core
 
