@@ -19,6 +19,7 @@
 
   "dependencies": {
     "DiscUtils": "1.0.3",
+    "DiscUtils.Ext": "1.0.3",
     "DiscUtils.Fat": "1.0.3",
     "DiscUtils.HfsPlus": "1.0.3",
     "DiscUtils.Ntfs": "1.0.3",

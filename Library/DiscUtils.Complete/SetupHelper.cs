@@ -6,6 +6,7 @@ namespace DiscUtils.Complete
     {
         public static void SetupComplete()
         {
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Ext.ExtFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Fat.FatFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(HfsPlus.HfsPlusFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Iscsi.Disk)));

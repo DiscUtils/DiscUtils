@@ -5,6 +5,8 @@ build_script:
 
     dotnet restore Library\DiscUtils
 
+    dotnet restore Library\DiscUtils.Ext
+
     dotnet restore Library\DiscUtils.Fat
 
     dotnet restore Library\DiscUtils.FileSystems
@@ -39,6 +41,8 @@ build_script:
 
 
     dotnet build -c Release Library\DiscUtils
+
+    dotnet build -c Release Library\DiscUtils.Ext
 
     dotnet build -c Release Library\DiscUtils.Fat
 

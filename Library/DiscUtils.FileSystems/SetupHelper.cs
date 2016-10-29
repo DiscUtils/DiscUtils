@@ -6,6 +6,7 @@ namespace DiscUtils.FileSystems
     {
         public static void SetupFileSystems()
         {
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Ext.ExtFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Fat.FatFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(HfsPlus.HfsPlusFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Ntfs.NtfsFileSystem)));
