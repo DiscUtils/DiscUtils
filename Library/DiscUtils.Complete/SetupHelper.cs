@@ -19,6 +19,8 @@ namespace DiscUtils.Complete
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Vmdk.Disk)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Wim.WimFile)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Xva.Disk)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(SquashFs.SquashFileSystemBuilder)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(HfsPlus.HfsPlusFileSystem)));
         }
     }
 }

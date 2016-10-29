@@ -20,8 +20,10 @@
   "dependencies": {
     "DiscUtils": "1.0.3",
     "DiscUtils.Fat": "1.0.3",
+    "DiscUtils.HfsPlus": "1.0.3",
     "DiscUtils.Ntfs": "1.0.3",
-    "DiscUtils.OpticalDisk": "1.0.3"
+    "DiscUtils.OpticalDisk": "1.0.3",
+    "DiscUtils.SquashFs": "1.0.3"
   },
 
   "buildOptions": {
@@ -67,7 +69,6 @@
         "System.Xml": "2.0.0.0"
       },
       "dependencies": {
-        "DiscUtils.Net": "1.0.3"
       },
       "buildOptions": {
         "define": [ "NET20" ]
@@ -75,7 +76,6 @@
     },
     "net40": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3"
       },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
@@ -83,7 +83,6 @@
     },
     "net45": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3"
       },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
