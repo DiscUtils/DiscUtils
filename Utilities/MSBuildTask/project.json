@@ -1,14 +1,22 @@
-﻿{
+{
   "version": "1.0.0-*",
   "buildOptions": {
-    "emitEntryPoint": true
+
   },
 
   "dependencies": {
+    "DiscUtils": "1.0.3",
+    "DiscUtils.Common": "1.0.0-*",
+    "DiscUtils.Iso9660": "1.0.3",
+    "DiscUtils.SquashFs": "1.0.3"
   },
 
   "frameworks": {
     "net40": {
+      "frameworkAssemblies": {
+        "Microsoft.Build.Framework": "4.0.0.0",
+        "Microsoft.Build.Utilities.v4.0": "4.0.0.0"
+      }
     }
   }
 }

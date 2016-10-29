@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Threading.Tasks;
+
 namespace MSBuildTask
 {
     using System;
