@@ -22,22 +22,6 @@
 
 namespace DiscUtils.Nfs
 {
-    internal enum RpcRejectedStatus
-    {
-        RpcMismatch = 0,
-        AuthError = 1,
-    }
-
-    internal enum RpcAuthenticationStatus
-    {
-        None = 0,
-        BadCredentials = 1,
-        RejectedCredentials = 2,
-        BadVerifier = 3,
-        RejectedVerifier = 4,
-        TooWeak = 5
-    }
-
     internal class RpcRejectedReplyHeader
     {
         public RpcRejectedStatus Status;

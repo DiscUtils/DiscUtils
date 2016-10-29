@@ -22,19 +22,8 @@
 
 namespace DiscUtils.Ntfs
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
-
-    [Flags]
-    internal enum FileRecordFlags : ushort
-    {
-        None = 0x0000,
-        InUse = 0x0001,
-        IsDirectory = 0x0002,
-        IsMetaFile = 0x0004,
-        HasViewIndex = 0x0008
-    }
 
     internal class FileRecord : FixupRecordBase
     {

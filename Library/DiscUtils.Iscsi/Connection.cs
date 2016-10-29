@@ -30,14 +30,6 @@ namespace DiscUtils.Iscsi
     using System.Net.Sockets;
     using System.Reflection;
 
-    internal enum Digest
-    {
-        [ProtocolKeyValue("None")]
-        None,
-        [ProtocolKeyValue("CRC32C")]
-        Crc32c
-    }
-
     internal sealed class Connection : IDisposable
     {
         #region Parameters

@@ -20,16 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
-
 namespace DiscUtils.SquashFs
 {
     using System.IO;
     using DiscUtils.Vfs;
-
-    internal delegate Block ReadBlock(long pos, int diskLen);
-
-    internal delegate Metablock ReadMetaBlock(long pos);
 
     internal class Context : VfsContext
     {

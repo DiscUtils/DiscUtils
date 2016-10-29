@@ -26,8 +26,6 @@ using System.IO;
 
 namespace DiscUtils.Fat
 {
-    internal delegate void FirstClusterChangedDelegate(uint cluster);
-
     internal class ClusterStream : Stream
     {
         private readonly FileAccess _access;

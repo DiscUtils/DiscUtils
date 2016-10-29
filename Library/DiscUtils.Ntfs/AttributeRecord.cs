@@ -26,15 +26,6 @@ namespace DiscUtils.Ntfs
     using System.IO;
     using System.Text;
 
-    [Flags]
-    internal enum AttributeFlags : ushort
-    {
-        None = 0x0000,
-        Compressed = 0x0001,
-        Encrypted = 0x4000,
-        Sparse = 0x8000
-    }
-
     internal abstract class AttributeRecord : IComparable<AttributeRecord>
     {
         protected AttributeType _type;

@@ -24,14 +24,6 @@ namespace DiscUtils.Ntfs
 {
     using System;
 
-    [Flags]
-    internal enum IndexEntryFlags : ushort
-    {
-        None = 0x00,
-        Node = 0x01,
-        End = 0x02
-    }
-
     internal class IndexEntry
     {
         public const int EndNodeSize = 0x18;

@@ -24,12 +24,6 @@ namespace DiscUtils.Nfs
 {
     using System;
 
-    internal enum RpcMessageType
-    {
-        Call = 0,
-        Reply = 1
-    }
-
     internal class RpcMessageHeader
     {
         public RpcMessageHeader(XdrDataReader reader)

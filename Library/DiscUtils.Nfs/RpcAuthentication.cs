@@ -24,14 +24,6 @@ namespace DiscUtils.Nfs
 {
     using System.IO;
 
-    internal enum RpcAuthFlavour
-    {
-        Null = 0,
-        Unix = 1,
-        Short = 2,
-        Des = 3
-    }
-
     internal class RpcAuthentication
     {
         private RpcAuthFlavour _flavour;

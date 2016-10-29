@@ -24,13 +24,6 @@ namespace DiscUtils.Iscsi
 {
     using System;
 
-    internal enum LoginStages
-    {
-        SecurityNegotiation = 0x0,
-        LoginOperationalNegotiation = 0x1,
-        FullFeaturePhase = 0x3
-    }
-
     internal class LoginRequest
     {
         private const ushort IsidQualifier = 0x0000;

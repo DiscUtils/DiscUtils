@@ -24,14 +24,6 @@ namespace DiscUtils.Udf
 {
     using System;
 
-    internal enum ShortAllocationFlags
-    {
-        RecordedAndAllocated = 0,
-        AllocatedNotRecorded = 1,
-        NotRecordedNotAllocated = 2,
-        NextExtentOfAllocationDescriptors = 3
-    }
-
     internal sealed class ExtentAllocationDescriptor : IByteArraySerializable
     {
         public uint ExtentLength;

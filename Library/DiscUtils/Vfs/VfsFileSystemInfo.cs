@@ -25,16 +25,6 @@ namespace DiscUtils.Vfs
     using System.IO;
 
     /// <summary>
-    /// Delegate for instantiating a file system.
-    /// </summary>
-    /// <param name="stream">The stream containing the file system.</param>
-    /// <param name="volumeInfo">Optional, information about the volume the file system is on.</param>
-    /// <param name="parameters">Parameters for the file system.</param>
-    /// <returns>A file system implementation.</returns>
-    public delegate DiscFileSystem VfsFileSystemOpener(
-        Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters);
-
-    /// <summary>
     /// Class holding information about a file system.
     /// </summary>
     public sealed class VfsFileSystemInfo : DiscUtils.FileSystemInfo

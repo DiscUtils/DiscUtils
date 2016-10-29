@@ -22,12 +22,6 @@
 
 namespace DiscUtils.Nfs
 {
-    internal enum RpcReplyStatus
-    {
-        Accepted = 0,
-        Denied = 1
-    }
-
     internal class RpcReplyHeader
     {
         public RpcReplyStatus Status;

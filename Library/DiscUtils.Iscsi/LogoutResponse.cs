@@ -22,14 +22,6 @@
 
 namespace DiscUtils.Iscsi
 {
-    internal enum LogoutResponseCode
-    {
-        ClosedSuccessfully = 0,
-        ConnectionIdNotFound = 1,
-        RecoveryNotSupported = 2,
-        CleanupFailed = 3
-    }
-
     internal class LogoutResponse : BaseResponse
     {
         public LogoutResponseCode Response;

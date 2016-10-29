@@ -26,8 +26,6 @@ namespace DiscUtils
     using System.Collections.Generic;
     using System.IO;
 
-    internal delegate SparseStream SparseStreamOpenDelegate();
-
     /// <summary>
     /// Represents a sparse stream.
     /// </summary>

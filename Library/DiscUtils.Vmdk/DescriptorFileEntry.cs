@@ -25,13 +25,6 @@ namespace DiscUtils.Vmdk
     using System;
     using System.Globalization;
 
-    internal enum DescriptorFileEntryType
-    {
-        NoValue = 0,
-        Quoted = 1,
-        Plain = 2
-    }
-
     internal class DescriptorFileEntry
     {
         private string _key;

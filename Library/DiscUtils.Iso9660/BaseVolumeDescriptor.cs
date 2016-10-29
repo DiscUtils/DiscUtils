@@ -25,15 +25,6 @@ namespace DiscUtils.Iso9660
     using System;
     using System.Text;
 
-    internal enum VolumeDescriptorType : byte
-    {
-        Boot = 0,
-        Primary = 1,
-        Supplementary = 2,
-        Partition = 3,
-        SetTerminator = 255
-    }
-
     internal class BaseVolumeDescriptor
     {
         public VolumeDescriptorType VolumeDescriptorType;

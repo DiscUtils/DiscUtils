@@ -30,15 +30,6 @@ namespace DiscUtils.Iscsi
     using System.Reflection;
     using System.Threading;
 
-    internal enum SessionType
-    {
-        [ProtocolKeyValue("Discovery")]
-        Discovery = 0,
-
-        [ProtocolKeyValue("Normal")]
-        Normal = 1
-    }
-
     /// <summary>
     /// Represents a connection to a particular Target.
     /// </summary>

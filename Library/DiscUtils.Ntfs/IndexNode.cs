@@ -26,8 +26,6 @@ namespace DiscUtils.Ntfs
     using System.Collections.Generic;
     using System.IO;
 
-    internal delegate void IndexNodeSaveFn();
-
     internal class IndexNode
     {
         private IndexNodeSaveFn _store;

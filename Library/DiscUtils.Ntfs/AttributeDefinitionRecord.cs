@@ -22,32 +22,7 @@
 
 namespace DiscUtils.Ntfs
 {
-    using System;
     using System.Text;
-
-    internal enum AttributeCollationRule : int
-    {
-        Binary = 0x00000000,
-        Filename = 0x00000001,
-        UnicodeString = 0x00000002,
-        UnsignedLong = 0x00000010,
-        Sid = 0x00000011,
-        SecurityHash = 0x00000012,
-        MultipleUnsignedLongs = 0x00000013
-    }
-
-    [Flags]
-    internal enum AttributeTypeFlags : int
-    {
-        None = 0x00,
-        Indexed = 0x02,
-        Multiple = 0x04,
-        NotZero = 0x08,
-        IndexedUnique = 0x10,
-        NamedUnique = 0x20,
-        MustBeResident = 0x40,
-        CanBeNonResident = 0x80
-    }
 
     internal sealed class AttributeDefinitionRecord
     {

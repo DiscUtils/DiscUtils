@@ -28,35 +28,6 @@ namespace DiscUtils.Iscsi
     using System.Globalization;
     using System.Reflection;
 
-    [Flags]
-    internal enum KeyUsagePhase
-    {
-        SecurityNegotiation = 0x01,
-
-        OperationalNegotiation = 0x02,
-
-        FullyFeatured = 0x04,
-
-        All = 0x07,
-    }
-
-    [Flags]
-    internal enum KeySender
-    {
-        Initiator = 0x01,
-
-        Target = 0x02,
-
-        Both = 0x03
-    }
-
-    internal enum KeyType
-    {
-        Declarative,
-
-        Negotiated
-    }
-
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     internal sealed class ProtocolKeyAttribute : Attribute
     {

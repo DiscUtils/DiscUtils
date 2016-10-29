@@ -24,14 +24,6 @@ namespace DiscUtils.SquashFs
 {
     using System.IO;
 
-    internal delegate uint AllocateInode();
-
-    internal delegate ushort AllocateId(int id);
-
-    internal delegate uint WriteDataBlock(byte[] buffer, int offset, int count);
-
-    internal delegate uint WriteFragment(int length, out uint offset);
-
     internal sealed class BuilderContext
     {
         public Stream RawStream { get; set; }

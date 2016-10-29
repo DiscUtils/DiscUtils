@@ -27,24 +27,6 @@ namespace DiscUtils.Vmdk
     using System.Globalization;
     using System.IO;
 
-    internal enum ExtentAccess
-    {
-        None = 0,
-        ReadOnly = 1,
-        ReadWrite = 2
-    }
-
-    internal enum ExtentType
-    {
-        Flat = 0,
-        Sparse = 1,
-        Zero = 2,
-        Vmfs = 3,
-        VmfsSparse = 4,
-        VmfsRdm = 5,
-        VmfsRaw = 6
-    }
-
     internal class ExtentDescriptor
     {
         private ExtentAccess _access;

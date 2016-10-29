@@ -24,57 +24,6 @@ namespace DiscUtils.Ntfs
 {
     using System.IO;
 
-    internal delegate File GetFileByIndexFn(long index);
-
-    internal delegate File GetFileByRefFn(FileRecordReference reference);
-
-    internal delegate Directory GetDirectoryByIndexFn(long index);
-
-    internal delegate Directory GetDirectoryByRefFn(FileRecordReference reference);
-
-    internal delegate File AllocateFileFn(FileRecordFlags flags);
-
-    internal delegate void ForgetFileFn(File file);
-
-    internal interface INtfsContext
-    {
-        Stream RawStream { get; }
-
-        AttributeDefinitions AttributeDefinitions { get; }
-
-        UpperCase UpperCase { get; }
-
-        BiosParameterBlock BiosParameterBlock { get; }
-
-        MasterFileTable Mft { get; }
-
-        ClusterBitmap ClusterBitmap { get; }
-
-        SecurityDescriptors SecurityDescriptors { get; }
-
-        ObjectIds ObjectIds { get; }
-
-        ReparsePoints ReparsePoints { get; }
-
-        Quotas Quotas { get; }
-
-        NtfsOptions Options { get; }
-
-        GetFileByIndexFn GetFileByIndex { get; }
-
-        GetFileByRefFn GetFileByRef { get; }
-
-        GetDirectoryByIndexFn GetDirectoryByIndex { get; }
-
-        GetDirectoryByRefFn GetDirectoryByRef { get; }
-
-        AllocateFileFn AllocateFile { get; }
-
-        ForgetFileFn ForgetFile { get; }
-
-        bool ReadOnly { get; }
-    }
-
     internal sealed class NtfsContext : INtfsContext
     {
         private Stream _rawStream;

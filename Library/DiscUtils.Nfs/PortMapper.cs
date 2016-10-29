@@ -24,12 +24,6 @@ namespace DiscUtils.Nfs
 {
     using System.IO;
 
-    internal enum PortMapperProtocol
-    {
-        Tcp = 6,
-        Udp = 17
-    }
-
     internal sealed class PortMapper : RpcProgram
     {
         public const int ProgramIdentifier = 100000;

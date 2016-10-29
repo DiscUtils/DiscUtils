@@ -22,13 +22,6 @@
 
 namespace DiscUtils.Nfs
 {
-    internal enum Nfs3SetTimeMethod
-    {
-        NoChange = 0,
-        ServerTime = 1,
-        ClientTime = 2
-    }
-
     internal sealed class Nfs3SetAttributes
     {
         public bool SetMode { get; set; }
