@@ -11,3 +11,5 @@
 
 - Refactored FileSystemManager to always be statics
 - Moved static parts of VirtualDisk into VirtualDiskManager
+
+- Changed codestyle from FxCop to Resharper
