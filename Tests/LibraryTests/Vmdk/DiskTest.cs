@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
+using DiscUtils.Complete;
 using DiscUtils.Vmdk;
 using NUnit.Framework;
 
@@ -31,6 +32,12 @@ namespace LibraryTests.Vmdk
     [TestFixture]
     public class DiskTest
     {
+        [OneTimeSetUp]
+        public static void RunBeforeAnyTests()
+        {
+            SetupHelper.SetupComplete();
+        }
+
         [Test]
         public void InitializeFixed()
         {
