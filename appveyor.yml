@@ -7,46 +7,70 @@ build_script:
 
     dotnet restore Library\DiscUtils.Fat
 
+    dotnet restore Library\DiscUtils.FileSystems
+
+    dotnet restore Library\DiscUtils.HfsPlus
+
+    dotnet restore Library\DiscUtils.Iscsi
+
+    dotnet restore Library\DiscUtils.Iso9660
+
+    dotnet restore Library\DiscUtils.Net
+
     dotnet restore Library\DiscUtils.Ntfs
+
+    dotnet restore Library\DiscUtils.OpticalDisk
+
+    dotnet restore Library\DiscUtils.SquashFs
+
+    dotnet restore Library\DiscUtils.Udf
+
+    dotnet restore Library\DiscUtils.Vdi
 
     dotnet restore Library\DiscUtils.Vhd
 
     dotnet restore Library\DiscUtils.Vhdx
 
+    dotnet restore Library\DiscUtils.Vmdk
+
     dotnet restore Library\DiscUtils.Wim
 
     dotnet restore Library\DiscUtils.Xva
-
-    dotnet restore Library\DiscUtils.Net
-
-    dotnet restore Library\DiscUtils.Vmdk
-
-    dotnet restore Library\DiscUtils.Udf
-
-    dotnet restore Library\DiscUtils.OpticalDisk
 
 
     dotnet build -c Release Library\DiscUtils
 
     dotnet build -c Release Library\DiscUtils.Fat
 
+    dotnet build -c Release Library\DiscUtils.FileSystems
+
+    dotnet build -c Release Library\DiscUtils.HfsPlus
+
+    dotnet build -c Release Library\DiscUtils.Iscsi
+
+    dotnet build -c Release Library\DiscUtils.Iso9660
+
+    dotnet build -c Release Library\DiscUtils.Net
+
     dotnet build -c Release Library\DiscUtils.Ntfs
+
+    dotnet build -c Release Library\DiscUtils.OpticalDisk
+
+    dotnet build -c Release Library\DiscUtils.SquashFs
+
+    dotnet build -c Release Library\DiscUtils.Udf
+
+    dotnet build -c Release Library\DiscUtils.Vdi
 
     dotnet build -c Release Library\DiscUtils.Vhd
 
     dotnet build -c Release Library\DiscUtils.Vhdx
 
+    dotnet build -c Release Library\DiscUtils.Vmdk
+
     dotnet build -c Release Library\DiscUtils.Wim
 
     dotnet build -c Release Library\DiscUtils.Xva
-
-    dotnet build -c Release Library\DiscUtils.Net
-
-    dotnet build -c Release Library\DiscUtils.Vmdk
-
-    dotnet build -c Release Library\DiscUtils.Udf
-
-    dotnet build -c Release Library\DiscUtils.OpticalDisk
 
 
     REM Utilities
