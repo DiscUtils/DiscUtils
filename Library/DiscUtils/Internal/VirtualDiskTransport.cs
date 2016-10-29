@@ -20,37 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+using System;
+using System.IO;
+
+namespace DiscUtils.Internal
 {
-    using System.Collections.Generic;
-    using System.IO;
-
-    internal abstract class VirtualDiskFactory
+    internal abstract class VirtualDiskTransport : IDisposable
     {
-        public abstract string[] Variants { get; }
+        public abstract bool IsRawDisk { get; }
 
-        public abstract VirtualDiskTypeInfo GetDiskTypeInformation(string variant);
+        public abstract void Connect(Uri uri, string username, string password);
 
-        public abstract DiskImageBuilder GetImageBuilder(string variant);
+        public abstract VirtualDisk OpenDisk(FileAccess access);
 
-        public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters);
+        public abstract FileLocator GetFileLocator();
 
-        public abstract VirtualDisk OpenDisk(string path, FileAccess access);
+        public abstract string GetFileName();
 
-        public abstract VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access);
+        public abstract string GetExtraInfo();
 
-        public virtual VirtualDisk OpenDisk(FileLocator locator, string path, string extraInfo,
-            Dictionary<string, string> parameters, FileAccess access)
+        public void Dispose()
         {
-            return OpenDisk(locator, path, access);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public VirtualDisk OpenDisk(DiscFileSystem fileSystem, string path, FileAccess access)
+        protected virtual void Dispose(bool disposing)
         {
-            return OpenDisk(new DiscFileLocator(fileSystem, @"\"), path, access);
         }
-
-        public abstract VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access);
     }
 }

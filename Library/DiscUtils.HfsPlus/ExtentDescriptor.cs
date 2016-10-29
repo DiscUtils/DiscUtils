@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Internal;
+
 namespace DiscUtils.HfsPlus
 {
     internal sealed class ExtentDescriptor : IByteArraySerializable

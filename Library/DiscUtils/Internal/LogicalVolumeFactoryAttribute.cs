@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,10 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+using System;
+
+namespace DiscUtils.Internal
 {
-    internal interface IMappedBuffer : IBuffer
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    internal sealed class LogicalVolumeFactoryAttribute : Attribute
     {
-        long MapPosition(long position);
     }
 }

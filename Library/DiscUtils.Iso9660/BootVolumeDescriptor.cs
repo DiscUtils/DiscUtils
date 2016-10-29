@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Internal;
+
 namespace DiscUtils.Iso9660
 {
     internal class BootVolumeDescriptor : BaseVolumeDescriptor

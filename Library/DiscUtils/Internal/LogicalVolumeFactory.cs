@@ -20,31 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+using System.Collections.Generic;
+
+namespace DiscUtils.Internal
 {
-    /// <summary>
-    /// Common interface for reading structures to/from byte arrays.
-    /// </summary>
-    internal interface IByteArraySerializable
+    internal abstract class LogicalVolumeFactory
     {
-        /// <summary>
-        /// Gets the total number of bytes the structure occupies.
-        /// </summary>
-        int Size { get; }
+        public abstract bool HandlesPhysicalVolume(PhysicalVolumeInfo volume);
 
-        /// <summary>
-        /// Reads the structure from a byte array.
-        /// </summary>
-        /// <param name="buffer">The buffer to read from.</param>
-        /// <param name="offset">The buffer offset to start reading from.</param>
-        /// <returns>The number of bytes read.</returns>
-        int ReadFrom(byte[] buffer, int offset);
-
-        /// <summary>
-        /// Writes a structure to a byte array.
-        /// </summary>
-        /// <param name="buffer">The buffer to write to.</param>
-        /// <param name="offset">The buffer offset to start writing at.</param>
-        void WriteTo(byte[] buffer, int offset);
+        public abstract void MapDisks(IEnumerable<VirtualDisk> disks, Dictionary<string, LogicalVolumeInfo> result);
     }
 }

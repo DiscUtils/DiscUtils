@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Internal;
 
 namespace DiscUtils.Fat
 {

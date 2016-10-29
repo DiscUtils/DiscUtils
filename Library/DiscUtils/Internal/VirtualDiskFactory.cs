@@ -20,23 +20,37 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+using System.Collections.Generic;
+using System.IO;
+
+namespace DiscUtils.Internal
 {
-    using System;
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    internal sealed class VirtualDiskTransportAttribute : Attribute
+    internal abstract class VirtualDiskFactory
     {
-        private string _scheme;
+        public abstract string[] Variants { get; }
 
-        public VirtualDiskTransportAttribute(string scheme)
+        public abstract VirtualDiskTypeInfo GetDiskTypeInformation(string variant);
+
+        public abstract DiskImageBuilder GetImageBuilder(string variant);
+
+        public abstract VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
+            VirtualDiskParameters diskParameters);
+
+        public abstract VirtualDisk OpenDisk(string path, FileAccess access);
+
+        public abstract VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access);
+
+        public virtual VirtualDisk OpenDisk(FileLocator locator, string path, string extraInfo,
+            Dictionary<string, string> parameters, FileAccess access)
         {
-            _scheme = scheme;
+            return OpenDisk(locator, path, access);
         }
 
-        public string Scheme
+        public VirtualDisk OpenDisk(DiscFileSystem fileSystem, string path, FileAccess access)
         {
-            get { return _scheme; }
+            return OpenDisk(new DiscFileLocator(fileSystem, @"\"), path, access);
         }
+
+        public abstract VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access);
     }
 }

@@ -22,6 +22,7 @@
 
 using System;
 using System.Text;
+using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {

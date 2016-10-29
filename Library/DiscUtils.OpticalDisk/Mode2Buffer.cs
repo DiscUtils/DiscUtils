@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Internal;
 
 namespace DiscUtils.OpticalDisk
 {

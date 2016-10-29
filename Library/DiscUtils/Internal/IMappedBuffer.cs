@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,30 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+namespace DiscUtils.Internal
 {
-    using System;
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    internal sealed class VirtualDiskFactoryAttribute : Attribute
+    internal interface IMappedBuffer : IBuffer
     {
-        private string _type;
-        private string[] _fileExtensions;
-
-        public VirtualDiskFactoryAttribute(string type, string fileExtensions)
-        {
-            _type = type;
-            _fileExtensions = fileExtensions.Replace(".", string.Empty).Split(',');
-        }
-
-        public string Type
-        {
-            get { return _type; }
-        }
-
-        public string[] FileExtensions
-        {
-            get { return _fileExtensions; }
-        }
+        long MapPosition(long position);
     }
 }

@@ -20,33 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+namespace DiscUtils.Internal
 {
-    using System;
-    using System.IO;
-
-    internal abstract class VirtualDiskTransport : IDisposable
+    internal static class Sizes
     {
-        public abstract bool IsRawDisk { get; }
+        public const long OneKiB = 1024;
+        public const long OneMiB = 1024*OneKiB;
+        public const long OneGiB = 1024*OneMiB;
 
-        public abstract void Connect(Uri uri, string username, string password);
-
-        public abstract VirtualDisk OpenDisk(FileAccess access);
-
-        public abstract FileLocator GetFileLocator();
-
-        public abstract string GetFileName();
-
-        public abstract string GetExtraInfo();
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-        }
+        public const int Sector = 512;
     }
 }

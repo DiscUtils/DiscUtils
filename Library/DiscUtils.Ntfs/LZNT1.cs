@@ -28,6 +28,8 @@
 // (*) Puyo tools implements a different LZ-style algorithm
 //
 
+using DiscUtils.Internal;
+
 namespace DiscUtils.Ntfs
 {
     using System;

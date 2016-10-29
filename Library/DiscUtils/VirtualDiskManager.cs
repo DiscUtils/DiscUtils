@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using DiscUtils.CoreCompat;
+using DiscUtils.Internal;
 
 namespace DiscUtils
 {

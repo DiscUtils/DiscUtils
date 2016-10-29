@@ -21,6 +21,7 @@
 //
 
 using DiscUtils.CoreCompat;
+using DiscUtils.Internal;
 
 namespace DiscUtils
 {

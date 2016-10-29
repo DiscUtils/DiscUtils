@@ -20,14 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+namespace DiscUtils.Internal
 {
-    internal static class Sizes
+    /// <summary>
+    /// Common interface for reading structures to/from byte arrays.
+    /// </summary>
+    internal interface IByteArraySerializable
     {
-        public const long OneKiB = 1024;
-        public const long OneMiB = 1024*OneKiB;
-        public const long OneGiB = 1024*OneMiB;
+        /// <summary>
+        /// Gets the total number of bytes the structure occupies.
+        /// </summary>
+        int Size { get; }
 
-        public const int Sector = 512;
+        /// <summary>
+        /// Reads the structure from a byte array.
+        /// </summary>
+        /// <param name="buffer">The buffer to read from.</param>
+        /// <param name="offset">The buffer offset to start reading from.</param>
+        /// <returns>The number of bytes read.</returns>
+        int ReadFrom(byte[] buffer, int offset);
+
+        /// <summary>
+        /// Writes a structure to a byte array.
+        /// </summary>
+        /// <param name="buffer">The buffer to write to.</param>
+        /// <param name="offset">The buffer offset to start writing at.</param>
+        void WriteTo(byte[] buffer, int offset);
     }
 }

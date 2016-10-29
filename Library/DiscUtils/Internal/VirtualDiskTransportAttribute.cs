@@ -20,14 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
+using System;
+
+namespace DiscUtils.Internal
 {
-    using System.Collections.Generic;
-
-    internal abstract class LogicalVolumeFactory
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    internal sealed class VirtualDiskTransportAttribute : Attribute
     {
-        public abstract bool HandlesPhysicalVolume(PhysicalVolumeInfo volume);
+        private string _scheme;
 
-        public abstract void MapDisks(IEnumerable<VirtualDisk> disks, Dictionary<string, LogicalVolumeInfo> result);
+        public VirtualDiskTransportAttribute(string scheme)
+        {
+            _scheme = scheme;
+        }
+
+        public string Scheme
+        {
+            get { return _scheme; }
+        }
     }
 }
