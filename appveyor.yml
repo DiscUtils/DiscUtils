@@ -5,6 +5,8 @@ build_script:
 
     dotnet restore Library\DiscUtils
 
+    dotnet restore Library\DiscUtils.BootConfig
+
     dotnet restore Library\DiscUtils.Complete
 
     dotnet restore Library\DiscUtils.Ext
@@ -25,6 +27,8 @@ build_script:
 
     dotnet restore Library\DiscUtils.OpticalDisk
 
+    dotnet restore Library\DiscUtils.Registry
+
     dotnet restore Library\DiscUtils.SquashFs
 
     dotnet restore Library\DiscUtils.Udf
@@ -43,6 +47,8 @@ build_script:
 
 
     dotnet build -c Release Library\DiscUtils
+
+    dotnet build -c Release Library\DiscUtils.BootConfig
 
     dotnet build -c Release Library\DiscUtils.Complete
 
@@ -63,6 +69,8 @@ build_script:
     dotnet build -c Release Library\DiscUtils.Ntfs
 
     dotnet build -c Release Library\DiscUtils.OpticalDisk
+
+    dotnet build -c Release Library\DiscUtils.Registry
 
     dotnet build -c Release Library\DiscUtils.SquashFs
 

@@ -6,6 +6,7 @@ namespace DiscUtils.Complete
     {
         public static void SetupComplete()
         {
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(BootConfig.Store)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Ext.ExtFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Fat.FatFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(HfsPlus.HfsPlusFileSystem)));
@@ -16,6 +17,7 @@ namespace DiscUtils.Complete
 #endif
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Ntfs.NtfsFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(OpticalDisk.Disc)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Registry.RegistryHive)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(SquashFs.SquashFileSystemBuilder)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Udf.UdfReader)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Vdi.Disk)));

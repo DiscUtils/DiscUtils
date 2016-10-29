@@ -1,14 +1,14 @@
-{
+﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.Complete",
-  "title": "DiscUtils.Complete",
-  "description": "DiscUtils, complete meta-package",
+  "name": "DiscUtils.BootConfig",
+  "title": "DiscUtils.BootConfig",
+  "description": "DiscUtils BootConfig",
   "authors": [ "Kenneth Bell" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils" ],
+    "tags": [ "DiscUtils", "BootConfig" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {
@@ -19,23 +19,7 @@
 
   "dependencies": {
     "DiscUtils": "1.0.3",
-    "DiscUtils.BootConfig": "1.0.3",
-    "DiscUtils.Ext": "1.0.3",
-    "DiscUtils.Fat": "1.0.3",
-    "DiscUtils.HfsPlus": "1.0.3",
-    "DiscUtils.Iscsi": "1.0.3",
-    "DiscUtils.Iso9660": "1.0.3",
-    "DiscUtils.Ntfs": "1.0.3",
-    "DiscUtils.OpticalDisk": "1.0.3",
-    "DiscUtils.Registry": "1.0.3",
-    "DiscUtils.SquashFs": "1.0.3",
-    "DiscUtils.Udf": "1.0.3",
-    "DiscUtils.Vdi": "1.0.3",
-    "DiscUtils.Vhd": "1.0.3",
-    "DiscUtils.Vhdx": "1.0.3",
-    "DiscUtils.Vmdk": "1.0.3",
-    "DiscUtils.Wim": "1.0.3",
-    "DiscUtils.Xva": "1.0.3"
+    "DiscUtils.Registry": "1.0.3"
   },
 
   "buildOptions": {
@@ -80,25 +64,16 @@
       "frameworkAssemblies": {
         "System.Xml": "2.0.0.0"
       },
-      "dependencies": {
-        "DiscUtils.Net": "1.0.3"
-      },
       "buildOptions": {
         "define": [ "NET20" ]
       }
     },
     "net40": {
-      "dependencies": {
-        "DiscUtils.Net": "1.0.3"
-      },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
       }
     },
     "net45": {
-      "dependencies": {
-        "DiscUtils.Net": "1.0.3"
-      },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
       }

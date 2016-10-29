@@ -6,7 +6,9 @@
 
   "dependencies": {
     "DiscUtils": "1.*",
-    "DiscUtils.Common": "1.0.0-*"
+    "DiscUtils.BootConfig": "1.0.3",
+    "DiscUtils.Common": "1.0.0-*",
+    "DiscUtils.Registry": "1.0.3"
   },
 
   "frameworks": {
