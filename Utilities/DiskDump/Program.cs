@@ -55,7 +55,7 @@ namespace DiskDump
             _showFiles = new CommandLineSwitch("sf", "showfiles", null, "Includes a list of all files found in volumes");
             _showBootCode = new CommandLineSwitch("bc", "bootcode", null, "Includes a hexdump of the MBR and OS boot code in the output");
             _hideExtents = new CommandLineSwitch("he", "hideextents", null, "Suppresses display of the stored extents, which can be slow for large disk images");
-            _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDisk.SupportedDiskTypes) + ")");
+            _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDiskManager.SupportedDiskTypes) + ")");
 
             parser.AddMultiParameter(_inFiles);
             parser.AddSwitch(_showContent);

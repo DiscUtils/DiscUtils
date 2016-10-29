@@ -93,7 +93,7 @@ namespace DiscUtils
         {
             return DoDetect(stream, null);
         }
-        
+
         private static IEnumerable<VfsFileSystemFactory> DetectFactories(Assembly assembly)
         {
             foreach (Type type in assembly.GetTypes())

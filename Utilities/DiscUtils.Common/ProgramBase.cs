@@ -342,7 +342,7 @@ namespace DiscUtils.Common
         private CommandLineSwitch OutputFormatSwitch()
         {
             List<string> outputTypes = new List<string>();
-            foreach (var type in VirtualDisk.SupportedDiskTypes)
+            foreach (var type in VirtualDiskManager.SupportedDiskTypes)
             {
                 List<string> variants = new List<string>(VirtualDisk.GetSupportedDiskVariants(type));
                 if (variants.Count == 0)

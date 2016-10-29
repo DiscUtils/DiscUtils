@@ -10,7 +10,7 @@ namespace DiscUtils.Setup
     public static class SetupHelper
     {
         private static readonly HashSet<string> _alreadyLoaded;
-        
+
         static SetupHelper()
         {
             _alreadyLoaded = new HashSet<string>();
@@ -31,6 +31,7 @@ namespace DiscUtils.Setup
                     return;
 
                 FileSystemManager.RegisterFileSystems(assembly);
+                VirtualDiskManager.RegisterVirtualDiskTypes(assembly);
             }
         }
     }

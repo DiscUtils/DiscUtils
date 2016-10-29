@@ -49,7 +49,7 @@ namespace FileExtract
             _diskFiles = FileOrUriMultiParameter("disk", "The disks to inspect.", false);
             _inFilePath = new CommandLineParameter("file_path", "The path of the file to extract.", false);
             _outFilePath = new CommandLineParameter("out_file", "The output file to be written.", false);
-            _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDisk.SupportedDiskTypes) + ")");
+            _diskType = new CommandLineSwitch("dt", "disktype", "type", "Force the type of disk - use a file extension (one of " + string.Join(", ", VirtualDiskManager.SupportedDiskTypes) + ")");
             _hexDump = new CommandLineSwitch("hd", "hexdump", null, "Output a HexDump of the NTFS stream to the console, in addition to writing it to the output file.");
 
             parser.AddMultiParameter(_diskFiles);

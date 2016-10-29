@@ -39,10 +39,6 @@ namespace DiscUtils
 #endif
         IDisposable
     {
-        private static Dictionary<string, VirtualDiskFactory> s_extensionMap;
-        private static Dictionary<string, VirtualDiskFactory> s_typeMap;
-        private static Dictionary<string, Type> s_diskTransports;
-
         private VirtualDiskTransport _transport;
 
         /// <summary>
@@ -56,17 +52,19 @@ namespace DiscUtils
         /// <summary>
         /// Gets the set of disk formats supported as an array of file extensions.
         /// </summary>
+        [Obsolete("Use VirtualDiskManager.SupportedDiskFormats")]
         public static ICollection<string> SupportedDiskFormats
         {
-            get { return ExtensionMap.Keys; }
+            get { return VirtualDiskManager.SupportedDiskFormats; }
         }
 
         /// <summary>
         /// Gets the set of disk types supported, as an array of identifiers.
         /// </summary>
+        [Obsolete("Use VirtualDiskManager.SupportedDiskTypes")]
         public static ICollection<string> SupportedDiskTypes
         {
-            get { return TypeMap.Keys; }
+            get { return VirtualDiskManager.SupportedDiskTypes; }
         }
 
         /// <summary>
@@ -244,55 +242,6 @@ namespace DiscUtils
             get;
         }
 
-        private static Dictionary<string, VirtualDiskFactory> ExtensionMap
-        {
-            get
-            {
-                if (s_extensionMap == null)
-                {
-                    InitializeMaps();
-                }
-
-                return s_extensionMap;
-            }
-        }
-
-        private static Dictionary<string, VirtualDiskFactory> TypeMap
-        {
-            get
-            {
-                if (s_typeMap == null)
-                {
-                    InitializeMaps();
-                }
-
-                return s_typeMap;
-            }
-        }
-
-        private static Dictionary<string, Type> DiskTransports
-        {
-            get
-            {
-                if (s_diskTransports == null)
-                {
-                    Dictionary<string, Type> transports = new Dictionary<string, Type>();
-                    
-                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
-                    {
-                        foreach (VirtualDiskTransportAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(VirtualDiskTransportAttribute), false))
-                        {
-                            transports.Add(attr.Scheme.ToUpperInvariant(), type);
-                        }
-                    }
-
-                    s_diskTransports = transports;
-                }
-
-                return s_diskTransports;
-            }
-        }
-
         /// <summary>
         /// Gets the set of supported variants of a type of virtual disk.
         /// </summary>
@@ -300,7 +249,7 @@ namespace DiscUtils
         /// <returns>A collection of identifiers, or empty if there is no variant concept for this type of disk.</returns>
         public static ICollection<string> GetSupportedDiskVariants(string type)
         {
-            return TypeMap[type].Variants;
+            return VirtualDiskManager.TypeMap[type].Variants;
         }
 
         /// <summary>
@@ -311,7 +260,7 @@ namespace DiscUtils
         /// <returns>Information about the disk type.</returns>
         public static VirtualDiskTypeInfo GetDiskType(string type, string variant)
         {
-            return TypeMap[type].GetDiskTypeInformation(variant);
+            return VirtualDiskManager.TypeMap[type].GetDiskTypeInformation(variant);
         }
 
         /// <summary>
@@ -327,7 +276,7 @@ namespace DiscUtils
         /// <returns>The newly created disk.</returns>
         public static VirtualDisk CreateDisk(DiscFileSystem fileSystem, string type, string variant, string path, long capacity, Geometry geometry, Dictionary<string, string> parameters)
         {
-            VirtualDiskFactory factory = TypeMap[type];
+            VirtualDiskFactory factory = VirtualDiskManager.TypeMap[type];
 
             VirtualDiskParameters diskParams = new VirtualDiskParameters()
             {
@@ -410,7 +359,7 @@ namespace DiscUtils
             VirtualDisk result = null;
 
             Type transportType;
-            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transportType))
+            if (!VirtualDiskManager.DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transportType))
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "Unable to parse path '{0}'", path), path);
             }
@@ -427,7 +376,7 @@ namespace DiscUtils
                 }
                 else
                 {
-                    VirtualDiskFactory factory = TypeMap[type];
+                    VirtualDiskFactory factory = VirtualDiskManager.TypeMap[type];
 
                     result = factory.CreateDisk(transport.GetFileLocator(), variant.ToLowerInvariant(), Utilities.GetFileFromPath(path), diskParameters);
                 }
@@ -492,7 +441,7 @@ namespace DiscUtils
             VirtualDisk result = null;
 
             Type transportType;
-            if (!DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transportType))
+            if (!VirtualDiskManager.DiskTransports.TryGetValue(uri.Scheme.ToUpperInvariant(), out transportType))
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.InvariantCulture, "Unable to parse path '{0}'", path), path);
             }
@@ -514,7 +463,7 @@ namespace DiscUtils
 
                     if (!string.IsNullOrEmpty(forceType))
                     {
-                        foundFactory = TypeMap.TryGetValue(forceType, out factory);
+                        foundFactory = VirtualDiskManager.TypeMap.TryGetValue(forceType, out factory);
                     }
                     else
                     {
@@ -524,7 +473,7 @@ namespace DiscUtils
                             extension = extension.Substring(1);
                         }
 
-                        foundFactory = ExtensionMap.TryGetValue(extension, out factory);
+                        foundFactory = VirtualDiskManager.ExtensionMap.TryGetValue(extension, out factory);
                     }
 
                     if (foundFactory)
@@ -571,7 +520,7 @@ namespace DiscUtils
             }
 
             VirtualDiskFactory factory;
-            if (ExtensionMap.TryGetValue(extension, out factory))
+            if (VirtualDiskManager.ExtensionMap.TryGetValue(extension, out factory))
             {
                 return factory.OpenDisk(fs, path, access);
             }
@@ -649,7 +598,7 @@ namespace DiscUtils
             }
 
             VirtualDiskFactory factory;
-            if (ExtensionMap.TryGetValue(extension, out factory))
+            if (VirtualDiskManager.ExtensionMap.TryGetValue(extension, out factory))
             {
                 return factory.OpenDiskLayer(locator, path, access);
             }
@@ -714,29 +663,6 @@ namespace DiscUtils
             {
                 return new Uri(path);
             }
-        }
-
-        private static void InitializeMaps()
-        {
-            Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
-            Dictionary<string, VirtualDiskFactory> extensionMap = new Dictionary<string, VirtualDiskFactory>();
-            
-            foreach (var type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
-            {
-                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)ReflectionHelper.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
-                if (attr != null)
-                {
-                    VirtualDiskFactory factory = (VirtualDiskFactory)Activator.CreateInstance(type);
-                    typeMap.Add(attr.Type, factory);
-                    foreach (var extension in attr.FileExtensions)
-                    {
-                        extensionMap.Add(extension.ToUpperInvariant(), factory);
-                    }
-                }
-            }
-
-            s_typeMap = typeMap;
-            s_extensionMap = extensionMap;
         }
     }
 }
