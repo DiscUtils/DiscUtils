@@ -27,18 +27,18 @@ namespace DiscUtils.Fat
 {
     internal class DirectoryEntry
     {
-        private readonly FatFileSystemOptions _options;
         private readonly FatType _fatVariant;
+        private readonly FatFileSystemOptions _options;
         private byte _attr;
-        private byte _creationTimeTenth;
-        private ushort _creationTime;
         private ushort _creationDate;
-        private ushort _lastAccessDate;
-        private ushort _firstClusterHi;
-        private ushort _lastWriteTime;
-        private ushort _lastWriteDate;
-        private ushort _firstClusterLo;
+        private ushort _creationTime;
+        private byte _creationTimeTenth;
         private uint _fileSize;
+        private ushort _firstClusterHi;
+        private ushort _firstClusterLo;
+        private ushort _lastAccessDate;
+        private ushort _lastWriteDate;
+        private ushort _lastWriteTime;
 
         internal DirectoryEntry(FatFileSystemOptions options, Stream stream, FatType fatVariant)
         {
@@ -72,8 +72,6 @@ namespace DiscUtils.Fat
             _fileSize = toCopy._fileSize;
         }
 
-        public FileName Name { get; set; }
-
         public FatAttributes Attributes
         {
             get { return (FatAttributes)_attr; }
@@ -84,18 +82,6 @@ namespace DiscUtils.Fat
         {
             get { return FileTimeToDateTime(_creationDate, _creationTime, _creationTimeTenth); }
             set { DateTimeToFileTime(value, out _creationDate, out _creationTime, out _creationTimeTenth); }
-        }
-
-        public DateTime LastAccessTime
-        {
-            get { return FileTimeToDateTime(_lastAccessDate, 0, 0); }
-            set { DateTimeToFileTime(value, out _lastAccessDate); }
-        }
-
-        public DateTime LastWriteTime
-        {
-            get { return FileTimeToDateTime(_lastWriteDate, _lastWriteTime, 0); }
-            set { DateTimeToFileTime(value, out _lastWriteDate, out _lastWriteTime); }
         }
 
         public int FileSize
@@ -125,6 +111,20 @@ namespace DiscUtils.Fat
                 _firstClusterLo = (ushort)(value & 0xFFFF);
             }
         }
+
+        public DateTime LastAccessTime
+        {
+            get { return FileTimeToDateTime(_lastAccessDate, 0, 0); }
+            set { DateTimeToFileTime(value, out _lastAccessDate); }
+        }
+
+        public DateTime LastWriteTime
+        {
+            get { return FileTimeToDateTime(_lastWriteDate, _lastWriteTime, 0); }
+            set { DateTimeToFileTime(value, out _lastWriteDate, out _lastWriteTime); }
+        }
+
+        public FileName Name { get; set; }
 
         internal void WriteTo(Stream stream)
         {

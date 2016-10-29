@@ -44,12 +44,6 @@ namespace DiscUtils.Fat
             _stream.FirstClusterChanged += FirstClusterAllocatedHandler;
         }
 
-        public override long Position
-        {
-            get { return _stream.Position; }
-            set { _stream.Position = value; }
-        }
-
         public override bool CanRead
         {
             get { return _stream.CanRead; }
@@ -65,14 +59,20 @@ namespace DiscUtils.Fat
             get { return _stream.CanWrite; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return new[] { new StreamExtent(0, Length) }; }
+        }
+
         public override long Length
         {
             get { return _stream.Length; }
         }
 
-        public override IEnumerable<StreamExtent> Extents
+        public override long Position
         {
-            get { return new[] { new StreamExtent(0, Length) }; }
+            get { return _stream.Position; }
+            set { _stream.Position = value; }
         }
 
         protected override void Dispose(bool disposing)

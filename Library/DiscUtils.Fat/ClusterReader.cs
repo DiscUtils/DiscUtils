@@ -27,15 +27,16 @@ namespace DiscUtils.Fat
 {
     internal sealed class ClusterReader
     {
-        private readonly Stream _stream;
-        private readonly int _firstDataSector;
-        private readonly int _sectorsPerCluster;
         private readonly int _bytesPerSector;
 
         /// <summary>
         /// Pre-calculated value because of number of uses of this externally.
         /// </summary>
         private readonly int _clusterSize;
+
+        private readonly int _firstDataSector;
+        private readonly int _sectorsPerCluster;
+        private readonly Stream _stream;
 
         public ClusterReader(Stream stream, int firstDataSector, int sectorsPerCluster, int bytesPerSector)
         {

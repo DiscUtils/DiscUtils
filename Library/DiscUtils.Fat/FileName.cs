@@ -27,6 +27,8 @@ namespace DiscUtils.Fat
 {
     internal sealed class FileName : IEquatable<FileName>
     {
+        private const byte SpaceByte = 0x20;
+
         public static readonly FileName SelfEntryName =
             new FileName(new byte[] { 0x2E, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 }, 0);
 
@@ -35,8 +37,6 @@ namespace DiscUtils.Fat
 
         public static readonly FileName Null =
             new FileName(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0);
-
-        private const byte SpaceByte = 0x20;
 
         private static readonly byte[] InvalidBytes = { 0x22, 0x2A, 0x2B, 0x2C, 0x2E, 0x2F, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x5B, 0x5C, 0x5D, 0x7C };
 
@@ -107,6 +107,16 @@ namespace DiscUtils.Fat
             }
         }
 
+        public bool Equals(FileName other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return CompareRawNames(this, other) == 0;
+        }
+
         public static FileName FromPath(string path, Encoding encoding)
         {
             return new FileName(Utilities.GetFileFromPath(path), encoding);
@@ -164,16 +174,6 @@ namespace DiscUtils.Fat
         public override bool Equals(object other)
         {
             return Equals(other as FileName);
-        }
-
-        public bool Equals(FileName other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return CompareRawNames(this, other) == 0;
         }
 
         public override int GetHashCode()

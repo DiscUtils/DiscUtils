@@ -31,17 +31,17 @@ namespace DiscUtils.Fat
     internal class ClusterStream : Stream
     {
         private readonly FileAccess _access;
-        private readonly ClusterReader _reader;
+        private readonly byte[] _clusterBuffer;
         private readonly FileAllocationTable _fat;
-        private uint _length;
 
         private readonly List<uint> _knownClusters;
-        private long _position;
-
-        private uint _currentCluster;
-        private readonly byte[] _clusterBuffer;
+        private readonly ClusterReader _reader;
 
         private bool _atEOF;
+
+        private uint _currentCluster;
+        private uint _length;
+        private long _position;
 
         internal ClusterStream(FatFileSystem fileSystem, FileAccess access, uint firstCluster, uint length)
         {
@@ -68,8 +68,6 @@ namespace DiscUtils.Fat
             _currentCluster = uint.MaxValue;
             _clusterBuffer = new byte[_reader.ClusterSize];
         }
-
-        public event FirstClusterChangedDelegate FirstClusterChanged;
 
         public override bool CanRead
         {
@@ -108,6 +106,8 @@ namespace DiscUtils.Fat
                 }
             }
         }
+
+        public event FirstClusterChangedDelegate FirstClusterChanged;
 
         public override void Flush() {}
 

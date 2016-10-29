@@ -28,18 +28,18 @@ namespace DiscUtils.Fat
 {
     internal class Directory : IDisposable
     {
+        private readonly Stream _dirStream;
         private readonly Directory _parent;
         private readonly long _parentId;
-        private readonly Stream _dirStream;
+        private long _endOfEntries;
 
         private Dictionary<long, DirectoryEntry> _entries;
         private List<long> _freeEntries;
-        private long _endOfEntries;
+        private DirectoryEntry _parentEntry;
+        private long _parentEntryLocation;
 
         private DirectoryEntry _selfEntry;
         private long _selfEntryLocation;
-        private DirectoryEntry _parentEntry;
-        private long _parentEntryLocation;
 
         /// <summary>
         /// Initializes a new instance of the Directory class.  Use this constructor to represent non-root directories.
@@ -71,83 +71,17 @@ namespace DiscUtils.Fat
             LoadEntries();
         }
 
+        public DirectoryEntry[] Entries
+        {
+            get { return new List<DirectoryEntry>(_entries.Values).ToArray(); }
+        }
+
         public FatFileSystem FileSystem { get; }
 
         public bool IsEmpty
         {
             get { return _entries.Count == 0; }
         }
-
-        public DirectoryEntry[] Entries
-        {
-            get { return new List<DirectoryEntry>(_entries.Values).ToArray(); }
-        }
-
-        #region Convenient accessors for special entries
-
-        internal DirectoryEntry ParentsChildEntry
-        {
-            get
-            {
-                if (_parent == null)
-                {
-                    return new DirectoryEntry(FileSystem.FatOptions, FileName.ParentEntryName, FatAttributes.Directory,
-                        FileSystem.FatVariant);
-                }
-                return _parent.GetEntry(_parentId);
-            }
-
-            set
-            {
-                if (_parent != null)
-                {
-                    _parent.UpdateEntry(_parentId, value);
-                }
-            }
-        }
-
-        internal DirectoryEntry SelfEntry
-        {
-            get
-            {
-                if (_parent == null)
-                {
-                    // If we're the root directory, simulate the parent entry with a dummy record
-                    return new DirectoryEntry(FileSystem.FatOptions, FileName.Null, FatAttributes.Directory,
-                        FileSystem.FatVariant);
-                }
-                return _selfEntry;
-            }
-
-            set
-            {
-                if (_selfEntryLocation >= 0)
-                {
-                    _dirStream.Position = _selfEntryLocation;
-                    value.WriteTo(_dirStream);
-                    _selfEntry = value;
-                }
-            }
-        }
-
-        internal DirectoryEntry ParentEntry
-        {
-            get { return _parentEntry; }
-
-            set
-            {
-                if (_parentEntryLocation < 0)
-                {
-                    throw new IOException("No parent entry on disk to update");
-                }
-
-                _dirStream.Position = _parentEntryLocation;
-                value.WriteTo(_dirStream);
-                _parentEntry = value;
-            }
-        }
-
-        #endregion
 
         public void Dispose()
         {
@@ -510,5 +444,71 @@ namespace DiscUtils.Fat
                 _dirStream.Dispose();
             }
         }
+
+        #region Convenient accessors for special entries
+
+        internal DirectoryEntry ParentsChildEntry
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    return new DirectoryEntry(FileSystem.FatOptions, FileName.ParentEntryName, FatAttributes.Directory,
+                        FileSystem.FatVariant);
+                }
+                return _parent.GetEntry(_parentId);
+            }
+
+            set
+            {
+                if (_parent != null)
+                {
+                    _parent.UpdateEntry(_parentId, value);
+                }
+            }
+        }
+
+        internal DirectoryEntry SelfEntry
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    // If we're the root directory, simulate the parent entry with a dummy record
+                    return new DirectoryEntry(FileSystem.FatOptions, FileName.Null, FatAttributes.Directory,
+                        FileSystem.FatVariant);
+                }
+                return _selfEntry;
+            }
+
+            set
+            {
+                if (_selfEntryLocation >= 0)
+                {
+                    _dirStream.Position = _selfEntryLocation;
+                    value.WriteTo(_dirStream);
+                    _selfEntry = value;
+                }
+            }
+        }
+
+        internal DirectoryEntry ParentEntry
+        {
+            get { return _parentEntry; }
+
+            set
+            {
+                if (_parentEntryLocation < 0)
+                {
+                    throw new IOException("No parent entry on disk to update");
+                }
+
+                _dirStream.Position = _parentEntryLocation;
+                value.WriteTo(_dirStream);
+                _parentEntry = value;
+            }
+        }
+
+        #endregion
     }
 }

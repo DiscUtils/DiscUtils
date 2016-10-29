@@ -53,11 +53,11 @@ namespace DiscUtils.Fat
         public const uint FreeCluster = 0;
 
         private const uint DirtyRegionSize = 512;
+        private readonly byte[] _buffer;
+        private readonly Dictionary<uint, uint> _dirtySectors;
 
         private readonly FatType _type;
-        private readonly byte[] _buffer;
         private uint _nextFreeCandidate;
-        private readonly Dictionary<uint, uint> _dirtySectors;
 
         public FatBuffer(FatType type, byte[] buffer)
         {

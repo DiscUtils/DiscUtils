@@ -26,11 +26,10 @@ namespace DiscUtils.Fat
 {
     internal class FileAllocationTable
     {
-        private readonly Stream _stream;
+        private readonly FatBuffer _buffer;
         private readonly ushort _firstFatSector;
         private readonly byte _numFats;
-
-        private readonly FatBuffer _buffer;
+        private readonly Stream _stream;
 
         public FileAllocationTable(FatType type, Stream stream, ushort firstFatSector, uint fatSize, byte numFats,
                                    byte activeFat)
