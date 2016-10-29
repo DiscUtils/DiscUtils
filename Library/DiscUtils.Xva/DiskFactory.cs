@@ -20,18 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Xva
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     [VirtualDiskFactory("XVA", ".xva")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
         {
-            get { return new string[] { "dynamic" }; }
+            get { return new[] { "dynamic" }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -70,7 +70,7 @@ namespace DiscUtils.Xva
             }
 
             int i = 0;
-            foreach (var disk in machine.Disks)
+            foreach (Disk disk in machine.Disks)
             {
                 if (i == diskIndex)
                 {
@@ -90,14 +90,14 @@ namespace DiscUtils.Xva
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "XVA",
                 Variant = "dynamic",
                 CanBeHardDisk = true,
                 DeterministicGeometry = true,
                 PreservesBiosGeometry = false,
-                CalcGeometry = c => Geometry.FromCapacity(c),
+                CalcGeometry = c => Geometry.FromCapacity(c)
             };
         }
     }

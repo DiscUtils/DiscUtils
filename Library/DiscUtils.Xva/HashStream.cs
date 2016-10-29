@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Security.Cryptography;
+
 namespace DiscUtils.Xva
 {
-    using System;
-    using System.IO;
-    using System.Security.Cryptography;
-    
 #if NETCORE
     internal class HashStreamCore : Stream
     {
-        private Stream _wrapped;
-        private Ownership _ownWrapped;
-
-        private IncrementalHash _hashAlg;
+        private readonly IncrementalHash _hashAlg;
 
         private long _hashPos;
+        private readonly Ownership _ownWrapped;
+        private Stream _wrapped;
 
         public HashStreamCore(Stream wrapped, Ownership ownsWrapped, IncrementalHash hashAlg)
         {
@@ -65,15 +64,9 @@ namespace DiscUtils.Xva
 
         public override long Position
         {
-            get
-            {
-                return _wrapped.Position;
-            }
+            get { return _wrapped.Position; }
 
-            set
-            {
-                _wrapped.Position = value;
-            }
+            set { _wrapped.Position = value; }
         }
 
         public override void Flush()

@@ -20,26 +20,25 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using DiscUtils.Archives;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Xva
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using DiscUtils.Archives;
-
     internal class DiskStream : SparseStream
     {
-        private TarFile _archive;
-        private long _length;
-        private string _dir;
-
-        private long _position;
+        private readonly TarFile _archive;
+        private Stream _currentChunkData;
 
         private int _currentChunkIndex;
-        private Stream _currentChunkData;
+        private readonly string _dir;
+        private readonly long _length;
+
+        private long _position;
         private int[] _skipChunks;
 
         public DiskStream(TarFile archive, long length, string dir)
@@ -69,29 +68,6 @@ namespace DiscUtils.Xva
         public override bool CanWrite
         {
             get { return false; }
-        }
-
-        public override long Length
-        {
-            get { return _length; }
-        }
-
-        public override long Position
-        {
-            get
-            {
-                return _position;
-            }
-
-            set
-            {
-                if (value > _length)
-                {
-                    throw new IOException("Attempt to move beyond end of stream");
-                }
-
-                _position = value;
-            }
         }
 
         public override IEnumerable<StreamExtent> Extents
@@ -129,9 +105,27 @@ namespace DiscUtils.Xva
             }
         }
 
-        public override void Flush()
+        public override long Length
         {
+            get { return _length; }
         }
+
+        public override long Position
+        {
+            get { return _position; }
+
+            set
+            {
+                if (value > _length)
+                {
+                    throw new IOException("Attempt to move beyond end of stream");
+                }
+
+                _position = value;
+            }
+        }
+
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -189,11 +183,8 @@ namespace DiscUtils.Xva
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                Position = effectiveOffset;
-                return Position;
-            }
+            Position = effectiveOffset;
+            return Position;
         }
 
         public override void SetLength(long value)
@@ -214,7 +205,7 @@ namespace DiscUtils.Xva
         private void ReadChunkSkipList()
         {
             List<int> skipChunks = new List<int>();
-            foreach (var fileInfo in _archive.GetFiles(_dir))
+            foreach (FileRecord fileInfo in _archive.GetFiles(_dir))
             {
                 if (fileInfo.Length == 0)
                 {

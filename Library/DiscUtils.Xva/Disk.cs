@@ -20,65 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.Xva
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Class representing a disk containing within an XVA file.
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
-        private VirtualMachine _vm;
-        private string _id;
-        private string _displayName;
-        private string _location;
-        private long _capacity;
+        private readonly long _capacity;
 
         private SparseStream _content;
+        private readonly string _location;
+        private readonly VirtualMachine _vm;
 
         internal Disk(VirtualMachine vm, string id, string displayname, string location, long capacity)
         {
             _vm = vm;
-            _id = id;
-            _displayName = displayname;
+            Uuid = id;
+            DisplayName = displayname;
             _location = location;
             _capacity = capacity;
-        }
-
-        /// <summary>
-        /// Gets the Unique id of the disk, as known by XenServer.
-        /// </summary>
-        public string Uuid
-        {
-            get { return _id; }
-        }
-
-        /// <summary>
-        /// Gets the display name of the disk, as shown by XenServer.
-        /// </summary>
-        public string DisplayName
-        {
-            get { return _displayName; }
-        }
-
-        /// <summary>
-        /// Gets the disk's geometry.
-        /// </summary>
-        /// <remarks>The geometry is not stored with the disk, so this is at best
-        /// a guess of the actual geometry.</remarks>
-        public override Geometry Geometry
-        {
-            get { return Geometry.FromCapacity(_capacity); }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -106,11 +70,11 @@ namespace DiscUtils.Xva
         }
 
         /// <summary>
-        /// Gets the (single) layer of an XVA disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { yield return new DiskLayer(_vm, _capacity, _location); }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -122,6 +86,34 @@ namespace DiscUtils.Xva
         {
             get { return DiskFactory.MakeDiskTypeInfo(); }
         }
+
+        /// <summary>
+        /// Gets the display name of the disk, as shown by XenServer.
+        /// </summary>
+        public string DisplayName { get; }
+
+        /// <summary>
+        /// Gets the disk's geometry.
+        /// </summary>
+        /// <remarks>The geometry is not stored with the disk, so this is at best
+        /// a guess of the actual geometry.</remarks>
+        public override Geometry Geometry
+        {
+            get { return Geometry.FromCapacity(_capacity); }
+        }
+
+        /// <summary>
+        /// Gets the (single) layer of an XVA disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield return new DiskLayer(_vm, _capacity, _location); }
+        }
+
+        /// <summary>
+        /// Gets the Unique id of the disk, as known by XenServer.
+        /// </summary>
+        public string Uuid { get; }
 
         /// <summary>
         /// Create a new differencing disk, possibly within an existing disk.

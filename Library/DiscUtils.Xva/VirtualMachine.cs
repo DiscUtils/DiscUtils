@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.XPath;
+using DiscUtils.Archives;
+
 namespace DiscUtils.Xva
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Xml.XPath;
-    using DiscUtils.Archives;
-
     /// <summary>
     /// Class representing the virtual machine stored in a Xen Virtual Appliance (XVA)
     /// file.
@@ -44,8 +44,7 @@ namespace DiscUtils.Xva
         private static readonly XPathExpression GetDiskCapacity = XPathExpression.Compile("member[child::name='snapshot']/value/struct/member[child::name='virtual_size']/value");
 
         private Stream _fileStream;
-        private Ownership _ownership;
-        private TarFile _archive;
+        private readonly Ownership _ownership;
 
         /// <summary>
         /// Initializes a new instance of the VirtualMachine class.
@@ -55,9 +54,7 @@ namespace DiscUtils.Xva
         /// Ownership of the stream is not transfered.
         /// </remarks>
         public VirtualMachine(Stream fileStream)
-            : this(fileStream, Ownership.None)
-        {
-        }
+            : this(fileStream, Ownership.None) {}
 
         /// <summary>
         /// Initializes a new instance of the VirtualMachine class.
@@ -69,8 +66,10 @@ namespace DiscUtils.Xva
             _fileStream = fileStream;
             _ownership = ownership;
             _fileStream.Position = 0;
-            _archive = new TarFile(fileStream);
+            Archive = new TarFile(fileStream);
         }
+
+        internal TarFile Archive { get; }
 
         /// <summary>
         /// Gets the disks in this XVA.
@@ -80,7 +79,7 @@ namespace DiscUtils.Xva
         {
             get
             {
-                using (Stream docStream = _archive.OpenFile("ova.xml"))
+                using (Stream docStream = Archive.OpenFile("ova.xml"))
                 {
                     XPathDocument ovaDoc = new XPathDocument(docStream);
                     XPathNavigator nav = ovaDoc.CreateNavigator();
@@ -89,7 +88,7 @@ namespace DiscUtils.Xva
                         XPathNavigator idNode = node.SelectSingleNode(GetDiskId);
 
                         // Skip disks which are only referenced, not present
-                        if (_archive.DirExists(idNode.ToString()))
+                        if (Archive.DirExists(idNode.ToString()))
                         {
                             XPathNavigator uuidNode = node.SelectSingleNode(GetDiskUuid);
                             XPathNavigator nameLabelNode = node.SelectSingleNode(GetDiskNameLabel);
@@ -99,11 +98,6 @@ namespace DiscUtils.Xva
                     }
                 }
             }
-        }
-
-        internal TarFile Archive
-        {
-            get { return _archive; }
         }
 
         /// <summary>

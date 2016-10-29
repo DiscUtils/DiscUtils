@@ -20,17 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using DiscUtils.Archives;
+using DiscUtils.Internal;
+
 namespace DiscUtils.Xva
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Security.Cryptography;
-    using System.Text;
-    using DiscUtils.Archives;
-    using DiscUtils.Internal;
-    using DiskRecord = System.Tuple<string, DiscUtils.SparseStream, DiscUtils.Ownership>;
+    using DiskRecord = Tuple<string, SparseStream, Ownership>;
 
     /// <summary>
     /// A class that can be used to create Xen Virtual Appliance (XVA) files.
@@ -41,8 +42,7 @@ namespace DiscUtils.Xva
     /// making them easy to import into XenServer.</remarks>
     public sealed class VirtualMachineBuilder : StreamBuilder, IDisposable
     {
-        private List<DiskRecord> _disks;
-        private string _vmDisplayName;
+        private readonly List<DiskRecord> _disks;
 
         /// <summary>
         /// Initializes a new instance of the VirtualMachineBuilder class.
@@ -50,17 +50,13 @@ namespace DiscUtils.Xva
         public VirtualMachineBuilder()
         {
             _disks = new List<DiskRecord>();
-            _vmDisplayName = "VM";
+            DisplayName = "VM";
         }
 
         /// <summary>
         /// Gets or sets the display name of the VM.
         /// </summary>
-        public string DisplayName
-        {
-            get { return _vmDisplayName; }
-            set { _vmDisplayName = value; }
-        }
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// Disposes this instance, including any underlying resources.
@@ -112,7 +108,7 @@ namespace DiscUtils.Xva
             tarBuilder.AddFile("ova.xml", Encoding.ASCII.GetBytes(ovaFileContent));
 
             int diskIdx = 0;
-            foreach (var diskRec in _disks)
+            foreach (DiskRecord diskRec in _disks)
             {
                 SparseStream diskStream = diskRec.Item2;
                 List<StreamExtent> extents = new List<StreamExtent>(diskStream.Extents);
@@ -129,7 +125,7 @@ namespace DiscUtils.Xva
                         {
                             Stream chunkStream;
 
-                            long diskBytesLeft = diskStream.Length - (i * Sizes.OneMiB);
+                            long diskBytesLeft = diskStream.Length - i * Sizes.OneMiB;
                             if (diskBytesLeft < Sizes.OneMiB)
                             {
                                 chunkStream = new ConcatStream(
@@ -141,7 +137,6 @@ namespace DiscUtils.Xva
                             {
                                 chunkStream = new SubStream(diskStream, i * Sizes.OneMiB, Sizes.OneMiB);
                             }
-
 
                             Stream chunkHashStream;
 #if NETCORE
@@ -218,7 +213,7 @@ namespace DiscUtils.Xva
             int id = 0;
 
             Guid vmGuid = Guid.NewGuid();
-            string vmName = _vmDisplayName;
+            string vmName = DisplayName;
             int vmId = id++;
 
             // Establish per-disk info
@@ -230,7 +225,7 @@ namespace DiscUtils.Xva
             long[] vdiSizes = new long[_disks.Count];
 
             int diskIdx = 0;
-            foreach (var disk in _disks)
+            foreach (DiskRecord disk in _disks)
             {
                 vbdGuids[diskIdx] = Guid.NewGuid();
                 vbdIds[diskIdx] = id++;

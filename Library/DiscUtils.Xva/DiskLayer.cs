@@ -28,15 +28,23 @@ namespace DiscUtils.Xva
     /// <remarks>XVA only supports a single layer.</remarks>
     public sealed class DiskLayer : VirtualDiskLayer
     {
-        private VirtualMachine _vm;
-        private long _capacity;
-        private string _location;
+        private readonly long _capacity;
+        private readonly string _location;
+        private readonly VirtualMachine _vm;
 
         internal DiskLayer(VirtualMachine vm, long capacity, string location)
         {
             _vm = vm;
             _capacity = capacity;
             _location = location;
+        }
+
+        /// <summary>
+        /// Gets the capacity of the layer (in bytes).
+        /// </summary>
+        internal override long Capacity
+        {
+            get { return _capacity; }
         }
 
         /// <summary>
@@ -64,14 +72,6 @@ namespace DiscUtils.Xva
         public override bool NeedsParent
         {
             get { return false; }
-        }
-
-        /// <summary>
-        /// Gets the capacity of the layer (in bytes).
-        /// </summary>
-        internal override long Capacity
-        {
-            get { return _capacity; }
         }
 
         internal override FileLocator RelativeFileLocator
