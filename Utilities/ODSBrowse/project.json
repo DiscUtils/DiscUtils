@@ -1,10 +1,13 @@
-﻿{
+{
   "version": "1.0.0-*",
   "buildOptions": {
     "emitEntryPoint": true
   },
 
   "dependencies": {
+    "DiscUtils": "1.0.3",
+    "DiscUtils.Common": "1.0.0-*",
+    "DiscUtils.OpticalDiscSharing": "1.0.3"
   },
 
   "frameworks": {
