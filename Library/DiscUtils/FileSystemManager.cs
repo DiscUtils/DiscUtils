@@ -93,12 +93,7 @@ namespace DiscUtils
         {
             return DoDetect(stream, null);
         }
-
-        public static List<VfsFileSystemFactory> GetFs()
-        {
-            return _factories;
-        }
-
+        
         private static IEnumerable<VfsFileSystemFactory> DetectFactories(Assembly assembly)
         {
             foreach (Type type in assembly.GetTypes())
