@@ -25,6 +25,7 @@ using DiscUtils.Common;
 using DiscUtils.HfsPlus;
 using System;
 using System.IO;
+using DiscUtils.Setup;
 
 namespace DmgExtract
 {
@@ -36,6 +37,8 @@ namespace DmgExtract
 
         static void Main(string[] args)
         {
+            SetupHelper.RegisterAssembly(typeof(HfsPlusFileSystem).Assembly);
+
             Program program = new Program();
             program.Run(args);
         }
@@ -61,7 +64,7 @@ namespace DmgExtract
 
                 foreach (var volume in VolumeManager.GetPhysicalVolumes(disk))
                 {
-                    foreach (var fileSystem in FileSystemManager.DetectDefaultFileSystems(volume))
+                    foreach (var fileSystem in FileSystemManager.DetectFileSystems(volume))
                     {
                         if (fileSystem.Name == "HFS+")
                         {

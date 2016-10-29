@@ -9,13 +9,7 @@
     "dotnet-test-nunit": "3.4.0-beta-2",
     "DiscUtils": "1.*",
     "DiscUtils.Diagnostics": "1.0.0-*",
-    "DiscUtils.Ntfs": "1.0.3",
-    "DiscUtils.Fat": "1.0.3",
-    "DiscUtils.Vhd": "1.0.3",
-    "DiscUtils.Vhdx": "1.0.3",
-    "DiscUtils.Xva": "1.0.3",
-    "DiscUtils.Vmdk": "1.0.3",
-    "DiscUtils.Iso9660": "1.0.3"
+    "DiscUtils.Complete": "1.0.3"
   },
   "frameworks": {
     "net451": {

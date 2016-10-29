@@ -70,6 +70,8 @@ namespace DiskDump
 
         protected override void DoRun()
         {
+            DiscUtils.FileSystems.SetupHelper.SetupFileSystems();
+
             Console.OutputEncoding = Encoding.UTF8;
 
             List<VirtualDisk> disks = new List<VirtualDisk>();
@@ -207,7 +209,7 @@ namespace DiskDump
                         continue;
                     }
 
-                    DiscUtils.FileSystemInfo[] fileSystemInfos = FileSystemManager.DetectDefaultFileSystems(vol);
+                    DiscUtils.FileSystemInfo[] fileSystemInfos = FileSystemManager.DetectFileSystems(vol);
                     Console.WriteLine("    File Systems: " + string.Join<DiscUtils.FileSystemInfo>(", ", fileSystemInfos));
 
                     Console.WriteLine();

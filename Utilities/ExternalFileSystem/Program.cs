@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using DiscUtils;
+using DiscUtils.Setup;
 using DiscUtils.Vfs;
 
 namespace ExternalFileSystem
@@ -33,16 +34,15 @@ namespace ExternalFileSystem
     {
         static void Main(string[] args)
         {
+            SetupHelper.RegisterAssembly(typeof(Program).Assembly);
+
             MemoryStream dummyFileSystemData = new MemoryStream(Encoding.ASCII.GetBytes("MYFS"));
-
-            FileSystemManager fsmgr = new FileSystemManager();
-            fsmgr.RegisterFileSystems(typeof(Program).Assembly);
-
+            
             VirtualDisk dummyDisk = new DiscUtils.Raw.Disk(dummyFileSystemData, Ownership.None);
             VolumeManager volMgr = new VolumeManager(dummyDisk);
 
             VolumeInfo volInfo = volMgr.GetLogicalVolumes()[0];
-            DiscUtils.FileSystemInfo fsInfo = fsmgr.DetectFileSystems(volInfo)[0];
+            DiscUtils.FileSystemInfo fsInfo = FileSystemManager.DetectFileSystems(volInfo)[0];
 
             DiscFileSystem fs = fsInfo.Open(volInfo);
             ShowDir(fs.Root, 4);

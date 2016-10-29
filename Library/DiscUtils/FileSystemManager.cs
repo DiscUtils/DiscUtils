@@ -37,59 +37,23 @@ namespace DiscUtils
     /// The static detection methods detect default file systems.  To plug in additional
     /// file systems, create an instance of this class and call RegisterFileSystems.
     /// </remarks>
-    public sealed class FileSystemManager
+    public static class FileSystemManager
     {
-        private static List<VfsFileSystemFactory> s_detectedFactories;
-        private static FileSystemManager s_defaultInstance = new FileSystemManager();
-
-        private List<VfsFileSystemFactory> _factories;
+        private static readonly List<VfsFileSystemFactory> _factories;
 
         /// <summary>
         /// Initializes a new instance of the FileSystemManager class.
         /// </summary>
-        public FileSystemManager()
+        static FileSystemManager()
         {
-            _factories = new List<VfsFileSystemFactory>(DetectedFactories);
+            _factories = new List<VfsFileSystemFactory>();
         }
-
-        private static List<VfsFileSystemFactory> DetectedFactories
-        {
-            get
-            {
-                if (s_detectedFactories == null)
-                {
-                    s_detectedFactories = DetectFactories(ReflectionHelper.GetAssembly(typeof(FileSystemManager)));
-                }
-
-                return s_detectedFactories;
-            }
-        }
-
-        /// <summary>
-        /// Detect which file systems are present on a volume.
-        /// </summary>
-        /// <param name="volume">The volume to inspect.</param>
-        /// <returns>The list of file systems detected.</returns>
-        public static FileSystemInfo[] DetectDefaultFileSystems(VolumeInfo volume)
-        {
-            return s_defaultInstance.DetectFileSystems(volume);
-        }
-
-        /// <summary>
-        /// Detect which file systems are present in a stream.
-        /// </summary>
-        /// <param name="stream">The stream to inspect.</param>
-        /// <returns>The list of file systems detected.</returns>
-        public static FileSystemInfo[] DetectDefaultFileSystems(Stream stream)
-        {
-            return s_defaultInstance.DetectFileSystems(stream);
-        }
-
+        
         /// <summary>
         /// Registers new file systems with an instance of this class.
         /// </summary>
         /// <param name="factory">The detector for the new file systems.</param>
-        public void RegisterFileSystems(VfsFileSystemFactory factory)
+        public static void RegisterFileSystems(VfsFileSystemFactory factory)
         {
             _factories.Add(factory);
         }
@@ -102,7 +66,7 @@ namespace DiscUtils
         /// To be detected, the <c>VfsFileSystemFactory</c> instances must be marked with the
         /// <c>VfsFileSystemFactoryAttribute</c>> attribute.
         /// </remarks>
-        public void RegisterFileSystems(Assembly assembly)
+        public static void RegisterFileSystems(Assembly assembly)
         {
             _factories.AddRange(DetectFactories(assembly));
         }
@@ -112,7 +76,7 @@ namespace DiscUtils
         /// </summary>
         /// <param name="volume">The volume to inspect.</param>
         /// <returns>The list of file systems detected.</returns>
-        public FileSystemInfo[] DetectFileSystems(VolumeInfo volume)
+        public static FileSystemInfo[] DetectFileSystems(VolumeInfo volume)
         {
             using (Stream s = volume.Open())
             {
@@ -125,27 +89,29 @@ namespace DiscUtils
         /// </summary>
         /// <param name="stream">The stream to inspect.</param>
         /// <returns>The list of file systems detected.</returns>
-        public FileSystemInfo[] DetectFileSystems(Stream stream)
+        public static FileSystemInfo[] DetectFileSystems(Stream stream)
         {
             return DoDetect(stream, null);
         }
 
-        private static List<VfsFileSystemFactory> DetectFactories(Assembly assembly)
+        public static List<VfsFileSystemFactory> GetFs()
         {
-            List<VfsFileSystemFactory> factories = new List<VfsFileSystemFactory>();
-
-            foreach (var type in assembly.GetTypes())
-            {
-                foreach (VfsFileSystemFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(VfsFileSystemFactoryAttribute), false))
-                {
-                    factories.Add((VfsFileSystemFactory)Activator.CreateInstance(type));
-                }
-            }
-
-            return factories;
+            return _factories;
         }
 
-        private FileSystemInfo[] DoDetect(Stream stream, VolumeInfo volume)
+        private static IEnumerable<VfsFileSystemFactory> DetectFactories(Assembly assembly)
+        {
+            foreach (Type type in assembly.GetTypes())
+            {
+                Attribute attrib = ReflectionHelper.GetCustomAttribute(type, typeof(VfsFileSystemFactoryAttribute), false);
+                if (attrib == null)
+                    continue;
+
+                yield return (VfsFileSystemFactory)Activator.CreateInstance(type);
+            }
+        }
+
+        private static FileSystemInfo[] DoDetect(Stream stream, VolumeInfo volume)
         {
             BufferedStream detectStream = new BufferedStream(stream);
             List<FileSystemInfo> detected = new List<FileSystemInfo>();

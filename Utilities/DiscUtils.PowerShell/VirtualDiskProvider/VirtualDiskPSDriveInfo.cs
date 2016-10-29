@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Management.Automation;
+using DiscUtils.FileSystems;
 
 namespace DiscUtils.PowerShell.VirtualDiskProvider
 {
@@ -51,11 +52,12 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
 
         internal DiscFileSystem GetFileSystem(VolumeInfo volInfo)
         {
+            SetupHelper.SetupFileSystems();
+
             DiscFileSystem result;
             if (!_fsCache.TryGetValue(volInfo.Identity, out result))
             {
-                FileSystemManager fsmgr = new FileSystemManager();
-                FileSystemInfo[] fsInfo = fsmgr.DetectFileSystems(volInfo);
+                FileSystemInfo[] fsInfo = FileSystemManager.DetectFileSystems(volInfo);
                 if (fsInfo != null && fsInfo.Length > 0)
                 {
                     result = fsInfo[0].Open(volInfo);
@@ -69,7 +71,7 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         internal void RescanVolumes()
         {
             VolumeManager newVolMgr = new VolumeManager(_disk);
-            Dictionary<string, DiscFileSystem> newFsCache = new Dictionary<string,DiscFileSystem>();
+            Dictionary<string, DiscFileSystem> newFsCache = new Dictionary<string, DiscFileSystem>();
             Dictionary<string, DiscFileSystem> deadFileSystems = new Dictionary<string, DiscFileSystem>(_fsCache);
 
             foreach (var volInfo in newVolMgr.GetLogicalVolumes())

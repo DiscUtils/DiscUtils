@@ -6,7 +6,8 @@
   "dependencies": {
     "DiscUtils": "1.*",
     "DiscUtils.Common": "1.0.0-*",
-    "DiscUtils.Ntfs": "1.0.3",
+    "DiscUtils.Complete": "1.0.3",
+    "DiscUtils.FileSystems": "1.0.3",
     "System.Management.Automation": "6.1.7601.17515"
   },
 

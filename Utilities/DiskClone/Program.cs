@@ -228,7 +228,7 @@ namespace DiskClone
             // Write out the disk images
             string dir = Path.GetDirectoryName(_destDisk.Value);
             string file = Path.GetFileNameWithoutExtension(_destDisk.Value);
-
+            
             builder.Content = contentStream;
             DiskImageFileSpecification[] fileSpecs = builder.Build(file);
 

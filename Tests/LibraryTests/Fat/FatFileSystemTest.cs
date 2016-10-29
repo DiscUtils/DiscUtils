@@ -25,7 +25,7 @@ using System.IO;
 using System.Text;
 using DiscUtils;
 using DiscUtils.Fat;
-using DiscUtils.Ntfs;
+using DiscUtils.Setup;
 using NUnit.Framework;
 using FileSystemInfo = DiscUtils.FileSystemInfo;
 
@@ -44,6 +44,8 @@ namespace LibraryTests.Fat
         [Test]
         public void Cyrillic()
         {
+            SetupHelper.RegisterAssembly(typeof(FatFileSystem).Assembly);
+
             string lowerDE = "\x0434";
             string upperDE = "\x0414";
 
@@ -69,11 +71,7 @@ namespace LibraryTests.Fat
                 Assert.AreEqual(1, fs.GetDirectories("").Length);
             }
 
-            FileSystemManager fsManager = new FileSystemManager();
-            fsManager.RegisterFileSystems(typeof(NtfsFileSystem).Assembly);
-            fsManager.RegisterFileSystems(typeof(FatFileSystem).Assembly);
-
-            FileSystemInfo[] detectDefaultFileSystems = fsManager.DetectFileSystems(ms);
+            FileSystemInfo[] detectDefaultFileSystems = FileSystemManager.DetectFileSystems(ms);
 
             DiscFileSystem fs2 = detectDefaultFileSystems[0].Open(
                 ms,

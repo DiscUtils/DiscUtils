@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
+using DiscUtils.FileSystems;
 
 namespace FileExtract
 {
@@ -37,6 +38,8 @@ namespace FileExtract
 
         static void Main(string[] args)
         {
+            SetupHelper.SetupFileSystems();
+
             Program program = new Program();
             program.Run(args);
         }
@@ -66,7 +69,6 @@ namespace FileExtract
                 volMgr.AddDisk(VirtualDisk.OpenDisk(disk, _diskType.IsPresent ? _diskType.Value : null, FileAccess.Read, UserName, Password));
             }
 
-
             VolumeInfo volInfo = null;
             if (!string.IsNullOrEmpty(VolumeId))
             {
@@ -81,9 +83,7 @@ namespace FileExtract
                 volInfo = volMgr.GetLogicalVolumes()[0];
             }
 
-
-            DiscUtils.FileSystemInfo fsInfo = FileSystemManager.DetectDefaultFileSystems(volInfo)[0];
-
+            DiscUtils.FileSystemInfo fsInfo = FileSystemManager.DetectFileSystems(volInfo)[0];
 
             using (DiscFileSystem fs = fsInfo.Open(volInfo, FileSystemParameters))
             {

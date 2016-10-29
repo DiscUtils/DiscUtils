@@ -26,6 +26,7 @@ using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
+using DiscUtils.Setup;
 
 namespace VirtualDiskConvert
 {
@@ -38,6 +39,8 @@ namespace VirtualDiskConvert
 
         static void Main(string[] args)
         {
+            SetupHelper.RegisterAssembly(typeof(NtfsFileSystem).Assembly);
+
             Program program = new Program();
             program.Run(args);
         }
@@ -148,7 +151,7 @@ namespace VirtualDiskConvert
             VolumeManager volMgr = new VolumeManager(contentStream);
             foreach (var volume in volMgr.GetLogicalVolumes())
             {
-                foreach (var fsInfo in FileSystemManager.DetectDefaultFileSystems(volume.Open()))
+                foreach (var fsInfo in FileSystemManager.DetectFileSystems(volume.Open()))
                 {
                     if (fsInfo.Name == "NTFS")
                     {
