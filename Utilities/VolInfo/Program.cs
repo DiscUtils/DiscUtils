@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
+using DiscUtils.Transports;
 
 namespace VolInfo
 {
@@ -33,6 +34,8 @@ namespace VolInfo
 
         static void Main(string[] args)
         {
+            SetupHelper.SetupTransports();
+
             Program program = new Program();
             program.Run(args);
         }

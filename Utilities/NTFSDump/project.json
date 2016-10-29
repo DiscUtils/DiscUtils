@@ -7,7 +7,9 @@
   "dependencies": {
     "DiscUtils": "1.*",
     "DiscUtils.Common": "1.0.0-*",
-    "DiscUtils.Ntfs": "1.0.3"
+    "DiscUtils.Containers": "1.0.3",
+    "DiscUtils.Ntfs": "1.0.3",
+    "DiscUtils.Transports": "1.0.3"
   },
 
   "frameworks": {

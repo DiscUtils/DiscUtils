@@ -37,6 +37,9 @@ namespace NTFSDump
 
         static void Main(string[] args)
         {
+            DiscUtils.Containers.SetupHelper.SetupContainers();
+            DiscUtils.Transports.SetupHelper.SetupTransports();
+
             Program program = new Program();
             program.Run(args);
         }
@@ -63,8 +66,7 @@ namespace NTFSDump
             {
                 volMgr.AddDisk(VirtualDisk.OpenDisk(disk, FileAccess.Read, UserName, Password));
             }
-
-
+            
             Stream partitionStream = null;
             if (!string.IsNullOrEmpty(VolumeId))
             {
