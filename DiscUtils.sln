@@ -108,6 +108,10 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Sdi", "Library\Di
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.OpticalDiscSharing", "Library\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.xproj", "{C65D14F5-2423-4CED-B741-68FAAAE6208A}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Transports", "Library\DiscUtils.Transports\DiscUtils.Transports.xproj", "{385E6192-2A33-4E4A-BE2D-5002656308BE}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Containers", "Library\DiscUtils.Containers\DiscUtils.Containers.xproj", "{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -302,6 +306,14 @@ Global
 		{C65D14F5-2423-4CED-B741-68FAAAE6208A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C65D14F5-2423-4CED-B741-68FAAAE6208A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C65D14F5-2423-4CED-B741-68FAAAE6208A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{385E6192-2A33-4E4A-BE2D-5002656308BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{385E6192-2A33-4E4A-BE2D-5002656308BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{385E6192-2A33-4E4A-BE2D-5002656308BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{385E6192-2A33-4E4A-BE2D-5002656308BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -354,5 +366,7 @@ Global
 		{EEC95FF7-8906-4A7D-BE8C-7D7374B31A0E} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
 		{7BA86AD5-108C-41AC-A970-48589B0C2988} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
 		{C65D14F5-2423-4CED-B741-68FAAAE6208A} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
+		{385E6192-2A33-4E4A-BE2D-5002656308BE} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
+		{63D52295-322F-4FFA-86B0-3BFC1A9E4C08} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
 	EndGlobalSection
 EndGlobal
