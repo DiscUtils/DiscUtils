@@ -20,22 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Fat
 {
-    using System;
-    using System.IO;
-
     internal sealed class ClusterReader
     {
-        private Stream _stream;
-        private int _firstDataSector;
-        private int _sectorsPerCluster;
-        private int _bytesPerSector;
+        private readonly Stream _stream;
+        private readonly int _firstDataSector;
+        private readonly int _sectorsPerCluster;
+        private readonly int _bytesPerSector;
 
         /// <summary>
         /// Pre-calculated value because of number of uses of this externally.
         /// </summary>
-        private int _clusterSize;
+        private readonly int _clusterSize;
 
         public ClusterReader(Stream stream, int firstDataSector, int sectorsPerCluster, int bytesPerSector)
         {
@@ -44,7 +44,7 @@ namespace DiscUtils.Fat
             _sectorsPerCluster = sectorsPerCluster;
             _bytesPerSector = bytesPerSector;
 
-            _clusterSize = _sectorsPerCluster*_bytesPerSector;
+            _clusterSize = _sectorsPerCluster * _bytesPerSector;
         }
 
         public int ClusterSize
@@ -60,9 +60,9 @@ namespace DiscUtils.Fat
                     "buffer is too small - cluster would overflow buffer");
             }
 
-            uint firstSector = (uint) (((cluster - 2)*_sectorsPerCluster) + _firstDataSector);
+            uint firstSector = (uint)((cluster - 2) * _sectorsPerCluster + _firstDataSector);
 
-            _stream.Position = firstSector*_bytesPerSector;
+            _stream.Position = firstSector * _bytesPerSector;
             if (Utilities.ReadFully(_stream, buffer, offset, _clusterSize) != _clusterSize)
             {
                 throw new IOException("Failed to read cluster " + cluster);
@@ -77,18 +77,18 @@ namespace DiscUtils.Fat
                     "buffer is too small - cluster would overflow buffer");
             }
 
-            uint firstSector = (uint) (((cluster - 2)*_sectorsPerCluster) + _firstDataSector);
+            uint firstSector = (uint)((cluster - 2) * _sectorsPerCluster + _firstDataSector);
 
-            _stream.Position = firstSector*_bytesPerSector;
+            _stream.Position = firstSector * _bytesPerSector;
 
             _stream.Write(buffer, offset, _clusterSize);
         }
 
         internal void WipeCluster(uint cluster)
         {
-            uint firstSector = (uint) (((cluster - 2)*_sectorsPerCluster) + _firstDataSector);
+            uint firstSector = (uint)((cluster - 2) * _sectorsPerCluster + _firstDataSector);
 
-            _stream.Position = firstSector*_bytesPerSector;
+            _stream.Position = firstSector * _bytesPerSector;
 
             _stream.Write(new byte[_clusterSize], 0, _clusterSize);
         }

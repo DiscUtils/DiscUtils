@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
+
 namespace DiscUtils.Fat
 {
-    using System;
-    using System.Text;
-
     /// <summary>
     /// FAT file system options.
     /// </summary>

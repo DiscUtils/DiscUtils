@@ -20,19 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Fat
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class FatFileStream : SparseStream
     {
-        private Directory _dir;
-        private long _dirId;
-        private ClusterStream _stream;
+        private readonly Directory _dir;
+        private readonly long _dirId;
+        private readonly ClusterStream _stream;
 
-        private bool didWrite = false;
+        private bool didWrite;
 
         public FatFileStream(FatFileSystem fileSystem, Directory dir, long fileId, FileAccess access)
         {
@@ -40,7 +40,7 @@ namespace DiscUtils.Fat
             _dirId = fileId;
 
             DirectoryEntry dirEntry = _dir.GetEntry(_dirId);
-            _stream = new ClusterStream(fileSystem, access, (uint) dirEntry.FirstCluster, (uint) dirEntry.FileSize);
+            _stream = new ClusterStream(fileSystem, access, dirEntry.FirstCluster, (uint)dirEntry.FileSize);
             _stream.FirstClusterChanged += FirstClusterAllocatedHandler;
         }
 
@@ -72,7 +72,7 @@ namespace DiscUtils.Fat
 
         public override IEnumerable<StreamExtent> Extents
         {
-            get { return new StreamExtent[] {new StreamExtent(0, Length)}; }
+            get { return new[] { new StreamExtent(0, Length) }; }
         }
 
         protected override void Dispose(bool disposing)
@@ -87,7 +87,7 @@ namespace DiscUtils.Fat
                     dirEntry.LastAccessTime = now;
                     if (didWrite)
                     {
-                        dirEntry.FileSize = (int) _stream.Length;
+                        dirEntry.FileSize = (int)_stream.Length;
                         dirEntry.LastWriteTime = now;
                     }
 

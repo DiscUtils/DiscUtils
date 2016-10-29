@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Fat
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class FatBuffer
     {
         /// <summary>
@@ -54,10 +54,10 @@ namespace DiscUtils.Fat
 
         private const uint DirtyRegionSize = 512;
 
-        private FatType _type;
-        private byte[] _buffer;
+        private readonly FatType _type;
+        private readonly byte[] _buffer;
         private uint _nextFreeCandidate;
-        private Dictionary<uint, uint> _dirtySectors;
+        private readonly Dictionary<uint, uint> _dirtySectors;
 
         public FatBuffer(FatType type, byte[] buffer)
         {
@@ -73,11 +73,11 @@ namespace DiscUtils.Fat
                 switch (_type)
                 {
                     case FatType.Fat12:
-                        return (_buffer.Length/3)*2;
+                        return _buffer.Length / 3 * 2;
                     case FatType.Fat16:
-                        return _buffer.Length/2;
+                        return _buffer.Length / 2;
                     default: // FAT32
-                        return _buffer.Length/4;
+                        return _buffer.Length / 4;
                 }
             }
         }
@@ -126,25 +126,20 @@ namespace DiscUtils.Fat
         {
             if (_type == FatType.Fat16)
             {
-                return Utilities.ToUInt16LittleEndian(_buffer, (int) (cluster*2));
+                return Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster * 2));
             }
-            else if (_type == FatType.Fat32)
+            if (_type == FatType.Fat32)
             {
-                return Utilities.ToUInt32LittleEndian(_buffer, (int) (cluster*4)) & 0x0FFFFFFF;
+                return Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
             }
-            else
+
+            // FAT12
+            if ((cluster & 1) != 0)
             {
-                // FAT12
-                if ((cluster & 1) != 0)
-                {
-                    return
-                        (uint) ((Utilities.ToUInt16LittleEndian(_buffer, (int) (cluster + (cluster/2))) >> 4) & 0x0FFF);
-                }
-                else
-                {
-                    return (uint) (Utilities.ToUInt16LittleEndian(_buffer, (int) (cluster + (cluster/2))) & 0x0FFF);
-                }
+                return
+                    (uint)((Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + cluster / 2)) >> 4) & 0x0FFF);
             }
+            return (uint)(Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + cluster / 2)) & 0x0FFF);
         }
 
         internal void SetEndOfChain(uint cluster)
@@ -171,19 +166,19 @@ namespace DiscUtils.Fat
         {
             if (_type == FatType.Fat16)
             {
-                MarkDirty(cluster*2);
-                Utilities.WriteBytesLittleEndian((ushort) next, _buffer, (int) (cluster*2));
+                MarkDirty(cluster * 2);
+                Utilities.WriteBytesLittleEndian((ushort)next, _buffer, (int)(cluster * 2));
             }
             else if (_type == FatType.Fat32)
             {
-                MarkDirty(cluster*4);
-                uint oldVal = Utilities.ToUInt32LittleEndian(_buffer, (int) (cluster*4));
+                MarkDirty(cluster * 4);
+                uint oldVal = Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4));
                 uint newVal = (oldVal & 0xF0000000) | (next & 0x0FFFFFFF);
-                Utilities.WriteBytesLittleEndian((uint) newVal, _buffer, (int) (cluster*4));
+                Utilities.WriteBytesLittleEndian(newVal, _buffer, (int)(cluster * 4));
             }
             else
             {
-                uint offset = cluster + (cluster/2);
+                uint offset = cluster + cluster / 2;
                 MarkDirty(offset);
                 MarkDirty(offset + 1); // On alternate sector boundaries, cluster info crosses two sectors
 
@@ -191,27 +186,27 @@ namespace DiscUtils.Fat
                 if ((cluster & 1) != 0)
                 {
                     next = next << 4;
-                    maskedOldVal = (ushort) (Utilities.ToUInt16LittleEndian(_buffer, (int) offset) & 0x000F);
+                    maskedOldVal = (ushort)(Utilities.ToUInt16LittleEndian(_buffer, (int)offset) & 0x000F);
                 }
                 else
                 {
                     next = next & 0x0FFF;
-                    maskedOldVal = (ushort) (Utilities.ToUInt16LittleEndian(_buffer, (int) offset) & 0xF000);
+                    maskedOldVal = (ushort)(Utilities.ToUInt16LittleEndian(_buffer, (int)offset) & 0xF000);
                 }
 
-                ushort newVal = (ushort) (maskedOldVal | next);
+                ushort newVal = (ushort)(maskedOldVal | next);
 
-                Utilities.WriteBytesLittleEndian(newVal, _buffer, (int) offset);
+                Utilities.WriteBytesLittleEndian(newVal, _buffer, (int)offset);
             }
         }
 
         internal bool TryGetFreeCluster(out uint cluster)
         {
             // Simple scan - don't hold a free list...
-            uint numEntries = (uint) NumEntries;
+            uint numEntries = (uint)NumEntries;
             for (uint i = 0; i < numEntries; i++)
             {
-                uint candidate = (i + _nextFreeCandidate)%numEntries;
+                uint candidate = (i + _nextFreeCandidate) % numEntries;
                 if (IsFree(GetNext(candidate)))
                 {
                     cluster = candidate;
@@ -251,15 +246,15 @@ namespace DiscUtils.Fat
 
         internal void MarkDirty(uint offset)
         {
-            _dirtySectors[offset/DirtyRegionSize] = offset/DirtyRegionSize;
+            _dirtySectors[offset / DirtyRegionSize] = offset / DirtyRegionSize;
         }
 
         internal void WriteDirtyRegions(Stream stream, long position)
         {
             foreach (uint val in _dirtySectors.Values)
             {
-                stream.Position = position + (val*DirtyRegionSize);
-                stream.Write(_buffer, (int) (val*DirtyRegionSize), (int) DirtyRegionSize);
+                stream.Position = position + val * DirtyRegionSize;
+                stream.Write(_buffer, (int)(val * DirtyRegionSize), (int)DirtyRegionSize);
             }
         }
 

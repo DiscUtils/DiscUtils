@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Fat
 {
-    using System;
-    using System.IO;
-
     internal class DirectoryEntry
     {
-        private FatFileSystemOptions _options;
-        private FatType _fatVariant;
-        private FileName _name;
+        private readonly FatFileSystemOptions _options;
+        private readonly FatType _fatVariant;
         private byte _attr;
         private byte _creationTimeTenth;
         private ushort _creationTime;
@@ -53,15 +52,15 @@ namespace DiscUtils.Fat
         {
             _options = options;
             _fatVariant = fatVariant;
-            _name = name;
-            _attr = (byte) attrs;
+            Name = name;
+            _attr = (byte)attrs;
         }
 
         internal DirectoryEntry(DirectoryEntry toCopy)
         {
             _options = toCopy._options;
             _fatVariant = toCopy._fatVariant;
-            _name = toCopy._name;
+            Name = toCopy.Name;
             _attr = toCopy._attr;
             _creationTimeTenth = toCopy._creationTimeTenth;
             _creationTime = toCopy._creationTime;
@@ -73,17 +72,12 @@ namespace DiscUtils.Fat
             _fileSize = toCopy._fileSize;
         }
 
-        public FileName Name
-        {
-            get { return _name; }
-
-            set { _name = value; }
-        }
+        public FileName Name { get; set; }
 
         public FatAttributes Attributes
         {
-            get { return (FatAttributes) _attr; }
-            set { _attr = (byte) value; }
+            get { return (FatAttributes)_attr; }
+            set { _attr = (byte)value; }
         }
 
         public DateTime CreationTime
@@ -106,8 +100,8 @@ namespace DiscUtils.Fat
 
         public int FileSize
         {
-            get { return (int) _fileSize; }
-            set { _fileSize = (uint) value; }
+            get { return (int)_fileSize; }
+            set { _fileSize = (uint)value; }
         }
 
         public uint FirstCluster
@@ -116,22 +110,19 @@ namespace DiscUtils.Fat
             {
                 if (_fatVariant == FatType.Fat32)
                 {
-                    return (uint) (_firstClusterHi << 16) | _firstClusterLo;
+                    return (uint)(_firstClusterHi << 16) | _firstClusterLo;
                 }
-                else
-                {
-                    return _firstClusterLo;
-                }
+                return _firstClusterLo;
             }
 
             set
             {
                 if (_fatVariant == FatType.Fat32)
                 {
-                    _firstClusterHi = (ushort) ((value >> 16) & 0xFFFF);
+                    _firstClusterHi = (ushort)((value >> 16) & 0xFFFF);
                 }
 
-                _firstClusterLo = (ushort) (value & 0xFFFF);
+                _firstClusterLo = (ushort)(value & 0xFFFF);
             }
         }
 
@@ -139,17 +130,17 @@ namespace DiscUtils.Fat
         {
             byte[] buffer = new byte[32];
 
-            _name.GetBytes(buffer, 0);
+            Name.GetBytes(buffer, 0);
             buffer[11] = _attr;
             buffer[13] = _creationTimeTenth;
-            Utilities.WriteBytesLittleEndian((ushort) _creationTime, buffer, 14);
-            Utilities.WriteBytesLittleEndian((ushort) _creationDate, buffer, 16);
-            Utilities.WriteBytesLittleEndian((ushort) _lastAccessDate, buffer, 18);
-            Utilities.WriteBytesLittleEndian((ushort) _firstClusterHi, buffer, 20);
-            Utilities.WriteBytesLittleEndian((ushort) _lastWriteTime, buffer, 22);
-            Utilities.WriteBytesLittleEndian((ushort) _lastWriteDate, buffer, 24);
-            Utilities.WriteBytesLittleEndian((ushort) _firstClusterLo, buffer, 26);
-            Utilities.WriteBytesLittleEndian((uint) _fileSize, buffer, 28);
+            Utilities.WriteBytesLittleEndian(_creationTime, buffer, 14);
+            Utilities.WriteBytesLittleEndian(_creationDate, buffer, 16);
+            Utilities.WriteBytesLittleEndian(_lastAccessDate, buffer, 18);
+            Utilities.WriteBytesLittleEndian(_firstClusterHi, buffer, 20);
+            Utilities.WriteBytesLittleEndian(_lastWriteTime, buffer, 22);
+            Utilities.WriteBytesLittleEndian(_lastWriteDate, buffer, 24);
+            Utilities.WriteBytesLittleEndian(_firstClusterLo, buffer, 26);
+            Utilities.WriteBytesLittleEndian(_fileSize, buffer, 28);
 
             stream.Write(buffer, 0, buffer.Length);
         }
@@ -167,8 +158,8 @@ namespace DiscUtils.Fat
             int day = date & 0x001F;
             int hour = (time & 0xF800) >> 11;
             int minute = (time & 0x07E0) >> 5;
-            int second = ((time & 0x001F)*2) + (tenths/100);
-            int millis = (tenths%100)*10;
+            int second = (time & 0x001F) * 2 + tenths / 100;
+            int millis = tenths % 100 * 10;
 
             return new DateTime(year, month, day, hour, minute, second, millis);
         }
@@ -194,15 +185,15 @@ namespace DiscUtils.Fat
             }
 
             date =
-                (ushort) ((((value.Year - 1980) << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
+                (ushort)((((value.Year - 1980) << 9) & 0xFE00) | ((value.Month << 5) & 0x01E0) | (value.Day & 0x001F));
             time =
-                (ushort) (((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second/2) & 0x001F));
-            tenths = (byte) (((value.Second%2)*100) + (value.Millisecond/10));
+                (ushort)(((value.Hour << 11) & 0xF800) | ((value.Minute << 5) & 0x07E0) | ((value.Second / 2) & 0x001F));
+            tenths = (byte)(value.Second % 2 * 100 + value.Millisecond / 10);
         }
 
         private void Load(byte[] data, int offset)
         {
-            _name = new FileName(data, offset);
+            Name = new FileName(data, offset);
             _attr = data[offset + 11];
             _creationTimeTenth = data[offset + 13];
             _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);

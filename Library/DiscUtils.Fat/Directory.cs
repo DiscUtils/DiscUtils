@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Fat
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class Directory : IDisposable
     {
-        private FatFileSystem _fileSystem;
-        private Directory _parent;
-        private long _parentId;
-        private Stream _dirStream;
+        private readonly Directory _parent;
+        private readonly long _parentId;
+        private readonly Stream _dirStream;
 
         private Dictionary<long, DirectoryEntry> _entries;
         private List<long> _freeEntries;
@@ -49,12 +48,12 @@ namespace DiscUtils.Fat
         /// <param name="parentId">The identity of the entry representing this directory in the parent.</param>
         internal Directory(Directory parent, long parentId)
         {
-            _fileSystem = parent._fileSystem;
+            FileSystem = parent.FileSystem;
             _parent = parent;
             _parentId = parentId;
 
             DirectoryEntry dirEntry = ParentsChildEntry;
-            _dirStream = new ClusterStream(_fileSystem, FileAccess.ReadWrite, dirEntry.FirstCluster, uint.MaxValue);
+            _dirStream = new ClusterStream(FileSystem, FileAccess.ReadWrite, dirEntry.FirstCluster, uint.MaxValue);
 
             LoadEntries();
         }
@@ -66,16 +65,13 @@ namespace DiscUtils.Fat
         /// <param name="dirStream">The stream containing the directory info.</param>
         internal Directory(FatFileSystem fileSystem, Stream dirStream)
         {
-            _fileSystem = fileSystem;
+            FileSystem = fileSystem;
             _dirStream = dirStream;
 
             LoadEntries();
         }
 
-        public FatFileSystem FileSystem
-        {
-            get { return _fileSystem; }
-        }
+        public FatFileSystem FileSystem { get; }
 
         public bool IsEmpty
         {
@@ -95,13 +91,10 @@ namespace DiscUtils.Fat
             {
                 if (_parent == null)
                 {
-                    return new DirectoryEntry(_fileSystem.FatOptions, FileName.ParentEntryName, FatAttributes.Directory,
-                        _fileSystem.FatVariant);
+                    return new DirectoryEntry(FileSystem.FatOptions, FileName.ParentEntryName, FatAttributes.Directory,
+                        FileSystem.FatVariant);
                 }
-                else
-                {
-                    return _parent.GetEntry(_parentId);
-                }
+                return _parent.GetEntry(_parentId);
             }
 
             set
@@ -120,13 +113,10 @@ namespace DiscUtils.Fat
                 if (_parent == null)
                 {
                     // If we're the root directory, simulate the parent entry with a dummy record
-                    return new DirectoryEntry(_fileSystem.FatOptions, FileName.Null, FatAttributes.Directory,
-                        _fileSystem.FatVariant);
+                    return new DirectoryEntry(FileSystem.FatOptions, FileName.Null, FatAttributes.Directory,
+                        FileSystem.FatVariant);
                 }
-                else
-                {
-                    return _selfEntry;
-                }
+                return _selfEntry;
             }
 
             set
@@ -195,7 +185,7 @@ namespace DiscUtils.Fat
 
         public DirectoryEntry GetEntry(long id)
         {
-            return (id < 0) ? null : _entries[id];
+            return id < 0 ? null : _entries[id];
         }
 
         public Directory GetChildDirectory(FileName name)
@@ -205,14 +195,11 @@ namespace DiscUtils.Fat
             {
                 return null;
             }
-            else if ((_entries[id].Attributes & FatAttributes.Directory) == 0)
+            if ((_entries[id].Attributes & FatAttributes.Directory) == 0)
             {
                 return null;
             }
-            else
-            {
-                return _fileSystem.GetDirectory(this, id);
-            }
+            return FileSystem.GetDirectory(this, id);
         }
 
         internal Directory CreateChildDirectory(FileName name)
@@ -224,41 +211,35 @@ namespace DiscUtils.Fat
                 {
                     throw new IOException("A file exists with the same name");
                 }
-                else
-                {
-                    return _fileSystem.GetDirectory(this, id);
-                }
+                return FileSystem.GetDirectory(this, id);
             }
-            else
+            try
             {
-                try
+                uint firstCluster;
+                if (!FileSystem.Fat.TryGetFreeCluster(out firstCluster))
                 {
-                    uint firstCluster;
-                    if (!_fileSystem.Fat.TryGetFreeCluster(out firstCluster))
-                    {
-                        throw new IOException("Failed to allocate first cluster for new directory");
-                    }
-
-                    _fileSystem.Fat.SetEndOfChain(firstCluster);
-
-                    DirectoryEntry newEntry = new DirectoryEntry(_fileSystem.FatOptions, name, FatAttributes.Directory,
-                        _fileSystem.FatVariant);
-                    newEntry.FirstCluster = firstCluster;
-                    newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
-                    newEntry.LastWriteTime = newEntry.CreationTime;
-
-                    id = AddEntry(newEntry);
-
-                    PopulateNewChildDirectory(newEntry);
-
-                    // Rather than just creating a new instance, pull it through the fileSystem cache
-                    // to ensure the cache model is preserved.
-                    return _fileSystem.GetDirectory(this, id);
+                    throw new IOException("Failed to allocate first cluster for new directory");
                 }
-                finally
-                {
-                    _fileSystem.Fat.Flush();
-                }
+
+                FileSystem.Fat.SetEndOfChain(firstCluster);
+
+                DirectoryEntry newEntry = new DirectoryEntry(FileSystem.FatOptions, name, FatAttributes.Directory,
+                    FileSystem.FatVariant);
+                newEntry.FirstCluster = firstCluster;
+                newEntry.CreationTime = FileSystem.ConvertFromUtc(DateTime.UtcNow);
+                newEntry.LastWriteTime = newEntry.CreationTime;
+
+                id = AddEntry(newEntry);
+
+                PopulateNewChildDirectory(newEntry);
+
+                // Rather than just creating a new instance, pull it through the fileSystem cache
+                // to ensure the cache model is preserved.
+                return FileSystem.GetDirectory(this, id);
+            }
+            finally
+            {
+                FileSystem.Fat.Flush();
             }
         }
 
@@ -321,14 +302,14 @@ namespace DiscUtils.Fat
             {
                 throw new IOException("File already exists");
             }
-            else if (mode == FileMode.Open && !exists)
+            if (mode == FileMode.Open && !exists)
             {
                 throw new FileNotFoundException("File not found",
-                    name.GetDisplayName(_fileSystem.FatOptions.FileNameEncoding));
+                    name.GetDisplayName(FileSystem.FatOptions.FileNameEncoding));
             }
-            else if ((mode == FileMode.Open || mode == FileMode.OpenOrCreate || mode == FileMode.Create) && exists)
+            if ((mode == FileMode.Open || mode == FileMode.OpenOrCreate || mode == FileMode.Create) && exists)
             {
-                SparseStream stream = new FatFileStream(_fileSystem, this, fileId, fileAccess);
+                SparseStream stream = new FatFileStream(FileSystem, this, fileId, fileAccess);
                 if (mode == FileMode.Create)
                 {
                     stream.SetLength(0);
@@ -338,24 +319,22 @@ namespace DiscUtils.Fat
 
                 return stream;
             }
-            else if ((mode == FileMode.OpenOrCreate || mode == FileMode.CreateNew || mode == FileMode.Create) && !exists)
+            if ((mode == FileMode.OpenOrCreate || mode == FileMode.CreateNew || mode == FileMode.Create) && !exists)
             {
                 // Create new file
-                DirectoryEntry newEntry = new DirectoryEntry(_fileSystem.FatOptions, name, FatAttributes.Archive,
-                    _fileSystem.FatVariant);
+                DirectoryEntry newEntry = new DirectoryEntry(FileSystem.FatOptions, name, FatAttributes.Archive,
+                    FileSystem.FatVariant);
                 newEntry.FirstCluster = 0; // i.e. Zero-length
-                newEntry.CreationTime = _fileSystem.ConvertFromUtc(DateTime.UtcNow);
+                newEntry.CreationTime = FileSystem.ConvertFromUtc(DateTime.UtcNow);
                 newEntry.LastWriteTime = newEntry.CreationTime;
 
                 fileId = AddEntry(newEntry);
 
-                return new FatFileStream(_fileSystem, this, fileId, fileAccess);
+                return new FatFileStream(FileSystem, this, fileId, fileAccess);
             }
-            else
-            {
-                // Should never get here...
-                throw new NotImplementedException();
-            }
+
+            // Should never get here...
+            throw new NotImplementedException();
         }
 
         internal long AddEntry(DirectoryEntry newEntry)
@@ -403,7 +382,7 @@ namespace DiscUtils.Fat
 
                 if (releaseContents)
                 {
-                    _fileSystem.Fat.FreeChain(entry.FirstCluster);
+                    FileSystem.Fat.FreeChain(entry.FirstCluster);
                 }
 
                 _entries.Remove(id);
@@ -413,7 +392,7 @@ namespace DiscUtils.Fat
             }
             finally
             {
-                _fileSystem.Fat.Flush();
+                FileSystem.Fat.Flush();
             }
         }
 
@@ -440,7 +419,7 @@ namespace DiscUtils.Fat
             while (_dirStream.Position < _dirStream.Length)
             {
                 long streamPos = _dirStream.Position;
-                DirectoryEntry entry = new DirectoryEntry(_fileSystem.FatOptions, _dirStream, _fileSystem.FatVariant);
+                DirectoryEntry entry = new DirectoryEntry(FileSystem.FatOptions, _dirStream, FileSystem.FatVariant);
 
                 if (entry.Attributes ==
                     (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
@@ -477,7 +456,7 @@ namespace DiscUtils.Fat
 
         private void HandleAccessed(bool forWrite)
         {
-            if (_fileSystem.CanWrite && _parent != null)
+            if (FileSystem.CanWrite && _parent != null)
             {
                 DateTime now = DateTime.Now;
                 DirectoryEntry entry = SelfEntry;
@@ -507,7 +486,7 @@ namespace DiscUtils.Fat
         {
             // Populate new directory with initial (special) entries.  First one is easy, just change the name!
             using (
-                ClusterStream stream = new ClusterStream(_fileSystem, FileAccess.Write, newEntry.FirstCluster,
+                ClusterStream stream = new ClusterStream(FileSystem, FileAccess.Write, newEntry.FirstCluster,
                     uint.MaxValue))
             {
                 // First is the self-referencing entry...
