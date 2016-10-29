@@ -1,0 +1,50 @@
+{
+  "version": "1.0.3",
+
+  "name": "DiscUtils.OpticalDiscSharing",
+  "title": "DiscUtils.OpticalDiscSharing",
+  "description": "DiscUtils OpticalDiscSharing",
+  "authors": [ "Kenneth Bell" ],
+
+  "packOptions": {
+    "owners": [ "LordMike" ],
+    "tags": [ "DiscUtils", "OpticalDiscSharing" ],
+    "projectUrl": "https://github.com/lordmike/discutils",
+    "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lordmike/discutils"
+    }
+  },
+
+  "dependencies": {
+    "DiscUtils": "1.0.3",
+    "DiscUtils.Net": "1.0.3"
+  },
+
+  "buildOptions": {
+    "publicSign": true,
+    "keyFile": "../../discutils.snk"
+  },
+
+  "frameworks": {
+    "net20": {
+      "frameworkAssemblies": {
+        "System.Xml": "2.0.0.0"
+      },
+      "buildOptions": {
+        "define": [ "NET20" ]
+      }
+    },
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Xml": "4.0.0.0"
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Xml": "4.0.0.0"
+      }
+    }
+  }
+}

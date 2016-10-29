@@ -1,14 +1,14 @@
-{
+﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils",
-  "title": "DiscUtils (for .NET and .NET Core)",
-  "description": "Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. VHD, XVA, VMDK and VDI disk formats are implemented, as well as read/write Registry support. The library also includes a simple iSCSI initiator, for accessing disks via iSCSI and an NFS client implementation.",
-  "authors": [ "Kenneth Bell", "Quamotion", "LordMike" ],
+  "name": "DiscUtils.Sdi",
+  "title": "DiscUtils.Sdi",
+  "description": "DiscUtils Sdi",
+  "authors": [ "Kenneth Bell" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "VHD", "VDI", "XVA", "VMDK", "ISO", "NTFS", "EXT2FS" ],
+    "tags": [ "DiscUtils", "Sdi" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {
@@ -18,13 +18,12 @@
   },
 
   "dependencies": {
-
+    "DiscUtils": "1.0.3"
   },
 
   "buildOptions": {
     "publicSign": true,
-    "keyFile": "../../discutils.snk",
-    "xmlDoc": true
+    "keyFile": "../../discutils.snk"
   },
 
   "frameworks": {

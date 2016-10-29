@@ -30,6 +30,7 @@
     "DiscUtils.Ntfs": "1.0.3",
     "DiscUtils.OpticalDisk": "1.0.3",
     "DiscUtils.Registry": "1.0.3",
+    "DiscUtils.Sdi": "1.0.3",
     "DiscUtils.SquashFs": "1.0.3",
     "DiscUtils.Udf": "1.0.3",
     "DiscUtils.Vdi": "1.0.3",
@@ -83,7 +84,8 @@
         "System.Xml": "2.0.0.0"
       },
       "dependencies": {
-        "DiscUtils.Net": "1.0.3"
+        "DiscUtils.Net": "1.0.3",
+        "DiscUtils.OpticalDiscSharing": "1.0.3"
       },
       "buildOptions": {
         "define": [ "NET20" ]
@@ -91,7 +93,8 @@
     },
     "net40": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3"
+        "DiscUtils.Net": "1.0.3",
+        "DiscUtils.OpticalDiscSharing": "1.0.3"
       },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
@@ -99,7 +102,8 @@
     },
     "net45": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3"
+        "DiscUtils.Net": "1.0.3",
+        "DiscUtils.OpticalDiscSharing": "1.0.3"
       },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"

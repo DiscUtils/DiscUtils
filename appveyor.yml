@@ -29,9 +29,13 @@ build_script:
 
     dotnet restore Library\DiscUtils.Ntfs
 
+    dotnet restore Library\DiscUtils.OpticalDiscSharing
+
     dotnet restore Library\DiscUtils.OpticalDisk
 
     dotnet restore Library\DiscUtils.Registry
+
+    dotnet restore Library\DiscUtils.Sdi
 
     dotnet restore Library\DiscUtils.SquashFs
 
@@ -76,9 +80,13 @@ build_script:
 
     dotnet build -c Release Library\DiscUtils.Ntfs
 
+    dotnet build -c Release Library\DiscUtils.OpticalDiscSharing
+
     dotnet build -c Release Library\DiscUtils.OpticalDisk
 
     dotnet build -c Release Library\DiscUtils.Registry
+
+    dotnet build -c Release Library\DiscUtils.Sdi
 
     dotnet build -c Release Library\DiscUtils.SquashFs
 
