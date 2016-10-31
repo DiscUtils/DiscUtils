@@ -41,7 +41,8 @@
         "System.Runtime.InteropServices": "4.1.0",
         "System.Security.AccessControl": "4.0.0",
         "System.Text.RegularExpressions": "4.1.0",
-        "System.Xml.XmlDocument": "4.0.1"
+        "System.Xml.XmlDocument": "4.0.1",
+        "System.Threading": "4.0.11" 
       },
       "buildOptions": {
         "define": [ "NETCORE" ]
