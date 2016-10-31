@@ -139,11 +139,11 @@ build_script:
 
     dotnet restore Utilities\ISOCreate
 
-    REM dotnet restore Utilities\MSBuildTask
+    dotnet restore Utilities\MSBuildTask
 
     dotnet restore Utilities\NTFSDump
 
-    REM dotnet restore Utilities\ODSBrowse
+    dotnet restore Utilities\ODSBrowse
 
     dotnet restore Utilities\OSClone
 
@@ -182,11 +182,11 @@ build_script:
 
     dotnet build -c Release Utilities\ISOCreate
 
-    REM dotnet build -c Release Utilities\MSBuildTask
+    dotnet build -c Release Utilities\MSBuildTask
 
     dotnet build -c Release Utilities\NTFSDump
 
-    REM dotnet build -c Release Utilities\ODSBrowse
+    dotnet build -c Release Utilities\ODSBrowse
 
     dotnet build -c Release Utilities\OSClone
 
