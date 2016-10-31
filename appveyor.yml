@@ -58,59 +58,59 @@ build_script:
     dotnet restore Library\DiscUtils.Xva
 
 
-    dotnet build -c Release Library\DiscUtils
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils
 
-    dotnet build -c Release Library\DiscUtils.BootConfig
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.BootConfig
 
-    dotnet build -c Release Library\DiscUtils.Complete
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Complete
 
-    dotnet build -c Release Library\DiscUtils.Containers
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Containers
 
-    dotnet build -c Release Library\DiscUtils.Dmg
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Dmg
 
-    dotnet build -c Release Library\DiscUtils.Ext
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ext
 
-    dotnet build -c Release Library\DiscUtils.Fat
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Fat
 
-    dotnet build -c Release Library\DiscUtils.FileSystems
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.FileSystems
 
-    dotnet build -c Release Library\DiscUtils.HfsPlus
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.HfsPlus
 
-    dotnet build -c Release Library\DiscUtils.Iscsi
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iscsi
 
-    dotnet build -c Release Library\DiscUtils.Iso9660
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iso9660
 
-    dotnet build -c Release Library\DiscUtils.Net
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Net
 
-    dotnet build -c Release Library\DiscUtils.Nfs
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Nfs
 
-    dotnet build -c Release Library\DiscUtils.Ntfs
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ntfs
 
-    dotnet build -c Release Library\DiscUtils.OpticalDiscSharing
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDiscSharing
 
-    dotnet build -c Release Library\DiscUtils.OpticalDisk
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDisk
 
-    dotnet build -c Release Library\DiscUtils.Registry
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Registry
 
-    dotnet build -c Release Library\DiscUtils.Sdi
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Sdi
 
-    dotnet build -c Release Library\DiscUtils.SquashFs
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.SquashFs
 
-    dotnet build -c Release Library\DiscUtils.Transports
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Transports
 
-    dotnet build -c Release Library\DiscUtils.Udf
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Udf
 
-    dotnet build -c Release Library\DiscUtils.Vdi
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vdi
 
-    dotnet build -c Release Library\DiscUtils.Vhd
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhd
 
-    dotnet build -c Release Library\DiscUtils.Vhdx
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhdx
 
-    dotnet build -c Release Library\DiscUtils.Vmdk
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vmdk
 
-    dotnet build -c Release Library\DiscUtils.Wim
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Wim
 
-    dotnet build -c Release Library\DiscUtils.Xva
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Xva
 
 
     REM Utilities
@@ -208,58 +208,5 @@ build_script:
     dotnet build -c Release Tests\LibraryTests
 test_script:
 - cmd: dotnet test -c Release Tests\LibraryTests
-deploy_script:
-- cmd: >-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.BootConfig
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Complete
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Containers
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Dmg
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ext
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Fat
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.FileSystems
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.HfsPlus
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iscsi
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iso9660
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Net
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Nfs
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ntfs
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDiscSharing
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDisk
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Registry
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Sdi
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.SquashFs
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Transports
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Udf
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vdi
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhd
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhdx
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vmdk
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Wim
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Xva
+artifacts:
+- path: Nuget\*.nupkg
