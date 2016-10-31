@@ -36,9 +36,6 @@ namespace DiscUtils.Partitions
     /// streams only when a client of this class tries to read from
     /// that partition.
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
-         "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable",
-         Justification = "SparseMemoryStream holds no resources")]
     public class BiosPartitionedDiskBuilder : StreamBuilder
     {
         private long _capacity;
