@@ -6,6 +6,7 @@ obj/
 *.lock.json
 
 .vs/
+Nuget/
 
 # Tests
 TestResult.xml
