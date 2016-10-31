@@ -1,14 +1,13 @@
 ﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.HfsPlus",
   "title": "DiscUtils.HfsPlus",
-  "description": "DiscUtils Hfs+",
-  "authors": [ "Kenneth Bell" ],
+  "description": "DiscUtils Hfs+ filesystem parser",
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "Hfs+", "HfsPlus" ],
+    "tags": [ "DiscUtils", "Filesystem", "Hfs+", "HfsPlus" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {

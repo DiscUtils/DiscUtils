@@ -1,10 +1,9 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.OpticalDiscSharing",
   "title": "DiscUtils.OpticalDiscSharing",
   "description": "DiscUtils OpticalDiscSharing",
-  "authors": [ "Kenneth Bell" ],
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],

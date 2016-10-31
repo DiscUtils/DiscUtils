@@ -1,10 +1,9 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.Net",
   "title": "DiscUtils.Net",
   "description": "DiscUtils NET",
-  "authors": [ "Kenneth Bell" ],
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],

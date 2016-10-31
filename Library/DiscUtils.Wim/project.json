@@ -1,10 +1,9 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.Wim",
   "title": "DiscUtils.Wim",
   "description": "DiscUtils WIM",
-  "authors": [ "Kenneth Bell" ],
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],

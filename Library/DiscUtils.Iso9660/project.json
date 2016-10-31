@@ -1,10 +1,9 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.Iso9660",
   "title": "DiscUtils.Iso9660",
   "description": "DiscUtils Iso9660",
-  "authors": [ "Kenneth Bell" ],
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],

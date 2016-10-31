@@ -1,14 +1,13 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.Fat",
   "title": "DiscUtils.Fat",
-  "description": "DiscUtils FAT",
-  "authors": [ "Kenneth Bell" ],
+  "description": "DiscUtils FAT filesystem parser",
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "FAT" ],
+    "tags": [ "DiscUtils", "Filesystem", "FAT" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {

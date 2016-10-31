@@ -1,14 +1,13 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.Ntfs",
   "title": "DiscUtils.Ntfs",
-  "description": "DiscUtils NTFS",
-  "authors": [ "Kenneth Bell" ],
+  "description": "DiscUtils NTFS filesystem parser",
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "NTFS" ],
+    "tags": [ "DiscUtils", "Filesystem", "NTFS" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {

@@ -1,10 +1,9 @@
 {
   "version": "1.0.3",
 
-  "name": "DiscUtils.OpticalDisk",
   "title": "DiscUtils.OpticalDisk",
   "description": "DiscUtils OpticalDisk",
-  "authors": [ "Kenneth Bell" ],
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],

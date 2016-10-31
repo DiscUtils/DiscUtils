@@ -1,10 +1,9 @@
 ﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.Nfs",
   "title": "DiscUtils.Nfs",
   "description": "DiscUtils Nfs",
-  "authors": [ "Kenneth Bell" ],
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],

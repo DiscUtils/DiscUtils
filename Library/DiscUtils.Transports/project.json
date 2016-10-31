@@ -1,14 +1,13 @@
 ﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.Transports",
   "title": "DiscUtils.Transports",
-  "description": "DiscUtils, meta-package with transports",
-  "authors": [ "Kenneth Bell" ],
+  "description": "DiscUtils, meta-package with transports, such as iSCSI and NFS",
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils" ],
+    "tags": [ "DiscUtils", "iSCSI", "NFS" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {

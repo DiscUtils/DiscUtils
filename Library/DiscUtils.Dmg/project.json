@@ -1,14 +1,13 @@
 ﻿{
   "version": "1.0.3",
 
-  "name": "DiscUtils.Dmg",
   "title": "DiscUtils.Dmg",
-  "description": "DiscUtils Dmg",
-  "authors": [ "Kenneth Bell" ],
+  "description": "DiscUtils dmg parser. Works with apple disk (.dmg) files",
+  "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
     "owners": [ "LordMike" ],
-    "tags": [ "DiscUtils", "Dmg" ],
+    "tags": [ "DiscUtils", "dmg" ],
     "projectUrl": "https://github.com/lordmike/discutils",
     "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
     "repository": {
