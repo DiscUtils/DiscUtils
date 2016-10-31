@@ -29,11 +29,22 @@
 
   "frameworks": {
     "net20": {
+      "frameworkAssemblies": {
+        "System.Xml": "2.0.0.0"
+      },
       "buildOptions": {
         "define": [ "NET20" ]
       }
     },
-    "net40": { },
-    "net45": { }
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Xml": "4.0.0.0"
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Xml": "4.0.0.0"
+      }
+    }
   }
 }
