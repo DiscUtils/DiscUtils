@@ -115,3 +115,7 @@ test_script:
 - cmd: dotnet test -c Release Tests\LibraryTests
 artifacts:
 - path: Nuget\*.nupkg
+deploy:
+- provider: NuGet
+  api_key:
+    secure: dgfUEGXULcqCTyNcS6UEDK8BCBi8y+M2+d4IFjnb3Gf9DqV34fMSp1XjxJg2AVRC
