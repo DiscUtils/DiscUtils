@@ -3,59 +3,8 @@ build_script:
 - cmd: >-
     REM Core
 
-    dotnet restore Library\DiscUtils
+    dotnet restore
 
-    dotnet restore Library\DiscUtils.BootConfig
-
-    dotnet restore Library\DiscUtils.Complete
-
-    dotnet restore Library\DiscUtils.Containers
-
-    dotnet restore Library\DiscUtils.Dmg
-
-    dotnet restore Library\DiscUtils.Ext
-
-    dotnet restore Library\DiscUtils.Fat
-
-    dotnet restore Library\DiscUtils.FileSystems
-
-    dotnet restore Library\DiscUtils.HfsPlus
-
-    dotnet restore Library\DiscUtils.Iscsi
-
-    dotnet restore Library\DiscUtils.Iso9660
-
-    dotnet restore Library\DiscUtils.Net
-
-    dotnet restore Library\DiscUtils.Nfs
-
-    dotnet restore Library\DiscUtils.Ntfs
-
-    dotnet restore Library\DiscUtils.OpticalDiscSharing
-
-    dotnet restore Library\DiscUtils.OpticalDisk
-
-    dotnet restore Library\DiscUtils.Registry
-
-    dotnet restore Library\DiscUtils.Sdi
-
-    dotnet restore Library\DiscUtils.SquashFs
-
-    dotnet restore Library\DiscUtils.Transports
-
-    dotnet restore Library\DiscUtils.Udf
-
-    dotnet restore Library\DiscUtils.Vdi
-
-    dotnet restore Library\DiscUtils.Vhd
-
-    dotnet restore Library\DiscUtils.Vhdx
-
-    dotnet restore Library\DiscUtils.Vmdk
-
-    dotnet restore Library\DiscUtils.Wim
-
-    dotnet restore Library\DiscUtils.Xva
 
 
     dotnet pack -c Release -o Nuget\ Library\DiscUtils
@@ -113,50 +62,8 @@ build_script:
     dotnet pack -c Release -o Nuget\ Library\DiscUtils.Xva
 
 
+
     REM Utilities
-
-    dotnet restore Utilities\BCDDump
-
-    dotnet restore Utilities\DiscUtils.Common
-
-    dotnet restore Utilities\DiscUtils.Diagnostics
-
-    dotnet restore Utilities\DiscUtils.PowerShell
-
-    dotnet restore Utilities\DiskClone
-
-    dotnet restore Utilities\DiskDump
-
-    dotnet restore Utilities\DmgExtract
-
-    dotnet restore Utilities\ExternalFileSystem
-
-    dotnet restore Utilities\FileExtract
-
-    dotnet restore Utilities\FileRecover
-
-    dotnet restore Utilities\iSCSIBrowse
-
-    dotnet restore Utilities\ISOCreate
-
-    dotnet restore Utilities\MSBuildTask
-
-    dotnet restore Utilities\NTFSDump
-
-    dotnet restore Utilities\ODSBrowse
-
-    dotnet restore Utilities\OSClone
-
-    dotnet restore Utilities\VHDCreate
-
-    dotnet restore Utilities\VHDDump
-
-    dotnet restore Utilities\VHDXDump
-
-    dotnet restore Utilities\VirtualDiskConvert
-
-    dotnet restore Utilities\VolInfo
-
 
     dotnet build -c Release Utilities\BCDDump
 
@@ -202,8 +109,6 @@ build_script:
 
 
     REM Tests
-
-    dotnet restore Tests\LibraryTests
 
     dotnet build -c Release Tests\LibraryTests
 test_script:
