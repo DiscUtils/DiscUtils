@@ -4,10 +4,10 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.*",
+    "LordMike.DiscUtils": "1.*",
     "DiscUtils.Common": "1.0.0-*",
-    "DiscUtils.Complete": "1.0.3",
-    "DiscUtils.FileSystems": "1.0.3",
+    "LordMike.DiscUtils.Complete": "1.0.3",
+    "LordMike.DiscUtils.FileSystems": "1.0.3",
     "System.Management.Automation": "6.1.7601.17515"
   },
 

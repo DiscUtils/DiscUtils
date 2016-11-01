@@ -1,7 +1,7 @@
 ﻿{
   "version": "1.0.3",
 
-  "title": "DiscUtils.HfsPlus",
+  "title": "LordMike.DiscUtils.HfsPlus",
   "description": "DiscUtils Hfs+ filesystem parser",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,7 +17,7 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3"
   },
 
   "buildOptions": {

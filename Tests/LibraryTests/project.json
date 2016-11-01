@@ -7,9 +7,9 @@
   "dependencies": {
     "NUnit": "3.4.1",
     "dotnet-test-nunit": "3.4.0-beta-2",
-    "DiscUtils": "1.*",
+    "LordMike.DiscUtils": "1.*",
     "DiscUtils.Diagnostics": "1.0.0-*",
-    "DiscUtils.Complete": "1.0.3"
+    "LordMike.DiscUtils.Complete": "1.0.3"
   },
   "frameworks": {
     "net451": {

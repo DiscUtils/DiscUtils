@@ -1,7 +1,7 @@
 {
   "version": "1.0.3",
 
-  "title": "DiscUtils.OpticalDiscSharing",
+  "title": "LordMike.DiscUtils.OpticalDiscSharing",
   "description": "DiscUtils OpticalDiscSharing",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,8 +17,8 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3",
-    "DiscUtils.Net": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3",
+    "LordMike.DiscUtils.Net": "1.0.3"
   },
 
   "buildOptions": {

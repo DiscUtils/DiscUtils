@@ -1,7 +1,7 @@
 ﻿{
   "version": "1.0.3",
 
-  "title": "DiscUtils.Dmg",
+  "title": "LordMike.DiscUtils.Dmg",
   "description": "DiscUtils dmg parser. Works with apple disk (.dmg) files",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,7 +17,7 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3"
   },
 
   "buildOptions": {

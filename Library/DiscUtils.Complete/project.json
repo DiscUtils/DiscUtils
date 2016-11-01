@@ -1,7 +1,7 @@
 {
   "version": "1.0.3",
 
-  "title": "DiscUtils.Complete",
+  "title": "LordMike.DiscUtils.Complete",
   "description": "DiscUtils, complete meta-package",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,27 +17,27 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3",
-    "DiscUtils.BootConfig": "1.0.3",
-    "DiscUtils.Dmg": "1.0.3",
-    "DiscUtils.Ext": "1.0.3",
-    "DiscUtils.Fat": "1.0.3",
-    "DiscUtils.HfsPlus": "1.0.3",
-    "DiscUtils.Iscsi": "1.0.3",
-    "DiscUtils.Iso9660": "1.0.3",
-    "DiscUtils.Nfs": "1.0.3",
-    "DiscUtils.Ntfs": "1.0.3",
-    "DiscUtils.OpticalDisk": "1.0.3",
-    "DiscUtils.Registry": "1.0.3",
-    "DiscUtils.Sdi": "1.0.3",
-    "DiscUtils.SquashFs": "1.0.3",
-    "DiscUtils.Udf": "1.0.3",
-    "DiscUtils.Vdi": "1.0.3",
-    "DiscUtils.Vhd": "1.0.3",
-    "DiscUtils.Vhdx": "1.0.3",
-    "DiscUtils.Vmdk": "1.0.3",
-    "DiscUtils.Wim": "1.0.3",
-    "DiscUtils.Xva": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3",
+    "LordMike.DiscUtils.BootConfig": "1.0.3",
+    "LordMike.DiscUtils.Dmg": "1.0.3",
+    "LordMike.DiscUtils.Ext": "1.0.3",
+    "LordMike.DiscUtils.Fat": "1.0.3",
+    "LordMike.DiscUtils.HfsPlus": "1.0.3",
+    "LordMike.DiscUtils.Iscsi": "1.0.3",
+    "LordMike.DiscUtils.Iso9660": "1.0.3",
+    "LordMike.DiscUtils.Nfs": "1.0.3",
+    "LordMike.DiscUtils.Ntfs": "1.0.3",
+    "LordMike.DiscUtils.OpticalDisk": "1.0.3",
+    "LordMike.DiscUtils.Registry": "1.0.3",
+    "LordMike.DiscUtils.Sdi": "1.0.3",
+    "LordMike.DiscUtils.SquashFs": "1.0.3",
+    "LordMike.DiscUtils.Udf": "1.0.3",
+    "LordMike.DiscUtils.Vdi": "1.0.3",
+    "LordMike.DiscUtils.Vhd": "1.0.3",
+    "LordMike.DiscUtils.Vhdx": "1.0.3",
+    "LordMike.DiscUtils.Vmdk": "1.0.3",
+    "LordMike.DiscUtils.Wim": "1.0.3",
+    "LordMike.DiscUtils.Xva": "1.0.3"
   },
 
   "buildOptions": {
@@ -53,8 +53,8 @@
     },
     "net20": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3",
-        "DiscUtils.OpticalDiscSharing": "1.0.3"
+        "LordMike.DiscUtils.Net": "1.0.3",
+        "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
       },
       "buildOptions": {
         "define": [ "NET20" ]
@@ -62,14 +62,14 @@
     },
     "net40": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3",
-        "DiscUtils.OpticalDiscSharing": "1.0.3"
+        "LordMike.DiscUtils.Net": "1.0.3",
+        "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
       }
     },
     "net45": {
       "dependencies": {
-        "DiscUtils.Net": "1.0.3",
-        "DiscUtils.OpticalDiscSharing": "1.0.3"
+        "LordMike.DiscUtils.Net": "1.0.3",
+        "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
       }
     }
   }

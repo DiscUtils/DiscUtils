@@ -5,10 +5,10 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.*",
-    "DiscUtils.BootConfig": "1.0.3",
+    "LordMike.DiscUtils": "1.*",
+    "LordMike.DiscUtils.BootConfig": "1.0.3",
     "DiscUtils.Common": "1.0.0-*",
-    "DiscUtils.Registry": "1.0.3"
+    "LordMike.DiscUtils.Registry": "1.0.3"
   },
 
   "frameworks": {

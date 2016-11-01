@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{94C9C1CB-7CD2-4327-AEC0-DDE375C85CEF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils", "Library\DiscUtils\DiscUtils.xproj", "{1D40DF20-B233-4A06-965D-60C37410234D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils", "Library\LordMike.DiscUtils\LordMike.DiscUtils.xproj", "{1D40DF20-B233-4A06-965D-60C37410234D}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Common", "Utilities\DiscUtils.Common\DiscUtils.Common.xproj", "{17D2A977-E3C8-4492-9B56-548D51A38B00}"
 EndProject
@@ -60,57 +60,57 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "VolInfo", "Utilities\VolInf
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LibraryTests", "Tests\LibraryTests\LibraryTests.xproj", "{772C6E51-8C0F-4C8C-8025-DF81BF6FB06A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Ntfs", "Library\DiscUtils.Ntfs\DiscUtils.Ntfs.xproj", "{9095333E-08E4-4C13-B556-20B5FDB9DB2A}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Ntfs", "Library\LordMike.DiscUtils.Ntfs\LordMike.DiscUtils.Ntfs.xproj", "{9095333E-08E4-4C13-B556-20B5FDB9DB2A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Fat", "Library\DiscUtils.Fat\DiscUtils.Fat.xproj", "{300CB5E3-4B67-4CB9-95E7-B90063B517A2}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Fat", "Library\LordMike.DiscUtils.Fat\LordMike.DiscUtils.Fat.xproj", "{300CB5E3-4B67-4CB9-95E7-B90063B517A2}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Vhdx", "Library\DiscUtils.Vhdx\DiscUtils.Vhdx.xproj", "{C4E9425C-28E1-4DBF-9BF9-3303934D99BF}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Vhdx", "Library\LordMike.DiscUtils.Vhdx\LordMike.DiscUtils.Vhdx.xproj", "{C4E9425C-28E1-4DBF-9BF9-3303934D99BF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Vhd", "Library\DiscUtils.Vhd\DiscUtils.Vhd.xproj", "{635513F8-0DBD-40DA-A903-6A8060141355}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Vhd", "Library\LordMike.DiscUtils.Vhd\LordMike.DiscUtils.Vhd.xproj", "{635513F8-0DBD-40DA-A903-6A8060141355}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Xva", "Library\DiscUtils.Xva\DiscUtils.Xva.xproj", "{66E1DB18-1109-470D-9D34-8F0535B868CC}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Xva", "Library\LordMike.DiscUtils.Xva\LordMike.DiscUtils.Xva.xproj", "{66E1DB18-1109-470D-9D34-8F0535B868CC}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Wim", "Library\DiscUtils.Wim\DiscUtils.Wim.xproj", "{0B5D5BAB-1078-438B-BE35-B8792DCED8D3}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Wim", "Library\LordMike.DiscUtils.Wim\LordMike.DiscUtils.Wim.xproj", "{0B5D5BAB-1078-438B-BE35-B8792DCED8D3}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Net", "Library\DiscUtils.Net\DiscUtils.Net.xproj", "{129A4AB8-DD5A-4649-9444-BECF9A744576}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Net", "Library\LordMike.DiscUtils.Net\LordMike.DiscUtils.Net.xproj", "{129A4AB8-DD5A-4649-9444-BECF9A744576}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Vmdk", "Library\DiscUtils.Vmdk\DiscUtils.Vmdk.xproj", "{F258C8A8-FCC6-4FB9-977F-E1153F29FF60}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Vmdk", "Library\LordMike.DiscUtils.Vmdk\LordMike.DiscUtils.Vmdk.xproj", "{F258C8A8-FCC6-4FB9-977F-E1153F29FF60}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Udf", "Library\DiscUtils.Udf\DiscUtils.Udf.xproj", "{8DDA2119-BDFC-4497-8FC2-F5BA40351CD5}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Udf", "Library\LordMike.DiscUtils.Udf\LordMike.DiscUtils.Udf.xproj", "{8DDA2119-BDFC-4497-8FC2-F5BA40351CD5}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.OpticalDisk", "Library\DiscUtils.OpticalDisk\DiscUtils.OpticalDisk.xproj", "{CBA7EC9A-05F6-4A5A-B759-467042EDC61C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.OpticalDisk", "Library\LordMike.DiscUtils.OpticalDisk\LordMike.DiscUtils.OpticalDisk.xproj", "{CBA7EC9A-05F6-4A5A-B759-467042EDC61C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Iso9660", "Library\DiscUtils.Iso9660\DiscUtils.Iso9660.xproj", "{1C0DD4D8-3DB3-4630-8253-EA8566686225}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Iso9660", "Library\LordMike.DiscUtils.Iso9660\LordMike.DiscUtils.Iso9660.xproj", "{1C0DD4D8-3DB3-4630-8253-EA8566686225}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Complete", "Library\DiscUtils.Complete\DiscUtils.Complete.xproj", "{B32B821C-E6AA-4B26-8721-4CCE98C4180D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Complete", "Library\LordMike.DiscUtils.Complete\LordMike.DiscUtils.Complete.xproj", "{B32B821C-E6AA-4B26-8721-4CCE98C4180D}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.FileSystems", "Library\DiscUtils.FileSystems\DiscUtils.FileSystems.xproj", "{502B3303-640C-4176-9EB6-D48065B74D1C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.FileSystems", "Library\LordMike.DiscUtils.FileSystems\LordMike.DiscUtils.FileSystems.xproj", "{502B3303-640C-4176-9EB6-D48065B74D1C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.SquashFs", "Library\DiscUtils.SquashFs\DiscUtils.SquashFs.xproj", "{15CF6728-7415-4B35-89B7-AC4B2397AB87}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.SquashFs", "Library\LordMike.DiscUtils.SquashFs\LordMike.DiscUtils.SquashFs.xproj", "{15CF6728-7415-4B35-89B7-AC4B2397AB87}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.HfsPlus", "Library\DiscUtils.HfsPlus\DiscUtils.HfsPlus.xproj", "{44F65897-A810-44E0-87C8-A27EDB7F660E}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.HfsPlus", "Library\LordMike.DiscUtils.HfsPlus\LordMike.DiscUtils.HfsPlus.xproj", "{44F65897-A810-44E0-87C8-A27EDB7F660E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Vdi", "Library\DiscUtils.Vdi\DiscUtils.Vdi.xproj", "{18C1D083-9326-4C11-B6BA-E05AD54FAC88}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Vdi", "Library\LordMike.DiscUtils.Vdi\LordMike.DiscUtils.Vdi.xproj", "{18C1D083-9326-4C11-B6BA-E05AD54FAC88}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Ext", "Library\DiscUtils.Ext\DiscUtils.Ext.xproj", "{122743CF-4C7F-4B1B-8D45-D9F3264221EA}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Ext", "Library\LordMike.DiscUtils.Ext\LordMike.DiscUtils.Ext.xproj", "{122743CF-4C7F-4B1B-8D45-D9F3264221EA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Iscsi", "Library\DiscUtils.Iscsi\DiscUtils.Iscsi.xproj", "{125BEE92-28AA-4812-B624-5BEEFC3539F3}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Iscsi", "Library\LordMike.DiscUtils.Iscsi\LordMike.DiscUtils.Iscsi.xproj", "{125BEE92-28AA-4812-B624-5BEEFC3539F3}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.BootConfig", "Library\DiscUtils.BootConfig\DiscUtils.BootConfig.xproj", "{234CBDA1-361F-4D60-81C2-48860C181036}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.BootConfig", "Library\LordMike.DiscUtils.BootConfig\LordMike.DiscUtils.BootConfig.xproj", "{234CBDA1-361F-4D60-81C2-48860C181036}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Registry", "Library\DiscUtils.Registry\DiscUtils.Registry.xproj", "{BD86E3F8-850F-4F99-A387-1096505C3F39}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Registry", "Library\LordMike.DiscUtils.Registry\LordMike.DiscUtils.Registry.xproj", "{BD86E3F8-850F-4F99-A387-1096505C3F39}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Nfs", "Library\DiscUtils.Nfs\DiscUtils.Nfs.xproj", "{8EF4E7A9-7E9C-4C7C-A8A1-CFC49B139441}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Nfs", "Library\LordMike.DiscUtils.Nfs\LordMike.DiscUtils.Nfs.xproj", "{8EF4E7A9-7E9C-4C7C-A8A1-CFC49B139441}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Dmg", "Library\DiscUtils.Dmg\DiscUtils.Dmg.xproj", "{EEC95FF7-8906-4A7D-BE8C-7D7374B31A0E}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Dmg", "Library\LordMike.DiscUtils.Dmg\LordMike.DiscUtils.Dmg.xproj", "{EEC95FF7-8906-4A7D-BE8C-7D7374B31A0E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Sdi", "Library\DiscUtils.Sdi\DiscUtils.Sdi.xproj", "{7BA86AD5-108C-41AC-A970-48589B0C2988}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Sdi", "Library\LordMike.DiscUtils.Sdi\LordMike.DiscUtils.Sdi.xproj", "{7BA86AD5-108C-41AC-A970-48589B0C2988}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.OpticalDiscSharing", "Library\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.xproj", "{C65D14F5-2423-4CED-B741-68FAAAE6208A}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.OpticalDiscSharing", "Library\LordMike.DiscUtils.OpticalDiscSharing\LordMike.DiscUtils.OpticalDiscSharing.xproj", "{C65D14F5-2423-4CED-B741-68FAAAE6208A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Transports", "Library\DiscUtils.Transports\DiscUtils.Transports.xproj", "{385E6192-2A33-4E4A-BE2D-5002656308BE}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Transports", "Library\LordMike.DiscUtils.Transports\LordMike.DiscUtils.Transports.xproj", "{385E6192-2A33-4E4A-BE2D-5002656308BE}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DiscUtils.Containers", "Library\DiscUtils.Containers\DiscUtils.Containers.xproj", "{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LordMike.DiscUtils.Containers", "Library\LordMike.DiscUtils.Containers\LordMike.DiscUtils.Containers.xproj", "{63D52295-322F-4FFA-86B0-3BFC1A9E4C08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

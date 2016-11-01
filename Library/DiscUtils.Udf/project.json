@@ -1,7 +1,7 @@
 {
   "version": "1.0.3",
 
-  "title": "DiscUtils.Udf",
+  "title": "LordMike.DiscUtils.Udf",
   "description": "DiscUtils UDF filesystem parser.",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,8 +17,8 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3",
-    "DiscUtils.Iso9660": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3",
+    "LordMike.DiscUtils.Iso9660": "1.0.3"
   },
 
   "buildOptions": {

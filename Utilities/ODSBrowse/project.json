@@ -5,9 +5,9 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3",
+    "LordMike.DiscUtils": "1.0.3",
     "DiscUtils.Common": "1.0.0-*",
-    "DiscUtils.OpticalDiscSharing": "1.0.3"
+    "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
   },
 
   "frameworks": {

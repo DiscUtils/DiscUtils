@@ -4,7 +4,7 @@
     "debugType": "portable"
   },
   "dependencies": {
-    "DiscUtils": "1.*"
+    "LordMike.DiscUtils": "1.*"
   },
   "frameworks": {
     "net40": {

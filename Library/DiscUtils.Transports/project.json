@@ -1,7 +1,7 @@
 ﻿{
   "version": "1.0.3",
 
-  "title": "DiscUtils.Transports",
+  "title": "LordMike.DiscUtils.Transports",
   "description": "DiscUtils, meta-package with transports, such as iSCSI and NFS",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,10 +17,10 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3",
-    "DiscUtils.Iscsi": "1.0.3",
-    "DiscUtils.Nfs": "1.0.3",
-    "DiscUtils.OpticalDisk": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3",
+    "LordMike.DiscUtils.Iscsi": "1.0.3",
+    "LordMike.DiscUtils.Nfs": "1.0.3",
+    "LordMike.DiscUtils.OpticalDisk": "1.0.3"
   },
 
   "buildOptions": {

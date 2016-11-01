@@ -1,7 +1,7 @@
 {
   "version": "1.0.3",
 
-  "title": "DiscUtils.Iso9660",
+  "title": "LordMike.DiscUtils.Iso9660",
   "description": "DiscUtils Iso9660",
   "authors": [ "Kenneth Bell", "LordMike" ],
 
@@ -17,7 +17,7 @@
   },
 
   "dependencies": {
-    "DiscUtils": "1.0.3"
+    "LordMike.DiscUtils": "1.0.3"
   },
 
   "buildOptions": {
