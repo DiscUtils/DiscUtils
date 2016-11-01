@@ -29,7 +29,7 @@
 
   "buildOptions": {
     "publicSign": true,
-    "keyFile": "../../discutils.snk"
+    "keyFile": "../../SigningKey.snk"
   },
 
   "frameworks": {
