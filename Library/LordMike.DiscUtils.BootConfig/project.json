@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.3",
+  "version": "0.12.0-alpha",
 
   "title": "LordMike.DiscUtils.BootConfig",
   "description": "DiscUtils BootConfig parser",
@@ -17,8 +17,8 @@
   },
 
   "dependencies": {
-    "LordMike.DiscUtils": "1.0.3",
-    "LordMike.DiscUtils.Registry": "1.0.3"
+    "LordMike.DiscUtils": "0.12.0-alpha",
+    "LordMike.DiscUtils.Registry": "0.12.0-alpha"
   },
 
   "buildOptions": {

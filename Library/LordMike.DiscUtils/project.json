@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "0.12.0-alpha",
 
   "title": "DiscUtils (for .NET and .NET Core), core library that supports parts of DiscUtils",
   "description": "Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. VHD, XVA, VMDK and VDI disk formats are implemented, as well as read/write Registry support. The library also includes a simple iSCSI initiator, for accessing disks via iSCSI and an NFS client implementation.",

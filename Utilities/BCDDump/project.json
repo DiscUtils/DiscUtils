@@ -6,9 +6,9 @@
 
   "dependencies": {
     "LordMike.DiscUtils": "1.*",
-    "LordMike.DiscUtils.BootConfig": "1.0.3",
+    "LordMike.DiscUtils.BootConfig": "0.12.0-alpha",
     "DiscUtils.Common": "1.0.0-*",
-    "LordMike.DiscUtils.Registry": "1.0.3"
+    "LordMike.DiscUtils.Registry": "0.12.0-alpha"
   },
 
   "frameworks": {

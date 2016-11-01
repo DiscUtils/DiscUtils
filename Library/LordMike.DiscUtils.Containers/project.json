@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.3",
+  "version": "0.12.0-alpha",
 
   "title": "LordMike.DiscUtils.Containers",
   "description": "DiscUtils, meta-package with container formats such as WIM, DMG, VHD, VHDX, XVA, VMDK",
@@ -17,14 +17,14 @@
   },
 
   "dependencies": {
-    "LordMike.DiscUtils": "1.0.3",
-    "LordMike.DiscUtils.Dmg": "1.0.3",
-    "LordMike.DiscUtils.Iso9660": "1.0.3",
-    "LordMike.DiscUtils.Vhd": "1.0.3",
-    "LordMike.DiscUtils.Vhdx": "1.0.3",
-    "LordMike.DiscUtils.Vmdk": "1.0.3",
-    "LordMike.DiscUtils.Wim": "1.0.3",
-    "LordMike.DiscUtils.Xva": "1.0.3"
+    "LordMike.DiscUtils": "0.12.0-alpha",
+    "LordMike.DiscUtils.Dmg": "0.12.0-alpha",
+    "LordMike.DiscUtils.Iso9660": "0.12.0-alpha",
+    "LordMike.DiscUtils.Vhd": "0.12.0-alpha",
+    "LordMike.DiscUtils.Vhdx": "0.12.0-alpha",
+    "LordMike.DiscUtils.Vmdk": "0.12.0-alpha",
+    "LordMike.DiscUtils.Wim": "0.12.0-alpha",
+    "LordMike.DiscUtils.Xva": "0.12.0-alpha"
   },
 
   "buildOptions": {
@@ -40,8 +40,8 @@
     },
     "net20": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "1.0.3",
-        "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
+        "LordMike.DiscUtils.Net": "0.12.0-alpha",
+        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
       },
       "buildOptions": {
         "define": [ "NET20" ]
@@ -49,14 +49,14 @@
     },
     "net40": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "1.0.3",
-        "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
+        "LordMike.DiscUtils.Net": "0.12.0-alpha",
+        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
       }
     },
     "net45": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "1.0.3",
-        "LordMike.DiscUtils.OpticalDiscSharing": "1.0.3"
+        "LordMike.DiscUtils.Net": "0.12.0-alpha",
+        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
       }
     }
   }

@@ -7,7 +7,7 @@
   "dependencies": {
     "LordMike.DiscUtils": "1.*",
     "DiscUtils.Common": "1.0.0-*",
-    "LordMike.DiscUtils.HfsPlus": "1.0.3"
+    "LordMike.DiscUtils.HfsPlus": "0.12.0-alpha"
   },
 
   "frameworks": {
