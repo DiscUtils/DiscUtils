@@ -1,4 +1,3 @@
-Note: this is a fork of https://github.com/quamotion/DiscUtils, which itself is a fork of https://discutils.codeplex.com/. 
 
 # Project Description
 
@@ -6,15 +5,41 @@ Note: this is a fork of https://github.com/quamotion/DiscUtils, which itself is 
 
 DiscUtils is a .NET library to read and write ISO files and Virtual Machine disk files (VHD, VDI, XVA, VMDK, etc). DiscUtils is developed in C# with no native code (or P/Invoke).
 
-# Project Status
-
 Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. VHD, XVA, VMDK and VDI disk formats are implemented, as well as read/write Registry support. The library also includes a simple iSCSI initiator, for accessing disks via iSCSI and an NFS client implementation.
 
-# How to use the Library
+Note: this is a fork of https://github.com/quamotion/DiscUtils, which itself is a fork of https://discutils.codeplex.com/. 
+
+### Implementation in this repository
+
+This repository has performed a few changes to the core DiscUtils library. For starters, all projects have been converted to .NET Core, and are targeting .NET 2.0 through 4.5, in addition to NETStandard 1.5 (thanks [Quamotion](https://github.com/Quamotion)). 
+
+The DiscUtils library has been split into 25 independent projects, which can function without the others present. This reduces the "cost" of having DiscUtils immensely, as we're down from the 1 MB binary it used to be. 
+
+To work with this, four Meta packages have been created:
+
+* LordMike.DiscUtils.Complete: Everything, like before
+* LordMike.DiscUtils.Containers: such as VMDK, VHD, VHDX
+* LordMike.DiscUtils.FileSystems: such as NTFS, FAT, EXT
+* LordMike.DiscUtils.Transports: such as NFS
+
+#### Note on detections
+
+DiscUtils has a number of detection helpers. These provide services like "which filesystem is this stream?". For this to work, you must register your filesystem providers with the DiscUtils core. To do this, call:
+
+    DiscUtils.Setup.RegisterAssembly(assembly);
+
+Where `assembly` is the assembly you wish to register. Note that the metapackages have helpers:
+
+    SetupHelper.SetupComplete(); // From LordMike.DiscUtils.Complete
+    SetupHelper.SetupContainers(); // From LordMike.DiscUtils.Containers
+    SetupHelper.SetupFileSystems(); // From LordMike.DiscUtils.FileSystems
+    SetupHelper.SetupTransports(); // From LordMike.DiscUtils.Transports
+
+## How to use the Library
 
 Here's a few really simple examples.
 
-## How to create a new ISO:
+### How to create a new ISO:
 
 ``` 
 CDBuilder builder = new CDBuilder();
@@ -27,7 +52,7 @@ builder.Build(@"C:\temp\sample.iso");
 You can add files as byte arrays (shown above), as files from the Windows filesystem, or as a Stream. By using a different form of Build, you can get a Stream to the ISO file, rather than writing it to the Windows filesystem.
 
 
-## How to extract a file from an ISO:
+### How to extract a file from an ISO:
 
 ``` 
 using (FileStream isoStream = File.Open(@"C:\temp\sample.iso"))
@@ -40,7 +65,7 @@ using (FileStream isoStream = File.Open(@"C:\temp\sample.iso"))
 
 You can also browse through the directory hierarchy, starting at cd.Root.
 
-## How to create a virtual hard disk:
+### How to create a virtual hard disk:
 
 ``` 
 long diskSize = 30 * 1024 * 1024; //30MB
@@ -59,7 +84,7 @@ using (Stream vhdStream = File.Create(@"C:\TEMP\mydisk.vhd"))
 As with ISOs, you can browse the file system, starting at fs.Root.
 
 
-## How to create a virtual floppy disk:
+### How to create a virtual floppy disk:
 
 ``` 
 using (FileStream fs = File.Create(@"myfloppy.vfd"))

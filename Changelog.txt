@@ -1,15 +1,14 @@
 
-
-
+2016-11-01
 - The FileSystemManager, VirtualDiskManager can no longer auto-detect some filesystems / vdi types, as they have been separated into different assemblies (See use of SetupHelper)
 - The DiscUtils.Xva library has been ported to .NET Core
 - DiscUtils.Net has been reintroduced, but not ported to .NET Core
 
 - Created Meta packages for Complete and FileSystems
 - Use SetupHelper prior to using detection classes, such as PartitionTable, FileSystemManager, VirtualDisk, VolumeManager
-- Meta packages ship their own SetupHelper as a conveniencemethod
+- Meta packages ship their own SetupHelper as a convenience method
 
-- Refactored FileSystemManager to always be statics
+- Refactored FileSystemManager to always be static
 - Moved static parts of VirtualDisk into VirtualDiskManager
 
 - Changed codestyle from FxCop to Resharper
