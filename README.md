@@ -9,6 +9,10 @@ Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. 
 
 Note: this is a fork of https://github.com/quamotion/DiscUtils, which itself is a fork of https://discutils.codeplex.com/. 
 
+### Wiki
+
+See more up to date documentation at the [Wiki](https://github.com/LordMike/DiscUtils/wiki)
+
 ### Implementation in this repository
 
 This repository has performed a few changes to the core DiscUtils library. For starters, all projects have been converted to .NET Core, and are targeting .NET 2.0 through 4.5, in addition to NETStandard 1.5 (thanks [Quamotion](https://github.com/Quamotion)). 
