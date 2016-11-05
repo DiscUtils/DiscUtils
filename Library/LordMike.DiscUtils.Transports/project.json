@@ -38,22 +38,16 @@
       "frameworkAssemblies": {
         "System.Xml": "2.0.0.0"
       },
-      "dependencies": {
-      },
       "buildOptions": {
         "define": [ "NET20" ]
       }
     },
     "net40": {
-      "dependencies": {
-      },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
       }
     },
     "net45": {
-      "dependencies": {
-      },
       "frameworkAssemblies": {
         "System.Xml": "4.0.0.0"
       }

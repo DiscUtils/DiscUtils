@@ -16,10 +16,6 @@
     }
   },
 
-  "dependencies": {
-
-  },
-
   "buildOptions": {
     "publicSign": true,
     "keyFile": "../../SigningKey.snk",
