@@ -4,7 +4,7 @@
   },
 
   "dependencies": {
-    "LordMike.DiscUtils": "1.*",
+    "LordMike.DiscUtils": "0.12.1-alpha",
     "DiscUtils.Common": "1.0.0-*"
   },
 

@@ -1,5 +1,5 @@
 {
-  "version": "0.12.0-alpha",
+  "version": "0.12.1-alpha",
 
   "title": "LordMike.DiscUtils.Complete",
   "description": "DiscUtils, complete meta-package",
@@ -17,27 +17,27 @@
   },
 
   "dependencies": {
-    "LordMike.DiscUtils": "0.12.0-alpha",
-    "LordMike.DiscUtils.BootConfig": "0.12.0-alpha",
-    "LordMike.DiscUtils.Dmg": "0.12.0-alpha",
-    "LordMike.DiscUtils.Ext": "0.12.0-alpha",
-    "LordMike.DiscUtils.Fat": "0.12.0-alpha",
-    "LordMike.DiscUtils.HfsPlus": "0.12.0-alpha",
-    "LordMike.DiscUtils.Iscsi": "0.12.0-alpha",
-    "LordMike.DiscUtils.Iso9660": "0.12.0-alpha",
-    "LordMike.DiscUtils.Nfs": "0.12.0-alpha",
-    "LordMike.DiscUtils.Ntfs": "0.12.0-alpha",
-    "LordMike.DiscUtils.OpticalDisk": "0.12.0-alpha",
-    "LordMike.DiscUtils.Registry": "0.12.0-alpha",
-    "LordMike.DiscUtils.Sdi": "0.12.0-alpha",
-    "LordMike.DiscUtils.SquashFs": "0.12.0-alpha",
-    "LordMike.DiscUtils.Udf": "0.12.0-alpha",
-    "LordMike.DiscUtils.Vdi": "0.12.0-alpha",
-    "LordMike.DiscUtils.Vhd": "0.12.0-alpha",
-    "LordMike.DiscUtils.Vhdx": "0.12.0-alpha",
-    "LordMike.DiscUtils.Vmdk": "0.12.0-alpha",
-    "LordMike.DiscUtils.Wim": "0.12.0-alpha",
-    "LordMike.DiscUtils.Xva": "0.12.0-alpha"
+    "LordMike.DiscUtils": "0.12.1-alpha",
+    "LordMike.DiscUtils.BootConfig": "0.12.1-alpha",
+    "LordMike.DiscUtils.Dmg": "0.12.1-alpha",
+    "LordMike.DiscUtils.Ext": "0.12.1-alpha",
+    "LordMike.DiscUtils.Fat": "0.12.1-alpha",
+    "LordMike.DiscUtils.HfsPlus": "0.12.1-alpha",
+    "LordMike.DiscUtils.Iscsi": "0.12.1-alpha",
+    "LordMike.DiscUtils.Iso9660": "0.12.1-alpha",
+    "LordMike.DiscUtils.Nfs": "0.12.1-alpha",
+    "LordMike.DiscUtils.Ntfs": "0.12.1-alpha",
+    "LordMike.DiscUtils.OpticalDisk": "0.12.1-alpha",
+    "LordMike.DiscUtils.Registry": "0.12.1-alpha",
+    "LordMike.DiscUtils.Sdi": "0.12.1-alpha",
+    "LordMike.DiscUtils.SquashFs": "0.12.1-alpha",
+    "LordMike.DiscUtils.Udf": "0.12.1-alpha",
+    "LordMike.DiscUtils.Vdi": "0.12.1-alpha",
+    "LordMike.DiscUtils.Vhd": "0.12.1-alpha",
+    "LordMike.DiscUtils.Vhdx": "0.12.1-alpha",
+    "LordMike.DiscUtils.Vmdk": "0.12.1-alpha",
+    "LordMike.DiscUtils.Wim": "0.12.1-alpha",
+    "LordMike.DiscUtils.Xva": "0.12.1-alpha"
   },
 
   "buildOptions": {
@@ -53,8 +53,8 @@
     },
     "net20": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "0.12.0-alpha",
-        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
+        "LordMike.DiscUtils.Net": "0.12.1-alpha",
+        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.1-alpha"
       },
       "buildOptions": {
         "define": [ "NET20" ]
@@ -62,14 +62,14 @@
     },
     "net40": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "0.12.0-alpha",
-        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
+        "LordMike.DiscUtils.Net": "0.12.1-alpha",
+        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.1-alpha"
       }
     },
     "net45": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "0.12.0-alpha",
-        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
+        "LordMike.DiscUtils.Net": "0.12.1-alpha",
+        "LordMike.DiscUtils.OpticalDiscSharing": "0.12.1-alpha"
       }
     }
   }

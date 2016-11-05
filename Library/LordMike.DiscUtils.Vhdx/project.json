@@ -1,5 +1,5 @@
 {
-  "version": "0.12.0-alpha",
+  "version": "0.12.1-alpha",
 
   "title": "LordMike.DiscUtils.Vhdx",
   "description": "DiscUtils VHDX",
@@ -17,7 +17,7 @@
   },
 
   "dependencies": {
-    "LordMike.DiscUtils": "0.12.0-alpha"
+    "LordMike.DiscUtils": "0.12.1-alpha"
   },
 
   "buildOptions": {

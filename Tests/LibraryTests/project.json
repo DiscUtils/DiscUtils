@@ -5,11 +5,11 @@
   },
   "testRunner": "nunit",
   "dependencies": {
-    "NUnit": "3.4.1",
-    "dotnet-test-nunit": "3.4.0-beta-2",
-    "LordMike.DiscUtils": "1.*",
     "DiscUtils.Diagnostics": "1.0.0-*",
-    "LordMike.DiscUtils.Complete": "0.12.0-alpha"
+    "dotnet-test-nunit": "3.4.0-beta-2",
+    "LordMike.DiscUtils": "0.12.1-alpha",
+    "LordMike.DiscUtils.Complete": "0.12.1-alpha",
+    "NUnit": "3.4.1"
   },
   "frameworks": {
     "net451": {
