@@ -40,7 +40,6 @@
     },
     "net20": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "0.12.0-alpha",
         "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
       },
       "buildOptions": {
@@ -49,13 +48,11 @@
     },
     "net40": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "0.12.0-alpha",
         "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
       }
     },
     "net45": {
       "dependencies": {
-        "LordMike.DiscUtils.Net": "0.12.0-alpha",
         "LordMike.DiscUtils.OpticalDiscSharing": "0.12.0-alpha"
       }
     }
