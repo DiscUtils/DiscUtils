@@ -627,20 +627,9 @@ namespace DiscUtils.Ntfs
 #if !NETCORE
         [Serializable]
 #endif
-
         private sealed class AbortException : InvalidFileSystemException
         {
-            public AbortException()
-                   : base()
-            {
-            }
 
-#if !NETCORE
-            private AbortException(SerializationInfo info, StreamingContext ctxt)
-                : base(info, ctxt)
-            {
-            }
-#endif
         }
     }
 }
