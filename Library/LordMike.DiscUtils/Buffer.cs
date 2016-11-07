@@ -22,12 +22,12 @@
 
 using System.Collections.Generic;
 
-namespace DiscUtils
-{
 #if !NETCORE
     using System;
 #endif
 
+namespace DiscUtils
+{
     /// <summary>
     /// Abstract base class for implementations of IBuffer.
     /// </summary>

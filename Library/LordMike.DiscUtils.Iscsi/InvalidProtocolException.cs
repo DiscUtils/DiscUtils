@@ -22,12 +22,12 @@
 
 using System;
 
-namespace DiscUtils.Iscsi
-{
 #if !NETCORE
-    using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 #endif
 
+namespace DiscUtils.Iscsi
+{
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>

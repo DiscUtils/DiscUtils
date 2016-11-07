@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils
-{
 #if !NETCORE
-    using System;
+using System;
 #endif
 
+namespace DiscUtils
+{
     /// <summary>
     /// Base class that holds information about a disk volume.
     /// </summary>

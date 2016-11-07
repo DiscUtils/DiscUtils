@@ -25,12 +25,12 @@ using System.IO;
 using System.Runtime.InteropServices;
 using DiscUtils.Internal;
 
-namespace DiscUtils.Vhdx
-{
 #if !NETCORE
     using System.Security.Permissions;
 #endif
 
+namespace DiscUtils.Vhdx
+{
     internal sealed class Metadata
     {
         private readonly Stream _regionStream;

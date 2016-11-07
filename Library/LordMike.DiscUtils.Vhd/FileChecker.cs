@@ -24,12 +24,12 @@ using System;
 using System.IO;
 using DiscUtils.Internal;
 
-namespace DiscUtils.Vhd
-{
 #if !NETCORE
-    using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 #endif
 
+namespace DiscUtils.Vhd
+{
     /// <summary>
     /// VHD file format verifier, that identifies corrupt VHD files.
     /// </summary>

@@ -23,12 +23,12 @@
 using System;
 using System.IO;
 
-namespace DiscUtils
-{
 #if !NETCORE
-    using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 #endif
 
+namespace DiscUtils
+{
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
