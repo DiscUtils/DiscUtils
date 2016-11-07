@@ -21,24 +21,21 @@
 //
 
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
 {
-    using DiscUtils.Vfs;
-
     internal class Symlink : File, IVfsSymlink<DirEntry, File>
     {
         public Symlink(Context context, uint inodeNum, Inode inode)
-            : base(context, inodeNum, inode)
-        {
-        }
+            : base(context, inodeNum, inode) {}
 
         public string TargetPath
         {
             get
             {
                 IBuffer content = FileContent;
-                byte[] data = Utilities.ReadFully(content, 0, (int) content.Capacity);
+                byte[] data = Utilities.ReadFully(content, 0, (int)content.Capacity);
                 return Utilities.BytesToZString(data, 0, data.Length).Replace('/', '\\');
             }
         }

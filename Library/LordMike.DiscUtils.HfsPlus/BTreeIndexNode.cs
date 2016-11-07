@@ -20,21 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System.Collections.Generic;
-
     internal class BTreeIndexNode<TKey> : BTreeKeyedNode<TKey>
         where TKey : BTreeKey, new()
     {
         private BTreeIndexRecord<TKey>[] _records;
 
         public BTreeIndexNode(BTree tree, BTreeNodeDescriptor descriptor)
-            : base(tree, descriptor)
-        {
-        }
+            : base(tree, descriptor) {}
 
         public override byte[] FindKey(TKey key)
         {
@@ -60,10 +57,10 @@ namespace DiscUtils.HfsPlus
                     // will match.
                     return null;
                 }
-                else if (nextResult > 0)
+                if (nextResult > 0)
                 {
                     // Next record's key is too big, so worth looking at children
-                    BTreeKeyedNode<TKey> child = ((BTree<TKey>) Tree).GetKeyedNode(_records[idx].ChildId);
+                    BTreeKeyedNode<TKey> child = ((BTree<TKey>)Tree).GetKeyedNode(_records[idx].ChildId);
                     return child.FindKey(key);
                 }
 
@@ -97,10 +94,10 @@ namespace DiscUtils.HfsPlus
                     // will match.
                     return;
                 }
-                else if (nextResult >= 0)
+                if (nextResult >= 0)
                 {
                     // Next record's key isn't too small, so worth looking at children
-                    BTreeKeyedNode<TKey> child = ((BTree<TKey>) Tree).GetKeyedNode(_records[idx].ChildId);
+                    BTreeKeyedNode<TKey> child = ((BTree<TKey>)Tree).GetKeyedNode(_records[idx].ChildId);
                     child.VisitRange(visitor);
                 }
 
@@ -119,7 +116,7 @@ namespace DiscUtils.HfsPlus
 
             for (int i = 0; i < numRecords; ++i)
             {
-                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - ((i + 2)*2));
+                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - (i + 2) * 2);
 
                 _records[i] = new BTreeIndexRecord<TKey>(end - start);
                 _records[i].ReadFrom(buffer, offset + start);

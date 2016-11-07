@@ -20,65 +20,64 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class VolumeHeader : IByteArraySerializable
     {
         public const ushort HfsPlusSignature = 0x482b;
 
-        public ushort Signature;
-        public ushort Version;
+        public ForkData AllocationFile;
         public VolumeAttributes Attributes;
-        public uint LastMountedVersion;
-        public uint JournalInfoBlock;
-
-        public DateTime CreateDate;
-        public DateTime ModifyDate;
+        public ForkData AttributesFile;
         public DateTime BackupDate;
-        public DateTime CheckedDate;
-
-        public uint FileCount;
-        public uint FolderCount;
 
         public uint BlockSize;
-        public uint TotalBlocks;
-        public uint FreeBlocks;
+        public ForkData CatalogFile;
+        public DateTime CheckedDate;
 
-        public uint NextAllocation;
-        public uint ResourceClumpSize;
+        public DateTime CreateDate;
         public uint DataClumpSize;
-        public CatalogNodeId NextCatalogId;
-
-        public uint WriteCount;
         public ulong EncodingsBitmap;
+        public ForkData ExtentsFile;
+
+        public uint FileCount;
 
         public uint[] FinderInfo;
+        public uint FolderCount;
+        public uint FreeBlocks;
+        public uint JournalInfoBlock;
+        public uint LastMountedVersion;
+        public DateTime ModifyDate;
 
-        public ForkData AllocationFile;
-        public ForkData ExtentsFile;
-        public ForkData CatalogFile;
-        public ForkData AttributesFile;
+        public uint NextAllocation;
+        public CatalogNodeId NextCatalogId;
+        public uint ResourceClumpSize;
+
+        public ushort Signature;
         public ForkData StartupFile;
+        public uint TotalBlocks;
+        public ushort Version;
 
-        public int Size
-        {
-            get { return 512; }
-        }
+        public uint WriteCount;
 
         public bool IsValid
         {
             get { return Signature == HfsPlusSignature; }
         }
 
+        public int Size
+        {
+            get { return 512; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.ToUInt16BigEndian(buffer, offset + 0);
             Version = Utilities.ToUInt16BigEndian(buffer, offset + 2);
-            Attributes = (VolumeAttributes) Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            Attributes = (VolumeAttributes)Utilities.ToUInt32BigEndian(buffer, offset + 4);
             LastMountedVersion = Utilities.ToUInt32BigEndian(buffer, offset + 8);
             JournalInfoBlock = Utilities.ToUInt32BigEndian(buffer, offset + 12);
 
@@ -105,14 +104,14 @@ namespace DiscUtils.HfsPlus
             FinderInfo = new uint[8];
             for (int i = 0; i < 8; ++i)
             {
-                FinderInfo[i] = Utilities.ToUInt32BigEndian(buffer, offset + 80 + (i*4));
+                FinderInfo[i] = Utilities.ToUInt32BigEndian(buffer, offset + 80 + i * 4);
             }
 
-            AllocationFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 112);
-            ExtentsFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 192);
-            CatalogFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 272);
-            AttributesFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 352);
-            StartupFile = (ForkData) Utilities.ToStruct<ForkData>(buffer, offset + 432);
+            AllocationFile = Utilities.ToStruct<ForkData>(buffer, offset + 112);
+            ExtentsFile = Utilities.ToStruct<ForkData>(buffer, offset + 192);
+            CatalogFile = Utilities.ToStruct<ForkData>(buffer, offset + 272);
+            AttributesFile = Utilities.ToStruct<ForkData>(buffer, offset + 352);
+            StartupFile = Utilities.ToStruct<ForkData>(buffer, offset + 432);
 
             return 512;
         }

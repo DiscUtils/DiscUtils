@@ -20,17 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.HfsPlus
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
-    internal sealed class FileBuffer : DiscUtils.Buffer
+    internal sealed class FileBuffer : Buffer
     {
-        private Context _context;
-        private ForkData _baseData;
-        private CatalogNodeId _cnid;
+        private readonly ForkData _baseData;
+        private readonly CatalogNodeId _cnid;
+        private readonly Context _context;
 
         public FileBuffer(Context context, ForkData baseData, CatalogNodeId catalogNodeId)
         {
@@ -51,24 +51,24 @@ namespace DiscUtils.HfsPlus
 
         public override long Capacity
         {
-            get { return (long) _baseData.LogicalSize; }
+            get { return (long)_baseData.LogicalSize; }
         }
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
             int totalRead = 0;
 
-            int limitedCount = (int) Math.Min(count, Math.Max(0, Capacity - pos));
+            int limitedCount = (int)Math.Min(count, Math.Max(0, Capacity - pos));
 
             while (totalRead < limitedCount)
             {
                 long extentLogicalStart;
                 ExtentDescriptor extent = FindExtent(pos, out extentLogicalStart);
-                long extentStreamStart = extent.StartBlock*(long) _context.VolumeHeader.BlockSize;
-                long extentSize = extent.BlockCount*(long) _context.VolumeHeader.BlockSize;
+                long extentStreamStart = extent.StartBlock * (long)_context.VolumeHeader.BlockSize;
+                long extentSize = extent.BlockCount * (long)_context.VolumeHeader.BlockSize;
 
-                long extentOffset = (pos + totalRead) - extentLogicalStart;
-                int toRead = (int) Math.Min(limitedCount - totalRead, extentSize - extentOffset);
+                long extentOffset = pos + totalRead - extentLogicalStart;
+                int toRead = (int)Math.Min(limitedCount - totalRead, extentSize - extentOffset);
 
                 // Remaining in extent can create a situation where amount to read is zero, and that appears
                 // to be OK, just need to exit thie while loop to avoid infinite loop.
@@ -99,18 +99,18 @@ namespace DiscUtils.HfsPlus
 
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
-            return new StreamExtent[] {new StreamExtent(start, Math.Min(start + count, Capacity) - start)};
+            return new[] { new StreamExtent(start, Math.Min(start + count, Capacity) - start) };
         }
 
         private ExtentDescriptor FindExtent(long pos, out long extentLogicalStart)
         {
             uint blocksSeen = 0;
-            uint block = (uint) (pos/_context.VolumeHeader.BlockSize);
+            uint block = (uint)(pos / _context.VolumeHeader.BlockSize);
             for (int i = 0; i < _baseData.Extents.Length; ++i)
             {
                 if (blocksSeen + _baseData.Extents[i].BlockCount > block)
                 {
-                    extentLogicalStart = blocksSeen*(long) _context.VolumeHeader.BlockSize;
+                    extentLogicalStart = blocksSeen * (long)_context.VolumeHeader.BlockSize;
                     return _baseData.Extents[i];
                 }
 
@@ -123,15 +123,15 @@ namespace DiscUtils.HfsPlus
 
                 if (extentData != null)
                 {
-                    int extentDescriptorCount = extentData.Length/8;
+                    int extentDescriptorCount = extentData.Length / 8;
                     for (int a = 0; a < extentDescriptorCount; a++)
                     {
                         ExtentDescriptor extentDescriptor = new ExtentDescriptor();
-                        int bytesRead = extentDescriptor.ReadFrom(extentData, a*8);
+                        int bytesRead = extentDescriptor.ReadFrom(extentData, a * 8);
 
-                        if ((blocksSeen + extentDescriptor.BlockCount) > block)
+                        if (blocksSeen + extentDescriptor.BlockCount > block)
                         {
-                            extentLogicalStart = blocksSeen*(long) _context.VolumeHeader.BlockSize;
+                            extentLogicalStart = blocksSeen * (long)_context.VolumeHeader.BlockSize;
                             return extentDescriptor;
                         }
 

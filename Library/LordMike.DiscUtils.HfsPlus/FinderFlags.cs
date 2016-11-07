@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     [Flags]
     internal enum FinderFlags : ushort
     {
@@ -38,6 +38,6 @@ namespace DiscUtils.HfsPlus
         NameLocked = 0x1000,
         HasBundle = 0x2000,
         IsInvisible = 0x4000,
-        IsAlias = 0x8000,
+        IsAlias = 0x8000
     }
 }

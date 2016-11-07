@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ext
 {
-    using System;
-
     /// <summary>
     /// Feature flags for backwards compatible features.
     /// </summary>
@@ -58,6 +58,6 @@ namespace DiscUtils.Ext
         /// <summary>
         /// Indicates that directory indexes are present (not used in mainline?).
         /// </summary>
-        DirectoryIndex = 0x0020,
+        DirectoryIndex = 0x0020
     }
 }

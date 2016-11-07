@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal abstract class BTreeKey : IByteArraySerializable, IComparable<BTreeKey>
     {
         public abstract int Size { get; }

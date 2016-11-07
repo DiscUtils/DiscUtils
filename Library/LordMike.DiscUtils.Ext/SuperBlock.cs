@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-
     internal class SuperBlock : IByteArraySerializable
     {
         public const ushort Ext2Magic = 0xEF53;
@@ -35,72 +34,73 @@ namespace DiscUtils.Ext
         /// </summary>
         public const uint OldRevision = 0;
 
-        public uint InodesCount;
+        public ushort BlockGroupNumber;
         public uint BlocksCount;
-        public uint ReservedBlocksCount;
-        public uint FreeBlocksCount;
-        public uint FreeInodesCount;
-        public uint FirstDataBlock;
-        public uint LogBlockSize;
-        public uint LogFragSize;
+        public uint BlocksCountHigh;
         public uint BlocksPerGroup;
-        public uint FragsPerGroup;
-        public uint InodesPerGroup;
-        public uint MountTime;
-        public uint WriteTime;
-        public ushort MountCount;
-        public ushort MaxMountCount;
-        public ushort Magic;
-        public ushort State;
-        public ushort Errors;
-        public ushort MinorRevisionLevel;
-        public uint LastCheckTime;
         public uint CheckInterval;
+        public CompatibleFeatures CompatibleFeatures;
+        public uint CompressionAlgorithmUsageBitmap;
         public uint CreatorOS;
-        public uint RevisionLevel;
-        public ushort DefaultReservedBlockUid;
+        public byte DefaultHashVersion;
+        public uint DefaultMountOptions;
         public ushort DefaultReservedBlockGid;
+        public ushort DefaultReservedBlockUid;
+        public ushort DescriptorSize;
+        public byte DirPreallocateBlockCount;
+        public ushort Errors;
+        public uint FirstDataBlock;
 
         public uint FirstInode;
-        public ushort InodeSize;
-        public ushort BlockGroupNumber;
-        public CompatibleFeatures CompatibleFeatures;
+        public uint FirstMetablockBlockGroup;
+        public uint Flags;
+        public uint FragsPerGroup;
+        public uint FreeBlocksCount;
+        public uint FreeBlocksCountHigh;
+        public uint FreeInodesCount;
+        public uint[] HashSeed;
         public IncompatibleFeatures IncompatibleFeatures;
-        public ReadOnlyCompatibleFeatures ReadOnlyCompatibleFeatures;
-        public Guid UniqueId;
-        public string VolumeName;
-        public string LastMountPoint;
-        public uint CompressionAlgorithmUsageBitmap;
 
-        public byte PreallocateBlockCount;
-        public byte DirPreallocateBlockCount;
+        public uint InodesCount;
+        public ushort InodeSize;
+        public uint InodesPerGroup;
+        public uint[] JournalBackup;
+        public uint JournalDevice;
+        public uint JournalInode;
 
         public Guid JournalSuperBlockUniqueId;
-        public uint JournalInode;
-        public uint JournalDevice;
+        public uint LastCheckTime;
+        public string LastMountPoint;
         public uint LastOrphan;
-        public uint[] HashSeed;
-        public byte DefaultHashVersion;
-        public ushort DescriptorSize;
-        public uint DefaultMountOptions;
-        public uint FirstMetablockBlockGroup;
-        public uint MkfsTime;
-        public uint[] JournalBackup;
-        public uint BlocksCountHigh;
-        public uint ReservedBlocksCountHigh;
-        public uint FreeBlocksCountHigh;
-        public ushort MinimumExtraInodeSize;
-        public ushort WantExtraInodeSize;
-        public uint Flags;
-        public ushort RaidStride;
-        public ushort MultiMountProtectionInterval;
-        public ulong MultiMountProtectionBlock;
-        public uint RaidStripeWidth;
+        public uint LogBlockSize;
+        public uint LogFragSize;
         public byte LogGroupsPerFlex;
+        public ushort Magic;
+        public ushort MaxMountCount;
+        public ushort MinimumExtraInodeSize;
+        public ushort MinorRevisionLevel;
+        public uint MkfsTime;
+        public ushort MountCount;
+        public uint MountTime;
+        public ulong MultiMountProtectionBlock;
+        public ushort MultiMountProtectionInterval;
+
+        public byte PreallocateBlockCount;
+        public ushort RaidStride;
+        public uint RaidStripeWidth;
+        public ReadOnlyCompatibleFeatures ReadOnlyCompatibleFeatures;
+        public uint ReservedBlocksCount;
+        public uint ReservedBlocksCountHigh;
+        public uint RevisionLevel;
+        public ushort State;
+        public Guid UniqueId;
+        public string VolumeName;
+        public ushort WantExtraInodeSize;
+        public uint WriteTime;
 
         public uint BlockSize
         {
-            get { return (uint) (1024 << (int) LogBlockSize); }
+            get { return (uint)(1024 << (int)LogBlockSize); }
         }
 
         public int Size
@@ -139,10 +139,10 @@ namespace DiscUtils.Ext
             FirstInode = Utilities.ToUInt32LittleEndian(buffer, offset + 84);
             InodeSize = Utilities.ToUInt16LittleEndian(buffer, offset + 88);
             BlockGroupNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 90);
-            CompatibleFeatures = (CompatibleFeatures) Utilities.ToUInt32LittleEndian(buffer, offset + 92);
-            IncompatibleFeatures = (IncompatibleFeatures) Utilities.ToUInt32LittleEndian(buffer, offset + 96);
+            CompatibleFeatures = (CompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 92);
+            IncompatibleFeatures = (IncompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 96);
             ReadOnlyCompatibleFeatures =
-                (ReadOnlyCompatibleFeatures) Utilities.ToUInt32LittleEndian(buffer, offset + 100);
+                (ReadOnlyCompatibleFeatures)Utilities.ToUInt32LittleEndian(buffer, offset + 100);
             UniqueId = Utilities.ToGuidLittleEndian(buffer, offset + 104);
             VolumeName = Utilities.BytesToZString(buffer, offset + 120, 16);
             LastMountPoint = Utilities.BytesToZString(buffer, offset + 136, 64);
@@ -169,7 +169,7 @@ namespace DiscUtils.Ext
             JournalBackup = new uint[17];
             for (int i = 0; i < 17; ++i)
             {
-                JournalBackup[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 268 + (4*i));
+                JournalBackup[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 268 + 4 * i);
             }
 
             BlocksCountHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 336);

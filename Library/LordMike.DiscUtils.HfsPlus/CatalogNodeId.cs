@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
+
 namespace DiscUtils.HfsPlus
 {
-    using System.Globalization;
-
     internal struct CatalogNodeId
     {
         public static readonly CatalogNodeId RootParentId = new CatalogNodeId(1);
@@ -38,7 +38,7 @@ namespace DiscUtils.HfsPlus
         public static readonly CatalogNodeId BogusExtentFileId = new CatalogNodeId(15);
         public static readonly CatalogNodeId FirstUserCatalogNodeId = new CatalogNodeId(16);
 
-        private uint _id;
+        private readonly uint _id;
 
         public CatalogNodeId(uint id)
         {

@@ -20,14 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
     internal sealed class ExtentDescriptor : IByteArraySerializable
     {
-        public uint StartBlock;
         public uint BlockCount;
+        public uint StartBlock;
 
         public int Size
         {
@@ -44,7 +45,7 @@ namespace DiscUtils.HfsPlus
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

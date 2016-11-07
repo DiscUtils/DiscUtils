@@ -28,6 +28,6 @@ namespace DiscUtils.HfsPlus
         FolderRecord = 0x0001,
         FileRecord = 0x0002,
         FolderThreadRecord = 0x0003,
-        FileThreadRecord = 0x0004,
+        FileThreadRecord = 0x0004
     }
 }

@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal class BTreeGenericRecord : BTreeNodeRecord
     {
-        private int _size;
         private byte[] _data;
+        private readonly int _size;
 
         public BTreeGenericRecord(int size)
         {

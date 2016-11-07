@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-
     internal class BlockGroup : IByteArraySerializable
     {
         public const int DescriptorSize = 32;
 
         public uint BlockBitmapBlock;
-        public uint InodeBitmapBlock;
-        public uint InodeTableBlock;
         public ushort FreeBlocksCount;
         public ushort FreeInodesCount;
+        public uint InodeBitmapBlock;
+        public uint InodeTableBlock;
         public ushort UsedDirsCount;
 
         public int Size

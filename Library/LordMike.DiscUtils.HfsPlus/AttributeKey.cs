@@ -29,29 +29,19 @@ namespace DiscUtils.HfsPlus
     {
         private ushort _keyLength;
         private ushort _pad;
-        private CatalogNodeId _fileId;
         private uint _startBlock;
-        private string _name;
 
-        public AttributeKey()
-        {
-        }
+        public AttributeKey() {}
 
         public AttributeKey(CatalogNodeId nodeId, string name)
         {
-            _fileId = nodeId;
-            _name = name;
+            FileId = nodeId;
+            Name = name;
         }
 
-        public CatalogNodeId FileId
-        {
-            get { return _fileId; }
-        }
+        public CatalogNodeId FileId { get; private set; }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; private set; }
 
         public override int Size
         {
@@ -62,9 +52,9 @@ namespace DiscUtils.HfsPlus
         {
             _keyLength = Utilities.ToUInt16BigEndian(buffer, offset + 0);
             _pad = Utilities.ToUInt16BigEndian(buffer, offset + 2);
-            _fileId = new CatalogNodeId(Utilities.ToUInt32BigEndian(buffer, offset + 4));
+            FileId = new CatalogNodeId(Utilities.ToUInt32BigEndian(buffer, offset + 4));
             _startBlock = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            _name = HfsPlusUtilities.ReadUniStr255(buffer, offset + 12);
+            Name = HfsPlusUtilities.ReadUniStr255(buffer, offset + 12);
 
             return _keyLength + 2;
         }
@@ -86,17 +76,17 @@ namespace DiscUtils.HfsPlus
                 throw new ArgumentNullException(nameof(other));
             }
 
-            if (_fileId != other._fileId)
+            if (FileId != other.FileId)
             {
-                return _fileId < other._fileId ? -1 : 1;
+                return FileId < other.FileId ? -1 : 1;
             }
 
-            return HfsPlusUtilities.FastUnicodeCompare(_name, other._name);
+            return HfsPlusUtilities.FastUnicodeCompare(Name, other.Name);
         }
 
         public override string ToString()
         {
-            return _name + " (" + _fileId + ")";
+            return Name + " (" + FileId + ")";
         }
     }
 }

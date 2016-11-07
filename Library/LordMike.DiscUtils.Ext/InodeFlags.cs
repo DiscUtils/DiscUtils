@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ext
 {
-    using System;
-
     /// <summary>
     /// Inode flags.
     /// </summary>
@@ -50,6 +50,6 @@ namespace DiscUtils.Ext
         TopDir = 0x00020000,
         HugeFile = 0x00040000,
         ExtentsUsed = 0x00080000,
-        Migrating = 0x00100000,
+        Migrating = 0x00100000
     }
 }

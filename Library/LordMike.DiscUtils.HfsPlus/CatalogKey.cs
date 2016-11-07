@@ -20,48 +20,52 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class CatalogKey : BTreeKey, IComparable<CatalogKey>
     {
         private ushort _keyLength;
-        private CatalogNodeId _nodeId;
-        private string _name;
 
-        public CatalogKey()
-        {
-        }
+        public CatalogKey() {}
 
         public CatalogKey(CatalogNodeId nodeId, string name)
         {
-            _nodeId = nodeId;
-            _name = name;
+            NodeId = nodeId;
+            Name = name;
         }
 
-        public CatalogNodeId NodeId
-        {
-            get { return _nodeId; }
-        }
+        public string Name { get; private set; }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public CatalogNodeId NodeId { get; private set; }
 
         public override int Size
         {
             get { throw new NotImplementedException(); }
         }
 
+        public int CompareTo(CatalogKey other)
+        {
+            if (other == null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            if (NodeId != other.NodeId)
+            {
+                return NodeId < other.NodeId ? -1 : 1;
+            }
+
+            return HfsPlusUtilities.FastUnicodeCompare(Name, other.Name);
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             _keyLength = Utilities.ToUInt16BigEndian(buffer, offset + 0);
-            _nodeId = new CatalogNodeId(Utilities.ToUInt32BigEndian(buffer, offset + 2));
-            _name = HfsPlusUtilities.ReadUniStr255(buffer, offset + 6);
+            NodeId = new CatalogNodeId(Utilities.ToUInt32BigEndian(buffer, offset + 2));
+            Name = HfsPlusUtilities.ReadUniStr255(buffer, offset + 6);
 
             return _keyLength + 2;
         }
@@ -76,24 +80,9 @@ namespace DiscUtils.HfsPlus
             return CompareTo(other as CatalogKey);
         }
 
-        public int CompareTo(CatalogKey other)
-        {
-            if (other == null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            if (_nodeId != other._nodeId)
-            {
-                return _nodeId < other._nodeId ? -1 : 1;
-            }
-
-            return HfsPlusUtilities.FastUnicodeCompare(_name, other._name);
-        }
-
         public override string ToString()
         {
-            return _name + " (" + _nodeId + ")";
+            return Name + " (" + NodeId + ")";
         }
     }
 }

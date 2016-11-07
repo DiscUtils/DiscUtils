@@ -26,44 +26,27 @@ namespace DiscUtils.HfsPlus
 {
     internal class CompressionResourceHeader
     {
-        private uint _headerSize;
-        private uint _totalSize;
-        private uint _dataSize;
-        private uint _flags;
+        public uint DataSize { get; private set; }
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            _headerSize = Utilities.ToUInt32BigEndian(buffer, offset);
-            _totalSize = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            _dataSize = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            _flags = Utilities.ToUInt32BigEndian(buffer, offset + 12);
+        public uint Flags { get; private set; }
 
-            return Size;
-        }
+        public uint HeaderSize { get; private set; }
 
         public static int Size
         {
             get { return 16; }
         }
 
-        public uint HeaderSize
-        {
-            get { return _headerSize; }
-        }
+        public uint TotalSize { get; private set; }
 
-        public uint TotalSize
+        public int ReadFrom(byte[] buffer, int offset)
         {
-            get { return _totalSize; }
-        }
+            HeaderSize = Utilities.ToUInt32BigEndian(buffer, offset);
+            TotalSize = Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            DataSize = Utilities.ToUInt32BigEndian(buffer, offset + 8);
+            Flags = Utilities.ToUInt32BigEndian(buffer, offset + 12);
 
-        public uint DataSize
-        {
-            get { return _dataSize; }
-        }
-
-        public uint Flags
-        {
-            get { return _flags; }
+            return Size;
         }
     }
 }

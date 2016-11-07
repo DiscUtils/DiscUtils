@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.Ext
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class Context : VfsContext
     {
+        public ExtFileSystemOptions Options { get; set; }
         public Stream RawStream { get; set; }
 
         public SuperBlock SuperBlock { get; set; }
-
-        public ExtFileSystemOptions Options { get; set; }
     }
 }

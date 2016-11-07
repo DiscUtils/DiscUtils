@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal sealed class VfsExtFileSystem : VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
         internal const IncompatibleFeatures SupportedIncompatibleFeatures =
@@ -34,7 +33,7 @@ namespace DiscUtils.Ext
             | IncompatibleFeatures.FlexBlockGroups
             | IncompatibleFeatures.Extents;
 
-        private BlockGroup[] _blockGroups;
+        private readonly BlockGroup[] _blockGroups;
 
         public VfsExtFileSystem(Stream stream, FileSystemParameters parameters)
             : base(new ExtFileSystemOptions(parameters))
@@ -61,33 +60,28 @@ namespace DiscUtils.Ext
                                       (superblock.IncompatibleFeatures & ~SupportedIncompatibleFeatures));
             }
 
-            Context = new Context()
+            Context = new Context
             {
                 RawStream = stream,
                 SuperBlock = superblock,
-                Options = (ExtFileSystemOptions) Options
+                Options = (ExtFileSystemOptions)Options
             };
 
             uint numGroups = Utilities.Ceil(superblock.BlocksCount, superblock.BlocksPerGroup);
-            long blockDescStart = (superblock.FirstDataBlock + 1)*(long) superblock.BlockSize;
+            long blockDescStart = (superblock.FirstDataBlock + 1) * (long)superblock.BlockSize;
 
             stream.Position = blockDescStart;
-            byte[] blockDescData = Utilities.ReadFully(stream, (int) numGroups*BlockGroup.DescriptorSize);
+            byte[] blockDescData = Utilities.ReadFully(stream, (int)numGroups * BlockGroup.DescriptorSize);
 
             _blockGroups = new BlockGroup[numGroups];
             for (int i = 0; i < numGroups; ++i)
             {
                 BlockGroup bg = new BlockGroup();
-                bg.ReadFrom(blockDescData, i*BlockGroup.DescriptorSize);
+                bg.ReadFrom(blockDescData, i * BlockGroup.DescriptorSize);
                 _blockGroups[i] = bg;
             }
 
             RootDirectory = new Directory(Context, 2, GetInode(2));
-        }
-
-        public override string VolumeLabel
-        {
-            get { return Context.SuperBlock.VolumeName; }
         }
 
         public override string FriendlyName
@@ -95,12 +89,17 @@ namespace DiscUtils.Ext
             get { return "EXT-family"; }
         }
 
+        public override string VolumeLabel
+        {
+            get { return Context.SuperBlock.VolumeName; }
+        }
+
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             File file = GetFile(path);
             Inode inode = file.Inode;
 
-            UnixFileType fileType = (UnixFileType) ((inode.Mode >> 12) & 0xff);
+            UnixFileType fileType = (UnixFileType)((inode.Mode >> 12) & 0xff);
 
             uint deviceId = 0;
             if (fileType == UnixFileType.Character || fileType == UnixFileType.Block)
@@ -115,12 +114,12 @@ namespace DiscUtils.Ext
                 }
             }
 
-            return new UnixFileSystemInfo()
+            return new UnixFileSystemInfo
             {
                 FileType = fileType,
-                Permissions = (UnixFilePermissions) (inode.Mode & 0xfff),
-                UserId = (((int) inode.UserIdHigh) << 16) | inode.UserIdLow,
-                GroupId = (((int) inode.GroupIdHigh) << 16) | inode.GroupIdLow,
+                Permissions = (UnixFilePermissions)(inode.Mode & 0xfff),
+                UserId = (inode.UserIdHigh << 16) | inode.UserIdLow,
+                GroupId = (inode.GroupIdHigh << 16) | inode.GroupIdLow,
                 Inode = file.InodeNumber,
                 LinkCount = inode.LinksCount,
                 DeviceId = deviceId
@@ -134,14 +133,11 @@ namespace DiscUtils.Ext
             {
                 return new Directory(Context, dirEntry.Record.Inode, inode);
             }
-            else if (dirEntry.Record.FileType == DirectoryRecord.FileTypeSymlink)
+            if (dirEntry.Record.FileType == DirectoryRecord.FileTypeSymlink)
             {
                 return new Symlink(Context, dirEntry.Record.Inode, inode);
             }
-            else
-            {
-                return new File(Context, dirEntry.Record.Inode, inode);
-            }
+            return new File(Context, dirEntry.Record.Inode, inode);
         }
 
         private Inode GetInode(uint inodeNum)
@@ -150,16 +146,16 @@ namespace DiscUtils.Ext
 
             SuperBlock superBlock = Context.SuperBlock;
 
-            uint group = index/superBlock.InodesPerGroup;
-            uint groupOffset = index - (group*superBlock.InodesPerGroup);
+            uint group = index / superBlock.InodesPerGroup;
+            uint groupOffset = index - group * superBlock.InodesPerGroup;
             BlockGroup inodeBlockGroup = GetBlockGroup(group);
 
-            uint inodesPerBlock = superBlock.BlockSize/superBlock.InodeSize;
-            uint block = groupOffset/inodesPerBlock;
-            uint blockOffset = groupOffset - (block*inodesPerBlock);
+            uint inodesPerBlock = superBlock.BlockSize / superBlock.InodeSize;
+            uint block = groupOffset / inodesPerBlock;
+            uint blockOffset = groupOffset - block * inodesPerBlock;
 
-            Context.RawStream.Position = ((inodeBlockGroup.InodeTableBlock + block)*(long) superBlock.BlockSize) +
-                                         (blockOffset*superBlock.InodeSize);
+            Context.RawStream.Position = (inodeBlockGroup.InodeTableBlock + block) * (long)superBlock.BlockSize +
+                                         blockOffset * superBlock.InodeSize;
             byte[] inodeData = Utilities.ReadFully(Context.RawStream, superBlock.InodeSize);
 
             return Utilities.ToStruct<Inode>(inodeData, 0);

@@ -20,20 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Vfs;
-
     internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
         public Directory(Context context, uint inodeNum, Inode inode)
-            : base(context, inodeNum, inode)
-        {
-        }
+            : base(context, inodeNum, inode) {}
 
         public ICollection<DirEntry> AllEntries
         {
@@ -50,7 +47,7 @@ namespace DiscUtils.Ext
                 long pos = 0;
                 while (pos < Inode.FileSize)
                 {
-                    Utilities.ReadFully(content, blockSize*(long) relBlock, blockData, 0, (int) blockSize);
+                    Utilities.ReadFully(content, blockSize * (long)relBlock, blockData, 0, (int)blockSize);
 
                     int blockPos = 0;
                     while (blockPos < blockSize)

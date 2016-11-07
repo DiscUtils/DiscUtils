@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
@@ -27,11 +28,11 @@ namespace DiscUtils.HfsPlus
     internal sealed class ForkData : IByteArraySerializable
     {
         public const int StructSize = 80;
+        public uint ClumpSize;
+        public ExtentDescriptor[] Extents;
 
         public ulong LogicalSize;
-        public uint ClumpSize;
         public uint TotalBlocks;
-        public ExtentDescriptor[] Extents;
 
         public int Size
         {
@@ -47,7 +48,7 @@ namespace DiscUtils.HfsPlus
             Extents = new ExtentDescriptor[8];
             for (int i = 0; i < 8; ++i)
             {
-                Extents[i] = Utilities.ToStruct<ExtentDescriptor>(buffer, offset + 16 + (i*8));
+                Extents[i] = Utilities.ToStruct<ExtentDescriptor>(buffer, offset + 16 + i * 8);
             }
 
             return StructSize;
@@ -55,7 +56,7 @@ namespace DiscUtils.HfsPlus
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

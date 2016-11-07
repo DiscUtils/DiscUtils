@@ -20,18 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System.Collections.Generic;
-
     internal class BTreeHeaderNode : BTreeNode
     {
         public BTreeHeaderNode(BTree tree, BTreeNodeDescriptor descriptor)
-            : base(tree, descriptor)
-        {
-        }
+            : base(tree, descriptor) {}
 
         public BTreeHeaderRecord HeaderRecord
         {
@@ -54,7 +51,7 @@ namespace DiscUtils.HfsPlus
             results[1] = new BTreeGenericRecord(mapRecordOffset - userDataRecordOffset);
             results[1].ReadFrom(buffer, offset + userDataRecordOffset);
 
-            results[2] = new BTreeGenericRecord(nodeSize - ((totalRecords*2) + mapRecordOffset));
+            results[2] = new BTreeGenericRecord(nodeSize - (totalRecords * 2 + mapRecordOffset));
             results[2].ReadFrom(buffer, offset + mapRecordOffset);
 
             return results;

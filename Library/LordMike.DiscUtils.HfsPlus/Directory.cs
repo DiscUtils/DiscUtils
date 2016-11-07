@@ -20,18 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.HfsPlus
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Vfs;
-
     internal sealed class Directory : File, IVfsDirectory<DirEntry, File>
     {
         public Directory(Context context, CatalogNodeId nodeId, CommonCatalogFileInfo fileInfo)
-            : base(context, nodeId, fileInfo)
-        {
-        }
+            : base(context, nodeId, fileInfo) {}
 
         public ICollection<DirEntry> AllEntries
         {
@@ -39,22 +37,19 @@ namespace DiscUtils.HfsPlus
             {
                 List<DirEntry> results = new List<DirEntry>();
 
-                Context.Catalog.VisitRange((CatalogKey key, byte[] data) =>
-                {
-                    if (key.NodeId == NodeId)
-                    {
-                        if (data != null && !string.IsNullOrEmpty(key.Name) && DirEntry.IsFileOrDirectory(data))
-                        {
-                            results.Add(new DirEntry(key.Name, data));
-                        }
+                Context.Catalog.VisitRange((key, data) =>
+                       {
+                           if (key.NodeId == NodeId)
+                           {
+                               if (data != null && !string.IsNullOrEmpty(key.Name) && DirEntry.IsFileOrDirectory(data))
+                               {
+                                   results.Add(new DirEntry(key.Name, data));
+                               }
 
-                        return 0;
-                    }
-                    else
-                    {
-                        return key.NodeId < NodeId ? -1 : 1;
-                    }
-                });
+                               return 0;
+                           }
+                           return key.NodeId < NodeId ? -1 : 1;
+                       });
 
                 return results;
             }

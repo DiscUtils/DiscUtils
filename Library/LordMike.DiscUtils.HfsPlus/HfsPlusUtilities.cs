@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-    using System.Text;
-
     internal static class HfsPlusUtilities
     {
         #region LowerCase Table
 
-        private static ushort[] s_lowerCaseTable =
+        private static readonly ushort[] s_lowerCaseTable =
         {
             /* 0 */ 0x0100, 0x0200, 0x0000, 0x0300, 0x0400, 0x0500, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -384,7 +383,7 @@ namespace DiscUtils.HfsPlus
             /* E */ 0xFFE0, 0xFFE1, 0xFFE2, 0xFFE3, 0xFFE4, 0xFFE5, 0xFFE6, 0xFFE7,
             0xFFE8, 0xFFE9, 0xFFEA, 0xFFEB, 0xFFEC, 0xFFED, 0xFFEE, 0xFFEF,
             /* F */ 0xFFF0, 0xFFF1, 0xFFF2, 0xFFF3, 0xFFF4, 0xFFF5, 0xFFF6, 0xFFF7,
-            0xFFF8, 0xFFF9, 0xFFFA, 0xFFFB, 0xFFFC, 0xFFFD, 0xFFFE, 0xFFFF,
+            0xFFF8, 0xFFF9, 0xFFFA, 0xFFFB, 0xFFFC, 0xFFFD, 0xFFFE, 0xFFFF
         };
 
         #endregion
@@ -392,7 +391,7 @@ namespace DiscUtils.HfsPlus
         public static string ReadUniStr255(byte[] buffer, int offset)
         {
             int len = Utilities.ToUInt16BigEndian(buffer, offset + 0);
-            return Encoding.BigEndianUnicode.GetString(buffer, offset + 2, len*2);
+            return Encoding.BigEndianUnicode.GetString(buffer, offset + 2, len * 2);
         }
 
         public static DateTime ReadHFSPlusDate(DateTimeKind kind, byte[] buffer, int offset)
@@ -411,8 +410,8 @@ namespace DiscUtils.HfsPlus
             result.GroupId = Utilities.ToInt32BigEndian(buffer, offset + 4);
 
             ushort fileMode = Utilities.ToUInt16BigEndian(buffer, offset + 8);
-            result.FileType = (UnixFileType) ((fileMode >> 12) & 0xF);
-            result.Permissions = (UnixFilePermissions) (fileMode & 0xFFF);
+            result.FileType = (UnixFileType)((fileMode >> 12) & 0xF);
+            result.Permissions = (UnixFilePermissions)(fileMode & 0xFFF);
 
             special = Utilities.ToUInt32BigEndian(buffer, offset + 10);
             if (result.FileType == UnixFileType.Block || result.FileType == UnixFileType.Character)
@@ -439,7 +438,7 @@ namespace DiscUtils.HfsPlus
                     int temp = s_lowerCaseTable[(aChar >> 8) & 0xFF];
                     if (temp != 0)
                     {
-                        aChar = (char) s_lowerCaseTable[temp + (aChar & 0xFF)];
+                        aChar = (char)s_lowerCaseTable[temp + (aChar & 0xFF)];
                     }
                 }
 
@@ -449,13 +448,13 @@ namespace DiscUtils.HfsPlus
                     int temp = s_lowerCaseTable[(bChar >> 8) & 0xFF];
                     if (temp != 0)
                     {
-                        bChar = (char) s_lowerCaseTable[temp + (bChar & 0xFF)];
+                        bChar = (char)s_lowerCaseTable[temp + (bChar & 0xFF)];
                     }
                 }
 
                 if (aChar != bChar)
                 {
-                    return (aChar < bChar) ? -1 : 1;
+                    return aChar < bChar ? -1 : 1;
                 }
 
                 // aChar and bChar are same and both 0

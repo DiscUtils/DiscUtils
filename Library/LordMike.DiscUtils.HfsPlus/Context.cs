@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.HfsPlus
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal sealed class Context : VfsContext
     {
-        public Stream VolumeStream { get; set; }
+        public BTree<AttributeKey> Attributes { get; set; }
 
         public BTree<CatalogKey> Catalog { get; set; }
 
         public BTree<ExtentKey> ExtentsOverflow { get; set; }
 
-        public BTree<AttributeKey> Attributes { get; set; }
-
         public VolumeHeader VolumeHeader { get; set; }
+        public Stream VolumeStream { get; set; }
     }
 }

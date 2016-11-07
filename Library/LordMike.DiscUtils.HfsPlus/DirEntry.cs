@@ -20,28 +20,48 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal sealed class DirEntry : VfsDirEntry
     {
-        private string _name;
-        private CommonCatalogFileInfo _info;
-
         public DirEntry(string name, byte[] dirEntryData)
         {
-            _name = name;
-            _info = ParseDirEntryData(dirEntryData);
+            FileName = name;
+            CatalogFileInfo = ParseDirEntryData(dirEntryData);
+        }
+
+        public CommonCatalogFileInfo CatalogFileInfo { get; }
+
+        public override DateTime CreationTimeUtc
+        {
+            get { return CatalogFileInfo.CreateTime; }
+        }
+
+        public override FileAttributes FileAttributes
+        {
+            get { return Utilities.FileAttributesFromUnixFileType(CatalogFileInfo.FileSystemInfo.FileType); }
+        }
+
+        public override string FileName { get; }
+
+        public override bool HasVfsFileAttributes
+        {
+            get { return true; }
+        }
+
+        public override bool HasVfsTimeInfo
+        {
+            get { return true; }
         }
 
         public override bool IsDirectory
         {
-            get { return _info.RecordType == CatalogRecordType.FolderRecord; }
+            get { return CatalogFileInfo.RecordType == CatalogRecordType.FolderRecord; }
         }
 
         public override bool IsSymlink
@@ -50,69 +70,39 @@ namespace DiscUtils.HfsPlus
             {
                 return
                     !IsDirectory
-                    && ((FileTypeFlags) ((CatalogFileInfo) _info).FileInfo.FileType) == FileTypeFlags.SymLinkFileType;
+                    && (FileTypeFlags)((CatalogFileInfo)CatalogFileInfo).FileInfo.FileType == FileTypeFlags.SymLinkFileType;
             }
-        }
-
-        public override string FileName
-        {
-            get { return _name; }
-        }
-
-        public override bool HasVfsTimeInfo
-        {
-            get { return true; }
         }
 
         public override DateTime LastAccessTimeUtc
         {
-            get { return _info.AccessTime; }
+            get { return CatalogFileInfo.AccessTime; }
         }
 
         public override DateTime LastWriteTimeUtc
         {
-            get { return _info.ContentModifyTime; }
-        }
-
-        public override DateTime CreationTimeUtc
-        {
-            get { return _info.CreateTime; }
-        }
-
-        public override bool HasVfsFileAttributes
-        {
-            get { return true; }
-        }
-
-        public override FileAttributes FileAttributes
-        {
-            get { return Utilities.FileAttributesFromUnixFileType(_info.FileSystemInfo.FileType); }
-        }
-
-        public override long UniqueCacheId
-        {
-            get { return _info.FileId; }
+            get { return CatalogFileInfo.ContentModifyTime; }
         }
 
         public CatalogNodeId NodeId
         {
-            get { return _info.FileId; }
+            get { return CatalogFileInfo.FileId; }
         }
 
-        public CommonCatalogFileInfo CatalogFileInfo
+        public override long UniqueCacheId
         {
-            get { return _info; }
+            get { return CatalogFileInfo.FileId; }
         }
 
         internal static bool IsFileOrDirectory(byte[] dirEntryData)
         {
-            CatalogRecordType type = (CatalogRecordType) Utilities.ToInt16BigEndian(dirEntryData, 0);
+            CatalogRecordType type = (CatalogRecordType)Utilities.ToInt16BigEndian(dirEntryData, 0);
             return type == CatalogRecordType.FolderRecord || type == CatalogRecordType.FileRecord;
         }
 
         private static CommonCatalogFileInfo ParseDirEntryData(byte[] dirEntryData)
         {
-            CatalogRecordType type = (CatalogRecordType) Utilities.ToInt16BigEndian(dirEntryData, 0);
+            CatalogRecordType type = (CatalogRecordType)Utilities.ToInt16BigEndian(dirEntryData, 0);
 
             CommonCatalogFileInfo result = null;
             switch (type)

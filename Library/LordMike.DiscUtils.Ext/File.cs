@@ -20,59 +20,61 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class File : IVfsFile
     {
-        private Context _context;
-        private uint _inodeNum;
-        private Inode _inode;
         private IBuffer _content;
 
         public File(Context context, uint inodeNum, Inode inode)
         {
-            _context = context;
-            _inodeNum = inodeNum;
-            _inode = inode;
+            Context = context;
+            InodeNumber = inodeNum;
+            Inode = inode;
         }
+
+        protected Context Context { get; }
+
+        internal Inode Inode { get; }
+
+        internal uint InodeNumber { get; }
 
         public DateTime LastAccessTimeUtc
         {
-            get { return Utilities.DateTimeFromUnix(_inode.AccessTime); }
+            get { return Utilities.DateTimeFromUnix(Inode.AccessTime); }
 
             set { throw new NotImplementedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get { return Utilities.DateTimeFromUnix(_inode.ModificationTime); }
+            get { return Utilities.DateTimeFromUnix(Inode.ModificationTime); }
 
             set { throw new NotImplementedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
-            get { return Utilities.DateTimeFromUnix(_inode.CreationTime); }
+            get { return Utilities.DateTimeFromUnix(Inode.CreationTime); }
 
             set { throw new NotImplementedException(); }
         }
 
         public FileAttributes FileAttributes
         {
-            get { return FromMode(_inode.Mode); }
+            get { return FromMode(Inode.Mode); }
 
             set { throw new NotImplementedException(); }
         }
 
         public long FileLength
         {
-            get { return _inode.FileSize; }
+            get { return Inode.FileSize; }
         }
 
         public IBuffer FileContent
@@ -81,31 +83,16 @@ namespace DiscUtils.Ext
             {
                 if (_content == null)
                 {
-                    _content = _inode.GetContentBuffer(_context);
+                    _content = Inode.GetContentBuffer(Context);
                 }
 
                 return _content;
             }
         }
 
-        internal uint InodeNumber
-        {
-            get { return _inodeNum; }
-        }
-
-        internal Inode Inode
-        {
-            get { return _inode; }
-        }
-
-        protected Context Context
-        {
-            get { return _context; }
-        }
-
         private static FileAttributes FromMode(uint mode)
         {
-            return Utilities.FileAttributesFromUnixFileType((UnixFileType) ((mode >> 12) & 0xF));
+            return Utilities.FileAttributesFromUnixFileType((UnixFileType)((mode >> 12) & 0xF));
         }
     }
 }

@@ -27,9 +27,9 @@ namespace DiscUtils.HfsPlus
     internal sealed class BTree<TKey> : BTree
         where TKey : BTreeKey, new()
     {
-        private BTreeHeaderRecord _header;
-        private IBuffer _data;
-        private BTreeKeyedNode<TKey> _rootNode;
+        private readonly IBuffer _data;
+        private readonly BTreeHeaderRecord _header;
+        private readonly BTreeKeyedNode<TKey> _rootNode;
 
         public BTree(IBuffer data)
         {
@@ -68,7 +68,7 @@ namespace DiscUtils.HfsPlus
 
         internal BTreeKeyedNode<TKey> GetKeyedNode(uint nodeId)
         {
-            byte[] nodeData = Utilities.ReadFully(_data, (int) nodeId*_header.NodeSize, _header.NodeSize);
+            byte[] nodeData = Utilities.ReadFully(_data, (int)nodeId * _header.NodeSize, _header.NodeSize);
 
             BTreeKeyedNode<TKey> node = BTreeNode.ReadNode<TKey>(this, nodeData, 0) as BTreeKeyedNode<TKey>;
             node.ReadFrom(nodeData, 0);

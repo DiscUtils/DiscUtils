@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-
     internal class ExtentIndex : IByteArraySerializable
     {
         public uint FirstLogicalBlock;
-        public uint LeafPhysicalBlockLo;
         public ushort LeafPhysicalBlockHi;
+        public uint LeafPhysicalBlockLo;
 
         public long LeafPhysicalBlock
         {
-            get { return LeafPhysicalBlockLo | (((long) LeafPhysicalBlockHi) << 32); }
+            get { return LeafPhysicalBlockLo | ((long)LeafPhysicalBlockHi << 32); }
         }
 
         public int Size

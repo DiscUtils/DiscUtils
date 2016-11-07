@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal class FileInfo : IByteArraySerializable
     {
-        public uint FileType;
         public uint FileCreator;
+        public uint FileType;
         public FinderFlags FinderFlags;
         public Point Point;
 
@@ -42,7 +41,7 @@ namespace DiscUtils.HfsPlus
         {
             FileType = Utilities.ToUInt32BigEndian(buffer, offset + 0);
             FileCreator = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            FinderFlags = (FinderFlags) Utilities.ToUInt16BigEndian(buffer, offset + 8);
+            FinderFlags = (FinderFlags)Utilities.ToUInt16BigEndian(buffer, offset + 8);
             Point = Utilities.ToStruct<Point>(buffer, offset + 10);
 
             return 16;

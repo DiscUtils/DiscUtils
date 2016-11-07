@@ -20,33 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.IO.Compression;
+using DiscUtils.Compression;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-    using DiscUtils.Compression;
-    using System.IO.Compression;
-
     internal class File : IVfsFileWithStreams
     {
-        private Context _context;
-        private CatalogNodeId _nodeId;
-        private CommonCatalogFileInfo _catalogInfo;
-        private bool _hasCompressionAttribute;
-
         private const string CompressionAttributeName = "com.apple.decmpfs";
+        private readonly CommonCatalogFileInfo _catalogInfo;
+        private readonly bool _hasCompressionAttribute;
 
         public File(Context context, CatalogNodeId nodeId, CommonCatalogFileInfo catalogInfo)
         {
-            _context = context;
-            _nodeId = nodeId;
+            Context = context;
+            NodeId = nodeId;
             _catalogInfo = catalogInfo;
             _hasCompressionAttribute =
-                this._context.Attributes.Find(new AttributeKey(this._nodeId, CompressionAttributeName)) != null;
+                Context.Attributes.Find(new AttributeKey(NodeId, CompressionAttributeName)) != null;
         }
+
+        protected Context Context { get; }
+
+        protected CatalogNodeId NodeId { get; }
 
         public DateTime LastAccessTimeUtc
         {
@@ -86,7 +86,7 @@ namespace DiscUtils.HfsPlus
                     throw new InvalidOperationException();
                 }
 
-                return (long) fileInfo.DataFork.LogicalSize;
+                return (long)fileInfo.DataFork.LogicalSize;
             }
         }
 
@@ -104,7 +104,7 @@ namespace DiscUtils.HfsPlus
                 {
                     // Open the compression attribute
                     byte[] compressionAttributeData =
-                        _context.Attributes.Find(new AttributeKey(_catalogInfo.FileId, "com.apple.decmpfs"));
+                        Context.Attributes.Find(new AttributeKey(_catalogInfo.FileId, "com.apple.decmpfs"));
                     CompressionAttribute compressionAttribute = new CompressionAttribute();
                     compressionAttribute.ReadFrom(compressionAttributeData, 0);
 
@@ -119,12 +119,12 @@ namespace DiscUtils.HfsPlus
                         MemoryStream stream = new MemoryStream(
                             compressionAttributeData,
                             CompressionAttribute.Size + 1,
-                            (int) compressionAttribute.UncompressedSize,
+                            (int)compressionAttribute.UncompressedSize,
                             false);
 
                         return new StreamBuffer(stream, Ownership.Dispose);
                     }
-                    else if (compressionAttribute.CompressionType == 3)
+                    if (compressionAttribute.CompressionType == 3)
                     {
                         // Inline, but we must decompress
                         MemoryStream stream = new MemoryStream(
@@ -138,10 +138,10 @@ namespace DiscUtils.HfsPlus
                         ZlibStream compressedStream = new ZlibStream(stream, CompressionMode.Decompress, false);
                         return new ZlibBuffer(compressedStream, Ownership.Dispose);
                     }
-                    else if (compressionAttribute.CompressionType == 4)
+                    if (compressionAttribute.CompressionType == 4)
                     {
                         // The data is stored in the resource fork.
-                        FileBuffer buffer = new FileBuffer(_context, fileInfo.ResourceFork, fileInfo.FileId);
+                        FileBuffer buffer = new FileBuffer(Context, fileInfo.ResourceFork, fileInfo.FileId);
                         CompressionResourceHeader compressionFork = new CompressionResourceHeader();
                         byte[] compressionForkData = new byte[CompressionResourceHeader.Size];
                         buffer.Read(0, compressionForkData, 0, CompressionResourceHeader.Size);
@@ -168,7 +168,7 @@ namespace DiscUtils.HfsPlus
                             byte[] blockData = new byte[CompressionResourceBlock.Size];
                             buffer.Read(
                                 compressionFork.HeaderSize + CompressionResourceBlockHead.Size +
-                                i*CompressionResourceBlock.Size,
+                                i * CompressionResourceBlock.Size,
                                 blockData,
                                 0,
                                 blockData.Length);
@@ -192,27 +192,12 @@ namespace DiscUtils.HfsPlus
                         ConcatStream concatStream = new ConcatStream(Ownership.Dispose, streams);
                         return new ZlibBuffer(concatStream, Ownership.Dispose);
                     }
-                    else
-                    {
-                        // Fall back to the default behavior.
-                        return new FileBuffer(_context, fileInfo.DataFork, fileInfo.FileId);
-                    }
+
+                    // Fall back to the default behavior.
+                    return new FileBuffer(Context, fileInfo.DataFork, fileInfo.FileId);
                 }
-                else
-                {
-                    return new FileBuffer(_context, fileInfo.DataFork, fileInfo.FileId);
-                }
+                return new FileBuffer(Context, fileInfo.DataFork, fileInfo.FileId);
             }
-        }
-
-        protected Context Context
-        {
-            get { return _context; }
-        }
-
-        protected CatalogNodeId NodeId
-        {
-            get { return _nodeId; }
         }
 
         public SparseStream CreateStream(string name)

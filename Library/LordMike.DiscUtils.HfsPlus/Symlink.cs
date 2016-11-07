@@ -1,6 +1,6 @@
-﻿using DiscUtils.Vfs;
-using System.IO;
+﻿using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
 {
@@ -9,9 +9,7 @@ namespace DiscUtils.HfsPlus
         private string _targetPath;
 
         public Symlink(Context context, CatalogNodeId nodeId, CommonCatalogFileInfo catalogInfo)
-            : base(context, nodeId, catalogInfo)
-        {
-        }
+            : base(context, nodeId, catalogInfo) {}
 
         public string TargetPath
         {
@@ -19,7 +17,7 @@ namespace DiscUtils.HfsPlus
             {
                 if (_targetPath == null)
                 {
-                    using (BufferStream stream = new BufferStream(this.FileContent, FileAccess.Read))
+                    using (BufferStream stream = new BufferStream(FileContent, FileAccess.Read))
                     using (StreamReader reader = new StreamReader(stream))
                     {
                         _targetPath = reader.ReadToEnd();

@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     /// <summary>
     /// Class that interprets Apple's HFS+ file system, found in DMG files.
     /// </summary>
@@ -37,9 +36,7 @@ namespace DiscUtils.HfsPlus
         /// </summary>
         /// <param name="stream">A stream containing the file system.</param>
         public HfsPlusFileSystem(Stream stream)
-            : base(new HfsPlusFileSystemImpl(stream))
-        {
-        }
+            : base(new HfsPlusFileSystemImpl(stream)) {}
 
         /// <summary>
         /// Gets the Unix (BSD) file information about a file or directory.

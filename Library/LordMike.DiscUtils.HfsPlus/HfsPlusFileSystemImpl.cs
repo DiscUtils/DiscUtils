@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal sealed class HfsPlusFileSystemImpl : VfsFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
         public HfsPlusFileSystemImpl(Stream s)
@@ -38,7 +37,7 @@ namespace DiscUtils.HfsPlus
             VolumeHeader hdr = new VolumeHeader();
             hdr.ReadFrom(headerBuf, 0);
 
-            Context = new HfsPlus.Context();
+            Context = new Context();
             Context.VolumeStream = s;
             Context.VolumeHeader = hdr;
 
@@ -57,7 +56,12 @@ namespace DiscUtils.HfsPlus
             rootThread.ReadFrom(rootThreadData, 0);
             byte[] rootDirEntryData = Context.Catalog.Find(new CatalogKey(rootThread.ParentId, rootThread.Name));
             DirEntry rootDirEntry = new DirEntry(rootThread.Name, rootDirEntryData);
-            RootDirectory = (Directory) GetFile(rootDirEntry);
+            RootDirectory = (Directory)GetFile(rootDirEntry);
+        }
+
+        public override string FriendlyName
+        {
+            get { return "Apple HFS+"; }
         }
 
         public override string VolumeLabel
@@ -70,11 +74,6 @@ namespace DiscUtils.HfsPlus
 
                 return rootThread.Name;
             }
-        }
-
-        public override string FriendlyName
-        {
-            get { return "Apple HFS+"; }
         }
 
         public override bool CanWrite
@@ -99,14 +98,11 @@ namespace DiscUtils.HfsPlus
             {
                 return new Directory(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
             }
-            else if (dirEntry.IsSymlink)
+            if (dirEntry.IsSymlink)
             {
                 return new Symlink(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
             }
-            else
-            {
-                return new File(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
-            }
+            return new File(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
         }
     }
 }

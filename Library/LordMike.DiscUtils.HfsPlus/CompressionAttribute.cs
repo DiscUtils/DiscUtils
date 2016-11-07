@@ -28,54 +28,42 @@ namespace DiscUtils.HfsPlus
 {
     internal class CompressionAttribute
     {
-        private uint _recordType;
-        private uint _reserved1;
-        private uint _reserved2;
-        private uint _attrSize;
         private byte _attrData1;
         private byte _attrData2;
         private uint _compressionMagic;
-        private uint _compressionType;
-        private uint _uncompressedSize;
+        private uint _recordType;
+        private uint _reserved1;
+        private uint _reserved2;
         private uint _reserved3;
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            _recordType = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            _reserved1 = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            _reserved1 = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            _attrSize = Utilities.ToUInt32BigEndian(buffer, offset + 12);
-            _compressionMagic = Utilities.ToUInt32BigEndian(buffer, offset + 16);
-            _compressionType = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            _uncompressedSize = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            _reserved3 = Utilities.ToUInt32BigEndian(buffer, offset + 28);
-
-            return Size;
-        }
+        public uint AttrSize { get; private set; }
 
         public string CompressionMagic
         {
-            get { return Encoding.ASCII.GetString(BitConverter.GetBytes(this._compressionMagic)); }
+            get { return Encoding.ASCII.GetString(BitConverter.GetBytes(_compressionMagic)); }
         }
+
+        public uint CompressionType { get; private set; }
 
         public static int Size
         {
             get { return 32; }
         }
 
-        public uint AttrSize
-        {
-            get { return _attrSize; }
-        }
+        public uint UncompressedSize { get; private set; }
 
-        public uint CompressionType
+        public int ReadFrom(byte[] buffer, int offset)
         {
-            get { return _compressionType; }
-        }
+            _recordType = Utilities.ToUInt32BigEndian(buffer, offset + 0);
+            _reserved1 = Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            _reserved1 = Utilities.ToUInt32BigEndian(buffer, offset + 8);
+            AttrSize = Utilities.ToUInt32BigEndian(buffer, offset + 12);
+            _compressionMagic = Utilities.ToUInt32BigEndian(buffer, offset + 16);
+            CompressionType = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
+            UncompressedSize = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
+            _reserved3 = Utilities.ToUInt32BigEndian(buffer, offset + 28);
 
-        public uint UncompressedSize
-        {
-            get { return _uncompressedSize; }
+            return Size;
         }
     }
 }

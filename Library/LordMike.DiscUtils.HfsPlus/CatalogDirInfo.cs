@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class CatalogDirInfo : CommonCatalogFileInfo
     {
         public ushort Flags;

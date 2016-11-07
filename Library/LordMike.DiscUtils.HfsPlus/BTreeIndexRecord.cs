@@ -20,33 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class BTreeIndexRecord<TKey> : BTreeNodeRecord
         where TKey : BTreeKey, new()
     {
-        private int _size;
-        private TKey _key;
-        private uint _childId;
+        private readonly int _size;
 
         public BTreeIndexRecord(int size)
         {
             _size = size;
         }
 
-        public TKey Key
-        {
-            get { return _key; }
-        }
+        public uint ChildId { get; private set; }
 
-        public uint ChildId
-        {
-            get { return _childId; }
-        }
+        public TKey Key { get; private set; }
 
         public override int Size
         {
@@ -55,15 +46,15 @@ namespace DiscUtils.HfsPlus
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            _key = new TKey();
-            int keySize = _key.ReadFrom(buffer, offset);
+            Key = new TKey();
+            int keySize = Key.ReadFrom(buffer, offset);
 
             if ((keySize & 1) != 0)
             {
                 ++keySize;
             }
 
-            _childId = Utilities.ToUInt32BigEndian(buffer, offset + keySize);
+            ChildId = Utilities.ToUInt32BigEndian(buffer, offset + keySize);
 
             return _size;
         }
@@ -75,7 +66,7 @@ namespace DiscUtils.HfsPlus
 
         public override string ToString()
         {
-            return _key + ":" + _childId;
+            return Key + ":" + ChildId;
         }
     }
 }

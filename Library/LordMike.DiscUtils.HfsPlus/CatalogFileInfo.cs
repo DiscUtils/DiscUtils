@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class CatalogFileInfo : CommonCatalogFileInfo
     {
-        public ushort Flags;
-        public FileInfo FileInfo;
         public ForkData DataFork;
+        public FileInfo FileInfo;
+        public ushort Flags;
         public ForkData ResourceFork;
 
         public override int Size

@@ -20,49 +20,47 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-    using System.Collections.Generic;
-
     internal abstract class BTreeNode : IByteArraySerializable
     {
-        private BTree _tree;
-        private BTreeNodeDescriptor _descriptor;
-        private IList<BTreeNodeRecord> _records;
-
         public BTreeNode(BTree tree, BTreeNodeDescriptor descriptor)
         {
-            _tree = tree;
-            _descriptor = descriptor;
+            Tree = tree;
+            Descriptor = descriptor;
         }
+
+        protected BTreeNodeDescriptor Descriptor { get; }
+
+        public IList<BTreeNodeRecord> Records { get; private set; }
+
+        protected BTree Tree { get; }
 
         public int Size
         {
-            get { return _tree.NodeSize; }
+            get { return Tree.NodeSize; }
         }
 
-        public IList<BTreeNodeRecord> Records
+        public int ReadFrom(byte[] buffer, int offset)
         {
-            get { return _records; }
+            Records = ReadRecords(buffer, offset);
+
+            return 0;
         }
 
-        protected BTree Tree
+        public void WriteTo(byte[] buffer, int offset)
         {
-            get { return _tree; }
-        }
-
-        protected BTreeNodeDescriptor Descriptor
-        {
-            get { return _descriptor; }
+            throw new NotImplementedException();
         }
 
         public static BTreeNode ReadNode(BTree tree, byte[] buffer, int offset)
         {
             BTreeNodeDescriptor descriptor =
-                (BTreeNodeDescriptor) Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
+                Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
 
             switch (descriptor.Kind)
             {
@@ -80,7 +78,7 @@ namespace DiscUtils.HfsPlus
             where TKey : BTreeKey, new()
         {
             BTreeNodeDescriptor descriptor =
-                (BTreeNodeDescriptor) Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
+                Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
 
             switch (descriptor.Kind)
             {
@@ -93,18 +91,6 @@ namespace DiscUtils.HfsPlus
                 default:
                     throw new NotImplementedException("Unrecognized BTree node kind: " + descriptor.Kind);
             }
-        }
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            _records = ReadRecords(buffer, offset);
-
-            return 0;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
         }
 
         protected virtual IList<BTreeNodeRecord> ReadRecords(byte[] buffer, int offset)

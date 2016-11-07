@@ -20,39 +20,52 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.Ext
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class DirEntry : VfsDirEntry
     {
-        private DirectoryRecord _record;
-
         public DirEntry(DirectoryRecord record)
         {
-            _record = record;
+            Record = record;
         }
 
-        public override bool IsDirectory
+        public override DateTime CreationTimeUtc
         {
-            get { return _record.FileType == DirectoryRecord.FileTypeDirectory; }
+            get { throw new NotSupportedException(); }
         }
 
-        public override bool IsSymlink
+        public override FileAttributes FileAttributes
         {
-            get { return _record.FileType == DirectoryRecord.FileTypeSymlink; }
+            get { throw new NotSupportedException(); }
         }
 
         public override string FileName
         {
-            get { return _record.Name; }
+            get { return Record.Name; }
+        }
+
+        public override bool HasVfsFileAttributes
+        {
+            get { return false; }
         }
 
         public override bool HasVfsTimeInfo
         {
             get { return false; }
+        }
+
+        public override bool IsDirectory
+        {
+            get { return Record.FileType == DirectoryRecord.FileTypeDirectory; }
+        }
+
+        public override bool IsSymlink
+        {
+            get { return Record.FileType == DirectoryRecord.FileTypeSymlink; }
         }
 
         public override DateTime LastAccessTimeUtc
@@ -65,34 +78,16 @@ namespace DiscUtils.Ext
             get { throw new NotSupportedException(); }
         }
 
-        public override DateTime CreationTimeUtc
-        {
-            get { throw new NotSupportedException(); }
-        }
-
-        public override bool HasVfsFileAttributes
-        {
-            get { return false; }
-        }
-
-        public override FileAttributes FileAttributes
-        {
-            get { throw new NotSupportedException(); }
-        }
+        public DirectoryRecord Record { get; }
 
         public override long UniqueCacheId
         {
-            get { return _record.Inode; }
-        }
-
-        public DirectoryRecord Record
-        {
-            get { return _record; }
+            get { return Record.Inode; }
         }
 
         public override string ToString()
         {
-            return _record.Name ?? "(no name)";
+            return Record.Name ?? "(no name)";
         }
     }
 }

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ext
 {
-    using System;
-
     /// <summary>
     /// Feature flags for features backwards compatible with read-only mounting.
     /// </summary>
@@ -68,6 +68,6 @@ namespace DiscUtils.Ext
         /// <summary>
         /// Ext4 feature for storage of block groups.
         /// </summary>
-        FlexBlockGroups = 0x0200,
+        FlexBlockGroups = 0x0200
     }
 }

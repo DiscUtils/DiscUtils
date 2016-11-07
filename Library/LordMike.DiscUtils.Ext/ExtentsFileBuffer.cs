@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
-    internal class ExtentsFileBuffer : DiscUtils.Buffer
+    internal class ExtentsFileBuffer : Buffer
     {
-        private Context _context;
-        private Inode _inode;
+        private readonly Context _context;
+        private readonly Inode _inode;
 
         public ExtentsFileBuffer(Context context, Inode inode)
         {
@@ -64,14 +63,14 @@ namespace DiscUtils.Ext
             long blockSize = _context.SuperBlock.BlockSize;
 
             int totalRead = 0;
-            int totalBytesRemaining = (int) Math.Min(count, _inode.FileSize - pos);
+            int totalBytesRemaining = (int)Math.Min(count, _inode.FileSize - pos);
 
             ExtentBlock extents = _inode.Extents;
 
             while (totalBytesRemaining > 0)
             {
-                uint logicalBlock = (uint) ((pos + totalRead)/blockSize);
-                int blockOffset = (int) ((pos + totalRead) - (logicalBlock*blockSize));
+                uint logicalBlock = (uint)((pos + totalRead) / blockSize);
+                int blockOffset = (int)(pos + totalRead - logicalBlock * blockSize);
 
                 int numRead = 0;
 
@@ -80,23 +79,23 @@ namespace DiscUtils.Ext
                 {
                     throw new IOException("Unable to find extent for block " + logicalBlock);
                 }
-                else if (extent.FirstLogicalBlock > logicalBlock)
+                if (extent.FirstLogicalBlock > logicalBlock)
                 {
                     numRead =
                         (int)
                         Math.Min(totalBytesRemaining,
-                            ((extent.FirstLogicalBlock - logicalBlock)*blockSize) - blockOffset);
+                            (extent.FirstLogicalBlock - logicalBlock) * blockSize - blockOffset);
                     Array.Clear(buffer, offset + totalRead, numRead);
                 }
                 else
                 {
-                    long physicalBlock = (logicalBlock - extent.FirstLogicalBlock) + (long) extent.FirstPhysicalBlock;
+                    long physicalBlock = logicalBlock - extent.FirstLogicalBlock + (long)extent.FirstPhysicalBlock;
                     int toRead =
                         (int)
                         Math.Min(totalBytesRemaining,
-                            ((extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock))*blockSize) - blockOffset);
+                            (extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock)) * blockSize - blockOffset);
 
-                    _context.RawStream.Position = (physicalBlock*blockSize) + blockOffset;
+                    _context.RawStream.Position = physicalBlock * blockSize + blockOffset;
                     numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
                 }
 
@@ -120,7 +119,7 @@ namespace DiscUtils.Ext
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             return StreamExtent.Intersect(
-                new StreamExtent[] {new StreamExtent(0, Capacity)},
+                new[] { new StreamExtent(0, Capacity) },
                 new StreamExtent(start, count));
         }
 
@@ -134,7 +133,7 @@ namespace DiscUtils.Ext
                 {
                     return null;
                 }
-                else if (node.Index[0].FirstLogicalBlock >= logicalBlock)
+                if (node.Index[0].FirstLogicalBlock >= logicalBlock)
                 {
                     idxEntry = node.Index[0];
                 }
@@ -158,7 +157,7 @@ namespace DiscUtils.Ext
                 ExtentBlock subBlock = LoadExtentBlock(idxEntry);
                 return FindExtent(subBlock, logicalBlock);
             }
-            else if (node.Extents != null)
+            if (node.Extents != null)
             {
                 Extent entry = null;
 
@@ -166,19 +165,16 @@ namespace DiscUtils.Ext
                 {
                     return null;
                 }
-                else if (node.Extents[0].FirstLogicalBlock >= logicalBlock)
+                if (node.Extents[0].FirstLogicalBlock >= logicalBlock)
                 {
                     return node.Extents[0];
                 }
-                else
+                for (int i = 0; i < node.Extents.Length; ++i)
                 {
-                    for (int i = 0; i < node.Extents.Length; ++i)
+                    if (node.Extents[i].FirstLogicalBlock > logicalBlock)
                     {
-                        if (node.Extents[i].FirstLogicalBlock > logicalBlock)
-                        {
-                            entry = node.Extents[i - 1];
-                            break;
-                        }
+                        entry = node.Extents[i - 1];
+                        break;
                     }
                 }
 
@@ -189,17 +185,14 @@ namespace DiscUtils.Ext
 
                 return entry;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         private ExtentBlock LoadExtentBlock(ExtentIndex idxEntry)
         {
             uint blockSize = _context.SuperBlock.BlockSize;
-            _context.RawStream.Position = idxEntry.LeafPhysicalBlock*blockSize;
-            byte[] buffer = Utilities.ReadFully(_context.RawStream, (int) blockSize);
+            _context.RawStream.Position = idxEntry.LeafPhysicalBlock * blockSize;
+            byte[] buffer = Utilities.ReadFully(_context.RawStream, (int)blockSize);
             ExtentBlock subBlock = Utilities.ToStruct<ExtentBlock>(buffer, 0);
             return subBlock;
         }

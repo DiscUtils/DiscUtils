@@ -26,30 +26,21 @@ namespace DiscUtils.HfsPlus
 {
     internal class CompressionResourceBlockHead
     {
-        private uint _dataSize;
-        private uint _numBlocks;
+        public uint DataSize { get; private set; }
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            _dataSize = Utilities.ToUInt32BigEndian(buffer, offset);
-            _numBlocks = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-
-            return Size;
-        }
+        public uint NumBlocks { get; private set; }
 
         public static int Size
         {
             get { return 8; }
         }
 
-        public uint DataSize
+        public int ReadFrom(byte[] buffer, int offset)
         {
-            get { return _dataSize; }
-        }
+            DataSize = Utilities.ToUInt32BigEndian(buffer, offset);
+            NumBlocks = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
 
-        public uint NumBlocks
-        {
-            get { return _numBlocks; }
+            return Size;
         }
     }
 }

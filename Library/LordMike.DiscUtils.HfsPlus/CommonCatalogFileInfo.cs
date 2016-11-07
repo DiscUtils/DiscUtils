@@ -20,29 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal abstract class CommonCatalogFileInfo : IByteArraySerializable
     {
-        public CatalogRecordType RecordType;
-        public CatalogNodeId FileId;
-        public DateTime CreateTime;
-        public DateTime ContentModifyTime;
-        public DateTime AttributeModifyTime;
         public DateTime AccessTime;
+        public DateTime AttributeModifyTime;
         public DateTime BackupTime;
+        public DateTime ContentModifyTime;
+        public DateTime CreateTime;
+        public CatalogNodeId FileId;
         public UnixFileSystemInfo FileSystemInfo;
+        public CatalogRecordType RecordType;
         public uint UnixSpecialField;
 
         public abstract int Size { get; }
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            RecordType = (CatalogRecordType) Utilities.ToInt16BigEndian(buffer, offset + 0);
+            RecordType = (CatalogRecordType)Utilities.ToInt16BigEndian(buffer, offset + 0);
             FileId = Utilities.ToUInt32BigEndian(buffer, offset + 8);
             CreateTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 12);
             ContentModifyTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 16);

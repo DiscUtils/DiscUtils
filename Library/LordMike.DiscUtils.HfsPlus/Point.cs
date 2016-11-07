@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class Point : IByteArraySerializable
     {
-        public short Vertical;
         public short Horizontal;
+        public short Vertical;
 
         public int Size
         {

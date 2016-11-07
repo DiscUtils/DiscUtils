@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ext
 {
-    using System;
-
     /// <summary>
     /// Feature flags for features backwards compatible with read-only mounting.
     /// </summary>
@@ -63,6 +63,6 @@ namespace DiscUtils.Ext
         /// <summary>
         /// Ext4 feature - extra inode size.
         /// </summary>
-        ExtraInodeSize,
+        ExtraInodeSize
     }
 }

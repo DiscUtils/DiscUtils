@@ -20,28 +20,27 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal class BTreeHeaderRecord : BTreeNodeRecord
     {
-        public ushort TreeDepth;
-        public uint RootNode;
-        public uint NumLeafRecords;
-        public uint FirstLeafNode;
-        public uint LastLeafNode;
-        public ushort NodeSize;
-        public ushort MaxKeyLength;
-        public uint TotalNodes;
-        public uint FreeNodes;
-        public ushort Res1;
-        public uint ClumpSize;
-        public byte TreeType;
-        public byte KeyCompareType;
         public uint Attributes;
+        public uint ClumpSize;
+        public uint FirstLeafNode;
+        public uint FreeNodes;
+        public byte KeyCompareType;
+        public uint LastLeafNode;
+        public ushort MaxKeyLength;
+        public ushort NodeSize;
+        public uint NumLeafRecords;
+        public ushort Res1;
+        public uint RootNode;
+        public uint TotalNodes;
+        public ushort TreeDepth;
+        public byte TreeType;
 
         public override int Size
         {

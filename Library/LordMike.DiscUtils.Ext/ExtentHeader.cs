@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-
     internal class ExtentHeader : IByteArraySerializable
     {
         public const ushort HeaderMagic = 0xf30a;
+        public ushort Depth;
+        public ushort Entries;
+        public uint Generation;
 
         public ushort Magic;
-        public ushort Entries;
         public ushort MaxEntries;
-        public ushort Depth;
-        public uint Generation;
 
         public int Size
         {

@@ -20,31 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class BTreeLeafRecord<TKey> : BTreeNodeRecord
         where TKey : BTreeKey, new()
     {
-        private int _size;
-        private TKey _key;
-        private byte[] _data;
+        private readonly int _size;
 
         public BTreeLeafRecord(int size)
         {
             _size = size;
         }
 
-        public TKey Key
-        {
-            get { return _key; }
-        }
+        public byte[] Data { get; private set; }
 
-        public byte[] Data
-        {
-            get { return _data; }
-        }
+        public TKey Key { get; private set; }
 
         public override int Size
         {
@@ -53,16 +45,16 @@ namespace DiscUtils.HfsPlus
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            _key = new TKey();
-            int keySize = _key.ReadFrom(buffer, offset);
+            Key = new TKey();
+            int keySize = Key.ReadFrom(buffer, offset);
 
             if ((keySize & 1) != 0)
             {
                 ++keySize;
             }
 
-            _data = new byte[_size - keySize];
-            Array.Copy(buffer, offset + keySize, _data, 0, _data.Length);
+            Data = new byte[_size - keySize];
+            Array.Copy(buffer, offset + keySize, Data, 0, Data.Length);
 
             return _size;
         }
@@ -74,7 +66,7 @@ namespace DiscUtils.HfsPlus
 
         public override string ToString()
         {
-            return _key + ":" + _data;
+            return Key + ":" + Data;
         }
     }
 }

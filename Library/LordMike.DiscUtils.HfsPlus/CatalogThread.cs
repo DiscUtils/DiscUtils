@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System;
-
     internal sealed class CatalogThread : IByteArraySerializable
     {
-        public CatalogRecordType RecordType;
-        public CatalogNodeId ParentId;
         public string Name;
+        public CatalogNodeId ParentId;
+        public CatalogRecordType RecordType;
 
         public int Size
         {
@@ -39,7 +38,7 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            RecordType = (CatalogRecordType) Utilities.ToInt16BigEndian(buffer, offset + 0);
+            RecordType = (CatalogRecordType)Utilities.ToInt16BigEndian(buffer, offset + 0);
             ParentId = Utilities.ToUInt32BigEndian(buffer, offset + 4);
             Name = HfsPlusUtilities.ReadUniStr255(buffer, offset + 8);
 

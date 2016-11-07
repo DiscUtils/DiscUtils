@@ -20,21 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.HfsPlus
 {
-    using System.Collections.Generic;
-
     internal sealed class BTreeLeafNode<TKey> : BTreeKeyedNode<TKey>
         where TKey : BTreeKey, new()
     {
         private BTreeLeafRecord<TKey>[] _records;
 
         public BTreeLeafNode(BTree tree, BTreeNodeDescriptor descriptor)
-            : base(tree, descriptor)
-        {
-        }
+            : base(tree, descriptor) {}
 
         public override byte[] FindKey(TKey key)
         {
@@ -78,7 +75,7 @@ namespace DiscUtils.HfsPlus
 
             for (int i = 0; i < numRecords; ++i)
             {
-                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - ((i + 2)*2));
+                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - (i + 2) * 2);
 
                 _records[i] = new BTreeLeafRecord<TKey>(end - start);
                 _records[i].ReadFrom(buffer, offset + start);

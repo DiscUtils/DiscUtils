@@ -20,22 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-
     internal class Extent : IByteArraySerializable
     {
         public uint FirstLogicalBlock;
-        public ushort NumBlocks;
         public ushort FirstPhysicalBlockHi;
         public uint FirstPhysicalBlockLow;
+        public ushort NumBlocks;
 
         public ulong FirstPhysicalBlock
         {
-            get { return FirstPhysicalBlockLow | (((ulong) FirstPhysicalBlockHi) << 32); }
+            get { return FirstPhysicalBlockLow | ((ulong)FirstPhysicalBlockHi << 32); }
         }
 
         public int Size

@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ext
 {
-    using System;
-    using System.Text;
-
     internal class DirectoryRecord : IByteArraySerializable
     {
         public const byte FileTypeUnknown = 0;
@@ -38,11 +37,11 @@ namespace DiscUtils.Ext
         public const byte FileTypeSocket = 6;
         public const byte FileTypeSymlink = 7;
 
-        public uint Inode;
-        public string Name;
+        private readonly Encoding _nameEncoding;
         public byte FileType;
 
-        private Encoding _nameEncoding;
+        public uint Inode;
+        public string Name;
 
         public DirectoryRecord(Encoding nameEncoding)
         {
