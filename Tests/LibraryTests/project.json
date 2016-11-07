@@ -3,7 +3,9 @@
   "buildOptions": {
     "debugType": "portable"
   },
+
   "testRunner": "nunit",
+
   "dependencies": {
     "DiscUtils.Diagnostics": "1.0.0-*",
     "dotnet-test-nunit": "3.4.0-beta-2",
@@ -11,8 +13,8 @@
     "LordMike.DiscUtils.Complete": "0.12.1-alpha",
     "NUnit": "3.4.1"
   },
+
   "frameworks": {
-    "net451": {
-    }
+    "net451": {}
   }
 }
