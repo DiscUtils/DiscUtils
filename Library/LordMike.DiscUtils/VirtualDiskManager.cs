@@ -6,6 +6,9 @@ using DiscUtils.Internal;
 
 namespace DiscUtils
 {
+    /// <summary>
+    /// Helps discover and use VirtualDiskFactory's
+    /// </summary>
     public static class VirtualDiskManager
     {
         static VirtualDiskManager()
@@ -36,6 +39,10 @@ namespace DiscUtils
 
         internal static Dictionary<string, VirtualDiskFactory> TypeMap { get; }
 
+        /// <summary>
+        /// Locates VirtualDiskFactory factories attributed with VirtualDiskFactoryAttribute, and types marked with VirtualDiskTransportAttribute, that are able to work with Virtual Disk types.
+        /// </summary>
+        /// <param name="assembly">An assembly to scan</param>
         public static void RegisterVirtualDiskTypes(Assembly assembly)
         {
             foreach (Type type in assembly.GetTypes())
