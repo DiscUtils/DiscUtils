@@ -26,7 +26,7 @@ namespace DiscUtils.Ntfs
     /// Enumeration of NTFS file attribute types.
     /// </summary>
     /// <remarks>Normally applications only create Data attributes.</remarks>
-    public enum AttributeType : int
+    public enum AttributeType
     {
         /// <summary>
         /// No type specified.

@@ -20,25 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class NtfsFileStream : SparseStream
     {
-        private DirectoryEntry _entry;
-
-        private File _file;
         private SparseStream _baseStream;
+        private readonly DirectoryEntry _entry;
+
+        private readonly File _file;
 
         private bool _isDirty;
 
         public NtfsFileStream(NtfsFileSystem fileSystem, DirectoryEntry entry, AttributeType attrType, string attrName,
-            FileAccess access)
+                              FileAccess access)
         {
             _entry = entry;
 
@@ -73,6 +72,15 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                AssertOpen();
+                return _baseStream.Extents;
+            }
+        }
+
         public override long Length
         {
             get
@@ -97,15 +105,6 @@ namespace DiscUtils.Ntfs
                 {
                     _baseStream.Position = value;
                 }
-            }
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                AssertOpen();
-                return _baseStream.Extents;
             }
         }
 

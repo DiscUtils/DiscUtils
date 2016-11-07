@@ -20,26 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class IndexNode
     {
-        private IndexNodeSaveFn _store;
-        private int _storageOverhead;
-        private long _totalSpaceAvailable;
+        private readonly List<IndexEntry> _entries;
 
-        private IndexHeader _header;
-
-        private Index _index;
-        private bool _isRoot;
-
-        private List<IndexEntry> _entries;
+        private readonly Index _index;
+        private readonly bool _isRoot;
+        private readonly int _storageOverhead;
+        private readonly IndexNodeSaveFn _store;
 
         public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, bool isRoot, uint allocatedSize)
         {
@@ -47,8 +42,8 @@ namespace DiscUtils.Ntfs
             _storageOverhead = storeOverhead;
             _index = index;
             _isRoot = isRoot;
-            _header = new IndexHeader(allocatedSize);
-            _totalSpaceAvailable = allocatedSize;
+            Header = new IndexHeader(allocatedSize);
+            TotalSpaceAvailable = allocatedSize;
 
             IndexEntry endEntry = new IndexEntry(_index.IsFileIndex);
             endEntry.Flags |= IndexEntryFlags.End;
@@ -56,8 +51,8 @@ namespace DiscUtils.Ntfs
             _entries = new List<IndexEntry>();
             _entries.Add(endEntry);
 
-            _header.OffsetToFirstEntry = (uint) (IndexHeader.Size + storeOverhead);
-            _header.TotalSizeOfEntries = (uint) (_header.OffsetToFirstEntry + endEntry.Size);
+            Header.OffsetToFirstEntry = (uint)(IndexHeader.Size + storeOverhead);
+            Header.TotalSizeOfEntries = (uint)(Header.OffsetToFirstEntry + endEntry.Size);
         }
 
         public IndexNode(IndexNodeSaveFn store, int storeOverhead, Index index, bool isRoot, byte[] buffer, int offset)
@@ -66,12 +61,12 @@ namespace DiscUtils.Ntfs
             _storageOverhead = storeOverhead;
             _index = index;
             _isRoot = isRoot;
-            _header = new IndexHeader(buffer, offset + 0);
-            _totalSpaceAvailable = _header.AllocatedSizeOfEntries;
+            Header = new IndexHeader(buffer, offset + 0);
+            TotalSpaceAvailable = Header.AllocatedSizeOfEntries;
 
             _entries = new List<IndexEntry>();
-            int pos = (int) _header.OffsetToFirstEntry;
-            while (pos < _header.TotalSizeOfEntries)
+            int pos = (int)Header.OffsetToFirstEntry;
+            while (pos < Header.TotalSizeOfEntries)
             {
                 IndexEntry entry = new IndexEntry(index.IsFileIndex);
                 entry.Read(buffer, offset + pos);
@@ -86,21 +81,12 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public IndexHeader Header
-        {
-            get { return _header; }
-        }
-
         public IEnumerable<IndexEntry> Entries
         {
             get { return _entries; }
         }
 
-        internal long TotalSpaceAvailable
-        {
-            get { return _totalSpaceAvailable; }
-            set { _totalSpaceAvailable = value; }
-        }
+        public IndexHeader Header { get; }
 
         private long SpaceFree
         {
@@ -114,9 +100,11 @@ namespace DiscUtils.Ntfs
 
                 int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
 
-                return _totalSpaceAvailable - (entriesTotal + firstEntryOffset);
+                return TotalSpaceAvailable - (entriesTotal + firstEntryOffset);
             }
         }
+
+        internal long TotalSpaceAvailable { get; set; }
 
         public void AddEntry(byte[] key, byte[] data)
         {
@@ -131,7 +119,7 @@ namespace DiscUtils.Ntfs
         {
             for (int i = 0; i < _entries.Count; ++i)
             {
-                var focus = _entries[i];
+                IndexEntry focus = _entries[i];
                 int compVal = _index.Compare(key, focus.KeyBuffer);
                 if (compVal == 0)
                 {
@@ -152,7 +140,7 @@ namespace DiscUtils.Ntfs
 
         public bool TryFindEntry(byte[] key, out IndexEntry entry, out IndexNode node)
         {
-            foreach (var focus in _entries)
+            foreach (IndexEntry focus in _entries)
             {
                 if ((focus.Flags & IndexEntryFlags.End) != 0)
                 {
@@ -164,20 +152,17 @@ namespace DiscUtils.Ntfs
 
                     break;
                 }
-                else
+                int compVal = _index.Compare(key, focus.KeyBuffer);
+                if (compVal == 0)
                 {
-                    int compVal = _index.Compare(key, focus.KeyBuffer);
-                    if (compVal == 0)
-                    {
-                        entry = focus;
-                        node = this;
-                        return true;
-                    }
-                    else if (compVal < 0 && (focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
-                    {
-                        IndexBlock subNode = _index.GetSubBlock(focus);
-                        return subNode.Node.TryFindEntry(key, out entry, out node);
-                    }
+                    entry = focus;
+                    node = this;
+                    return true;
+                }
+                if (compVal < 0 && (focus.Flags & (IndexEntryFlags.End | IndexEntryFlags.Node)) != 0)
+                {
+                    IndexBlock subNode = _index.GetSubBlock(focus);
+                    return subNode.Node.TryFindEntry(key, out entry, out node);
                 }
             }
 
@@ -190,19 +175,19 @@ namespace DiscUtils.Ntfs
         {
             bool haveSubNodes = false;
             uint totalEntriesSize = 0;
-            foreach (var entry in _entries)
+            foreach (IndexEntry entry in _entries)
             {
-                totalEntriesSize += (uint) entry.Size;
+                totalEntriesSize += (uint)entry.Size;
                 haveSubNodes |= (entry.Flags & IndexEntryFlags.Node) != 0;
             }
 
-            _header.OffsetToFirstEntry = (uint) Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
-            _header.TotalSizeOfEntries = totalEntriesSize + _header.OffsetToFirstEntry;
-            _header.HasChildNodes = (byte) (haveSubNodes ? 1 : 0);
-            _header.WriteTo(buffer, offset + 0);
+            Header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+            Header.TotalSizeOfEntries = totalEntriesSize + Header.OffsetToFirstEntry;
+            Header.HasChildNodes = (byte)(haveSubNodes ? 1 : 0);
+            Header.WriteTo(buffer, offset + 0);
 
-            int pos = (int) _header.OffsetToFirstEntry;
-            foreach (var entry in _entries)
+            int pos = (int)Header.OffsetToFirstEntry;
+            foreach (IndexEntry entry in _entries)
             {
                 entry.WriteTo(buffer, offset + pos);
                 pos += entry.Size;
@@ -214,7 +199,7 @@ namespace DiscUtils.Ntfs
         public int CalcEntriesSize()
         {
             int totalEntriesSize = 0;
-            foreach (var entry in _entries)
+            foreach (IndexEntry entry in _entries)
             {
                 totalEntriesSize += entry.Size;
             }
@@ -232,7 +217,7 @@ namespace DiscUtils.Ntfs
         {
             for (int i = 0; i < _entries.Count; ++i)
             {
-                var focus = _entries[i];
+                IndexEntry focus = _entries[i];
                 int compVal;
 
                 if ((focus.Flags & IndexEntryFlags.End) != 0)
@@ -240,14 +225,11 @@ namespace DiscUtils.Ntfs
                     exactMatch = false;
                     return i;
                 }
-                else
+                compVal = _index.Compare(key, focus.KeyBuffer);
+                if (compVal <= 0)
                 {
-                    compVal = _index.Compare(key, focus.KeyBuffer);
-                    if (compVal <= 0)
-                    {
-                        exactMatch = compVal == 0;
-                        return i;
-                    }
+                    exactMatch = compVal == 0;
+                    return i;
                 }
             }
 
@@ -305,7 +287,7 @@ namespace DiscUtils.Ntfs
                 _store();
                 return true;
             }
-            else if ((entry.Flags & IndexEntryFlags.Node) != 0)
+            if ((entry.Flags & IndexEntryFlags.Node) != 0)
             {
                 IndexNode childNode = _index.GetSubBlock(entry).Node;
                 IndexEntry newEntry;
@@ -434,10 +416,7 @@ namespace DiscUtils.Ntfs
             {
                 throw new InvalidOperationException("Entry already exists");
             }
-            else
-            {
-                _entries.Insert(index, newEntry);
-            }
+            _entries.Insert(index, newEntry);
         }
 
         private IndexEntry AddEntry(IndexEntry newEntry)
@@ -504,14 +483,11 @@ namespace DiscUtils.Ntfs
             {
                 return _index.GetSubBlock(_entries[_entries.Count - 1]).Node.FindLargestLeaf();
             }
-            else if (_entries.Count > 1 && (_entries[_entries.Count - 2].Flags & IndexEntryFlags.Node) == 0)
+            if (_entries.Count > 1 && (_entries[_entries.Count - 2].Flags & IndexEntryFlags.Node) == 0)
             {
                 return _entries[_entries.Count - 2];
             }
-            else
-            {
-                throw new IOException("Invalid index node found");
-            }
+            throw new IOException("Invalid index node found");
         }
 
         /// <summary>
@@ -521,7 +497,7 @@ namespace DiscUtils.Ntfs
         /// <returns>An entry that needs to be promoted to the parent node (if any).</returns>
         private IndexEntry Divide()
         {
-            int midEntryIdx = _entries.Count/2;
+            int midEntryIdx = _entries.Count / 2;
             IndexEntry midEntry = _entries[midEntryIdx];
 
             // The terminating entry (aka end) for the new node

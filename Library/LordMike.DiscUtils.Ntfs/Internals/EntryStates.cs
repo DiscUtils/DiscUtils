@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     /// <summary>
     /// Flags indicating the state of a Master File Table entry.
     /// </summary>

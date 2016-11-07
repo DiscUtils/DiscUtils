@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.Collections.Generic;
-
     internal sealed class SparseClusterStream : ClusterStream
     {
-        private NtfsAttribute _attr;
-        private RawClusterStream _rawStream;
+        private readonly NtfsAttribute _attr;
+        private readonly RawClusterStream _rawStream;
 
         public SparseClusterStream(NtfsAttribute attr, RawClusterStream rawStream)
         {
@@ -63,7 +62,7 @@ namespace DiscUtils.Ntfs
             _rawStream.TruncateToClusters(alignedNum);
             if (alignedNum != numVirtualClusters)
             {
-                _rawStream.ReleaseClusters(numVirtualClusters, (int) (alignedNum - numVirtualClusters));
+                _rawStream.ReleaseClusters(numVirtualClusters, (int)(alignedNum - numVirtualClusters));
             }
         }
 

@@ -20,98 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Compression;
+
 namespace DiscUtils.Ntfs
 {
-    using DiscUtils.Compression;
-
     /// <summary>
     /// Class whose instances hold options controlling how <see cref="NtfsFileSystem"/> works.
     /// </summary>
     public sealed class NtfsOptions : DiscFileSystemOptions
     {
-        private bool _hideMetaFiles;
-        private bool _hideHiddenFiles;
-        private bool _hideSystemFiles;
-        private bool _hideDosFileNames;
-        private ShortFileNameOption _shortNameCreation;
-        private BlockCompressor _compressor;
-        private bool _readCache;
-        private bool _fileLengthFromDirectoryEntries;
-
         internal NtfsOptions()
         {
-            _hideMetaFiles = true;
-            _hideHiddenFiles = true;
-            _hideSystemFiles = true;
-            _hideDosFileNames = true;
-            _compressor = new LZNT1();
-            _readCache = true;
-            _fileLengthFromDirectoryEntries = true;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to include file system meta-files when enumerating directories.
-        /// </summary>
-        /// <remarks>Meta-files are those with an MFT (Master File Table) index less than 24.</remarks>
-        public bool HideMetafiles
-        {
-            get { return _hideMetaFiles; }
-            set { _hideMetaFiles = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to include hidden files when enumerating directories.
-        /// </summary>
-        public bool HideHiddenFiles
-        {
-            get { return _hideHiddenFiles; }
-            set { _hideHiddenFiles = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to include system files when enumerating directories.
-        /// </summary>
-        public bool HideSystemFiles
-        {
-            get { return _hideSystemFiles; }
-            set { _hideSystemFiles = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to hide DOS (8.3-style) file names when enumerating directories.
-        /// </summary>
-        public bool HideDosFileNames
-        {
-            get { return _hideDosFileNames; }
-            set { _hideDosFileNames = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether short (8.3) file names are created automatically.
-        /// </summary>
-        public ShortFileNameOption ShortNameCreation
-        {
-            get { return _shortNameCreation; }
-            set { _shortNameCreation = value; }
+            HideMetafiles = true;
+            HideHiddenFiles = true;
+            HideSystemFiles = true;
+            HideDosFileNames = true;
+            Compressor = new LZNT1();
+            ReadCacheEnabled = true;
+            FileLengthFromDirectoryEntries = true;
         }
 
         /// <summary>
         /// Gets or sets the compression algorithm used for compressing files.
         /// </summary>
-        public BlockCompressor Compressor
-        {
-            get { return _compressor; }
-            set { _compressor = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether NTFS-level read caching is used.
-        /// </summary>
-        public bool ReadCacheEnabled
-        {
-            get { return _readCache; }
-            set { _readCache = value; }
-        }
+        public BlockCompressor Compressor { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether file length information comes from directory entries or file data.
@@ -123,11 +55,38 @@ namespace DiscUtils.Ntfs
         /// <para>Setting this value to <c>false</c>, will always retrieve the latest information from the underlying
         /// NTFS attribute information, which reflects the true size of the file.</para>
         /// </remarks>
-        public bool FileLengthFromDirectoryEntries
-        {
-            get { return _fileLengthFromDirectoryEntries; }
-            set { _fileLengthFromDirectoryEntries = value; }
-        }
+        public bool FileLengthFromDirectoryEntries { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to hide DOS (8.3-style) file names when enumerating directories.
+        /// </summary>
+        public bool HideDosFileNames { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to include hidden files when enumerating directories.
+        /// </summary>
+        public bool HideHiddenFiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to include file system meta-files when enumerating directories.
+        /// </summary>
+        /// <remarks>Meta-files are those with an MFT (Master File Table) index less than 24.</remarks>
+        public bool HideMetafiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to include system files when enumerating directories.
+        /// </summary>
+        public bool HideSystemFiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether NTFS-level read caching is used.
+        /// </summary>
+        public bool ReadCacheEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether short (8.3) file names are created automatically.
+        /// </summary>
+        public ShortFileNameOption ShortNameCreation { get; set; }
 
         /// <summary>
         /// Returns a string representation of the file system options.

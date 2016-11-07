@@ -20,49 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.IO;
-
     internal sealed class StandardInformation : IByteArraySerializable, IDiagnosticTraceable
     {
-        public DateTime CreationTime;
-        public DateTime ModificationTime;
-        public DateTime MftChangedTime;
-        public DateTime LastAccessTime;
-        public FileAttributeFlags FileAttributes;
-        public uint MaxVersions;
-        public uint Version;
-        public uint ClassId;
-        public uint OwnerId;
-        public uint SecurityId;
-        public ulong QuotaCharged;
-        public ulong UpdateSequenceNumber;
-
         private bool _haveExtraFields = true;
+        public uint ClassId;
+        public DateTime CreationTime;
+        public FileAttributeFlags FileAttributes;
+        public DateTime LastAccessTime;
+        public uint MaxVersions;
+        public DateTime MftChangedTime;
+        public DateTime ModificationTime;
+        public uint OwnerId;
+        public ulong QuotaCharged;
+        public uint SecurityId;
+        public ulong UpdateSequenceNumber;
+        public uint Version;
 
         public int Size
         {
             get { return _haveExtraFields ? 0x48 : 0x30; }
-        }
-
-        public static StandardInformation InitializeNewFile(File file, FileAttributeFlags flags)
-        {
-            DateTime now = DateTime.UtcNow;
-
-            NtfsStream siStream = file.CreateStream(AttributeType.StandardInformation, null);
-            StandardInformation si = new StandardInformation();
-            si.CreationTime = now;
-            si.ModificationTime = now;
-            si.MftChangedTime = now;
-            si.LastAccessTime = now;
-            si.FileAttributes = flags;
-            siStream.SetContent(si);
-
-            return si;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -71,7 +53,7 @@ namespace DiscUtils.Ntfs
             ModificationTime = ReadDateTime(buffer, 0x08);
             MftChangedTime = ReadDateTime(buffer, 0x10);
             LastAccessTime = ReadDateTime(buffer, 0x18);
-            FileAttributes = (FileAttributeFlags) Utilities.ToUInt32LittleEndian(buffer, 0x20);
+            FileAttributes = (FileAttributeFlags)Utilities.ToUInt32LittleEndian(buffer, 0x20);
             MaxVersions = Utilities.ToUInt32LittleEndian(buffer, 0x24);
             Version = Utilities.ToUInt32LittleEndian(buffer, 0x28);
             ClassId = Utilities.ToUInt32LittleEndian(buffer, 0x2C);
@@ -85,11 +67,8 @@ namespace DiscUtils.Ntfs
                 _haveExtraFields = true;
                 return 0x48;
             }
-            else
-            {
-                _haveExtraFields = false;
-                return 0x30;
-            }
+            _haveExtraFields = false;
+            return 0x30;
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -98,7 +77,7 @@ namespace DiscUtils.Ntfs
             Utilities.WriteBytesLittleEndian(ModificationTime.ToFileTimeUtc(), buffer, 0x08);
             Utilities.WriteBytesLittleEndian(MftChangedTime.ToFileTimeUtc(), buffer, 0x10);
             Utilities.WriteBytesLittleEndian(LastAccessTime.ToFileTimeUtc(), buffer, 0x18);
-            Utilities.WriteBytesLittleEndian((uint) FileAttributes, buffer, 0x20);
+            Utilities.WriteBytesLittleEndian((uint)FileAttributes, buffer, 0x20);
             Utilities.WriteBytesLittleEndian(MaxVersions, buffer, 0x24);
             Utilities.WriteBytesLittleEndian(Version, buffer, 0x28);
             Utilities.WriteBytesLittleEndian(ClassId, buffer, 0x2C);
@@ -127,9 +106,25 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "     Update Seq Num: " + UpdateSequenceNumber);
         }
 
+        public static StandardInformation InitializeNewFile(File file, FileAttributeFlags flags)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            NtfsStream siStream = file.CreateStream(AttributeType.StandardInformation, null);
+            StandardInformation si = new StandardInformation();
+            si.CreationTime = now;
+            si.ModificationTime = now;
+            si.MftChangedTime = now;
+            si.LastAccessTime = now;
+            si.FileAttributes = flags;
+            siStream.SetContent(si);
+
+            return si;
+        }
+
         internal static FileAttributes ConvertFlags(FileAttributeFlags flags, bool isDirectory)
         {
-            FileAttributes result = (FileAttributes) (((uint) flags) & 0xFFFF);
+            FileAttributes result = (FileAttributes)((uint)flags & 0xFFFF);
 
             if (isDirectory)
             {
@@ -141,7 +136,7 @@ namespace DiscUtils.Ntfs
 
         internal static FileAttributeFlags SetFileAttributes(FileAttributes newAttributes, FileAttributeFlags existing)
         {
-            return (FileAttributeFlags) (((uint) existing & 0xFFFF0000) | ((uint) newAttributes & 0xFFFF));
+            return (FileAttributeFlags)(((uint)existing & 0xFFFF0000) | ((uint)newAttributes & 0xFFFF));
         }
 
         private static DateTime ReadDateTime(byte[] buffer, int offset)

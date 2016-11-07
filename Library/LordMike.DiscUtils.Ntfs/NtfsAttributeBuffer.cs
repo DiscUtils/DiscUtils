@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
-    internal class NtfsAttributeBuffer : DiscUtils.Buffer, IMappedBuffer
+    internal class NtfsAttributeBuffer : Buffer, IMappedBuffer
     {
-        private File _file;
-        private NtfsAttribute _attribute;
+        private readonly NtfsAttribute _attribute;
+        private readonly File _file;
 
         public NtfsAttributeBuffer(File file, NtfsAttribute attribute)
         {
@@ -58,27 +57,24 @@ namespace DiscUtils.Ntfs
         {
             if (_attribute.IsNonResident)
             {
-                return ((IMappedBuffer) _attribute.RawBuffer).MapPosition(pos);
+                return ((IMappedBuffer)_attribute.RawBuffer).MapPosition(pos);
             }
-            else
-            {
-                AttributeReference attrRef = new AttributeReference(_file.MftReference,
-                    _attribute.PrimaryRecord.AttributeId);
-                ResidentAttributeRecord attrRecord = (ResidentAttributeRecord) _file.GetAttribute(attrRef).PrimaryRecord;
+            AttributeReference attrRef = new AttributeReference(_file.MftReference,
+                _attribute.PrimaryRecord.AttributeId);
+            ResidentAttributeRecord attrRecord = (ResidentAttributeRecord)_file.GetAttribute(attrRef).PrimaryRecord;
 
-                long attrStart = _file.GetAttributeOffset(attrRef);
-                long mftPos = attrStart + attrRecord.DataOffset + pos;
+            long attrStart = _file.GetAttributeOffset(attrRef);
+            long mftPos = attrStart + attrRecord.DataOffset + pos;
 
-                return
-                    _file.Context.GetFileByIndex(MasterFileTable.MftIndex)
-                        .GetAttribute(AttributeType.Data, null)
-                        .OffsetToAbsolutePos(mftPos);
-            }
+            return
+                _file.Context.GetFileByIndex(MasterFileTable.MftIndex)
+                     .GetAttribute(AttributeType.Data, null)
+                     .OffsetToAbsolutePos(mftPos);
         }
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
-            var record = _attribute.PrimaryRecord;
+            AttributeRecord record = _attribute.PrimaryRecord;
 
             if (!CanRead)
             {
@@ -93,7 +89,7 @@ namespace DiscUtils.Ntfs
             }
 
             // Limit read to length of attribute
-            int totalToRead = (int) Math.Min(count, Capacity - pos);
+            int totalToRead = (int)Math.Min(count, Capacity - pos);
             int toRead = totalToRead;
 
             // Handle uninitialized bytes at end of attribute
@@ -106,13 +102,11 @@ namespace DiscUtils.Ntfs
                     pos += totalToRead;
                     return totalToRead;
                 }
-                else
-                {
-                    // Partial read of uninitialized area
-                    Array.Clear(buffer, offset + (int) (record.InitializedDataLength - pos),
-                        (int) ((pos + toRead) - record.InitializedDataLength));
-                    toRead = (int) (record.InitializedDataLength - pos);
-                }
+
+                // Partial read of uninitialized area
+                Array.Clear(buffer, offset + (int)(record.InitializedDataLength - pos),
+                    (int)(pos + toRead - record.InitializedDataLength));
+                toRead = (int)(record.InitializedDataLength - pos);
             }
 
             int numRead = 0;
@@ -150,7 +144,7 @@ namespace DiscUtils.Ntfs
 
         public override void Write(long pos, byte[] buffer, int offset, int count)
         {
-            var record = _attribute.PrimaryRecord;
+            AttributeRecord record = _attribute.PrimaryRecord;
 
             if (!CanWrite)
             {
@@ -174,7 +168,7 @@ namespace DiscUtils.Ntfs
 
         public override void Clear(long pos, int count)
         {
-            var record = _attribute.PrimaryRecord;
+            AttributeRecord record = _attribute.PrimaryRecord;
 
             if (!CanWrite)
             {

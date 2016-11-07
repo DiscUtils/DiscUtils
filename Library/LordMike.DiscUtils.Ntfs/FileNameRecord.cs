@@ -20,31 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal class FileNameRecord : IByteArraySerializable, IDiagnosticTraceable, IEquatable<FileNameRecord>
     {
-        public FileRecordReference ParentDirectory;
-        public DateTime CreationTime;
-        public DateTime ModificationTime;
-        public DateTime MftChangedTime;
-        public DateTime LastAccessTime;
         public ulong AllocatedSize;
-        public ulong RealSize;
-        public FileAttributeFlags Flags;
+        public DateTime CreationTime;
         public uint EASizeOrReparsePointTag;
-        public FileNameNamespace FileNameNamespace;
         public string FileName;
+        public FileNameNamespace FileNameNamespace;
+        public FileAttributeFlags Flags;
+        public DateTime LastAccessTime;
+        public DateTime MftChangedTime;
+        public DateTime ModificationTime;
+        public FileRecordReference ParentDirectory;
+        public ulong RealSize;
 
-        public FileNameRecord()
-        {
-        }
+        public FileNameRecord() {}
 
         public FileNameRecord(FileNameRecord toCopy)
         {
@@ -68,12 +65,41 @@ namespace DiscUtils.Ntfs
 
         public int Size
         {
-            get { return 0x42 + (FileName.Length*2); }
+            get { return 0x42 + FileName.Length * 2; }
         }
 
-        public override string ToString()
+        public int ReadFrom(byte[] buffer, int offset)
         {
-            return FileName;
+            ParentDirectory = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x00));
+            CreationTime = ReadDateTime(buffer, offset + 0x08);
+            ModificationTime = ReadDateTime(buffer, offset + 0x10);
+            MftChangedTime = ReadDateTime(buffer, offset + 0x18);
+            LastAccessTime = ReadDateTime(buffer, offset + 0x20);
+            AllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
+            RealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
+            Flags = (FileAttributeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 0x38);
+            EASizeOrReparsePointTag = Utilities.ToUInt32LittleEndian(buffer, offset + 0x3C);
+            byte fnLen = buffer[offset + 0x40];
+            FileNameNamespace = (FileNameNamespace)buffer[offset + 0x41];
+            FileName = Encoding.Unicode.GetString(buffer, offset + 0x42, fnLen * 2);
+
+            return 0x42 + fnLen * 2;
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(ParentDirectory.Value, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian((ulong)CreationTime.ToFileTimeUtc(), buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian((ulong)ModificationTime.ToFileTimeUtc(), buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian((ulong)MftChangedTime.ToFileTimeUtc(), buffer, offset + 0x18);
+            Utilities.WriteBytesLittleEndian((ulong)LastAccessTime.ToFileTimeUtc(), buffer, offset + 0x20);
+            Utilities.WriteBytesLittleEndian(AllocatedSize, buffer, offset + 0x28);
+            Utilities.WriteBytesLittleEndian(RealSize, buffer, offset + 0x30);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 0x38);
+            Utilities.WriteBytesLittleEndian(EASizeOrReparsePointTag, buffer, offset + 0x3C);
+            buffer[offset + 0x40] = (byte)FileName.Length;
+            buffer[offset + 0x41] = (byte)FileNameNamespace;
+            Encoding.Unicode.GetBytes(FileName, 0, FileName.Length, buffer, offset + 0x42);
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -101,40 +127,6 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "          File Name: " + FileName);
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            ParentDirectory = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x00));
-            CreationTime = ReadDateTime(buffer, offset + 0x08);
-            ModificationTime = ReadDateTime(buffer, offset + 0x10);
-            MftChangedTime = ReadDateTime(buffer, offset + 0x18);
-            LastAccessTime = ReadDateTime(buffer, offset + 0x20);
-            AllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
-            RealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
-            Flags = (FileAttributeFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 0x38);
-            EASizeOrReparsePointTag = Utilities.ToUInt32LittleEndian(buffer, offset + 0x3C);
-            byte fnLen = buffer[offset + 0x40];
-            FileNameNamespace = (FileNameNamespace) buffer[offset + 0x41];
-            FileName = Encoding.Unicode.GetString(buffer, offset + 0x42, fnLen*2);
-
-            return 0x42 + (fnLen*2);
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            Utilities.WriteBytesLittleEndian((ulong) ParentDirectory.Value, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian((ulong) CreationTime.ToFileTimeUtc(), buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian((ulong) ModificationTime.ToFileTimeUtc(), buffer, offset + 0x10);
-            Utilities.WriteBytesLittleEndian((ulong) MftChangedTime.ToFileTimeUtc(), buffer, offset + 0x18);
-            Utilities.WriteBytesLittleEndian((ulong) LastAccessTime.ToFileTimeUtc(), buffer, offset + 0x20);
-            Utilities.WriteBytesLittleEndian(AllocatedSize, buffer, offset + 0x28);
-            Utilities.WriteBytesLittleEndian(RealSize, buffer, offset + 0x30);
-            Utilities.WriteBytesLittleEndian((uint) Flags, buffer, offset + 0x38);
-            Utilities.WriteBytesLittleEndian(EASizeOrReparsePointTag, buffer, offset + 0x3C);
-            buffer[offset + 0x40] = (byte) FileName.Length;
-            buffer[offset + 0x41] = (byte) FileNameNamespace;
-            Encoding.Unicode.GetBytes(FileName, 0, FileName.Length, buffer, offset + 0x42);
-        }
-
         public bool Equals(FileNameRecord other)
         {
             if (other == null)
@@ -147,15 +139,20 @@ namespace DiscUtils.Ntfs
                    && FileName == other.FileName;
         }
 
+        public override string ToString()
+        {
+            return FileName;
+        }
+
         internal static FileAttributeFlags SetAttributes(FileAttributes attrs, FileAttributeFlags flags)
         {
-            FileAttributes attrMask = ((FileAttributes) 0xFFFF) & ~FileAttributes.Directory;
-            return (FileAttributeFlags) (((uint) flags & 0xFFFF0000) | (uint) (attrs & attrMask));
+            FileAttributes attrMask = (FileAttributes)0xFFFF & ~FileAttributes.Directory;
+            return (FileAttributeFlags)(((uint)flags & 0xFFFF0000) | (uint)(attrs & attrMask));
         }
 
         internal static FileAttributes ConvertFlags(FileAttributeFlags flags)
         {
-            FileAttributes result = (FileAttributes) (((uint) flags) & 0xFFFF);
+            FileAttributes result = (FileAttributes)((uint)flags & 0xFFFF);
 
             if ((flags & FileAttributeFlags.Directory) != 0)
             {

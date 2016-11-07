@@ -20,10 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Ntfs.Internals
 {
-    using System.Collections.Generic;
-    using InternalMasterFileTable = DiscUtils.Ntfs.MasterFileTable;
+    using InternalMasterFileTable = Ntfs.MasterFileTable;
 
     /// <summary>
     /// Provides read-only access to the Master File Table of an NTFS file system.
@@ -95,8 +96,8 @@ namespace DiscUtils.Ntfs.Internals
         /// </summary>
         private const uint FirstNormalFileIndex = 24;
 
-        private INtfsContext _context;
-        private InternalMasterFileTable _mft;
+        private readonly INtfsContext _context;
+        private readonly InternalMasterFileTable _mft;
 
         internal MasterFileTable(INtfsContext context, InternalMasterFileTable mft)
         {
@@ -118,10 +119,7 @@ namespace DiscUtils.Ntfs.Internals
                 {
                     return new MasterFileTableEntry(_context, mftRecord);
                 }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
         }
 
@@ -132,7 +130,7 @@ namespace DiscUtils.Ntfs.Internals
         /// <returns>An enumeration of entries matching the filter.</returns>
         public IEnumerable<MasterFileTableEntry> GetEntries(EntryStates filter)
         {
-            foreach (var record in _mft.Records)
+            foreach (FileRecord record in _mft.Records)
             {
                 EntryStates state;
                 if ((record.Flags & FileRecordFlags.InUse) != 0)

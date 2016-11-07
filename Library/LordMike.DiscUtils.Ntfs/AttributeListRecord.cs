@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal class AttributeListRecord : IDiagnosticTraceable, IByteArraySerializable, IComparable<AttributeListRecord>
     {
-        public AttributeType Type;
-        public ushort RecordLength;
+        public ushort AttributeId;
+        public FileRecordReference BaseFileReference;
+        public string Name;
         public byte NameLength;
         public byte NameOffset;
-        public string Name;
+        public ushort RecordLength;
         public ulong StartVcn;
-        public FileRecordReference BaseFileReference;
-        public ushort AttributeId;
+        public AttributeType Type;
 
         public int Size
         {
@@ -48,28 +47,9 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public static AttributeListRecord FromAttribute(AttributeRecord attr, FileRecordReference mftRecord)
-        {
-            AttributeListRecord newRecord = new AttributeListRecord()
-            {
-                Type = attr.AttributeType,
-                Name = attr.Name,
-                StartVcn = 0,
-                BaseFileReference = mftRecord,
-                AttributeId = attr.AttributeId
-            };
-
-            if (attr.IsNonResident)
-            {
-                newRecord.StartVcn = (ulong) ((NonResidentAttributeRecord) attr).StartVcn;
-            }
-
-            return newRecord;
-        }
-
         public int ReadFrom(byte[] data, int offset)
         {
-            Type = (AttributeType) Utilities.ToUInt32LittleEndian(data, offset + 0x00);
+            Type = (AttributeType)Utilities.ToUInt32LittleEndian(data, offset + 0x00);
             RecordLength = Utilities.ToUInt16LittleEndian(data, offset + 0x04);
             NameLength = data[offset + 0x06];
             NameOffset = data[offset + 0x07];
@@ -79,7 +59,7 @@ namespace DiscUtils.Ntfs
 
             if (NameLength > 0)
             {
-                Name = Encoding.Unicode.GetString(data, offset + NameOffset, NameLength*2);
+                Name = Encoding.Unicode.GetString(data, offset + NameOffset, NameLength * 2);
             }
             else
             {
@@ -103,12 +83,12 @@ namespace DiscUtils.Ntfs
             }
             else
             {
-                NameLength = (byte) (Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset)/2);
+                NameLength = (byte)(Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset) / 2);
             }
 
-            RecordLength = (ushort) Utilities.RoundUp(NameOffset + (NameLength*2), 8);
+            RecordLength = (ushort)Utilities.RoundUp(NameOffset + NameLength * 2, 8);
 
-            Utilities.WriteBytesLittleEndian((uint) Type, buffer, offset);
+            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset);
             Utilities.WriteBytesLittleEndian(RecordLength, buffer, offset + 0x04);
             buffer[offset + 0x06] = NameLength;
             buffer[offset + 0x07] = NameOffset;
@@ -119,7 +99,7 @@ namespace DiscUtils.Ntfs
 
         public int CompareTo(AttributeListRecord other)
         {
-            int val = ((int) Type) - (int) other.Type;
+            int val = (int)Type - (int)other.Type;
             if (val != 0)
             {
                 return val;
@@ -131,7 +111,7 @@ namespace DiscUtils.Ntfs
                 return val;
             }
 
-            return ((int) StartVcn) - (int) other.StartVcn;
+            return (int)StartVcn - (int)other.StartVcn;
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -143,6 +123,25 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "            Start VCN: " + StartVcn);
             writer.WriteLine(indent + "  Base File Reference: " + BaseFileReference);
             writer.WriteLine(indent + "         Attribute ID: " + AttributeId);
+        }
+
+        public static AttributeListRecord FromAttribute(AttributeRecord attr, FileRecordReference mftRecord)
+        {
+            AttributeListRecord newRecord = new AttributeListRecord
+            {
+                Type = attr.AttributeType,
+                Name = attr.Name,
+                StartVcn = 0,
+                BaseFileReference = mftRecord,
+                AttributeId = attr.AttributeId
+            };
+
+            if (attr.IsNonResident)
+            {
+                newRecord.StartVcn = (ulong)((NonResidentAttributeRecord)attr).StartVcn;
+            }
+
+            return newRecord;
         }
     }
 }

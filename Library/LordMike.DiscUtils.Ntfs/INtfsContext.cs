@@ -4,40 +4,39 @@ namespace DiscUtils.Ntfs
 {
     internal interface INtfsContext
     {
-        Stream RawStream { get; }
+        AllocateFileFn AllocateFile { get; }
 
         AttributeDefinitions AttributeDefinitions { get; }
 
-        UpperCase UpperCase { get; }
-
         BiosParameterBlock BiosParameterBlock { get; }
-
-        MasterFileTable Mft { get; }
 
         ClusterBitmap ClusterBitmap { get; }
 
-        SecurityDescriptors SecurityDescriptors { get; }
-
-        ObjectIds ObjectIds { get; }
-
-        ReparsePoints ReparsePoints { get; }
-
-        Quotas Quotas { get; }
-
-        NtfsOptions Options { get; }
-
-        GetFileByIndexFn GetFileByIndex { get; }
-
-        GetFileByRefFn GetFileByRef { get; }
+        ForgetFileFn ForgetFile { get; }
 
         GetDirectoryByIndexFn GetDirectoryByIndex { get; }
 
         GetDirectoryByRefFn GetDirectoryByRef { get; }
 
-        AllocateFileFn AllocateFile { get; }
+        GetFileByIndexFn GetFileByIndex { get; }
 
-        ForgetFileFn ForgetFile { get; }
+        GetFileByRefFn GetFileByRef { get; }
+
+        MasterFileTable Mft { get; }
+
+        ObjectIds ObjectIds { get; }
+
+        NtfsOptions Options { get; }
+
+        Quotas Quotas { get; }
+        Stream RawStream { get; }
 
         bool ReadOnly { get; }
+
+        ReparsePoints ReparsePoints { get; }
+
+        SecurityDescriptors SecurityDescriptors { get; }
+
+        UpperCase UpperCase { get; }
     }
 }

@@ -20,137 +20,46 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Ntfs
 {
-    using System.IO;
-
     internal sealed class NtfsContext : INtfsContext
     {
-        private Stream _rawStream;
-        private AttributeDefinitions _attrDefs;
-        private UpperCase _upperCase;
-        private BiosParameterBlock _bpb;
-        private MasterFileTable _mft;
-        private ClusterBitmap _bitmap;
-        private SecurityDescriptors _securityDescriptors;
-        private ObjectIds _objectIds;
-        private ReparsePoints _reparsePoints;
-        private Quotas _quotas;
-        private NtfsOptions _options;
-        private GetFileByIndexFn _getFileByIndexFn;
-        private GetFileByRefFn _getFileByRefFn;
-        private GetDirectoryByIndexFn _getDirByIndexFn;
-        private GetDirectoryByRefFn _getDirByRefFn;
-        private AllocateFileFn _allocateFileFn;
-        private ForgetFileFn _forgetFileFn;
-        private bool _readOnly;
+        public Stream RawStream { get; set; }
 
-        public Stream RawStream
-        {
-            get { return _rawStream; }
-            set { _rawStream = value; }
-        }
+        public AttributeDefinitions AttributeDefinitions { get; set; }
 
-        public AttributeDefinitions AttributeDefinitions
-        {
-            get { return _attrDefs; }
-            set { _attrDefs = value; }
-        }
+        public UpperCase UpperCase { get; set; }
 
-        public UpperCase UpperCase
-        {
-            get { return _upperCase; }
-            set { _upperCase = value; }
-        }
+        public BiosParameterBlock BiosParameterBlock { get; set; }
 
-        public BiosParameterBlock BiosParameterBlock
-        {
-            get { return _bpb; }
-            set { _bpb = value; }
-        }
+        public MasterFileTable Mft { get; set; }
 
-        public MasterFileTable Mft
-        {
-            get { return _mft; }
-            set { _mft = value; }
-        }
+        public ClusterBitmap ClusterBitmap { get; set; }
 
-        public ClusterBitmap ClusterBitmap
-        {
-            get { return _bitmap; }
-            set { _bitmap = value; }
-        }
+        public SecurityDescriptors SecurityDescriptors { get; set; }
 
-        public SecurityDescriptors SecurityDescriptors
-        {
-            get { return _securityDescriptors; }
-            set { _securityDescriptors = value; }
-        }
+        public ObjectIds ObjectIds { get; set; }
 
-        public ObjectIds ObjectIds
-        {
-            get { return _objectIds; }
-            set { _objectIds = value; }
-        }
+        public ReparsePoints ReparsePoints { get; set; }
 
-        public ReparsePoints ReparsePoints
-        {
-            get { return _reparsePoints; }
-            set { _reparsePoints = value; }
-        }
+        public Quotas Quotas { get; set; }
 
-        public Quotas Quotas
-        {
-            get { return _quotas; }
-            set { _quotas = value; }
-        }
+        public NtfsOptions Options { get; set; }
 
-        public NtfsOptions Options
-        {
-            get { return _options; }
-            set { _options = value; }
-        }
+        public GetFileByIndexFn GetFileByIndex { get; set; }
 
-        public GetFileByIndexFn GetFileByIndex
-        {
-            get { return _getFileByIndexFn; }
-            set { _getFileByIndexFn = value; }
-        }
+        public GetFileByRefFn GetFileByRef { get; set; }
 
-        public GetFileByRefFn GetFileByRef
-        {
-            get { return _getFileByRefFn; }
-            set { _getFileByRefFn = value; }
-        }
+        public GetDirectoryByIndexFn GetDirectoryByIndex { get; set; }
 
-        public GetDirectoryByIndexFn GetDirectoryByIndex
-        {
-            get { return _getDirByIndexFn; }
-            set { _getDirByIndexFn = value; }
-        }
+        public GetDirectoryByRefFn GetDirectoryByRef { get; set; }
 
-        public GetDirectoryByRefFn GetDirectoryByRef
-        {
-            get { return _getDirByRefFn; }
-            set { _getDirByRefFn = value; }
-        }
+        public AllocateFileFn AllocateFile { get; set; }
 
-        public AllocateFileFn AllocateFile
-        {
-            get { return _allocateFileFn; }
-            set { _allocateFileFn = value; }
-        }
+        public ForgetFileFn ForgetFile { get; set; }
 
-        public ForgetFileFn ForgetFile
-        {
-            get { return _forgetFileFn; }
-            set { _forgetFileFn = value; }
-        }
-
-        public bool ReadOnly
-        {
-            get { return _readOnly; }
-            set { _readOnly = value; }
-        }
+        public bool ReadOnly { get; set; }
     }
 }

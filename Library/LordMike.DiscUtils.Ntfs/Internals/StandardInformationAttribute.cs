@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     /// <summary>
     /// Representation of an NTFS File Name attribute.
     /// </summary>
@@ -36,7 +35,7 @@ namespace DiscUtils.Ntfs.Internals
     /// </para>
     public sealed class StandardInformationAttribute : GenericAttribute
     {
-        private StandardInformation _si;
+        private readonly StandardInformation _si;
 
         internal StandardInformationAttribute(INtfsContext context, AttributeRecord record)
             : base(context, record)
@@ -44,62 +43,6 @@ namespace DiscUtils.Ntfs.Internals
             byte[] content = Utilities.ReadAll(Content);
             _si = new StandardInformation();
             _si.ReadFrom(content, 0);
-        }
-
-        /// <summary>
-        /// Gets the creation time of the file.
-        /// </summary>
-        public DateTime CreationTime
-        {
-            get { return _si.CreationTime; }
-        }
-
-        /// <summary>
-        /// Gets the modification time of the file.
-        /// </summary>
-        public DateTime ModificationTime
-        {
-            get { return _si.ModificationTime; }
-        }
-
-        /// <summary>
-        /// Gets the last time the Master File Table entry for the file was changed.
-        /// </summary>
-        public DateTime MasterFileTableChangedTime
-        {
-            get { return _si.MftChangedTime; }
-        }
-
-        /// <summary>
-        /// Gets the last access time of the file.
-        /// </summary>
-        public DateTime LastAccessTime
-        {
-            get { return _si.LastAccessTime; }
-        }
-
-        /// <summary>
-        /// Gets the attributes of the file, as stored by NTFS.
-        /// </summary>
-        public NtfsFileAttributes FileAttributes
-        {
-            get { return (NtfsFileAttributes) _si.FileAttributes; }
-        }
-
-        /// <summary>
-        /// Gets the maximum number of file versions (normally 0).
-        /// </summary>
-        public long MaxVersions
-        {
-            get { return _si.MaxVersions; }
-        }
-
-        /// <summary>
-        /// Gets the version number of the file (normally 0).
-        /// </summary>
-        public long Version
-        {
-            get { return _si.Version; }
         }
 
         /// <summary>
@@ -111,11 +54,75 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
+        /// Gets the creation time of the file.
+        /// </summary>
+        public DateTime CreationTime
+        {
+            get { return _si.CreationTime; }
+        }
+
+        /// <summary>
+        /// Gets the attributes of the file, as stored by NTFS.
+        /// </summary>
+        public NtfsFileAttributes FileAttributes
+        {
+            get { return (NtfsFileAttributes)_si.FileAttributes; }
+        }
+
+        /// <summary>
+        /// Gets the last update sequence number of the file (relates to the user-readable journal).
+        /// </summary>
+        public long JournalSequenceNumber
+        {
+            get { return (long)_si.UpdateSequenceNumber; }
+        }
+
+        /// <summary>
+        /// Gets the last access time of the file.
+        /// </summary>
+        public DateTime LastAccessTime
+        {
+            get { return _si.LastAccessTime; }
+        }
+
+        /// <summary>
+        /// Gets the last time the Master File Table entry for the file was changed.
+        /// </summary>
+        public DateTime MasterFileTableChangedTime
+        {
+            get { return _si.MftChangedTime; }
+        }
+
+        /// <summary>
+        /// Gets the maximum number of file versions (normally 0).
+        /// </summary>
+        public long MaxVersions
+        {
+            get { return _si.MaxVersions; }
+        }
+
+        /// <summary>
+        /// Gets the modification time of the file.
+        /// </summary>
+        public DateTime ModificationTime
+        {
+            get { return _si.ModificationTime; }
+        }
+
+        /// <summary>
         /// Gets the owner identity, for the purposes of quota allocation.
         /// </summary>
         public long OwnerId
         {
             get { return _si.OwnerId; }
+        }
+
+        /// <summary>
+        /// Gets the amount charged to the owners quota for this file.
+        /// </summary>
+        public long QuotaCharged
+        {
+            get { return (long)_si.QuotaCharged; }
         }
 
         /// <summary>
@@ -130,19 +137,11 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the amount charged to the owners quota for this file.
+        /// Gets the version number of the file (normally 0).
         /// </summary>
-        public long QuotaCharged
+        public long Version
         {
-            get { return (long) _si.QuotaCharged; }
-        }
-
-        /// <summary>
-        /// Gets the last update sequence number of the file (relates to the user-readable journal).
-        /// </summary>
-        public long JournalSequenceNumber
-        {
-            get { return (long) _si.UpdateSequenceNumber; }
+            get { return _si.Version; }
         }
     }
 }

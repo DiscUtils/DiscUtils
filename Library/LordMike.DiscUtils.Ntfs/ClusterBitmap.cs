@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class ClusterBitmap : IDisposable
     {
-        private File _file;
         private Bitmap _bitmap;
+        private readonly File _file;
+        private bool _fragmentedDiskMode;
 
         private long _nextDataCluster;
-        private bool _fragmentedDiskMode;
 
         public ClusterBitmap(File file)
         {
@@ -68,7 +67,7 @@ namespace DiscUtils.Ntfs
 
             long numFound = 0;
 
-            long totalClusters = _file.Context.RawStream.Length/_file.Context.BiosParameterBlock.BytesPerCluster;
+            long totalClusters = _file.Context.RawStream.Length / _file.Context.BiosParameterBlock.BytesPerCluster;
 
             if (isMft)
             {
@@ -100,29 +99,29 @@ namespace DiscUtils.Ntfs
                 // Try to find a contiguous range
                 if (numFound < count && !_fragmentedDiskMode)
                 {
-                    numFound += FindClusters(count - numFound, result, totalClusters/8, totalClusters, isMft, true,
-                        total/4);
+                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, true,
+                        total / 4);
                 }
 
                 if (numFound < count)
                 {
-                    numFound += FindClusters(count - numFound, result, totalClusters/8, totalClusters, isMft, false, 0);
+                    numFound += FindClusters(count - numFound, result, totalClusters / 8, totalClusters, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters/16, totalClusters/8, isMft, false, 0);
+                    numFound = FindClusters(count - numFound, result, totalClusters / 16, totalClusters / 8, isMft, false, 0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, totalClusters/32, totalClusters/16, isMft, false,
+                    numFound = FindClusters(count - numFound, result, totalClusters / 32, totalClusters / 16, isMft, false,
                         0);
                 }
 
                 if (numFound < count)
                 {
-                    numFound = FindClusters(count - numFound, result, 0, totalClusters/32, isMft, false, 0);
+                    numFound = FindClusters(count - numFound, result, 0, totalClusters / 32, isMft, false, 0);
                 }
             }
 
@@ -137,7 +136,7 @@ namespace DiscUtils.Ntfs
             // switch back if we found a resonable quantity in a single span.
             if ((numFound > 4 && result.Count == 1) || result.Count > 1)
             {
-                _fragmentedDiskMode = (numFound/result.Count) < 4;
+                _fragmentedDiskMode = numFound / result.Count < 4;
             }
 
             return result.ToArray();
@@ -150,7 +149,7 @@ namespace DiscUtils.Ntfs
 
         internal void FreeClusters(params Tuple<long, long>[] runs)
         {
-            foreach (var run in runs)
+            foreach (Tuple<long, long> run in runs)
             {
 #if NET20
                 _bitmap.MarkAbsentRange(run.Item1, run.Item2);
@@ -162,7 +161,7 @@ namespace DiscUtils.Ntfs
 
         internal void FreeClusters(params Range<long, long>[] runs)
         {
-            foreach (var run in runs)
+            foreach (Range<long, long> run in runs)
             {
                 _bitmap.MarkAbsentRange(run.Offset, run.Count);
             }
@@ -215,7 +214,7 @@ namespace DiscUtils.Ntfs
         /// <param name="headroom">Indicates how many clusters to skip before next allocation, to prevent fragmentation.</param>
         /// <returns>The number of clusters found in the range.</returns>
         private long FindClusters(long count, List<Tuple<long, long>> result, long start, long end, bool isMft,
-            bool contiguous, long headroom)
+                                  bool contiguous, long headroom)
         {
             long numFound = 0;
 
@@ -243,13 +242,13 @@ namespace DiscUtils.Ntfs
                     long runStart = focusCluster;
                     ++focusCluster;
 
-                    while (!_bitmap.IsPresent(focusCluster) && focusCluster - runStart < (count - numFound))
+                    while (!_bitmap.IsPresent(focusCluster) && focusCluster - runStart < count - numFound)
                     {
                         ++focusCluster;
                         ++numInspected;
                     }
 
-                    if (!contiguous || (focusCluster - runStart) == (count - numFound))
+                    if (!contiguous || focusCluster - runStart == count - numFound)
                     {
                         _bitmap.MarkPresentRange(runStart, focusCluster - runStart);
 

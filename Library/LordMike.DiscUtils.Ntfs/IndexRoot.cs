@@ -20,55 +20,58 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class IndexRoot : IByteArraySerializable, IDiagnosticTraceable
     {
         public const int HeaderOffset = 0x10;
 
-        private uint _attrType;
-        private AttributeCollationRule _collationRule;
-        private uint _indexAllocationEntrySize;
-        private byte _rawClustersPerIndexRecord;
+        public uint AttributeType { get; set; }
 
-        public uint AttributeType
-        {
-            get { return _attrType; }
-            set { _attrType = value; }
-        }
+        public AttributeCollationRule CollationRule { get; set; }
 
-        public AttributeCollationRule CollationRule
-        {
-            get { return _collationRule; }
-            set { _collationRule = value; }
-        }
+        public uint IndexAllocationSize { get; set; }
 
-        public uint IndexAllocationSize
-        {
-            get { return _indexAllocationEntrySize; }
-            set { _indexAllocationEntrySize = value; }
-        }
-
-        public byte RawClustersPerIndexRecord
-        {
-            get { return _rawClustersPerIndexRecord; }
-            set { _rawClustersPerIndexRecord = value; }
-        }
+        public byte RawClustersPerIndexRecord { get; set; }
 
         public int Size
         {
             get { return 16; }
         }
 
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            AttributeType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
+            CollationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, 0x04);
+            IndexAllocationSize = Utilities.ToUInt32LittleEndian(buffer, 0x08);
+            RawClustersPerIndexRecord = buffer[0x0C];
+            return 16;
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian(AttributeType, buffer, 0);
+            Utilities.WriteBytesLittleEndian((uint)CollationRule, buffer, 0x04);
+            Utilities.WriteBytesLittleEndian(IndexAllocationSize, buffer, 0x08);
+            Utilities.WriteBytesLittleEndian(RawClustersPerIndexRecord, buffer, 0x0C);
+        }
+
+        public void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "                Attr Type: " + AttributeType);
+            writer.WriteLine(indent + "           Collation Rule: " + CollationRule);
+            writer.WriteLine(indent + "         Index Alloc Size: " + IndexAllocationSize);
+            writer.WriteLine(indent + "  Raw Clusters Per Record: " + RawClustersPerIndexRecord);
+        }
+
         public IComparer<byte[]> GetCollator(UpperCase upCase)
         {
-            switch (_collationRule)
+            switch (CollationRule)
             {
                 case AttributeCollationRule.Filename:
                     return new FileNameComparer(upCase);
@@ -85,31 +88,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            _attrType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
-            _collationRule = (AttributeCollationRule) Utilities.ToUInt32LittleEndian(buffer, 0x04);
-            _indexAllocationEntrySize = Utilities.ToUInt32LittleEndian(buffer, 0x08);
-            _rawClustersPerIndexRecord = buffer[0x0C];
-            return 16;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            Utilities.WriteBytesLittleEndian(_attrType, buffer, 0);
-            Utilities.WriteBytesLittleEndian((uint) _collationRule, buffer, 0x04);
-            Utilities.WriteBytesLittleEndian(_indexAllocationEntrySize, buffer, 0x08);
-            Utilities.WriteBytesLittleEndian(_rawClustersPerIndexRecord, buffer, 0x0C);
-        }
-
-        public void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + "                Attr Type: " + _attrType);
-            writer.WriteLine(indent + "           Collation Rule: " + _collationRule);
-            writer.WriteLine(indent + "         Index Alloc Size: " + _indexAllocationEntrySize);
-            writer.WriteLine(indent + "  Raw Clusters Per Record: " + _rawClustersPerIndexRecord);
-        }
-
         private sealed class SecurityHashComparer : IComparer<byte[]>
         {
             public int Compare(byte[] x, byte[] y)
@@ -118,11 +96,11 @@ namespace DiscUtils.Ntfs
                 {
                     return 0;
                 }
-                else if (y == null)
+                if (y == null)
                 {
                     return -1;
                 }
-                else if (x == null)
+                if (x == null)
                 {
                     return 1;
                 }
@@ -134,7 +112,7 @@ namespace DiscUtils.Ntfs
                 {
                     return -1;
                 }
-                else if (xHash > yHash)
+                if (xHash > yHash)
                 {
                     return 1;
                 }
@@ -145,14 +123,11 @@ namespace DiscUtils.Ntfs
                 {
                     return -1;
                 }
-                else if (xId > yId)
+                if (xId > yId)
                 {
                     return 1;
                 }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
         }
 
@@ -164,11 +139,11 @@ namespace DiscUtils.Ntfs
                 {
                     return 0;
                 }
-                else if (y == null)
+                if (y == null)
                 {
                     return -1;
                 }
-                else if (x == null)
+                if (x == null)
                 {
                     return 1;
                 }
@@ -180,7 +155,7 @@ namespace DiscUtils.Ntfs
                 {
                     return -1;
                 }
-                else if (xVal > yVal)
+                if (xVal > yVal)
                 {
                     return 1;
                 }
@@ -193,29 +168,29 @@ namespace DiscUtils.Ntfs
         {
             public int Compare(byte[] x, byte[] y)
             {
-                for (int i = 0; i < x.Length/4; ++i)
+                for (int i = 0; i < x.Length / 4; ++i)
                 {
                     if (x == null && y == null)
                     {
                         return 0;
                     }
-                    else if (y == null)
+                    if (y == null)
                     {
                         return -1;
                     }
-                    else if (x == null)
+                    if (x == null)
                     {
                         return 1;
                     }
 
-                    uint xVal = Utilities.ToUInt32LittleEndian(x, i*4);
-                    uint yVal = Utilities.ToUInt32LittleEndian(y, i*4);
+                    uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
+                    uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);
 
                     if (xVal < yVal)
                     {
                         return -1;
                     }
-                    else if (xVal > yVal)
+                    if (xVal > yVal)
                     {
                         return 1;
                     }
@@ -227,7 +202,7 @@ namespace DiscUtils.Ntfs
 
         private sealed class FileNameComparer : IComparer<byte[]>
         {
-            private UpperCase _stringComparer;
+            private readonly UpperCase _stringComparer;
 
             public FileNameComparer(UpperCase upCase)
             {
@@ -240,11 +215,11 @@ namespace DiscUtils.Ntfs
                 {
                     return 0;
                 }
-                else if (y == null)
+                if (y == null)
                 {
                     return -1;
                 }
-                else if (x == null)
+                if (x == null)
                 {
                     return 1;
                 }
@@ -252,7 +227,7 @@ namespace DiscUtils.Ntfs
                 byte xFnLen = x[0x40];
                 byte yFnLen = y[0x40];
 
-                return _stringComparer.Compare(x, 0x42, xFnLen*2, y, 0x42, yFnLen*2);
+                return _stringComparer.Compare(x, 0x42, xFnLen * 2, y, 0x42, yFnLen * 2);
             }
         }
 
@@ -264,11 +239,11 @@ namespace DiscUtils.Ntfs
                 {
                     return 0;
                 }
-                else if (y == null)
+                if (y == null)
                 {
                     return -1;
                 }
-                else if (x == null)
+                if (x == null)
                 {
                     return 1;
                 }
@@ -276,7 +251,7 @@ namespace DiscUtils.Ntfs
                 int toComp = Math.Min(x.Length, y.Length);
                 for (int i = 0; i < toComp; ++i)
                 {
-                    int val = ((int) x[i]) - ((int) y[i]);
+                    int val = x[i] - y[i];
                     if (val != 0)
                     {
                         return val;
@@ -287,7 +262,7 @@ namespace DiscUtils.Ntfs
                 {
                     return -1;
                 }
-                else if (x.Length > y.Length)
+                if (x.Length > y.Length)
                 {
                     return 1;
                 }

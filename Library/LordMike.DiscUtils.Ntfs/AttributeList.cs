@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class AttributeList : IByteArraySerializable, IDiagnosticTraceable, ICollection<AttributeListRecord>
     {
-        private List<AttributeListRecord> _records;
+        private readonly List<AttributeListRecord> _records;
 
         public AttributeList()
         {
@@ -42,23 +41,13 @@ namespace DiscUtils.Ntfs
             get
             {
                 int total = 0;
-                foreach (var record in _records)
+                foreach (AttributeListRecord record in _records)
                 {
                     total += record.Size;
                 }
 
                 return total;
             }
-        }
-
-        public int Count
-        {
-            get { return _records.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -79,20 +68,21 @@ namespace DiscUtils.Ntfs
         public void WriteTo(byte[] buffer, int offset)
         {
             int pos = offset;
-            foreach (var record in _records)
+            foreach (AttributeListRecord record in _records)
             {
                 record.WriteTo(buffer, offset + pos);
                 pos += record.Size;
             }
         }
 
-        public void Dump(TextWriter writer, string indent)
+        public int Count
         {
-            writer.WriteLine(indent + "ATTRIBUTE LIST RECORDS");
-            foreach (AttributeListRecord r in _records)
-            {
-                r.Dump(writer, indent + "  ");
-            }
+            get { return _records.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return false; }
         }
 
         public void Add(AttributeListRecord item)
@@ -138,5 +128,14 @@ namespace DiscUtils.Ntfs
         }
 
         #endregion
+
+        public void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "ATTRIBUTE LIST RECORDS");
+            foreach (AttributeListRecord r in _records)
+            {
+                r.Dump(writer, indent + "  ");
+            }
+        }
     }
 }

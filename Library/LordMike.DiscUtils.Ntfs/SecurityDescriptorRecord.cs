@@ -20,23 +20,40 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-
     internal sealed class SecurityDescriptorRecord : IByteArraySerializable
     {
+        public uint EntrySize;
         public uint Hash;
         public uint Id;
         public long OffsetInFile;
-        public uint EntrySize;
         public byte[] SecurityDescriptor;
 
         public int Size
         {
             get { return SecurityDescriptor.Length + 0x14; }
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            Read(buffer, offset);
+            return SecurityDescriptor.Length + 0x14;
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            EntrySize = (uint)Size;
+
+            Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(OffsetInFile, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(EntrySize, buffer, offset + 0x10);
+
+            Array.Copy(SecurityDescriptor, 0, buffer, offset + 0x14, SecurityDescriptor.Length);
         }
 
         public bool Read(byte[] buffer, int offset)
@@ -52,28 +69,7 @@ namespace DiscUtils.Ntfs
                 Array.Copy(buffer, offset + 0x14, SecurityDescriptor, 0, SecurityDescriptor.Length);
                 return true;
             }
-            else
-            {
-                return false;
-            }
-        }
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            Read(buffer, offset);
-            return SecurityDescriptor.Length + 0x14;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            EntrySize = (uint) Size;
-
-            Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(OffsetInFile, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(EntrySize, buffer, offset + 0x10);
-
-            Array.Copy(SecurityDescriptor, 0, buffer, offset + 0x14, SecurityDescriptor.Length);
+            return false;
         }
     }
 }

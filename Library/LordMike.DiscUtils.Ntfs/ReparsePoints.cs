@@ -20,17 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.Globalization;
-    using System.IO;
-
     internal class ReparsePoints
     {
-        private IndexView<Key, Data> _index;
-        private File _file;
+        private readonly File _file;
+        private readonly IndexView<Key, Data> _index;
 
         public ReparsePoints(File file)
         {
@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs
         {
             writer.WriteLine(indent + "REPARSE POINT INDEX");
 
-            foreach (var entry in _index.Entries)
+            foreach (KeyValuePair<Key, Data> entry in _index.Entries)
             {
                 writer.WriteLine(indent + "  REPARSE POINT INDEX ENTRY");
                 writer.WriteLine(indent + "            Tag: " +
@@ -75,8 +75,8 @@ namespace DiscUtils.Ntfs
 
         internal sealed class Key : IByteArraySerializable
         {
-            public uint Tag;
             public FileRecordReference File;
+            public uint Tag;
 
             public int Size
             {
@@ -115,9 +115,7 @@ namespace DiscUtils.Ntfs
                 return 0;
             }
 
-            public void WriteTo(byte[] buffer, int offset)
-            {
-            }
+            public void WriteTo(byte[] buffer, int offset) {}
 
             public override string ToString()
             {

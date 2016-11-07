@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class CookedDataRuns
     {
-        private List<CookedDataRun> _runs;
-
         private int _firstDirty = int.MaxValue;
-        private int _lastDirty = 0;
+        private int _lastDirty;
+        private readonly List<CookedDataRun> _runs;
 
         public CookedDataRuns()
         {
@@ -44,20 +43,14 @@ namespace DiscUtils.Ntfs
             Append(rawRuns, attributeExtent);
         }
 
-        public long NextVirtualCluster
+        public int Count
         {
-            get
-            {
-                if (_runs.Count == 0)
-                {
-                    return 0;
-                }
-                else
-                {
-                    int lastRun = _runs.Count - 1;
-                    return _runs[lastRun].StartVcn + _runs[lastRun].Length;
-                }
-            }
+            get { return _runs.Count; }
+        }
+
+        public CookedDataRun this[int index]
+        {
+            get { return _runs[index]; }
         }
 
         public CookedDataRun Last
@@ -68,21 +61,21 @@ namespace DiscUtils.Ntfs
                 {
                     return null;
                 }
-                else
-                {
-                    return _runs[_runs.Count - 1];
-                }
+                return _runs[_runs.Count - 1];
             }
         }
 
-        public int Count
+        public long NextVirtualCluster
         {
-            get { return _runs.Count; }
-        }
-
-        public CookedDataRun this[int index]
-        {
-            get { return _runs[index]; }
+            get
+            {
+                if (_runs.Count == 0)
+                {
+                    return 0;
+                }
+                int lastRun = _runs.Count - 1;
+                return _runs[lastRun].StartVcn + _runs[lastRun].Length;
+            }
         }
 
         public int FindDataRun(long vcn, int startIdx)
@@ -97,10 +90,7 @@ namespace DiscUtils.Ntfs
                     {
                         return numRuns - 1;
                     }
-                    else
-                    {
-                        throw new IOException("Looking for VCN outside of data runs");
-                    }
+                    throw new IOException("Looking for VCN outside of data runs");
                 }
 
                 for (int i = startIdx; i < numRuns; ++i)
@@ -126,7 +116,7 @@ namespace DiscUtils.Ntfs
         {
             long vcn = NextVirtualCluster;
             long lcn = 0;
-            foreach (var run in rawRuns)
+            foreach (DataRun run in rawRuns)
             {
                 _runs.Add(new CookedDataRun(run, vcn, lcn, attributeExtent));
                 vcn += run.RunLength;
@@ -194,7 +184,7 @@ namespace DiscUtils.Ntfs
             CookedDataRun lastNewRun = null;
             long lcn = prevLcn;
             long vcn = run.StartVcn;
-            foreach (var rawRun in rawRuns)
+            foreach (DataRun rawRun in rawRuns)
             {
                 CookedDataRun newRun = new CookedDataRun(rawRun, vcn, lcn, run.AttributeExtent);
 

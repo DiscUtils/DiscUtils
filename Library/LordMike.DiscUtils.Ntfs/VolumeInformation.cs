@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.IO;
-
     internal sealed class VolumeInformation : IByteArraySerializable, IDiagnosticTraceable
     {
         public const int VersionNt4 = 0x0102;
@@ -34,27 +33,21 @@ namespace DiscUtils.Ntfs
 
         private byte _majorVersion;
         private byte _minorVersion;
-        private VolumeInformationFlags _flags;
 
-        public VolumeInformation()
-        {
-        }
+        public VolumeInformation() {}
 
         public VolumeInformation(byte major, byte minor, VolumeInformationFlags flags)
         {
             _majorVersion = major;
             _minorVersion = minor;
-            _flags = flags;
+            Flags = flags;
         }
 
-        public VolumeInformationFlags Flags
-        {
-            get { return _flags; }
-        }
+        public VolumeInformationFlags Flags { get; private set; }
 
         public int Version
         {
-            get { return ((int) _majorVersion) << 8 | _minorVersion; }
+            get { return _majorVersion << 8 | _minorVersion; }
         }
 
         public int Size
@@ -66,22 +59,22 @@ namespace DiscUtils.Ntfs
         {
             _majorVersion = buffer[offset + 0x08];
             _minorVersion = buffer[offset + 0x09];
-            _flags = (VolumeInformationFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            Flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
             return 0x0C;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian((ulong) 0, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian((ulong)0, buffer, offset + 0x00);
             buffer[offset + 0x08] = _majorVersion;
             buffer[offset + 0x09] = _minorVersion;
-            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x0A);
+            Utilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x0A);
         }
 
         public void Dump(TextWriter writer, string indent)
         {
             writer.WriteLine(indent + "  Version: " + _majorVersion + "." + _minorVersion);
-            writer.WriteLine(indent + "    Flags: " + _flags);
+            writer.WriteLine(indent + "    Flags: " + Flags);
         }
     }
 }

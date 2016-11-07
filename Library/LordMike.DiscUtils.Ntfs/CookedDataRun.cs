@@ -20,65 +20,47 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs
 {
-    using System;
-
     internal class CookedDataRun
     {
-        private long _startVcn;
-        private long _startLcn;
-        private DataRun _raw;
-        private NonResidentAttributeRecord _attributeExtent;
-
         public CookedDataRun(DataRun raw, long startVcn, long prevLcn, NonResidentAttributeRecord attributeExtent)
         {
-            _raw = raw;
-            _startVcn = startVcn;
-            _startLcn = prevLcn + raw.RunOffset;
-            _attributeExtent = attributeExtent;
+            DataRun = raw;
+            StartVcn = startVcn;
+            StartLcn = prevLcn + raw.RunOffset;
+            AttributeExtent = attributeExtent;
 
             if (startVcn < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(startVcn), startVcn, "VCN must be >= 0");
             }
 
-            if (_startLcn < 0)
+            if (StartLcn < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(prevLcn), prevLcn, "LCN must be >= 0");
             }
         }
 
-        public long StartVcn
-        {
-            get { return _startVcn; }
-        }
+        public NonResidentAttributeRecord AttributeExtent { get; }
 
-        public long StartLcn
+        public DataRun DataRun { get; }
+
+        public bool IsSparse
         {
-            get { return _startLcn; }
-            set { _startLcn = value; }
+            get { return DataRun.IsSparse; }
         }
 
         public long Length
         {
-            get { return _raw.RunLength; }
-            set { _raw.RunLength = value; }
+            get { return DataRun.RunLength; }
+            set { DataRun.RunLength = value; }
         }
 
-        public bool IsSparse
-        {
-            get { return _raw.IsSparse; }
-        }
+        public long StartLcn { get; set; }
 
-        public DataRun DataRun
-        {
-            get { return _raw; }
-        }
-
-        public NonResidentAttributeRecord AttributeExtent
-        {
-            get { return _attributeExtent; }
-        }
+        public long StartVcn { get; }
     }
 }

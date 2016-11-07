@@ -20,24 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Security.AccessControl;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Security.AccessControl;
-
     internal sealed class SecurityDescriptors : IDiagnosticTraceable
     {
         // File consists of pairs of duplicate blocks (one after the other), providing
         // redundancy.  When a pair is full, the next pair is used.
         private const int BlockSize = 0x40000;
 
-        private File _file;
-        private IndexView<HashIndexKey, HashIndexData> _hashIndex;
-        private IndexView<IdIndexKey, IdIndexData> _idIndex;
+        private readonly File _file;
+        private readonly IndexView<HashIndexKey, HashIndexData> _hashIndex;
+        private readonly IndexView<IdIndexKey, IdIndexData> _idIndex;
         private uint _nextId;
         private long _nextSpace;
 
@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
             _hashIndex = new IndexView<HashIndexKey, HashIndexData>(file.GetIndex("$SDH"));
             _idIndex = new IndexView<IdIndexKey, IdIndexData>(file.GetIndex("$SII"));
 
-            foreach (var entry in _idIndex.Entries)
+            foreach (KeyValuePair<IdIndexKey, IdIndexData> entry in _idIndex.Entries)
             {
                 if (entry.Key.Id > _nextId)
                 {
@@ -73,10 +73,45 @@ namespace DiscUtils.Ntfs
             _nextSpace = Utilities.RoundUp(_nextSpace, 16);
         }
 
+        public void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + "SECURITY DESCRIPTORS");
+
+            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
+            {
+                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+
+                foreach (KeyValuePair<IdIndexKey, IdIndexData> entry in _idIndex.Entries)
+                {
+                    int pos = (int)entry.Value.SdsOffset;
+
+                    SecurityDescriptorRecord rec = new SecurityDescriptorRecord();
+                    if (!rec.Read(buffer, pos))
+                    {
+                        break;
+                    }
+
+                    string secDescStr = "--unknown--";
+                    if (rec.SecurityDescriptor[0] != 0)
+                    {
+                        RawSecurityDescriptor sd = new RawSecurityDescriptor(rec.SecurityDescriptor, 0);
+                        secDescStr = sd.GetSddlForm(AccessControlSections.All);
+                    }
+
+                    writer.WriteLine(indent + "  SECURITY DESCRIPTOR RECORD");
+                    writer.WriteLine(indent + "           Hash: " + rec.Hash);
+                    writer.WriteLine(indent + "             Id: " + rec.Id);
+                    writer.WriteLine(indent + "    File Offset: " + rec.OffsetInFile);
+                    writer.WriteLine(indent + "           Size: " + rec.EntrySize);
+                    writer.WriteLine(indent + "          Value: " + secDescStr);
+                }
+            }
+        }
+
         public static SecurityDescriptors Initialize(File file)
         {
-            file.CreateIndex("$SDH", (AttributeType) 0, AttributeCollationRule.SecurityHash);
-            file.CreateIndex("$SII", (AttributeType) 0, AttributeCollationRule.UnsignedLong);
+            file.CreateIndex("$SDH", 0, AttributeCollationRule.SecurityHash);
+            file.CreateIndex("$SII", 0, AttributeCollationRule.UnsignedLong);
             file.CreateStream(AttributeType.Data, "$SDS");
 
             return new SecurityDescriptors(file);
@@ -101,7 +136,7 @@ namespace DiscUtils.Ntfs
             byte[] newByteForm = new byte[newDescObj.Size];
             newDescObj.WriteTo(newByteForm, 0);
 
-            foreach (var entry in _hashIndex.FindAll(new HashFinder(newHash)))
+            foreach (KeyValuePair<HashIndexKey, HashIndexData> entry in _hashIndex.FindAll(new HashFinder(newHash)))
             {
                 SecurityDescriptor stored = ReadDescriptor(entry.Value);
 
@@ -124,9 +159,9 @@ namespace DiscUtils.Ntfs
 
             // If we'd overflow into our duplicate block, skip over it to the
             // start of the next block
-            if (((offset + record.Size)/BlockSize)%2 == 1)
+            if ((offset + record.Size) / BlockSize % 2 == 1)
             {
-                _nextSpace = Utilities.RoundUp(offset, BlockSize*2);
+                _nextSpace = Utilities.RoundUp(offset, BlockSize * 2);
                 offset = _nextSpace;
             }
 
@@ -152,7 +187,7 @@ namespace DiscUtils.Ntfs
             hashIndexData.Hash = record.Hash;
             hashIndexData.Id = record.Id;
             hashIndexData.SdsOffset = record.OffsetInFile;
-            hashIndexData.SdsLength = (int) record.EntrySize;
+            hashIndexData.SdsLength = (int)record.EntrySize;
 
             HashIndexKey hashIndexKey = new HashIndexKey();
             hashIndexKey.Hash = record.Hash;
@@ -164,7 +199,7 @@ namespace DiscUtils.Ntfs
             idIndexData.Hash = record.Hash;
             idIndexData.Id = record.Id;
             idIndexData.SdsOffset = record.OffsetInFile;
-            idIndexData.SdsLength = (int) record.EntrySize;
+            idIndexData.SdsLength = (int)record.EntrySize;
 
             IdIndexKey idIndexKey = new IdIndexKey();
             idIndexKey.Id = record.Id;
@@ -174,41 +209,6 @@ namespace DiscUtils.Ntfs
             _file.UpdateRecordInMft();
 
             return record.Id;
-        }
-
-        public void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + "SECURITY DESCRIPTORS");
-
-            using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
-            {
-                byte[] buffer = Utilities.ReadFully(s, (int) s.Length);
-
-                foreach (var entry in _idIndex.Entries)
-                {
-                    int pos = (int) entry.Value.SdsOffset;
-
-                    SecurityDescriptorRecord rec = new SecurityDescriptorRecord();
-                    if (!rec.Read(buffer, pos))
-                    {
-                        break;
-                    }
-
-                    string secDescStr = "--unknown--";
-                    if (rec.SecurityDescriptor[0] != 0)
-                    {
-                        RawSecurityDescriptor sd = new RawSecurityDescriptor(rec.SecurityDescriptor, 0);
-                        secDescStr = sd.GetSddlForm(AccessControlSections.All);
-                    }
-
-                    writer.WriteLine(indent + "  SECURITY DESCRIPTOR RECORD");
-                    writer.WriteLine(indent + "           Hash: " + rec.Hash);
-                    writer.WriteLine(indent + "             Id: " + rec.Id);
-                    writer.WriteLine(indent + "    File Offset: " + rec.OffsetInFile);
-                    writer.WriteLine(indent + "           Size: " + rec.EntrySize);
-                    writer.WriteLine(indent + "          Value: " + secDescStr);
-                }
-            }
         }
 
         private SecurityDescriptor ReadDescriptor(IndexData data)
@@ -229,8 +229,8 @@ namespace DiscUtils.Ntfs
         {
             public uint Hash;
             public uint Id;
-            public long SdsOffset;
             public int SdsLength;
+            public long SdsOffset;
 
             public override string ToString()
             {
@@ -298,9 +298,7 @@ namespace DiscUtils.Ntfs
         {
             public uint Id;
 
-            public IdIndexKey()
-            {
-            }
+            public IdIndexKey() {}
 
             public IdIndexKey(uint id)
             {
@@ -356,11 +354,16 @@ namespace DiscUtils.Ntfs
 
         private class HashFinder : IComparable<HashIndexKey>
         {
-            private uint _toMatch;
+            private readonly uint _toMatch;
 
             public HashFinder(uint toMatch)
             {
                 _toMatch = toMatch;
+            }
+
+            public int CompareTo(HashIndexKey other)
+            {
+                return CompareTo(other.Hash);
             }
 
             public int CompareTo(uint otherHash)
@@ -369,17 +372,12 @@ namespace DiscUtils.Ntfs
                 {
                     return -1;
                 }
-                else if (_toMatch > otherHash)
+                if (_toMatch > otherHash)
                 {
                     return 1;
                 }
 
                 return 0;
-            }
-
-            public int CompareTo(HashIndexKey other)
-            {
-                return CompareTo(other.Hash);
             }
         }
     }

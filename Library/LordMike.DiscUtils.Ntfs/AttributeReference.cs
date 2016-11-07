@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs
 {
-    using System;
-
     /// <summary>
     /// Fully-qualified reference to an attribute.
     /// </summary>
     internal class AttributeReference : IComparable<AttributeReference>, IEquatable<AttributeReference>
     {
         private FileRecordReference _fileReference;
-        private ushort _attributeId;
 
         /// <summary>
         /// Initializes a new instance of the AttributeReference class.
@@ -40,8 +39,13 @@ namespace DiscUtils.Ntfs
         public AttributeReference(FileRecordReference fileReference, ushort attributeId)
         {
             _fileReference = fileReference;
-            _attributeId = attributeId;
+            AttributeId = attributeId;
         }
+
+        /// <summary>
+        /// Gets the identity of the attribute within the file record.
+        /// </summary>
+        public ushort AttributeId { get; }
 
         /// <summary>
         /// Gets the file containing the attribute.
@@ -49,23 +53,6 @@ namespace DiscUtils.Ntfs
         public FileRecordReference File
         {
             get { return _fileReference; }
-        }
-
-        /// <summary>
-        /// Gets the identity of the attribute within the file record.
-        /// </summary>
-        public ushort AttributeId
-        {
-            get { return _attributeId; }
-        }
-
-        /// <summary>
-        /// The reference as a string.
-        /// </summary>
-        /// <returns>String representing the attribute.</returns>
-        public override string ToString()
-        {
-            return _fileReference.ToString() + ".attr[" + _attributeId + "]";
         }
 
         #region IComparable<AttributeReference> Members
@@ -83,7 +70,7 @@ namespace DiscUtils.Ntfs
                 return refDiff;
             }
 
-            return _attributeId.CompareTo(other._attributeId);
+            return AttributeId.CompareTo(other.AttributeId);
         }
 
         #endregion
@@ -101,6 +88,15 @@ namespace DiscUtils.Ntfs
         }
 
         #endregion
+
+        /// <summary>
+        /// The reference as a string.
+        /// </summary>
+        /// <returns>String representing the attribute.</returns>
+        public override string ToString()
+        {
+            return _fileReference + ".attr[" + AttributeId + "]";
+        }
 
         /// <summary>
         /// Indicates if this reference is equivalent to another object.
@@ -124,7 +120,7 @@ namespace DiscUtils.Ntfs
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return _fileReference.GetHashCode() ^ _attributeId.GetHashCode();
+            return _fileReference.GetHashCode() ^ AttributeId.GetHashCode();
         }
     }
 }

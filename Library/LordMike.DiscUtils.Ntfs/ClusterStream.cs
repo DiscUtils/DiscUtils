@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Ntfs
 {
-    using System.Collections.Generic;
-
     internal abstract class ClusterStream
     {
         public abstract long AllocatedClusterCount { get; }

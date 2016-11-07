@@ -20,36 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class Index : IDisposable
     {
-        protected File _file;
-        protected string _name;
+        private readonly ObjectCache<long, IndexBlock> _blockCache;
         protected BiosParameterBlock _bpb;
-        private bool _isFileIndex;
 
-        private IComparer<byte[]> _comparer;
-
-        private IndexRoot _root;
-        private IndexNode _rootNode;
-        private Stream _indexStream;
+        private readonly IComparer<byte[]> _comparer;
+        protected File _file;
         private Bitmap _indexBitmap;
+        protected string _name;
 
-        private ObjectCache<long, IndexBlock> _blockCache;
+        private readonly IndexRoot _root;
+        private readonly IndexNode _rootNode;
 
         public Index(File file, string name, BiosParameterBlock bpb, UpperCase upCase)
         {
             _file = file;
             _name = name;
             _bpb = bpb;
-            _isFileIndex = name == "$I30";
+            IsFileIndex = name == "$I30";
 
             _blockCache = new ObjectCache<long, IndexBlock>();
 
@@ -58,7 +54,7 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
-                byte[] buffer = Utilities.ReadFully(s, (int) s.Length);
+                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
                 _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, buffer, IndexRoot.HeaderOffset);
 
                 // Give the attribute some room to breathe, so long as it doesn't squeeze others out
@@ -68,7 +64,7 @@ namespace DiscUtils.Ntfs
 
             if (_file.StreamExists(AttributeType.IndexAllocation, _name))
             {
-                _indexStream = _file.OpenStream(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
+                AllocationStream = _file.OpenStream(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
             }
 
             if (_file.StreamExists(AttributeType.Bitmap, _name))
@@ -79,22 +75,22 @@ namespace DiscUtils.Ntfs
         }
 
         private Index(AttributeType attrType, AttributeCollationRule collationRule, File file, string name,
-            BiosParameterBlock bpb, UpperCase upCase)
+                      BiosParameterBlock bpb, UpperCase upCase)
         {
             _file = file;
             _name = name;
             _bpb = bpb;
-            _isFileIndex = name == "$I30";
+            IsFileIndex = name == "$I30";
 
             _blockCache = new ObjectCache<long, IndexBlock>();
 
             _file.CreateStream(AttributeType.IndexRoot, _name);
 
-            _root = new IndexRoot()
+            _root = new IndexRoot
             {
-                AttributeType = (uint) attrType,
+                AttributeType = (uint)attrType,
                 CollationRule = collationRule,
-                IndexAllocationSize = (uint) bpb.IndexBufferSize,
+                IndexAllocationSize = (uint)bpb.IndexBufferSize,
                 RawClustersPerIndexRecord = bpb.RawIndexBufferSize
             };
 
@@ -103,23 +99,14 @@ namespace DiscUtils.Ntfs
             _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, 32);
         }
 
-        public IEnumerable<KeyValuePair<byte[], byte[]>> Entries
-        {
-            get
-            {
-                foreach (var entry in Enumerate(_rootNode))
-                {
-                    yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
-                }
-            }
-        }
+        internal Stream AllocationStream { get; private set; }
 
         public int Count
         {
             get
             {
                 int i = 0;
-                foreach (var entry in Entries)
+                foreach (KeyValuePair<byte[], byte[]> entry in Entries)
                 {
                     ++i;
                 }
@@ -128,9 +115,15 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        internal Stream AllocationStream
+        public IEnumerable<KeyValuePair<byte[], byte[]>> Entries
         {
-            get { return _indexStream; }
+            get
+            {
+                foreach (IndexEntry entry in Enumerate(_rootNode))
+                {
+                    yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
+                }
+            }
         }
 
         internal uint IndexBufferSize
@@ -138,10 +131,7 @@ namespace DiscUtils.Ntfs
             get { return _root.IndexAllocationSize; }
         }
 
-        internal bool IsFileIndex
-        {
-            get { return _isFileIndex; }
-        }
+        internal bool IsFileIndex { get; }
 
         public byte[] this[byte[] key]
         {
@@ -152,10 +142,7 @@ namespace DiscUtils.Ntfs
                 {
                     return value;
                 }
-                else
-                {
-                    throw new KeyNotFoundException();
-                }
+                throw new KeyNotFoundException();
             }
 
             set
@@ -175,14 +162,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
-        {
-            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock,
-                file.Context.UpperCase);
-
-            idx.WriteRootNodeToDisk();
-        }
-
         public void Dispose()
         {
             if (_indexBitmap != null)
@@ -192,9 +171,17 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public static void Create(AttributeType attrType, AttributeCollationRule collationRule, File file, string name)
+        {
+            Index idx = new Index(attrType, collationRule, file, name, file.Context.BiosParameterBlock,
+                file.Context.UpperCase);
+
+            idx.WriteRootNodeToDisk();
+        }
+
         public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query)
         {
-            foreach (var entry in FindAllIn(query, _rootNode))
+            foreach (IndexEntry entry in FindAllIn(query, _rootNode))
             {
                 yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
             }
@@ -303,7 +290,7 @@ namespace DiscUtils.Ntfs
 
         internal long IndexBlockVcnToPosition(long vcn)
         {
-            if (vcn%_root.RawClustersPerIndexRecord != 0)
+            if (vcn % _root.RawClustersPerIndexRecord != 0)
             {
                 throw new NotSupportedException("Unexpected vcn (not a multiple of clusters-per-index-record): vcn=" +
                                                 vcn + " rcpir=" + _root.RawClustersPerIndexRecord);
@@ -311,19 +298,16 @@ namespace DiscUtils.Ntfs
 
             if (_bpb.BytesPerCluster <= _root.IndexAllocationSize)
             {
-                return vcn*(long) _bpb.BytesPerCluster;
+                return vcn * _bpb.BytesPerCluster;
             }
-            else
+            if (_root.RawClustersPerIndexRecord != 8)
             {
-                if (_root.RawClustersPerIndexRecord != 8)
-                {
-                    throw new NotSupportedException(
-                        "Unexpected RawClustersPerIndexRecord (multiple index blocks per cluster): " +
-                        _root.RawClustersPerIndexRecord);
-                }
-
-                return (vcn/_root.RawClustersPerIndexRecord)*_root.IndexAllocationSize;
+                throw new NotSupportedException(
+                    "Unexpected RawClustersPerIndexRecord (multiple index blocks per cluster): " +
+                    _root.RawClustersPerIndexRecord);
             }
+
+            return vcn / _root.RawClustersPerIndexRecord * _root.IndexAllocationSize;
         }
 
         internal bool ShrinkRoot()
@@ -353,10 +337,10 @@ namespace DiscUtils.Ntfs
 
         internal IndexBlock AllocateBlock(IndexEntry parentEntry)
         {
-            if (_indexStream == null)
+            if (AllocationStream == null)
             {
                 _file.CreateStream(AttributeType.IndexAllocation, _name);
-                _indexStream = _file.OpenStream(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
+                AllocationStream = _file.OpenStream(AttributeType.IndexAllocation, _name, FileAccess.ReadWrite);
             }
 
             if (_indexBitmap == null)
@@ -368,9 +352,9 @@ namespace DiscUtils.Ntfs
 
             long idx = _indexBitmap.AllocateFirstAvailable(0);
 
-            parentEntry.ChildrenVirtualCluster = idx*
+            parentEntry.ChildrenVirtualCluster = idx *
                                                  Utilities.Ceil(_bpb.IndexBufferSize,
-                                                     _bpb.SectorsPerCluster*_bpb.BytesPerSector);
+                                                     _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             parentEntry.Flags |= IndexEntryFlags.Node;
 
             IndexBlock block = IndexBlock.Initialize(this, false, parentEntry, _bpb);
@@ -380,7 +364,7 @@ namespace DiscUtils.Ntfs
 
         internal void FreeBlock(long vcn)
         {
-            long idx = vcn/Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster*_bpb.BytesPerSector);
+            long idx = vcn / Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             _indexBitmap.MarkAbsent(idx);
             _blockCache.Remove(vcn);
         }
@@ -397,12 +381,12 @@ namespace DiscUtils.Ntfs
 
         protected IEnumerable<IndexEntry> Enumerate(IndexNode node)
         {
-            foreach (var focus in node.Entries)
+            foreach (IndexEntry focus in node.Entries)
             {
                 if ((focus.Flags & IndexEntryFlags.Node) != 0)
                 {
                     IndexBlock block = GetSubBlock(focus);
-                    foreach (var subEntry in Enumerate(block.Node))
+                    foreach (IndexEntry subEntry in Enumerate(block.Node))
                     {
                         yield return subEntry;
                     }
@@ -417,7 +401,7 @@ namespace DiscUtils.Ntfs
 
         private IEnumerable<IndexEntry> FindAllIn(IComparable<byte[]> query, IndexNode node)
         {
-            foreach (var focus in node.Entries)
+            foreach (IndexEntry focus in node.Entries)
             {
                 bool searchChildren = true;
                 bool matches = false;
@@ -443,7 +427,7 @@ namespace DiscUtils.Ntfs
                 if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
                 {
                     IndexBlock block = GetSubBlock(focus);
-                    foreach (var entry in FindAllIn(query, block.Node))
+                    foreach (IndexEntry entry in FindAllIn(query, block.Node))
                     {
                         yield return entry;
                     }
@@ -463,7 +447,7 @@ namespace DiscUtils.Ntfs
 
         private void WriteRootNodeToDisk()
         {
-            _rootNode.Header.AllocatedSizeOfEntries = (uint) _rootNode.CalcSize();
+            _rootNode.Header.AllocatedSizeOfEntries = (uint)_rootNode.CalcSize();
             byte[] buffer = new byte[_rootNode.Header.AllocatedSizeOfEntries + _root.Size];
             _root.WriteTo(buffer, 0);
             _rootNode.WriteTo(buffer, _root.Size);
@@ -478,7 +462,7 @@ namespace DiscUtils.Ntfs
         private void NodeAsString(TextWriter writer, string prefix, IndexNode node, string id)
         {
             writer.WriteLine(prefix + id + ":");
-            foreach (var entry in node.Entries)
+            foreach (IndexEntry entry in node.Entries)
             {
                 if ((entry.Flags & IndexEntryFlags.End) != 0)
                 {

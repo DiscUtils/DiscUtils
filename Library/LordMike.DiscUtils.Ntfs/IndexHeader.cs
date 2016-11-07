@@ -27,11 +27,11 @@ namespace DiscUtils.Ntfs
     internal class IndexHeader
     {
         public const int Size = 0x10;
+        public uint AllocatedSizeOfEntries;
+        public byte HasChildNodes;
 
         public uint OffsetToFirstEntry;
         public uint TotalSizeOfEntries;
-        public uint AllocatedSizeOfEntries;
-        public byte HasChildNodes;
 
         public IndexHeader(uint allocatedSize)
         {

@@ -20,40 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-
     internal struct FileRecordReference : IByteArraySerializable, IComparable<FileRecordReference>
     {
-        private ulong _val;
-
         public FileRecordReference(ulong val)
         {
-            _val = val;
+            Value = val;
         }
 
         public FileRecordReference(long mftIndex, ushort sequenceNumber)
         {
-            _val = (ulong) (mftIndex & 0x0000FFFFFFFFFFFFL) |
-                   ((ulong) ((ulong) sequenceNumber << 48) & 0xFFFF000000000000L);
+            Value = (ulong)(mftIndex & 0x0000FFFFFFFFFFFFL) |
+                    ((ulong)sequenceNumber << 48 & 0xFFFF000000000000L);
         }
 
-        public ulong Value
-        {
-            get { return _val; }
-        }
+        public ulong Value { get; private set; }
 
         public long MftIndex
         {
-            get { return (long) (_val & 0x0000FFFFFFFFFFFFL); }
+            get { return (long)(Value & 0x0000FFFFFFFFFFFFL); }
         }
 
         public ushort SequenceNumber
         {
-            get { return (ushort) ((_val >> 48) & 0xFFFF); }
+            get { return (ushort)((Value >> 48) & 0xFFFF); }
         }
 
         public int Size
@@ -68,23 +62,23 @@ namespace DiscUtils.Ntfs
 
         public static bool operator ==(FileRecordReference a, FileRecordReference b)
         {
-            return a._val == b._val;
+            return a.Value == b.Value;
         }
 
         public static bool operator !=(FileRecordReference a, FileRecordReference b)
         {
-            return a._val != b._val;
+            return a.Value != b.Value;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _val = Utilities.ToUInt64LittleEndian(buffer, offset);
+            Value = Utilities.ToUInt64LittleEndian(buffer, offset);
             return 8;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(_val, buffer, offset);
+            Utilities.WriteBytesLittleEndian(Value, buffer, offset);
         }
 
         public override bool Equals(object obj)
@@ -94,28 +88,25 @@ namespace DiscUtils.Ntfs
                 return false;
             }
 
-            return _val == ((FileRecordReference) obj)._val;
+            return Value == ((FileRecordReference)obj).Value;
         }
 
         public override int GetHashCode()
         {
-            return _val.GetHashCode();
+            return Value.GetHashCode();
         }
 
         public int CompareTo(FileRecordReference other)
         {
-            if (_val < other._val)
+            if (Value < other.Value)
             {
                 return -1;
             }
-            else if (_val > other._val)
+            if (Value > other.Value)
             {
                 return 1;
             }
-            else
-            {
-                return 0;
-            }
+            return 0;
         }
 
         public override string ToString()

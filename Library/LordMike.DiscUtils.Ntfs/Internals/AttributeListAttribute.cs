@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs.Internals
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// List of attributes for files that are split over multiple Master File Table entries.
     /// </summary>
@@ -39,7 +38,7 @@ namespace DiscUtils.Ntfs.Internals
     /// </remarks>
     public sealed class AttributeListAttribute : GenericAttribute
     {
-        private AttributeList _list;
+        private readonly AttributeList _list;
 
         internal AttributeListAttribute(INtfsContext context, AttributeRecord record)
             : base(context, record)
@@ -57,7 +56,7 @@ namespace DiscUtils.Ntfs.Internals
             get
             {
                 List<AttributeListEntry> entries = new List<AttributeListEntry>();
-                foreach (var record in _list)
+                foreach (AttributeListRecord record in _list)
                 {
                     entries.Add(new AttributeListEntry(record));
                 }

@@ -20,19 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Security.Principal;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Security.Principal;
-
     internal sealed class Quotas
     {
-        private IndexView<OwnerKey, OwnerRecord> _ownerIndex;
-        private IndexView<OwnerRecord, QuotaRecord> _quotaIndex;
+        private readonly IndexView<OwnerKey, OwnerRecord> _ownerIndex;
+        private readonly IndexView<OwnerRecord, QuotaRecord> _quotaIndex;
 
         public Quotas(File file)
         {
@@ -42,8 +42,8 @@ namespace DiscUtils.Ntfs
 
         public static Quotas Initialize(File file)
         {
-            Index ownerIndex = file.CreateIndex("$O", (AttributeType) 0, AttributeCollationRule.Sid);
-            Index quotaIndox = file.CreateIndex("$Q", (AttributeType) 0, AttributeCollationRule.UnsignedLong);
+            Index ownerIndex = file.CreateIndex("$O", 0, AttributeCollationRule.Sid);
+            Index quotaIndox = file.CreateIndex("$Q", 0, AttributeCollationRule.UnsignedLong);
 
             IndexView<OwnerKey, OwnerRecord> ownerIndexView = new IndexView<OwnerKey, OwnerRecord>(ownerIndex);
             IndexView<OwnerRecord, QuotaRecord> quotaIndexView = new IndexView<OwnerRecord, QuotaRecord>(quotaIndox);
@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs
             writer.WriteLine(indent + "QUOTAS");
 
             writer.WriteLine(indent + "  OWNER INDEX");
-            foreach (var entry in _ownerIndex.Entries)
+            foreach (KeyValuePair<OwnerKey, OwnerRecord> entry in _ownerIndex.Entries)
             {
                 writer.WriteLine(indent + "    OWNER INDEX ENTRY");
                 writer.WriteLine(indent + "            SID: " + entry.Key.Sid);
@@ -72,7 +72,7 @@ namespace DiscUtils.Ntfs
             }
 
             writer.WriteLine(indent + "  QUOTA INDEX");
-            foreach (var entry in _quotaIndex.Entries)
+            foreach (KeyValuePair<OwnerRecord, QuotaRecord> entry in _quotaIndex.Entries)
             {
                 writer.WriteLine(indent + "    QUOTA INDEX ENTRY");
                 writer.WriteLine(indent + "           Owner Id: " + entry.Key.OwnerId);
@@ -91,9 +91,7 @@ namespace DiscUtils.Ntfs
         {
             public SecurityIdentifier Sid;
 
-            public OwnerKey()
-            {
-            }
+            public OwnerKey() {}
 
             public OwnerKey(SecurityIdentifier sid)
             {
@@ -126,9 +124,7 @@ namespace DiscUtils.Ntfs
         {
             public int OwnerId;
 
-            public OwnerRecord()
-            {
-            }
+            public OwnerRecord() {}
 
             public OwnerRecord(int ownerId)
             {
@@ -159,18 +155,16 @@ namespace DiscUtils.Ntfs
 
         internal sealed class QuotaRecord : IByteArraySerializable
         {
-            public int Version;
-            public int Flags;
             public long BytesUsed;
             public DateTime ChangeTime;
-            public long WarningLimit;
-            public long HardLimit;
             public long ExceededTime;
+            public int Flags;
+            public long HardLimit;
             public SecurityIdentifier Sid;
+            public int Version;
+            public long WarningLimit;
 
-            public QuotaRecord()
-            {
-            }
+            public QuotaRecord() {}
 
             public QuotaRecord(SecurityIdentifier sid)
             {

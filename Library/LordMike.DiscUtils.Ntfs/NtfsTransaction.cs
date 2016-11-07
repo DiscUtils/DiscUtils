@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs
 {
-    using System;
-
     internal sealed class NtfsTransaction : IDisposable
     {
-        [ThreadStatic] private static NtfsTransaction s_instance;
+        [ThreadStatic]
+        private static NtfsTransaction s_instance;
 
-        private bool _ownRecord;
-
-        private DateTime _timestamp;
+        private readonly bool _ownRecord;
 
         public NtfsTransaction()
         {
             if (s_instance == null)
             {
                 s_instance = this;
-                _timestamp = DateTime.UtcNow;
+                Timestamp = DateTime.UtcNow;
                 _ownRecord = true;
             }
         }
@@ -47,10 +46,7 @@ namespace DiscUtils.Ntfs
             get { return s_instance; }
         }
 
-        public DateTime Timestamp
-        {
-            get { return _timestamp; }
-        }
+        public DateTime Timestamp { get; }
 
         public void Dispose()
         {

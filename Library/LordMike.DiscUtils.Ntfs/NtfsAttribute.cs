@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-
     internal class NtfsAttribute : IDiagnosticTraceable
     {
-        protected File _file;
-        protected FileRecordReference _containingFile;
-        protected AttributeRecord _primaryRecord;
-        protected Dictionary<AttributeReference, AttributeRecord> _extents;
         private IBuffer _cachedRawBuffer;
+        protected FileRecordReference _containingFile;
+        protected Dictionary<AttributeReference, AttributeRecord> _extents;
+        protected File _file;
+        protected AttributeRecord _primaryRecord;
 
         protected NtfsAttribute(File file, FileRecordReference containingFile, AttributeRecord record)
         {
@@ -43,192 +42,6 @@ namespace DiscUtils.Ntfs
             _primaryRecord = record;
             _extents = new Dictionary<AttributeReference, AttributeRecord>();
             _extents.Add(new AttributeReference(containingFile, record.AttributeId), _primaryRecord);
-        }
-
-        public AttributeReference Reference
-        {
-            get { return new AttributeReference(_containingFile, _primaryRecord.AttributeId); }
-        }
-
-        public AttributeType Type
-        {
-            get { return _primaryRecord.AttributeType; }
-        }
-
-        public string Name
-        {
-            get { return _primaryRecord.Name; }
-        }
-
-        public AttributeFlags Flags
-        {
-            get { return _primaryRecord.Flags; }
-
-            set
-            {
-                _primaryRecord.Flags = value;
-                _cachedRawBuffer = null;
-            }
-        }
-
-        public ushort Id
-        {
-            get { return _primaryRecord.AttributeId; }
-        }
-
-        public long Length
-        {
-            get { return _primaryRecord.DataLength; }
-        }
-
-        public AttributeRecord PrimaryRecord
-        {
-            get { return _primaryRecord; }
-        }
-
-        public int CompressionUnitSize
-        {
-            get
-            {
-                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
-                if (firstExtent == null)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return firstExtent.CompressionUnitSize;
-                }
-            }
-
-            set
-            {
-                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
-                if (firstExtent != null)
-                {
-                    firstExtent.CompressionUnitSize = value;
-                }
-            }
-        }
-
-        public long CompressedDataSize
-        {
-            get
-            {
-                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
-                if (firstExtent == null)
-                {
-                    return FirstExtent.AllocatedLength;
-                }
-                else
-                {
-                    return firstExtent.CompressedDataSize;
-                }
-            }
-
-            set
-            {
-                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
-                if (firstExtent != null)
-                {
-                    firstExtent.CompressedDataSize = value;
-                }
-            }
-        }
-
-        public List<AttributeRecord> Records
-        {
-            get
-            {
-                List<AttributeRecord> records = new List<AttributeRecord>(_extents.Values);
-                records.Sort(AttributeRecord.CompareStartVcns);
-                return records;
-            }
-        }
-
-        public IBuffer RawBuffer
-        {
-            get
-            {
-                if (_cachedRawBuffer == null)
-                {
-                    if (_primaryRecord.IsNonResident)
-                    {
-                        _cachedRawBuffer = new NonResidentAttributeBuffer(_file, this);
-                    }
-                    else
-                    {
-                        _cachedRawBuffer = ((ResidentAttributeRecord) _primaryRecord).DataBuffer;
-                    }
-                }
-
-                return _cachedRawBuffer;
-            }
-        }
-
-        public IDictionary<AttributeReference, AttributeRecord> Extents
-        {
-            get { return _extents; }
-        }
-
-        public AttributeRecord LastExtent
-        {
-            get
-            {
-                AttributeRecord last = null;
-
-                if (_extents != null)
-                {
-                    long lastVcn = 0;
-                    foreach (var extent in _extents)
-                    {
-                        NonResidentAttributeRecord nonResident = extent.Value as NonResidentAttributeRecord;
-                        if (nonResident == null)
-                        {
-                            // Resident attribute, so there can only be one...
-                            return extent.Value;
-                        }
-
-                        if (nonResident.LastVcn >= lastVcn)
-                        {
-                            last = extent.Value;
-                            lastVcn = nonResident.LastVcn;
-                        }
-                    }
-                }
-
-                return last;
-            }
-        }
-
-        public AttributeRecord FirstExtent
-        {
-            get
-            {
-                if (_extents != null)
-                {
-                    foreach (var extent in _extents)
-                    {
-                        NonResidentAttributeRecord nonResident = extent.Value as NonResidentAttributeRecord;
-                        if (nonResident == null)
-                        {
-                            // Resident attribute, so there can only be one...
-                            return extent.Value;
-                        }
-                        else if (nonResident.StartVcn == 0)
-                        {
-                            return extent.Value;
-                        }
-                    }
-                }
-
-                throw new InvalidDataException("Attribute with no initial extent");
-            }
-        }
-
-        public bool IsNonResident
-        {
-            get { return _primaryRecord.IsNonResident; }
         }
 
         protected string AttributeTypeName
@@ -265,6 +78,221 @@ namespace DiscUtils.Ntfs
                         return "UNKNOWN";
                 }
             }
+        }
+
+        public long CompressedDataSize
+        {
+            get
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent == null)
+                {
+                    return FirstExtent.AllocatedLength;
+                }
+                return firstExtent.CompressedDataSize;
+            }
+
+            set
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent != null)
+                {
+                    firstExtent.CompressedDataSize = value;
+                }
+            }
+        }
+
+        public int CompressionUnitSize
+        {
+            get
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent == null)
+                {
+                    return 0;
+                }
+                return firstExtent.CompressionUnitSize;
+            }
+
+            set
+            {
+                NonResidentAttributeRecord firstExtent = FirstExtent as NonResidentAttributeRecord;
+                if (firstExtent != null)
+                {
+                    firstExtent.CompressionUnitSize = value;
+                }
+            }
+        }
+
+        public IDictionary<AttributeReference, AttributeRecord> Extents
+        {
+            get { return _extents; }
+        }
+
+        public AttributeRecord FirstExtent
+        {
+            get
+            {
+                if (_extents != null)
+                {
+                    foreach (KeyValuePair<AttributeReference, AttributeRecord> extent in _extents)
+                    {
+                        NonResidentAttributeRecord nonResident = extent.Value as NonResidentAttributeRecord;
+                        if (nonResident == null)
+                        {
+                            // Resident attribute, so there can only be one...
+                            return extent.Value;
+                        }
+                        if (nonResident.StartVcn == 0)
+                        {
+                            return extent.Value;
+                        }
+                    }
+                }
+
+                throw new InvalidDataException("Attribute with no initial extent");
+            }
+        }
+
+        public AttributeFlags Flags
+        {
+            get { return _primaryRecord.Flags; }
+
+            set
+            {
+                _primaryRecord.Flags = value;
+                _cachedRawBuffer = null;
+            }
+        }
+
+        public ushort Id
+        {
+            get { return _primaryRecord.AttributeId; }
+        }
+
+        public bool IsNonResident
+        {
+            get { return _primaryRecord.IsNonResident; }
+        }
+
+        public AttributeRecord LastExtent
+        {
+            get
+            {
+                AttributeRecord last = null;
+
+                if (_extents != null)
+                {
+                    long lastVcn = 0;
+                    foreach (KeyValuePair<AttributeReference, AttributeRecord> extent in _extents)
+                    {
+                        NonResidentAttributeRecord nonResident = extent.Value as NonResidentAttributeRecord;
+                        if (nonResident == null)
+                        {
+                            // Resident attribute, so there can only be one...
+                            return extent.Value;
+                        }
+
+                        if (nonResident.LastVcn >= lastVcn)
+                        {
+                            last = extent.Value;
+                            lastVcn = nonResident.LastVcn;
+                        }
+                    }
+                }
+
+                return last;
+            }
+        }
+
+        public long Length
+        {
+            get { return _primaryRecord.DataLength; }
+        }
+
+        public string Name
+        {
+            get { return _primaryRecord.Name; }
+        }
+
+        public AttributeRecord PrimaryRecord
+        {
+            get { return _primaryRecord; }
+        }
+
+        public IBuffer RawBuffer
+        {
+            get
+            {
+                if (_cachedRawBuffer == null)
+                {
+                    if (_primaryRecord.IsNonResident)
+                    {
+                        _cachedRawBuffer = new NonResidentAttributeBuffer(_file, this);
+                    }
+                    else
+                    {
+                        _cachedRawBuffer = ((ResidentAttributeRecord)_primaryRecord).DataBuffer;
+                    }
+                }
+
+                return _cachedRawBuffer;
+            }
+        }
+
+        public List<AttributeRecord> Records
+        {
+            get
+            {
+                List<AttributeRecord> records = new List<AttributeRecord>(_extents.Values);
+                records.Sort(AttributeRecord.CompareStartVcns);
+                return records;
+            }
+        }
+
+        public AttributeReference Reference
+        {
+            get { return new AttributeReference(_containingFile, _primaryRecord.AttributeId); }
+        }
+
+        public AttributeType Type
+        {
+            get { return _primaryRecord.AttributeType; }
+        }
+
+        public virtual void Dump(TextWriter writer, string indent)
+        {
+            writer.WriteLine(indent + AttributeTypeName + " ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
+
+            writer.WriteLine(indent + "  Length: " + _primaryRecord.DataLength + " bytes");
+            if (_primaryRecord.DataLength == 0)
+            {
+                writer.WriteLine(indent + "    Data: <none>");
+            }
+            else
+            {
+                try
+                {
+                    using (Stream s = Open(FileAccess.Read))
+                    {
+                        string hex = string.Empty;
+                        byte[] buffer = new byte[32];
+                        int numBytes = s.Read(buffer, 0, buffer.Length);
+                        for (int i = 0; i < numBytes; ++i)
+                        {
+                            hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
+                        }
+
+                        writer.WriteLine(indent + "    Data: " + hex + (numBytes < s.Length ? "..." : string.Empty));
+                    }
+                }
+                catch
+                {
+                    writer.WriteLine(indent + "    Data: <can't read>");
+                }
+            }
+
+            _primaryRecord.Dump(writer, indent + "  ");
         }
 
         public static NtfsAttribute FromRecord(File file, FileRecordReference recordFile, AttributeRecord record)
@@ -328,64 +356,26 @@ namespace DiscUtils.Ntfs
             {
                 return false;
             }
-            else
+            if (oldRef.Equals(Reference) || _extents.Count == 0)
             {
-                if (oldRef.Equals(Reference) || _extents.Count == 0)
-                {
-                    _primaryRecord = record;
-                    _containingFile = newRef.File;
-                }
-
-                _extents.Add(newRef, record);
-                return true;
+                _primaryRecord = record;
+                _containingFile = newRef.File;
             }
+
+            _extents.Add(newRef, record);
+            return true;
         }
 
         public Range<long, long>[] GetClusters()
         {
             List<Range<long, long>> result = new List<Range<long, long>>();
 
-            foreach (var extent in _extents)
+            foreach (KeyValuePair<AttributeReference, AttributeRecord> extent in _extents)
             {
                 result.AddRange(extent.Value.GetClusters());
             }
 
             return result.ToArray();
-        }
-
-        public virtual void Dump(TextWriter writer, string indent)
-        {
-            writer.WriteLine(indent + AttributeTypeName + " ATTRIBUTE (" + (Name == null ? "No Name" : Name) + ")");
-
-            writer.WriteLine(indent + "  Length: " + _primaryRecord.DataLength + " bytes");
-            if (_primaryRecord.DataLength == 0)
-            {
-                writer.WriteLine(indent + "    Data: <none>");
-            }
-            else
-            {
-                try
-                {
-                    using (Stream s = Open(FileAccess.Read))
-                    {
-                        string hex = string.Empty;
-                        byte[] buffer = new byte[32];
-                        int numBytes = s.Read(buffer, 0, buffer.Length);
-                        for (int i = 0; i < numBytes; ++i)
-                        {
-                            hex = hex + string.Format(CultureInfo.InvariantCulture, " {0:X2}", buffer[i]);
-                        }
-
-                        writer.WriteLine(indent + "    Data: " + hex + ((numBytes < s.Length) ? "..." : string.Empty));
-                    }
-                }
-                catch
-                {
-                    writer.WriteLine(indent + "    Data: <can't read>");
-                }
-            }
-
-            _primaryRecord.Dump(writer, indent + "  ");
         }
 
         internal SparseStream Open(FileAccess access)

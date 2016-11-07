@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.IO;
-
     internal class IndexBlock : FixupRecordBase
     {
         /// <summary>
@@ -34,14 +33,13 @@ namespace DiscUtils.Ntfs
         /// </summary>
         private const int FieldSize = 0x18;
 
-        private ulong _logSequenceNumber;
+        private readonly Index _index;
         private ulong _indexBlockVcn; // Virtual Cluster Number (maybe in sectors sometimes...?)
+        private readonly bool _isRoot;
 
-        private IndexNode _node;
+        private ulong _logSequenceNumber;
 
-        private Index _index;
-        private bool _isRoot;
-        private long _streamPosition;
+        private readonly long _streamPosition;
 
         public IndexBlock(Index index, bool isRoot, IndexEntry parentEntry, BiosParameterBlock bpb)
             : base("INDX", bpb.BytesPerSector)
@@ -52,7 +50,7 @@ namespace DiscUtils.Ntfs
             Stream stream = index.AllocationStream;
             _streamPosition = index.IndexBlockVcnToPosition(parentEntry.ChildrenVirtualCluster);
             stream.Position = _streamPosition;
-            byte[] buffer = Utilities.ReadFully(stream, (int) index.IndexBufferSize);
+            byte[] buffer = Utilities.ReadFully(stream, (int)index.IndexBufferSize);
             FromBytes(buffer, 0);
         }
 
@@ -62,20 +60,17 @@ namespace DiscUtils.Ntfs
             _index = index;
             _isRoot = isRoot;
 
-            _indexBlockVcn = (ulong) vcn;
+            _indexBlockVcn = (ulong)vcn;
 
-            _streamPosition = vcn*bpb.BytesPerSector*bpb.SectorsPerCluster;
+            _streamPosition = vcn * bpb.BytesPerSector * bpb.SectorsPerCluster;
 
-            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, isRoot,
-                (uint) bpb.IndexBufferSize - FieldSize);
+            Node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, isRoot,
+                (uint)bpb.IndexBufferSize - FieldSize);
 
             WriteToDisk();
         }
 
-        public IndexNode Node
-        {
-            get { return _node; }
-        }
+        public IndexNode Node { get; private set; }
 
         internal static IndexBlock Initialize(Index index, bool isRoot, IndexEntry parentEntry, BiosParameterBlock bpb)
         {
@@ -98,14 +93,14 @@ namespace DiscUtils.Ntfs
             // Skip FixupRecord fields...
             _logSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
             _indexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            _node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _isRoot, buffer, offset + FieldSize);
+            Node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _isRoot, buffer, offset + FieldSize);
         }
 
         protected override ushort Write(byte[] buffer, int offset)
         {
             Utilities.WriteBytesLittleEndian(_logSequenceNumber, buffer, offset + 0x08);
             Utilities.WriteBytesLittleEndian(_indexBlockVcn, buffer, offset + 0x10);
-            return (ushort) (FieldSize + Node.WriteTo(buffer, offset + FieldSize));
+            return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize));
         }
 
         protected override int CalcSize()

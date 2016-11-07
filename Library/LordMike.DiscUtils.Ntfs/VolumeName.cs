@@ -20,50 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.IO;
-    using System.Text;
-
     internal sealed class VolumeName : IByteArraySerializable, IDiagnosticTraceable
     {
-        private string _name;
-
-        public VolumeName()
-        {
-        }
+        public VolumeName() {}
 
         public VolumeName(string name)
         {
-            _name = name;
+            Name = name;
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; private set; }
 
         public int Size
         {
-            get { return Encoding.Unicode.GetByteCount(_name); }
+            get { return Encoding.Unicode.GetByteCount(Name); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _name = Encoding.Unicode.GetString(buffer, offset, buffer.Length - offset);
+            Name = Encoding.Unicode.GetString(buffer, offset, buffer.Length - offset);
             return buffer.Length - offset;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Encoding.Unicode.GetBytes(_name, 0, _name.Length, buffer, offset);
+            Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset);
         }
 
         public void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "  Volume Name: " + _name);
+            writer.WriteLine(indent + "  Volume Name: " + Name);
         }
     }
 }

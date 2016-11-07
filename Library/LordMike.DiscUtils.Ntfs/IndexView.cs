@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-
     internal class IndexView<K, D>
         where K : IByteArraySerializable, new()
         where D : IByteArraySerializable, new()
     {
-        private Index _index;
+        private readonly Index _index;
 
         public IndexView(Index index)
         {
@@ -47,7 +46,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                foreach (var entry in _index.Entries)
+                foreach (KeyValuePair<byte[], byte[]> entry in _index.Entries)
                 {
                     yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
                 }
@@ -58,12 +57,12 @@ namespace DiscUtils.Ntfs
         {
             get { return Convert<D>(_index[Unconvert(key)]); }
 
-            set { _index[Unconvert(key)] = Unconvert<D>(value); }
+            set { _index[Unconvert(key)] = Unconvert(value); }
         }
 
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<byte[]> query)
         {
-            foreach (var entry in _index.FindAll(query))
+            foreach (KeyValuePair<byte[], byte[]> entry in _index.FindAll(query))
             {
                 yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
             }
@@ -71,7 +70,7 @@ namespace DiscUtils.Ntfs
 
         public KeyValuePair<K, D> FindFirst(IComparable<byte[]> query)
         {
-            foreach (var entry in FindAll(query))
+            foreach (KeyValuePair<K, D> entry in FindAll(query))
             {
                 return entry;
             }
@@ -81,7 +80,7 @@ namespace DiscUtils.Ntfs
 
         public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<K> query)
         {
-            foreach (var entry in _index.FindAll(new ComparableConverter(query)))
+            foreach (KeyValuePair<byte[], byte[]> entry in _index.FindAll(new ComparableConverter(query)))
             {
                 yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
             }
@@ -89,7 +88,7 @@ namespace DiscUtils.Ntfs
 
         public KeyValuePair<K, D> FindFirst(IComparable<K> query)
         {
-            foreach (var entry in FindAll(query))
+            foreach (KeyValuePair<K, D> entry in FindAll(query))
             {
                 return entry;
             }
@@ -105,11 +104,8 @@ namespace DiscUtils.Ntfs
                 data = Convert<D>(value);
                 return true;
             }
-            else
-            {
-                data = default(D);
-                return false;
-            }
+            data = default(D);
+            return false;
         }
 
         public bool ContainsKey(K key)
@@ -140,7 +136,7 @@ namespace DiscUtils.Ntfs
 
         private class ComparableConverter : IComparable<byte[]>
         {
-            private IComparable<K> _wrapped;
+            private readonly IComparable<K> _wrapped;
 
             public ComparableConverter(IComparable<K> toWrap)
             {

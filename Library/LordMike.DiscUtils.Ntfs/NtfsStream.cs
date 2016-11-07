@@ -20,37 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class NtfsStream
     {
-        private File _file;
-        private NtfsAttribute _attr;
+        private readonly File _file;
 
         public NtfsStream(File file, NtfsAttribute attr)
         {
             _file = file;
-            _attr = attr;
+            Attribute = attr;
         }
 
-        public NtfsAttribute Attribute
-        {
-            get { return _attr; }
-        }
+        public NtfsAttribute Attribute { get; }
 
         public AttributeType AttributeType
         {
-            get { return _attr.Type; }
+            get { return Attribute.Type; }
         }
 
         public string Name
         {
-            get { return _attr.Name; }
+            get { return Attribute.Name; }
         }
 
         /// <summary>
@@ -64,7 +59,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer;
             using (Stream s = Open(FileAccess.Read))
             {
-                buffer = Utilities.ReadFully(s, (int) s.Length);
+                buffer = Utilities.ReadFully(s, (int)s.Length);
             }
 
             T value = new T();
@@ -91,12 +86,12 @@ namespace DiscUtils.Ntfs
 
         public SparseStream Open(FileAccess access)
         {
-            return _attr.Open(access);
+            return Attribute.Open(access);
         }
 
         internal Range<long, long>[] GetClusters()
         {
-            return _attr.GetClusters();
+            return Attribute.GetClusters();
         }
 
         internal StreamExtent[] GetAbsoluteExtents()
@@ -104,17 +99,17 @@ namespace DiscUtils.Ntfs
             List<StreamExtent> result = new List<StreamExtent>();
 
             long clusterSize = _file.Context.BiosParameterBlock.BytesPerCluster;
-            if (_attr.IsNonResident)
+            if (Attribute.IsNonResident)
             {
-                Range<long, long>[] clusters = _attr.GetClusters();
-                foreach (var clusterRange in clusters)
+                Range<long, long>[] clusters = Attribute.GetClusters();
+                foreach (Range<long, long> clusterRange in clusters)
                 {
-                    result.Add(new StreamExtent(clusterRange.Offset*clusterSize, clusterRange.Count*clusterSize));
+                    result.Add(new StreamExtent(clusterRange.Offset * clusterSize, clusterRange.Count * clusterSize));
                 }
             }
             else
             {
-                result.Add(new StreamExtent(_attr.OffsetToAbsolutePos(0), _attr.Length));
+                result.Add(new StreamExtent(Attribute.OffsetToAbsolutePos(0), Attribute.Length));
             }
 
             return result.ToArray();

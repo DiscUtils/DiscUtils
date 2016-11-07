@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     /// <summary>
     /// Flags indicating the nature of a Master File Table entry.
     /// </summary>
     [Flags]
-    public enum MasterFileTableEntryFlags : int
+    public enum MasterFileTableEntryFlags
     {
         /// <summary>
         /// Default value.

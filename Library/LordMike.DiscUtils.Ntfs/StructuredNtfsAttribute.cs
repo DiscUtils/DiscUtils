@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.IO;
-
     internal class StructuredNtfsAttribute<T> : NtfsAttribute
         where T : IByteArraySerializable, IDiagnosticTraceable, new()
     {
-        private T _structure;
-        private bool _initialized;
         private bool _hasContent;
+        private bool _initialized;
+        private T _structure;
 
         public StructuredNtfsAttribute(File file, FileRecordReference containingFile, AttributeRecord record)
             : base(file, containingFile, record)
@@ -95,7 +94,7 @@ namespace DiscUtils.Ntfs
             {
                 using (Stream s = Open(FileAccess.Read))
                 {
-                    byte[] buffer = Utilities.ReadFully(s, (int) Length);
+                    byte[] buffer = Utilities.ReadFully(s, (int)Length);
                     _structure.ReadFrom(buffer, 0);
                     _hasContent = s.Length != 0;
                 }

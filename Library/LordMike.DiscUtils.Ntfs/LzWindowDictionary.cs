@@ -25,17 +25,17 @@
 //   - Derived from Puyo tools (BSD license)
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class LzWindowDictionary
     {
         /// <summary>
         /// Index of locations of each possible byte value within the compression window.
         /// </summary>
-        private List<int>[] _offsetList;
+        private readonly List<int>[] _offsetList;
 
         public LzWindowDictionary()
         {
@@ -49,11 +49,11 @@ namespace DiscUtils.Ntfs
             }
         }
 
-        public int MinMatchAmount { get; set; }
+        private int BlockSize { get; set; }
 
         public int MaxMatchAmount { get; set; }
 
-        private int BlockSize { get; set; }
+        public int MinMatchAmount { get; set; }
 
         public void Reset()
         {
@@ -69,7 +69,7 @@ namespace DiscUtils.Ntfs
         {
             RemoveOldEntries(decompressedData[decompressedDataOffset + index]); // Remove old entries for this index 
 
-            int[] match = new int[] {0, 0};
+            int[] match = { 0, 0 };
 
             if (index < 1 || length - index < MinMatchAmount)
             {
@@ -88,7 +88,7 @@ namespace DiscUtils.Ntfs
                 }
 
                 int maxMatchSize =
-                    (int) Math.Min(Math.Min(MaxMatchAmount, BlockSize), Math.Min(length - index, length - matchStart));
+                    (int)Math.Min(Math.Min(MaxMatchAmount, BlockSize), Math.Min(length - index, length - matchStart));
                 while (matchSize < maxMatchSize &&
                        decompressedData[decompressedDataOffset + index + matchSize] ==
                        decompressedData[decompressedDataOffset + matchStart + matchSize])
@@ -99,7 +99,7 @@ namespace DiscUtils.Ntfs
                 if (matchSize >= MinMatchAmount && matchSize > match[1])
                 {
                     // This is a good match 
-                    match = new int[] {(int) (index - matchStart), matchSize};
+                    match = new[] { (int)(index - matchStart), matchSize };
 
                     if (matchSize == MaxMatchAmount)
                     {

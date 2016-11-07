@@ -32,8 +32,8 @@ namespace DiscUtils.Ntfs.Internals
     /// </remarks>
     public abstract class GenericAttribute
     {
-        private INtfsContext _context;
-        private AttributeRecord _record;
+        private readonly INtfsContext _context;
+        private readonly AttributeRecord _record;
 
         internal GenericAttribute(INtfsContext context, AttributeRecord record)
         {
@@ -42,19 +42,39 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the name of the attribute (if any).
-        /// </summary>
-        public string Name
-        {
-            get { return _record.Name; }
-        }
-
-        /// <summary>
         /// Gets the type of the attribute.
         /// </summary>
         public AttributeType AttributeType
         {
             get { return _record.AttributeType; }
+        }
+
+        /// <summary>
+        /// Gets a buffer that can access the content of the attribute.
+        /// </summary>
+        public IBuffer Content
+        {
+            get
+            {
+                IBuffer rawBuffer = _record.GetReadOnlyDataBuffer(_context);
+                return new SubBuffer(rawBuffer, 0, _record.DataLength);
+            }
+        }
+
+        /// <summary>
+        /// Gets the amount of valid data in the attribute's content.
+        /// </summary>
+        public long ContentLength
+        {
+            get { return _record.DataLength; }
+        }
+
+        /// <summary>
+        /// Gets the flags indicating how the content of the attribute is stored.
+        /// </summary>
+        public AttributeFlags Flags
+        {
+            get { return (AttributeFlags)_record.Flags; }
         }
 
         /// <summary>
@@ -74,31 +94,11 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the flags indicating how the content of the attribute is stored.
+        /// Gets the name of the attribute (if any).
         /// </summary>
-        public AttributeFlags Flags
+        public string Name
         {
-            get { return (AttributeFlags) _record.Flags; }
-        }
-
-        /// <summary>
-        /// Gets the amount of valid data in the attribute's content.
-        /// </summary>
-        public long ContentLength
-        {
-            get { return _record.DataLength; }
-        }
-
-        /// <summary>
-        /// Gets a buffer that can access the content of the attribute.
-        /// </summary>
-        public IBuffer Content
-        {
-            get
-            {
-                IBuffer rawBuffer = _record.GetReadOnlyDataBuffer(_context);
-                return new SubBuffer(rawBuffer, 0, _record.DataLength);
-            }
+            get { return _record.Name; }
         }
 
         internal static GenericAttribute FromAttributeRecord(INtfsContext context, AttributeRecord record)

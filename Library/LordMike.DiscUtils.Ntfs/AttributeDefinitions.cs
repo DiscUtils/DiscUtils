@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class AttributeDefinitions
     {
-        private Dictionary<AttributeType, AttributeDefinitionRecord> _attrDefs;
+        private readonly Dictionary<AttributeType, AttributeDefinitionRecord> _attrDefs;
 
         public AttributeDefinitions()
         {
@@ -102,7 +101,7 @@ namespace DiscUtils.Ntfs
 
         internal AttributeDefinitionRecord Lookup(string name)
         {
-            foreach (var record in _attrDefs.Values)
+            foreach (AttributeDefinitionRecord record in _attrDefs.Values)
             {
                 if (string.Compare(name, record.Name, StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -136,7 +135,7 @@ namespace DiscUtils.Ntfs
         }
 
         private void Add(AttributeType attributeType, string name, AttributeTypeFlags attributeTypeFlags, int minSize,
-            int maxSize)
+                         int maxSize)
         {
             AttributeDefinitionRecord adr = new AttributeDefinitionRecord();
             adr.Type = attributeType;

@@ -30,7 +30,7 @@ namespace DiscUtils.Ntfs.Internals
     /// Master File Table entries.</remarks>
     public sealed class AttributeListEntry
     {
-        private AttributeListRecord _record;
+        private readonly AttributeListRecord _record;
 
         internal AttributeListEntry(AttributeListRecord record)
         {
@@ -38,11 +38,11 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the type of the attribute.
+        /// Gets the identifier of the attribute.
         /// </summary>
-        public AttributeType AttributeType
+        public int AttributeIdentifier
         {
-            get { return _record.Type; }
+            get { return _record.AttributeId; }
         }
 
         /// <summary>
@@ -51,6 +51,14 @@ namespace DiscUtils.Ntfs.Internals
         public string AttributeName
         {
             get { return _record.Name; }
+        }
+
+        /// <summary>
+        /// Gets the type of the attribute.
+        /// </summary>
+        public AttributeType AttributeType
+        {
+            get { return _record.Type; }
         }
 
         /// <summary>
@@ -71,7 +79,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </remarks>
         public long FirstFileCluster
         {
-            get { return (long) _record.StartVcn; }
+            get { return (long)_record.StartVcn; }
         }
 
         /// <summary>
@@ -80,14 +88,6 @@ namespace DiscUtils.Ntfs.Internals
         public MasterFileTableReference MasterFileTableEntry
         {
             get { return new MasterFileTableReference(_record.BaseFileReference); }
-        }
-
-        /// <summary>
-        /// Gets the identifier of the attribute.
-        /// </summary>
-        public int AttributeIdentifier
-        {
-            get { return _record.AttributeId; }
         }
     }
 }

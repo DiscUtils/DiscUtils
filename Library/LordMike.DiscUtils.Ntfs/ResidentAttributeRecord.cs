@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal sealed class ResidentAttributeRecord : AttributeRecord
     {
         private byte _indexedFlag;
@@ -42,7 +41,7 @@ namespace DiscUtils.Ntfs
             : base(type, name, id, flags)
         {
             _nonResidentFlag = 0;
-            _indexedFlag = (byte) (indexed ? 1 : 0);
+            _indexedFlag = (byte)(indexed ? 1 : 0);
             _memoryBuffer = new SparseMemoryBuffer(1024);
         }
 
@@ -52,9 +51,9 @@ namespace DiscUtils.Ntfs
             set { throw new NotSupportedException(); }
         }
 
-        public override long StartVcn
+        public IBuffer DataBuffer
         {
-            get { return 0; }
+            get { return _memoryBuffer; }
         }
 
         public override long DataLength
@@ -63,12 +62,26 @@ namespace DiscUtils.Ntfs
             set { throw new NotSupportedException(); }
         }
 
+        public int DataOffset
+        {
+            get
+            {
+                byte nameLength = 0;
+                if (Name != null)
+                {
+                    nameLength = (byte)Name.Length;
+                }
+
+                return Utilities.RoundUp(0x18 + nameLength * 2, 8);
+            }
+        }
+
         /// <summary>
         /// The amount of initialized data in the attribute (in bytes).
         /// </summary>
         public override long InitializedDataLength
         {
-            get { return (long) DataLength; }
+            get { return DataLength; }
             set { throw new NotSupportedException(); }
         }
 
@@ -80,31 +93,17 @@ namespace DiscUtils.Ntfs
                 ushort nameOffset = 0x18;
                 if (Name != null)
                 {
-                    nameLength = (byte) Name.Length;
+                    nameLength = (byte)Name.Length;
                 }
 
-                ushort dataOffset = (ushort) Utilities.RoundUp(nameOffset + (nameLength*2), 8);
-                return (int) Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
+                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + nameLength * 2, 8);
+                return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
             }
         }
 
-        public int DataOffset
+        public override long StartVcn
         {
-            get
-            {
-                byte nameLength = 0;
-                if (Name != null)
-                {
-                    nameLength = (byte) Name.Length;
-                }
-
-                return Utilities.RoundUp(0x18 + (nameLength*2), 8);
-            }
-        }
-
-        public IBuffer DataBuffer
-        {
-            get { return _memoryBuffer; }
+            get { return 0; }
         }
 
         public override IBuffer GetReadOnlyDataBuffer(INtfsContext context)
@@ -124,32 +123,32 @@ namespace DiscUtils.Ntfs
             if (Name != null)
             {
                 nameOffset = 0x18;
-                nameLength = (byte) Name.Length;
+                nameLength = (byte)Name.Length;
             }
 
-            ushort dataOffset = (ushort) Utilities.RoundUp(0x18 + (nameLength*2), 8);
-            int length = (int) Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
+            ushort dataOffset = (ushort)Utilities.RoundUp(0x18 + nameLength * 2, 8);
+            int length = (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
 
-            Utilities.WriteBytesLittleEndian((uint) _type, buffer, offset + 0x00);
+            Utilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
             Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x04);
             buffer[offset + 0x08] = _nonResidentFlag;
             buffer[offset + 0x09] = nameLength;
             Utilities.WriteBytesLittleEndian(nameOffset, buffer, offset + 0x0A);
-            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x0C);
+            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
             Utilities.WriteBytesLittleEndian(_attributeId, buffer, offset + 0x0E);
-            Utilities.WriteBytesLittleEndian((int) _memoryBuffer.Capacity, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian((int)_memoryBuffer.Capacity, buffer, offset + 0x10);
             Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x14);
             buffer[offset + 0x16] = _indexedFlag;
             buffer[offset + 0x17] = 0; // Padding
 
             if (Name != null)
             {
-                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength*2);
+                Array.Copy(Encoding.Unicode.GetBytes(Name), 0, buffer, offset + nameOffset, nameLength * 2);
             }
 
-            _memoryBuffer.Read(0, buffer, offset + dataOffset, (int) _memoryBuffer.Capacity);
+            _memoryBuffer.Read(0, buffer, offset + dataOffset, (int)_memoryBuffer.Capacity);
 
-            return (int) length;
+            return length;
         }
 
         public override void Dump(TextWriter writer, string indent)
@@ -173,7 +172,7 @@ namespace DiscUtils.Ntfs
             }
 
             _memoryBuffer = new SparseMemoryBuffer(1024);
-            _memoryBuffer.Write(0, buffer, offset + dataOffset, (int) dataLength);
+            _memoryBuffer.Write(0, buffer, offset + dataOffset, (int)dataLength);
         }
     }
 }

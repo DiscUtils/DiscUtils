@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-
     internal sealed class ObjectIds
     {
-        private IndexView<IndexKey, ObjectIdRecord> _index;
-        private File _file;
+        private readonly File _file;
+        private readonly IndexView<IndexKey, ObjectIdRecord> _index;
 
         public ObjectIds(File file)
         {
@@ -44,7 +43,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                foreach (var record in _index.Entries)
+                foreach (KeyValuePair<IndexKey, ObjectIdRecord> record in _index.Entries)
                 {
                     yield return new KeyValuePair<Guid, ObjectIdRecord>(record.Key.Id, record.Value);
                 }
@@ -87,7 +86,7 @@ namespace DiscUtils.Ntfs
         {
             writer.WriteLine(indent + "OBJECT ID INDEX");
 
-            foreach (var entry in _index.Entries)
+            foreach (KeyValuePair<IndexKey, ObjectIdRecord> entry in _index.Entries)
             {
                 writer.WriteLine(indent + "  OBJECT ID INDEX ENTRY");
                 writer.WriteLine(indent + "             Id: " + entry.Key.Id);

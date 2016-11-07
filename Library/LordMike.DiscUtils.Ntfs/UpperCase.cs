@@ -20,29 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class UpperCase : IComparer<string>
     {
-        private char[] _table;
+        private readonly char[] _table;
 
         public UpperCase(File file)
         {
             using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             {
-                _table = new char[s.Length/2];
+                _table = new char[s.Length / 2];
 
-                byte[] buffer = Utilities.ReadFully(s, (int) s.Length);
+                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
 
                 for (int i = 0; i < _table.Length; ++i)
                 {
-                    _table[i] = (char) Utilities.ToUInt16LittleEndian(buffer, i*2);
+                    _table[i] = (char)Utilities.ToUInt16LittleEndian(buffer, i * 2);
                 }
             }
         }
@@ -66,11 +65,11 @@ namespace DiscUtils.Ntfs
 
         public int Compare(byte[] x, int xOffset, int xLength, byte[] y, int yOffset, int yLength)
         {
-            int compLen = Math.Min(xLength, yLength)/2;
+            int compLen = Math.Min(xLength, yLength) / 2;
             for (int i = 0; i < compLen; ++i)
             {
-                char xCh = (char) (x[xOffset + (i*2)] | (x[xOffset + ((i*2) + 1)] << 8));
-                char yCh = (char) (y[yOffset + (i*2)] | (y[yOffset + ((i*2) + 1)] << 8));
+                char xCh = (char)(x[xOffset + i * 2] | (x[xOffset + i * 2 + 1] << 8));
+                char yCh = (char)(y[yOffset + i * 2] | (y[yOffset + i * 2 + 1] << 8));
 
                 int result = _table[xCh] - _table[yCh];
                 if (result != 0)
@@ -86,10 +85,10 @@ namespace DiscUtils.Ntfs
 
         internal static UpperCase Initialize(File file)
         {
-            byte[] buffer = new byte[(char.MaxValue + 1)*2];
-            for (int i = Char.MinValue; i <= char.MaxValue; ++i)
+            byte[] buffer = new byte[(char.MaxValue + 1) * 2];
+            for (int i = char.MinValue; i <= char.MaxValue; ++i)
             {
-                Utilities.WriteBytesLittleEndian((ushort) char.ToUpperInvariant((char) i), buffer, i*2);
+                Utilities.WriteBytesLittleEndian(char.ToUpperInvariant((char)i), buffer, i * 2);
             }
 
             using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))

@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     [Flags]
-    public enum MasterFileTableRecordFlags : int
+    public enum MasterFileTableRecordFlags
     {
         None = 0x0000,
         InUse = 0x0001,

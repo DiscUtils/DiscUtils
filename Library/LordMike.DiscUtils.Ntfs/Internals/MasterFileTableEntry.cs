@@ -20,22 +20,67 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Ntfs.Internals
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// An entry within the Master File Table.
     /// </summary>
     public sealed class MasterFileTableEntry
     {
-        private INtfsContext _context;
-        private FileRecord _fileRecord;
+        private readonly INtfsContext _context;
+        private readonly FileRecord _fileRecord;
 
         internal MasterFileTableEntry(INtfsContext context, FileRecord fileRecord)
         {
             _context = context;
             _fileRecord = fileRecord;
+        }
+
+        /// <summary>
+        /// Gets the attributes contained in this entry.
+        /// </summary>
+        public ICollection<GenericAttribute> Attributes
+        {
+            get
+            {
+                List<GenericAttribute> result = new List<GenericAttribute>();
+                foreach (AttributeRecord attr in _fileRecord.Attributes)
+                {
+                    result.Add(GenericAttribute.FromAttributeRecord(_context, attr));
+                }
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets the identity of the base entry for files split over multiple entries.
+        /// </summary>
+        /// <remarks>
+        /// All entries that form part of the same file have the same value for
+        /// this property.
+        /// </remarks>
+        public MasterFileTableReference BaseRecordReference
+        {
+            get { return new MasterFileTableReference(_fileRecord.BaseFile); }
+        }
+
+        /// <summary>
+        /// Gets the flags indicating the nature of the entry.
+        /// </summary>
+        public MasterFileTableEntryFlags Flags
+        {
+            get { return (MasterFileTableEntryFlags)_fileRecord.Flags; }
+        }
+
+        /// <summary>
+        /// Gets the number of hard links referencing this file.
+        /// </summary>
+        public int HardLinkCount
+        {
+            get { return _fileRecord.HardLinkCount; }
         }
 
         /// <summary>
@@ -54,46 +99,7 @@ namespace DiscUtils.Ntfs.Internals
         /// </remarks>
         public long LogFileSequenceNumber
         {
-            get { return (long) _fileRecord.LogFileSequenceNumber; }
-        }
-
-        /// <summary>
-        /// Gets the revision number of the entry.
-        /// </summary>
-        /// <remarks>
-        /// Each time an entry is allocated or de-allocated, this number is incremented by one.
-        /// </remarks>
-        public int SequenceNumber
-        {
-            get { return _fileRecord.SequenceNumber; }
-        }
-
-        /// <summary>
-        /// Gets the number of hard links referencing this file.
-        /// </summary>
-        public int HardLinkCount
-        {
-            get { return _fileRecord.HardLinkCount; }
-        }
-
-        /// <summary>
-        /// Gets the flags indicating the nature of the entry.
-        /// </summary>
-        public MasterFileTableEntryFlags Flags
-        {
-            get { return (MasterFileTableEntryFlags) _fileRecord.Flags; }
-        }
-
-        /// <summary>
-        /// Gets the identity of the base entry for files split over multiple entries.
-        /// </summary>
-        /// <remarks>
-        /// All entries that form part of the same file have the same value for
-        /// this property.
-        /// </remarks>
-        public MasterFileTableReference BaseRecordReference
-        {
-            get { return new MasterFileTableReference(_fileRecord.BaseFile); }
+            get { return (long)_fileRecord.LogFileSequenceNumber; }
         }
 
         /// <summary>
@@ -116,20 +122,14 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the attributes contained in this entry.
+        /// Gets the revision number of the entry.
         /// </summary>
-        public ICollection<GenericAttribute> Attributes
+        /// <remarks>
+        /// Each time an entry is allocated or de-allocated, this number is incremented by one.
+        /// </remarks>
+        public int SequenceNumber
         {
-            get
-            {
-                List<GenericAttribute> result = new List<GenericAttribute>();
-                foreach (var attr in _fileRecord.Attributes)
-                {
-                    result.Add(GenericAttribute.FromAttributeRecord(_context, attr));
-                }
-
-                return result;
-            }
+            get { return _fileRecord.SequenceNumber; }
         }
     }
 }

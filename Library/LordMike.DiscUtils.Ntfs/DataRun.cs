@@ -20,50 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
+
 namespace DiscUtils.Ntfs
 {
-    using System.Globalization;
-
     internal class DataRun
     {
-        private long _runLength;
-        private long _runOffset;
-        private bool _isSparse;
-
-        public DataRun()
-        {
-        }
+        public DataRun() {}
 
         public DataRun(long offset, long length, bool isSparse)
         {
-            _runOffset = offset;
-            _runLength = length;
-            _isSparse = isSparse;
+            RunOffset = offset;
+            RunLength = length;
+            IsSparse = isSparse;
         }
 
-        public long RunLength
-        {
-            get { return _runLength; }
-            set { _runLength = value; }
-        }
+        public bool IsSparse { get; private set; }
 
-        public long RunOffset
-        {
-            get { return _runOffset; }
-            set { _runOffset = value; }
-        }
+        public long RunLength { get; set; }
 
-        public bool IsSparse
-        {
-            get { return _isSparse; }
-        }
+        public long RunOffset { get; set; }
 
         internal int Size
         {
             get
             {
-                int runLengthSize = VarLongSize(_runLength);
-                int runOffsetSize = VarLongSize(_runOffset);
+                int runLengthSize = VarLongSize(RunLength);
+                int runOffsetSize = VarLongSize(RunOffset);
                 return 1 + runLengthSize + runOffsetSize;
             }
         }
@@ -73,24 +56,24 @@ namespace DiscUtils.Ntfs
             int runOffsetSize = (buffer[offset] >> 4) & 0x0F;
             int runLengthSize = buffer[offset] & 0x0F;
 
-            _runLength = ReadVarLong(buffer, offset + 1, runLengthSize);
-            _runOffset = ReadVarLong(buffer, offset + 1 + runLengthSize, runOffsetSize);
-            _isSparse = runOffsetSize == 0;
+            RunLength = ReadVarLong(buffer, offset + 1, runLengthSize);
+            RunOffset = ReadVarLong(buffer, offset + 1 + runLengthSize, runOffsetSize);
+            IsSparse = runOffsetSize == 0;
 
             return 1 + runLengthSize + runOffsetSize;
         }
 
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0:+##;-##;0}[+{1}]", _runOffset, _runLength);
+            return string.Format(CultureInfo.InvariantCulture, "{0:+##;-##;0}[+{1}]", RunOffset, RunLength);
         }
 
         internal int Write(byte[] buffer, int offset)
         {
-            int runLengthSize = WriteVarLong(buffer, offset + 1, _runLength);
-            int runOffsetSize = _isSparse ? 0 : WriteVarLong(buffer, offset + 1 + runLengthSize, _runOffset);
+            int runLengthSize = WriteVarLong(buffer, offset + 1, RunLength);
+            int runOffsetSize = IsSparse ? 0 : WriteVarLong(buffer, offset + 1 + runLengthSize, RunOffset);
 
-            buffer[offset] = (byte) ((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
+            buffer[offset] = (byte)((runLengthSize & 0x0F) | ((runOffsetSize << 4) & 0xF0));
 
             return 1 + runLengthSize + runOffsetSize;
         }
@@ -103,7 +86,7 @@ namespace DiscUtils.Ntfs
             for (int i = 0; i < size; ++i)
             {
                 byte b = buffer[offset + i];
-                val = val | (((ulong) b) << (i*8));
+                val = val | ((ulong)b << (i * 8));
                 signExtend = (b & 0x80) != 0;
             }
 
@@ -111,11 +94,11 @@ namespace DiscUtils.Ntfs
             {
                 for (int i = size; i < 8; ++i)
                 {
-                    val = val | (((ulong) 0xFF) << (i*8));
+                    val = val | ((ulong)0xFF << (i * 8));
                 }
             }
 
-            return (long) val;
+            return (long)val;
         }
 
         private static int WriteVarLong(byte[] buffer, int offset, long val)
@@ -125,7 +108,7 @@ namespace DiscUtils.Ntfs
             int pos = 0;
             do
             {
-                buffer[offset + pos] = (byte) (val & 0xFF);
+                buffer[offset + pos] = (byte)(val & 0xFF);
                 val >>= 8;
                 pos++;
             } while (val != 0 && val != -1);

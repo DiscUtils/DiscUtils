@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     /// <summary>
     /// Flags indicating how an attribute's content is stored on disk.
     /// </summary>

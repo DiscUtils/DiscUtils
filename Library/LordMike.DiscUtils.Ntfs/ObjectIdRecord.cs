@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Globalization;
-
     internal sealed class ObjectIdRecord : IByteArraySerializable
     {
-        public FileRecordReference MftReference;
-        public Guid BirthVolumeId;
-        public Guid BirthObjectId;
         public Guid BirthDomainId;
+        public Guid BirthObjectId;
+        public Guid BirthVolumeId;
+        public FileRecordReference MftReference;
 
         public int Size
         {

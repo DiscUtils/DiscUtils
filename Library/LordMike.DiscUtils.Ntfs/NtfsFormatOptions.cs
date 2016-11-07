@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Security.Principal;
+
 namespace DiscUtils.Ntfs
 {
-    using System.Security.Principal;
-
     /// <summary>
     /// Class representing NTFS formatting options.
     /// </summary>

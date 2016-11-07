@@ -20,31 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text;
     using DirectoryIndexEntry =
-        System.Collections.Generic.KeyValuePair<DiscUtils.Ntfs.FileNameRecord, DiscUtils.Ntfs.FileRecordReference>;
+        KeyValuePair<FileNameRecord, FileRecordReference>;
 
     internal class Directory : File
     {
         private IndexView<FileNameRecord, FileRecordReference> _index;
 
         public Directory(INtfsContext context, FileRecord baseRecord)
-            : base(context, baseRecord)
-        {
-        }
-
-        public bool IsEmpty
-        {
-            get { return Index.Count == 0; }
-        }
+            : base(context, baseRecord) {}
 
         private IndexView<FileNameRecord, FileRecordReference> Index
         {
@@ -59,11 +52,16 @@ namespace DiscUtils.Ntfs
             }
         }
 
+        public bool IsEmpty
+        {
+            get { return Index.Count == 0; }
+        }
+
         public IEnumerable<DirectoryEntry> GetAllEntries(bool filter)
         {
             IEnumerable<DirectoryIndexEntry> entries = filter ? FilterEntries(Index.Entries) : Index.Entries;
 
-            foreach (var entry in entries)
+            foreach (DirectoryIndexEntry entry in entries)
             {
                 yield return new DirectoryEntry(this, entry.Value, entry.Key);
             }
@@ -82,7 +80,7 @@ namespace DiscUtils.Ntfs
 
             if (Index != null)
             {
-                foreach (var entry in Index.Entries)
+                foreach (DirectoryIndexEntry entry in Index.Entries)
                 {
                     writer.WriteLine(indent + "  DIRECTORY ENTRY (" + entry.Key.FileName + ")");
                     writer.WriteLine(indent + "    MFT Ref: " + entry.Value);
@@ -96,9 +94,9 @@ namespace DiscUtils.Ntfs
             return base.ToString() + @"\";
         }
 
-        internal static new Directory CreateNew(INtfsContext context, FileAttributeFlags parentDirFlags)
+        internal new static Directory CreateNew(INtfsContext context, FileAttributeFlags parentDirFlags)
         {
-            Directory dir = (Directory) context.AllocateFile(FileRecordFlags.IsDirectory);
+            Directory dir = (Directory)context.AllocateFile(FileRecordFlags.IsDirectory);
 
             StandardInformation.InitializeNewFile(
                 dir,
@@ -127,10 +125,7 @@ namespace DiscUtils.Ntfs
             {
                 return new DirectoryEntry(this, entry.Value, entry.Key);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         internal DirectoryEntry AddEntry(File file, string name, FileNameNamespace nameNamespace)
@@ -139,7 +134,7 @@ namespace DiscUtils.Ntfs
             {
                 throw new IOException("Invalid file name, more than 255 characters: " + name);
             }
-            else if (name.IndexOfAny(new char[] {'\0', '/'}) != -1)
+            if (name.IndexOfAny(new[] { '\0', '/' }) != -1)
             {
                 throw new IOException(@"Invalid file name, contains '\0' or '/': " + name);
             }
@@ -198,7 +193,7 @@ namespace DiscUtils.Ntfs
             int i = 0;
             while (baseName.Length < 6 && i < name.Length && i != lastPeriod)
             {
-                char upperChar = Char.ToUpperInvariant(name[i]);
+                char upperChar = char.ToUpperInvariant(name[i]);
                 if (Utilities.Is8Dot3Char(upperChar))
                 {
                     baseName += upperChar;
@@ -212,7 +207,7 @@ namespace DiscUtils.Ntfs
                 i = lastPeriod + 1;
                 while (ext.Length < 3 && i < name.Length)
                 {
-                    char upperChar = Char.ToUpperInvariant(name[i]);
+                    char upperChar = char.ToUpperInvariant(name[i]);
                     if (Utilities.Is8Dot3Char(upperChar))
                     {
                         ext += upperChar;
@@ -272,8 +267,8 @@ namespace DiscUtils.Ntfs
 
         private sealed class FileNameQuery : IComparable<byte[]>
         {
-            private byte[] _query;
-            private UpperCase _upperCase;
+            private readonly byte[] _query;
+            private readonly UpperCase _upperCase;
 
             public FileNameQuery(string query, UpperCase upperCase)
             {
@@ -287,7 +282,7 @@ namespace DiscUtils.Ntfs
                 // reasons, we don't want to decode the entire structure.  In fact can avoid the string
                 // conversion as well.
                 byte fnLen = buffer[0x40];
-                return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen*2);
+                return _upperCase.Compare(_query, 0, _query.Length, buffer, 0x42, fnLen * 2);
             }
         }
     }

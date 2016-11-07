@@ -20,34 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
+
+#if !NETCORE
+using System.Runtime.Serialization;
+#endif
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text;
-
-#if !NETCORE
-    using System.Runtime.Serialization;
-#endif
-
     /// <summary>
     /// Class that checks NTFS file system integrity.
     /// </summary>
     /// <remarks>Poor relation of chkdsk/fsck.</remarks>
     public sealed class NtfsFileSystemChecker : DiscFileSystemChecker
     {
-        private Stream _target;
+        private readonly Stream _target;
 
         private NtfsContext _context;
         private TextWriter _report;
         private ReportLevels _reportLevels;
 
         private ReportLevels _levelsDetected;
-        private ReportLevels _levelsConsideredFail = ReportLevels.Errors;
+        private readonly ReportLevels _levelsConsideredFail = ReportLevels.Errors;
 
         /// <summary>
         /// Initializes a new instance of the NtfsFileSystemChecker class.
@@ -83,12 +82,12 @@ namespace DiscUtils.Ntfs
             }
             catch (AbortException ae)
             {
-                ReportError("File system check aborted: " + ae.ToString());
+                ReportError("File system check aborted: " + ae);
                 return false;
             }
             catch (Exception e)
             {
-                ReportError("File system check aborted with exception: " + e.ToString());
+                ReportError("File system check aborted with exception: " + e);
                 return false;
             }
 
@@ -222,7 +221,7 @@ namespace DiscUtils.Ntfs
                 if (fr.BaseFile.Value != 0)
                 {
                     File f = new File(_context, fr);
-                    foreach (var stream in f.AllStreams)
+                    foreach (NtfsStream stream in f.AllStreams)
                     {
                         if (stream.AttributeType == AttributeType.ObjectId)
                         {
@@ -242,7 +241,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            foreach (var objIdRec in _context.ObjectIds.All)
+            foreach (KeyValuePair<Guid, ObjectIdRecord> objIdRec in _context.ObjectIds.All)
             {
                 if (_context.Mft.GetRecord(objIdRec.Value.MftReference) == null)
                 {
@@ -262,13 +261,13 @@ namespace DiscUtils.Ntfs
                 }
 
                 File f = new File(_context, fr);
-                foreach (var stream in f.AllStreams)
+                foreach (NtfsStream stream in f.AllStreams)
                 {
                     if (stream.AttributeType == AttributeType.IndexRoot && stream.Name == "$I30")
                     {
                         IndexView<FileNameRecord, FileRecordReference> dir =
                             new IndexView<FileNameRecord, FileRecordReference>(f.GetIndex("$I30"));
-                        foreach (var entry in dir.Entries)
+                        foreach (KeyValuePair<FileNameRecord, FileRecordReference> entry in dir.Entries)
                         {
                             FileRecord refFile = _context.Mft.GetRecord(entry.Value);
 
@@ -297,7 +296,7 @@ namespace DiscUtils.Ntfs
             foreach (FileRecord fr in _context.Mft.Records)
             {
                 File f = new File(_context, fr);
-                foreach (var stream in f.AllStreams)
+                foreach (NtfsStream stream in f.AllStreams)
                 {
                     if (stream.AttributeType == AttributeType.IndexRoot)
                     {
@@ -316,7 +315,7 @@ namespace DiscUtils.Ntfs
             byte[] rootBuffer;
             using (Stream s = file.OpenStream(AttributeType.IndexRoot, name, FileAccess.Read))
             {
-                rootBuffer = Utilities.ReadFully(s, (int) s.Length);
+                rootBuffer = Utilities.ReadFully(s, (int)s.Length);
             }
 
             Bitmap indexBitmap = null;
@@ -338,7 +337,7 @@ namespace DiscUtils.Ntfs
         }
 
         private bool SelfCheckIndexNode(byte[] buffer, int offset, Bitmap bitmap, IndexRoot root, string fileName,
-            string indexName)
+                                        string indexName)
         {
             bool ok = true;
 
@@ -348,7 +347,7 @@ namespace DiscUtils.Ntfs
 
             IComparer<byte[]> collator = root.GetCollator(_context.UpperCase);
 
-            int pos = (int) header.OffsetToFirstEntry;
+            int pos = (int)header.OffsetToFirstEntry;
             while (pos < header.TotalSizeOfEntries)
             {
                 IndexEntry entry = new IndexEntry(indexName == "$I30");
@@ -357,9 +356,9 @@ namespace DiscUtils.Ntfs
 
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
-                    long bitmapIdx = entry.ChildrenVirtualCluster/
+                    long bitmapIdx = entry.ChildrenVirtualCluster /
                                      Utilities.Ceil(root.IndexAllocationSize,
-                                         _context.BiosParameterBlock.SectorsPerCluster*
+                                         _context.BiosParameterBlock.SectorsPerCluster *
                                          _context.BiosParameterBlock.BytesPerSector);
                     if (!bitmap.IsPresent(bitmapIdx))
                     {
@@ -398,7 +397,7 @@ namespace DiscUtils.Ntfs
             int bytesPerSector = _context.BiosParameterBlock.BytesPerSector;
 
             // Check out the MFT's clusters
-            foreach (var range in file.GetAttribute(AttributeType.Data, null).GetClusters())
+            foreach (Range<long, long> range in file.GetAttribute(AttributeType.Data, null).GetClusters())
             {
                 if (!VerifyClusterRange(range))
                 {
@@ -407,7 +406,7 @@ namespace DiscUtils.Ntfs
                 }
             }
 
-            foreach (var range in file.GetAttribute(AttributeType.Bitmap, null).GetClusters())
+            foreach (Range<long, long> range in file.GetAttribute(AttributeType.Bitmap, null).GetClusters())
             {
                 if (!VerifyClusterRange(range))
                 {
@@ -432,7 +431,7 @@ namespace DiscUtils.Ntfs
                         if (bitmap.IsPresent(index))
                         {
                             ReportError("Invalid MFT record magic at index {0} - was ({2},{3},{4},{5}) \"{1}\"", index,
-                                magic.Trim('\0'), (int) magic[0], (int) magic[1], (int) magic[2], (int) magic[3]);
+                                magic.Trim('\0'), (int)magic[0], (int)magic[1], (int)magic[2], (int)magic[3]);
                         }
                     }
                     else
@@ -468,7 +467,7 @@ namespace DiscUtils.Ntfs
                     {
                         string attrKey = fr.MasterFileTableIndex + ":" + attr.Id;
 
-                        foreach (var range in attr.GetClusters())
+                        foreach (Range<long, long> range in attr.GetClusters())
                         {
                             if (!VerifyClusterRange(range))
                             {
@@ -518,11 +517,11 @@ namespace DiscUtils.Ntfs
 
                     if (ar.IsNonResident)
                     {
-                        NonResidentAttributeRecord nrr = (NonResidentAttributeRecord) ar;
+                        NonResidentAttributeRecord nrr = (NonResidentAttributeRecord)ar;
                         if (nrr.DataRuns.Count > 0)
                         {
                             long totalVcn = 0;
-                            foreach (var run in nrr.DataRuns)
+                            foreach (DataRun run in nrr.DataRuns)
                             {
                                 totalVcn += run.RunLength;
                             }
@@ -565,7 +564,7 @@ namespace DiscUtils.Ntfs
                 ok = false;
             }
 
-            if (Utilities.ToUInt32LittleEndian(recordData, (int) record.RealSize - 8) != uint.MaxValue)
+            if (Utilities.ToUInt32LittleEndian(recordData, (int)record.RealSize - 8) != uint.MaxValue)
             {
                 ReportError("MFT record is not correctly terminated with 0xFFFFFFFF");
                 ok = false;
@@ -589,7 +588,7 @@ namespace DiscUtils.Ntfs
                 ok = false;
             }
 
-            if ((range.Offset + range.Count)*_context.BiosParameterBlock.BytesPerCluster > _context.RawStream.Length)
+            if ((range.Offset + range.Count) * _context.BiosParameterBlock.BytesPerCluster > _context.RawStream.Length)
             {
                 ReportError("Invalid cluster range {0} - beyond end of disk", range);
                 ok = false;
@@ -632,7 +631,7 @@ namespace DiscUtils.Ntfs
         private sealed class AbortException : InvalidFileSystemException
         {
             public AbortException()
-                : base()
+                   : base()
             {
             }
 

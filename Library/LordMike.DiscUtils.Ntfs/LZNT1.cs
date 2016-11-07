@@ -28,13 +28,12 @@
 // (*) Puyo tools implements a different LZ-style algorithm
 //
 
+using System;
+using DiscUtils.Compression;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using DiscUtils.Compression;
-
     /// <summary>
     /// Implementation of the LZNT1 algorithm used for compressing NTFS files.
     /// </summary>
@@ -52,7 +51,7 @@ namespace DiscUtils.Ntfs
         // we assume each block is 4KB on decode also.
         private const int FixedBlockSize = 0x1000;
 
-        private static byte[] s_compressionBits = CalcCompressionBits();
+        private static readonly byte[] s_compressionBits = CalcCompressionBits();
 
         public LZNT1()
         {
@@ -60,7 +59,7 @@ namespace DiscUtils.Ntfs
         }
 
         public override CompressionResult Compress(byte[] source, int sourceOffset, int sourceLength, byte[] compressed,
-            int compressedOffset, ref int compressedLength)
+                                                   int compressedOffset, ref int compressedLength)
         {
             uint sourcePointer = 0;
             uint sourceCurrentBlock = 0;
@@ -75,7 +74,7 @@ namespace DiscUtils.Ntfs
                 lzDictionary.MinMatchAmount = 3;
                 sourceCurrentBlock = sourcePointer;
 
-                uint decompressedSize = (uint) Math.Min(sourceLength - subBlock, BlockSize);
+                uint decompressedSize = (uint)Math.Min(sourceLength - subBlock, BlockSize);
                 uint compressedSize = 0;
 
                 // Start compression 
@@ -100,12 +99,12 @@ namespace DiscUtils.Ntfs
                     for (int i = 0; i < 8; i++)
                     {
                         int lengthBits = 16 - s_compressionBits[sourcePointer - subBlock];
-                        ushort lengthMask = (ushort) ((1 << s_compressionBits[sourcePointer - subBlock]) - 1);
+                        ushort lengthMask = (ushort)((1 << s_compressionBits[sourcePointer - subBlock]) - 1);
 
                         lzDictionary.MaxMatchAmount = Math.Min(1 << lengthBits, BlockSize - 1);
 
                         int[] lzSearchMatch = lzDictionary.Search(source, sourceOffset + subBlock,
-                            (uint) (sourcePointer - subBlock), decompressedSize);
+                            (uint)(sourcePointer - subBlock), decompressedSize);
                         if (lzSearchMatch[1] > 0)
                         {
                             // There is a compression match
@@ -114,7 +113,7 @@ namespace DiscUtils.Ntfs
                                 return CompressionResult.Incompressible;
                             }
 
-                            bitFlag |= (byte) (1 << i);
+                            bitFlag |= (byte)(1 << i);
 
                             int rawOffset = lzSearchMatch[0];
                             int rawLength = lzSearchMatch[1];
@@ -122,13 +121,13 @@ namespace DiscUtils.Ntfs
                             int convertedOffset = (rawOffset - 1) << lengthBits;
                             int convertedSize = (rawLength - 3) & ((1 << lengthMask) - 1);
 
-                            ushort convertedData = (ushort) (convertedOffset | convertedSize);
+                            ushort convertedData = (ushort)(convertedOffset | convertedSize);
                             Utilities.WriteBytesLittleEndian(convertedData, compressed,
-                                compressedOffset + (int) destPointer);
+                                compressedOffset + (int)destPointer);
 
-                            lzDictionary.AddEntryRange(source, sourceOffset + subBlock, (int) (sourcePointer - subBlock),
+                            lzDictionary.AddEntryRange(source, sourceOffset + subBlock, (int)(sourcePointer - subBlock),
                                 lzSearchMatch[1]);
-                            sourcePointer += (uint) lzSearchMatch[1];
+                            sourcePointer += (uint)lzSearchMatch[1];
                             destPointer += 2;
                             compressedSize += 2;
                         }
@@ -140,7 +139,7 @@ namespace DiscUtils.Ntfs
                                 return CompressionResult.Incompressible;
                             }
 
-                            bitFlag |= (byte) (0 << i);
+                            bitFlag |= (byte)(0 << i);
 
                             if (source[sourceOffset + sourcePointer] != 0)
                             {
@@ -148,7 +147,7 @@ namespace DiscUtils.Ntfs
                             }
 
                             compressed[compressedOffset + destPointer] = source[sourceOffset + sourcePointer];
-                            lzDictionary.AddEntry(source, sourceOffset + subBlock, (int) (sourcePointer - subBlock));
+                            lzDictionary.AddEntry(source, sourceOffset + subBlock, (int)(sourcePointer - subBlock));
 
                             sourcePointer++;
                             destPointer++;
@@ -170,12 +169,12 @@ namespace DiscUtils.Ntfs
                 if (compressedSize >= BlockSize)
                 {
                     // Set the header to indicate non-compressed block
-                    Utilities.WriteBytesLittleEndian((ushort) (0x3000 | (BlockSize - 1)), compressed,
-                        compressedOffset + (int) headerPosition);
+                    Utilities.WriteBytesLittleEndian((ushort)(0x3000 | (BlockSize - 1)), compressed,
+                        compressedOffset + (int)headerPosition);
 
-                    Array.Copy(source, (int) (sourceOffset + sourceCurrentBlock), compressed,
-                        (int) (compressedOffset + headerPosition + 2), BlockSize);
-                    destPointer = (uint) (headerPosition + 2 + BlockSize);
+                    Array.Copy(source, (int)(sourceOffset + sourceCurrentBlock), compressed,
+                        (int)(compressedOffset + headerPosition + 2), BlockSize);
+                    destPointer = (uint)(headerPosition + 2 + BlockSize);
 
                     // Make sure decompression stops by setting the next two bytes to null, prevents us from having to 
                     // clear the rest of the array.
@@ -185,8 +184,8 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     // Set the header to indicate compressed and the right length
-                    Utilities.WriteBytesLittleEndian((ushort) (0xb000 | (compressedSize - 1)), compressed,
-                        compressedOffset + (int) headerPosition);
+                    Utilities.WriteBytesLittleEndian((ushort)(0xb000 | (compressedSize - 1)), compressed,
+                        compressedOffset + (int)headerPosition);
                 }
 
                 lzDictionary.Reset();
@@ -197,20 +196,17 @@ namespace DiscUtils.Ntfs
                 compressedLength = 0;
                 return CompressionResult.Incompressible;
             }
-            else if (nonZeroDataFound)
+            if (nonZeroDataFound)
             {
-                compressedLength = (int) destPointer;
+                compressedLength = (int)destPointer;
                 return CompressionResult.Compressed;
             }
-            else
-            {
-                compressedLength = 0;
-                return CompressionResult.AllZeros;
-            }
+            compressedLength = 0;
+            return CompressionResult.AllZeros;
         }
 
         public override int Decompress(byte[] source, int sourceOffset, int sourceLength, byte[] decompressed,
-            int decompressedOffset)
+                                       int decompressedOffset)
         {
             int sourceIdx = 0;
             int destIdx = 0;
@@ -265,8 +261,8 @@ namespace DiscUtils.Ntfs
                             }
                             else
                             {
-                                ushort lengthBits = (ushort) (16 - s_compressionBits[destIdx - destSubBlockStart]);
-                                ushort lengthMask = (ushort) ((1 << lengthBits) - 1);
+                                ushort lengthBits = (ushort)(16 - s_compressionBits[destIdx - destSubBlockStart]);
+                                ushort lengthMask = (ushort)((1 << lengthBits) - 1);
 
                                 ushort phraseToken = Utilities.ToUInt16LittleEndian(source, sourceOffset + sourceIdx);
                                 sourceIdx += 2;
@@ -291,9 +287,9 @@ namespace DiscUtils.Ntfs
                     {
                         return destIdx;
                     }
-                    else if (destIdx < destSubBlockStart + FixedBlockSize)
+                    if (destIdx < destSubBlockStart + FixedBlockSize)
                     {
-                        int skip = (destSubBlockStart + FixedBlockSize) - destIdx;
+                        int skip = destSubBlockStart + FixedBlockSize - destIdx;
                         Array.Clear(decompressed, decompressedOffset + destIdx, skip);
                         destIdx += skip;
                     }
@@ -311,7 +307,7 @@ namespace DiscUtils.Ntfs
             int y = 0x10;
             for (int x = 0; x < result.Length; x++)
             {
-                result[x] = (byte) (4 + offsetBits);
+                result[x] = (byte)(4 + offsetBits);
                 if (x == y)
                 {
                     y <<= 1;

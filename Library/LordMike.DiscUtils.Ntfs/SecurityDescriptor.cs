@@ -20,54 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using System.Security.AccessControl;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.IO;
-    using System.Security.AccessControl;
-
     internal sealed class SecurityDescriptor : IByteArraySerializable, IDiagnosticTraceable
     {
-        private RawSecurityDescriptor _securityDescriptor;
-
-        public SecurityDescriptor()
-        {
-        }
+        public SecurityDescriptor() {}
 
         public SecurityDescriptor(RawSecurityDescriptor secDesc)
         {
-            _securityDescriptor = secDesc;
+            Descriptor = secDesc;
         }
 
-        public RawSecurityDescriptor Descriptor
-        {
-            get { return _securityDescriptor; }
-            set { _securityDescriptor = value; }
-        }
+        public RawSecurityDescriptor Descriptor { get; set; }
 
         public int Size
         {
-            get { return _securityDescriptor.BinaryLength; }
-        }
-
-        public uint CalcHash()
-        {
-            byte[] buffer = new byte[Size];
-            WriteTo(buffer, 0);
-            uint hash = 0;
-            for (int i = 0; i < buffer.Length/4; ++i)
-            {
-                hash = Utilities.ToUInt32LittleEndian(buffer, i*4) + ((hash << 3) | (hash >> 29));
-            }
-
-            return hash;
+            get { return Descriptor.BinaryLength; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _securityDescriptor = new RawSecurityDescriptor(buffer, offset);
-            return _securityDescriptor.BinaryLength;
+            Descriptor = new RawSecurityDescriptor(buffer, offset);
+            return Descriptor.BinaryLength;
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -75,10 +53,10 @@ namespace DiscUtils.Ntfs
             // Write out the security descriptor manually because on NTFS the DACL is written
             // before the Owner & Group.  Writing the components in the same order means the
             // hashes will match for identical Security Descriptors.
-            ControlFlags controlFlags = _securityDescriptor.ControlFlags;
+            ControlFlags controlFlags = Descriptor.ControlFlags;
             buffer[offset + 0x00] = 1;
-            buffer[offset + 0x01] = _securityDescriptor.ResourceManagerControl;
-            Utilities.WriteBytesLittleEndian((ushort) controlFlags, buffer, offset + 0x02);
+            buffer[offset + 0x01] = Descriptor.ResourceManagerControl;
+            Utilities.WriteBytesLittleEndian((ushort)controlFlags, buffer, offset + 0x02);
 
             // Blank out offsets, will fill later
             for (int i = 0x04; i < 0x14; ++i)
@@ -88,39 +66,39 @@ namespace DiscUtils.Ntfs
 
             int pos = 0x14;
 
-            RawAcl discAcl = _securityDescriptor.DiscretionaryAcl;
+            RawAcl discAcl = Descriptor.DiscretionaryAcl;
             if ((controlFlags & ControlFlags.DiscretionaryAclPresent) != 0 && discAcl != null)
             {
                 Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x10);
                 discAcl.GetBinaryForm(buffer, offset + pos);
-                pos += _securityDescriptor.DiscretionaryAcl.BinaryLength;
+                pos += Descriptor.DiscretionaryAcl.BinaryLength;
             }
             else
             {
-                Utilities.WriteBytesLittleEndian((int) 0, buffer, offset + 0x10);
+                Utilities.WriteBytesLittleEndian(0, buffer, offset + 0x10);
             }
 
-            RawAcl sysAcl = _securityDescriptor.SystemAcl;
+            RawAcl sysAcl = Descriptor.SystemAcl;
             if ((controlFlags & ControlFlags.SystemAclPresent) != 0 && sysAcl != null)
             {
                 Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x0C);
                 sysAcl.GetBinaryForm(buffer, offset + pos);
-                pos += _securityDescriptor.SystemAcl.BinaryLength;
+                pos += Descriptor.SystemAcl.BinaryLength;
             }
             else
             {
-                Utilities.WriteBytesLittleEndian((int) 0, buffer, offset + 0x0C);
+                Utilities.WriteBytesLittleEndian(0, buffer, offset + 0x0C);
             }
 
             Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x04);
-            _securityDescriptor.Owner.GetBinaryForm(buffer, offset + pos);
-            pos += _securityDescriptor.Owner.BinaryLength;
+            Descriptor.Owner.GetBinaryForm(buffer, offset + pos);
+            pos += Descriptor.Owner.BinaryLength;
 
             Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x08);
-            _securityDescriptor.Group.GetBinaryForm(buffer, offset + pos);
-            pos += _securityDescriptor.Group.BinaryLength;
+            Descriptor.Group.GetBinaryForm(buffer, offset + pos);
+            pos += Descriptor.Group.BinaryLength;
 
-            if (pos != _securityDescriptor.BinaryLength)
+            if (pos != Descriptor.BinaryLength)
             {
                 throw new IOException("Failed to write Security Descriptor correctly");
             }
@@ -128,7 +106,20 @@ namespace DiscUtils.Ntfs
 
         public void Dump(TextWriter writer, string indent)
         {
-            writer.WriteLine(indent + "Descriptor: " + _securityDescriptor.GetSddlForm(AccessControlSections.All));
+            writer.WriteLine(indent + "Descriptor: " + Descriptor.GetSddlForm(AccessControlSections.All));
+        }
+
+        public uint CalcHash()
+        {
+            byte[] buffer = new byte[Size];
+            WriteTo(buffer, 0);
+            uint hash = 0;
+            for (int i = 0; i < buffer.Length / 4; ++i)
+            {
+                hash = Utilities.ToUInt32LittleEndian(buffer, i * 4) + ((hash << 3) | (hash >> 29));
+            }
+
+            return hash;
         }
 
         internal static RawSecurityDescriptor CalcNewObjectDescriptor(RawSecurityDescriptor parent, bool isContainer)

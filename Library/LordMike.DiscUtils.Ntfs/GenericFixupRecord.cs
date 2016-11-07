@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Ntfs
 {
-    using System;
-
     internal sealed class GenericFixupRecord : FixupRecordBase
     {
-        private int _bytesPerSector;
-        private byte[] _content;
+        private readonly int _bytesPerSector;
 
         public GenericFixupRecord(int bytesPerSector)
             : base(null, bytesPerSector)
@@ -35,15 +34,12 @@ namespace DiscUtils.Ntfs
             _bytesPerSector = bytesPerSector;
         }
 
-        public byte[] Content
-        {
-            get { return _content; }
-        }
+        public byte[] Content { get; private set; }
 
         protected override void Read(byte[] buffer, int offset)
         {
-            _content = new byte[(UpdateSequenceCount - 1)*_bytesPerSector];
-            Array.Copy(buffer, offset, _content, 0, _content.Length);
+            Content = new byte[(UpdateSequenceCount - 1) * _bytesPerSector];
+            Array.Copy(buffer, offset, Content, 0, Content.Length);
         }
 
         protected override ushort Write(byte[] buffer, int offset)

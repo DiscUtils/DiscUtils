@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     internal sealed class ReparsePointRecord : IByteArraySerializable, IDiagnosticTraceable
     {
-        public uint Tag;
         public byte[] Content;
+        public uint Tag;
 
         public int Size
         {
@@ -50,8 +49,8 @@ namespace DiscUtils.Ntfs
         public void WriteTo(byte[] buffer, int offset)
         {
             Utilities.WriteBytesLittleEndian(Tag, buffer, offset);
-            Utilities.WriteBytesLittleEndian((ushort) Content.Length, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 6);
+            Utilities.WriteBytesLittleEndian((ushort)Content.Length, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 6);
             Array.Copy(Content, 0, buffer, offset + 8, Content.Length);
         }
 

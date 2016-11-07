@@ -24,51 +24,40 @@ namespace DiscUtils.Ntfs
 {
     internal class DirectoryEntry
     {
-        private Directory _directory;
-        private FileRecordReference _fileReference;
-        private FileNameRecord _fileDetails;
+        private readonly Directory _directory;
 
         public DirectoryEntry(Directory directory, FileRecordReference fileReference, FileNameRecord fileDetails)
         {
             _directory = directory;
-            _fileReference = fileReference;
-            _fileDetails = fileDetails;
+            Reference = fileReference;
+            Details = fileDetails;
         }
 
-        public FileRecordReference Reference
-        {
-            get { return _fileReference; }
-        }
-
-        public FileNameRecord Details
-        {
-            get { return _fileDetails; }
-        }
+        public FileNameRecord Details { get; }
 
         public bool IsDirectory
         {
-            get { return (_fileDetails.Flags & FileAttributeFlags.Directory) != 0; }
+            get { return (Details.Flags & FileAttributeFlags.Directory) != 0; }
         }
+
+        public FileRecordReference Reference { get; }
 
         public string SearchName
         {
             get
             {
-                string fileName = _fileDetails.FileName;
+                string fileName = Details.FileName;
                 if (fileName.IndexOf('.') == -1)
                 {
                     return fileName + ".";
                 }
-                else
-                {
-                    return fileName;
-                }
+                return fileName;
             }
         }
 
         internal void UpdateFrom(File file)
         {
-            file.FreshenFileName(_fileDetails, true);
+            file.FreshenFileName(Details, true);
             _directory.UpdateEntry(this);
         }
     }

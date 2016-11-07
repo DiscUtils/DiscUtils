@@ -24,34 +24,11 @@ namespace DiscUtils.Ntfs.Internals
 {
     public sealed class MasterFileTableRecord
     {
-        private FileRecord _fileRecord;
+        private readonly FileRecord _fileRecord;
 
         internal MasterFileTableRecord(FileRecord fileRecord)
         {
             _fileRecord = fileRecord;
-        }
-
-        /// <summary>
-        /// Changes each time the file is modified by Windows, relates to the NTFS journal.
-        /// </summary>
-        public long JournalSequenceNumber
-        {
-            get { return (long) _fileRecord.LogFileSequenceNumber; }
-        }
-
-        public int SequenceNumber
-        {
-            get { return _fileRecord.SequenceNumber; }
-        }
-
-        public int HardLinkCount
-        {
-            get { return _fileRecord.HardLinkCount; }
-        }
-
-        public MasterFileTableRecordFlags Flags
-        {
-            get { return (MasterFileTableRecordFlags) _fileRecord.Flags; }
         }
 
         public MasterFileTableReference BaseRecordReference
@@ -59,9 +36,32 @@ namespace DiscUtils.Ntfs.Internals
             get { return new MasterFileTableReference(_fileRecord.BaseFile); }
         }
 
+        public MasterFileTableRecordFlags Flags
+        {
+            get { return (MasterFileTableRecordFlags)_fileRecord.Flags; }
+        }
+
+        public int HardLinkCount
+        {
+            get { return _fileRecord.HardLinkCount; }
+        }
+
+        /// <summary>
+        /// Changes each time the file is modified by Windows, relates to the NTFS journal.
+        /// </summary>
+        public long JournalSequenceNumber
+        {
+            get { return (long)_fileRecord.LogFileSequenceNumber; }
+        }
+
         public int NextAttributeId
         {
             get { return _fileRecord.NextAttributeId; }
+        }
+
+        public int SequenceNumber
+        {
+            get { return _fileRecord.SequenceNumber; }
         }
     }
 }

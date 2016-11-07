@@ -20,31 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.Text;
-
     internal sealed class AttributeDefinitionRecord
     {
         public const int Size = 0xA0;
+        public AttributeCollationRule CollationRule;
+        public uint DisplayRule;
+        public AttributeTypeFlags Flags;
+        public long MaxSize;
+        public long MinSize;
 
         public string Name;
         public AttributeType Type;
-        public uint DisplayRule;
-        public AttributeCollationRule CollationRule;
-        public AttributeTypeFlags Flags;
-        public long MinSize;
-        public long MaxSize;
 
         internal void Read(byte[] buffer, int offset)
         {
             Name = Encoding.Unicode.GetString(buffer, offset + 0, 128).Trim('\0');
-            Type = (AttributeType) Utilities.ToUInt32LittleEndian(buffer, offset + 0x80);
+            Type = (AttributeType)Utilities.ToUInt32LittleEndian(buffer, offset + 0x80);
             DisplayRule = Utilities.ToUInt32LittleEndian(buffer, offset + 0x84);
-            CollationRule = (AttributeCollationRule) Utilities.ToUInt32LittleEndian(buffer, offset + 0x88);
-            Flags = (AttributeTypeFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 0x8C);
+            CollationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, offset + 0x88);
+            Flags = (AttributeTypeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 0x8C);
             MinSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x90);
             MaxSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x98);
         }
@@ -52,10 +51,10 @@ namespace DiscUtils.Ntfs
         internal void Write(byte[] buffer, int offset)
         {
             Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian((uint) Type, buffer, offset + 0x80);
+            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset + 0x80);
             Utilities.WriteBytesLittleEndian(DisplayRule, buffer, offset + 0x84);
-            Utilities.WriteBytesLittleEndian((uint) CollationRule, buffer, offset + 0x88);
-            Utilities.WriteBytesLittleEndian((uint) Flags, buffer, offset + 0x8C);
+            Utilities.WriteBytesLittleEndian((uint)CollationRule, buffer, offset + 0x88);
+            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 0x8C);
             Utilities.WriteBytesLittleEndian(MinSize, buffer, offset + 0x90);
             Utilities.WriteBytesLittleEndian(MaxSize, buffer, offset + 0x98);
         }

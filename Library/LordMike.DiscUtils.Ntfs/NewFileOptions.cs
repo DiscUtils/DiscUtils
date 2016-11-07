@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Security.AccessControl;
+
 namespace DiscUtils.Ntfs
 {
-    using System.Security.AccessControl;
-
     /// <summary>
     /// Options controlling how new NTFS files are created.
     /// </summary>

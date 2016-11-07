@@ -3,7 +3,7 @@ using System;
 namespace DiscUtils.Ntfs
 {
     [Flags]
-    internal enum AttributeTypeFlags : int
+    internal enum AttributeTypeFlags
     {
         None = 0x00,
         Indexed = 0x02,

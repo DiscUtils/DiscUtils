@@ -20,26 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal abstract class AttributeRecord : IComparable<AttributeRecord>
     {
-        protected AttributeType _type;
-        protected byte _nonResidentFlag;
-        protected AttributeFlags _flags;
         protected ushort _attributeId;
+        protected AttributeFlags _flags;
 
         protected string _name;
+        protected byte _nonResidentFlag;
+        protected AttributeType _type;
 
-        public AttributeRecord()
-        {
-        }
+        public AttributeRecord() {}
 
         public AttributeRecord(AttributeType type, string name, ushort id, AttributeFlags flags)
         {
@@ -49,10 +46,7 @@ namespace DiscUtils.Ntfs
             _flags = flags;
         }
 
-        public AttributeType AttributeType
-        {
-            get { return _type; }
-        }
+        public abstract long AllocatedLength { get; set; }
 
         public ushort AttributeId
         {
@@ -60,11 +54,18 @@ namespace DiscUtils.Ntfs
             set { _attributeId = value; }
         }
 
-        public abstract long AllocatedLength { get; set; }
-
-        public abstract long StartVcn { get; }
+        public AttributeType AttributeType
+        {
+            get { return _type; }
+        }
 
         public abstract long DataLength { get; set; }
+
+        public AttributeFlags Flags
+        {
+            get { return _flags; }
+            set { _flags = value; }
+        }
 
         public abstract long InitializedDataLength { get; set; }
 
@@ -78,54 +79,13 @@ namespace DiscUtils.Ntfs
             get { return _name; }
         }
 
-        public AttributeFlags Flags
-        {
-            get { return _flags; }
-            set { _flags = value; }
-        }
-
         public abstract int Size { get; }
 
-        public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
-        {
-            if (Utilities.ToUInt32LittleEndian(buffer, offset) == 0xFFFFFFFF)
-            {
-                length = 0;
-                return null;
-            }
-            else if (buffer[offset + 0x08] != 0x00)
-            {
-                return new NonResidentAttributeRecord(buffer, offset, out length);
-            }
-            else
-            {
-                return new ResidentAttributeRecord(buffer, offset, out length);
-            }
-        }
-
-        public static int CompareStartVcns(AttributeRecord x, AttributeRecord y)
-        {
-            if (x.StartVcn < y.StartVcn)
-            {
-                return -1;
-            }
-            else if (x.StartVcn == y.StartVcn)
-            {
-                return 0;
-            }
-            else
-            {
-                return 1;
-            }
-        }
-
-        public abstract Range<long, long>[] GetClusters();
-
-        public abstract IBuffer GetReadOnlyDataBuffer(INtfsContext context);
+        public abstract long StartVcn { get; }
 
         public int CompareTo(AttributeRecord other)
         {
-            int val = ((int) _type) - (int) other._type;
+            int val = (int)_type - (int)other._type;
             if (val != 0)
             {
                 return val;
@@ -137,8 +97,39 @@ namespace DiscUtils.Ntfs
                 return val;
             }
 
-            return ((int) _attributeId) - (int) other._attributeId;
+            return _attributeId - other._attributeId;
         }
+
+        public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
+        {
+            if (Utilities.ToUInt32LittleEndian(buffer, offset) == 0xFFFFFFFF)
+            {
+                length = 0;
+                return null;
+            }
+            if (buffer[offset + 0x08] != 0x00)
+            {
+                return new NonResidentAttributeRecord(buffer, offset, out length);
+            }
+            return new ResidentAttributeRecord(buffer, offset, out length);
+        }
+
+        public static int CompareStartVcns(AttributeRecord x, AttributeRecord y)
+        {
+            if (x.StartVcn < y.StartVcn)
+            {
+                return -1;
+            }
+            if (x.StartVcn == y.StartVcn)
+            {
+                return 0;
+            }
+            return 1;
+        }
+
+        public abstract Range<long, long>[] GetClusters();
+
+        public abstract IBuffer GetReadOnlyDataBuffer(INtfsContext context);
 
         public abstract int Write(byte[] buffer, int offset);
 
@@ -154,13 +145,13 @@ namespace DiscUtils.Ntfs
 
         protected virtual void Read(byte[] buffer, int offset, out int length)
         {
-            _type = (AttributeType) Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+            _type = (AttributeType)Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
             length = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
 
             _nonResidentFlag = buffer[offset + 0x08];
             byte nameLength = buffer[offset + 0x09];
             ushort nameOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = (AttributeFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            _flags = (AttributeFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
             _attributeId = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0E);
 
             if (nameLength != 0x00)
@@ -170,7 +161,7 @@ namespace DiscUtils.Ntfs
                     throw new IOException("Corrupt attribute, name outside of attribute");
                 }
 
-                _name = Encoding.Unicode.GetString(buffer, offset + nameOffset, nameLength*2);
+                _name = Encoding.Unicode.GetString(buffer, offset + nameOffset, nameLength * 2);
             }
         }
     }

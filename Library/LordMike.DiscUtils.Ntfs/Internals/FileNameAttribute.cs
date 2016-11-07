@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs.Internals
 {
-    using System;
-
     /// <summary>
     /// Representation of an NTFS File Name attribute.
     /// </summary>
@@ -42,7 +41,7 @@ namespace DiscUtils.Ntfs.Internals
     /// </remarks>
     public sealed class FileNameAttribute : GenericAttribute
     {
-        private FileNameRecord _fnr;
+        private readonly FileNameRecord _fnr;
 
         internal FileNameAttribute(INtfsContext context, AttributeRecord record)
             : base(context, record)
@@ -50,6 +49,78 @@ namespace DiscUtils.Ntfs.Internals
             byte[] content = Utilities.ReadAll(Content);
             _fnr = new FileNameRecord();
             _fnr.ReadFrom(content, 0);
+        }
+
+        /// <summary>
+        /// Gets the amount of disk space allocated for the file.
+        /// </summary>
+        public long AllocatedSize
+        {
+            get { return (long)_fnr.AllocatedSize; }
+        }
+
+        /// <summary>
+        /// Gets the creation time of the file.
+        /// </summary>
+        public DateTime CreationTime
+        {
+            get { return _fnr.CreationTime; }
+        }
+
+        /// <summary>
+        /// Gets the extended attributes size, or a reparse tag, depending on the nature of the file.
+        /// </summary>
+        public long ExtendedAttributesSizeOrReparsePointTag
+        {
+            get { return _fnr.EASizeOrReparsePointTag; }
+        }
+
+        /// <summary>
+        /// Gets the attributes of the file, as stored by NTFS.
+        /// </summary>
+        public NtfsFileAttributes FileAttributes
+        {
+            get { return (NtfsFileAttributes)_fnr.Flags; }
+        }
+
+        /// <summary>
+        /// Gets the name of the file within the parent directory.
+        /// </summary>
+        public string FileName
+        {
+            get { return _fnr.FileName; }
+        }
+
+        /// <summary>
+        /// Gets the namespace of the FileName property.
+        /// </summary>
+        public NtfsNamespace FileNameNamespace
+        {
+            get { return (NtfsNamespace)_fnr.FileNameNamespace; }
+        }
+
+        /// <summary>
+        /// Gets the last access time of the file.
+        /// </summary>
+        public DateTime LastAccessTime
+        {
+            get { return _fnr.LastAccessTime; }
+        }
+
+        /// <summary>
+        /// Gets the last time the Master File Table entry for the file was changed.
+        /// </summary>
+        public DateTime MasterFileTableChangedTime
+        {
+            get { return _fnr.MftChangedTime; }
+        }
+
+        /// <summary>
+        /// Gets the modification time of the file.
+        /// </summary>
+        public DateTime ModificationTime
+        {
+            get { return _fnr.ModificationTime; }
         }
 
         /// <summary>
@@ -65,83 +136,11 @@ namespace DiscUtils.Ntfs.Internals
         }
 
         /// <summary>
-        /// Gets the creation time of the file.
-        /// </summary>
-        public DateTime CreationTime
-        {
-            get { return _fnr.CreationTime; }
-        }
-
-        /// <summary>
-        /// Gets the modification time of the file.
-        /// </summary>
-        public DateTime ModificationTime
-        {
-            get { return _fnr.ModificationTime; }
-        }
-
-        /// <summary>
-        /// Gets the last time the Master File Table entry for the file was changed.
-        /// </summary>
-        public DateTime MasterFileTableChangedTime
-        {
-            get { return _fnr.MftChangedTime; }
-        }
-
-        /// <summary>
-        /// Gets the last access time of the file.
-        /// </summary>
-        public DateTime LastAccessTime
-        {
-            get { return _fnr.LastAccessTime; }
-        }
-
-        /// <summary>
-        /// Gets the amount of disk space allocated for the file.
-        /// </summary>
-        public long AllocatedSize
-        {
-            get { return (long) _fnr.AllocatedSize; }
-        }
-
-        /// <summary>
         /// Gets the amount of data stored in the file.
         /// </summary>
         public long RealSize
         {
-            get { return (long) _fnr.RealSize; }
-        }
-
-        /// <summary>
-        /// Gets the attributes of the file, as stored by NTFS.
-        /// </summary>
-        public NtfsFileAttributes FileAttributes
-        {
-            get { return (NtfsFileAttributes) _fnr.Flags; }
-        }
-
-        /// <summary>
-        /// Gets the extended attributes size, or a reparse tag, depending on the nature of the file.
-        /// </summary>
-        public long ExtendedAttributesSizeOrReparsePointTag
-        {
-            get { return (long) _fnr.EASizeOrReparsePointTag; }
-        }
-
-        /// <summary>
-        /// Gets the namespace of the FileName property.
-        /// </summary>
-        public NtfsNamespace FileNameNamespace
-        {
-            get { return (NtfsNamespace) _fnr.FileNameNamespace; }
-        }
-
-        /// <summary>
-        /// Gets the name of the file within the parent directory.
-        /// </summary>
-        public string FileName
-        {
-            get { return _fnr.FileName; }
+            get { return (long)_fnr.RealSize; }
         }
     }
 }

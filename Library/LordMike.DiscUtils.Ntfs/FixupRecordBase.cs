@@ -20,26 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System.IO;
-
     internal abstract class FixupRecordBase
     {
         private int _sectorSize;
-
-        private string _magic;
-        private ushort _updateSequenceOffset;
-        private ushort _updateSequenceCount;
-
-        private ushort _updateSequenceNumber;
         private ushort[] _updateSequenceArray;
 
         public FixupRecordBase(string magic, int sectorSize)
         {
-            _magic = magic;
+            Magic = magic;
             _sectorSize = sectorSize;
         }
 
@@ -48,34 +41,22 @@ namespace DiscUtils.Ntfs
             Initialize(magic, sectorSize, recordLength);
         }
 
-        public string Magic
-        {
-            get { return _magic; }
-        }
-
-        public ushort UpdateSequenceOffset
-        {
-            get { return _updateSequenceOffset; }
-        }
-
-        public ushort UpdateSequenceCount
-        {
-            get { return _updateSequenceCount; }
-        }
-
-        public ushort UpdateSequenceNumber
-        {
-            get { return _updateSequenceNumber; }
-        }
-
-        public int UpdateSequenceSize
-        {
-            get { return _updateSequenceCount*2; }
-        }
+        public string Magic { get; private set; }
 
         public int Size
         {
             get { return CalcSize(); }
+        }
+
+        public ushort UpdateSequenceCount { get; private set; }
+
+        public ushort UpdateSequenceNumber { get; private set; }
+
+        public ushort UpdateSequenceOffset { get; private set; }
+
+        public int UpdateSequenceSize
+        {
+            get { return UpdateSequenceCount * 2; }
         }
 
         public void FromBytes(byte[] buffer, int offset)
@@ -86,32 +67,32 @@ namespace DiscUtils.Ntfs
         public void FromBytes(byte[] buffer, int offset, bool ignoreMagic)
         {
             string diskMagic = Utilities.BytesToString(buffer, offset + 0x00, 4);
-            if (_magic == null)
+            if (Magic == null)
             {
-                _magic = diskMagic;
+                Magic = diskMagic;
             }
             else
             {
-                if (diskMagic != _magic && ignoreMagic)
+                if (diskMagic != Magic && ignoreMagic)
                 {
                     return;
                 }
 
-                if (diskMagic != _magic)
+                if (diskMagic != Magic)
                 {
                     throw new IOException("Corrupt record");
                 }
             }
 
-            _updateSequenceOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x04);
-            _updateSequenceCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
+            UpdateSequenceOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x04);
+            UpdateSequenceCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
 
-            _updateSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + _updateSequenceOffset);
-            _updateSequenceArray = new ushort[_updateSequenceCount - 1];
+            UpdateSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + UpdateSequenceOffset);
+            _updateSequenceArray = new ushort[UpdateSequenceCount - 1];
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
                 _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer,
-                    offset + _updateSequenceOffset + (2*(i + 1)));
+                    offset + UpdateSequenceOffset + 2 * (i + 1));
             }
 
             UnprotectBuffer(buffer, offset);
@@ -121,29 +102,29 @@ namespace DiscUtils.Ntfs
 
         public void ToBytes(byte[] buffer, int offset)
         {
-            _updateSequenceOffset = Write(buffer, offset);
+            UpdateSequenceOffset = Write(buffer, offset);
 
             ProtectBuffer(buffer, offset);
 
-            Utilities.StringToBytes(_magic, buffer, offset + 0x00, 4);
-            Utilities.WriteBytesLittleEndian(_updateSequenceOffset, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(_updateSequenceCount, buffer, offset + 0x06);
+            Utilities.StringToBytes(Magic, buffer, offset + 0x00, 4);
+            Utilities.WriteBytesLittleEndian(UpdateSequenceOffset, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(UpdateSequenceCount, buffer, offset + 0x06);
 
-            Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + _updateSequenceOffset);
+            Utilities.WriteBytesLittleEndian(UpdateSequenceNumber, buffer, offset + UpdateSequenceOffset);
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
                 Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer,
-                    offset + _updateSequenceOffset + (2*(i + 1)));
+                    offset + UpdateSequenceOffset + 2 * (i + 1));
             }
         }
 
         protected void Initialize(string magic, int sectorSize, int recordLength)
         {
-            _magic = magic;
+            Magic = magic;
             _sectorSize = sectorSize;
-            _updateSequenceCount = (ushort) (1 + Utilities.Ceil(recordLength, Sizes.Sector));
-            _updateSequenceNumber = 1;
-            _updateSequenceArray = new ushort[_updateSequenceCount - 1];
+            UpdateSequenceCount = (ushort)(1 + Utilities.Ceil(recordLength, Sizes.Sector));
+            UpdateSequenceNumber = 1;
+            _updateSequenceArray = new ushort[UpdateSequenceCount - 1];
         }
 
         protected abstract void Read(byte[] buffer, int offset);
@@ -157,7 +138,7 @@ namespace DiscUtils.Ntfs
             // First do validation check - make sure the USN matches on all sectors)
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                if (_updateSequenceNumber != Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector*(i + 1)) - 2))
+                if (UpdateSequenceNumber != Utilities.ToUInt16LittleEndian(buffer, offset + Sizes.Sector * (i + 1) - 2))
                 {
                     throw new IOException("Corrupt file system record found");
                 }
@@ -166,24 +147,24 @@ namespace DiscUtils.Ntfs
             // Now replace the USNs with the actual data from the sequence array
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + (Sizes.Sector*(i + 1)) - 2);
+                Utilities.WriteBytesLittleEndian(_updateSequenceArray[i], buffer, offset + Sizes.Sector * (i + 1) - 2);
             }
         }
 
         private void ProtectBuffer(byte[] buffer, int offset)
         {
-            _updateSequenceNumber++;
+            UpdateSequenceNumber++;
 
             // Read in the bytes that are replaced by the USN
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + (Sizes.Sector*(i + 1)) - 2);
+                _updateSequenceArray[i] = Utilities.ToUInt16LittleEndian(buffer, offset + Sizes.Sector * (i + 1) - 2);
             }
 
             // Overwrite the bytes that are replaced with the USN
             for (int i = 0; i < _updateSequenceArray.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_updateSequenceNumber, buffer, offset + (Sizes.Sector*(i + 1)) - 2);
+                Utilities.WriteBytesLittleEndian(UpdateSequenceNumber, buffer, offset + Sizes.Sector * (i + 1) - 2);
             }
         }
     }

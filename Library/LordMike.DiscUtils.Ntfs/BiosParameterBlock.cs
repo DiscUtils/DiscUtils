@@ -20,43 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ntfs
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     internal class BiosParameterBlock
     {
-        public string OemId;
-        public ushort BytesPerSector;
-        public byte SectorsPerCluster;
-        public ushort ReservedSectors; // Must be 0
-        public byte NumFats; // Must be 0
-        public ushort FatRootEntriesCount; // Must be 0
-        public ushort TotalSectors16; // Must be 0
-        public byte Media; // Must be 0xF8
-        public ushort FatSize16; // Must be 0
-        public ushort SectorsPerTrack; // Value: 0x3F 0x00
-        public ushort NumHeads; // Value: 0xFF 0x00
-        public uint HiddenSectors; // Value: 0x3F 0x00 0x00 0x00
-        public uint TotalSectors32; // Must be 0
         public byte BiosDriveNumber; // Value: 0x80 (first hard disk)
+        public ushort BytesPerSector;
         public byte ChkDskFlags; // Value: 0x00
-        public byte SignatureByte; // Value: 0x80
-        public byte PaddingByte; // Value: 0x00
-        public long TotalSectors64;
+        public ushort FatRootEntriesCount; // Must be 0
+        public ushort FatSize16; // Must be 0
+        public uint HiddenSectors; // Value: 0x3F 0x00 0x00 0x00
+        public byte Media; // Must be 0xF8
         public long MftCluster;
         public long MftMirrorCluster;
-        public byte RawMftRecordSize;
+        public byte NumFats; // Must be 0
+        public ushort NumHeads; // Value: 0xFF 0x00
+        public string OemId;
+        public byte PaddingByte; // Value: 0x00
         public byte RawIndexBufferSize;
+        public byte RawMftRecordSize;
+        public ushort ReservedSectors; // Must be 0
+        public byte SectorsPerCluster;
+        public ushort SectorsPerTrack; // Value: 0x3F 0x00
+        public byte SignatureByte; // Value: 0x80
+        public ushort TotalSectors16; // Must be 0
+        public uint TotalSectors32; // Must be 0
+        public long TotalSectors64;
         public ulong VolumeSerialNumber;
 
-        public int MftRecordSize
+        public int BytesPerCluster
         {
-            get { return CalcRecordSize(RawMftRecordSize); }
+            get { return BytesPerSector * SectorsPerCluster; }
         }
 
         public int IndexBufferSize
@@ -64,9 +63,9 @@ namespace DiscUtils.Ntfs
             get { return CalcRecordSize(RawIndexBufferSize); }
         }
 
-        public int BytesPerCluster
+        public int MftRecordSize
         {
-            get { return ((int) BytesPerSector)*((int) SectorsPerCluster); }
+            get { return CalcRecordSize(RawMftRecordSize); }
         }
 
         public void Dump(TextWriter writer, string linePrefix)
@@ -96,20 +95,20 @@ namespace DiscUtils.Ntfs
         }
 
         internal static BiosParameterBlock Initialized(Geometry diskGeometry, int clusterSize, uint partitionStartLba,
-            long partitionSizeLba, int mftRecordSize, int indexBufferSize)
+                                                       long partitionSizeLba, int mftRecordSize, int indexBufferSize)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
             bpb.OemId = "NTFS    ";
             bpb.BytesPerSector = Sizes.Sector;
-            bpb.SectorsPerCluster = (byte) (clusterSize/bpb.BytesPerSector);
+            bpb.SectorsPerCluster = (byte)(clusterSize / bpb.BytesPerSector);
             bpb.ReservedSectors = 0;
             bpb.NumFats = 0;
             bpb.FatRootEntriesCount = 0;
             bpb.TotalSectors16 = 0;
             bpb.Media = 0xF8;
             bpb.FatSize16 = 0;
-            bpb.SectorsPerTrack = (ushort) diskGeometry.SectorsPerTrack;
-            bpb.NumHeads = (ushort) diskGeometry.HeadsPerCylinder;
+            bpb.SectorsPerTrack = (ushort)diskGeometry.SectorsPerTrack;
+            bpb.NumHeads = (ushort)diskGeometry.HeadsPerCylinder;
             bpb.HiddenSectors = partitionStartLba;
             bpb.TotalSectors32 = 0;
             bpb.BiosDriveNumber = 0x80;
@@ -185,12 +184,9 @@ namespace DiscUtils.Ntfs
         {
             if ((rawSize & 0x80) != 0)
             {
-                return 1 << (-(sbyte) rawSize);
+                return 1 << -(sbyte)rawSize;
             }
-            else
-            {
-                return rawSize*SectorsPerCluster*BytesPerSector;
-            }
+            return rawSize * SectorsPerCluster * BytesPerSector;
         }
 
         private static ulong GenSerialNumber()
@@ -205,19 +201,16 @@ namespace DiscUtils.Ntfs
         {
             if (size >= BytesPerCluster)
             {
-                return (byte) (size/BytesPerCluster);
+                return (byte)(size / BytesPerCluster);
             }
-            else
+            sbyte val = 0;
+            while (size != 1)
             {
-                sbyte val = 0;
-                while (size != 1)
-                {
-                    size = (size >> 1) & 0x7FFFFFFF;
-                    val++;
-                }
-
-                return (byte) -val;
+                size = (size >> 1) & 0x7FFFFFFF;
+                val++;
             }
+
+            return (byte)-val;
         }
     }
 }
