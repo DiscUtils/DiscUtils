@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class ScsiReportLunsCommand : ScsiCommand
     {
         public const int InitialResponseSize = 16;
 
-        private uint _expected;
+        private readonly uint _expected;
 
         public ScsiReportLunsCommand(uint expected)
             : base(0)

@@ -24,7 +24,7 @@ namespace DiscUtils.Iso9660
 {
     internal class PrimaryVolumeDescriptorRegion : VolumeDescriptorDiskRegion
     {
-        private PrimaryVolumeDescriptor _descriptor;
+        private readonly PrimaryVolumeDescriptor _descriptor;
 
         public PrimaryVolumeDescriptorRegion(PrimaryVolumeDescriptor descriptor, long start)
             : base(start)

@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal class DirectoryExtent : BuilderExtent
     {
-        private BuildDirectoryInfo _dirInfo;
-        private Dictionary<BuildDirectoryMember, uint> _locationTable;
-        private Encoding _enc;
+        private readonly BuildDirectoryInfo _dirInfo;
+        private readonly Encoding _enc;
+        private readonly Dictionary<BuildDirectoryMember, uint> _locationTable;
 
         private byte[] _readCache;
 
         public DirectoryExtent(BuildDirectoryInfo dirInfo, Dictionary<BuildDirectoryMember, uint> locationTable,
-            Encoding enc, long start)
+                               Encoding enc, long start)
             : base(start, dirInfo.GetDataSize(enc))
         {
             _dirInfo = dirInfo;
@@ -45,9 +44,7 @@ namespace DiscUtils.Iso9660
             _enc = enc;
         }
 
-        public override void Dispose()
-        {
-        }
+        public override void Dispose() {}
 
         internal override void PrepareForRead()
         {
@@ -59,9 +56,9 @@ namespace DiscUtils.Iso9660
         {
             long relPos = diskOffset - Start;
 
-            int numRead = (int) Math.Min(count, _readCache.Length - relPos);
+            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 
-            Array.Copy(_readCache, (int) relPos, buffer, offset, numRead);
+            Array.Copy(_readCache, (int)relPos, buffer, offset, numRead);
 
             return numRead;
         }

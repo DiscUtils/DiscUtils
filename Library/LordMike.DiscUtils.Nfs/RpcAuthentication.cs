@@ -20,18 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Nfs
 {
-    using System.IO;
-
     internal class RpcAuthentication
     {
-        private RpcAuthFlavour _flavour;
-        private byte[] _body;
+        private readonly byte[] _body;
+        private readonly RpcAuthFlavour _flavour;
 
         public RpcAuthentication(XdrDataReader reader)
         {
-            _flavour = (RpcAuthFlavour) reader.ReadInt32();
+            _flavour = (RpcAuthFlavour)reader.ReadInt32();
             _body = reader.ReadBuffer(400);
         }
 
@@ -52,7 +52,7 @@ namespace DiscUtils.Nfs
 
         public void Write(XdrDataWriter writer)
         {
-            writer.Write((int) _flavour);
+            writer.Write((int)_flavour);
             writer.WriteBuffer(_body);
         }
     }

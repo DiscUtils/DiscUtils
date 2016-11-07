@@ -11,6 +11,6 @@ namespace DiscUtils.Iscsi
 
         FullyFeatured = 0x04,
 
-        All = 0x07,
+        All = 0x07
     }
 }

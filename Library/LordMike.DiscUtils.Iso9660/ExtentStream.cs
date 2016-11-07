@@ -20,24 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.IO;
-
     internal class ExtentStream : Stream
     {
+        private readonly uint _dataLength;
+        private readonly byte _fileUnitSize;
+        private readonly byte _interleaveGapSize;
+
+        private readonly Stream _isoStream;
         private long _position;
 
-        private uint _startBlock;
-        private uint _dataLength;
-        private byte _fileUnitSize;
-        private byte _interleaveGapSize;
-
-        private Stream _isoStream;
+        private readonly uint _startBlock;
 
         public ExtentStream(Stream isoStream, uint startBlock, uint dataLength, byte fileUnitSize,
-            byte interleaveGapSize)
+                            byte interleaveGapSize)
         {
             _isoStream = isoStream;
             _startBlock = startBlock;
@@ -77,9 +77,7 @@ namespace DiscUtils.Iso9660
             set { _position = value; }
         }
 
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -88,9 +86,9 @@ namespace DiscUtils.Iso9660
                 return 0;
             }
 
-            int toRead = (int) Math.Min((uint) count, _dataLength - _position);
+            int toRead = (int)Math.Min((uint)count, _dataLength - _position);
 
-            _isoStream.Position = _position + (_startBlock*(long) IsoUtilities.SectorSize);
+            _isoStream.Position = _position + _startBlock * (long)IsoUtilities.SectorSize;
             int numRead = _isoStream.Read(buffer, offset, toRead);
             _position += numRead;
             return numRead;

@@ -24,11 +24,9 @@ namespace DiscUtils.Net.Dns
 {
     internal struct MessageFlags
     {
-        private ushort _value;
-
         public MessageFlags(ushort value)
         {
-            _value = value;
+            Value = value;
         }
 
         public MessageFlags(
@@ -49,47 +47,44 @@ namespace DiscUtils.Net.Dns
             val |= recursionAvailable ? 0x0080 : 0x0000;
             val |= (int)responseCode & 0xF;
 
-            _value = (ushort)val;
+            Value = (ushort)val;
         }
 
-        public ushort Value
-        {
-            get { return _value; }
-        }
+        public ushort Value { get; }
 
         public bool IsResponse
         {
-            get { return (_value & 0x8000) != 0; }
+            get { return (Value & 0x8000) != 0; }
         }
 
         public OpCode OpCode
         {
-            get { return (OpCode)((_value >> 11) & 0xF); }
+            get { return (OpCode)((Value >> 11) & 0xF); }
         }
 
         public bool IsAuthorative
         {
-            get { return (_value & 0x0400) != 0; }
+            get { return (Value & 0x0400) != 0; }
         }
 
         public bool IsTruncated
         {
-            get { return (_value & 0x0200) != 0; }
+            get { return (Value & 0x0200) != 0; }
         }
 
         public bool RecursionDesired
         {
-            get { return (_value & 0x0100) != 0; }
+            get { return (Value & 0x0100) != 0; }
         }
 
         public bool RecursionAvailable
         {
-            get { return (_value & 0x0080) != 0; }
+            get { return (Value & 0x0080) != 0; }
         }
 
         public ResponseCode ResponseCode
         {
-            get { return (ResponseCode)(_value & 0x000F); }
+            get { return (ResponseCode)(Value & 0x000F); }
         }
     }
 }

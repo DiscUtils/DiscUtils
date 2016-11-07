@@ -24,13 +24,13 @@ namespace DiscUtils.Nfs
 {
     internal class RpcReplyHeader
     {
-        public RpcReplyStatus Status;
         public RpcAcceptedReplyHeader AcceptReply;
         public RpcRejectedReplyHeader RejectedReply;
+        public RpcReplyStatus Status;
 
         public RpcReplyHeader(XdrDataReader reader)
         {
-            Status = (RpcReplyStatus) reader.ReadInt32();
+            Status = (RpcReplyStatus)reader.ReadInt32();
             if (Status == RpcReplyStatus.Accepted)
             {
                 AcceptReply = new RpcAcceptedReplyHeader(reader);

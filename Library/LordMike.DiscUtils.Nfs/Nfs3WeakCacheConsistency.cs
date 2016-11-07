@@ -37,8 +37,8 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3WeakCacheConsistencyAttr Before { get; set; }
-
         public Nfs3FileAttributes After { get; set; }
+
+        public Nfs3WeakCacheConsistencyAttr Before { get; set; }
     }
 }

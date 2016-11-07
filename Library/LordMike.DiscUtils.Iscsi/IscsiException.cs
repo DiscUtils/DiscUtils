@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.IO;
-
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -40,18 +40,14 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the IscsiException class.
         /// </summary>
-        public IscsiException()
-        {
-        }
+        public IscsiException() {}
 
         /// <summary>
         /// Initializes a new instance of the IscsiException class.
         /// </summary>
         /// <param name="message">The reason for the exception.</param>
         public IscsiException(string message)
-            : base(message)
-        {
-        }
+            : base(message) {}
 
         /// <summary>
         /// Initializes a new instance of the IscsiException class.
@@ -59,11 +55,10 @@ namespace DiscUtils.Iscsi
         /// <param name="message">The reason for the exception.</param>
         /// <param name="innerException">The inner exception.</param>
         public IscsiException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+            : base(message, innerException) {}
 
 #if !NETCORE
+
 /// <summary>
 /// Initializes a new instance of the IscsiException class.
 /// </summary>

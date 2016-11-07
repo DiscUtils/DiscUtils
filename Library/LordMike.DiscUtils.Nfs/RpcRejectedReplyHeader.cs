@@ -24,20 +24,20 @@ namespace DiscUtils.Nfs
 {
     internal class RpcRejectedReplyHeader
     {
-        public RpcRejectedStatus Status;
-        public RpcMismatchInfo MismatchInfo;
         public RpcAuthenticationStatus AuthenticationStatus;
+        public RpcMismatchInfo MismatchInfo;
+        public RpcRejectedStatus Status;
 
         public RpcRejectedReplyHeader(XdrDataReader reader)
         {
-            Status = (RpcRejectedStatus) reader.ReadInt32();
+            Status = (RpcRejectedStatus)reader.ReadInt32();
             if (Status == RpcRejectedStatus.RpcMismatch)
             {
                 MismatchInfo = new RpcMismatchInfo(reader);
             }
             else
             {
-                AuthenticationStatus = (RpcAuthenticationStatus) reader.ReadInt32();
+                AuthenticationStatus = (RpcAuthenticationStatus)reader.ReadInt32();
             }
         }
     }

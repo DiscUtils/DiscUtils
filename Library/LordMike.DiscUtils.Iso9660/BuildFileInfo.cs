@@ -20,30 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using DiscUtils.CoreCompat;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Text;
-
     /// <summary>
     /// Represents a file that will be built into the ISO image.
     /// </summary>
     public sealed class BuildFileInfo : BuildDirectoryMember
     {
-        private BuildDirectoryInfo _parent;
-        private byte[] _contentData;
-        private string _contentPath;
-        private Stream _contentStream;
-        private long _contentSize;
+        private readonly byte[] _contentData;
+        private readonly string _contentPath;
+        private readonly long _contentSize;
+        private readonly Stream _contentStream;
 
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, byte[] content)
             : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
-            _parent = parent;
+            Parent = parent;
             _contentData = content;
             _contentSize = content.Length;
         }
@@ -51,7 +49,7 @@ namespace DiscUtils.Iso9660
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, string content)
             : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
-            _parent = parent;
+            Parent = parent;
             _contentPath = content;
             _contentSize = new FileInfo(_contentPath).Length;
 
@@ -61,7 +59,7 @@ namespace DiscUtils.Iso9660
         internal BuildFileInfo(string name, BuildDirectoryInfo parent, Stream source)
             : base(IsoUtilities.NormalizeFileName(name), MakeShortFileName(name, parent))
         {
-            _parent = parent;
+            Parent = parent;
             _contentStream = source;
             _contentSize = _contentStream.Length;
         }
@@ -69,10 +67,7 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// The parent directory, or <c>null</c> if none.
         /// </summary>
-        public override BuildDirectoryInfo Parent
-        {
-            get { return _parent; }
-        }
+        public override BuildDirectoryInfo Parent { get; }
 
         internal override long GetDataSize(Encoding enc)
         {
@@ -85,14 +80,11 @@ namespace DiscUtils.Iso9660
             {
                 return new MemoryStream(_contentData, false);
             }
-            else if (_contentPath != null)
+            if (_contentPath != null)
             {
                 return new FileStream(_contentPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             }
-            else
-            {
-                return _contentStream;
-            }
+            return _contentStream;
         }
 
         internal void CloseStream(Stream s)

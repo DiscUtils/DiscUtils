@@ -20,55 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Sockets;
+using System.Reflection;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net.Sockets;
-    using System.Reflection;
-
     internal sealed class Connection : IDisposable
     {
-        #region Parameters
-        private const string InitiatorNameParameter = "InitiatorName";
-        private const string SessionTypeParameter = "SessionType";
-        private const string AuthMethodParameter = "AuthMethod";
-
-        private const string HeaderDigestParameter = "HeaderDigest";
-        private const string DataDigestParameter = "DataDigest";
-        private const string MaxRecvDataSegmentLengthParameter = "MaxRecvDataSegmentLength";
-        private const string DefaultTime2WaitParameter = "DefaultTime2Wait";
-        private const string DefaultTime2RetainParameter = "DefaultTime2Retain";
-
-        private const string SendTargetsParameter = "SendTargets";
-        private const string TargetNameParameter = "TargetName";
-        private const string TargetAddressParameter = "TargetAddress";
-
-        private const string NoneValue = "None";
-        private const string ChapValue = "CHAP";
-        #endregion
-
-        private Session _session;
-
-        private Stream _stream;
-        private Authenticator[] _authenticators;
-
-        private ushort _id;
-        private uint _expectedStatusSequenceNumber = 1;
-        private LoginStages _loginStage = LoginStages.SecurityNegotiation;
+        private readonly Authenticator[] _authenticators;
 
         /// <summary>
         /// The set of all 'parameters' we've negotiated.
         /// </summary>
-        private Dictionary<string, string> _negotiatedParameters;
+        private readonly Dictionary<string, string> _negotiatedParameters;
+
+        private readonly Stream _stream;
 
         public Connection(Session session, TargetAddress address, Authenticator[] authenticators)
         {
-            _session = session;
+            Session = session;
             _authenticators = authenticators;
 
 #if NETCORE
@@ -80,7 +55,7 @@ namespace DiscUtils.Iscsi
             client.NoDelay = true;
             _stream = client.GetStream();
 
-            _id = session.NextConnectionId();
+            Id = session.NextConnectionId();
 
             // Default negotiated values
             HeaderDigest = Digest.None;
@@ -93,40 +68,17 @@ namespace DiscUtils.Iscsi
             NegotiateFeatures();
         }
 
-#region Protocol Features
-        [ProtocolKey("HeaderDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
-        public Digest HeaderDigest { get; set; }
+        internal LoginStages CurrentLoginStage { get; private set; } = LoginStages.SecurityNegotiation;
 
-        [ProtocolKey("DataDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
-        public Digest DataDigest { get; set; }
+        internal uint ExpectedStatusSequenceNumber { get; private set; } = 1;
 
-        [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Initiator, KeyType.Declarative)]
-        internal int MaxInitiatorTransmitDataSegmentLength { get; set; }
-
-        [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Target, KeyType.Declarative)]
-        internal int MaxTargetReceiveDataSegmentLength { get; set; }
-#endregion
-
-        internal ushort Id
-        {
-            get { return _id; }
-        }
-
-        internal Session Session
-        {
-            get { return _session; }
-        }
-
-        internal LoginStages CurrentLoginStage
-        {
-            get { return _loginStage; }
-        }
+        internal ushort Id { get; }
 
         internal LoginStages NextLoginStage
         {
             get
             {
-                switch (_loginStage)
+                switch (CurrentLoginStage)
                 {
                     case LoginStages.SecurityNegotiation:
                         return LoginStages.LoginOperationalNegotiation;
@@ -138,10 +90,7 @@ namespace DiscUtils.Iscsi
             }
         }
 
-        internal uint ExpectedStatusSequenceNumber
-        {
-            get { return _expectedStatusSequenceNumber; }
-        }
+        internal Session Session { get; }
 
         public void Dispose()
         {
@@ -181,7 +130,7 @@ namespace DiscUtils.Iscsi
         {
             CommandRequest req = new CommandRequest(this, cmd.TargetLun);
 
-            int toSend = Math.Min(Math.Min(outBufferCount, _session.ImmediateData ? _session.FirstBurstLength : 0), MaxTargetReceiveDataSegmentLength);
+            int toSend = Math.Min(Math.Min(outBufferCount, Session.ImmediateData ? Session.FirstBurstLength : 0), MaxTargetReceiveDataSegmentLength);
             byte[] packet = req.GetBytes(cmd, outBuffer, outBufferOffset, toSend, true, inBufferMax != 0, outBufferCount != 0, (uint)(outBufferCount != 0 ? outBufferCount : inBufferMax));
             _stream.Write(packet, 0, packet.Length);
             _stream.Flush();
@@ -228,7 +177,7 @@ namespace DiscUtils.Iscsi
                         Array.Copy(pdu.ContentData, 2, senseData, 0, senseLength);
                         throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure", senseData);
                     }
-                    else if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
+                    if (resp.StatusPresent && resp.Status != ScsiStatus.Good)
                     {
                         throw new ScsiCommandException(resp.Status, "Target indicated SCSI failure");
                     }
@@ -254,8 +203,8 @@ namespace DiscUtils.Iscsi
                 }
             }
 
-            _session.NextTaskTag();
-            _session.NextCommandSequenceNumber();
+            Session.NextTaskTag();
+            Session.NextCommandSequenceNumber();
 
             return numRead;
         }
@@ -298,7 +247,7 @@ namespace DiscUtils.Iscsi
 
             string currentTarget = null;
             List<TargetAddress> currentAddresses = null;
-            foreach (var line in buffer.Lines)
+            foreach (KeyValuePair<string, string> line in buffer.Lines)
             {
                 if (currentTarget == null)
                 {
@@ -332,25 +281,25 @@ namespace DiscUtils.Iscsi
 
         internal void SeenStatusSequenceNumber(uint number)
         {
-            if (number != 0 && number != _expectedStatusSequenceNumber)
+            if (number != 0 && number != ExpectedStatusSequenceNumber)
             {
-                throw new InvalidProtocolException("Unexpected status sequence number " + number + ", expected " + _expectedStatusSequenceNumber);
+                throw new InvalidProtocolException("Unexpected status sequence number " + number + ", expected " + ExpectedStatusSequenceNumber);
             }
 
-            _expectedStatusSequenceNumber = number + 1;
+            ExpectedStatusSequenceNumber = number + 1;
         }
 
         private void NegotiateSecurity()
         {
-            _loginStage = LoginStages.SecurityNegotiation;
+            CurrentLoginStage = LoginStages.SecurityNegotiation;
 
             //
             // Establish the contents of the request
             //
             TextBuffer parameters = new TextBuffer();
 
-            GetParametersToNegotiate(parameters, KeyUsagePhase.SecurityNegotiation, _session.SessionType);
-            _session.GetParametersToNegotiate(parameters, KeyUsagePhase.SecurityNegotiation);
+            GetParametersToNegotiate(parameters, KeyUsagePhase.SecurityNegotiation, Session.SessionType);
+            Session.GetParametersToNegotiate(parameters, KeyUsagePhase.SecurityNegotiation);
 
             string authParam = _authenticators[0].Identifier;
             for (int i = 1; i < _authenticators.Length; ++i)
@@ -484,7 +433,7 @@ namespace DiscUtils.Iscsi
                 throw new LoginException("iSCSI Target wants to transition to a different login stage: " + resp.NextStage + " (expected: " + NextLoginStage + ")");
             }
 
-            _loginStage = resp.NextStage;
+            CurrentLoginStage = resp.NextStage;
         }
 
         private void NegotiateFeatures()
@@ -493,8 +442,8 @@ namespace DiscUtils.Iscsi
             // Send the request...
             //
             TextBuffer parameters = new TextBuffer();
-            GetParametersToNegotiate(parameters, KeyUsagePhase.OperationalNegotiation, _session.SessionType);
-            _session.GetParametersToNegotiate(parameters, KeyUsagePhase.OperationalNegotiation);
+            GetParametersToNegotiate(parameters, KeyUsagePhase.OperationalNegotiation, Session.SessionType);
+            Session.GetParametersToNegotiate(parameters, KeyUsagePhase.OperationalNegotiation);
 
             byte[] paramBuffer = new byte[parameters.Size];
             parameters.WriteTo(paramBuffer, 0);
@@ -596,7 +545,7 @@ namespace DiscUtils.Iscsi
                 throw new LoginException("iSCSI Target wants to transition to a different login stage: " + resp.NextStage + " (expected: " + NextLoginStage + ")");
             }
 
-            _loginStage = resp.NextStage;
+            CurrentLoginStage = resp.NextStage;
         }
 
         private ProtocolDataUnit ReadPdu()
@@ -617,7 +566,7 @@ namespace DiscUtils.Iscsi
         private void GetParametersToNegotiate(TextBuffer parameters, KeyUsagePhase phase, SessionType sessionType)
         {
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var propInfo in properties)
+            foreach (PropertyInfo propInfo in properties)
             {
                 ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null)
@@ -636,7 +585,7 @@ namespace DiscUtils.Iscsi
         private void ConsumeParameters(TextBuffer inParameters, TextBuffer outParameters)
         {
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var propInfo in properties)
+            foreach (PropertyInfo propInfo in properties)
             {
                 ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null && (attr.Sender & KeySender.Target) != 0)
@@ -645,7 +594,7 @@ namespace DiscUtils.Iscsi
                     {
                         object value = ProtocolKeyAttribute.GetValueAsObject(inParameters[attr.Name], propInfo.PropertyType);
 
-                        propInfo.GetSetMethod(true).Invoke(this, new object[] { value });
+                        propInfo.GetSetMethod(true).Invoke(this, new[] { value });
                         inParameters.Remove(attr.Name);
 
                         if (attr.Type == KeyType.Negotiated && !_negotiatedParameters.ContainsKey(attr.Name))
@@ -658,9 +607,9 @@ namespace DiscUtils.Iscsi
                 }
             }
 
-            _session.ConsumeParameters(inParameters, outParameters);
+            Session.ConsumeParameters(inParameters, outParameters);
 
-            foreach (var param in inParameters.Lines)
+            foreach (KeyValuePair<string, string> param in inParameters.Lines)
             {
                 outParameters.Add(param.Key, "NotUnderstood");
             }
@@ -719,5 +668,42 @@ namespace DiscUtils.Iscsi
 
             return result;
         }
+
+        #region Parameters
+
+        private const string InitiatorNameParameter = "InitiatorName";
+        private const string SessionTypeParameter = "SessionType";
+        private const string AuthMethodParameter = "AuthMethod";
+
+        private const string HeaderDigestParameter = "HeaderDigest";
+        private const string DataDigestParameter = "DataDigest";
+        private const string MaxRecvDataSegmentLengthParameter = "MaxRecvDataSegmentLength";
+        private const string DefaultTime2WaitParameter = "DefaultTime2Wait";
+        private const string DefaultTime2RetainParameter = "DefaultTime2Retain";
+
+        private const string SendTargetsParameter = "SendTargets";
+        private const string TargetNameParameter = "TargetName";
+        private const string TargetAddressParameter = "TargetAddress";
+
+        private const string NoneValue = "None";
+        private const string ChapValue = "CHAP";
+
+        #endregion
+
+        #region Protocol Features
+
+        [ProtocolKey("HeaderDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
+        public Digest HeaderDigest { get; set; }
+
+        [ProtocolKey("DataDigest", "None", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, UsedForDiscovery = true)]
+        public Digest DataDigest { get; set; }
+
+        [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Initiator, KeyType.Declarative)]
+        internal int MaxInitiatorTransmitDataSegmentLength { get; set; }
+
+        [ProtocolKey("MaxRecvDataSegmentLength", "8192", KeyUsagePhase.OperationalNegotiation, KeySender.Target, KeyType.Declarative)]
+        internal int MaxTargetReceiveDataSegmentLength { get; set; }
+
+        #endregion
     }
 }

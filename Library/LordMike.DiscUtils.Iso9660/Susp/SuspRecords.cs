@@ -20,15 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System.Collections.Generic;
-
     internal sealed class SuspRecords
     {
-        private Dictionary<string, Dictionary<string, List<SystemUseEntry>>> _records;
+        private readonly Dictionary<string, Dictionary<string, List<SystemUseEntry>>> _records;
 
         public SuspRecords(IsoContext context, byte[] data, int offset)
         {
@@ -37,9 +36,9 @@ namespace DiscUtils.Iso9660
             ContinuationSystemUseEntry contEntry = Parse(context, data, offset + context.SuspSkipBytes);
             while (contEntry != null)
             {
-                context.DataStream.Position = (contEntry.Block*(long) context.VolumeDescriptor.LogicalBlockSize) +
+                context.DataStream.Position = contEntry.Block * (long)context.VolumeDescriptor.LogicalBlockSize +
                                               contEntry.BlockOffset;
-                byte[] contData = Utilities.ReadFully(context.DataStream, (int) contEntry.Length);
+                byte[] contData = Utilities.ReadFully(context.DataStream, (int)contEntry.Length);
 
                 contEntry = Parse(context, contData, 0);
             }
@@ -132,15 +131,16 @@ namespace DiscUtils.Iso9660
                 switch (entry.Name)
                 {
                     case "ST":
+
                         // Abort
                         return contEntry;
 
                     case "CE":
-                        contEntry = (ContinuationSystemUseEntry) entry;
+                        contEntry = (ContinuationSystemUseEntry)entry;
                         break;
 
                     case "ES":
-                        ExtensionSelectSystemUseEntry esEntry = (ExtensionSelectSystemUseEntry) entry;
+                        ExtensionSelectSystemUseEntry esEntry = (ExtensionSelectSystemUseEntry)entry;
                         extension = context.SuspExtensions[esEntry.SelectedExtension];
                         break;
 

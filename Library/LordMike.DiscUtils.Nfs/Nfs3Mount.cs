@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Nfs
 {
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class Nfs3Mount : RpcProgram
     {
         public const int ProgramIdentifier = 100005;
@@ -35,9 +35,7 @@ namespace DiscUtils.Nfs
         public const int MaxFileHandleSize = 64;
 
         public Nfs3Mount(RpcClient client)
-            : base(client)
-        {
-        }
+            : base(client) {}
 
         public override int Identifier
         {
@@ -65,10 +63,7 @@ namespace DiscUtils.Nfs
 
                 return exports;
             }
-            else
-            {
-                throw new RpcException(reply.Header.ReplyHeader);
-            }
+            throw new RpcException(reply.Header.ReplyHeader);
         }
 
         public Nfs3MountResult Mount(string dirPath)
@@ -80,7 +75,7 @@ namespace DiscUtils.Nfs
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                Nfs3Status status = (Nfs3Status) reply.BodyReader.ReadInt32();
+                Nfs3Status status = (Nfs3Status)reply.BodyReader.ReadInt32();
                 if (status == Nfs3Status.Ok)
                 {
                     return new Nfs3MountResult(reply.BodyReader);
@@ -88,10 +83,7 @@ namespace DiscUtils.Nfs
 
                 throw new Nfs3Exception(status);
             }
-            else
-            {
-                throw new RpcException(reply.Header.ReplyHeader);
-            }
+            throw new RpcException(reply.Header.ReplyHeader);
         }
     }
 }

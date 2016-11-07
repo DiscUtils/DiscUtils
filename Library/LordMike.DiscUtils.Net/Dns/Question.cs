@@ -24,11 +24,10 @@ namespace DiscUtils.Net.Dns
 {
     internal sealed class Question
     {
+        public RecordClass Class { get; set; }
         public string Name { get; set; }
 
         public RecordType Type { get; set; }
-
-        public RecordClass Class { get; set; }
 
         public static Question ReadFrom(PacketReader reader)
         {

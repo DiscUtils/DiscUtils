@@ -24,36 +24,35 @@ namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3SetAttributes
     {
-        public bool SetMode { get; set; }
-
-        public UnixFilePermissions Mode { get; set; }
-
-        public bool SetUid { get; set; }
-
-        public uint Uid { get; set; }
-
-        public bool SetGid { get; set; }
+        public Nfs3FileTime AccessTime { get; set; }
 
         public uint Gid { get; set; }
 
-        public bool SetSize { get; set; }
+        public UnixFilePermissions Mode { get; set; }
 
-        public long Size { get; set; }
+        public Nfs3FileTime ModifyTime { get; set; }
 
         public Nfs3SetTimeMethod SetAccessTime { get; set; }
 
-        public Nfs3FileTime AccessTime { get; set; }
+        public bool SetGid { get; set; }
+        public bool SetMode { get; set; }
 
         public Nfs3SetTimeMethod SetModifyTime { get; set; }
 
-        public Nfs3FileTime ModifyTime { get; set; }
+        public bool SetSize { get; set; }
+
+        public bool SetUid { get; set; }
+
+        public long Size { get; set; }
+
+        public uint Uid { get; set; }
 
         public void Write(XdrDataWriter writer)
         {
             writer.Write(SetMode);
             if (SetMode)
             {
-                writer.Write((int) Mode);
+                writer.Write((int)Mode);
             }
 
             writer.Write(SetUid);
@@ -74,13 +73,13 @@ namespace DiscUtils.Nfs
                 writer.Write(Size);
             }
 
-            writer.Write((int) SetAccessTime);
+            writer.Write((int)SetAccessTime);
             if (SetAccessTime == Nfs3SetTimeMethod.ClientTime)
             {
                 AccessTime.Write(writer);
             }
 
-            writer.Write((int) SetModifyTime);
+            writer.Write((int)SetModifyTime);
             if (SetModifyTime == Nfs3SetTimeMethod.ClientTime)
             {
                 ModifyTime.Write(writer);

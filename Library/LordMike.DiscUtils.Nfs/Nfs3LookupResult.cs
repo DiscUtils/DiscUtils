@@ -26,7 +26,7 @@ namespace DiscUtils.Nfs
     {
         public Nfs3LookupResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status) reader.ReadInt32();
+            Status = (Nfs3Status)reader.ReadInt32();
             if (Status == Nfs3Status.Ok)
             {
                 ObjectHandle = new Nfs3FileHandle(reader);
@@ -42,10 +42,10 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3FileHandle ObjectHandle { get; set; }
+        public Nfs3FileAttributes DirAttributes { get; set; }
 
         public Nfs3FileAttributes ObjectAttributes { get; set; }
 
-        public Nfs3FileAttributes DirAttributes { get; set; }
+        public Nfs3FileHandle ObjectHandle { get; set; }
     }
 }

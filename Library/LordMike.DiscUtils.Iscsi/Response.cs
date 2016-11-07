@@ -26,12 +26,12 @@ namespace DiscUtils.Iscsi
 {
     internal class Response : BaseResponse
     {
+        public uint BidiReadResidualCount;
+        public uint ExpectedDataSequenceNumber;
         public BasicHeaderSegment Header;
+        public uint ResidualCount;
         public byte ResponseCode;
         public ScsiStatus Status;
-        public uint ExpectedDataSequenceNumber;
-        public uint BidiReadResidualCount;
-        public uint ResidualCount;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -51,7 +51,7 @@ namespace DiscUtils.Iscsi
 
             ResponseCode = headerData[headerOffset + 2];
             StatusPresent = true;
-            Status = (ScsiStatus) headerData[headerOffset + 3];
+            Status = (ScsiStatus)headerData[headerOffset + 3];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);

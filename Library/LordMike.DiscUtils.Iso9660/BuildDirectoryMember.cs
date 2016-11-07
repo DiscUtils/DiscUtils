@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Provides the base class for <see cref="BuildFileInfo"/> and
     /// <see cref="BuildDirectoryInfo"/> objects that will be built into an
@@ -38,10 +38,6 @@ namespace DiscUtils.Iso9660
     {
         internal static readonly Comparer<BuildDirectoryMember> SortedComparison = new DirectorySortedComparison();
 
-        private string _name;
-        private string _shortName;
-        private DateTime _creationTime;
-
         /// <summary>
         /// Initializes a new instance of the BuildDirectoryMember class.
         /// </summary>
@@ -49,26 +45,20 @@ namespace DiscUtils.Iso9660
         /// <param name="shortName">The ISO 9660 compliant name of the file or directory.</param>
         protected BuildDirectoryMember(string name, string shortName)
         {
-            _name = name;
-            _shortName = shortName;
-            _creationTime = DateTime.UtcNow;
+            Name = name;
+            ShortName = shortName;
+            CreationTime = DateTime.UtcNow;
         }
+
+        /// <summary>
+        /// Gets or sets the creation date for the file or directory, in UTC.
+        /// </summary>
+        public DateTime CreationTime { get; set; }
 
         /// <summary>
         /// Gets the Joliet compliant name of the file or directory.
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
-
-        /// <summary>
-        /// Gets the ISO 9660 compliant name of the file or directory.
-        /// </summary>
-        public string ShortName
-        {
-            get { return _shortName; }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the parent directory, or <c>null</c> if this is the root directory.
@@ -76,13 +66,9 @@ namespace DiscUtils.Iso9660
         public abstract BuildDirectoryInfo Parent { get; }
 
         /// <summary>
-        /// Gets or sets the creation date for the file or directory, in UTC.
+        /// Gets the ISO 9660 compliant name of the file or directory.
         /// </summary>
-        public DateTime CreationTime
-        {
-            get { return _creationTime; }
-            set { _creationTime = value; }
-        }
+        public string ShortName { get; }
 
         internal string PickName(string nameOverride, Encoding enc)
         {
@@ -90,10 +76,7 @@ namespace DiscUtils.Iso9660
             {
                 return nameOverride;
             }
-            else
-            {
-                return (enc == Encoding.ASCII) ? ShortName : Name;
-            }
+            return enc == Encoding.ASCII ? ShortName : Name;
         }
 
         internal abstract long GetDataSize(Encoding enc);
@@ -115,8 +98,8 @@ namespace DiscUtils.Iso9660
 
                 for (int i = 0; i < 2; ++i)
                 {
-                    xPart = (xParts.Length > i) ? xParts[i] : string.Empty;
-                    yPart = (yParts.Length > i) ? yParts[i] : string.Empty;
+                    xPart = xParts.Length > i ? xParts[i] : string.Empty;
+                    yPart = yParts.Length > i ? yParts[i] : string.Empty;
                     int val = ComparePart(xPart, yPart, ' ');
                     if (val != 0)
                     {
@@ -124,8 +107,8 @@ namespace DiscUtils.Iso9660
                     }
                 }
 
-                xPart = (xParts.Length > 2) ? xParts[2] : string.Empty;
-                yPart = (yParts.Length > 2) ? yParts[2] : string.Empty;
+                xPart = xParts.Length > 2 ? xParts[2] : string.Empty;
+                yPart = yParts.Length > 2 ? yParts[2] : string.Empty;
                 return ComparePartBackwards(xPart, yPart, '0');
             }
 
@@ -134,8 +117,8 @@ namespace DiscUtils.Iso9660
                 int max = Math.Max(x.Length, y.Length);
                 for (int i = 0; i < max; ++i)
                 {
-                    char xChar = (i < x.Length) ? x[i] : padChar;
-                    char yChar = (i < y.Length) ? y[i] : padChar;
+                    char xChar = i < x.Length ? x[i] : padChar;
+                    char yChar = i < y.Length ? y[i] : padChar;
 
                     if (xChar != yChar)
                     {
@@ -155,8 +138,8 @@ namespace DiscUtils.Iso9660
 
                 for (int i = 0; i < max; ++i)
                 {
-                    char xChar = (i >= xPad) ? x[i - xPad] : padChar;
-                    char yChar = (i >= yPad) ? y[i - yPad] : padChar;
+                    char xChar = i >= xPad ? x[i - xPad] : padChar;
+                    char yChar = i >= yPad ? y[i - yPad] : padChar;
 
                     if (xChar != yChar)
                     {

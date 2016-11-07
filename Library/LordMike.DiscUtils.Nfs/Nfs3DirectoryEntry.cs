@@ -40,14 +40,14 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public ulong FileId { get; set; }
-
-        public string Name { get; set; }
-
         public ulong Cookie { get; set; }
 
         public Nfs3FileAttributes FileAttributes { get; set; }
 
         public Nfs3FileHandle FileHandle { get; set; }
+
+        public ulong FileId { get; set; }
+
+        public string Name { get; set; }
     }
 }

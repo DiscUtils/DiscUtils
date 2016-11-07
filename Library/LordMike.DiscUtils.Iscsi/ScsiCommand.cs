@@ -26,26 +26,21 @@ namespace DiscUtils.Iscsi
 {
     internal abstract class ScsiCommand : IByteArraySerializable
     {
-        private ulong _targetLun;
-
         public ScsiCommand(ulong targetLun)
         {
-            _targetLun = targetLun;
-        }
-
-        public ulong TargetLun
-        {
-            get { return _targetLun; }
-        }
-
-        public virtual TaskAttributes TaskAttributes
-        {
-            get { return TaskAttributes.Untagged; }
+            TargetLun = targetLun;
         }
 
         public virtual bool ImmediateDelivery
         {
             get { return false; }
+        }
+
+        public ulong TargetLun { get; }
+
+        public virtual TaskAttributes TaskAttributes
+        {
+            get { return TaskAttributes.Untagged; }
         }
 
         #region IByteArraySerializable Members

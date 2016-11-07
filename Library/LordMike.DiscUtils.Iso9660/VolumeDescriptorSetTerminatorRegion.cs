@@ -24,7 +24,7 @@ namespace DiscUtils.Iso9660
 {
     internal class VolumeDescriptorSetTerminatorRegion : VolumeDescriptorDiskRegion
     {
-        private VolumeDescriptorSetTerminator _descriptor;
+        private readonly VolumeDescriptorSetTerminator _descriptor;
 
         public VolumeDescriptorSetTerminatorRegion(VolumeDescriptorSetTerminator descriptor, long start)
             : base(start)

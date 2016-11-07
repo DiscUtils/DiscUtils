@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Globalization;
-
     /// <summary>
     /// Information about an iSCSI Target.
     /// </summary>
@@ -35,10 +35,6 @@ namespace DiscUtils.Iscsi
     {
         internal const int DefaultPort = 3260;
 
-        private string _networkAddress;
-        private int _networkPort;
-        private string _targetGroupTag;
-
         /// <summary>
         /// Initializes a new instance of the TargetAddress class.
         /// </summary>
@@ -47,34 +43,25 @@ namespace DiscUtils.Iscsi
         /// <param name="targetGroupTag">The Group Tag of the Target.</param>
         public TargetAddress(string address, int port, string targetGroupTag)
         {
-            _networkAddress = address;
-            _networkPort = port;
-            _targetGroupTag = targetGroupTag;
+            NetworkAddress = address;
+            NetworkPort = port;
+            TargetGroupTag = targetGroupTag;
         }
 
         /// <summary>
         /// Gets the IP address (or FQDN) of the Target.
         /// </summary>
-        public string NetworkAddress
-        {
-            get { return _networkAddress; }
-        }
+        public string NetworkAddress { get; }
 
         /// <summary>
         /// Gets the network port of the Target.
         /// </summary>
-        public int NetworkPort
-        {
-            get { return _networkPort; }
-        }
+        public int NetworkPort { get; }
 
         /// <summary>
         /// Gets the Group Tag of the Target.
         /// </summary>
-        public string TargetGroupTag
-        {
-            get { return _targetGroupTag; }
-        }
+        public string TargetGroupTag { get; }
 
         /// <summary>
         /// Parses a Target address in string form.
@@ -83,7 +70,7 @@ namespace DiscUtils.Iscsi
         /// <returns>The structured address.</returns>
         public static TargetAddress Parse(string address)
         {
-            int addrEnd = address.IndexOfAny(new char[] {':', ','});
+            int addrEnd = address.IndexOfAny(new[] { ':', ',' });
             if (addrEnd == -1)
             {
                 return new TargetAddress(address, DefaultPort, string.Empty);
@@ -126,14 +113,14 @@ namespace DiscUtils.Iscsi
         public override string ToString()
         {
             string result = NetworkAddress;
-            if (_networkPort != DefaultPort)
+            if (NetworkPort != DefaultPort)
             {
-                result += ":" + _networkPort;
+                result += ":" + NetworkPort;
             }
 
-            if (!string.IsNullOrEmpty(_targetGroupTag))
+            if (!string.IsNullOrEmpty(TargetGroupTag))
             {
-                result += "," + _targetGroupTag;
+                result += "," + TargetGroupTag;
             }
 
             return result;
@@ -148,8 +135,8 @@ namespace DiscUtils.Iscsi
             UriBuilder builder = new UriBuilder();
             builder.Scheme = "iscsi";
             builder.Host = NetworkAddress;
-            builder.Port = (_networkPort != DefaultPort) ? _networkPort : -1;
-            builder.Path = string.IsNullOrEmpty(_targetGroupTag) ? string.Empty : _targetGroupTag;
+            builder.Port = NetworkPort != DefaultPort ? NetworkPort : -1;
+            builder.Path = string.IsNullOrEmpty(TargetGroupTag) ? string.Empty : TargetGroupTag;
             return builder.Uri;
         }
     }

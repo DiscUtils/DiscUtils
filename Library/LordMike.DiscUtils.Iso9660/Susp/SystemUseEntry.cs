@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal abstract class SystemUseEntry
     {
         public string Name;
         public byte Version;
 
         public static SystemUseEntry Parse(byte[] data, int offset, Encoding encoding, SuspExtension extension,
-            out int length)
+                                           out int length)
         {
             string name = Utilities.BytesToString(data, offset, 2);
             length = data[offset + 2];
@@ -64,10 +63,7 @@ namespace DiscUtils.Iso9660
                     {
                         return new GenericSystemUseEntry(data, offset);
                     }
-                    else
-                    {
-                        return extension.Parse(name, data, offset, length, encoding);
-                    }
+                    return extension.Parse(name, data, offset, length, encoding);
             }
         }
 

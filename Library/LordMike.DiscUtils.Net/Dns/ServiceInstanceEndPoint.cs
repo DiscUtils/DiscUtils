@@ -20,62 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.Net;
+
 namespace DiscUtils.Net.Dns
 {
-    using System.Collections.Generic;
-    using System.Net;
-
     /// <summary>
     /// Represents an endpoint (address, port, etc) that provides a DNS-SD service instance.
     /// </summary>
     public sealed class ServiceInstanceEndPoint
     {
-        private int _priority;
-        private int _weight;
-        private int _port;
-        private string _address;
-        private IPEndPoint[] _ipEndPoints;
+        private readonly IPEndPoint[] _ipEndPoints;
 
         internal ServiceInstanceEndPoint(int priority, int weight, int port, string address, IPEndPoint[] ipEndPoints)
         {
-            _priority = priority;
-            _weight = weight;
-            _port = port;
-            _address = address;
+            Priority = priority;
+            Weight = weight;
+            Port = port;
+            DnsAddress = address;
             _ipEndPoints = ipEndPoints;
-        }
-
-        /// <summary>
-        /// Gets the priority of this EndPoint (lower value is higher priority).
-        /// </summary>
-        public int Priority
-        {
-            get { return _priority; }
-        }
-
-        /// <summary>
-        /// Gets the relative weight of this EndPoint when randomly choosing between EndPoints of equal priority.
-        /// </summary>
-        public int Weight
-        {
-            get { return _weight; }
         }
 
         /// <summary>
         /// Gets the DNS address of this EndPoint.
         /// </summary>
-        public string DnsAddress
-        {
-            get { return _address; }
-        }
-
-        /// <summary>
-        /// Gets the port of this EndPoint.
-        /// </summary>
-        public int Port
-        {
-            get { return _port; }
-        }
+        public string DnsAddress { get; }
 
         /// <summary>
         /// Gets the IP addresses (as IPEndPoint instances) of this EndPoint.
@@ -84,5 +53,20 @@ namespace DiscUtils.Net.Dns
         {
             get { return _ipEndPoints; }
         }
+
+        /// <summary>
+        /// Gets the port of this EndPoint.
+        /// </summary>
+        public int Port { get; }
+
+        /// <summary>
+        /// Gets the priority of this EndPoint (lower value is higher priority).
+        /// </summary>
+        public int Priority { get; }
+
+        /// <summary>
+        /// Gets the relative weight of this EndPoint when randomly choosing between EndPoints of equal priority.
+        /// </summary>
+        public int Weight { get; }
     }
 }

@@ -20,35 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Text;
-
     /// <summary>
     /// Represents a directory that will be built into the ISO image.
     /// </summary>
     public sealed class BuildDirectoryInfo : BuildDirectoryMember
     {
         internal static readonly Comparer<BuildDirectoryInfo> PathTableSortComparison = new PathTableComparison();
+        private readonly Dictionary<string, BuildDirectoryMember> _members;
 
-        private BuildDirectoryInfo _parent;
-        private Dictionary<string, BuildDirectoryMember> _members;
-        private int _hierarchyDepth;
+        private readonly BuildDirectoryInfo _parent;
         private List<BuildDirectoryMember> _sortedMembers;
 
         internal BuildDirectoryInfo(string name, BuildDirectoryInfo parent)
             : base(name, MakeShortDirName(name, parent))
         {
-            _parent = (parent == null) ? this : parent;
-            _hierarchyDepth = (parent == null) ? 0 : parent._hierarchyDepth + 1;
+            _parent = parent == null ? this : parent;
+            HierarchyDepth = parent == null ? 0 : parent.HierarchyDepth + 1;
             _members = new Dictionary<string, BuildDirectoryMember>();
         }
+
+        internal int HierarchyDepth { get; }
 
         /// <summary>
         /// The parent directory, or <c>null</c> if none.
@@ -56,11 +56,6 @@ namespace DiscUtils.Iso9660
         public override BuildDirectoryInfo Parent
         {
             get { return _parent; }
-        }
-
-        internal int HierarchyDepth
-        {
-            get { return _hierarchyDepth; }
         }
 
         /// <summary>
@@ -92,9 +87,9 @@ namespace DiscUtils.Iso9660
 
                 // If this record would span a sector boundary, then the current sector is
                 // zero-padded, and the record goes at the start of the next sector.
-                if ((total % IsoUtilities.SectorSize) + recordSize > IsoUtilities.SectorSize)
+                if (total % IsoUtilities.SectorSize + recordSize > IsoUtilities.SectorSize)
                 {
-                    long padLength = IsoUtilities.SectorSize - (total % IsoUtilities.SectorSize);
+                    long padLength = IsoUtilities.SectorSize - total % IsoUtilities.SectorSize;
                     total += padLength;
                 }
 
@@ -108,7 +103,7 @@ namespace DiscUtils.Iso9660
         {
             int nameBytes = enc.GetByteCount(PickName(null, enc));
 
-            return (uint)(8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0));
+            return (uint)(8 + nameBytes + ((nameBytes & 0x1) == 1 ? 1 : 0));
         }
 
         internal int Write(byte[] buffer, int offset, Dictionary<BuildDirectoryMember, uint> locationTable, Encoding enc)
@@ -125,9 +120,9 @@ namespace DiscUtils.Iso9660
             {
                 uint recordSize = m.GetDirectoryRecordSize(enc);
 
-                if ((pos % IsoUtilities.SectorSize) + recordSize > IsoUtilities.SectorSize)
+                if (pos % IsoUtilities.SectorSize + recordSize > IsoUtilities.SectorSize)
                 {
-                    int padLength = IsoUtilities.SectorSize - (pos % IsoUtilities.SectorSize);
+                    int padLength = IsoUtilities.SectorSize - pos % IsoUtilities.SectorSize;
                     Array.Clear(buffer, offset + pos, padLength);
                     pos += padLength;
                 }
@@ -149,7 +144,7 @@ namespace DiscUtils.Iso9660
             dr.LocationOfExtent = locationTable[m];
             dr.DataLength = (uint)m.GetDataSize(dataEnc);
             dr.RecordingDateAndTime = m.CreationTime;
-            dr.Flags = (m is BuildDirectoryInfo) ? FileFlags.Directory : FileFlags.None;
+            dr.Flags = m is BuildDirectoryInfo ? FileFlags.Directory : FileFlags.None;
             return dr.WriteTo(buffer, offset, nameEnc);
         }
 
@@ -177,7 +172,7 @@ namespace DiscUtils.Iso9660
             if (_sortedMembers == null)
             {
                 List<BuildDirectoryMember> sorted = new List<BuildDirectoryMember>(_members.Values);
-                sorted.Sort(BuildDirectoryMember.SortedComparison);
+                sorted.Sort(SortedComparison);
                 _sortedMembers = sorted;
             }
 
@@ -206,8 +201,8 @@ namespace DiscUtils.Iso9660
                 int max = Math.Max(x.Length, y.Length);
                 for (int i = 0; i < max; ++i)
                 {
-                    char xChar = (i < x.Length) ? x[i] : padChar;
-                    char yChar = (i < y.Length) ? y[i] : padChar;
+                    char xChar = i < x.Length ? x[i] : padChar;
+                    char yChar = i < y.Length ? y[i] : padChar;
 
                     if (xChar != yChar)
                     {

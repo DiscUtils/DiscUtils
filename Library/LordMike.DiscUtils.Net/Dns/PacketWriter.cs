@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Text;
-
     internal sealed class PacketWriter
     {
-        private int _pos = 0;
-        private byte[] _data;
+        private readonly byte[] _data;
+        private int _pos;
 
         public PacketWriter(int maxSize)
         {
@@ -40,9 +39,9 @@ namespace DiscUtils.Net.Dns
         public void WriteName(string name)
         {
             // TODO: Implement compression
-            string[] labels = name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] labels = name.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var label in labels)
+            foreach (string label in labels)
             {
                 byte[] labelBytes = Encoding.UTF8.GetBytes(label);
                 if (labelBytes.Length > 63)

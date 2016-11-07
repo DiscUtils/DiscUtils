@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class TextRequest
     {
-        private Connection _connection;
+        private uint _commandSequenceNumber; // Per-session
+        private readonly Connection _connection;
 
         private bool _continue;
-        private ulong _lun;
-        private uint _targetTransferTag = 0xFFFFFFFF;
-        private uint _commandSequenceNumber; // Per-session
         private uint _expectedStatusSequenceNumber; // Per-connection (ack)
+        private ulong _lun;
+        private readonly uint _targetTransferTag = 0xFFFFFFFF;
 
         public TextRequest(Connection connection)
         {
@@ -58,7 +57,7 @@ namespace DiscUtils.Iscsi
 
             byte[] buffer = new byte[Utilities.RoundUp(48 + count, 4)];
             _basicHeader.WriteTo(buffer, 0);
-            buffer[1] |= (byte) (_continue ? 0x40 : 0x00);
+            buffer[1] |= (byte)(_continue ? 0x40 : 0x00);
             Utilities.WriteBytesBigEndian(lun, buffer, 8);
             Utilities.WriteBytesBigEndian(_targetTransferTag, buffer, 20);
             Utilities.WriteBytesBigEndian(_commandSequenceNumber, buffer, 24);

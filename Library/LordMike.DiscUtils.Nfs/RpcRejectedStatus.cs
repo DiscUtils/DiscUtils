@@ -3,6 +3,6 @@ namespace DiscUtils.Nfs
     internal enum RpcRejectedStatus
     {
         RpcMismatch = 0,
-        AuthError = 1,
+        AuthError = 1
     }
 }

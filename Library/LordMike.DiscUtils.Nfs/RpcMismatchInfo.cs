@@ -24,8 +24,8 @@ namespace DiscUtils.Nfs
 {
     internal class RpcMismatchInfo
     {
-        public uint Low;
         public uint High;
+        public uint Low;
 
         public RpcMismatchInfo(XdrDataReader reader)
         {

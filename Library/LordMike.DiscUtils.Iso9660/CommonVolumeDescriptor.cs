@@ -20,41 +20,40 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Text;
-
     internal class CommonVolumeDescriptor : BaseVolumeDescriptor
     {
+        public string AbstractFileIdentifier;
+        public string ApplicationIdentifier;
+        public string BibliographicFileIdentifier;
         public Encoding CharacterEncoding;
+        public string CopyrightFileIdentifier;
+        public DateTime CreationDateAndTime;
+        public string DataPreparerIdentifier;
+        public DateTime EffectiveDateAndTime;
+        public DateTime ExpirationDateAndTime;
+        public byte FileStructureVersion;
+        public ushort LogicalBlockSize;
+        public DateTime ModificationDateAndTime;
+        public uint OptionalTypeLPathTableLocation;
+        public uint OptionalTypeMPathTableLocation;
+        public uint PathTableSize;
+        public string PublisherIdentifier;
+        public DirectoryRecord RootDirectory;
 
         public string SystemIdentifier;
-        public string VolumeIdentifier;
-        public uint VolumeSpaceSize;
-        public ushort VolumeSetSize;
-        public ushort VolumeSequenceNumber;
-        public ushort LogicalBlockSize;
-        public uint PathTableSize;
         public uint TypeLPathTableLocation;
-        public uint OptionalTypeLPathTableLocation;
         public uint TypeMPathTableLocation;
-        public uint OptionalTypeMPathTableLocation;
-        public DirectoryRecord RootDirectory;
+        public string VolumeIdentifier;
+        public ushort VolumeSequenceNumber;
         public string VolumeSetIdentifier;
-        public string PublisherIdentifier;
-        public string DataPreparerIdentifier;
-        public string ApplicationIdentifier;
-        public string CopyrightFileIdentifier;
-        public string AbstractFileIdentifier;
-        public string BibliographicFileIdentifier;
-        public DateTime CreationDateAndTime;
-        public DateTime ModificationDateAndTime;
-        public DateTime ExpirationDateAndTime;
-        public DateTime EffectiveDateAndTime;
-        public byte FileStructureVersion;
+        public ushort VolumeSetSize;
+        public uint VolumeSpaceSize;
 
         public CommonVolumeDescriptor(byte[] src, int offset, Encoding enc)
             : base(src, offset)

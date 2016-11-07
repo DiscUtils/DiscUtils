@@ -41,13 +41,13 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Gets or sets the permission mask to apply to newly created files.
-        /// </summary>
-        public UnixFilePermissions NewFilePermissions { get; set; }
-
-        /// <summary>
         /// Gets or sets the permission mask to apply to newly created directories.
         /// </summary>
         public UnixFilePermissions NewDirectoryPermissions { get; set; }
+
+        /// <summary>
+        /// Gets or sets the permission mask to apply to newly created files.
+        /// </summary>
+        public UnixFilePermissions NewFilePermissions { get; set; }
     }
 }

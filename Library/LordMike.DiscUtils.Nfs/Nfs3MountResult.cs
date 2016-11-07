@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Nfs
 {
-    using System.Collections.Generic;
-
     internal sealed class Nfs3MountResult
     {
         internal Nfs3MountResult(XdrDataReader reader)
@@ -37,8 +37,8 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3FileHandle FileHandle { get; set; }
-
         public List<int> AuthFlavours { get; set; }
+
+        public Nfs3FileHandle FileHandle { get; set; }
     }
 }

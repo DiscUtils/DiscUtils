@@ -26,18 +26,18 @@ namespace DiscUtils.Iscsi
 {
     internal class LoginResponse : BaseResponse
     {
-        public bool Transit;
+        public byte ActiveVersion;
         public bool Continue;
         public LoginStages CurrentStage;
-        public LoginStages NextStage;
 
         public byte MaxVersion;
-        public byte ActiveVersion;
-
-        public ushort TargetSessionId;
+        public LoginStages NextStage;
         public byte StatusClass;
         public LoginStatusCode StatusCode;
+
+        public ushort TargetSessionId;
         public byte[] TextData;
+        public bool Transit;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -64,7 +64,7 @@ namespace DiscUtils.Iscsi
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
             StatusClass = headerData[headerOffset + 36];
-            StatusCode = (LoginStatusCode) Utilities.ToUInt16BigEndian(headerData, headerOffset + 36);
+            StatusCode = (LoginStatusCode)Utilities.ToUInt16BigEndian(headerData, headerOffset + 36);
 
             TextData = bodyData;
         }
@@ -73,8 +73,8 @@ namespace DiscUtils.Iscsi
         {
             Transit = (value & 0x80) != 0;
             Continue = (value & 0x40) != 0;
-            CurrentStage = (LoginStages) ((value >> 2) & 0x3);
-            NextStage = (LoginStages) (value & 0x3);
+            CurrentStage = (LoginStages)((value >> 2) & 0x3);
+            NextStage = (LoginStages)(value & 0x3);
         }
     }
 }

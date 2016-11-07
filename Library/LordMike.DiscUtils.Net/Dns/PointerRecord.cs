@@ -20,24 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-
     /// <summary>
     /// Represents a DNS PTR record.
     /// </summary>
     public sealed class PointerRecord : ResourceRecord
     {
-        private string _targetName;
-
         internal PointerRecord(string name, RecordType type, RecordClass rClass, DateTime expiry, PacketReader reader)
             : base(name, type, rClass, expiry)
         {
             ushort dataLen = reader.ReadUShort();
             int pos = reader.Position;
 
-            _targetName = reader.ReadName();
+            TargetName = reader.ReadName();
 
             reader.Position = pos + dataLen;
         }
@@ -45,9 +43,6 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Gets the DNS name pointed to.
         /// </summary>
-        public string TargetName
-        {
-            get { return _targetName; }
-        }
+        public string TargetName { get; }
     }
 }

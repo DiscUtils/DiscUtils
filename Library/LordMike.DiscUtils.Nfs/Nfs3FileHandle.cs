@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-
     internal sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
     {
         internal Nfs3FileHandle(XdrDataReader reader)
@@ -32,6 +32,30 @@ namespace DiscUtils.Nfs
         }
 
         public byte[] Value { get; set; }
+
+        public int CompareTo(Nfs3FileHandle other)
+        {
+            if (other.Value == null)
+            {
+                return Value == null ? 0 : 1;
+            }
+            if (Value == null)
+            {
+                return -1;
+            }
+
+            int maxIndex = Math.Min(Value.Length, other.Value.Length);
+            for (int i = 0; i < maxIndex; ++i)
+            {
+                int diff = Value[i] - other.Value[i];
+                if (diff != 0)
+                {
+                    return diff;
+                }
+            }
+
+            return Value.Length - other.Value.Length;
+        }
 
         public bool Equals(Nfs3FileHandle other)
         {
@@ -44,7 +68,7 @@ namespace DiscUtils.Nfs
             {
                 return other.Value == null;
             }
-            else if (other.Value == null)
+            if (other.Value == null)
             {
                 return false;
             }
@@ -63,30 +87,6 @@ namespace DiscUtils.Nfs
             }
 
             return true;
-        }
-
-        public int CompareTo(Nfs3FileHandle other)
-        {
-            if (other.Value == null)
-            {
-                return Value == null ? 0 : 1;
-            }
-            else if (Value == null)
-            {
-                return -1;
-            }
-
-            int maxIndex = Math.Min(Value.Length, other.Value.Length);
-            for (int i = 0; i < maxIndex; ++i)
-            {
-                int diff = Value[i] - other.Value[i];
-                if (diff != 0)
-                {
-                    return diff;
-                }
-            }
-
-            return Value.Length - other.Value.Length;
         }
 
         public override bool Equals(object obj)

@@ -20,19 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Nfs
 {
-    using System.IO;
-
     internal sealed class PortMapper : RpcProgram
     {
         public const int ProgramIdentifier = 100000;
         public const int ProgramVersion = 2;
 
         public PortMapper(RpcClient client)
-            : base(client)
-        {
-        }
+            : base(client) {}
 
         public override int Identifier
         {
@@ -50,18 +48,15 @@ namespace DiscUtils.Nfs
             XdrDataWriter writer = StartCallMessage(ms, null, 3);
             writer.Write(program);
             writer.Write(version);
-            writer.Write((uint) protocol);
-            writer.Write((uint) 0);
+            writer.Write((uint)protocol);
+            writer.Write((uint)0);
 
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                return (int) reply.BodyReader.ReadUInt32();
+                return (int)reply.BodyReader.ReadUInt32();
             }
-            else
-            {
-                throw new RpcException(reply.Header.ReplyHeader);
-            }
+            throw new RpcException(reply.Header.ReplyHeader);
         }
     }
 }

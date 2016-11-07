@@ -20,23 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
+
 namespace DiscUtils.Iso9660
 {
-    using System.Text;
-
     internal sealed class GenericSuspExtension : SuspExtension
     {
-        private string _identifier;
-
         public GenericSuspExtension(string identifier)
         {
-            _identifier = identifier;
+            Identifier = identifier;
         }
 
-        public override string Identifier
-        {
-            get { return _identifier; }
-        }
+        public override string Identifier { get; }
 
         public override SystemUseEntry Parse(string name, byte[] data, int offset, int length, Encoding encoding)
         {

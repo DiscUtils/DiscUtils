@@ -20,20 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Iso9660
 {
-    using System;
-
     internal sealed class FileTimeSystemUseEntry : SystemUseEntry
     {
-        public Timestamps TimestampsPresent = Timestamps.None;
-        public DateTime CreationTime;
-        public DateTime ModifyTime;
+        [Flags]
+        public enum Timestamps : byte
+        {
+            None = 0x00,
+            Creation = 0x01,
+            Modify = 0x02,
+            Access = 0x04,
+            Attributes = 0x08,
+            Backup = 0x10,
+            Expiration = 0x20,
+            Effective = 0x40
+        }
+
         public DateTime AccessTime;
         public DateTime AttributesTime;
         public DateTime BackupTime;
-        public DateTime ExpirationTime;
+        public DateTime CreationTime;
         public DateTime EffectiveTime;
+        public DateTime ExpirationTime;
+        public DateTime ModifyTime;
+        public Timestamps TimestampsPresent = Timestamps.None;
 
         public FileTimeSystemUseEntry(byte[] data, int offset)
         {
@@ -49,7 +62,7 @@ namespace DiscUtils.Iso9660
             bool longForm = (flags & 0x80) != 0;
             int fieldLen = longForm ? 17 : 7;
 
-            TimestampsPresent = (Timestamps) (flags & 0x7F);
+            TimestampsPresent = (Timestamps)(flags & 0x7F);
 
             int pos = offset + 5;
 
@@ -60,19 +73,6 @@ namespace DiscUtils.Iso9660
             BackupTime = ReadTimestamp(Timestamps.Backup, data, longForm, ref pos);
             ExpirationTime = ReadTimestamp(Timestamps.Expiration, data, longForm, ref pos);
             EffectiveTime = ReadTimestamp(Timestamps.Effective, data, longForm, ref pos);
-        }
-
-        [Flags]
-        public enum Timestamps : byte
-        {
-            None = 0x00,
-            Creation = 0x01,
-            Modify = 0x02,
-            Access = 0x04,
-            Attributes = 0x08,
-            Backup = 0x10,
-            Expiration = 0x20,
-            Effective = 0x40,
         }
 
         private DateTime ReadTimestamp(Timestamps timestamp, byte[] data, bool longForm, ref int pos)

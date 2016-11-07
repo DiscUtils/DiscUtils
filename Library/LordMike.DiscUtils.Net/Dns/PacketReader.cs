@@ -20,35 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Text;
-
     internal sealed class PacketReader
     {
-        private int _pos = 0;
-        private byte[] _data;
+        private readonly byte[] _data;
 
         public PacketReader(byte[] data)
         {
             _data = data;
         }
 
-        public int Position
-        {
-            get { return _pos; }
-            set { _pos = value; }
-        }
+        public int Position { get; set; }
 
         public string ReadName()
         {
             StringBuilder sb = new StringBuilder();
 
             bool hasIndirected = false;
-            int readPos = _pos;
+            int readPos = Position;
 
             while (_data[readPos] != 0)
             {
@@ -61,7 +55,7 @@ namespace DiscUtils.Net.Dns
                         readPos += 1 + len;
                         if (!hasIndirected)
                         {
-                            _pos = readPos;
+                            Position = readPos;
                         }
 
                         break;
@@ -69,7 +63,7 @@ namespace DiscUtils.Net.Dns
                     case 0xC0:
                         if (!hasIndirected)
                         {
-                            _pos += 2;
+                            Position += 2;
                         }
 
                         hasIndirected = true;
@@ -83,7 +77,7 @@ namespace DiscUtils.Net.Dns
 
             if (!hasIndirected)
             {
-                _pos++;
+                Position++;
             }
 
             return sb.ToString();
@@ -91,30 +85,30 @@ namespace DiscUtils.Net.Dns
 
         public ushort ReadUShort()
         {
-            ushort result = Utilities.ToUInt16BigEndian(_data, _pos);
-            _pos += 2;
+            ushort result = Utilities.ToUInt16BigEndian(_data, Position);
+            Position += 2;
             return result;
         }
 
         public int ReadInt()
         {
-            int result = Utilities.ToInt32BigEndian(_data, _pos);
-            _pos += 4;
+            int result = Utilities.ToInt32BigEndian(_data, Position);
+            Position += 4;
             return result;
         }
 
         public byte ReadByte()
         {
-            byte result = _data[_pos];
-            _pos++;
+            byte result = _data[Position];
+            Position++;
             return result;
         }
 
         public byte[] ReadBytes(int count)
         {
             byte[] result = new byte[count];
-            Array.Copy(_data, _pos, result, 0, count);
-            _pos += count;
+            Array.Copy(_data, Position, result, 0, count);
+            Position += count;
             return result;
         }
     }

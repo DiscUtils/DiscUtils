@@ -31,10 +31,10 @@ namespace DiscUtils.Nfs
             ChangeTime = new Nfs3FileTime(reader);
         }
 
-        public long Size { get; set; }
+        public Nfs3FileTime ChangeTime { get; set; }
 
         public Nfs3FileTime ModifyTime { get; set; }
 
-        public Nfs3FileTime ChangeTime { get; set; }
+        public long Size { get; set; }
     }
 }

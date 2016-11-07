@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System.IO;
-    using System.Text;
-
     internal class FileExtent : BuilderExtent
     {
-        private BuildFileInfo _fileInfo;
+        private readonly BuildFileInfo _fileInfo;
 
         private Stream _readStream;
 

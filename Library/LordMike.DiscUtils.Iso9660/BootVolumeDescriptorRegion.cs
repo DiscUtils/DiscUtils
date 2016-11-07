@@ -24,7 +24,7 @@ namespace DiscUtils.Iso9660
 {
     internal class BootVolumeDescriptorRegion : VolumeDescriptorDiskRegion
     {
-        private BootVolumeDescriptor _descriptor;
+        private readonly BootVolumeDescriptor _descriptor;
 
         public BootVolumeDescriptorRegion(BootVolumeDescriptor descriptor, long start)
             : base(start)

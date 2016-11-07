@@ -20,23 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Represents a DNS TXT record.
     /// </summary>
     public sealed class TextRecord : ResourceRecord
     {
-        private Dictionary<string, byte[]> _values;
-
         internal TextRecord(string name, RecordType type, RecordClass rClass, DateTime expiry, PacketReader reader)
             : base(name, type, rClass, expiry)
         {
-            _values = new Dictionary<string, byte[]>();
+            Values = new Dictionary<string, byte[]>();
 
             ushort dataLen = reader.ReadUShort();
             int pos = reader.Position;
@@ -55,10 +53,7 @@ namespace DiscUtils.Net.Dns
         /// </summary>
         /// <remarks>For data fidelity, the data is returned in byte form - typically
         /// the encoded data is actually ASCII or UTF-8.</remarks>
-        public Dictionary<string, byte[]> Values
-        {
-            get { return _values; }
-        }
+        public Dictionary<string, byte[]> Values { get; }
 
         private void StoreValue(byte[] value)
         {
@@ -72,11 +67,11 @@ namespace DiscUtils.Net.Dns
             {
                 byte[] data = new byte[value.Length - (i + 1)];
                 Array.Copy(value, i + 1, data, 0, data.Length);
-                _values[Encoding.ASCII.GetString(value, 0, i)] = data;
+                Values[Encoding.ASCII.GetString(value, 0, i)] = data;
             }
             else
             {
-                _values[Encoding.ASCII.GetString(value)] = null;
+                Values[Encoding.ASCII.GetString(value)] = null;
             }
         }
     }

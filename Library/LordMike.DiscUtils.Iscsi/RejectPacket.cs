@@ -26,9 +26,9 @@ namespace DiscUtils.Iscsi
 {
     internal class RejectPacket : BaseResponse
     {
+        public uint DataSequenceNumber;
         public BasicHeaderSegment Header;
         public RejectReason Reason;
-        public uint DataSequenceNumber;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -46,7 +46,7 @@ namespace DiscUtils.Iscsi
                                                    Header.OpCode);
             }
 
-            Reason = (RejectReason) headerData[headerOffset + 2];
+            Reason = (RejectReason)headerData[headerOffset + 2];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);

@@ -20,23 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
+
 namespace DiscUtils.Iso9660
 {
-    using System.Text;
-
     internal sealed class RockRidgeExtension : SuspExtension
     {
-        private string _variant;
-
         public RockRidgeExtension(string identifier)
         {
-            _variant = identifier;
+            Identifier = identifier;
         }
 
-        public override string Identifier
-        {
-            get { return _variant; }
-        }
+        public override string Identifier { get; }
 
         public override SystemUseEntry Parse(string name, byte[] data, int offset, int length, Encoding encoding)
         {

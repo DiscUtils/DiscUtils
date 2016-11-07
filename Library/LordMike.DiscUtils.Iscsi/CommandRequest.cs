@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class CommandRequest
     {
-        private Connection _connection;
+        private readonly Connection _connection;
 
-        private ulong _lun;
+        private readonly ulong _lun;
 
         public CommandRequest(Connection connection, ulong lun)
         {
@@ -39,7 +38,7 @@ namespace DiscUtils.Iscsi
         }
 
         public byte[] GetBytes(ScsiCommand cmd, byte[] immediateData, int offset, int count, bool isFinalData,
-            bool willRead, bool willWrite, uint expected)
+                               bool willRead, bool willWrite, uint expected)
         {
             BasicHeaderSegment _basicHeader = new BasicHeaderSegment();
             _basicHeader.Immediate = cmd.ImmediateDelivery;
@@ -67,7 +66,7 @@ namespace DiscUtils.Iscsi
         }
 
         private static byte PackAttrByte(bool isFinalData, bool expectReadFromTarget, bool expectWriteToTarget,
-            TaskAttributes taskAttr)
+                                         TaskAttributes taskAttr)
         {
             byte value = 0;
 
@@ -86,7 +85,7 @@ namespace DiscUtils.Iscsi
                 value |= 0x20;
             }
 
-            value |= (byte) ((int) taskAttr & 0x3);
+            value |= (byte)((int)taskAttr & 0x3);
 
             return value;
         }

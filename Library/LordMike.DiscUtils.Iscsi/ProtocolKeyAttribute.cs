@@ -20,58 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.Reflection;
 using DiscUtils.CoreCompat;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Globalization;
-    using System.Reflection;
-
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     internal sealed class ProtocolKeyAttribute : Attribute
     {
-        private string _name;
-        private string _default;
-        private KeyUsagePhase _phase;
-        private KeySender _sender;
-        private KeyType _type;
-
         public ProtocolKeyAttribute(string name, string defaultValue, KeyUsagePhase phase, KeySender sender, KeyType type)
         {
-            _name = name;
-            _default = defaultValue;
-            _phase = phase;
-            _sender = sender;
-            _type = type;
+            Name = name;
+            DefaultValue = defaultValue;
+            Phase = phase;
+            Sender = sender;
+            Type = type;
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
-
-        public string DefaultValue
-        {
-            get { return _default; }
-        }
-
-        public KeyUsagePhase Phase
-        {
-            get { return _phase; }
-        }
+        public string DefaultValue { get; }
 
         public bool LeadingConnectionOnly { get; set; }
 
-        public KeySender Sender
-        {
-            get { return _sender; }
-        }
+        public string Name { get; }
 
-        public KeyType Type
-        {
-            get { return _type; }
-        }
+        public KeyUsagePhase Phase { get; }
+
+        public KeySender Sender { get; }
+
+        public KeyType Type { get; }
 
         public bool UsedForDiscovery { get; set; }
 
@@ -79,21 +57,21 @@ namespace DiscUtils.Iscsi
         {
             if (valueType == typeof(bool))
             {
-                return ((bool)value) ? "Yes" : "No";
+                return (bool)value ? "Yes" : "No";
             }
-            else if (valueType == typeof(string))
+            if (valueType == typeof(string))
             {
                 return (string)value;
             }
-            else if (valueType == typeof(int))
+            if (valueType == typeof(int))
             {
                 return ((int)value).ToString(CultureInfo.InvariantCulture);
             }
-            else if (ReflectionHelper.IsEnum(valueType))
+            if (ReflectionHelper.IsEnum(valueType))
             {
                 FieldInfo[] infos = valueType.GetFields();
 
-                foreach (var info in infos)
+                foreach (FieldInfo info in infos)
                 {
                     if (info.IsLiteral)
                     {
@@ -108,10 +86,7 @@ namespace DiscUtils.Iscsi
 
                 throw new NotImplementedException();
             }
-            else
-            {
-                throw new NotSupportedException("Unknown property type: " + valueType);
-            }
+            throw new NotSupportedException("Unknown property type: " + valueType);
         }
 
         internal static object GetValueAsObject(string value, Type valueType)
@@ -120,18 +95,18 @@ namespace DiscUtils.Iscsi
             {
                 return value == "Yes";
             }
-            else if (valueType == typeof(string))
+            if (valueType == typeof(string))
             {
                 return value;
             }
-            else if (valueType == typeof(int))
+            if (valueType == typeof(int))
             {
                 return int.Parse(value, CultureInfo.InvariantCulture);
             }
-            else if (ReflectionHelper.IsEnum(valueType))
+            if (ReflectionHelper.IsEnum(valueType))
             {
                 FieldInfo[] infos = valueType.GetFields();
-                foreach (var info in infos)
+                foreach (FieldInfo info in infos)
                 {
                     if (info.IsLiteral)
                     {
@@ -145,17 +120,14 @@ namespace DiscUtils.Iscsi
 
                 throw new NotImplementedException();
             }
-            else
-            {
-                throw new NotSupportedException("Unknown property type: " + valueType);
-            }
+            throw new NotSupportedException("Unknown property type: " + valueType);
         }
 
         internal bool ShouldTransmit(object currentValue, Type valueType, KeyUsagePhase phase, bool discoverySession)
         {
             return
                 (Phase & phase) != 0
-                && (discoverySession ? (UsedForDiscovery == true) : true)
+                && (discoverySession ? UsedForDiscovery : true)
                 && currentValue != null
                 && GetValueAsString(currentValue, valueType) != DefaultValue
                 && (Sender & KeySender.Initiator) != 0;

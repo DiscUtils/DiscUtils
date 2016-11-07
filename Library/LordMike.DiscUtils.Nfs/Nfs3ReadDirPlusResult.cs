@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Nfs
 {
-    using System.Collections.Generic;
-
     internal class Nfs3ReadDirPlusResult : Nfs3CallResult
     {
         public Nfs3ReadDirPlusResult(XdrDataReader reader)
         {
-            Status = (Nfs3Status) reader.ReadInt32();
+            Status = (Nfs3Status)reader.ReadInt32();
             if (reader.ReadBool())
             {
                 DirAttributes = new Nfs3FileAttributes(reader);
@@ -49,9 +49,9 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public Nfs3FileAttributes DirAttributes { get; set; }
-
         public byte[] CookieVerifier { get; set; }
+
+        public Nfs3FileAttributes DirAttributes { get; set; }
 
         public List<Nfs3DirectoryEntry> DirEntries { get; set; }
 

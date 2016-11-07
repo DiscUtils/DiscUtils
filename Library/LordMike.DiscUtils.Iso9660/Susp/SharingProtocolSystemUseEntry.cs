@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Iso9660
 {
-    using System.IO;
-
     internal sealed class SharingProtocolSystemUseEntry : SystemUseEntry
     {
         public byte SystemAreaSkip;

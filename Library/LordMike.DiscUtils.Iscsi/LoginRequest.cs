@@ -20,27 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class LoginRequest
     {
         private const ushort IsidQualifier = 0x0000;
 
-        private Connection _connection;
-
         private BasicHeaderSegment _basicHeader;
+        private uint _commandSequenceNumber; // Per-session
 
-        private bool _transit;
+        private readonly Connection _connection;
+        private ushort _connectionId;
         private bool _continue;
         private LoginStages _currentStage;
-        private LoginStages _nextStage;
-        private ushort _connectionId;
-        private uint _commandSequenceNumber; // Per-session
         private uint _expectedStatusSequenceNumber; // Per-connection (ack)
+        private LoginStages _nextStage;
+
+        private bool _transit;
 
         public LoginRequest(Connection connection)
         {
@@ -98,8 +97,8 @@ namespace DiscUtils.Iscsi
                 val |= 0x40;
             }
 
-            val |= (byte) (((int) _currentStage) << 2);
-            val |= (byte) _nextStage;
+            val |= (byte)((int)_currentStage << 2);
+            val |= (byte)_nextStage;
 
             return val;
         }

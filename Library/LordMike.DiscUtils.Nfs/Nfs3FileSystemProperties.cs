@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-
     [Flags]
     internal enum Nfs3FileSystemProperties
     {

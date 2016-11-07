@@ -20,27 +20,25 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class ScsiReadCapacityCommand : ScsiCommand
     {
         public const int ResponseDataLength = 32;
 
         public ScsiReadCapacityCommand(ulong targetLun)
-            : base(targetLun)
+            : base(targetLun) {}
+
+        public override int Size
         {
+            get { return 10; }
         }
 
         public override TaskAttributes TaskAttributes
         {
             get { return TaskAttributes.Simple; }
-        }
-
-        public override int Size
-        {
-            get { return 10; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)

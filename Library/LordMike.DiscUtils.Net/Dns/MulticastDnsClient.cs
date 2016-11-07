@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Net.Sockets;
-
     /// <summary>
     /// Implements the Multicast DNS (mDNS) protocol.
     /// </summary>
@@ -39,11 +39,11 @@ namespace DiscUtils.Net.Dns
     /// </remarks>
     public sealed class MulticastDnsClient : DnsClient, IDisposable
     {
-        private ushort _nextTransId;
-        private UdpClient _udpClient;
         private Dictionary<string, Dictionary<RecordType, List<ResourceRecord>>> _cache;
+        private ushort _nextTransId;
 
-        private Dictionary<ushort, Transaction> _transactions;
+        private readonly Dictionary<ushort, Transaction> _transactions;
+        private UdpClient _udpClient;
 
         /// <summary>
         /// Initializes a new instance of the MulticastDnsClient class.
@@ -144,7 +144,7 @@ namespace DiscUtils.Net.Dns
                 Message msg = new Message();
                 msg.TransactionId = transactionId;
                 msg.Flags = new MessageFlags(false, OpCode.Query, false, false, false, false, ResponseCode.Success);
-                msg.Questions.Add(new Question() { Name = normName, Type = type, Class = RecordClass.Internet });
+                msg.Questions.Add(new Question { Name = normName, Type = type, Class = RecordClass.Internet });
 
                 msg.WriteTo(writer);
 
@@ -175,11 +175,11 @@ namespace DiscUtils.Net.Dns
 
             List<string> removeNames = new List<string>();
 
-            foreach (var nameRecord in _cache)
+            foreach (KeyValuePair<string, Dictionary<RecordType, List<ResourceRecord>>> nameRecord in _cache)
             {
                 List<RecordType> removeTypes = new List<RecordType>();
 
-                foreach (var typeRecords in nameRecord.Value)
+                foreach (KeyValuePair<RecordType, List<ResourceRecord>> typeRecords in nameRecord.Value)
                 {
                     int i = 0;
                     while (i < typeRecords.Value.Count)
@@ -200,7 +200,7 @@ namespace DiscUtils.Net.Dns
                     }
                 }
 
-                foreach (var recordType in removeTypes)
+                foreach (RecordType recordType in removeTypes)
                 {
                     nameRecord.Value.Remove(recordType);
                 }
@@ -211,7 +211,7 @@ namespace DiscUtils.Net.Dns
                 }
             }
 
-            foreach (var name in removeNames)
+            foreach (string name in removeNames)
             {
                 _cache.Remove(name);
             }
@@ -238,12 +238,12 @@ namespace DiscUtils.Net.Dns
                     Transaction transaction;
                     _transactions.TryGetValue(msg.TransactionId, out transaction);
 
-                    foreach (var answer in msg.AdditionalRecords)
+                    foreach (ResourceRecord answer in msg.AdditionalRecords)
                     {
                         AddRecord(_cache, answer);
                     }
 
-                    foreach (var answer in msg.Answers)
+                    foreach (ResourceRecord answer in msg.Answers)
                     {
                         if (transaction != null)
                         {

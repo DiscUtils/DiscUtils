@@ -20,58 +20,38 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Net.Dns
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Represents an instance of a type of DNS-SD service.
     /// </summary>
     public sealed class ServiceInstance
     {
-        private string _name;
-        private string _displayName;
-        private Dictionary<string, byte[]> _parameters;
-        private IList<ServiceInstanceEndPoint> _endpoints;
-
         internal ServiceInstance(string name)
         {
-            _name = name;
-        }
-
-        /// <summary>
-        /// Gets the network name for the service instance (think of this as the unique key).
-        /// </summary>
-        public string Name
-        {
-            get { return _name; }
+            Name = name;
         }
 
         /// <summary>
         /// Gets the display name for the service instance.
         /// </summary>
-        public string DisplayName
-        {
-            get { return _displayName; }
-            internal set { _displayName = value; }
-        }
-
-        /// <summary>
-        /// Gets the parameters of the service instance.
-        /// </summary>
-        public Dictionary<string, byte[]> Parameters
-        {
-            get { return _parameters; }
-            internal set { _parameters = value; }
-        }
+        public string DisplayName { get; internal set; }
 
         /// <summary>
         /// Gets the EndPoints that service this instance.
         /// </summary>
-        public IList<ServiceInstanceEndPoint> EndPoints
-        {
-            get { return _endpoints; }
-            internal set { _endpoints = value; }
-        }
+        public IList<ServiceInstanceEndPoint> EndPoints { get; internal set; }
+
+        /// <summary>
+        /// Gets the network name for the service instance (think of this as the unique key).
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets the parameters of the service instance.
+        /// </summary>
+        public Dictionary<string, byte[]> Parameters { get; internal set; }
     }
 }

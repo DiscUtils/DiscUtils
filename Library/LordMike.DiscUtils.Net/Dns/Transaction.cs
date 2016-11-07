@@ -20,39 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-
     internal sealed class Transaction : IDisposable
     {
-        private List<ResourceRecord> _answers;
-        private ManualResetEvent _completeEvent;
-
         public Transaction()
         {
-            _answers = new List<ResourceRecord>();
-            _completeEvent = new ManualResetEvent(false);
+            Answers = new List<ResourceRecord>();
+            CompleteEvent = new ManualResetEvent(false);
         }
 
-        public ManualResetEvent CompleteEvent
-        {
-            get { return _completeEvent; }
-        }
+        public List<ResourceRecord> Answers { get; }
 
-        public List<ResourceRecord> Answers
-        {
-            get { return _answers; }
-        }
+        public ManualResetEvent CompleteEvent { get; private set; }
 
         public void Dispose()
         {
-            if (_completeEvent != null)
+            if (CompleteEvent != null)
             {
-                ((IDisposable)_completeEvent).Dispose();
-                _completeEvent = null;
+                ((IDisposable)CompleteEvent).Dispose();
+                CompleteEvent = null;
             }
         }
     }

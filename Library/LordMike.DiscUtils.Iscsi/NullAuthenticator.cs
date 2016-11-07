@@ -34,8 +34,6 @@ namespace DiscUtils.Iscsi
             return true;
         }
 
-        public override void SetParameters(TextBuffer textBuffer)
-        {
-        }
+        public override void SetParameters(TextBuffer textBuffer) {}
     }
 }

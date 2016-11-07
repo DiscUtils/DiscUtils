@@ -26,19 +26,19 @@ namespace DiscUtils.Iscsi
 {
     internal class DataInPacket : BaseResponse
     {
-        public BasicHeaderSegment Header;
         public bool Acknowledge;
-        public bool O;
-        public bool U;
-
-        public ScsiStatus Status;
-        public ulong Lun;
-        public uint TargetTransferTag;
+        public uint BufferOffset;
 
         public uint DataSequenceNumber;
-        public uint BufferOffset;
-        public uint ResidualCount;
+        public BasicHeaderSegment Header;
+        public ulong Lun;
+        public bool O;
         public byte[] ReadData;
+        public uint ResidualCount;
+
+        public ScsiStatus Status;
+        public uint TargetTransferTag;
+        public bool U;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -59,7 +59,7 @@ namespace DiscUtils.Iscsi
             UnpackFlags(headerData[headerOffset + 1]);
             if (StatusPresent)
             {
-                Status = (ScsiStatus) headerData[headerOffset + 3];
+                Status = (ScsiStatus)headerData[headerOffset + 3];
             }
 
             Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);

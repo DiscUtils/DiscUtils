@@ -28,52 +28,27 @@ namespace DiscUtils.Iscsi
     {
         private bool _truncated;
 
-        private LunClass _deviceType;
-        private bool _removable;
-        private byte _version;
-        private string _vendorId;
-        private string _productId;
-        private string _productRevision;
+        public LunClass DeviceType { get; private set; }
 
-        public LunClass DeviceType
+        public override uint NeededDataLength
         {
-            get { return _deviceType; }
+            get { return 36; }
         }
 
-        public bool Removable
-        {
-            get { return _removable; }
-        }
+        public string ProductId { get; private set; }
 
-        public byte SpecificationVersion
-        {
-            get { return _version; }
-        }
+        public string ProductRevision { get; private set; }
 
-        public string VendorId
-        {
-            get { return _vendorId; }
-        }
+        public bool Removable { get; private set; }
 
-        public string ProductId
-        {
-            get { return _productId; }
-        }
-
-        public string ProductRevision
-        {
-            get { return _productRevision; }
-        }
+        public byte SpecificationVersion { get; private set; }
 
         public override bool Truncated
         {
             get { return _truncated; }
         }
 
-        public override uint NeededDataLength
-        {
-            get { return 36; }
-        }
+        public string VendorId { get; private set; }
 
         public override void ReadFrom(byte[] buffer, int offset, int count)
         {
@@ -83,13 +58,13 @@ namespace DiscUtils.Iscsi
                 return;
             }
 
-            _deviceType = (LunClass) (buffer[0] & 0x1F);
-            _removable = (buffer[1] & 0x80) != 0;
-            _version = buffer[2];
+            DeviceType = (LunClass)(buffer[0] & 0x1F);
+            Removable = (buffer[1] & 0x80) != 0;
+            SpecificationVersion = buffer[2];
 
-            _vendorId = Utilities.BytesToString(buffer, 8, 8);
-            _productId = Utilities.BytesToString(buffer, 16, 16);
-            _productRevision = Utilities.BytesToString(buffer, 32, 4);
+            VendorId = Utilities.BytesToString(buffer, 8, 8);
+            ProductId = Utilities.BytesToString(buffer, 16, 16);
+            ProductRevision = Utilities.BytesToString(buffer, 32, 4);
         }
     }
 }

@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Nfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// A file system backed by an NFS server.
     /// </summary>
@@ -65,11 +64,11 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Gets the options controlling this instance.
+        /// Gets whether this file system supports modification (true for NFS).
         /// </summary>
-        public NfsFileSystemOptions NfsOptions
+        public override bool CanWrite
         {
-            get { return (NfsFileSystemOptions) Options; }
+            get { return true; }
         }
 
         /// <summary>
@@ -81,11 +80,11 @@ namespace DiscUtils.Nfs
         }
 
         /// <summary>
-        /// Gets whether this file system supports modification (true for NFS).
+        /// Gets the options controlling this instance.
         /// </summary>
-        public override bool CanWrite
+        public NfsFileSystemOptions NfsOptions
         {
-            get { return true; }
+            get { return (NfsFileSystemOptions)Options; }
         }
 
         /// <summary>
@@ -93,7 +92,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         public int PreferredReadSize
         {
-            get { return _client == null ? 0 : (int) _client.FileSystemInfo.ReadPreferredBytes; }
+            get { return _client == null ? 0 : (int)_client.FileSystemInfo.ReadPreferredBytes; }
         }
 
         /// <summary>
@@ -101,7 +100,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         public int PreferredWriteSize
         {
-            get { return _client == null ? 0 : (int) _client.FileSystemInfo.WritePreferredBytes; }
+            get { return _client == null ? 0 : (int)_client.FileSystemInfo.WritePreferredBytes; }
         }
 
         /// <summary>
@@ -114,7 +113,7 @@ namespace DiscUtils.Nfs
             using (RpcClient rpcClient = new RpcClient(address, null))
             {
                 Nfs3Mount mountClient = new Nfs3Mount(rpcClient);
-                foreach (var export in mountClient.Exports())
+                foreach (Nfs3Export export in mountClient.Exports())
                 {
                     yield return export.DirPath;
                 }
@@ -177,7 +176,7 @@ namespace DiscUtils.Nfs
                 {
                     int bufferSize =
                         (int)
-                        Math.Max(1*Sizes.OneMiB,
+                        Math.Max(1 * Sizes.OneMiB,
                             Math.Min(_client.FileSystemInfo.WritePreferredBytes,
                                 _client.FileSystemInfo.ReadPreferredBytes));
                     byte[] buffer = new byte[bufferSize];
@@ -561,7 +560,7 @@ namespace DiscUtils.Nfs
                 Nfs3FileHandle handle = GetFile(path);
                 Nfs3FileAttributes nfsAttrs = _client.GetAttributes(handle);
 
-                FileAttributes result = (FileAttributes) 0;
+                FileAttributes result = 0;
                 if (nfsAttrs.Type == Nfs3FileType.Directory)
                 {
                     result |= FileAttributes.Directory;
@@ -661,7 +660,7 @@ namespace DiscUtils.Nfs
             {
                 Nfs3FileHandle handle = GetFile(path);
                 _client.SetAttributes(handle,
-                    new Nfs3SetAttributes()
+                    new Nfs3SetAttributes
                     {
                         SetAccessTime = Nfs3SetTimeMethod.ClientTime,
                         AccessTime = new Nfs3FileTime(newTime)
@@ -703,7 +702,7 @@ namespace DiscUtils.Nfs
             {
                 Nfs3FileHandle handle = GetFile(path);
                 _client.SetAttributes(handle,
-                    new Nfs3SetAttributes()
+                    new Nfs3SetAttributes
                     {
                         SetModifyTime = Nfs3SetTimeMethod.ClientTime,
                         ModifyTime = new Nfs3FileTime(newTime)
@@ -772,7 +771,7 @@ namespace DiscUtils.Nfs
 
                 if ((isDir && dirs) || (!isDir && files))
                 {
-                    string searchName = (de.Name.IndexOf('.') == -1) ? de.Name + "." : de.Name;
+                    string searchName = de.Name.IndexOf('.') == -1 ? de.Name + "." : de.Name;
 
                     if (regex.IsMatch(searchName))
                     {
@@ -804,14 +803,14 @@ namespace DiscUtils.Nfs
         private Nfs3FileHandle GetParentDirectory(string path)
         {
             string[] dirs = Utilities.GetDirectoryFromPath(path)
-                .Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries);
+                                     .Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             Nfs3FileHandle parent = GetDirectory(_client.RootHandle, dirs);
             return parent;
         }
 
         private Nfs3FileHandle GetDirectory(string path)
         {
-            string[] dirs = path.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] dirs = path.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             return GetDirectory(_client.RootHandle, dirs);
         }
 

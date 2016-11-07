@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class File : IVfsFile
     {
         protected IsoContext _context;
@@ -35,6 +35,41 @@ namespace DiscUtils.Iso9660
         {
             _context = context;
             _dirEntry = dirEntry;
+        }
+
+        public virtual byte[] SystemUseData
+        {
+            get { return _dirEntry.Record.SystemUseData; }
+        }
+
+        public UnixFileSystemInfo UnixFileInfo
+        {
+            get
+            {
+                if (!_context.SuspDetected || string.IsNullOrEmpty(_context.RockRidgeIdentifier))
+                {
+                    throw new InvalidOperationException("No RockRidge file information available");
+                }
+
+                SuspRecords suspRecords = new SuspRecords(_context, SystemUseData, 0);
+
+                PosixFileInfoSystemUseEntry pfi =
+                    suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
+                if (pfi != null)
+                {
+                    return new UnixFileSystemInfo
+                    {
+                        FileType = (UnixFileType)((pfi.FileMode >> 12) & 0xff),
+                        Permissions = (UnixFilePermissions)(pfi.FileMode & 0xfff),
+                        UserId = (int)pfi.UserId,
+                        GroupId = (int)pfi.GroupId,
+                        Inode = pfi.Inode,
+                        LinkCount = (int)pfi.NumLinks
+                    };
+                }
+
+                throw new InvalidOperationException("No RockRidge file information available for this file");
+            }
         }
 
         public DateTime LastAccessTimeUtc
@@ -77,41 +112,6 @@ namespace DiscUtils.Iso9660
                 ExtentStream es = new ExtentStream(_context.DataStream, _dirEntry.Record.LocationOfExtent,
                     _dirEntry.Record.DataLength, _dirEntry.Record.FileUnitSize, _dirEntry.Record.InterleaveGapSize);
                 return new StreamBuffer(es, Ownership.Dispose);
-            }
-        }
-
-        public virtual byte[] SystemUseData
-        {
-            get { return _dirEntry.Record.SystemUseData; }
-        }
-
-        public UnixFileSystemInfo UnixFileInfo
-        {
-            get
-            {
-                if (!_context.SuspDetected || string.IsNullOrEmpty(_context.RockRidgeIdentifier))
-                {
-                    throw new InvalidOperationException("No RockRidge file information available");
-                }
-
-                SuspRecords suspRecords = new SuspRecords(_context, SystemUseData, 0);
-
-                PosixFileInfoSystemUseEntry pfi =
-                    suspRecords.GetEntry<PosixFileInfoSystemUseEntry>(_context.RockRidgeIdentifier, "PX");
-                if (pfi != null)
-                {
-                    return new UnixFileSystemInfo()
-                    {
-                        FileType = (UnixFileType) ((pfi.FileMode >> 12) & 0xff),
-                        Permissions = (UnixFilePermissions) (pfi.FileMode & 0xfff),
-                        UserId = (int) pfi.UserId,
-                        GroupId = (int) pfi.GroupId,
-                        Inode = pfi.Inode,
-                        LinkCount = (int) pfi.NumLinks
-                    };
-                }
-
-                throw new InvalidOperationException("No RockRidge file information available for this file");
             }
         }
     }

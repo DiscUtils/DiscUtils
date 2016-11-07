@@ -4,6 +4,7 @@ namespace DiscUtils.Iscsi
     {
         [ProtocolKeyValue("None")]
         None,
+
         [ProtocolKeyValue("CRC32C")]
         Crc32c
     }

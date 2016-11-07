@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.Iso9660
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class IsoContext : VfsContext
     {
-        public CommonVolumeDescriptor VolumeDescriptor { get; set; }
-
         public Stream DataStream { get; set; }
+
+        public string RockRidgeIdentifier { get; set; }
 
         public bool SuspDetected { get; set; }
 
         public List<SuspExtension> SuspExtensions { get; set; }
 
         public int SuspSkipBytes { get; set; }
-
-        public string RockRidgeIdentifier { get; set; }
+        public CommonVolumeDescriptor VolumeDescriptor { get; set; }
     }
 }

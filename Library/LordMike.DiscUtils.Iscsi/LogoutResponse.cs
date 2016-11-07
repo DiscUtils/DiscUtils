@@ -27,8 +27,8 @@ namespace DiscUtils.Iscsi
     internal class LogoutResponse : BaseResponse
     {
         public LogoutResponseCode Response;
-        public ushort Time2Wait;
         public ushort Time2Retain;
+        public ushort Time2Wait;
 
         public override void Parse(ProtocolDataUnit pdu)
         {
@@ -46,7 +46,7 @@ namespace DiscUtils.Iscsi
                                                    " was " + _headerSegment.OpCode);
             }
 
-            Response = (LogoutResponseCode) headerData[headerOffset + 2];
+            Response = (LogoutResponseCode)headerData[headerOffset + 2];
             StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
             ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
             MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);

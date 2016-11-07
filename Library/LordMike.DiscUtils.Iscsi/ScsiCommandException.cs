@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Iscsi
-{
-    using System;
+using System;
 
 #if !NETCORE
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 #endif
 
+namespace DiscUtils.Iscsi
+{
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>
@@ -37,15 +37,14 @@ namespace DiscUtils.Iscsi
 #endif
     public class ScsiCommandException : IscsiException
     {
-        private ScsiStatus _status;
-        private byte[] _senseData;
+        private readonly byte[] _senseData;
 
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
         public ScsiCommandException()
         {
-            _status = ScsiStatus.Good;
+            Status = ScsiStatus.Good;
         }
 
         /// <summary>
@@ -54,7 +53,7 @@ namespace DiscUtils.Iscsi
         /// <param name="status">The SCSI status code.</param>
         public ScsiCommandException(ScsiStatus status)
         {
-            _status = status;
+            Status = status;
         }
 
         /// <summary>
@@ -64,7 +63,7 @@ namespace DiscUtils.Iscsi
         public ScsiCommandException(string message)
             : base(message)
         {
-            _status = ScsiStatus.Good;
+            Status = ScsiStatus.Good;
         }
 
         /// <summary>
@@ -75,7 +74,7 @@ namespace DiscUtils.Iscsi
         public ScsiCommandException(ScsiStatus status, string message)
             : base(message)
         {
-            _status = status;
+            Status = status;
         }
 
         /// <summary>
@@ -87,7 +86,7 @@ namespace DiscUtils.Iscsi
         public ScsiCommandException(ScsiStatus status, string message, byte[] senseData)
             : base(message)
         {
-            _status = status;
+            Status = status;
             _senseData = senseData;
         }
 
@@ -99,7 +98,7 @@ namespace DiscUtils.Iscsi
         public ScsiCommandException(string message, Exception innerException)
             : base(message, innerException)
         {
-            _status = ScsiStatus.Good;
+            Status = ScsiStatus.Good;
         }
 
         /// <summary>
@@ -111,10 +110,11 @@ namespace DiscUtils.Iscsi
         public ScsiCommandException(ScsiStatus status, string message, Exception innerException)
             : base(message, innerException)
         {
-            _status = status;
+            Status = status;
         }
 
 #if !NETCORE
+
 /// <summary>
 /// Initializes a new instance of the ScsiCommandException class.
 /// </summary>
@@ -123,7 +123,7 @@ namespace DiscUtils.Iscsi
         protected ScsiCommandException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            _status = (ScsiStatus)info.GetByte("status");
+            Status = (ScsiStatus)info.GetByte("status");
             _senseData = (byte[])info.GetValue("senseData", typeof(byte[]));
         }
 #endif
@@ -131,12 +131,10 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Gets the SCSI status associated with this exception.
         /// </summary>
-        public ScsiStatus Status
-        {
-            get { return _status; }
-        }
+        public ScsiStatus Status { get; }
 
 #if !NETCORE
+
 /// <summary>
 /// Gets the serialized state of this exception.
 /// </summary>
@@ -146,7 +144,7 @@ namespace DiscUtils.Iscsi
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue("status", (byte)_status);
+            info.AddValue("status", (byte)Status);
             info.AddValue("senseData", _senseData);
         }
 #endif

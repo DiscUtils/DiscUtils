@@ -20,19 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Text;
-
     internal class SupplementaryVolumeDescriptor : CommonVolumeDescriptor
     {
         public SupplementaryVolumeDescriptor(byte[] src, int offset)
-            : base(src, offset, IsoUtilities.EncodingFromBytes(src, offset + 88))
-        {
-        }
+            : base(src, offset, IsoUtilities.EncodingFromBytes(src, offset + 88)) {}
 
         public SupplementaryVolumeDescriptor(
             uint volumeSpaceSize,
@@ -45,9 +42,7 @@ namespace DiscUtils.Iso9660
             Encoding enc)
             : base(
                 VolumeDescriptorType.Supplementary, 1, volumeSpaceSize, pathTableSize, typeLPathTableLocation,
-                typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, enc)
-        {
-        }
+                typeMPathTableLocation, rootDirExtentLocation, rootDirDataLength, buildTime, enc) {}
 
         internal override void WriteTo(byte[] buffer, int offset)
         {
@@ -72,7 +67,8 @@ namespace DiscUtils.Iso9660
             IsoUtilities.WriteD1Chars(buffer, offset + 702, 37, CopyrightFileIdentifier, CharacterEncoding); // FIXME!!
             IsoUtilities.WriteD1Chars(buffer, offset + 739, 37, AbstractFileIdentifier, CharacterEncoding); // FIXME!!
             IsoUtilities.WriteD1Chars(buffer, offset + 776, 37, BibliographicFileIdentifier, CharacterEncoding);
-                // FIXME!!
+
+            // FIXME!!
             IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 813, CreationDateAndTime);
             IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 830, ModificationDateAndTime);
             IsoUtilities.ToVolumeDescriptorTimeFromUTC(buffer, offset + 847, ExpirationDateAndTime);

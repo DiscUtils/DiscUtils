@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
+
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Text;
-
     internal class BaseVolumeDescriptor
     {
-        public VolumeDescriptorType VolumeDescriptorType;
         public string StandardIdentifier;
+        public VolumeDescriptorType VolumeDescriptorType;
         public byte VolumeDescriptorVersion;
 
         public BaseVolumeDescriptor(VolumeDescriptorType type, byte version)
@@ -40,7 +40,7 @@ namespace DiscUtils.Iso9660
 
         public BaseVolumeDescriptor(byte[] src, int offset)
         {
-            VolumeDescriptorType = (VolumeDescriptorType) src[offset + 0];
+            VolumeDescriptorType = (VolumeDescriptorType)src[offset + 0];
             StandardIdentifier = Encoding.ASCII.GetString(src, offset + 1, 5);
             VolumeDescriptorVersion = src[offset + 6];
         }
@@ -48,7 +48,7 @@ namespace DiscUtils.Iso9660
         internal virtual void WriteTo(byte[] buffer, int offset)
         {
             Array.Clear(buffer, offset, IsoUtilities.SectorSize);
-            buffer[offset] = (byte) VolumeDescriptorType;
+            buffer[offset] = (byte)VolumeDescriptorType;
             IsoUtilities.WriteAChars(buffer, offset + 1, 5, StandardIdentifier);
             buffer[offset + 6] = VolumeDescriptorVersion;
         }

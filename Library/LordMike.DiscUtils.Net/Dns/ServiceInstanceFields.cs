@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-
     /// <summary>
     /// Flags controlling which details are discovered for a particular DNS-SD service.
     /// </summary>

@@ -20,37 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class ScsiWriteCommand : ScsiCommand
     {
-        private uint _logicalBlockAddress;
-        private ushort _numBlocks;
+        private readonly uint _logicalBlockAddress;
 
         public ScsiWriteCommand(ulong targetLun, uint logicalBlockAddress, ushort numBlocks)
             : base(targetLun)
         {
             _logicalBlockAddress = logicalBlockAddress;
-            _numBlocks = numBlocks;
+            NumBlocks = numBlocks;
         }
 
-        public ushort NumBlocks
+        public ushort NumBlocks { get; }
+
+        public override int Size
         {
-            get { return _numBlocks; }
+            get { return 10; }
         }
 
         public override TaskAttributes TaskAttributes
         {
             get { return TaskAttributes.Simple; }
-        }
-
-        public override int Size
-        {
-            get { return 10; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)
@@ -64,7 +59,7 @@ namespace DiscUtils.Iscsi
             buffer[offset + 1] = 0;
             Utilities.WriteBytesBigEndian(_logicalBlockAddress, buffer, offset + 2);
             buffer[offset + 6] = 0;
-            Utilities.WriteBytesBigEndian(_numBlocks, buffer, offset + 7);
+            Utilities.WriteBytesBigEndian(NumBlocks, buffer, offset + 7);
             buffer[offset + 9] = 0;
         }
     }

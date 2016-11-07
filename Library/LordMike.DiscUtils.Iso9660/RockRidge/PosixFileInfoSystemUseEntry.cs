@@ -25,10 +25,10 @@ namespace DiscUtils.Iso9660
     internal sealed class PosixFileInfoSystemUseEntry : SystemUseEntry
     {
         public uint FileMode;
-        public uint NumLinks;
-        public uint UserId;
         public uint GroupId;
         public uint Inode;
+        public uint NumLinks;
+        public uint UserId;
 
         public PosixFileInfoSystemUseEntry(byte[] data, int offset)
         {

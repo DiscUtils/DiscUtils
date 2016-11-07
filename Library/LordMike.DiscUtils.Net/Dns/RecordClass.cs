@@ -25,7 +25,7 @@ namespace DiscUtils.Net.Dns
     /// <summary>
     /// Enumeration of known DNS record classes (CLASS in DNS).
     /// </summary>
-    public enum RecordClass : int
+    public enum RecordClass
     {
         /// <summary>
         /// No class defined.
@@ -55,6 +55,6 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Wildcard that matches any class.
         /// </summary>
-        Any = 255,
+        Any = 255
     }
 }

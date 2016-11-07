@@ -27,9 +27,7 @@ namespace DiscUtils.Nfs
     /// </summary>
     public abstract class RpcCredentials
     {
-        internal RpcCredentials()
-        {
-        }
+        internal RpcCredentials() {}
 
         internal abstract RpcAuthFlavour AuthFlavour { get; }
 

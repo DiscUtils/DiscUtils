@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Nfs
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     [VirtualDiskTransport("nfs")]
     internal sealed class DiskTransport : VirtualDiskTransport
     {
+        private string _extraInfo;
         private NfsFileSystem _fileSystem;
         private string _path;
-        private string _extraInfo;
 
         public override bool IsRawDisk
         {
@@ -47,7 +46,7 @@ namespace DiscUtils.Nfs
             // Find the best (least specific) export
             string bestRoot = null;
             int bestMatchLength = int.MaxValue;
-            foreach (var export in NfsFileSystem.GetExports(uri.Host))
+            foreach (string export in NfsFileSystem.GetExports(uri.Host))
             {
                 if (fsPath.Length >= export.Length)
                 {

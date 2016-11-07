@@ -20,31 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Nfs
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Threading;
-
     internal sealed class RpcTcpTransport : IDisposable
     {
         private const int RetryLimit = 20;
 
-        private string _address;
-        private int _port;
-        private int _localPort;
+        private readonly string _address;
+        private readonly int _localPort;
+        private readonly int _port;
         private Socket _socket;
         private NetworkStream _tcpStream;
 
         public RpcTcpTransport(string address, int port)
-            : this(address, port, 0)
-        {
-        }
+            : this(address, port, 0) {}
 
         public RpcTcpTransport(string address, int port, int localPort)
         {
@@ -145,7 +142,7 @@ namespace DiscUtils.Nfs
                     try
                     {
                         byte[] header = new byte[4];
-                        Utilities.WriteBytesBigEndian((uint) (0x80000000 | (uint) message.Length), header, 0);
+                        Utilities.WriteBytesBigEndian(0x80000000 | (uint)message.Length, header, 0);
                         _tcpStream.Write(header, 0, 4);
                         _tcpStream.Write(message, 0, message.Length);
                         _tcpStream.Flush();
@@ -191,7 +188,7 @@ namespace DiscUtils.Nfs
                 uint headerVal = Utilities.ToUInt32BigEndian(header, 0);
 
                 lastFragFound = (headerVal & 0x80000000) != 0;
-                byte[] frag = Utilities.ReadFully(_tcpStream, (int) (headerVal & 0x7FFFFFFF));
+                byte[] frag = Utilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
 
                 if (ms != null)
                 {

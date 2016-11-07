@@ -55,6 +55,6 @@ namespace DiscUtils.Iso9660
         /// <summary>
         /// Rock Ridge (Unix).
         /// </summary>
-        RockRidge,
+        RockRidge
     }
 }

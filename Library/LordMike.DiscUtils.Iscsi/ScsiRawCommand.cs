@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class ScsiRawCommand : ScsiCommand
     {
-        private byte[] _buffer;
-        private int _offset;
-        private int _length;
+        private readonly byte[] _buffer;
+        private readonly int _length;
+        private readonly int _offset;
 
         public ScsiRawCommand(ulong targetLun, byte[] buffer, int offset, int length)
             : base(targetLun)
@@ -38,14 +38,14 @@ namespace DiscUtils.Iscsi
             _length = length;
         }
 
-        public override TaskAttributes TaskAttributes
-        {
-            get { return TaskAttributes.Simple; }
-        }
-
         public override int Size
         {
             get { return _length; }
+        }
+
+        public override TaskAttributes TaskAttributes
+        {
+            get { return TaskAttributes.Simple; }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)

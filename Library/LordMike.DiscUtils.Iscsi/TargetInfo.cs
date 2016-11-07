@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Iscsi
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Information about an iSCSI Target.
     /// </summary>
@@ -32,8 +32,7 @@ namespace DiscUtils.Iscsi
     /// </remarks>
     public class TargetInfo
     {
-        private string _name;
-        private TargetAddress[] _addresses;
+        private readonly TargetAddress[] _addresses;
 
         /// <summary>
         /// Initializes a new instance of the TargetInfo class.
@@ -42,16 +41,8 @@ namespace DiscUtils.Iscsi
         /// <param name="addresses">The network addresses of the Target.</param>
         public TargetInfo(string name, TargetAddress[] addresses)
         {
-            _name = name;
+            Name = name;
             _addresses = addresses;
-        }
-
-        /// <summary>
-        /// Gets the name of the Target.
-        /// </summary>
-        public string Name
-        {
-            get { return _name; }
         }
 
         /// <summary>
@@ -63,12 +54,17 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
+        /// Gets the name of the Target.
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
         /// Gets the primary address of the Target as a string.
         /// </summary>
         /// <returns>String of the form host[:port][,group]/name.</returns>
         public override string ToString()
         {
-            return _addresses[0] + "/" + _name;
+            return _addresses[0] + "/" + Name;
         }
     }
 }

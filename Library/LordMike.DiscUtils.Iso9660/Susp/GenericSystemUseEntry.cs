@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-
     internal sealed class GenericSystemUseEntry : SystemUseEntry
     {
         public byte[] Data;

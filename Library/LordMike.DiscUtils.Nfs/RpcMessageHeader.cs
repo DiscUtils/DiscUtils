@@ -20,16 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-
     internal class RpcMessageHeader
     {
         public RpcMessageHeader(XdrDataReader reader)
         {
             TransactionId = reader.ReadUInt32();
-            RpcMessageType type = (RpcMessageType) reader.ReadInt32();
+            RpcMessageType type = (RpcMessageType)reader.ReadInt32();
             if (type != RpcMessageType.Reply)
             {
                 throw new NotSupportedException("Parsing RPC call messages");
@@ -37,10 +37,6 @@ namespace DiscUtils.Nfs
 
             ReplyHeader = new RpcReplyHeader(reader);
         }
-
-        public uint TransactionId { get; set; }
-
-        public RpcReplyHeader ReplyHeader { get; set; }
 
         public bool IsSuccess
         {
@@ -50,5 +46,9 @@ namespace DiscUtils.Nfs
                        ReplyHeader.AcceptReply.AcceptStatus == RpcAcceptStatus.Success;
             }
         }
+
+        public RpcReplyHeader ReplyHeader { get; set; }
+
+        public uint TransactionId { get; set; }
     }
 }

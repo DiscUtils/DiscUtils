@@ -20,92 +20,63 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-
     /// <summary>
     /// Provides information about an iSCSI LUN.
     /// </summary>
     public class LunInfo
     {
-        private TargetInfo _targetInfo;
-        private long _lun;
-        private LunClass _deviceType;
-        private bool _removable;
-        private string _vendorId;
-        private string _productId;
-        private string _productRevision;
-
         internal LunInfo(TargetInfo targetInfo, long lun, LunClass type, bool removable, string vendor, string product,
-            string revision)
+                         string revision)
         {
-            _targetInfo = targetInfo;
-            _lun = lun;
-            _deviceType = type;
-            _removable = removable;
-            _vendorId = vendor;
-            _productId = product;
-            _productRevision = revision;
-        }
-
-        /// <summary>
-        /// Gets info about the target hosting this LUN.
-        /// </summary>
-        public TargetInfo Target
-        {
-            get { return _targetInfo; }
-        }
-
-        /// <summary>
-        /// Gets the Logical Unit Number of this device.
-        /// </summary>
-        public long Lun
-        {
-            get { return _lun; }
+            Target = targetInfo;
+            Lun = lun;
+            DeviceType = type;
+            Removable = removable;
+            VendorId = vendor;
+            ProductId = product;
+            ProductRevision = revision;
         }
 
         /// <summary>
         /// Gets the type (or class) of this device.
         /// </summary>
-        public LunClass DeviceType
-        {
-            get { return _deviceType; }
-        }
+        public LunClass DeviceType { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this Lun has removable media.
+        /// Gets the Logical Unit Number of this device.
         /// </summary>
-        public bool Removable
-        {
-            get { return _removable; }
-        }
-
-        /// <summary>
-        /// Gets the vendor id (registered name) for this device.
-        /// </summary>
-        public string VendorId
-        {
-            get { return _vendorId; }
-        }
+        public long Lun { get; }
 
         /// <summary>
         /// Gets the product id (name) for this device.
         /// </summary>
-        public string ProductId
-        {
-            get { return _productId; }
-        }
+        public string ProductId { get; }
 
         /// <summary>
         /// Gets the product revision for this device.
         /// </summary>
-        public string ProductRevision
-        {
-            get { return _productRevision; }
-        }
+        public string ProductRevision { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this Lun has removable media.
+        /// </summary>
+        public bool Removable { get; }
+
+        /// <summary>
+        /// Gets info about the target hosting this LUN.
+        /// </summary>
+        public TargetInfo Target { get; }
+
+        /// <summary>
+        /// Gets the vendor id (registered name) for this device.
+        /// </summary>
+        public string VendorId { get; }
 
         /// <summary>
         /// Parses a URI referring to a LUN.
@@ -166,21 +137,21 @@ namespace DiscUtils.Iscsi
             }
 
             TargetInfo targetInfo = new TargetInfo(targetName,
-                new TargetAddress[] {new TargetAddress(address, port, targetGroupTag)});
+                new[] { new TargetAddress(address, port, targetGroupTag) });
 
-            foreach (var queryElem in uri.Query.Substring(1).Split('&'))
+            foreach (string queryElem in uri.Query.Substring(1).Split('&'))
             {
                 if (queryElem.StartsWith("LUN=", StringComparison.OrdinalIgnoreCase))
                 {
                     lun = ulong.Parse(queryElem.Substring(4), CultureInfo.InvariantCulture);
                     if (lun < 256)
                     {
-                        lun = lun << (6*8);
+                        lun = lun << (6 * 8);
                     }
                 }
             }
 
-            return new LunInfo(targetInfo, (long) lun, LunClass.Unknown, false, string.Empty, string.Empty, string.Empty);
+            return new LunInfo(targetInfo, (long)lun, LunClass.Unknown, false, string.Empty, string.Empty, string.Empty);
         }
 
         /// <summary>
@@ -189,14 +160,11 @@ namespace DiscUtils.Iscsi
         /// <returns>The LUN in string form.</returns>
         public override string ToString()
         {
-            if ((((ulong) _lun) & 0xFF00000000000000) == 0)
+            if (((ulong)Lun & 0xFF00000000000000) == 0)
             {
-                return (_lun >> (6*8)).ToString(CultureInfo.InvariantCulture);
+                return (Lun >> (6 * 8)).ToString(CultureInfo.InvariantCulture);
             }
-            else
-            {
-                return _lun.ToString(CultureInfo.InvariantCulture);
-            }
+            return Lun.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -207,9 +175,9 @@ namespace DiscUtils.Iscsi
         public string[] GetUris()
         {
             List<string> results = new List<string>();
-            foreach (var targetAddress in _targetInfo.Addresses)
+            foreach (TargetAddress targetAddress in Target.Addresses)
             {
-                results.Add(targetAddress.ToUri().ToString() + "/" + _targetInfo.Name + "?LUN=" + ToString());
+                results.Add(targetAddress.ToUri() + "/" + Target.Name + "?LUN=" + ToString());
             }
 
             return results.ToArray();

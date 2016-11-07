@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System.Text;
-
     internal struct PathTableRecord
     {
         ////public byte ExtendedAttributeRecordLength;
@@ -54,7 +53,7 @@ namespace DiscUtils.Iso9660
         {
             int nameBytes = enc.GetByteCount(DirectoryIdentifier);
 
-            buffer[offset + 0] = (byte) nameBytes;
+            buffer[offset + 0] = (byte)nameBytes;
             buffer[offset + 1] = 0; // ExtendedAttributeRecordLength;
             IsoUtilities.ToBytesFromUInt32(buffer, offset + 2,
                 byteSwap ? Utilities.BitSwap(LocationOfExtent) : LocationOfExtent);
@@ -66,7 +65,7 @@ namespace DiscUtils.Iso9660
                 buffer[offset + 8 + nameBytes] = 0;
             }
 
-            return (int) (8 + nameBytes + (((nameBytes & 0x1) == 1) ? 1 : 0));
+            return 8 + nameBytes + ((nameBytes & 0x1) == 1 ? 1 : 0);
         }
     }
 }

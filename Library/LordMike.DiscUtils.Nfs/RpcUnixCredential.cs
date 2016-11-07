@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-
     /// <summary>
     /// RPC credentials used for accessing an access-controlled server.
     /// </summary>
@@ -40,10 +40,11 @@ namespace DiscUtils.Nfs
         /// </remarks>
         public static readonly RpcUnixCredential Default = new RpcUnixCredential(65534, 65534);
 
-        private string _machineName;
-        private int _uid;
-        private int _gid;
-        private int[] _gids;
+        private readonly int _gid;
+        private readonly int[] _gids;
+
+        private readonly string _machineName;
+        private readonly int _uid;
 
         /// <summary>
         /// Initializes a new instance of the RpcUnixCredential class.
@@ -51,9 +52,7 @@ namespace DiscUtils.Nfs
         /// <param name="user">The user's unique id (UID).</param>
         /// <param name="primaryGroup">The user's primary group id (GID).</param>
         public RpcUnixCredential(int user, int primaryGroup)
-            : this(user, primaryGroup, new int[] {})
-        {
-        }
+            : this(user, primaryGroup, new int[] { }) {}
 
         /// <summary>
         /// Initializes a new instance of the RpcUnixCredential class.
@@ -76,13 +75,13 @@ namespace DiscUtils.Nfs
 
         internal override void Write(XdrDataWriter writer)
         {
-            writer.Write((int) 0);
+            writer.Write(0);
             writer.Write(_machineName);
             writer.Write(_uid);
             writer.Write(_gid);
             if (_gids == null)
             {
-                writer.Write((int) 0);
+                writer.Write(0);
             }
             else
             {

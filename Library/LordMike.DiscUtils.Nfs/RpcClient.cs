@@ -20,36 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class RpcClient : IDisposable
     {
-        private string _serverAddress;
-        private RpcCredentials _credential;
-        private uint _nextTransaction = 0;
+        private uint _nextTransaction;
+        private readonly string _serverAddress;
         private Dictionary<int, RpcTcpTransport> _transports = new Dictionary<int, RpcTcpTransport>();
 
         public RpcClient(string address, RpcCredentials credential)
         {
             _serverAddress = address;
-            _credential = credential;
-            _nextTransaction = (uint) new Random().Next();
+            Credentials = credential;
+            _nextTransaction = (uint)new Random().Next();
             _transports[PortMapper.ProgramIdentifier] = new RpcTcpTransport(address, 111);
         }
 
-        internal RpcCredentials Credentials
-        {
-            get { return _credential; }
-        }
+        internal RpcCredentials Credentials { get; }
 
         public void Dispose()
         {
             if (_transports != null)
             {
-                foreach (var transport in _transports.Values)
+                foreach (RpcTcpTransport transport in _transports.Values)
                 {
                     transport.Dispose();
                 }

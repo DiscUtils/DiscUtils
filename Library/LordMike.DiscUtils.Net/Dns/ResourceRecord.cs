@@ -20,59 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-
     /// <summary>
     /// Base class for all resource records (DNS RRs).
     /// </summary>
     public class ResourceRecord
     {
-        private string _name;
-        private RecordType _type;
-        private RecordClass _class;
-        private DateTime _expiry;
-
         internal ResourceRecord(string name, RecordType type, RecordClass rClass, DateTime expiry)
         {
-            _name = name;
-            _type = type;
-            _class = rClass;
-            _expiry = expiry;
-        }
-
-        /// <summary>
-        /// Gets the name of the resource (domain).
-        /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
-
-        /// <summary>
-        /// Gets the type of record.
-        /// </summary>
-        public RecordType RecordType
-        {
-            get { return _type; }
+            Name = name;
+            RecordType = type;
+            Class = rClass;
+            Expiry = expiry;
         }
 
         /// <summary>
         /// Gets the class of record.
         /// </summary>
-        public RecordClass Class
-        {
-            get { return _class; }
-        }
+        public RecordClass Class { get; }
 
         /// <summary>
         /// Gets the expiry time of the record.
         /// </summary>
-        public DateTime Expiry
-        {
-            get { return _expiry; }
-        }
+        public DateTime Expiry { get; }
+
+        /// <summary>
+        /// Gets the name of the resource (domain).
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets the type of record.
+        /// </summary>
+        public RecordType RecordType { get; }
 
         internal static ResourceRecord ReadFrom(PacketReader reader)
         {

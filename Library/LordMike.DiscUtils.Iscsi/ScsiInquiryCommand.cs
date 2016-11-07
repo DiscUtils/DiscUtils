@@ -20,24 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class ScsiInquiryCommand : ScsiCommand
     {
         public const int InitialResponseDataLength = 36;
 
-        private bool _askForPage = false;
-        private byte _pageCode = 0;
-        private uint _expected = 0;
+        private readonly bool _askForPage = false;
+        private readonly uint _expected;
+        private readonly byte _pageCode = 0;
 
         public ScsiInquiryCommand(ulong targetLun, uint expected)
             : base(targetLun)
         {
             _expected = expected;
+        }
+
+        public override int Size
+        {
+            get { return 6; }
         }
 
         ////public ScsiInquiryCommand(ulong targetLun, byte pageCode, uint expected)
@@ -53,11 +57,6 @@ namespace DiscUtils.Iscsi
             get { return TaskAttributes.Untagged; }
         }
 
-        public override int Size
-        {
-            get { return 6; }
-        }
-
         public override int ReadFrom(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
@@ -67,9 +66,9 @@ namespace DiscUtils.Iscsi
         {
             Array.Clear(buffer, offset, 10);
             buffer[offset] = 0x12; // OpCode
-            buffer[offset + 1] = (byte) (_askForPage ? 0x01 : 0x00);
+            buffer[offset + 1] = (byte)(_askForPage ? 0x01 : 0x00);
             buffer[offset + 2] = _pageCode;
-            Utilities.WriteBytesBigEndian((ushort) _expected, buffer, offset + 3);
+            Utilities.WriteBytesBigEndian((ushort)_expected, buffer, offset + 3);
             buffer[offset + 5] = 0;
         }
     }

@@ -20,24 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Net.NetworkInformation;
-    using System.Net.Sockets;
-
     /// <summary>
     /// Implements the (conventional) unicast DNS protocol.
     /// </summary>
     public sealed class UnicastDnsClient : DnsClient
     {
         private ushort _nextTransId;
-        private IPEndPoint[] _servers;
+        private readonly IPEndPoint[] _servers;
+        private readonly int maxRetries = 3;
 
-        private int responseTimeout = 2000;
-        private int maxRetries = 3;
+        private readonly int responseTimeout = 2000;
 
         /// <summary>
         /// Initializes a new instance of the UnicastDnsClient class.
@@ -47,9 +47,7 @@ namespace DiscUtils.Net.Dns
         /// OS, and use those servers.
         /// </remarks>
         public UnicastDnsClient()
-            : this(GetDefaultDnsServers())
-        {
-        }
+            : this(GetDefaultDnsServers()) {}
 
         /// <summary>
         /// Initializes a new instance of the UnicastDnsClient class, using nominated DNS servers.
@@ -102,13 +100,13 @@ namespace DiscUtils.Net.Dns
                 Message msg = new Message();
                 msg.TransactionId = transactionId;
                 msg.Flags = new MessageFlags(false, OpCode.Query, false, false, false, false, ResponseCode.Success);
-                msg.Questions.Add(new Question() { Name = normName, Type = type, Class = RecordClass.Internet });
+                msg.Questions.Add(new Question { Name = normName, Type = type, Class = RecordClass.Internet });
 
                 msg.WriteTo(writer);
 
                 byte[] msgBytes = writer.GetBytes();
 
-                foreach (var server in _servers)
+                foreach (IPEndPoint server in _servers)
                 {
                     udpClient.Send(msgBytes, msgBytes.Length, server);
                 }
@@ -146,11 +144,11 @@ namespace DiscUtils.Net.Dns
         {
             Dictionary<IPAddress, object> addresses = new Dictionary<IPAddress, object>();
 
-            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (nic.OperationalStatus == OperationalStatus.Up)
                 {
-                    foreach (var address in nic.GetIPProperties().DnsAddresses)
+                    foreach (IPAddress address in nic.GetIPProperties().DnsAddresses)
                     {
                         if (address.AddressFamily == AddressFamily.InterNetwork && !addresses.ContainsKey(address))
                         {

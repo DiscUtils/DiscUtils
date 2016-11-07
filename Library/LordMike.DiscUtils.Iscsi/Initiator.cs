@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Iscsi
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Class representing an iSCSI initiator.
     /// </summary>
@@ -32,16 +32,9 @@ namespace DiscUtils.Iscsi
     public class Initiator
     {
         private const int DefaultPort = 3260;
-
-        private string _userName;
         private string _password;
 
-        /// <summary>
-        /// Initializes a new instance of the Initiator class.
-        /// </summary>
-        public Initiator()
-        {
-        }
+        private string _userName;
 
         /// <summary>
         /// Sets credentials used to authenticate this Initiator to the Target.
@@ -113,7 +106,7 @@ namespace DiscUtils.Iscsi
         {
             using (
                 Session session = new Session(SessionType.Discovery, null, _userName, _password,
-                    new TargetAddress[] {address}))
+                    new[] { address }))
             {
                 return session.EnumerateTargets();
             }

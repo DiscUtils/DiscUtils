@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 using DiscUtils.CoreCompat;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using System.Threading;
-
     /// <summary>
     /// Represents a connection to a particular Target.
     /// </summary>
@@ -37,31 +36,24 @@ namespace DiscUtils.Iscsi
     {
         private static int s_nextInitiatorSessionId = new Random().Next();
 
-        private IList<TargetAddress> _addresses;
-        private string _userName;
-        private string _password;
-
-        private Connection _currentConnection;
-
-        private ushort _targetSessionId; // a.k.a. TSIH
-        private uint _commandSequenceNumber;
-        private uint _nextInitiaterTaskTag;
-        private ushort _nextConnectionId;
-        private uint _initiatorSessionId;
+        private readonly IList<TargetAddress> _addresses;
 
         /// <summary>
         /// The set of all 'parameters' we've negotiated.
         /// </summary>
-        private Dictionary<string, string> _negotiatedParameters;
+        private readonly Dictionary<string, string> _negotiatedParameters;
+
+        private ushort _nextConnectionId;
+        private readonly string _password;
+
+        private readonly string _userName;
 
         internal Session(SessionType type, string targetName, params TargetAddress[] addresses)
-            : this(type, targetName, null, null, addresses)
-        {
-        }
+            : this(type, targetName, null, null, addresses) {}
 
         internal Session(SessionType type, string targetName, string userName, string password, IList<TargetAddress> addresses)
         {
-            _initiatorSessionId = (uint)Interlocked.Increment(ref s_nextInitiatorSessionId);
+            InitiatorSessionId = (uint)Interlocked.Increment(ref s_nextInitiatorSessionId);
             _addresses = addresses;
             _userName = userName;
             _password = password;
@@ -69,8 +61,8 @@ namespace DiscUtils.Iscsi
             SessionType = type;
             TargetName = targetName;
 
-            _commandSequenceNumber = 1;
-            _nextInitiaterTaskTag = 1;
+            CommandSequenceNumber = 1;
+            CurrentTaskTag = 1;
 
             // Default negotiated values...
             MaxConnections = 1;
@@ -88,117 +80,35 @@ namespace DiscUtils.Iscsi
 
             if (string.IsNullOrEmpty(userName))
             {
-                _currentConnection = new Connection(this, _addresses[0], new Authenticator[] { new NullAuthenticator() });
+                ActiveConnection = new Connection(this, _addresses[0], new Authenticator[] { new NullAuthenticator() });
             }
             else
             {
-                _currentConnection = new Connection(this, _addresses[0], new Authenticator[] { new NullAuthenticator(), new ChapAuthenticator(_userName, _password) });
+                ActiveConnection = new Connection(this, _addresses[0], new Authenticator[] { new NullAuthenticator(), new ChapAuthenticator(_userName, _password) });
             }
         }
 
-        #region Protocol Features
-        /// <summary>
-        /// Gets the name of the iSCSI target this session is connected to.
-        /// </summary>
-        [ProtocolKey("TargetName", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
-        public string TargetName { get; internal set; }
+        internal Connection ActiveConnection { get; private set; }
 
-        /// <summary>
-        /// Gets the name of the iSCSI initiator seen by the target for this session.
-        /// </summary>
-        [ProtocolKey("InitiatorName", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
-        public string InitiatorName
-        {
-            get { return "iqn.2008-2010-04.discutils.codeplex.com"; }
-        }
+        internal uint CommandSequenceNumber { get; private set; }
 
-        /// <summary>
-        /// Gets the friendly name of the iSCSI target this session is connected to.
-        /// </summary>
-        [ProtocolKey("TargetAlias", "", KeyUsagePhase.All, KeySender.Target, KeyType.Declarative)]
-        public string TargetAlias { get; internal set; }
+        internal uint CurrentTaskTag { get; private set; }
 
-        [ProtocolKey("SessionType", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
-        internal SessionType SessionType { get; set; }
+        internal uint InitiatorSessionId { get; }
 
-        [ProtocolKey("MaxConnections", "1", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int MaxConnections { get; set; }
-
-        [ProtocolKey("InitiatorAlias", "", KeyUsagePhase.All, KeySender.Initiator, KeyType.Declarative)]
-        internal string InitiatorAlias { get; set; }
-
-        [ProtocolKey("TargetPortalGroupTag", null, KeyUsagePhase.SecurityNegotiation, KeySender.Target, KeyType.Declarative)]
-        internal int TargetPortalGroupTag { get; set; }
-
-        [ProtocolKey("InitialR2T", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal bool InitialR2T { get; set; }
-
-        [ProtocolKey("ImmediateData", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal bool ImmediateData { get; set; }
-
-        [ProtocolKey("MaxBurstLength", "262144", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int MaxBurstLength { get; set; }
-
-        [ProtocolKey("FirstBurstLength", "65536", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int FirstBurstLength { get; set; }
-
-        [ProtocolKey("DefaultTime2Wait", "2", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int DefaultTime2Wait { get; set; }
-
-        [ProtocolKey("DefaultTime2Retain", "20", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int DefaultTime2Retain { get; set; }
-
-        [ProtocolKey("MaxOutstandingR2T", "1", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int MaxOutstandingR2T { get; set; }
-
-        [ProtocolKey("DataPDUInOrder", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal bool DataPDUInOrder { get; set; }
-
-        [ProtocolKey("DataSequenceInOrder", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal bool DataSequenceInOrder { get; set; }
-
-        [ProtocolKey("ErrorRecoveryLevel", "0", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
-        internal int ErrorRecoveryLevel { get; set; }
-
-        #endregion
-
-        internal Connection ActiveConnection
-        {
-            get { return _currentConnection; }
-        }
-
-        internal uint InitiatorSessionId
-        {
-            get { return _initiatorSessionId; }
-        }
-
-        internal ushort TargetSessionId
-        {
-            get { return _targetSessionId; }
-            set { _targetSessionId = value; }
-        }
-
-        internal uint CommandSequenceNumber
-        {
-            get { return _commandSequenceNumber; }
-        }
-
-        internal uint CurrentTaskTag
-        {
-            get { return _nextInitiaterTaskTag; }
-        }
+        internal ushort TargetSessionId { get; set; }
 
         /// <summary>
         /// Disposes of this instance, closing the session with the Target.
         /// </summary>
         public void Dispose()
         {
-            if (_currentConnection != null)
+            if (ActiveConnection != null)
             {
-                _currentConnection.Close(LogoutReason.CloseSession);
+                ActiveConnection.Close(LogoutReason.CloseSession);
             }
 
-            _currentConnection = null;
+            ActiveConnection = null;
         }
 
         /// <summary>
@@ -209,7 +119,7 @@ namespace DiscUtils.Iscsi
         /// the connected Target.</remarks>
         public TargetInfo[] EnumerateTargets()
         {
-            return _currentConnection.EnumerateTargets();
+            return ActiveConnection.EnumerateTargets();
         }
 
         /// <summary>
@@ -250,7 +160,7 @@ namespace DiscUtils.Iscsi
         {
             List<long> luns = new List<long>();
 
-            foreach (var info in GetLuns())
+            foreach (LunInfo info in GetLuns())
             {
                 if (info.DeviceType == LunClass.BlockStorage)
                 {
@@ -380,12 +290,12 @@ namespace DiscUtils.Iscsi
 
         internal uint NextCommandSequenceNumber()
         {
-            return ++_commandSequenceNumber;
+            return ++CommandSequenceNumber;
         }
 
         internal uint NextTaskTag()
         {
-            return ++_nextInitiaterTaskTag;
+            return ++CurrentTaskTag;
         }
 
         internal ushort NextConnectionId()
@@ -396,7 +306,7 @@ namespace DiscUtils.Iscsi
         internal void GetParametersToNegotiate(TextBuffer parameters, KeyUsagePhase phase)
         {
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var propInfo in properties)
+            foreach (PropertyInfo propInfo in properties)
             {
                 ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
 
@@ -416,7 +326,7 @@ namespace DiscUtils.Iscsi
         internal void ConsumeParameters(TextBuffer inParameters, TextBuffer outParameters)
         {
             PropertyInfo[] properties = GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var propInfo in properties)
+            foreach (PropertyInfo propInfo in properties)
             {
                 ProtocolKeyAttribute attr = (ProtocolKeyAttribute)ReflectionHelper.GetCustomAttribute(propInfo, typeof(ProtocolKeyAttribute));
                 if (attr != null)
@@ -425,7 +335,7 @@ namespace DiscUtils.Iscsi
                     {
                         object value = ProtocolKeyAttribute.GetValueAsObject(inParameters[attr.Name], propInfo.PropertyType);
 
-                        propInfo.GetSetMethod(true).Invoke(this, new object[] { value });
+                        propInfo.GetSetMethod(true).Invoke(this, new[] { value });
                         inParameters.Remove(attr.Name);
 
                         if (attr.Type == KeyType.Negotiated && !_negotiatedParameters.ContainsKey(attr.Name))
@@ -439,7 +349,75 @@ namespace DiscUtils.Iscsi
             }
         }
 
-#region Scsi Bus
+        #region Protocol Features
+
+        /// <summary>
+        /// Gets the name of the iSCSI target this session is connected to.
+        /// </summary>
+        [ProtocolKey("TargetName", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
+        public string TargetName { get; internal set; }
+
+        /// <summary>
+        /// Gets the name of the iSCSI initiator seen by the target for this session.
+        /// </summary>
+        [ProtocolKey("InitiatorName", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
+        public string InitiatorName
+        {
+            get { return "iqn.2008-2010-04.discutils.codeplex.com"; }
+        }
+
+        /// <summary>
+        /// Gets the friendly name of the iSCSI target this session is connected to.
+        /// </summary>
+        [ProtocolKey("TargetAlias", "", KeyUsagePhase.All, KeySender.Target, KeyType.Declarative)]
+        public string TargetAlias { get; internal set; }
+
+        [ProtocolKey("SessionType", null, KeyUsagePhase.SecurityNegotiation, KeySender.Initiator, KeyType.Declarative, UsedForDiscovery = true)]
+        internal SessionType SessionType { get; set; }
+
+        [ProtocolKey("MaxConnections", "1", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int MaxConnections { get; set; }
+
+        [ProtocolKey("InitiatorAlias", "", KeyUsagePhase.All, KeySender.Initiator, KeyType.Declarative)]
+        internal string InitiatorAlias { get; set; }
+
+        [ProtocolKey("TargetPortalGroupTag", null, KeyUsagePhase.SecurityNegotiation, KeySender.Target, KeyType.Declarative)]
+        internal int TargetPortalGroupTag { get; set; }
+
+        [ProtocolKey("InitialR2T", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal bool InitialR2T { get; set; }
+
+        [ProtocolKey("ImmediateData", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal bool ImmediateData { get; set; }
+
+        [ProtocolKey("MaxBurstLength", "262144", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int MaxBurstLength { get; set; }
+
+        [ProtocolKey("FirstBurstLength", "65536", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int FirstBurstLength { get; set; }
+
+        [ProtocolKey("DefaultTime2Wait", "2", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int DefaultTime2Wait { get; set; }
+
+        [ProtocolKey("DefaultTime2Retain", "20", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int DefaultTime2Retain { get; set; }
+
+        [ProtocolKey("MaxOutstandingR2T", "1", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int MaxOutstandingR2T { get; set; }
+
+        [ProtocolKey("DataPDUInOrder", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal bool DataPDUInOrder { get; set; }
+
+        [ProtocolKey("DataSequenceInOrder", "Yes", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal bool DataSequenceInOrder { get; set; }
+
+        [ProtocolKey("ErrorRecoveryLevel", "0", KeyUsagePhase.OperationalNegotiation, KeySender.Both, KeyType.Negotiated, LeadingConnectionOnly = true)]
+        internal int ErrorRecoveryLevel { get; set; }
+
+        #endregion
+
+        #region Scsi Bus
+
         /// <summary>
         /// Sends an SCSI command (aka task) to a LUN via the connected target.
         /// </summary>
@@ -453,14 +431,15 @@ namespace DiscUtils.Iscsi
         /// <returns>The number of bytes received.</returns>
         private int Send(ScsiCommand cmd, byte[] outBuffer, int outBufferOffset, int outBufferCount, byte[] inBuffer, int inBufferOffset, int inBufferMax)
         {
-            return _currentConnection.Send(cmd, outBuffer, outBufferOffset, outBufferCount, inBuffer, inBufferOffset, inBufferMax);
+            return ActiveConnection.Send(cmd, outBuffer, outBufferOffset, outBufferCount, inBuffer, inBufferOffset, inBufferMax);
         }
 
         private T Send<T>(ScsiCommand cmd, byte[] buffer, int offset, int count, int expected)
             where T : ScsiResponse, new()
         {
-            return _currentConnection.Send<T>(cmd, buffer, offset, count, expected);
+            return ActiveConnection.Send<T>(cmd, buffer, offset, count, expected);
         }
-#endregion
+
+        #endregion
     }
 }

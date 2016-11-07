@@ -20,37 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Globalization;
-    using System.Security.Cryptography;
-    using System.Text;
-
     internal class ChapAuthenticator : Authenticator
     {
-        private State _state;
-
-        private string _name;
-        private string _password;
-
         private int _algorithm;
-        private byte _identifier;
         private byte[] _challenge;
+        private byte _identifier;
+
+        private readonly string _name;
+        private readonly string _password;
+        private State _state;
 
         public ChapAuthenticator(string name, string password)
         {
             _name = name;
             _password = password;
             _state = State.SendAlgorithm;
-        }
-
-        private enum State
-        {
-            SendAlgorithm,
-            ReceiveChallenge,
-            SendResponse,
-            Finished
         }
 
         public override string Identifier
@@ -104,10 +95,10 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Invalid value in CHAP exchange");
             }
 
-            byte[] data = new byte[(p.Length - 2)/2];
+            byte[] data = new byte[(p.Length - 2) / 2];
             for (int i = 0; i < data.Length; ++i)
             {
-                data[i] = byte.Parse(p.Substring(2 + (i*2), 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                data[i] = byte.Parse(p.Substring(2 + i * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
             }
 
             return data;
@@ -131,6 +122,14 @@ namespace DiscUtils.Iscsi
             }
 
             return result.ToString();
+        }
+
+        private enum State
+        {
+            SendAlgorithm,
+            ReceiveChallenge,
+            SendResponse,
+            Finished
         }
     }
 }

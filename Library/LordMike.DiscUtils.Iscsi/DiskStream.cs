@@ -20,25 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class DiskStream : SparseStream
     {
-        private Session _session;
-        private long _lun;
+        private readonly int _blockSize;
 
-        private long _length;
+        private readonly long _length;
+        private readonly long _lun;
         private long _position;
-
-        private int _blockSize;
-        private bool _canWrite;
-        private bool _canRead;
+        private readonly Session _session;
 
         public DiskStream(Session session, long lun, FileAccess access)
         {
@@ -47,24 +43,23 @@ namespace DiscUtils.Iscsi
 
             LunCapacity capacity = session.GetCapacity(lun);
             _blockSize = capacity.BlockSize;
-            _length = capacity.LogicalBlockCount*capacity.BlockSize;
-            _canWrite = access != FileAccess.Read;
-            _canRead = access != FileAccess.Write;
+            _length = capacity.LogicalBlockCount * capacity.BlockSize;
+            CanWrite = access != FileAccess.Read;
+            CanRead = access != FileAccess.Write;
         }
 
-        public override bool CanRead
-        {
-            get { return _canRead; }
-        }
+        public override bool CanRead { get; }
 
         public override bool CanSeek
         {
             get { return true; }
         }
 
-        public override bool CanWrite
+        public override bool CanWrite { get; }
+
+        public override IEnumerable<StreamExtent> Extents
         {
-            get { return _canWrite; }
+            get { yield return new StreamExtent(0, _length); }
         }
 
         public override long Length
@@ -79,14 +74,7 @@ namespace DiscUtils.Iscsi
             set { _position = value; }
         }
 
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { yield return new StreamExtent(0, _length); }
-        }
-
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -95,16 +83,16 @@ namespace DiscUtils.Iscsi
                 throw new InvalidOperationException("Attempt to read from read-only stream");
             }
 
-            int maxToRead = (int) Math.Min(_length - _position, count);
+            int maxToRead = (int)Math.Min(_length - _position, count);
 
-            long firstBlock = _position/_blockSize;
+            long firstBlock = _position / _blockSize;
             long lastBlock = Utilities.Ceil(_position + maxToRead, _blockSize);
 
-            byte[] tempBuffer = new byte[(lastBlock - firstBlock)*_blockSize];
-            int numRead = _session.Read(_lun, firstBlock, (short) (lastBlock - firstBlock), tempBuffer, 0);
+            byte[] tempBuffer = new byte[(lastBlock - firstBlock) * _blockSize];
+            int numRead = _session.Read(_lun, firstBlock, (short)(lastBlock - firstBlock), tempBuffer, 0);
 
             int numCopied = Math.Min(maxToRead, numRead);
-            Array.Copy(tempBuffer, (int) (_position - (firstBlock*_blockSize)), buffer, offset, numCopied);
+            Array.Copy(tempBuffer, (int)(_position - firstBlock * _blockSize), buffer, offset, numCopied);
 
             _position += numCopied;
 
@@ -127,11 +115,8 @@ namespace DiscUtils.Iscsi
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         public override void SetLength(long value)
@@ -155,15 +140,15 @@ namespace DiscUtils.Iscsi
 
             while (numWritten < count)
             {
-                long block = _position/_blockSize;
-                uint offsetInBlock = (uint) (_position%_blockSize);
+                long block = _position / _blockSize;
+                uint offsetInBlock = (uint)(_position % _blockSize);
 
                 int toWrite = count - numWritten;
 
                 // Need to read - we're not handling a full block
                 if (offsetInBlock != 0 || toWrite < _blockSize)
                 {
-                    toWrite = (int) Math.Min(toWrite, _blockSize - offsetInBlock);
+                    toWrite = (int)Math.Min(toWrite, _blockSize - offsetInBlock);
 
                     byte[] blockBuffer = new byte[_blockSize];
                     int numRead = _session.Read(_lun, block, 1, blockBuffer, 0);
@@ -174,7 +159,7 @@ namespace DiscUtils.Iscsi
                     }
 
                     // Overlay as much data as we have for this block
-                    Array.Copy(buffer, offset + numWritten, blockBuffer, (int) offsetInBlock, toWrite);
+                    Array.Copy(buffer, offset + numWritten, blockBuffer, (int)offsetInBlock, toWrite);
 
                     // Write the block back
                     _session.Write(_lun, block, 1, _blockSize, blockBuffer, 0);
@@ -182,8 +167,8 @@ namespace DiscUtils.Iscsi
                 else
                 {
                     // Processing at least one whole block, just write (after making sure to trim any partial sectors from the end)...
-                    short numBlocks = (short) (toWrite/_blockSize);
-                    toWrite = numBlocks*_blockSize;
+                    short numBlocks = (short)(toWrite / _blockSize);
+                    toWrite = numBlocks * _blockSize;
 
                     _session.Write(_lun, block, numBlocks, _blockSize, buffer, offset + numWritten);
                 }

@@ -20,16 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Nfs
-{
-    using System;
-    using System.IO;
+using System;
+using System.IO;
 
 #if !NETCORE
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 #endif
 
+namespace DiscUtils.Nfs
+{
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
@@ -38,23 +38,17 @@ namespace DiscUtils.Nfs
 #endif
     public sealed class Nfs3Exception : IOException
     {
-        private Nfs3Status _status = Nfs3Status.Unknown;
-
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
-        public Nfs3Exception()
-        {
-        }
+        public Nfs3Exception() {}
 
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         public Nfs3Exception(string message)
-            : base(message)
-        {
-        }
+            : base(message) {}
 
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
@@ -64,7 +58,7 @@ namespace DiscUtils.Nfs
         public Nfs3Exception(string message, Nfs3Status status)
             : base(message)
         {
-            _status = status;
+            NfsStatus = status;
         }
 
         /// <summary>
@@ -73,9 +67,7 @@ namespace DiscUtils.Nfs
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">The inner exception.</param>
         public Nfs3Exception(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+            : base(message, innerException) {}
 
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
@@ -84,40 +76,37 @@ namespace DiscUtils.Nfs
         internal Nfs3Exception(Nfs3Status status)
             : base(GenerateMessage(status))
         {
-            _status = status;
+            NfsStatus = status;
         }
 
 #if !NETCORE
-/// <summary>
-/// Initializes a new instance of the Nfs3Exception class.
-/// </summary>
-/// <param name="info">The serialization info.</param>
-/// <param name="context">The streaming context.</param>
+        /// <summary>
+        /// Initializes a new instance of the Nfs3Exception class.
+        /// </summary>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         private Nfs3Exception(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            _status = (Nfs3Status)info.GetInt32("Status");
+            NfsStatus = (Nfs3Status)info.GetInt32("Status");
         }
 #endif
 
         /// <summary>
         /// Gets the NFS status code that lead to the exception.
         /// </summary>
-        public Nfs3Status NfsStatus
-        {
-            get { return _status; }
-        }
+        public Nfs3Status NfsStatus { get; } = Nfs3Status.Unknown;
 
 #if !NETCORE
-/// <summary>
-/// Serializes this exception.
-/// </summary>
-/// <param name="info">The object to populate with serialized data.</param>
-/// <param name="context">The context for this serialization.</param>
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+        /// <summary>
+        /// Serializes this exception.
+        /// </summary>
+        /// <param name="info">The object to populate with serialized data.</param>
+        /// <param name="context">The context for this serialization.</param>
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("Status", (int)_status);
+            info.AddValue("Status", (int)NfsStatus);
             base.GetObjectData(info, context);
         }
 #endif

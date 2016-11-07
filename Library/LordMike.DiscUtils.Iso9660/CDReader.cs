@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     /// <summary>
     /// Class for reading existing ISO images.
     /// </summary>
@@ -38,9 +37,7 @@ namespace DiscUtils.Iso9660
         /// <param name="data">The stream to read the ISO image from.</param>
         /// <param name="joliet">Whether to read Joliet extensions.</param>
         public CDReader(Stream data, bool joliet)
-            : base(new VfsCDReader(data, joliet, false))
-        {
-        }
+            : base(new VfsCDReader(data, joliet, false)) {}
 
         /// <summary>
         /// Initializes a new instance of the CDReader class.
@@ -49,16 +46,14 @@ namespace DiscUtils.Iso9660
         /// <param name="joliet">Whether to read Joliet extensions.</param>
         /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files.</param>
         public CDReader(Stream data, bool joliet, bool hideVersions)
-            : base(new VfsCDReader(data, joliet, hideVersions))
-        {
-        }
+            : base(new VfsCDReader(data, joliet, hideVersions)) {}
 
         /// <summary>
-        /// Gets a value indicating whether a boot image is present.
+        /// Gets which of the Iso9660 variants is being used.
         /// </summary>
-        public bool HasBootImage
+        public Iso9660Variant ActiveVariant
         {
-            get { return GetRealFileSystem<VfsCDReader>().HasBootImage; }
+            get { return GetRealFileSystem<VfsCDReader>().ActiveVariant; }
         }
 
         /// <summary>
@@ -70,6 +65,14 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets the absolute start position (in bytes) of the boot image, or zero if not found.
+        /// </summary>
+        public long BootImageStart
+        {
+            get { return GetRealFileSystem<VfsCDReader>().BootImageStart; }
+        }
+
+        /// <summary>
         /// Gets the memory segment the image should be loaded into (0 for default).
         /// </summary>
         public int BootLoadSegment
@@ -78,11 +81,11 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
-        /// Gets the absolute start position (in bytes) of the boot image, or zero if not found.
+        /// Gets a value indicating whether a boot image is present.
         /// </summary>
-        public long BootImageStart
+        public bool HasBootImage
         {
-            get { return GetRealFileSystem<VfsCDReader>().BootImageStart; }
+            get { return GetRealFileSystem<VfsCDReader>().HasBootImage; }
         }
 
         /// <summary>
@@ -99,48 +102,6 @@ namespace DiscUtils.Iso9660
         public long TotalClusters
         {
             get { return GetRealFileSystem<VfsCDReader>().TotalClusters; }
-        }
-
-        /// <summary>
-        /// Gets which of the Iso9660 variants is being used.
-        /// </summary>
-        public Iso9660Variant ActiveVariant
-        {
-            get { return GetRealFileSystem<VfsCDReader>().ActiveVariant; }
-        }
-
-        /// <summary>
-        /// Detects if a stream contains a valid ISO file system.
-        /// </summary>
-        /// <param name="data">The stream to inspect.</param>
-        /// <returns><c>true</c> if the stream contains an ISO file system, else false.</returns>
-        public static bool Detect(Stream data)
-        {
-            byte[] buffer = new byte[IsoUtilities.SectorSize];
-
-            if (data.Length < 0x8000 + IsoUtilities.SectorSize)
-            {
-                return false;
-            }
-
-            data.Position = 0x8000;
-            int numRead = Utilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
-            if (numRead != IsoUtilities.SectorSize)
-            {
-                return false;
-            }
-
-            BaseVolumeDescriptor bvd = new BaseVolumeDescriptor(buffer, 0);
-            return bvd.StandardIdentifier == "CD001";
-        }
-
-        /// <summary>
-        /// Opens a stream containing the boot image.
-        /// </summary>
-        /// <returns>The boot image as a stream.</returns>
-        public Stream OpenBootImage()
-        {
-            return GetRealFileSystem<VfsCDReader>().OpenBootImage();
         }
 
         /// <summary>
@@ -206,6 +167,40 @@ namespace DiscUtils.Iso9660
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             return GetRealFileSystem<VfsCDReader>().GetUnixFileInfo(path);
+        }
+
+        /// <summary>
+        /// Detects if a stream contains a valid ISO file system.
+        /// </summary>
+        /// <param name="data">The stream to inspect.</param>
+        /// <returns><c>true</c> if the stream contains an ISO file system, else false.</returns>
+        public static bool Detect(Stream data)
+        {
+            byte[] buffer = new byte[IsoUtilities.SectorSize];
+
+            if (data.Length < 0x8000 + IsoUtilities.SectorSize)
+            {
+                return false;
+            }
+
+            data.Position = 0x8000;
+            int numRead = Utilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
+            if (numRead != IsoUtilities.SectorSize)
+            {
+                return false;
+            }
+
+            BaseVolumeDescriptor bvd = new BaseVolumeDescriptor(buffer, 0);
+            return bvd.StandardIdentifier == "CD001";
+        }
+
+        /// <summary>
+        /// Opens a stream containing the boot image.
+        /// </summary>
+        /// <returns>The boot image as a stream.</returns>
+        public Stream OpenBootImage()
+        {
+            return GetRealFileSystem<VfsCDReader>().OpenBootImage();
         }
     }
 }

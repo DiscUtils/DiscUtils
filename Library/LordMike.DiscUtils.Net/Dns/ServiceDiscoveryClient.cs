@@ -20,20 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Text;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Text;
-
     /// <summary>
     /// Provides access to DNS-SD functionality.
     /// </summary>
     public sealed class ServiceDiscoveryClient : IDisposable
     {
+        private readonly UnicastDnsClient _dnsClient;
         private MulticastDnsClient _mDnsClient;
-        private UnicastDnsClient _dnsClient;
 
         /// <summary>
         /// Initializes a new instance of the ServiceDiscoveryClient class.
@@ -171,7 +171,7 @@ namespace DiscUtils.Net.Dns
             string instanceName = fullName.Substring(0, fullName.Length - (suffix.Length + 1));
 
             StringBuilder sb = new StringBuilder();
-            foreach (var ch in instanceName)
+            foreach (char ch in instanceName)
             {
                 if (ch == '.' || ch == '\\')
                 {
@@ -181,7 +181,7 @@ namespace DiscUtils.Net.Dns
                 sb.Append(ch);
             }
 
-            return sb.ToString() + "." + suffix;
+            return sb + "." + suffix;
         }
 
         private static string DecodeDisplayName(string fullName)
@@ -197,7 +197,7 @@ namespace DiscUtils.Net.Dns
                 {
                     return sb.ToString();
                 }
-                else if (ch == '\\')
+                if (ch == '\\')
                 {
                     ch = fullName[i++];
                 }
@@ -250,7 +250,7 @@ namespace DiscUtils.Net.Dns
 
             foreach (TextRecord record in records)
             {
-                foreach (var value in record.Values)
+                foreach (KeyValuePair<string, byte[]> value in record.Values)
                 {
                     details.Add(value.Key, value.Value);
                 }
@@ -277,7 +277,7 @@ namespace DiscUtils.Net.Dns
             ResourceRecord[] records = dnsClient.Lookup(fullName, recordType);
 
             List<ResourceRecord> cleanList = new List<ResourceRecord>();
-            foreach (var record in records)
+            foreach (ResourceRecord record in records)
             {
                 if (record.RecordType == recordType && string.Compare(fullName, record.Name, StringComparison.OrdinalIgnoreCase) == 0)
                 {

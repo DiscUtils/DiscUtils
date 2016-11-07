@@ -25,7 +25,7 @@ namespace DiscUtils.Net.Dns
     /// <summary>
     /// Enumeration of the known DNS record types.
     /// </summary>
-    public enum RecordType : int
+    public enum RecordType
     {
         /// <summary>
         ///  No record type defined.

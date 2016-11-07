@@ -20,25 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     internal class PathTable : BuilderExtent
     {
-        private bool _byteSwap;
-        private Encoding _enc;
-        private List<BuildDirectoryInfo> _dirs;
-        private Dictionary<BuildDirectoryMember, uint> _locations;
+        private readonly bool _byteSwap;
+        private readonly List<BuildDirectoryInfo> _dirs;
+        private readonly Encoding _enc;
+        private readonly Dictionary<BuildDirectoryMember, uint> _locations;
 
         private byte[] _readCache;
 
         public PathTable(bool byteSwap, Encoding enc, List<BuildDirectoryInfo> dirs,
-            Dictionary<BuildDirectoryMember, uint> locations, long start)
+                         Dictionary<BuildDirectoryMember, uint> locations, long start)
             : base(start, CalcLength(enc, dirs))
         {
             _byteSwap = byteSwap;
@@ -47,9 +46,7 @@ namespace DiscUtils.Iso9660
             _locations = locations;
         }
 
-        public override void Dispose()
-        {
-        }
+        public override void Dispose() {}
 
         internal override void PrepareForRead()
         {
@@ -77,9 +74,9 @@ namespace DiscUtils.Iso9660
         {
             long relPos = diskOffset - Start;
 
-            int numRead = (int) Math.Min(count, _readCache.Length - relPos);
+            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 
-            Array.Copy(_readCache, (int) relPos, buffer, offset, numRead);
+            Array.Copy(_readCache, (int)relPos, buffer, offset, numRead);
 
             return numRead;
         }

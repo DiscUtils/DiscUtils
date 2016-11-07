@@ -28,38 +28,29 @@ namespace DiscUtils.Iso9660
     {
         public const string ElToritoSystemIdentifier = "EL TORITO SPECIFICATION";
 
-        private string _systemId;
-        private uint _catalogSector;
-
         public BootVolumeDescriptor(uint catalogSector)
             : base(VolumeDescriptorType.Boot, 1)
         {
-            _catalogSector = catalogSector;
+            CatalogSector = catalogSector;
         }
 
         public BootVolumeDescriptor(byte[] src, int offset)
             : base(src, offset)
         {
-            _systemId = Utilities.BytesToString(src, offset + 0x7, 0x20).TrimEnd('\0');
-            _catalogSector = Utilities.ToUInt32LittleEndian(src, offset + 0x47);
+            SystemId = Utilities.BytesToString(src, offset + 0x7, 0x20).TrimEnd('\0');
+            CatalogSector = Utilities.ToUInt32LittleEndian(src, offset + 0x47);
         }
 
-        public string SystemId
-        {
-            get { return _systemId; }
-        }
+        public uint CatalogSector { get; }
 
-        public uint CatalogSector
-        {
-            get { return _catalogSector; }
-        }
+        public string SystemId { get; }
 
         internal override void WriteTo(byte[] buffer, int offset)
         {
             base.WriteTo(buffer, offset);
 
             Utilities.StringToBytes(ElToritoSystemIdentifier, buffer, offset + 7, 0x20);
-            Utilities.WriteBytesLittleEndian(_catalogSector, buffer, offset + 0x47);
+            Utilities.WriteBytesLittleEndian(CatalogSector, buffer, offset + 0x47);
         }
     }
 }

@@ -24,14 +24,14 @@ namespace DiscUtils.Nfs
 {
     internal class RpcAcceptedReplyHeader
     {
-        public RpcAuthentication Verifier;
         public RpcAcceptStatus AcceptStatus;
         public RpcMismatchInfo MismatchInfo;
+        public RpcAuthentication Verifier;
 
         public RpcAcceptedReplyHeader(XdrDataReader reader)
         {
             Verifier = new RpcAuthentication(reader);
-            AcceptStatus = (RpcAcceptStatus) reader.ReadInt32();
+            AcceptStatus = (RpcAcceptStatus)reader.ReadInt32();
             if (AcceptStatus == RpcAcceptStatus.ProgramVersionMismatch)
             {
                 MismatchInfo = new RpcMismatchInfo(reader);

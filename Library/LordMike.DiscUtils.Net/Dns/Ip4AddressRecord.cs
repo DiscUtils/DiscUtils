@@ -20,25 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Net;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-    using System.Net;
-
     /// <summary>
     /// Represents a DNS A record.
     /// </summary>
     public sealed class IP4AddressRecord : ResourceRecord
     {
-        private IPAddress _address;
-
         internal IP4AddressRecord(string name, RecordType type, RecordClass rClass, DateTime expiry, PacketReader reader)
             : base(name, type, rClass, expiry)
         {
             ushort dataLen = reader.ReadUShort();
             int pos = reader.Position;
 
-            _address = new IPAddress(reader.ReadBytes(dataLen));
+            Address = new IPAddress(reader.ReadBytes(dataLen));
 
             reader.Position = pos + dataLen;
         }
@@ -46,9 +44,6 @@ namespace DiscUtils.Net.Dns
         /// <summary>
         /// Gets the IPv4 address.
         /// </summary>
-        public IPAddress Address
-        {
-            get { return _address; }
-        }
+        public IPAddress Address { get; }
     }
 }

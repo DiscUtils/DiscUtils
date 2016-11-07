@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
+
 namespace DiscUtils.Iso9660
 {
-    using System.Text;
-
     internal abstract class SuspExtension
     {
         public abstract string Identifier { get; }

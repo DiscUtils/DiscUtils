@@ -20,48 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Net.Dns
 {
-    using System.Collections.Generic;
-
     internal class Message
     {
-        private List<Question> _questions;
-        private List<ResourceRecord> _answers;
-        private List<ResourceRecord> _authorityRecords;
-        private List<ResourceRecord> _additional;
-
         public Message()
         {
-            _questions = new List<Question>();
-            _answers = new List<ResourceRecord>();
-            _authorityRecords = new List<ResourceRecord>();
-            _additional = new List<ResourceRecord>();
+            Questions = new List<Question>();
+            Answers = new List<ResourceRecord>();
+            AuthorityRecords = new List<ResourceRecord>();
+            AdditionalRecords = new List<ResourceRecord>();
         }
 
-        public ushort TransactionId { get; set; }
+        public List<ResourceRecord> AdditionalRecords { get; }
+
+        public List<ResourceRecord> Answers { get; }
+
+        public List<ResourceRecord> AuthorityRecords { get; }
 
         public MessageFlags Flags { get; set; }
 
-        public List<Question> Questions
-        {
-            get { return _questions; }
-        }
+        public List<Question> Questions { get; }
 
-        public List<ResourceRecord> Answers
-        {
-            get { return _answers; }
-        }
-
-        public List<ResourceRecord> AuthorityRecords
-        {
-            get { return _authorityRecords; }
-        }
-
-        public List<ResourceRecord> AdditionalRecords
-        {
-            get { return _additional; }
-        }
+        public ushort TransactionId { get; set; }
 
         public static Message Read(PacketReader reader)
         {
@@ -102,12 +85,12 @@ namespace DiscUtils.Net.Dns
         {
             writer.Write(TransactionId);
             writer.Write(Flags.Value);
-            writer.Write((ushort)_questions.Count);
+            writer.Write((ushort)Questions.Count);
             writer.Write(0);
             writer.Write(0);
             writer.Write(0);
 
-            foreach (Question question in _questions)
+            foreach (Question question in Questions)
             {
                 question.WriteTo(writer);
             }

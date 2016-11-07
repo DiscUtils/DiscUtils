@@ -32,8 +32,6 @@ namespace DiscUtils.Nfs
             get { return RpcAuthFlavour.Null; }
         }
 
-        internal override void Write(XdrDataWriter writer)
-        {
-        }
+        internal override void Write(XdrDataWriter writer) {}
     }
 }

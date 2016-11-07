@@ -20,21 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using DiscUtils.Partitions;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a disk accessed via iSCSI.
     /// </summary>
     public class Disk : VirtualDisk
     {
-        private Session _session;
-        private long _lun;
-        private FileAccess _access;
+        private readonly FileAccess _access;
         private LunCapacity _capacity;
+        private readonly long _lun;
+        private readonly Session _session;
 
         private DiskStream _stream;
 
@@ -43,51 +44,6 @@ namespace DiscUtils.Iscsi
             _session = session;
             _lun = lun;
             _access = access;
-        }
-
-        /// <summary>
-        /// The Geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get
-            {
-                // We detect the geometry (which will return a sensible default if the disk has no partitions).
-                // We don't rely on asking the iSCSI target for the geometry because frequently values are returned
-                // that are not valid as BIOS disk geometries.
-                Stream stream = Content;
-                long pos = stream.Position;
-
-                Geometry result = DiscUtils.Partitions.BiosPartitionTable.DetectGeometry(stream);
-
-                stream.Position = pos;
-
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
-        }
-
-        /// <summary>
-        /// The capacity of the disk.
-        /// </summary>
-        public override long Capacity
-        {
-            get
-            {
-                if (_capacity == null)
-                {
-                    _capacity = _session.GetCapacity(_lun);
-                }
-
-                return _capacity.BlockSize*_capacity.LogicalBlockCount;
-            }
         }
 
         /// <summary>
@@ -103,6 +59,22 @@ namespace DiscUtils.Iscsi
                 }
 
                 return _capacity.BlockSize;
+            }
+        }
+
+        /// <summary>
+        /// The capacity of the disk.
+        /// </summary>
+        public override long Capacity
+        {
+            get
+            {
+                if (_capacity == null)
+                {
+                    _capacity = _session.GetCapacity(_lun);
+                }
+
+                return _capacity.BlockSize * _capacity.LogicalBlockCount;
             }
         }
 
@@ -123,11 +95,11 @@ namespace DiscUtils.Iscsi
         }
 
         /// <summary>
-        /// Gets the disk layers that constitute the disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { yield break; }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -139,7 +111,7 @@ namespace DiscUtils.Iscsi
         {
             get
             {
-                return new VirtualDiskTypeInfo()
+                return new VirtualDiskTypeInfo
                 {
                     Name = "iSCSI",
                     Variant = string.Empty,
@@ -149,6 +121,35 @@ namespace DiscUtils.Iscsi
                     CalcGeometry = c => Geometry.FromCapacity(c)
                 };
             }
+        }
+
+        /// <summary>
+        /// The Geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get
+            {
+                // We detect the geometry (which will return a sensible default if the disk has no partitions).
+                // We don't rely on asking the iSCSI target for the geometry because frequently values are returned
+                // that are not valid as BIOS disk geometries.
+                Stream stream = Content;
+                long pos = stream.Position;
+
+                Geometry result = BiosPartitionTable.DetectGeometry(stream);
+
+                stream.Position = pos;
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets the disk layers that constitute the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield break; }
         }
 
         /// <summary>

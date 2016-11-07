@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-
     /// <summary>
     /// Base class for DNS clients.
     /// </summary>
@@ -44,7 +44,7 @@ namespace DiscUtils.Net.Dns
 
         internal static string NormalizeDomainName(string name)
         {
-            string[] labels = name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] labels = name.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
             return string.Join(".", labels) + ".";
         }

@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using System.Text;
+
 namespace DiscUtils.Iso9660
 {
-    using System.IO;
-    using System.Text;
-
     internal sealed class ExtensionSystemUseEntry : SystemUseEntry
     {
-        public string ExtensionIdentifier;
         public string ExtensionDescriptor;
+        public string ExtensionIdentifier;
         public string ExtensionSource;
         public byte ExtensionVersion;
 

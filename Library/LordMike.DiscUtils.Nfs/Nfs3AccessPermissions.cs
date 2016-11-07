@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-
     [Flags]
     internal enum Nfs3AccessPermissions
     {
@@ -33,6 +33,6 @@ namespace DiscUtils.Nfs
         Modify = 0x04,
         Extend = 0x08,
         Delete = 0x10,
-        Execute = 0x20,
+        Execute = 0x20
     }
 }

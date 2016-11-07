@@ -20,23 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Field)]
     internal sealed class ProtocolKeyValueAttribute : Attribute
     {
-        private string _name;
-
         public ProtocolKeyValueAttribute(string name)
         {
-            _name = name;
+            Name = name;
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
     }
 }

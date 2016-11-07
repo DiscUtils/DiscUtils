@@ -26,12 +26,12 @@ namespace DiscUtils.Iscsi
 {
     internal class ReadyToTransferPacket : BaseResponse
     {
-        public BasicHeaderSegment Header;
-        public ulong Lun;
-        public uint TargetTransferTag;
-        public uint ReadyToTransferSequenceNumber;
         public uint BufferOffset;
         public uint DesiredTransferLength;
+        public BasicHeaderSegment Header;
+        public ulong Lun;
+        public uint ReadyToTransferSequenceNumber;
+        public uint TargetTransferTag;
 
         public override void Parse(ProtocolDataUnit pdu)
         {

@@ -20,24 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-
     internal abstract class VolumeDescriptorDiskRegion : BuilderExtent
     {
         private byte[] _readCache;
 
         public VolumeDescriptorDiskRegion(long start)
-            : base(start, IsoUtilities.SectorSize)
-        {
-        }
+            : base(start, IsoUtilities.SectorSize) {}
 
-        public override void Dispose()
-        {
-        }
+        public override void Dispose() {}
 
         internal override void PrepareForRead()
         {
@@ -48,9 +43,9 @@ namespace DiscUtils.Iso9660
         {
             long relPos = diskOffset - Start;
 
-            int numRead = (int) Math.Min(count, _readCache.Length - relPos);
+            int numRead = (int)Math.Min(count, _readCache.Length - relPos);
 
-            Array.Copy(_readCache, (int) relPos, buffer, offset, numRead);
+            Array.Copy(_readCache, (int)relPos, buffer, offset, numRead);
 
             return numRead;
         }

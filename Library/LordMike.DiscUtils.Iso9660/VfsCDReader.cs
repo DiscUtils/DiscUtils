@@ -20,29 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class VfsCDReader : VfsReadOnlyFileSystem<ReaderDirEntry, File, ReaderDirectory, IsoContext>,
-        IClusterBasedFileSystem, IUnixFileSystem
+                                 IClusterBasedFileSystem, IUnixFileSystem
     {
-        private static readonly Iso9660Variant[] DefaultVariantsNoJoliet = new Iso9660Variant[]
-            {Iso9660Variant.RockRidge, Iso9660Variant.Iso9660};
+        private static readonly Iso9660Variant[] DefaultVariantsNoJoliet = { Iso9660Variant.RockRidge, Iso9660Variant.Iso9660 };
 
-        private static readonly Iso9660Variant[] DefaultVariantsWithJoliet = new Iso9660Variant[]
-            {Iso9660Variant.Joliet, Iso9660Variant.RockRidge, Iso9660Variant.Iso9660};
+        private static readonly Iso9660Variant[] DefaultVariantsWithJoliet = { Iso9660Variant.Joliet, Iso9660Variant.RockRidge, Iso9660Variant.Iso9660 };
 
-        private Stream _data;
-        private bool _hideVersions;
-        private BootVolumeDescriptor _bootVolDesc;
         private byte[] _bootCatalog;
-        private Iso9660Variant _activeVariant;
+        private readonly BootVolumeDescriptor _bootVolDesc;
+
+        private readonly Stream _data;
+        private readonly bool _hideVersions;
 
         /// <summary>
         /// Initializes a new instance of the VfsCDReader class.
@@ -51,9 +48,7 @@ namespace DiscUtils.Iso9660
         /// <param name="joliet">Whether to read Joliet extensions.</param>
         /// <param name="hideVersions">Hides version numbers (e.g. ";1") from the end of files.</param>
         public VfsCDReader(Stream data, bool joliet, bool hideVersions)
-            : this(data, joliet ? DefaultVariantsWithJoliet : DefaultVariantsNoJoliet, hideVersions)
-        {
-        }
+            : this(data, joliet ? DefaultVariantsWithJoliet : DefaultVariantsNoJoliet, hideVersions) {}
 
         /// <summary>
         /// Initializes a new instance of the VfsCDReader class.
@@ -125,8 +120,8 @@ namespace DiscUtils.Iso9660
                 vdpos += IsoUtilities.SectorSize;
             } while (bvd.VolumeDescriptorType != VolumeDescriptorType.SetTerminator);
 
-            _activeVariant = Iso9660Variant.None;
-            foreach (var variant in variantPriorities)
+            ActiveVariant = Iso9660Variant.None;
+            foreach (Iso9660Variant variant in variantPriorities)
             {
                 switch (variant)
                 {
@@ -135,12 +130,12 @@ namespace DiscUtils.Iso9660
                         {
                             data.Position = svdPos;
                             data.Read(buffer, 0, IsoUtilities.SectorSize);
-                            var volDesc = new SupplementaryVolumeDescriptor(buffer, 0);
+                            SupplementaryVolumeDescriptor volDesc = new SupplementaryVolumeDescriptor(buffer, 0);
 
-                            Context = new IsoContext {VolumeDescriptor = volDesc, DataStream = _data};
+                            Context = new IsoContext { VolumeDescriptor = volDesc, DataStream = _data };
                             RootDirectory = new ReaderDirectory(Context,
                                 new ReaderDirEntry(Context, volDesc.RootDirectory));
-                            _activeVariant = Iso9660Variant.Iso9660;
+                            ActiveVariant = Iso9660Variant.Iso9660;
                         }
 
                         break;
@@ -151,9 +146,9 @@ namespace DiscUtils.Iso9660
                         {
                             data.Position = pvdPos;
                             data.Read(buffer, 0, IsoUtilities.SectorSize);
-                            var volDesc = new PrimaryVolumeDescriptor(buffer, 0);
+                            PrimaryVolumeDescriptor volDesc = new PrimaryVolumeDescriptor(buffer, 0);
 
-                            IsoContext context = new IsoContext {VolumeDescriptor = volDesc, DataStream = _data};
+                            IsoContext context = new IsoContext { VolumeDescriptor = volDesc, DataStream = _data };
                             DirectoryRecord rootSelfRecord = ReadRootSelfRecord(context);
 
                             InitializeSusp(context, rootSelfRecord);
@@ -165,22 +160,65 @@ namespace DiscUtils.Iso9660
                             {
                                 Context = context;
                                 RootDirectory = new ReaderDirectory(context, new ReaderDirEntry(context, rootSelfRecord));
-                                _activeVariant = variant;
+                                ActiveVariant = variant;
                             }
                         }
 
                         break;
                 }
 
-                if (_activeVariant != Iso9660Variant.None)
+                if (ActiveVariant != Iso9660Variant.None)
                 {
                     break;
                 }
             }
 
-            if (_activeVariant == Iso9660Variant.None)
+            if (ActiveVariant == Iso9660Variant.None)
             {
                 throw new IOException("None of the permitted ISO9660 file system variants was detected");
+            }
+        }
+
+        public Iso9660Variant ActiveVariant { get; }
+
+        public BootDeviceEmulation BootEmulation
+        {
+            get
+            {
+                BootInitialEntry initialEntry = GetBootInitialEntry();
+                if (initialEntry != null)
+                {
+                    return initialEntry.BootMediaType;
+                }
+
+                return BootDeviceEmulation.NoEmulation;
+            }
+        }
+
+        public long BootImageStart
+        {
+            get
+            {
+                BootInitialEntry initialEntry = GetBootInitialEntry();
+                if (initialEntry != null)
+                {
+                    return initialEntry.ImageStart * IsoUtilities.SectorSize;
+                }
+                return 0;
+            }
+        }
+
+        public int BootLoadSegment
+        {
+            get
+            {
+                BootInitialEntry initialEntry = GetBootInitialEntry();
+                if (initialEntry != null)
+                {
+                    return initialEntry.LoadSegment;
+                }
+
+                return 0;
             }
         }
 
@@ -190,14 +228,6 @@ namespace DiscUtils.Iso9660
         public override string FriendlyName
         {
             get { return "ISO 9660 (CD-ROM)"; }
-        }
-
-        /// <summary>
-        /// Gets the Volume Identifier.
-        /// </summary>
-        public override string VolumeLabel
-        {
-            get { return Context.VolumeDescriptor.VolumeIdentifier; }
         }
 
         public bool HasBootImage
@@ -220,48 +250,12 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        public BootDeviceEmulation BootEmulation
+        /// <summary>
+        /// Gets the Volume Identifier.
+        /// </summary>
+        public override string VolumeLabel
         {
-            get
-            {
-                BootInitialEntry initialEntry = GetBootInitialEntry();
-                if (initialEntry != null)
-                {
-                    return initialEntry.BootMediaType;
-                }
-
-                return BootDeviceEmulation.NoEmulation;
-            }
-        }
-
-        public int BootLoadSegment
-        {
-            get
-            {
-                BootInitialEntry initialEntry = GetBootInitialEntry();
-                if (initialEntry != null)
-                {
-                    return initialEntry.LoadSegment;
-                }
-
-                return 0;
-            }
-        }
-
-        public long BootImageStart
-        {
-            get
-            {
-                BootInitialEntry initialEntry = GetBootInitialEntry();
-                if (initialEntry != null)
-                {
-                    return initialEntry.ImageStart*IsoUtilities.SectorSize;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
+            get { return Context.VolumeDescriptor.VolumeIdentifier; }
         }
 
         public long ClusterSize
@@ -274,39 +268,14 @@ namespace DiscUtils.Iso9660
             get { return Context.VolumeDescriptor.VolumeSpaceSize; }
         }
 
-        public Iso9660Variant ActiveVariant
-        {
-            get { return _activeVariant; }
-        }
-
-        public Stream OpenBootImage()
-        {
-            BootInitialEntry initialEntry = GetBootInitialEntry();
-            if (initialEntry != null)
-            {
-                return new SubStream(_data, initialEntry.ImageStart*IsoUtilities.SectorSize,
-                    initialEntry.SectorCount*Sizes.Sector);
-            }
-            else
-            {
-                throw new InvalidOperationException("No valid boot image");
-            }
-        }
-
-        public UnixFileSystemInfo GetUnixFileInfo(string path)
-        {
-            File file = GetFile(path);
-            return file.UnixFileInfo;
-        }
-
         public long ClusterToOffset(long cluster)
         {
-            return cluster*ClusterSize;
+            return cluster * ClusterSize;
         }
 
         public long OffsetToCluster(long offset)
         {
-            return offset/ClusterSize;
+            return offset / ClusterSize;
         }
 
         public Range<long, long>[] PathToClusters(string path)
@@ -322,7 +291,7 @@ namespace DiscUtils.Iso9660
                 throw new NotSupportedException("Non-contiguous extents not supported");
             }
 
-            return new Range<long, long>[]
+            return new[]
             {
                 new Range<long, long>(entry.Record.LocationOfExtent,
                     Utilities.Ceil(entry.Record.DataLength, IsoUtilities.SectorSize))
@@ -342,8 +311,8 @@ namespace DiscUtils.Iso9660
                 throw new NotSupportedException("Non-contiguous extents not supported");
             }
 
-            return new StreamExtent[]
-                {new StreamExtent(entry.Record.LocationOfExtent*IsoUtilities.SectorSize, entry.Record.DataLength)};
+            return new[]
+                { new StreamExtent(entry.Record.LocationOfExtent * IsoUtilities.SectorSize, entry.Record.DataLength) };
         }
 
         public ClusterMap BuildClusterMap()
@@ -365,7 +334,7 @@ namespace DiscUtils.Iso9660
 
                     if (paths == null)
                     {
-                        fileIdToPaths[entry.UniqueCacheId] = new string[] {path};
+                        fileIdToPaths[entry.UniqueCacheId] = new[] { path };
                     }
                     else
                     {
@@ -391,16 +360,30 @@ namespace DiscUtils.Iso9660
             return new ClusterMap(clusterToRole, clusterToFileId, fileIdToPaths);
         }
 
+        public UnixFileSystemInfo GetUnixFileInfo(string path)
+        {
+            File file = GetFile(path);
+            return file.UnixFileInfo;
+        }
+
+        public Stream OpenBootImage()
+        {
+            BootInitialEntry initialEntry = GetBootInitialEntry();
+            if (initialEntry != null)
+            {
+                return new SubStream(_data, initialEntry.ImageStart * IsoUtilities.SectorSize,
+                    initialEntry.SectorCount * Sizes.Sector);
+            }
+            throw new InvalidOperationException("No valid boot image");
+        }
+
         protected override File ConvertDirEntryToFile(ReaderDirEntry dirEntry)
         {
             if (dirEntry.IsDirectory)
             {
                 return new ReaderDirectory(Context, dirEntry);
             }
-            else
-            {
-                return new File(Context, dirEntry);
-            }
+            return new File(Context, dirEntry);
         }
 
         protected override string FormatFileName(string name)
@@ -427,16 +410,13 @@ namespace DiscUtils.Iso9660
                 context.SuspDetected = false;
                 return;
             }
-            else
-            {
-                context.SuspDetected = true;
-            }
+            context.SuspDetected = true;
 
             SuspRecords suspRecords = new SuspRecords(context, rootSelfRecord.SystemUseData, 0);
 
             // Stage 2 - Init general SUSP params
             SharingProtocolSystemUseEntry spEntry =
-                (SharingProtocolSystemUseEntry) suspRecords.GetEntries(null, "SP")[0];
+                (SharingProtocolSystemUseEntry)suspRecords.GetEntries(null, "SP")[0];
             context.SuspSkipBytes = spEntry.SystemAreaSkip;
 
             // Stage 3 - Init extensions
@@ -473,7 +453,7 @@ namespace DiscUtils.Iso9660
 
         private static DirectoryRecord ReadRootSelfRecord(IsoContext context)
         {
-            context.DataStream.Position = context.VolumeDescriptor.RootDirectory.LocationOfExtent*
+            context.DataStream.Position = context.VolumeDescriptor.RootDirectory.LocationOfExtent *
                                           context.VolumeDescriptor.LogicalBlockSize;
             byte[] firstSector = Utilities.ReadFully(context.DataStream, context.VolumeDescriptor.LogicalBlockSize);
 
@@ -503,7 +483,7 @@ namespace DiscUtils.Iso9660
         {
             if (_bootCatalog == null && _bootVolDesc != null)
             {
-                _data.Position = _bootVolDesc.CatalogSector*IsoUtilities.SectorSize;
+                _data.Position = _bootVolDesc.CatalogSector * IsoUtilities.SectorSize;
                 _bootCatalog = Utilities.ReadFully(_data, IsoUtilities.SectorSize);
             }
 

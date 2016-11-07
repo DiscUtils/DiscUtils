@@ -35,27 +35,27 @@ namespace DiscUtils.Nfs
             DirectoryPreferredBytes = reader.ReadUInt32();
             MaxFileSize = reader.ReadInt64();
             TimePrecision = new Nfs3FileTime(reader);
-            FileSystemProperties = (Nfs3FileSystemProperties) reader.ReadInt32();
+            FileSystemProperties = (Nfs3FileSystemProperties)reader.ReadInt32();
         }
-
-        public uint ReadMaxBytes { get; set; }
-
-        public uint ReadPreferredBytes { get; set; }
-
-        public uint ReadMultipleSize { get; set; }
-
-        public uint WriteMaxBytes { get; set; }
-
-        public uint WritePreferredBytes { get; set; }
-
-        public uint WriteMultipleSize { get; set; }
 
         public uint DirectoryPreferredBytes { get; set; }
 
+        public Nfs3FileSystemProperties FileSystemProperties { get; set; }
+
         public long MaxFileSize { get; set; }
+
+        public uint ReadMaxBytes { get; set; }
+
+        public uint ReadMultipleSize { get; set; }
+
+        public uint ReadPreferredBytes { get; set; }
 
         public Nfs3FileTime TimePrecision { get; set; }
 
-        public Nfs3FileSystemProperties FileSystemProperties { get; set; }
+        public uint WriteMaxBytes { get; set; }
+
+        public uint WriteMultipleSize { get; set; }
+
+        public uint WritePreferredBytes { get; set; }
     }
 }

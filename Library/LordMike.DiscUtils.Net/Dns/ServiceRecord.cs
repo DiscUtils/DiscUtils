@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Net.Dns
 {
-    using System;
-
     /// <summary>
     /// Represents a DNS SRV record.
     /// </summary>
     public sealed class ServiceRecord : ResourceRecord
     {
-        private ushort _priority;
-        private ushort _weight;
-        private ushort _port;
-        private string _target;
+        private readonly ushort _port;
+        private readonly ushort _priority;
+        private readonly ushort _weight;
 
         internal ServiceRecord(string name, RecordType type, RecordClass rClass, DateTime expiry, PacketReader reader)
             : base(name, type, rClass, expiry)
@@ -43,25 +42,9 @@ namespace DiscUtils.Net.Dns
             _priority = reader.ReadUShort();
             _weight = reader.ReadUShort();
             _port = reader.ReadUShort();
-            _target = reader.ReadName();
+            Target = reader.ReadName();
 
             reader.Position = pos + dataLen;
-        }
-
-        /// <summary>
-        /// Gets the priority associated with this service record (lower value is higher priority).
-        /// </summary>
-        public int Priority
-        {
-            get { return _priority; }
-        }
-
-        /// <summary>
-        /// Gets the relative weight associated with this service record when randomly choosing between records of equal priority.
-        /// </summary>
-        public int Weight
-        {
-            get { return _weight; }
         }
 
         /// <summary>
@@ -73,11 +56,24 @@ namespace DiscUtils.Net.Dns
         }
 
         /// <summary>
+        /// Gets the priority associated with this service record (lower value is higher priority).
+        /// </summary>
+        public int Priority
+        {
+            get { return _priority; }
+        }
+
+        /// <summary>
         /// Gets the DNS name at which the service can be accessed.
         /// </summary>
-        public string Target
+        public string Target { get; }
+
+        /// <summary>
+        /// Gets the relative weight associated with this service record when randomly choosing between records of equal priority.
+        /// </summary>
+        public int Weight
         {
-            get { return _target; }
+            get { return _weight; }
         }
     }
 }

@@ -20,29 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-
     internal class BootInitialEntry
     {
         public byte BootIndicator;
         public BootDeviceEmulation BootMediaType;
-        public ushort LoadSegment;
-        public byte SystemType;
-        public ushort SectorCount;
         public uint ImageStart;
+        public ushort LoadSegment;
+        public ushort SectorCount;
+        public byte SystemType;
 
-        public BootInitialEntry()
-        {
-        }
+        public BootInitialEntry() {}
 
         public BootInitialEntry(byte[] buffer, int offset)
         {
             BootIndicator = buffer[offset + 0x00];
-            BootMediaType = (BootDeviceEmulation) buffer[offset + 0x01];
+            BootMediaType = (BootDeviceEmulation)buffer[offset + 0x01];
             LoadSegment = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             SystemType = buffer[offset + 0x04];
             SectorCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
@@ -53,7 +50,7 @@ namespace DiscUtils.Iso9660
         {
             Array.Clear(buffer, offset, 0x20);
             buffer[offset + 0x00] = BootIndicator;
-            buffer[offset + 0x01] = (byte) BootMediaType;
+            buffer[offset + 0x01] = (byte)BootMediaType;
             Utilities.WriteBytesLittleEndian(LoadSegment, buffer, offset + 0x02);
             buffer[offset + 0x04] = SystemType;
             Utilities.WriteBytesLittleEndian(SectorCount, buffer, offset + 0x06);

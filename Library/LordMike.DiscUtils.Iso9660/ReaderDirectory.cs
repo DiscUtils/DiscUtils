@@ -20,21 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class ReaderDirectory : File, IVfsDirectory<ReaderDirEntry, File>
     {
-        private List<ReaderDirEntry> _records;
-        private ReaderDirEntry _self;
+        private readonly List<ReaderDirEntry> _records;
 
         public ReaderDirectory(IsoContext context, ReaderDirEntry dirEntry)
             : base(context, dirEntry)
@@ -55,7 +53,7 @@ namespace DiscUtils.Iso9660
                     throw new IOException("Failed to read whole directory");
                 }
 
-                totalRead += (uint)bytesRead;
+                totalRead += bytesRead;
 
                 uint pos = 0;
                 while (pos < bytesRead && buffer[pos] != 0)
@@ -81,7 +79,7 @@ namespace DiscUtils.Iso9660
                     }
                     else if (dr.FileIdentifier == "\0")
                     {
-                        _self = new ReaderDirEntry(_context, dr);
+                        Self = new ReaderDirEntry(_context, dr);
                     }
 
                     pos += length;
@@ -89,20 +87,17 @@ namespace DiscUtils.Iso9660
             }
         }
 
+        public override byte[] SystemUseData
+        {
+            get { return Self.Record.SystemUseData; }
+        }
+
         public ICollection<ReaderDirEntry> AllEntries
         {
             get { return _records; }
         }
 
-        public ReaderDirEntry Self
-        {
-            get { return _self; }
-        }
-
-        public override byte[] SystemUseData
-        {
-            get { return _self.Record.SystemUseData; }
-        }
+        public ReaderDirEntry Self { get; }
 
         public ReaderDirEntry GetEntryByName(string name)
         {
@@ -120,7 +115,7 @@ namespace DiscUtils.Iso9660
                 {
                     return r;
                 }
-                else if (anyVerMatch && toComp.StartsWith(normName, StringComparison.Ordinal))
+                if (anyVerMatch && toComp.StartsWith(normName, StringComparison.Ordinal))
                 {
                     return r;
                 }

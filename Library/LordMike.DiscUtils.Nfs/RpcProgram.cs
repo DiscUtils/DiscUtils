@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Nfs
 {
-    using System.IO;
-
     internal abstract class RpcProgram
     {
         public const uint RpcVersion = 2;
@@ -44,10 +44,7 @@ namespace DiscUtils.Nfs
             MemoryStream ms = new MemoryStream();
             XdrDataWriter writer = StartCallMessage(ms, null, 0);
             RpcReply reply = DoSend(ms);
-            if (reply.Header.IsSuccess)
-            {
-                return;
-            }
+            if (reply.Header.IsSuccess) {}
             else
             {
                 throw new RpcException(reply.Header.ReplyHeader);
@@ -63,7 +60,7 @@ namespace DiscUtils.Nfs
 
             XdrDataReader reader = new XdrDataReader(new MemoryStream(buffer));
             RpcMessageHeader header = new RpcMessageHeader(reader);
-            return new RpcReply() {Header = header, BodyReader = reader};
+            return new RpcReply { Header = header, BodyReader = reader };
         }
 
         protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, uint procedure)
@@ -71,12 +68,12 @@ namespace DiscUtils.Nfs
             XdrDataWriter writer = new XdrDataWriter(ms);
 
             writer.Write(_client.NextTransactionId());
-            writer.Write((int) RpcMessageType.Call);
+            writer.Write((int)RpcMessageType.Call);
 
             RpcCallHeader hdr = new RpcCallHeader();
             hdr.RpcVersion = RpcVersion;
-            hdr.Program = (uint) Identifier;
-            hdr.Version = (uint) Version;
+            hdr.Program = (uint)Identifier;
+            hdr.Version = (uint)Version;
             hdr.Proc = procedure;
             hdr.Credentials = new RpcAuthentication(credentials ?? new RpcNullCredentials());
             hdr.Verifier = RpcAuthentication.Null();

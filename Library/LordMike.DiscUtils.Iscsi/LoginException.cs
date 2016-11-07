@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Iscsi
 {
-    using System;
-
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -39,18 +39,14 @@ namespace DiscUtils.Iscsi
         /// <summary>
         /// Initializes a new instance of the LoginException class.
         /// </summary>
-        public LoginException()
-        {
-        }
+        public LoginException() {}
 
         /// <summary>
         /// Initializes a new instance of the LoginException class.
         /// </summary>
         /// <param name="message">The reason for the exception.</param>
         public LoginException(string message)
-            : base(message)
-        {
-        }
+            : base(message) {}
 
         /// <summary>
         /// Initializes a new instance of the LoginException class.
@@ -58,9 +54,7 @@ namespace DiscUtils.Iscsi
         /// <param name="message">The reason for the exception.</param>
         /// <param name="innerException">The inner exception.</param>
         public LoginException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+            : base(message, innerException) {}
 
         /// <summary>
         /// Initializes a new instance of the LoginException class.
@@ -68,11 +62,10 @@ namespace DiscUtils.Iscsi
         /// <param name="message">The reason for the exception.</param>
         /// <param name="code">The target-indicated reason for the exception.</param>
         public LoginException(string message, LoginStatusCode code)
-            : base("iSCSI login failure (" + code + "):" + message)
-        {
-        }
+            : base("iSCSI login failure (" + code + "):" + message) {}
 
 #if !NETCORE
+
 /// <summary>
 /// Initializes a new instance of the LoginException class.
 /// </summary>

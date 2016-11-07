@@ -20,35 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System.Collections.Generic;
-
     internal class ScsiReportLunsResponse : ScsiResponse
     {
         private uint _availableLuns;
-        private List<ulong> _luns;
 
-        public List<ulong> Luns
+        public List<ulong> Luns { get; private set; }
+
+        public override uint NeededDataLength
         {
-            get { return _luns; }
+            get { return _availableLuns * 8 + 8; }
         }
 
         public override bool Truncated
         {
-            get { return _availableLuns != _luns.Count; }
-        }
-
-        public override uint NeededDataLength
-        {
-            get { return (_availableLuns*8) + 8; }
+            get { return _availableLuns != Luns.Count; }
         }
 
         public override void ReadFrom(byte[] buffer, int offset, int count)
         {
-            _luns = new List<ulong>();
+            Luns = new List<ulong>();
 
             if (count == 0)
             {
@@ -60,11 +55,11 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Data truncated too far");
             }
 
-            _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset)/8;
+            _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset) / 8;
             int pos = 8;
-            while (pos <= count - 8 && _luns.Count < _availableLuns)
+            while (pos <= count - 8 && Luns.Count < _availableLuns)
             {
-                _luns.Add(Utilities.ToUInt64BigEndian(buffer, offset + pos));
+                Luns.Add(Utilities.ToUInt64BigEndian(buffer, offset + pos));
                 pos += 8;
             }
         }

@@ -20,38 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.Text;
+
 namespace DiscUtils.Iscsi
 {
-    using System.Collections.Generic;
-    using System.Text;
-
     internal class TextBuffer
     {
-        private List<KeyValuePair<string, string>> _records;
+        private readonly List<KeyValuePair<string, string>> _records;
 
         public TextBuffer()
         {
             _records = new List<KeyValuePair<string, string>>();
-        }
-
-        public IEnumerable<KeyValuePair<string, string>> Lines
-        {
-            get { return _records; }
-        }
-
-        public int Size
-        {
-            get
-            {
-                int i = 0;
-
-                foreach (var entry in _records)
-                {
-                    i += entry.Key.Length + entry.Value.Length + 2;
-                }
-
-                return i;
-            }
         }
 
         internal int Count
@@ -63,7 +43,7 @@ namespace DiscUtils.Iscsi
         {
             get
             {
-                foreach (var entry in _records)
+                foreach (KeyValuePair<string, string> entry in _records)
                 {
                     if (entry.Key == key)
                     {
@@ -86,6 +66,26 @@ namespace DiscUtils.Iscsi
                 }
 
                 _records.Add(new KeyValuePair<string, string>(key, value));
+            }
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> Lines
+        {
+            get { return _records; }
+        }
+
+        public int Size
+        {
+            get
+            {
+                int i = 0;
+
+                foreach (KeyValuePair<string, string> entry in _records)
+                {
+                    i += entry.Key.Length + entry.Value.Length + 2;
+                }
+
+                return i;
             }
         }
 
@@ -136,10 +136,10 @@ namespace DiscUtils.Iscsi
         {
             int i = offset;
 
-            foreach (var entry in _records)
+            foreach (KeyValuePair<string, string> entry in _records)
             {
                 i += Encoding.ASCII.GetBytes(entry.Key, 0, entry.Key.Length, buffer, i);
-                buffer[i++] = (byte) '=';
+                buffer[i++] = (byte)'=';
                 i += Encoding.ASCII.GetBytes(entry.Value, 0, entry.Value.Length, buffer, i);
                 buffer[i++] = 0;
             }

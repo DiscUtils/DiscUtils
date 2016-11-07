@@ -20,44 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.Nfs
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class Nfs3Client : IDisposable
     {
-        private RpcClient _rpcClient;
-        private Nfs3Mount _mountClient;
-        private Nfs3 _nfsClient;
+        private readonly Dictionary<Nfs3FileHandle, Nfs3FileAttributes> _cachedAttributes;
+        private readonly Nfs3Mount _mountClient;
+        private readonly Nfs3 _nfsClient;
 
-        private Nfs3FileHandle _rootHandle;
-        private Nfs3FileSystemInfo _fsInfo;
-        private Dictionary<Nfs3FileHandle, Nfs3FileAttributes> _cachedAttributes;
+        private RpcClient _rpcClient;
 
         public Nfs3Client(string address, RpcCredentials credentials, string mountPoint)
         {
             _rpcClient = new RpcClient(address, credentials);
             _mountClient = new Nfs3Mount(_rpcClient);
-            _rootHandle = _mountClient.Mount(mountPoint).FileHandle;
+            RootHandle = _mountClient.Mount(mountPoint).FileHandle;
 
             _nfsClient = new Nfs3(_rpcClient);
 
-            Nfs3FileSystemInfoResult fsiResult = _nfsClient.FileSystemInfo(_rootHandle);
-            _fsInfo = fsiResult.FileSystemInfo;
+            Nfs3FileSystemInfoResult fsiResult = _nfsClient.FileSystemInfo(RootHandle);
+            FileSystemInfo = fsiResult.FileSystemInfo;
             _cachedAttributes = new Dictionary<Nfs3FileHandle, Nfs3FileAttributes>();
-            _cachedAttributes[_rootHandle] = fsiResult.PostOpAttributes;
+            _cachedAttributes[RootHandle] = fsiResult.PostOpAttributes;
         }
 
-        public Nfs3FileHandle RootHandle
-        {
-            get { return _rootHandle; }
-        }
+        public Nfs3FileSystemInfo FileSystemInfo { get; }
 
-        public Nfs3FileSystemInfo FileSystemInfo
-        {
-            get { return _fsInfo; }
-        }
+        public Nfs3FileHandle RootHandle { get; }
 
         public void Dispose()
         {
@@ -83,10 +75,7 @@ namespace DiscUtils.Nfs
                 _cachedAttributes[handle] = getResult.Attributes;
                 return getResult.Attributes;
             }
-            else
-            {
-                throw new Nfs3Exception(getResult.Status);
-            }
+            throw new Nfs3Exception(getResult.Status);
         }
 
         public void SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
@@ -119,14 +108,11 @@ namespace DiscUtils.Nfs
             {
                 return result.ObjectHandle;
             }
-            else if (result.Status == Nfs3Status.NoSuchEntity)
+            if (result.Status == Nfs3Status.NoSuchEntity)
             {
                 return null;
             }
-            else
-            {
-                throw new Nfs3Exception(result.Status);
-            }
+            throw new Nfs3Exception(result.Status);
         }
 
         public Nfs3AccessPermissions Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
@@ -142,10 +128,7 @@ namespace DiscUtils.Nfs
             {
                 return result.Access;
             }
-            else
-            {
-                throw new Nfs3Exception(result.Status);
-            }
+            throw new Nfs3Exception(result.Status);
         }
 
         public Nfs3ReadResult Read(Nfs3FileHandle fileHandle, long position, int count)
@@ -161,10 +144,7 @@ namespace DiscUtils.Nfs
             {
                 return result;
             }
-            else
-            {
-                throw new Nfs3Exception(result.Status);
-            }
+            throw new Nfs3Exception(result.Status);
         }
 
         public int Write(Nfs3FileHandle fileHandle, long position, byte[] buffer, int offset, int count)
@@ -177,10 +157,7 @@ namespace DiscUtils.Nfs
             {
                 return result.Count;
             }
-            else
-            {
-                throw new Nfs3Exception(result.Status);
-            }
+            throw new Nfs3Exception(result.Status);
         }
 
         public Nfs3FileHandle Create(Nfs3FileHandle dirHandle, string name, bool createNew, Nfs3SetAttributes attributes)
@@ -192,10 +169,7 @@ namespace DiscUtils.Nfs
                 _cachedAttributes[result.FileHandle] = result.FileAttributes;
                 return result.FileHandle;
             }
-            else
-            {
-                throw new Nfs3Exception(result.Status);
-            }
+            throw new Nfs3Exception(result.Status);
         }
 
         public Nfs3FileHandle MakeDirectory(Nfs3FileHandle dirHandle, string name, Nfs3SetAttributes attributes)
@@ -207,10 +181,7 @@ namespace DiscUtils.Nfs
                 _cachedAttributes[result.FileHandle] = result.FileAttributes;
                 return result.FileHandle;
             }
-            else
-            {
-                throw new Nfs3Exception(result.Status);
-            }
+            throw new Nfs3Exception(result.Status);
         }
 
         public void Remove(Nfs3FileHandle dirHandle, string name)
@@ -255,19 +226,19 @@ namespace DiscUtils.Nfs
             Nfs3ReadDirPlusResult result;
             do
             {
-                result = _nfsClient.ReadDirPlus(parent, cookie, cookieVerifier, _fsInfo.DirectoryPreferredBytes,
-                    _fsInfo.ReadMaxBytes);
+                result = _nfsClient.ReadDirPlus(parent, cookie, cookieVerifier, FileSystemInfo.DirectoryPreferredBytes,
+                    FileSystemInfo.ReadMaxBytes);
 
                 if (result.Status == Nfs3Status.AccessDenied && silentFail)
                 {
                     break;
                 }
-                else if (result.Status != Nfs3Status.Ok)
+                if (result.Status != Nfs3Status.Ok)
                 {
                     throw new Nfs3Exception(result.Status);
                 }
 
-                foreach (var entry in result.DirEntries)
+                foreach (Nfs3DirectoryEntry entry in result.DirEntries)
                 {
                     _cachedAttributes[entry.FileHandle] = entry.FileAttributes;
                     yield return entry;

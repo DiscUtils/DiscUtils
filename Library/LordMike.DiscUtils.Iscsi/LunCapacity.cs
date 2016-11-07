@@ -20,18 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
+
 namespace DiscUtils.Iscsi
 {
-    using System.Globalization;
-
     /// <summary>
     /// Class representing the capacity of a LUN.
     /// </summary>
     public class LunCapacity
     {
-        private long _logicalBlockCount;
-        private int _blockSize;
-
         /// <summary>
         /// Initializes a new instance of the LunCapacity class.
         /// </summary>
@@ -39,25 +36,19 @@ namespace DiscUtils.Iscsi
         /// <param name="blockSize">The size of each block.</param>
         public LunCapacity(long logicalBlockCount, int blockSize)
         {
-            _logicalBlockCount = logicalBlockCount;
-            _blockSize = blockSize;
-        }
-
-        /// <summary>
-        /// Gets the number of logical blocks in the LUN.
-        /// </summary>
-        public long LogicalBlockCount
-        {
-            get { return _logicalBlockCount; }
+            LogicalBlockCount = logicalBlockCount;
+            BlockSize = blockSize;
         }
 
         /// <summary>
         /// Gets the size of each logical block.
         /// </summary>
-        public int BlockSize
-        {
-            get { return _blockSize; }
-        }
+        public int BlockSize { get; }
+
+        /// <summary>
+        /// Gets the number of logical blocks in the LUN.
+        /// </summary>
+        public long LogicalBlockCount { get; }
 
         /// <summary>
         /// Gets the capacity (in bytes) as a string.
@@ -65,7 +56,7 @@ namespace DiscUtils.Iscsi
         /// <returns>A string containing an integer.</returns>
         public override string ToString()
         {
-            return (_blockSize*_logicalBlockCount).ToString(CultureInfo.InvariantCulture);
+            return (BlockSize * LogicalBlockCount).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

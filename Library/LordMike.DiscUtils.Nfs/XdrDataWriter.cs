@@ -20,23 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Nfs
 {
-    using System.IO;
-    using System.Text;
-
     internal sealed class XdrDataWriter : BigEndianDataWriter
     {
         public XdrDataWriter(Stream stream)
-            : base(stream)
-        {
-        }
+            : base(stream) {}
 
         public void Write(bool value)
         {
-            Write((int) (value ? 1 : 0));
+            Write(value ? 1 : 0);
         }
 
         public override void WriteBytes(byte[] buffer, int offset, int count)
@@ -58,7 +55,7 @@ namespace DiscUtils.Nfs
         {
             if (buffer == null || count == 0)
             {
-                Write((int) 0);
+                Write(0);
             }
             else
             {

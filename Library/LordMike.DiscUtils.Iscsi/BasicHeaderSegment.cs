@@ -26,12 +26,12 @@ namespace DiscUtils.Iscsi
 {
     internal class BasicHeaderSegment : IByteArraySerializable
     {
-        public bool Immediate;
-        public OpCode OpCode;
-        public bool FinalPdu;
-        public byte TotalAhsLength; // In 4-byte words!
         public int DataSegmentLength; // In bytes!
+        public bool FinalPdu;
+        public bool Immediate;
         public uint InitiatorTaskTag;
+        public OpCode OpCode;
+        public byte TotalAhsLength; // In 4-byte words!
 
         #region IByteArraySerializable Members
 
@@ -43,7 +43,7 @@ namespace DiscUtils.Iscsi
         public int ReadFrom(byte[] buffer, int offset)
         {
             Immediate = (buffer[offset] & 0x40) != 0;
-            OpCode = (OpCode) (buffer[offset] & 0x3F);
+            OpCode = (OpCode)(buffer[offset] & 0x3F);
             FinalPdu = (buffer[offset + 1] & 0x80) != 0;
             TotalAhsLength = buffer[offset + 4];
             DataSegmentLength = Utilities.ToInt32BigEndian(buffer, offset + 4) & 0x00FFFFFF;
@@ -53,12 +53,12 @@ namespace DiscUtils.Iscsi
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) ((Immediate ? 0x40 : 0x00) | ((int) OpCode & 0x3F));
-            buffer[offset + 1] |= (byte) (FinalPdu ? 0x80 : 0x00);
+            buffer[offset] = (byte)((Immediate ? 0x40 : 0x00) | ((int)OpCode & 0x3F));
+            buffer[offset + 1] |= (byte)(FinalPdu ? 0x80 : 0x00);
             buffer[offset + 4] = TotalAhsLength;
-            buffer[offset + 5] = (byte) ((DataSegmentLength >> 16) & 0xFF);
-            buffer[offset + 6] = (byte) ((DataSegmentLength >> 8) & 0xFF);
-            buffer[offset + 7] = (byte) (DataSegmentLength & 0xFF);
+            buffer[offset + 5] = (byte)((DataSegmentLength >> 16) & 0xFF);
+            buffer[offset + 6] = (byte)((DataSegmentLength >> 8) & 0xFF);
+            buffer[offset + 7] = (byte)(DataSegmentLength & 0xFF);
             Utilities.WriteBytesBigEndian(InitiatorTaskTag, buffer, offset + 16);
         }
 

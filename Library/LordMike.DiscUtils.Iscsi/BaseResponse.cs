@@ -24,10 +24,10 @@ namespace DiscUtils.Iscsi
 {
     internal abstract class BaseResponse
     {
-        public bool StatusPresent;
-        public uint StatusSequenceNumber;
         public uint ExpectedCommandSequenceNumber;
         public uint MaxCommandSequenceNumber;
+        public bool StatusPresent;
+        public uint StatusSequenceNumber;
 
         public abstract void Parse(ProtocolDataUnit pdu);
     }

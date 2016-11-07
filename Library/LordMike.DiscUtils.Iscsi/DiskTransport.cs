@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-    using System.IO;
-
     [VirtualDiskTransport("iscsi")]
     internal sealed class DiskTransport : VirtualDiskTransport
     {

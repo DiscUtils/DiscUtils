@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System;
-
     internal class ScsiReadCommand : ScsiCommand
     {
-        private uint _logicalBlockAddress;
-        private ushort _numBlocks;
+        private readonly uint _logicalBlockAddress;
+        private readonly ushort _numBlocks;
 
         public ScsiReadCommand(ulong targetLun, uint logicalBlockAddress, ushort numBlocks)
             : base(targetLun)

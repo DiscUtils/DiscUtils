@@ -20,36 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Iscsi
 {
-    using System.IO;
-
     internal class ProtocolDataUnit
     {
-        private byte[] _headerData;
-        private byte[] _contentData;
-
         public ProtocolDataUnit(byte[] headerData, byte[] contentData)
         {
-            _headerData = headerData;
-            _contentData = contentData;
+            HeaderData = headerData;
+            ContentData = contentData;
         }
+
+        public byte[] ContentData { get; }
+
+        public byte[] HeaderData { get; }
 
         public OpCode OpCode
         {
-            get { return (OpCode) (_headerData[0] & 0x3F); }
-        }
-
-        public byte[] HeaderData
-        {
-            get { return _headerData; }
-        }
-
-        public byte[] ContentData
-        {
-            get { return _contentData; }
+            get { return (OpCode)(HeaderData[0] & 0x3F); }
         }
 
         public static ProtocolDataUnit ReadFrom(Stream stream, bool headerDigestEnabled, bool dataDigestEnabled)
@@ -82,7 +72,7 @@ namespace DiscUtils.Iscsi
                 }
             }
 
-            int rem = 4 - (numRead%4);
+            int rem = 4 - numRead % 4;
             if (rem != 4)
             {
                 Utilities.ReadFully(stream, rem);
