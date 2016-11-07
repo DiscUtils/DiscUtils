@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 
 #if !NETCORE
@@ -128,7 +129,7 @@ namespace DiscUtils.Vhdx
             MetadataEntry entry = new MetadataEntry();
             entry.ItemId = id;
             entry.Offset = dataOffset;
-            entry.Length = (uint)Marshal.SizeOf(typeof(T));
+            entry.Length = (uint)ReflectionHelper.SizeOf<T>();
             entry.Flags = flags;
 
             header.Entries[key] = entry;
@@ -167,7 +168,7 @@ namespace DiscUtils.Vhdx
             if (Table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
-                byte[] data = Utilities.ReadFully(_regionStream, Marshal.SizeOf(typeof(T)));
+                byte[] data = Utilities.ReadFully(_regionStream, ReflectionHelper.SizeOf<T>());
                 return reader(data, 0);
             }
 

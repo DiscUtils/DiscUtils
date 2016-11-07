@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace DiscUtils.CoreCompat
 {
@@ -75,6 +76,15 @@ namespace DiscUtils.CoreCompat
             return type.GetTypeInfo().Assembly;
 #else
             return type.Assembly;
+#endif
+        }
+
+        public static int SizeOf<T>()
+        {
+#if NETCORE
+            return Marshal.SizeOf<T>();
+#else
+            return Marshal.SizeOf(typeof(T));
 #endif
         }
     }
