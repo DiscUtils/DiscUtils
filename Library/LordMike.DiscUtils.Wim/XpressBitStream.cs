@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using DiscUtils.Compression;
+
 namespace DiscUtils.Wim
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Compression;
-
     /// <summary>
     /// Converts a byte stream into a bit stream.
     /// </summary>
@@ -35,12 +35,11 @@ namespace DiscUtils.Wim
     /// location.</remarks>
     internal class XpressBitStream : BitStream
     {
-        private Stream _byteStream;
-
         private uint _buffer;
         private int _bufferAvailable;
+        private readonly Stream _byteStream;
 
-        private byte[] _readBuffer = new byte[2];
+        private readonly byte[] _readBuffer = new byte[2];
 
         public XpressBitStream(Stream byteStream)
         {
@@ -63,18 +62,18 @@ namespace DiscUtils.Wim
 
             _bufferAvailable -= count;
 
-            uint mask = (uint) ((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
-            return (uint) ((_buffer >> _bufferAvailable) & mask);
+            return (_buffer >> _bufferAvailable) & mask;
         }
 
         public override uint Peek(int count)
         {
             EnsureBufferFilled();
 
-            uint mask = (uint) ((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
-            return (uint) ((_buffer >> (_bufferAvailable - count)) & mask);
+            return (_buffer >> (_bufferAvailable - count)) & mask;
         }
 
         public override void Consume(int count)
@@ -92,7 +91,7 @@ namespace DiscUtils.Wim
                 _readBuffer[1] = 0;
                 _byteStream.Read(_readBuffer, 0, 2);
 
-                _buffer = (uint) ((uint) (_buffer << 16) | (uint) (_readBuffer[1] << 8) | (uint) _readBuffer[0]);
+                _buffer = _buffer << 16 | (uint)(_readBuffer[1] << 8) | _readBuffer[0];
                 _bufferAvailable += 16;
             }
         }

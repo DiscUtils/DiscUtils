@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vdi
 {
-    using System.IO;
-
     internal class PreHeaderRecord
     {
         public const uint VdiSignature = 0xbeda107f;
@@ -34,10 +33,6 @@ namespace DiscUtils.Vdi
         public string FileInfo;
         public uint Signature;
         public FileVersion Version;
-
-        public PreHeaderRecord()
-        {
-        }
 
         public static PreHeaderRecord Initialized()
         {
@@ -50,7 +45,7 @@ namespace DiscUtils.Vdi
 
         public int Read(byte[] buffer, int offset)
         {
-            FileInfo = Utilities.BytesToString(buffer, offset + 0, 64).TrimEnd(new char[] {'\0'});
+            FileInfo = Utilities.BytesToString(buffer, offset + 0, 64).TrimEnd('\0');
             Signature = Utilities.ToUInt32LittleEndian(buffer, offset + 64);
             Version = new FileVersion(Utilities.ToUInt32LittleEndian(buffer, offset + 68));
             return Size;
@@ -73,7 +68,7 @@ namespace DiscUtils.Vdi
         {
             Utilities.StringToBytes(FileInfo, buffer, offset + 0, 64);
             Utilities.WriteBytesLittleEndian(Signature, buffer, offset + 64);
-            Utilities.WriteBytesLittleEndian((uint) Version.Value, buffer, offset + 68);
+            Utilities.WriteBytesLittleEndian(Version.Value, buffer, offset + 68);
         }
     }
 }

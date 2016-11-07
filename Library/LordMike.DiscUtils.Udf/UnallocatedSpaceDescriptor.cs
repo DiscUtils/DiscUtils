@@ -26,13 +26,11 @@ namespace DiscUtils.Udf
 {
     internal sealed class UnallocatedSpaceDescriptor : TaggedDescriptor<UnallocatedSpaceDescriptor>
     {
-        public uint VolumeDescriptorSequenceNumber;
         public ExtentAllocationDescriptor[] Extents;
+        public uint VolumeDescriptorSequenceNumber;
 
         public UnallocatedSpaceDescriptor()
-            : base(TagIdentifier.UnallocatedSpaceDescriptor)
-        {
-        }
+            : base(TagIdentifier.UnallocatedSpaceDescriptor) {}
 
         public override int Parse(byte[] buffer, int offset)
         {
@@ -43,10 +41,10 @@ namespace DiscUtils.Udf
 
             for (int i = 0; i < numDescriptors; ++i)
             {
-                Extents[i] = Utilities.ToStruct<ExtentAllocationDescriptor>(buffer, offset + 24 + (i*8));
+                Extents[i] = Utilities.ToStruct<ExtentAllocationDescriptor>(buffer, offset + 24 + i * 8);
             }
 
-            return (int) (24 + (numDescriptors*8));
+            return (int)(24 + numDescriptors * 8);
         }
     }
 }

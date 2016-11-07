@@ -23,6 +23,6 @@ namespace DiscUtils.Udf
         UnallocatedSpaceEntry = 263,
         SpaceBitmapDescriptor = 264,
         PartitionIntegrityEntry = 265,
-        ExtendedFileEntry = 266,
+        ExtendedFileEntry = 266
     }
 }

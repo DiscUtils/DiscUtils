@@ -25,7 +25,7 @@ namespace DiscUtils.Vhdx
     /// <summary>
     /// The known types of VHDX disks.
     /// </summary>
-    public enum DiskType : int
+    public enum DiskType
     {
         /// <summary>
         /// Unknown type.
@@ -45,6 +45,6 @@ namespace DiscUtils.Vhdx
         /// <summary>
         /// Differencing disk, form of dynamic disk that stores changes relative to another disk.
         /// </summary>
-        Differencing = 4,
+        Differencing = 4
     }
 }

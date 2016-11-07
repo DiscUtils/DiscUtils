@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vdi
 {
-    using System;
-
     internal class GeometryRecord
     {
         public int Cylinders;
@@ -42,30 +41,30 @@ namespace DiscUtils.Vdi
         {
             GeometryRecord result = new GeometryRecord();
 
-            long totalSectors = capacity/512;
-            if (totalSectors/(16*63) <= 1024)
+            long totalSectors = capacity / 512;
+            if (totalSectors / (16 * 63) <= 1024)
             {
-                result.Cylinders = (int) Math.Max(totalSectors/(16*63), 1);
+                result.Cylinders = (int)Math.Max(totalSectors / (16 * 63), 1);
                 result.Heads = 16;
             }
-            else if (totalSectors/(32*63) <= 1024)
+            else if (totalSectors / (32 * 63) <= 1024)
             {
-                result.Cylinders = (int) Math.Max(totalSectors/(32*63), 1);
+                result.Cylinders = (int)Math.Max(totalSectors / (32 * 63), 1);
                 result.Heads = 32;
             }
-            else if (totalSectors/(64*63) <= 1024)
+            else if (totalSectors / (64 * 63) <= 1024)
             {
-                result.Cylinders = (int) (totalSectors/(64*63));
+                result.Cylinders = (int)(totalSectors / (64 * 63));
                 result.Heads = 64;
             }
-            else if (totalSectors/(128*63) <= 1024)
+            else if (totalSectors / (128 * 63) <= 1024)
             {
-                result.Cylinders = (int) (totalSectors/(128*63));
+                result.Cylinders = (int)(totalSectors / (128 * 63));
                 result.Heads = 128;
             }
             else
             {
-                result.Cylinders = (int) Math.Min(totalSectors/(255*63), 1024);
+                result.Cylinders = (int)Math.Min(totalSectors / (255 * 63), 1024);
                 result.Heads = 255;
             }
 
@@ -92,8 +91,8 @@ namespace DiscUtils.Vdi
 
         public Geometry ToGeometry(long actualCapacity)
         {
-            long cylinderCapacity = SectorSize*(long) Sectors*Heads;
-            return new Geometry((int) (actualCapacity/cylinderCapacity), Heads, Sectors, SectorSize);
+            long cylinderCapacity = SectorSize * (long)Sectors * Heads;
+            return new Geometry((int)(actualCapacity / cylinderCapacity), Heads, Sectors, SectorSize);
         }
     }
 }

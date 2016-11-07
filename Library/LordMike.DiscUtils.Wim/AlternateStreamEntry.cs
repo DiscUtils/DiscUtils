@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Wim
 {
-    using System.Text;
-
     internal class AlternateStreamEntry
     {
-        public long Length;
         public byte[] Hash;
+        public long Length;
         public string Name;
 
         public static AlternateStreamEntry ReadFrom(DataReader reader)
@@ -59,7 +58,7 @@ namespace DiscUtils.Wim
 
             if (startPos + length > reader.Position)
             {
-                int toRead = (int) (startPos + length - reader.Position);
+                int toRead = (int)(startPos + length - reader.Position);
                 reader.Skip(toRead);
             }
 

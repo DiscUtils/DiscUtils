@@ -20,24 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Class providing information about a VHDX region table.
     /// </summary>
     public sealed class RegionTableInfo : ICollection<RegionInfo>
     {
-        private RegionTable _table;
+        private readonly RegionTable _table;
 
         internal RegionTableInfo(RegionTable table)
         {
             _table = table;
+        }
+
+        /// <summary>
+        /// Gets the checksum of the region table.
+        /// </summary>
+        public int Checksum
+        {
+            get { return (int)_table.Checksum; }
+        }
+
+        private IEnumerable<RegionInfo> Entries
+        {
+            get
+            {
+                foreach (KeyValuePair<Guid, RegionEntry> entry in _table.Regions)
+                {
+                    yield return new RegionInfo(entry.Value);
+                }
+            }
         }
 
         /// <summary>
@@ -54,19 +72,11 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Gets the checksum of the region table.
-        /// </summary>
-        public int Checksum
-        {
-            get { return (int) _table.Checksum; }
-        }
-
-        /// <summary>
         /// Gets the number of metadata items present.
         /// </summary>
         public int Count
         {
-            get { return (int) _table.EntryCount; }
+            get { return (int)_table.EntryCount; }
         }
 
         /// <summary>
@@ -75,17 +85,6 @@ namespace DiscUtils.Vhdx
         public bool IsReadOnly
         {
             get { return true; }
-        }
-
-        private IEnumerable<RegionInfo> Entries
-        {
-            get
-            {
-                foreach (var entry in _table.Regions)
-                {
-                    yield return new RegionInfo(entry.Value);
-                }
-            }
         }
 
         /// <summary>
@@ -113,7 +112,7 @@ namespace DiscUtils.Vhdx
         /// <remarks>The comparison is based on the region identity.</remarks>
         public bool Contains(RegionInfo item)
         {
-            foreach (var entry in _table.Regions)
+            foreach (KeyValuePair<Guid, RegionEntry> entry in _table.Regions)
             {
                 if (entry.Key == item.Guid)
                 {
@@ -132,7 +131,7 @@ namespace DiscUtils.Vhdx
         public void CopyTo(RegionInfo[] array, int arrayIndex)
         {
             int offset = 0;
-            foreach (var entry in _table.Regions)
+            foreach (KeyValuePair<Guid, RegionEntry> entry in _table.Regions)
             {
                 array[arrayIndex + offset] = new RegionInfo(entry.Value);
                 ++offset;

@@ -20,28 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Globalization;
-
     internal class DomainEntityIdentifier : EntityIdentifier
     {
+        public override string ToString()
+        {
+            string major = ((uint)Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
+            string minor = ((uint)Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
+            DomainFlags flags = (DomainFlags)Suffix[2];
+            return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : Flags {3}]", Identifier, major, minor,
+                flags);
+        }
+
         [Flags]
         private enum DomainFlags : byte
         {
             None = 0,
             HardWriteProtect = 1,
             SoftWriteProtect = 2
-        }
-
-        public override string ToString()
-        {
-            string major = ((uint) Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
-            string minor = ((uint) Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
-            DomainFlags flags = (DomainFlags) Suffix[2];
-            return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : Flags {3}]", Identifier, major, minor,
-                flags);
         }
     }
 }

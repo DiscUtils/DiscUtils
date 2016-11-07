@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal class ExtendedAttributeRecord : IByteArraySerializable
     {
-        public uint AttributeType;
-        public byte AttributeSubType;
         public byte[] AttributeData;
+        public byte AttributeSubType;
+        public uint AttributeType;
 
         public int Size
         {

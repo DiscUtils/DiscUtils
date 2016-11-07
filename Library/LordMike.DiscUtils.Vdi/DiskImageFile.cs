@@ -20,33 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vdi
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Represents a single VirtualBox disk (.vdi file).
     /// </summary>
     public sealed class DiskImageFile : VirtualDiskLayer
     {
-        private Stream _stream;
+        private HeaderRecord _header;
+
+        /// <summary>
+        /// Indicates if this object controls the lifetime of the stream.
+        /// </summary>
+        private readonly Ownership _ownsStream;
 
         private PreHeaderRecord _preHeader;
-        private HeaderRecord _header;
+        private Stream _stream;
 
         /// <summary>
         /// Indicates if a write occurred, indicating the marker in the header needs
         /// to be updated.
         /// </summary>
         private bool _writeOccurred;
-
-        /// <summary>
-        /// Indicates if this object controls the lifetime of the stream.
-        /// </summary>
-        private Ownership _ownsStream;
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
@@ -72,6 +71,30 @@ namespace DiscUtils.Vdi
             ReadHeader();
         }
 
+        internal override long Capacity
+        {
+            get { return _header.DiskSize; }
+        }
+
+        /// <summary>
+        /// Gets (a guess at) the geometry of the virtual disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get
+            {
+                if (_header.LChsGeometry != null && _header.LChsGeometry.Cylinders != 0)
+                {
+                    return _header.LChsGeometry.ToGeometry(_header.DiskSize);
+                }
+                if (_header.LegacyGeometry.Cylinders != 0)
+                {
+                    return _header.LegacyGeometry.ToGeometry(_header.DiskSize);
+                }
+                return GeometryRecord.FromCapacity(_header.DiskSize).ToGeometry(_header.DiskSize);
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating if the layer only stores meaningful sectors.
         /// </summary>
@@ -86,33 +109,6 @@ namespace DiscUtils.Vdi
         public override bool NeedsParent
         {
             get { return _header.ImageType == ImageType.Differencing || _header.ImageType == ImageType.Undo; }
-        }
-
-        /// <summary>
-        /// Gets (a guess at) the geometry of the virtual disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get
-            {
-                if (_header.LChsGeometry != null && _header.LChsGeometry.Cylinders != 0)
-                {
-                    return _header.LChsGeometry.ToGeometry(_header.DiskSize);
-                }
-                else if (_header.LegacyGeometry.Cylinders != 0)
-                {
-                    return _header.LegacyGeometry.ToGeometry(_header.DiskSize);
-                }
-                else
-                {
-                    return GeometryRecord.FromCapacity(_header.DiskSize).ToGeometry(_header.DiskSize);
-                }
-            }
-        }
-
-        internal override long Capacity
-        {
-            get { return _header.DiskSize; }
         }
 
         internal override FileLocator RelativeFileLocator
@@ -131,12 +127,12 @@ namespace DiscUtils.Vdi
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
-            HeaderRecord header = HeaderRecord.Initialized(ImageType.Fixed, ImageFlags.None, capacity, 1024*1024, 0);
+            HeaderRecord header = HeaderRecord.Initialized(ImageType.Fixed, ImageFlags.None, capacity, 1024 * 1024, 0);
 
-            byte[] blockTable = new byte[header.BlockCount*4];
+            byte[] blockTable = new byte[header.BlockCount * 4];
             for (int i = 0; i < header.BlockCount; ++i)
             {
-                Utilities.WriteBytesLittleEndian((uint) i, blockTable, i*4);
+                Utilities.WriteBytesLittleEndian((uint)i, blockTable, i * 4);
             }
 
             header.BlocksAllocated = header.BlockCount;
@@ -148,7 +144,7 @@ namespace DiscUtils.Vdi
             stream.Position = header.BlocksOffset;
             stream.Write(blockTable, 0, blockTable.Length);
 
-            long totalSize = header.DataOffset + ((long) header.BlockSize*(long) header.BlockCount);
+            long totalSize = header.DataOffset + header.BlockSize * (long)header.BlockCount;
             if (stream.Length < totalSize)
             {
                 stream.SetLength(totalSize);
@@ -167,9 +163,9 @@ namespace DiscUtils.Vdi
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity)
         {
             PreHeaderRecord preHeader = PreHeaderRecord.Initialized();
-            HeaderRecord header = HeaderRecord.Initialized(ImageType.Dynamic, ImageFlags.None, capacity, 1024*1024, 0);
+            HeaderRecord header = HeaderRecord.Initialized(ImageType.Dynamic, ImageFlags.None, capacity, 1024 * 1024, 0);
 
-            byte[] blockTable = new byte[header.BlockCount*4];
+            byte[] blockTable = new byte[header.BlockCount * 4];
             for (int i = 0; i < blockTable.Length; ++i)
             {
                 blockTable[i] = 0xFF;

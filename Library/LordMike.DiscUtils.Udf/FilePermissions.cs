@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Udf
 {
-    using System;
-
     /// <summary>
     /// Standard Unix-style file system permissions.
     /// </summary>
@@ -108,6 +108,6 @@ namespace DiscUtils.Udf
         /// <summary>
         /// Owner delete permission.
         /// </summary>
-        OwnerDelete = 0x4000,
+        OwnerDelete = 0x4000
     }
 }

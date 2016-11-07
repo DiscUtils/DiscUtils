@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-
     internal sealed class ParentLocator : IByteArraySerializable
     {
-        public Guid LocatorType = LocatorTypeGuid;
-        public ushort Reserved = 0;
-        public ushort Count = 0;
-
         private static readonly Guid LocatorTypeGuid = new Guid("B04AEFB7-D19E-4A81-B789-25B8E9445913");
 
-        private Dictionary<string, string> _entries = new Dictionary<string, string>();
+        public ushort Count;
+        public Guid LocatorType = LocatorTypeGuid;
+        public ushort Reserved = 0;
+
+        public Dictionary<string, string> Entries { get; private set; } = new Dictionary<string, string>();
 
         public int Size
         {
@@ -52,25 +51,20 @@ namespace DiscUtils.Vhdx
             }
         }
 
-        public Dictionary<string, string> Entries
-        {
-            get { return _entries; }
-        }
-
         public int ReadFrom(byte[] buffer, int offset)
         {
             LocatorType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
-            if (LocatorType != ParentLocator.LocatorTypeGuid)
+            if (LocatorType != LocatorTypeGuid)
             {
                 throw new IOException("Unrecognized Parent Locator type: " + LocatorType);
             }
 
-            _entries = new Dictionary<string, string>();
+            Entries = new Dictionary<string, string>();
 
             Count = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
             for (ushort i = 0; i < Count; ++i)
             {
-                int kvOffset = offset + 20 + (i*12);
+                int kvOffset = offset + 20 + i * 12;
                 int keyOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 0);
                 int valueOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 4);
                 int keyLength = Utilities.ToUInt16LittleEndian(buffer, kvOffset + 8);
@@ -79,7 +73,7 @@ namespace DiscUtils.Vhdx
                 string key = Encoding.Unicode.GetString(buffer, keyOffset, keyLength);
                 string value = Encoding.Unicode.GetString(buffer, valueOffset, valueLength);
 
-                _entries[key] = value;
+                Entries[key] = value;
             }
 
             return 0;
@@ -92,7 +86,7 @@ namespace DiscUtils.Vhdx
                 throw new NotImplementedException();
             }
 
-            Count = (ushort) Entries.Count;
+            Count = (ushort)Entries.Count;
 
             Utilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);

@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Creates new VHD disks by wrapping existing streams.
     /// </summary>
@@ -36,16 +35,10 @@ namespace DiscUtils.Vhd
     /// is simply to present a VHD version of an existing disk.</remarks>
     public sealed class DiskBuilder : DiskImageBuilder
     {
-        private FileType _diskType = FileType.Dynamic;
-
         /// <summary>
         /// Gets or sets the type of VHD file to build.
         /// </summary>
-        public FileType DiskType
-        {
-            get { return _diskType; }
-            set { _diskType = value; }
-        }
+        public FileType DiskType { get; set; } = FileType.Dynamic;
 
         /// <summary>
         /// Initiates the build process.
@@ -71,7 +64,7 @@ namespace DiscUtils.Vhd
 
             Footer footer = new Footer(geometry, Content.Length, DiskType);
 
-            if (_diskType == FileType.Fixed)
+            if (DiskType == FileType.Fixed)
             {
                 footer.UpdateChecksum();
 
@@ -84,10 +77,10 @@ namespace DiscUtils.Vhd
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd",
                     new PassthroughStreamBuilder(imageStream)));
             }
-            else if (_diskType == FileType.Dynamic)
+            else if (DiskType == FileType.Dynamic)
             {
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vhd",
-                    new DynamicDiskBuilder(Content, footer, (uint) Sizes.OneMiB*2)));
+                    new DynamicDiskBuilder(Content, footer, (uint)Sizes.OneMiB * 2)));
             }
             else
             {

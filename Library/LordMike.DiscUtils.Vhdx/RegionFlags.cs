@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     [Flags]
     internal enum RegionFlags : uint
     {
         None = 0x00,
-        Required = 0x01,
+        Required = 0x01
     }
 }

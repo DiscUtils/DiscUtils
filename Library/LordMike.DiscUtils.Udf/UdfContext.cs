@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.Udf
 {
-    using System.Collections.Generic;
-    using DiscUtils.Vfs;
-
     internal class UdfContext : VfsContext
     {
+        public List<LogicalPartition> LogicalPartitions;
         public Dictionary<ushort, PhysicalPartition> PhysicalPartitions;
         public int PhysicalSectorSize;
-
-        public List<LogicalPartition> LogicalPartitions;
     }
 }

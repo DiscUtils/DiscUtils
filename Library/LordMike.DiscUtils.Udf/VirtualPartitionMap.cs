@@ -26,8 +26,8 @@ namespace DiscUtils.Udf
 {
     internal sealed class VirtualPartitionMap : PartitionMap
     {
-        public ushort VolumeSequenceNumber;
         public ushort PartitionNumber;
+        public ushort VolumeSequenceNumber;
 
         public override int Size
         {

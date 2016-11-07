@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Vdi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a disk stored in VirtualBox (Sun xVM) format.
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
-        private DiskImageFile _diskImage;
-
         private SparseStream _content;
+        private readonly DiskImageFile _diskImage;
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -41,9 +40,7 @@ namespace DiscUtils.Vdi
         /// <param name="path">The path to the disk.</param>
         /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
-            : this(new FileStream(path, FileMode.Open, access), Ownership.Dispose)
-        {
-        }
+            : this(new FileStream(path, FileMode.Open, access), Ownership.Dispose) {}
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -74,22 +71,6 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _diskImage.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
-        }
-
-        /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
         public override long Capacity
@@ -117,11 +98,11 @@ namespace DiscUtils.Vdi
         }
 
         /// <summary>
-        /// Gets the layers that make up the disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { yield return _diskImage; }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -132,6 +113,22 @@ namespace DiscUtils.Vdi
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
             get { return DiskFactory.MakeDiskTypeInfo(_diskImage.IsSparse ? "dynamic" : "fixed"); }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _diskImage.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield return _diskImage; }
         }
 
         /// <summary>

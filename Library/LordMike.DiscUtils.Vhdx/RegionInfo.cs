@@ -20,20 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     /// <summary>
     /// Class representing a region in a VHDX file.
     /// </summary>
     public sealed class RegionInfo
     {
-        private RegionEntry _entry;
+        private readonly RegionEntry _entry;
 
         internal RegionInfo(RegionEntry entry)
         {
             _entry = entry;
+        }
+
+        /// <summary>
+        /// Gets the file offset of this region within the VHDX file.
+        /// </summary>
+        public long FileOffset
+        {
+            get { return _entry.FileOffset; }
         }
 
         /// <summary>
@@ -42,6 +50,25 @@ namespace DiscUtils.Vhdx
         public Guid Guid
         {
             get { return _entry.Guid; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this region is required.
+        /// </summary>
+        /// <remarks>
+        /// To load a VHDX file, a parser must be able to interpret all regions marked as required.
+        /// </remarks>
+        public bool IsRequired
+        {
+            get { return (_entry.Flags & RegionFlags.Required) != 0; }
+        }
+
+        /// <summary>
+        /// Gets the length of this region within the VHDX file.
+        /// </summary>
+        public long Length
+        {
+            get { return _entry.Length; }
         }
 
         /// <summary>
@@ -59,42 +86,12 @@ namespace DiscUtils.Vhdx
                 {
                     return "BAT";
                 }
-                else if (_entry.Guid == RegionEntry.MetadataRegionGuid)
+                if (_entry.Guid == RegionEntry.MetadataRegionGuid)
                 {
                     return "Metadata Region";
                 }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
-        }
-
-        /// <summary>
-        /// Gets the file offset of this region within the VHDX file.
-        /// </summary>
-        public long FileOffset
-        {
-            get { return _entry.FileOffset; }
-        }
-
-        /// <summary>
-        /// Gets the length of this region within the VHDX file.
-        /// </summary>
-        public long Length
-        {
-            get { return _entry.Length; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this region is required.
-        /// </summary>
-        /// <remarks>
-        /// To load a VHDX file, a parser must be able to interpret all regions marked as required.
-        /// </remarks>
-        public bool IsRequired
-        {
-            get { return (_entry.Flags & RegionFlags.Required) != 0; }
         }
     }
 }

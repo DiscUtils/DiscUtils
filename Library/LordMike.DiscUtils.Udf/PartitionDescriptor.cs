@@ -26,21 +26,19 @@ namespace DiscUtils.Udf
 {
     internal class PartitionDescriptor : TaggedDescriptor<PartitionDescriptor>
     {
-        public uint VolumeDescriptorSequenceNumber;
-        public ushort PartitionFlags;
-        public ushort PartitionNumber;
-        public EntityIdentifier PartitionContents;
-        public byte[] PartitionContentsUse;
         public uint AccessType;
-        public uint PartitionStartingLocation;
-        public uint PartitionLength;
         public EntityIdentifier ImplementationIdentifier;
         public byte[] ImplementationUse;
+        public EntityIdentifier PartitionContents;
+        public byte[] PartitionContentsUse;
+        public ushort PartitionFlags;
+        public uint PartitionLength;
+        public ushort PartitionNumber;
+        public uint PartitionStartingLocation;
+        public uint VolumeDescriptorSequenceNumber;
 
         public PartitionDescriptor()
-            : base(TagIdentifier.PartitionDescriptor)
-        {
-        }
+            : base(TagIdentifier.PartitionDescriptor) {}
 
         public override int Parse(byte[] buffer, int offset)
         {

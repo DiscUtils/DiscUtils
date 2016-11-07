@@ -43,6 +43,6 @@ namespace DiscUtils.Udf
         UdfRealTimeFile = 249,
         UdfMetadataFile = 250,
         UdfMetadataMirrorFile = 251,
-        UdfMetadataBitmapFile = 252,
+        UdfMetadataBitmapFile = 252
     }
 }

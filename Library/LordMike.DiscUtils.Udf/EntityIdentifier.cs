@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Text;
-
     internal abstract class EntityIdentifier : IByteArraySerializable
     {
         public byte Flags;

@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using DiscUtils.Compression;
+
 namespace DiscUtils.Wim
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Compression;
-
     /// <summary>
     /// Implements the XPRESS decompression algorithm.
     /// </summary>
@@ -33,8 +33,8 @@ namespace DiscUtils.Wim
     /// fit into memory, it is not suitable for unbounded streams.</remarks>
     internal class XpressStream : Stream
     {
-        private Stream _compressedStream;
-        private byte[] _buffer;
+        private readonly byte[] _buffer;
+        private readonly Stream _compressedStream;
         private long _position;
 
         /// <summary>
@@ -75,9 +75,7 @@ namespace DiscUtils.Wim
             set { _position = value; }
         }
 
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -86,8 +84,8 @@ namespace DiscUtils.Wim
                 return 0;
             }
 
-            int numToRead = (int) Math.Min(count, _buffer.Length - _position);
-            Array.Copy(_buffer, (int) _position, buffer, offset, numToRead);
+            int numToRead = (int)Math.Min(count, _buffer.Length - _position);
+            Array.Copy(_buffer, (int)_position, buffer, offset, numToRead);
             _position += numToRead;
             return numToRead;
         }
@@ -109,14 +107,14 @@ namespace DiscUtils.Wim
 
         private HuffmanTree ReadHuffmanTree()
         {
-            uint[] lengths = new uint[256 + (16*16)];
+            uint[] lengths = new uint[256 + 16 * 16];
 
             for (int i = 0; i < lengths.Length; i += 2)
             {
                 int b = ReadCompressedByte();
 
-                lengths[i] = (uint) (b & 0xF);
-                lengths[i + 1] = (uint) (b >> 4);
+                lengths[i] = (uint)(b & 0xF);
+                lengths[i + 1] = (uint)(b >> 4);
             }
 
             return new HuffmanTree(lengths);
@@ -136,17 +134,17 @@ namespace DiscUtils.Wim
                 if (symbol < 256)
                 {
                     // The first 256 symbols are literal byte values
-                    buffer[numRead] = (byte) symbol;
+                    buffer[numRead] = (byte)symbol;
                     numRead++;
                 }
                 else
                 {
                     // The next 256 symbols are 4 bits each for offset and length.
-                    int offsetBits = (int) ((symbol - 256)/16);
-                    int len = (int) ((symbol - 256)%16);
+                    int offsetBits = (int)((symbol - 256) / 16);
+                    int len = (int)((symbol - 256) % 16);
 
                     // The actual offset
-                    int offset = (int) ((1 << offsetBits) - 1 + bitStream.Read(offsetBits));
+                    int offset = (int)((1 << offsetBits) - 1 + bitStream.Read(offsetBits));
 
                     // Lengths up to 15 bytes are stored directly in the symbol bits, beyond that
                     // the length is stored in the compression stream.

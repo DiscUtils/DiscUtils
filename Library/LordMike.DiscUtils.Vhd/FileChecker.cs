@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System;
-    using System.IO;
-
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -36,7 +35,7 @@ namespace DiscUtils.Vhd
     /// </summary>
     public class FileChecker
     {
-        private Stream _fileStream;
+        private readonly Stream _fileStream;
         private Footer _footer;
         private DynamicHeader _dynamicHeader;
 
@@ -44,7 +43,7 @@ namespace DiscUtils.Vhd
         private ReportLevels _reportLevels;
 
         private ReportLevels _levelsDetected;
-        private ReportLevels _levelsConsideredFail = ReportLevels.Errors;
+        private readonly ReportLevels _levelsConsideredFail = ReportLevels.Errors;
 
         /// <summary>
         /// Initializes a new instance of the FileChecker class.
@@ -73,12 +72,12 @@ namespace DiscUtils.Vhd
             }
             catch (AbortException ae)
             {
-                ReportError("File system check aborted: " + ae.ToString());
+                ReportError("File system check aborted: " + ae);
                 return false;
             }
             catch (Exception e)
             {
-                ReportError("File system check aborted with exception: " + e.ToString());
+                ReportError("File system check aborted with exception: " + e);
                 return false;
             }
 
@@ -117,7 +116,7 @@ namespace DiscUtils.Vhd
 
         private void CheckBat()
         {
-            int batSize = Utilities.RoundUp(_dynamicHeader.MaxTableEntries*4, Utilities.SectorSize);
+            int batSize = Utilities.RoundUp(_dynamicHeader.MaxTableEntries * 4, Utilities.SectorSize);
             if (_dynamicHeader.TableOffset > _fileStream.Length - batSize)
             {
                 ReportError("BAT: BAT extends beyond end of file");
@@ -126,10 +125,10 @@ namespace DiscUtils.Vhd
 
             _fileStream.Position = _dynamicHeader.TableOffset;
             byte[] batData = Utilities.ReadFully(_fileStream, batSize);
-            uint[] bat = new uint[batSize/4];
+            uint[] bat = new uint[batSize / 4];
             for (int i = 0; i < bat.Length; ++i)
             {
-                bat[i] = Utilities.ToUInt32BigEndian(batData, i*4);
+                bat[i] = Utilities.ToUInt32BigEndian(batData, i * 4);
             }
 
             for (int i = _dynamicHeader.MaxTableEntries; i < bat.Length; ++i)
@@ -154,9 +153,9 @@ namespace DiscUtils.Vhd
                 return;
             }
 
-            long dataStart = ((long) dataStartSector)*Utilities.SectorSize;
+            long dataStart = (long)dataStartSector * Utilities.SectorSize;
             uint blockBitmapSize =
-                (uint) Utilities.RoundUp((_dynamicHeader.BlockSize/Utilities.SectorSize)/8, Utilities.SectorSize);
+                (uint)Utilities.RoundUp(_dynamicHeader.BlockSize / Utilities.SectorSize / 8, Utilities.SectorSize);
             uint storedBlockSize = _dynamicHeader.BlockSize + blockBitmapSize;
 
             bool[] seenBlocks = new bool[_dynamicHeader.MaxTableEntries];
@@ -164,20 +163,20 @@ namespace DiscUtils.Vhd
             {
                 if (bat[i] != uint.MaxValue)
                 {
-                    long absPos = ((long) bat[i])*Utilities.SectorSize;
+                    long absPos = (long)bat[i] * Utilities.SectorSize;
 
                     if (absPos + storedBlockSize > _fileStream.Length)
                     {
                         ReportError("BAT: block stored beyond end of stream");
                     }
 
-                    if ((absPos - dataStart)%storedBlockSize != 0)
+                    if ((absPos - dataStart) % storedBlockSize != 0)
                     {
                         ReportError(
                             "BAT: block stored at invalid start sector (not a multiple of size of a stored block)");
                     }
 
-                    uint streamBlockIdx = (uint) ((absPos - dataStart)/storedBlockSize);
+                    uint streamBlockIdx = (uint)((absPos - dataStart) / storedBlockSize);
                     if (seenBlocks[streamBlockIdx])
                     {
                         ReportError("BAT: multiple blocks occupying same file space");
@@ -194,7 +193,7 @@ namespace DiscUtils.Vhd
             long pos = _footer.DataOffset;
             while (pos != -1)
             {
-                if ((pos%512) != 0)
+                if (pos % 512 != 0)
                 {
                     ReportError("DynHeader: Unaligned header @{0}", pos);
                 }
@@ -241,7 +240,7 @@ namespace DiscUtils.Vhd
                 ReportError("DynHeader: BAT offset is before last header");
             }
 
-            if ((_dynamicHeader.TableOffset%512) != 0)
+            if (_dynamicHeader.TableOffset % 512 != 0)
             {
                 ReportError("DynHeader: BAT offset is not sector aligned");
             }
@@ -256,7 +255,7 @@ namespace DiscUtils.Vhd
                 ReportError("DynHeader: Max table entries is invalid");
             }
 
-            if ((_dynamicHeader.BlockSize != Sizes.OneMiB*2) && (_dynamicHeader.BlockSize != Sizes.OneKiB*512))
+            if ((_dynamicHeader.BlockSize != Sizes.OneMiB * 2) && (_dynamicHeader.BlockSize != Sizes.OneKiB * 512))
             {
                 ReportWarning("DynHeader: Using non-standard block size '" + _dynamicHeader.BlockSize + "'");
             }
@@ -422,20 +421,9 @@ namespace DiscUtils.Vhd
 #if !NETCORE
         [Serializable]
 #endif
-
         private sealed class AbortException : InvalidFileSystemException
         {
-            public AbortException()
-                : base()
-            {
-            }
-
-#if !NETCORE
-            private AbortException(SerializationInfo info, StreamingContext ctxt)
-                : base(info, ctxt)
-            {
-            }
-#endif
+            
         }
     }
 }

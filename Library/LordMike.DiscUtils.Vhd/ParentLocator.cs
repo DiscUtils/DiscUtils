@@ -30,9 +30,9 @@ namespace DiscUtils.Vhd
         public const string PlatformCodeWindowsAbsoluteUnicode = "W2ku";
 
         public string PlatformCode;
-        public int PlatformDataSpace;
         public int PlatformDataLength;
         public long PlatformDataOffset;
+        public int PlatformDataSpace;
 
         public ParentLocator()
         {
@@ -62,7 +62,7 @@ namespace DiscUtils.Vhd
             Utilities.StringToBytes(PlatformCode, data, offset, 4);
             Utilities.WriteBytesBigEndian(PlatformDataSpace, data, offset + 4);
             Utilities.WriteBytesBigEndian(PlatformDataLength, data, offset + 8);
-            Utilities.WriteBytesBigEndian((uint) 0, data, offset + 12);
+            Utilities.WriteBytesBigEndian((uint)0, data, offset + 12);
             Utilities.WriteBytesBigEndian(PlatformDataOffset, data, offset + 16);
         }
     }

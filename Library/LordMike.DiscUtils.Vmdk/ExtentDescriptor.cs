@@ -20,58 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-
     internal class ExtentDescriptor
     {
-        private ExtentAccess _access;
-        private long _sizeInSectors;
-        private ExtentType _type;
-        private string _fileName;
-        private long _offset;
-
-        public ExtentDescriptor()
-        {
-        }
+        public ExtentDescriptor() {}
 
         public ExtentDescriptor(ExtentAccess access, long size, ExtentType type, string fileName, long offset)
         {
-            _access = access;
-            _sizeInSectors = size;
-            _type = type;
-            _fileName = fileName;
-            _offset = offset;
+            Access = access;
+            SizeInSectors = size;
+            Type = type;
+            FileName = fileName;
+            Offset = offset;
         }
 
-        public ExtentAccess Access
-        {
-            get { return _access; }
-        }
+        public ExtentAccess Access { get; private set; }
 
-        public long SizeInSectors
-        {
-            get { return _sizeInSectors; }
-        }
+        public string FileName { get; private set; }
 
-        public ExtentType Type
-        {
-            get { return _type; }
-        }
+        public long Offset { get; private set; }
 
-        public string FileName
-        {
-            get { return _fileName; }
-        }
+        public long SizeInSectors { get; private set; }
 
-        public long Offset
-        {
-            get { return _offset; }
-        }
+        public ExtentType Type { get; private set; }
 
         public static ExtentDescriptor Parse(string descriptor)
         {
@@ -84,13 +61,13 @@ namespace DiscUtils.Vmdk
 
             ExtentDescriptor result = new ExtentDescriptor();
 
-            result._access = ParseAccess(elems[0]);
-            result._sizeInSectors = long.Parse(elems[1], CultureInfo.InvariantCulture);
-            result._type = ParseType(elems[2]);
-            result._fileName = elems[3].Trim('\"');
+            result.Access = ParseAccess(elems[0]);
+            result.SizeInSectors = long.Parse(elems[1], CultureInfo.InvariantCulture);
+            result.Type = ParseType(elems[2]);
+            result.FileName = elems[3].Trim('\"');
             if (elems.Length > 4)
             {
-                result._offset = long.Parse(elems[4], CultureInfo.InvariantCulture);
+                result.Offset = long.Parse(elems[4], CultureInfo.InvariantCulture);
             }
 
             return result;
@@ -102,18 +79,15 @@ namespace DiscUtils.Vmdk
             {
                 return ExtentAccess.None;
             }
-            else if (access == "RDONLY")
+            if (access == "RDONLY")
             {
                 return ExtentAccess.ReadOnly;
             }
-            else if (access == "RW")
+            if (access == "RW")
             {
                 return ExtentAccess.ReadWrite;
             }
-            else
-            {
-                throw new ArgumentException("Unknown access type", nameof(access));
-            }
+            throw new ArgumentException("Unknown access type", nameof(access));
         }
 
         public static string FormatAccess(ExtentAccess access)
@@ -137,34 +111,31 @@ namespace DiscUtils.Vmdk
             {
                 return ExtentType.Flat;
             }
-            else if (type == "SPARSE")
+            if (type == "SPARSE")
             {
                 return ExtentType.Sparse;
             }
-            else if (type == "ZERO")
+            if (type == "ZERO")
             {
                 return ExtentType.Zero;
             }
-            else if (type == "VMFS")
+            if (type == "VMFS")
             {
                 return ExtentType.Vmfs;
             }
-            else if (type == "VMFSSPARSE")
+            if (type == "VMFSSPARSE")
             {
                 return ExtentType.VmfsSparse;
             }
-            else if (type == "VMFSRDM")
+            if (type == "VMFSRDM")
             {
                 return ExtentType.VmfsRdm;
             }
-            else if (type == "VMFSRAW")
+            if (type == "VMFSRAW")
             {
                 return ExtentType.VmfsRaw;
             }
-            else
-            {
-                throw new ArgumentException("Unknown extent type", nameof(type));
-            }
+            throw new ArgumentException("Unknown extent type", nameof(type));
         }
 
         public static string FormatExtentType(ExtentType type)
@@ -192,11 +163,11 @@ namespace DiscUtils.Vmdk
 
         public override string ToString()
         {
-            string basic = FormatAccess(_access) + " " + _sizeInSectors + " " + FormatExtentType(_type) + " \"" +
-                           _fileName + "\"";
-            if (_type != ExtentType.Sparse && _type != ExtentType.VmfsSparse && _type != ExtentType.Zero)
+            string basic = FormatAccess(Access) + " " + SizeInSectors + " " + FormatExtentType(Type) + " \"" +
+                           FileName + "\"";
+            if (Type != ExtentType.Sparse && Type != ExtentType.VmfsSparse && Type != ExtentType.Zero)
             {
-                return basic + " " + _offset;
+                return basic + " " + Offset;
             }
 
             return basic;

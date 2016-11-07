@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text;
-
     internal class DescriptorFile
     {
         private const string HeaderVersion = "version";
@@ -48,16 +47,15 @@ namespace DiscUtils.Vmdk
         private const string DiskDbHardwareVersion = "ddb.virtualHWVersion";
         private const string DiskDbUuid = "ddb.uuid";
 
-        private const long MaxSize = 20*Sizes.OneKiB;
+        private const long MaxSize = 20 * Sizes.OneKiB;
+        private readonly List<DescriptorFileEntry> _diskDataBase;
 
-        private List<DescriptorFileEntry> _header;
-        private List<ExtentDescriptor> _descriptors;
-        private List<DescriptorFileEntry> _diskDataBase;
+        private readonly List<DescriptorFileEntry> _header;
 
         public DescriptorFile()
         {
             _header = new List<DescriptorFileEntry>();
-            _descriptors = new List<ExtentDescriptor>();
+            Extents = new List<ExtentDescriptor>();
             _diskDataBase = new List<DescriptorFileEntry>();
 
             _header.Add(new DescriptorFileEntry(HeaderVersion, "1", DescriptorFileEntryType.Plain));
@@ -69,77 +67,16 @@ namespace DiscUtils.Vmdk
         public DescriptorFile(Stream source)
         {
             _header = new List<DescriptorFileEntry>();
-            _descriptors = new List<ExtentDescriptor>();
+            Extents = new List<ExtentDescriptor>();
             _diskDataBase = new List<DescriptorFileEntry>();
 
             Load(source);
         }
 
-        public uint ContentId
+        public DiskAdapterType AdapterType
         {
-            get { return uint.Parse(GetHeader(HeaderContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
-            set
-            {
-                SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture),
-                    DescriptorFileEntryType.Plain);
-            }
-        }
-
-        public uint ParentContentId
-        {
-            get
-            {
-                return uint.Parse(GetHeader(HeaderParentContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-            set
-            {
-                SetHeader(HeaderParentContentId, value.ToString("x8", CultureInfo.InvariantCulture),
-                    DescriptorFileEntryType.Plain);
-            }
-        }
-
-        public DiskCreateType CreateType
-        {
-            get { return ParseCreateType(GetHeader(HeaderCreateType)); }
-            set { SetHeader(HeaderCreateType, FormatCreateType(value), DescriptorFileEntryType.Plain); }
-        }
-
-        public string ParentFileNameHint
-        {
-            get { return GetHeader(HeaderParentFileNameHint); }
-            set { SetHeader(HeaderParentFileNameHint, value, DescriptorFileEntryType.Quoted); }
-        }
-
-        public List<ExtentDescriptor> Extents
-        {
-            get { return _descriptors; }
-        }
-
-        public Geometry DiskGeometry
-        {
-            get
-            {
-                string cylStr = GetDiskDatabase(DiskDbCylinders);
-                string headsStr = GetDiskDatabase(DiskDbHeads);
-                string sectorsStr = GetDiskDatabase(DiskDbSectors);
-                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) &&
-                    !string.IsNullOrEmpty(sectorsStr))
-                {
-                    return new Geometry(
-                        int.Parse(cylStr, CultureInfo.InvariantCulture),
-                        int.Parse(headsStr, CultureInfo.InvariantCulture),
-                        int.Parse(sectorsStr, CultureInfo.InvariantCulture));
-                }
-
-                return null;
-            }
-
-            set
-            {
-                SetDiskDatabase(DiskDbCylinders, value.Cylinders.ToString(CultureInfo.InvariantCulture));
-                SetDiskDatabase(DiskDbHeads, value.HeadsPerCylinder.ToString(CultureInfo.InvariantCulture));
-                SetDiskDatabase(DiskDbSectors, value.SectorsPerTrack.ToString(CultureInfo.InvariantCulture));
-            }
+            get { return ParseAdapterType(GetDiskDatabase(DiskDbAdapterType)); }
+            set { SetDiskDatabase(DiskDbAdapterType, FormatAdapterType(value)); }
         }
 
         public Geometry BiosGeometry
@@ -169,22 +106,77 @@ namespace DiscUtils.Vmdk
             }
         }
 
-        public Guid UniqueId
+        public uint ContentId
         {
-            get { return ParseUuid(GetDiskDatabase(DiskDbUuid)); }
-            set { SetDiskDatabase(DiskDbUuid, FormatUuid(value)); }
+            get { return uint.Parse(GetHeader(HeaderContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
+            set
+            {
+                SetHeader(HeaderContentId, value.ToString("x8", CultureInfo.InvariantCulture),
+                    DescriptorFileEntryType.Plain);
+            }
         }
 
-        public DiskAdapterType AdapterType
+        public DiskCreateType CreateType
         {
-            get { return ParseAdapterType(GetDiskDatabase(DiskDbAdapterType)); }
-            set { SetDiskDatabase(DiskDbAdapterType, FormatAdapterType(value)); }
+            get { return ParseCreateType(GetHeader(HeaderCreateType)); }
+            set { SetHeader(HeaderCreateType, FormatCreateType(value), DescriptorFileEntryType.Plain); }
         }
+
+        public Geometry DiskGeometry
+        {
+            get
+            {
+                string cylStr = GetDiskDatabase(DiskDbCylinders);
+                string headsStr = GetDiskDatabase(DiskDbHeads);
+                string sectorsStr = GetDiskDatabase(DiskDbSectors);
+                if (!string.IsNullOrEmpty(cylStr) && !string.IsNullOrEmpty(headsStr) &&
+                    !string.IsNullOrEmpty(sectorsStr))
+                {
+                    return new Geometry(
+                        int.Parse(cylStr, CultureInfo.InvariantCulture),
+                        int.Parse(headsStr, CultureInfo.InvariantCulture),
+                        int.Parse(sectorsStr, CultureInfo.InvariantCulture));
+                }
+
+                return null;
+            }
+
+            set
+            {
+                SetDiskDatabase(DiskDbCylinders, value.Cylinders.ToString(CultureInfo.InvariantCulture));
+                SetDiskDatabase(DiskDbHeads, value.HeadsPerCylinder.ToString(CultureInfo.InvariantCulture));
+                SetDiskDatabase(DiskDbSectors, value.SectorsPerTrack.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        public List<ExtentDescriptor> Extents { get; }
 
         public string HardwareVersion
         {
             get { return GetDiskDatabase(DiskDbHardwareVersion); }
             set { SetDiskDatabase(DiskDbHardwareVersion, value); }
+        }
+
+        public uint ParentContentId
+        {
+            get { return uint.Parse(GetHeader(HeaderParentContentId), NumberStyles.HexNumber, CultureInfo.InvariantCulture); }
+            set
+            {
+                SetHeader(HeaderParentContentId, value.ToString("x8", CultureInfo.InvariantCulture),
+                    DescriptorFileEntryType.Plain);
+            }
+        }
+
+        public string ParentFileNameHint
+        {
+            get { return GetHeader(HeaderParentFileNameHint); }
+            set { SetHeader(HeaderParentFileNameHint, value, DescriptorFileEntryType.Quoted); }
+        }
+
+        public Guid UniqueId
+        {
+            get { return ParseUuid(GetDiskDatabase(DiskDbUuid)); }
+            set { SetDiskDatabase(DiskDbUuid, FormatUuid(value)); }
         }
 
         internal void Write(Stream stream)
@@ -199,9 +191,9 @@ namespace DiscUtils.Vmdk
 
             content.Append("\n");
             content.Append("# Extent description\n");
-            for (int i = 0; i < _descriptors.Count; ++i)
+            for (int i = 0; i < Extents.Count; ++i)
             {
-                content.Append(_descriptors[i].ToString() + "\n");
+                content.Append(Extents[i] + "\n");
             }
 
             content.Append("\n");
@@ -363,7 +355,7 @@ namespace DiscUtils.Vmdk
 
         private string GetHeader(string key)
         {
-            foreach (var entry in _header)
+            foreach (DescriptorFileEntry entry in _header)
             {
                 if (entry.Key == key)
                 {
@@ -376,7 +368,7 @@ namespace DiscUtils.Vmdk
 
         private void SetHeader(string key, string newValue, DescriptorFileEntryType type)
         {
-            foreach (var entry in _header)
+            foreach (DescriptorFileEntry entry in _header)
             {
                 if (entry.Key == key)
                 {
@@ -390,7 +382,7 @@ namespace DiscUtils.Vmdk
 
         private string GetDiskDatabase(string key)
         {
-            foreach (var entry in _diskDataBase)
+            foreach (DescriptorFileEntry entry in _diskDataBase)
             {
                 if (entry.Key == key)
                 {
@@ -403,7 +395,7 @@ namespace DiscUtils.Vmdk
 
         private void SetDiskDatabase(string key, string value)
         {
-            foreach (var entry in _diskDataBase)
+            foreach (DescriptorFileEntry entry in _diskDataBase)
             {
                 if (entry.Key == key)
                 {
@@ -441,7 +433,7 @@ namespace DiscUtils.Vmdk
                         || line.StartsWith("RDONLY", StringComparison.Ordinal)
                         || line.StartsWith("NOACCESS", StringComparison.Ordinal))
                     {
-                        _descriptors.Add(ExtentDescriptor.Parse(line));
+                        Extents.Add(ExtentDescriptor.Parse(line));
                     }
                     else
                     {

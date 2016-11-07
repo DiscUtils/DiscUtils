@@ -20,22 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Wim
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Provides access to the contents of WIM (Windows Imaging) files.
     /// </summary>
     public class WimFile
     {
-        private Stream _fileStream;
-
-        private FileHeader _fileHeader;
+        private readonly FileHeader _fileHeader;
+        private readonly Stream _fileStream;
         private Dictionary<uint, List<ResourceInfo>> _resources;
 
         /// <summary>
@@ -64,19 +62,35 @@ namespace DiscUtils.Wim
         }
 
         /// <summary>
-        /// Gets the number of disk images within this file.
-        /// </summary>
-        public int ImageCount
-        {
-            get { return (int) _fileHeader.ImageCount; }
-        }
-
-        /// <summary>
         /// Gets the (zero-based) index of the bootable image.
         /// </summary>
         public int BootImage
         {
-            get { return (int) _fileHeader.BootIndex; }
+            get { return (int)_fileHeader.BootIndex; }
+        }
+
+        /// <summary>
+        /// Gets the version of the file format.
+        /// </summary>
+        public int FileFormatVersion
+        {
+            get { return (int)_fileHeader.Version; }
+        }
+
+        /// <summary>
+        /// Gets the identifying GUID for this WIM file.
+        /// </summary>
+        public Guid Guid
+        {
+            get { return _fileHeader.WimGuid; }
+        }
+
+        /// <summary>
+        /// Gets the number of disk images within this file.
+        /// </summary>
+        public int ImageCount
+        {
+            get { return (int)_fileHeader.ImageCount; }
         }
 
         /// <summary>
@@ -91,22 +105,6 @@ namespace DiscUtils.Wim
                     return reader.ReadToEnd();
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the version of the file format.
-        /// </summary>
-        public int FileFormatVersion
-        {
-            get { return (int) _fileHeader.Version; }
-        }
-
-        /// <summary>
-        /// Gets the identifying GUID for this WIM file.
-        /// </summary>
-        public Guid Guid
-        {
-            get { return _fileHeader.WimGuid; }
         }
 
         /// <summary>
@@ -160,7 +158,7 @@ namespace DiscUtils.Wim
                 return null;
             }
 
-            foreach (var header in _resources[hashHash])
+            foreach (ResourceInfo header in _resources[hashHash])
             {
                 if (Utilities.AreEqual(header.Hash, hash))
                 {

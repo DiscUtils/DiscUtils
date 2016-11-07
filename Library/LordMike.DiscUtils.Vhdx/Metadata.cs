@@ -20,86 +20,61 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.IO;
-    using System.Runtime.InteropServices;
-
 #if !NETCORE
     using System.Security.Permissions;
 #endif
 
     internal sealed class Metadata
     {
-        private Stream _regionStream;
-        private MetadataTable _table;
+        private readonly Stream _regionStream;
 
-        private FileParameters _fileParams;
-        private ulong _diskSize;
         private Guid _page83Data;
-        private uint _logicalSectorSize;
-        private uint _physicalSectorSize;
-        private ParentLocator _parentLocator;
 
         public Metadata(Stream regionStream)
         {
             _regionStream = regionStream;
             _regionStream.Position = 0;
-            _table = Utilities.ReadStruct<MetadataTable>(_regionStream);
+            Table = Utilities.ReadStruct<MetadataTable>(_regionStream);
 
-            _fileParams = ReadStruct<FileParameters>(MetadataTable.FileParametersGuid, false);
-            _diskSize = ReadValue<ulong>(MetadataTable.VirtualDiskSizeGuid, false, Utilities.ToUInt64LittleEndian);
-            _page83Data = ReadValue<Guid>(MetadataTable.Page83DataGuid, false, Utilities.ToGuidLittleEndian);
-            _logicalSectorSize = ReadValue<uint>(MetadataTable.LogicalSectorSizeGuid, false,
+            FileParameters = ReadStruct<FileParameters>(MetadataTable.FileParametersGuid, false);
+            DiskSize = ReadValue(MetadataTable.VirtualDiskSizeGuid, false, Utilities.ToUInt64LittleEndian);
+            _page83Data = ReadValue(MetadataTable.Page83DataGuid, false, Utilities.ToGuidLittleEndian);
+            LogicalSectorSize = ReadValue(MetadataTable.LogicalSectorSizeGuid, false,
                 Utilities.ToUInt32LittleEndian);
-            _physicalSectorSize = ReadValue<uint>(MetadataTable.PhysicalSectorSizeGuid, false,
+            PhysicalSectorSize = ReadValue(MetadataTable.PhysicalSectorSizeGuid, false,
                 Utilities.ToUInt32LittleEndian);
-            _parentLocator = ReadStruct<ParentLocator>(MetadataTable.ParentLocatorGuid, false);
+            ParentLocator = ReadStruct<ParentLocator>(MetadataTable.ParentLocatorGuid, false);
         }
 
         private delegate T Reader<T>(byte[] buffer, int offset);
 
         private delegate void Writer<T>(T val, byte[] buffer, int offset);
 
-        public MetadataTable Table
-        {
-            get { return _table; }
-        }
+        public MetadataTable Table { get; }
 
-        public FileParameters FileParameters
-        {
-            get { return _fileParams; }
-        }
+        public FileParameters FileParameters { get; }
 
-        public ulong DiskSize
-        {
-            get { return _diskSize; }
-        }
+        public ulong DiskSize { get; }
 
-        public uint LogicalSectorSize
-        {
-            get { return _logicalSectorSize; }
-        }
+        public uint LogicalSectorSize { get; }
 
-        public uint PhysicalSectorSize
-        {
-            get { return _physicalSectorSize; }
-        }
+        public uint PhysicalSectorSize { get; }
 
-        public ParentLocator ParentLocator
-        {
-            get { return _parentLocator; }
-        }
+        public ParentLocator ParentLocator { get; }
 
         internal static Metadata Initialize(Stream metadataStream, FileParameters fileParameters, ulong diskSize,
-            uint logicalSectorSize, uint physicalSectorSize, ParentLocator parentLocator)
+                                            uint logicalSectorSize, uint physicalSectorSize, ParentLocator parentLocator)
         {
             MetadataTable header = new MetadataTable();
 
-            uint dataOffset = (uint) (64*Sizes.OneKiB);
+            uint dataOffset = (uint)(64 * Sizes.OneKiB);
             dataOffset += AddEntryStruct(fileParameters, MetadataTable.FileParametersGuid, MetadataEntryFlags.IsRequired,
                 header, dataOffset, metadataStream);
             dataOffset += AddEntryValue(diskSize, Utilities.WriteBytesLittleEndian, MetadataTable.VirtualDiskSizeGuid,
@@ -124,14 +99,14 @@ namespace DiscUtils.Vhdx
         }
 
         private static uint AddEntryStruct<T>(T data, Guid id, MetadataEntryFlags flags, MetadataTable header,
-            uint dataOffset, Stream stream)
+                                              uint dataOffset, Stream stream)
             where T : IByteArraySerializable
         {
             MetadataEntryKey key = new MetadataEntryKey(id, (flags & MetadataEntryFlags.IsUser) != 0);
             MetadataEntry entry = new MetadataEntry();
             entry.ItemId = id;
             entry.Offset = dataOffset;
-            entry.Length = (uint) data.Size;
+            entry.Length = (uint)data.Size;
             entry.Flags = flags;
 
             header.Entries[key] = entry;
@@ -147,13 +122,13 @@ namespace DiscUtils.Vhdx
 #endif
 
         private static uint AddEntryValue<T>(T data, Writer<T> writer, Guid id, MetadataEntryFlags flags,
-            MetadataTable header, uint dataOffset, Stream stream)
+                                             MetadataTable header, uint dataOffset, Stream stream)
         {
             MetadataEntryKey key = new MetadataEntryKey(id, (flags & MetadataEntryFlags.IsUser) != 0);
             MetadataEntry entry = new MetadataEntry();
             entry.ItemId = id;
             entry.Offset = dataOffset;
-            entry.Length = (uint) Marshal.SizeOf(typeof(T));
+            entry.Length = (uint)Marshal.SizeOf(typeof(T));
             entry.Flags = flags;
 
             header.Entries[key] = entry;
@@ -172,10 +147,10 @@ namespace DiscUtils.Vhdx
         {
             MetadataEntryKey key = new MetadataEntryKey(itemId, isUser);
             MetadataEntry entry;
-            if (_table.Entries.TryGetValue(key, out entry))
+            if (Table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
-                return Utilities.ReadStruct<T>(_regionStream, (int) entry.Length);
+                return Utilities.ReadStruct<T>(_regionStream, (int)entry.Length);
             }
 
             return default(T);
@@ -189,7 +164,7 @@ namespace DiscUtils.Vhdx
         {
             MetadataEntryKey key = new MetadataEntryKey(itemId, isUser);
             MetadataEntry entry;
-            if (_table.Entries.TryGetValue(key, out entry))
+            if (Table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
                 byte[] data = Utilities.ReadFully(_regionStream, Marshal.SizeOf(typeof(T)));

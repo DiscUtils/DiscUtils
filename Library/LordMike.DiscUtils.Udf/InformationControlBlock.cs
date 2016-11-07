@@ -20,22 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal class InformationControlBlock : IByteArraySerializable
     {
-        public uint PriorDirectEntries;
-        public ushort StrategyType;
-        public ushort StrategyParameter;
-        public ushort MaxEntries;
-        public FileType FileType;
-        public LogicalBlockAddress ParentICBLocation;
         public AllocationType AllocationType;
+        public FileType FileType;
         public InformationControlBlockFlags Flags;
+        public ushort MaxEntries;
+        public LogicalBlockAddress ParentICBLocation;
+        public uint PriorDirectEntries;
+        public ushort StrategyParameter;
+        public ushort StrategyType;
 
         public int Size
         {
@@ -48,12 +47,12 @@ namespace DiscUtils.Udf
             StrategyType = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             StrategyParameter = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
             MaxEntries = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
-            FileType = (FileType) buffer[offset + 11];
+            FileType = (FileType)buffer[offset + 11];
             ParentICBLocation = Utilities.ToStruct<LogicalBlockAddress>(buffer, offset + 12);
 
             ushort flagsField = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
-            AllocationType = (AllocationType) (flagsField & 0x3);
-            Flags = (InformationControlBlockFlags) (flagsField & 0xFFFC);
+            AllocationType = (AllocationType)(flagsField & 0x3);
+            Flags = (InformationControlBlockFlags)(flagsField & 0xFFFC);
 
             return 20;
         }

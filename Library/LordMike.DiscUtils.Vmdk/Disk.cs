@@ -36,16 +36,16 @@ namespace DiscUtils.Vmdk
         internal const string ExtendedParameterKeyCreateType = "VMDK.CreateType";
 
         /// <summary>
-        /// The list of files that make up the disk.
-        /// </summary>
-        private List<Tuple<VirtualDiskLayer, Ownership>> _files;
-
-        /// <summary>
         /// The stream representing the content of this disk.
         /// </summary>
         private SparseStream _content;
 
-        private string _path;
+        /// <summary>
+        /// The list of files that make up the disk.
+        /// </summary>
+        private readonly List<Tuple<VirtualDiskLayer, Ownership>> _files;
+
+        private readonly string _path;
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -53,9 +53,7 @@ namespace DiscUtils.Vmdk
         /// <param name="path">The path to the disk.</param>
         /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
-            : this(new LocalFileLocator(Path.GetDirectoryName(path)), path, access)
-        {
-        }
+            : this(new LocalFileLocator(Path.GetDirectoryName(path)), path, access) {}
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -109,14 +107,6 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Gets the Geometry of this disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _files[_files.Count - 1].Item1.Geometry; }
-        }
-
-        /// <summary>
         /// Gets the geometry of the disk as it is anticipated a hypervisor BIOS will represent it.
         /// </summary>
         public override Geometry BiosGeometry
@@ -124,17 +114,9 @@ namespace DiscUtils.Vmdk
             get
             {
                 DiskImageFile file = _files[_files.Count - 1].Item1 as DiskImageFile;
-                Geometry result = (file != null) ? file.BiosGeometry : null;
+                Geometry result = file != null ? file.BiosGeometry : null;
                 return result ?? Geometry.MakeBiosSafe(_files[_files.Count - 1].Item1.Geometry, Capacity);
             }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -171,6 +153,60 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public override VirtualDiskClass DiskClass
+        {
+            get { return VirtualDiskClass.HardDisk; }
+        }
+
+        /// <summary>
+        /// Gets information about the type of disk.
+        /// </summary>
+        /// <remarks>This property provides access to meta-data about the disk format, for example whether the
+        /// BIOS geometry is preserved in the disk file.</remarks>
+        public override VirtualDiskTypeInfo DiskTypeInfo
+        {
+            get { return DiskFactory.MakeDiskTypeInfo(((DiskImageFile)_files[_files.Count - 1].Item1).CreateType); }
+        }
+
+        /// <summary>
+        /// Gets the Geometry of this disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _files[_files.Count - 1].Item1.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get
+            {
+                foreach (Tuple<VirtualDiskLayer, Ownership> file in _files)
+                {
+                    yield return file.Item1;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the links that make up the disk (type-safe version of Layers).
+        /// </summary>
+        public IEnumerable<DiskImageFile> Links
+        {
+            get
+            {
+                foreach (Tuple<VirtualDiskLayer, Ownership> file in _files)
+                {
+                    yield return (DiskImageFile)file.Item1;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the parameters of the disk.
         /// </summary>
         /// <remarks>Most of the parameters are also available individually, such as DiskType and Capacity.</remarks>
@@ -178,9 +214,9 @@ namespace DiscUtils.Vmdk
         {
             get
             {
-                DiskImageFile file = (DiskImageFile) _files[_files.Count - 1].Item1;
+                DiskImageFile file = (DiskImageFile)_files[_files.Count - 1].Item1;
 
-                VirtualDiskParameters diskParams = new VirtualDiskParameters()
+                VirtualDiskParameters diskParams = new VirtualDiskParameters
                 {
                     DiskType = DiskClass,
                     Capacity = Capacity,
@@ -196,44 +232,6 @@ namespace DiscUtils.Vmdk
                 diskParams.ExtendedParameters[ExtendedParameterKeyCreateType] = file.CreateType.ToString();
 
                 return diskParams;
-            }
-        }
-
-        /// <summary>
-        /// Gets the layers that make up the disk.
-        /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
-        {
-            get
-            {
-                foreach (var file in _files)
-                {
-                    yield return file.Item1 as VirtualDiskLayer;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets information about the type of disk.
-        /// </summary>
-        /// <remarks>This property provides access to meta-data about the disk format, for example whether the
-        /// BIOS geometry is preserved in the disk file.</remarks>
-        public override VirtualDiskTypeInfo DiskTypeInfo
-        {
-            get { return DiskFactory.MakeDiskTypeInfo(((DiskImageFile) _files[_files.Count - 1].Item1).CreateType); }
-        }
-
-        /// <summary>
-        /// Gets the links that make up the disk (type-safe version of Layers).
-        /// </summary>
-        public IEnumerable<DiskImageFile> Links
-        {
-            get
-            {
-                foreach (var file in _files)
-                {
-                    yield return (DiskImageFile) file.Item1;
-                }
             }
         }
 
@@ -309,7 +307,7 @@ namespace DiscUtils.Vmdk
         /// <param name="adapterType">The type of virtual disk adapter.</param>
         /// <returns>The newly created disk image.</returns>
         public static Disk Initialize(string path, long capacity, Geometry geometry, DiskCreateType type,
-            DiskAdapterType adapterType)
+                                      DiskAdapterType adapterType)
         {
             return new Disk(DiskImageFile.Initialize(path, capacity, geometry, type, adapterType), Ownership.Dispose);
         }
@@ -324,7 +322,7 @@ namespace DiscUtils.Vmdk
         /// <param name="adapterType">The type of virtual disk adapter.</param>
         /// <returns>The newly created disk image.</returns>
         public static Disk Initialize(DiscFileSystem fileSystem, string path, long capacity, DiskCreateType type,
-            DiskAdapterType adapterType)
+                                      DiskAdapterType adapterType)
         {
             return new Disk(DiskImageFile.Initialize(fileSystem, path, capacity, type, adapterType), Ownership.Dispose);
         }
@@ -350,7 +348,7 @@ namespace DiscUtils.Vmdk
         /// <param name="parentPath">The path to the parent disk.</param>
         /// <returns>The new disk.</returns>
         public static Disk InitializeDifferencing(DiscFileSystem fileSystem, string path, DiskCreateType type,
-            string parentPath)
+                                                  string parentPath)
         {
             return new Disk(DiskImageFile.InitializeDifferencing(fileSystem, path, type, parentPath), Ownership.Dispose);
         }
@@ -373,7 +371,7 @@ namespace DiscUtils.Vmdk
         /// <returns>The newly created disk.</returns>
         public override VirtualDisk CreateDifferencingDisk(string path)
         {
-            var firstLayer = _files[0].Item1;
+            VirtualDiskLayer firstLayer = _files[0].Item1;
             return InitializeDifferencing(path, DiffDiskCreateType(firstLayer),
                 firstLayer.RelativeFileLocator.GetFullPath(_path));
         }
@@ -399,7 +397,7 @@ namespace DiscUtils.Vmdk
                         _content = null;
                     }
 
-                    foreach (var file in _files)
+                    foreach (Tuple<VirtualDiskLayer, Ownership> file in _files)
                     {
                         if (file.Item2 == Ownership.Dispose)
                         {
@@ -433,10 +431,7 @@ namespace DiscUtils.Vmdk
                         return DiskCreateType.VmfsSparse;
                 }
             }
-            else
-            {
-                return DiskCreateType.MonolithicSparse;
-            }
+            return DiskCreateType.MonolithicSparse;
         }
 
         private void ResolveFileChain()
@@ -452,7 +447,7 @@ namespace DiscUtils.Vmdk
                 {
                     if (locator.Exists(posParent))
                     {
-                        file = VirtualDisk.OpenDiskLayer(file.RelativeFileLocator, posParent, FileAccess.Read);
+                        file = OpenDiskLayer(file.RelativeFileLocator, posParent, FileAccess.Read);
                         _files.Add(new Tuple<VirtualDiskLayer, Ownership>(file, Ownership.Dispose));
                         foundParent = true;
                         break;

@@ -28,9 +28,7 @@ namespace DiscUtils.Udf
         public ExtentDescriptor ReserveDescriptorSequence;
 
         public AnchorVolumeDescriptorPointer()
-            : base(TagIdentifier.AnchorVolumeDescriptorPointer)
-        {
-        }
+            : base(TagIdentifier.AnchorVolumeDescriptorPointer) {}
 
         public override int Parse(byte[] buffer, int offset)
         {

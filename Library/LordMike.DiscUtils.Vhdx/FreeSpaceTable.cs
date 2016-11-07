@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-
     internal sealed class FreeSpaceTable
     {
-        private List<StreamExtent> _freeExtents;
         private long _fileSize;
+        private List<StreamExtent> _freeExtents;
 
         public FreeSpaceTable(long fileSize)
         {
@@ -49,7 +48,7 @@ namespace DiscUtils.Vhdx
 
         public void ExtendTo(long fileSize, bool isFree)
         {
-            if (fileSize%Sizes.OneMiB != 0)
+            if (fileSize % Sizes.OneMiB != 0)
             {
                 throw new ArgumentException("VHDX space must be allocated on 1MB boundaries", nameof(fileSize));
             }
@@ -89,7 +88,7 @@ namespace DiscUtils.Vhdx
 
         public bool TryAllocate(long length, out long start)
         {
-            if (length%Sizes.OneMiB != 0)
+            if (length % Sizes.OneMiB != 0)
             {
                 throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", nameof(length));
             }
@@ -103,7 +102,7 @@ namespace DiscUtils.Vhdx
                     start = extent.Start;
                     return true;
                 }
-                else if (extent.Length > length)
+                if (extent.Length > length)
                 {
                     _freeExtents[i] = new StreamExtent(extent.Start + length, extent.Length - length);
                     start = extent.Start;
@@ -117,12 +116,12 @@ namespace DiscUtils.Vhdx
 
         private void ValidateRange(long start, long length, string method)
         {
-            if (start%Sizes.OneMiB != 0)
+            if (start % Sizes.OneMiB != 0)
             {
                 throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", nameof(start));
             }
 
-            if (length%Sizes.OneMiB != 0)
+            if (length % Sizes.OneMiB != 0)
             {
                 throw new ArgumentException("VHDX free space must be managed on 1MB boundaries", nameof(length));
             }

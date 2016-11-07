@@ -20,35 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Wim
 {
-    using System;
-
     internal class FileHeader
     {
-        public string Tag;
-        public uint HeaderSize;
-        public uint Version;
-        public FileFlags Flags;
-        public int CompressionSize;
-        public Guid WimGuid;
-        public ushort PartNumber;
-        public ushort TotalParts;
-        public uint ImageCount;
-        public ShortResourceHeader OffsetTableHeader;
-        public ShortResourceHeader XmlDataHeader;
-        public ShortResourceHeader BootMetaData;
         public uint BootIndex;
+        public ShortResourceHeader BootMetaData;
+        public int CompressionSize;
+        public FileFlags Flags;
+        public uint HeaderSize;
+        public uint ImageCount;
         public ShortResourceHeader IntegrityHeader;
+        public ShortResourceHeader OffsetTableHeader;
+        public ushort PartNumber;
+        public string Tag;
+        public ushort TotalParts;
+        public uint Version;
+        public Guid WimGuid;
+        public ShortResourceHeader XmlDataHeader;
 
         public void Read(byte[] buffer, int offset)
         {
             Tag = Utilities.BytesToString(buffer, offset, 8);
             HeaderSize = Utilities.ToUInt32LittleEndian(buffer, 8);
             Version = Utilities.ToUInt32LittleEndian(buffer, 12);
-            Flags = (FileFlags) Utilities.ToUInt32LittleEndian(buffer, 16);
+            Flags = (FileFlags)Utilities.ToUInt32LittleEndian(buffer, 16);
             CompressionSize = Utilities.ToInt32LittleEndian(buffer, 20);
             WimGuid = Utilities.ToGuidLittleEndian(buffer, 24);
             PartNumber = Utilities.ToUInt16LittleEndian(buffer, 40);

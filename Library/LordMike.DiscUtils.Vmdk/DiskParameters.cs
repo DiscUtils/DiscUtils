@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vmdk
 {
-    using System;
-
     /// <summary>
     /// The parameters used to create a new VMDK file.
     /// </summary>
@@ -32,9 +32,7 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// Initializes a new instance of the DiskParameters class with default values.
         /// </summary>
-        public DiskParameters()
-        {
-        }
+        public DiskParameters() {}
 
         /// <summary>
         /// Initializes a new instance of the DiskParameters class with generic parameters.
@@ -48,9 +46,9 @@ namespace DiscUtils.Vmdk
 
             string stringCreateType;
             if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyCreateType,
-                out stringCreateType))
+                                     out stringCreateType))
             {
-                CreateType = (DiskCreateType) Enum.Parse(typeof(DiskCreateType), stringCreateType);
+                CreateType = (DiskCreateType)Enum.Parse(typeof(DiskCreateType), stringCreateType);
             }
             else
             {
@@ -65,9 +63,9 @@ namespace DiscUtils.Vmdk
             {
                 string stringAdapterType;
                 if (genericParameters.ExtendedParameters.TryGetValue(Disk.ExtendedParameterKeyAdapterType,
-                    out stringAdapterType))
+                                         out stringAdapterType))
                 {
-                    AdapterType = (DiskAdapterType) Enum.Parse(typeof(DiskAdapterType), stringAdapterType);
+                    AdapterType = (DiskAdapterType)Enum.Parse(typeof(DiskAdapterType), stringAdapterType);
 
                     // Don't refining sub-type of SCSI actually select IDE
                     if (AdapterType == DiskAdapterType.Ide)
@@ -83,14 +81,9 @@ namespace DiscUtils.Vmdk
         }
 
         /// <summary>
-        /// Gets or sets the capacity of the virtual disk.
+        /// Gets or sets the type of emulated disk adapter.
         /// </summary>
-        public long Capacity { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Physical Geometry of the virtual disk.
-        /// </summary>
-        public Geometry Geometry { get; set; }
+        public DiskAdapterType AdapterType { get; set; }
 
         /// <summary>
         /// Gets or sets the BIOS Geometry of the virtual disk.
@@ -98,13 +91,18 @@ namespace DiscUtils.Vmdk
         public Geometry BiosGeometry { get; set; }
 
         /// <summary>
+        /// Gets or sets the capacity of the virtual disk.
+        /// </summary>
+        public long Capacity { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of VMDK file to create.
         /// </summary>
         public DiskCreateType CreateType { get; set; }
 
         /// <summary>
-        /// Gets or sets the type of emulated disk adapter.
+        /// Gets or sets the Physical Geometry of the virtual disk.
         /// </summary>
-        public DiskAdapterType AdapterType { get; set; }
+        public Geometry Geometry { get; set; }
     }
 }

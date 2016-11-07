@@ -20,37 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     internal sealed class LogEntryHeader : IByteArraySerializable
     {
         public const uint LogEntrySignature = 0x65676F6C;
 
-        public uint Signature;
+        private byte[] _data;
         public uint Checksum;
-        public uint EntryLength;
-        public uint Tail;
-        public ulong SequenceNumber;
         public uint DescriptorCount;
-        public uint Reserved;
-        public Guid LogGuid;
+        public uint EntryLength;
         public ulong FlushedFileOffset;
         public ulong LastFileOffset;
+        public Guid LogGuid;
+        public uint Reserved;
+        public ulong SequenceNumber;
 
-        private byte[] _data;
-
-        public int Size
-        {
-            get { return 64; }
-        }
+        public uint Signature;
+        public uint Tail;
 
         public bool IsValid
         {
             get { return Signature == LogEntrySignature; }
+        }
+
+        public int Size
+        {
+            get { return 64; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)

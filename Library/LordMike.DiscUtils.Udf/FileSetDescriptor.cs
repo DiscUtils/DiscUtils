@@ -20,31 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal class FileSetDescriptor : IByteArraySerializable
     {
-        public DescriptorTag DescriptorTag;
-        public DateTime RecordingTime;
-        public ushort InterchangeLevel;
-        public ushort MaximumInterchangeLevel;
-        public uint CharacterSetList;
-        public uint MaximumCharacterSetList;
-        public uint FileSetNumber;
-        public uint FileSetDescriptorNumber;
-        public CharacterSetSpecification LogicalVolumeIdentifierCharset;
-        public string LogicalVolumeIdentifier;
-        public CharacterSetSpecification FileSetCharset;
-        public string FileSetIdentifier;
-        public string CopyrightFileIdentifier;
         public string AbstractFileIdentifier;
-        public LongAllocationDescriptor RootDirectoryIcb;
+        public uint CharacterSetList;
+        public string CopyrightFileIdentifier;
+        public DescriptorTag DescriptorTag;
         public DomainEntityIdentifier DomainIdentifier;
+        public CharacterSetSpecification FileSetCharset;
+        public uint FileSetDescriptorNumber;
+        public string FileSetIdentifier;
+        public uint FileSetNumber;
+        public ushort InterchangeLevel;
+        public string LogicalVolumeIdentifier;
+        public CharacterSetSpecification LogicalVolumeIdentifierCharset;
+        public uint MaximumCharacterSetList;
+        public ushort MaximumInterchangeLevel;
         public LongAllocationDescriptor NextExtent;
+        public DateTime RecordingTime;
+        public LongAllocationDescriptor RootDirectoryIcb;
         public LongAllocationDescriptor SystemStreamDirectoryIcb;
 
         public int Size

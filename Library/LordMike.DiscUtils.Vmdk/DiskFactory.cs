@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     [VirtualDiskFactory("VMDK", ".vmdk")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
         {
-            get { return new string[] {"fixed", "dynamic", "vmfsfixed", "vmfsdynamic"}; }
+            get { return new[] { "fixed", "dynamic", "vmfsfixed", "vmfsdynamic" }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -49,7 +48,7 @@ namespace DiscUtils.Vmdk
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters)
+                                               VirtualDiskParameters diskParameters)
         {
             DiskParameters vmdkParams = new DiskParameters(diskParameters);
             vmdkParams.CreateType = VariantToCreateType(variant);
@@ -73,14 +72,14 @@ namespace DiscUtils.Vmdk
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo(DiskCreateType createType)
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "VMDK",
                 Variant = CreateTypeToVariant(createType),
                 CanBeHardDisk = true,
                 DeterministicGeometry = false,
                 PreservesBiosGeometry = false,
-                CalcGeometry = c => DiskImageFile.DefaultGeometry(c),
+                CalcGeometry = c => DiskImageFile.DefaultGeometry(c)
             };
         }
 

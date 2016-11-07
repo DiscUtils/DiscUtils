@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System.Globalization;
-
     internal class ImplementationEntityIdentifier : EntityIdentifier
     {
         public override string ToString()
         {
-            OSClass osClass = (OSClass) Suffix[0];
-            OSIdentifier osId = (OSIdentifier) Utilities.ToUInt16BigEndian(Suffix, 0);
+            OSClass osClass = (OSClass)Suffix[0];
+            OSIdentifier osId = (OSIdentifier)Utilities.ToUInt16BigEndian(Suffix, 0);
             return string.Format(CultureInfo.InvariantCulture, "{0} [OS {1} {2}]", Identifier, osClass, osId);
         }
     }

@@ -20,27 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Security.AccessControl;
+using System.Text.RegularExpressions;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Wim
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Security.AccessControl;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// Provides access to the file system within a WIM file image.
     /// </summary>
     public class WimFileSystem : ReadOnlyDiscFileSystem, IWindowsFileSystem
     {
+        private readonly ObjectCache<long, List<DirectoryEntry>> _dirCache;
         private WimFile _file;
-        private List<RawSecurityDescriptor> _securityDescriptors;
         private Stream _metaDataStream;
-        private ObjectCache<long, List<DirectoryEntry>> _dirCache;
         private long _rootDirPos;
+        private List<RawSecurityDescriptor> _securityDescriptors;
 
         internal WimFileSystem(WimFile file, int index)
         {
@@ -79,15 +78,13 @@ namespace DiscUtils.Wim
             {
                 return null;
             }
-            else if (id >= 0 && id < _securityDescriptors.Count)
+            if (id >= 0 && id < _securityDescriptors.Count)
             {
-                return _securityDescriptors[(int) id];
+                return _securityDescriptors[(int)id];
             }
-            else
-            {
-                // What if there is no descriptor?
-                throw new NotImplementedException();
-            }
+
+            // What if there is no descriptor?
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -119,7 +116,7 @@ namespace DiscUtils.Wim
             {
                 byte[] buffer = new byte[s.Length];
                 s.Read(buffer, 0, buffer.Length);
-                return new ReparsePoint((int) dirEntry.ReparseTag, buffer);
+                return new ReparsePoint((int)dirEntry.ReparseTag, buffer);
             }
         }
 
@@ -215,7 +212,7 @@ namespace DiscUtils.Wim
             List<string> names = new List<string>();
             if (dirEntry.AlternateStreams != null)
             {
-                foreach (var altStream in dirEntry.AlternateStreams)
+                foreach (KeyValuePair<string, AlternateStreamEntry> altStream in dirEntry.AlternateStreams)
                 {
                     if (!string.IsNullOrEmpty(altStream.Key))
                     {
@@ -240,7 +237,7 @@ namespace DiscUtils.Wim
         public long GetFileId(string path)
         {
             DirectoryEntry dirEntry = GetEntry(path);
-            return dirEntry.HardLink == 0 ? -1 : (long) dirEntry.HardLink;
+            return dirEntry.HardLink == 0 ? -1 : (long)dirEntry.HardLink;
         }
 
         /// <summary>
@@ -326,7 +323,7 @@ namespace DiscUtils.Wim
 
             List<DirectoryEntry> parentDir = GetDirectory(parentDirEntry.SubdirOffset);
 
-            return Utilities.Map<DirectoryEntry, string>(parentDir, (m) => Utilities.CombinePaths(path, m.FileName));
+            return Utilities.Map(parentDir, m => Utilities.CombinePaths(path, m.FileName));
         }
 
         /// <summary>
@@ -543,7 +540,7 @@ namespace DiscUtils.Wim
             List<DirectoryEntry> dir = _dirCache[id];
             if (dir == null)
             {
-                _metaDataStream.Position = (id == 0) ? _rootDirPos : id;
+                _metaDataStream.Position = id == 0 ? _rootDirPos : id;
                 LittleEndianDataReader reader = new LittleEndianDataReader(_metaDataStream);
 
                 dir = new List<DirectoryEntry>();
@@ -575,15 +572,15 @@ namespace DiscUtils.Wim
                 sdLengths[i] = reader.ReadUInt64();
             }
 
-            _securityDescriptors = new List<RawSecurityDescriptor>((int) numEntries);
+            _securityDescriptors = new List<RawSecurityDescriptor>((int)numEntries);
             for (uint i = 0; i < numEntries; ++i)
             {
-                _securityDescriptors.Add(new RawSecurityDescriptor(reader.ReadBytes((int) sdLengths[i]), 0));
+                _securityDescriptors.Add(new RawSecurityDescriptor(reader.ReadBytes((int)sdLengths[i]), 0));
             }
 
             if (reader.Position < startPos + totalLength)
             {
-                reader.Skip((int) (startPos + totalLength - reader.Position));
+                reader.Skip((int)(startPos + totalLength - reader.Position));
             }
 
             _rootDirPos = Utilities.RoundUp(startPos + totalLength, 8);
@@ -613,7 +610,7 @@ namespace DiscUtils.Wim
             {
                 nextEntry = null;
 
-                foreach (var entry in currentDir)
+                foreach (DirectoryEntry entry in currentDir)
                 {
                     if (path[i].Equals(entry.FileName, StringComparison.OrdinalIgnoreCase)
                         ||
@@ -629,7 +626,7 @@ namespace DiscUtils.Wim
                 {
                     return null;
                 }
-                else if (nextEntry.SubdirOffset != 0)
+                if (nextEntry.SubdirOffset != 0)
                 {
                     currentDir = GetDirectory(nextEntry.SubdirOffset);
                 }

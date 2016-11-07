@@ -10,6 +10,6 @@ namespace DiscUtils.Udf
         CharacterSet5 = 5,
         CharacterSet6 = 6,
         CharacterSet7 = 7,
-        CharacterSet8 = 8,
+        CharacterSet8 = 8
     }
 }

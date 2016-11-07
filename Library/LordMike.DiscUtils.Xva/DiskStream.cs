@@ -32,11 +32,11 @@ namespace DiscUtils.Xva
     internal class DiskStream : SparseStream
     {
         private readonly TarFile _archive;
+        private readonly string _dir;
+        private readonly long _length;
         private Stream _currentChunkData;
 
         private int _currentChunkIndex;
-        private readonly string _dir;
-        private readonly long _length;
 
         private long _position;
         private int[] _skipChunks;

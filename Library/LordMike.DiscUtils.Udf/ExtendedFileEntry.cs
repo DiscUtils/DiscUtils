@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal class ExtendedFileEntry : FileEntry, IByteArraySerializable
     {
-        public ulong ObjectSize;
         public DateTime CreationTime;
+        public ulong ObjectSize;
         public LongAllocationDescriptor StreamDirectoryIcb;
 
         public override int Size
@@ -43,7 +42,7 @@ namespace DiscUtils.Udf
             InformationControlBlock = Utilities.ToStruct<InformationControlBlock>(buffer, offset + 16);
             Uid = Utilities.ToUInt32LittleEndian(buffer, offset + 36);
             Gid = Utilities.ToUInt32LittleEndian(buffer, offset + 40);
-            Permissions = (FilePermissions) Utilities.ToUInt32LittleEndian(buffer, offset + 44);
+            Permissions = (FilePermissions)Utilities.ToUInt32LittleEndian(buffer, offset + 44);
             FileLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 48);
             RecordFormat = buffer[offset + 50];
             RecordDisplayAttributes = buffer[offset + 51];
@@ -68,7 +67,7 @@ namespace DiscUtils.Udf
             byte[] eaData = Utilities.ToByteArray(buffer, offset + 216, ExtendedAttributesLength);
             ExtendedAttributes = ReadExtendedAttributes(eaData);
 
-            return (int) (216 + ExtendedAttributesLength + AllocationDescriptorsLength);
+            return 216 + ExtendedAttributesLength + AllocationDescriptorsLength;
         }
 
         public override void WriteTo(byte[] buffer, int offset)

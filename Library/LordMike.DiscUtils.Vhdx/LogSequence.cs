@@ -20,20 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Vhdx
 {
-    using System.Collections.Generic;
-
     internal sealed class LogSequence : List<LogEntry>
     {
         public LogEntry Head
         {
-            get { return (Count > 0) ? this[Count - 1] : null; }
+            get { return Count > 0 ? this[Count - 1] : null; }
         }
 
         public LogEntry Tail
         {
-            get { return (Count > 0) ? this[0] : null; }
+            get { return Count > 0 ? this[0] : null; }
         }
 
         public bool Contains(long position)
@@ -47,16 +47,13 @@ namespace DiscUtils.Vhdx
             {
                 return position >= Tail.Position && position < Head.Position + LogEntry.LogSectorSize;
             }
-            else
-            {
-                return position >= Tail.Position || position < Head.Position + LogEntry.LogSectorSize;
-            }
+            return position >= Tail.Position || position < Head.Position + LogEntry.LogSectorSize;
         }
 
         internal bool HigherSequenceThan(LogSequence otherSequence)
         {
-            ulong other = (otherSequence.Count > 0) ? otherSequence.Head.SequenceNumber : 0;
-            ulong self = (Count > 0) ? Head.SequenceNumber : 0;
+            ulong other = otherSequence.Count > 0 ? otherSequence.Head.SequenceNumber : 0;
+            ulong self = Count > 0 ? Head.SequenceNumber : 0;
 
             return self > other;
         }

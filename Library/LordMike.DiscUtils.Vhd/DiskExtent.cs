@@ -24,21 +24,21 @@ namespace DiscUtils.Vhd
 {
     internal sealed class DiskExtent : VirtualDiskExtent
     {
-        private DiskImageFile _file;
+        private readonly DiskImageFile _file;
 
         public DiskExtent(DiskImageFile file)
         {
             _file = file;
         }
 
-        public override bool IsSparse
-        {
-            get { return _file.IsSparse; }
-        }
-
         public override long Capacity
         {
             get { return _file.Capacity; }
+        }
+
+        public override bool IsSparse
+        {
+            get { return _file.IsSparse; }
         }
 
         public override long StoredSize

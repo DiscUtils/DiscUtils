@@ -20,20 +20,44 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     /// <summary>
     /// Class representing an individual metadata item.
     /// </summary>
     public sealed class MetadataInfo
     {
-        private MetadataEntry _entry;
+        private readonly MetadataEntry _entry;
 
         internal MetadataInfo(MetadataEntry entry)
         {
             _entry = entry;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether parsing this metadata is needed to open the VHDX file.
+        /// </summary>
+        public bool IsRequired
+        {
+            get { return (_entry.Flags & MetadataEntryFlags.IsRequired) != 0; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this is system or user metadata.
+        /// </summary>
+        public bool IsUser
+        {
+            get { return (_entry.Flags & MetadataEntryFlags.IsUser) != 0; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this is virtual disk metadata, or VHDX file metadata.
+        /// </summary>
+        public bool IsVirtualDisk
+        {
+            get { return (_entry.Flags & MetadataEntryFlags.IsVirtualDisk) != 0; }
         }
 
         /// <summary>
@@ -42,6 +66,22 @@ namespace DiscUtils.Vhdx
         public Guid ItemId
         {
             get { return _entry.ItemId; }
+        }
+
+        /// <summary>
+        /// Gets the length of the metadata.
+        /// </summary>
+        public long Length
+        {
+            get { return _entry.Length; }
+        }
+
+        /// <summary>
+        /// Gets the offset within the metadata region of the metadata.
+        /// </summary>
+        public long Offset
+        {
+            get { return _entry.Offset; }
         }
 
         /// <summary>
@@ -55,71 +95,28 @@ namespace DiscUtils.Vhdx
                 {
                     return "File Parameters";
                 }
-                else if (_entry.ItemId == MetadataTable.LogicalSectorSizeGuid)
+                if (_entry.ItemId == MetadataTable.LogicalSectorSizeGuid)
                 {
                     return "Logical Sector Size";
                 }
-                else if (_entry.ItemId == MetadataTable.Page83DataGuid)
+                if (_entry.ItemId == MetadataTable.Page83DataGuid)
                 {
                     return "SCSI Page 83 Data";
                 }
-                else if (_entry.ItemId == MetadataTable.ParentLocatorGuid)
+                if (_entry.ItemId == MetadataTable.ParentLocatorGuid)
                 {
                     return "Parent Locator";
                 }
-                else if (_entry.ItemId == MetadataTable.PhysicalSectorSizeGuid)
+                if (_entry.ItemId == MetadataTable.PhysicalSectorSizeGuid)
                 {
                     return "Physical Sector Size";
                 }
-                else if (_entry.ItemId == MetadataTable.VirtualDiskSizeGuid)
+                if (_entry.ItemId == MetadataTable.VirtualDiskSizeGuid)
                 {
                     return "Virtual Disk Size";
                 }
-                else
-                {
-                    return null;
-                }
+                return null;
             }
-        }
-
-        /// <summary>
-        /// Gets the offset within the metadata region of the metadata.
-        /// </summary>
-        public long Offset
-        {
-            get { return _entry.Offset; }
-        }
-
-        /// <summary>
-        /// Gets the length of the metadata.
-        /// </summary>
-        public long Length
-        {
-            get { return _entry.Length; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this is system or user metadata.
-        /// </summary>
-        public bool IsUser
-        {
-            get { return (_entry.Flags & MetadataEntryFlags.IsUser) != 0; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether parsing this metadata is needed to open the VHDX file.
-        /// </summary>
-        public bool IsRequired
-        {
-            get { return (_entry.Flags & MetadataEntryFlags.IsRequired) != 0; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this is virtual disk metadata, or VHDX file metadata.
-        /// </summary>
-        public bool IsVirtualDisk
-        {
-            get { return (_entry.Flags & MetadataEntryFlags.IsVirtualDisk) != 0; }
         }
     }
 }

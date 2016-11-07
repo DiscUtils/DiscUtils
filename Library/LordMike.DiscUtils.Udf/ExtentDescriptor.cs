@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal class ExtentDescriptor : IByteArraySerializable
     {
         public uint Length;

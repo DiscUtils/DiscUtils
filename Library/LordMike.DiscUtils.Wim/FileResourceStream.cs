@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Wim
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Provides access to a (compressed) resource within the WIM file.
     /// </summary>
@@ -36,17 +35,17 @@ namespace DiscUtils.Wim
     {
         private const int E8DecodeFileSize = 12000000;
 
-        private Stream _baseStream;
-        private ShortResourceHeader _header;
-        private bool _lzxCompression;
-        private int _chunkSize;
+        private readonly Stream _baseStream;
+        private readonly long[] _chunkLength;
 
-        private long[] _chunkOffsets;
-        private long[] _chunkLength;
-        private long _offsetDelta;
+        private readonly long[] _chunkOffsets;
+        private readonly int _chunkSize;
 
         private int _currentChunk;
         private Stream _currentChunkStream;
+        private readonly ShortResourceHeader _header;
+        private readonly bool _lzxCompression;
+        private readonly long _offsetDelta;
 
         private long _position;
 
@@ -62,7 +61,7 @@ namespace DiscUtils.Wim
                 throw new NotImplementedException("Large files >4GB");
             }
 
-            int numChunks = (int) Utilities.Ceil(header.OriginalSize, _chunkSize);
+            int numChunks = (int)Utilities.Ceil(header.OriginalSize, _chunkSize);
 
             _chunkOffsets = new long[numChunks];
             _chunkLength = new long[numChunks];
@@ -72,7 +71,7 @@ namespace DiscUtils.Wim
                 _chunkLength[i - 1] = _chunkOffsets[i] - _chunkOffsets[i - 1];
             }
 
-            _chunkLength[numChunks - 1] = (_baseStream.Length - _baseStream.Position) - _chunkOffsets[numChunks - 1];
+            _chunkLength[numChunks - 1] = _baseStream.Length - _baseStream.Position - _chunkOffsets[numChunks - 1];
             _offsetDelta = _baseStream.Position;
 
             _currentChunk = -1;
@@ -93,6 +92,11 @@ namespace DiscUtils.Wim
             get { return false; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return new[] { new StreamExtent(0, Length) }; }
+        }
+
         public override long Length
         {
             get { return _header.OriginalSize; }
@@ -105,14 +109,7 @@ namespace DiscUtils.Wim
             set { _position = value; }
         }
 
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return new StreamExtent[] {new StreamExtent(0, Length)}; }
-        }
-
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -121,13 +118,13 @@ namespace DiscUtils.Wim
                 return 0;
             }
 
-            int maxToRead = (int) Math.Min(Length - _position, count);
+            int maxToRead = (int)Math.Min(Length - _position, count);
 
             int totalRead = 0;
             while (totalRead < maxToRead)
             {
-                int chunk = (int) (_position/_chunkSize);
-                int chunkOffset = (int) (_position%_chunkSize);
+                int chunk = (int)(_position / _chunkSize);
+                int chunkOffset = (int)(_position % _chunkSize);
                 int numToRead = Math.Min(maxToRead - totalRead, _chunkSize - chunkOffset);
 
                 if (_currentChunk != chunk)
@@ -170,7 +167,7 @@ namespace DiscUtils.Wim
             int targetUncompressed = _chunkSize;
             if (chunk == _chunkLength.Length - 1)
             {
-                targetUncompressed = (int) (Length - _position);
+                targetUncompressed = (int)(Length - _position);
             }
 
             Stream rawChunkStream = new SubStream(_baseStream, _offsetDelta + _chunkOffsets[chunk], _chunkLength[chunk]);
@@ -180,15 +177,9 @@ namespace DiscUtils.Wim
                 {
                     return new LzxStream(rawChunkStream, 15, E8DecodeFileSize);
                 }
-                else
-                {
-                    return new XpressStream(rawChunkStream, targetUncompressed);
-                }
+                return new XpressStream(rawChunkStream, targetUncompressed);
             }
-            else
-            {
-                return rawChunkStream;
-            }
+            return rawChunkStream;
         }
     }
 }

@@ -24,11 +24,11 @@ namespace DiscUtils.Vmdk
 {
     internal class CommonSparseExtentHeader
     {
-        public uint MagicNumber;
-        public uint Version;
         public long Capacity;
-        public long GrainSize;
         public long GdOffset;
+        public long GrainSize;
+        public uint MagicNumber;
         public uint NumGTEsPerGT;
+        public uint Version;
     }
 }

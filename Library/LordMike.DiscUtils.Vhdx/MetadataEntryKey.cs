@@ -20,44 +20,50 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     internal sealed class MetadataEntryKey : IEquatable<MetadataEntryKey>
     {
         private Guid _itemId;
-        private bool _isUser;
 
         public MetadataEntryKey(Guid itemId, bool isUser)
         {
             _itemId = itemId;
-            _isUser = isUser;
+            IsUser = isUser;
         }
+
+        public bool IsUser { get; }
 
         public Guid ItemId
         {
             get { return _itemId; }
         }
 
-        public bool IsUser
+        public bool Equals(MetadataEntryKey other)
         {
-            get { return _isUser; }
-        }
-
-        public static bool operator ==(MetadataEntryKey x, MetadataEntryKey y)
-        {
-            if (Object.ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (((object) x == null) || ((object) y == null))
+            if (other == null)
             {
                 return false;
             }
 
-            return x._itemId == y._itemId && x._isUser == y._isUser;
+            return _itemId == other._itemId && IsUser == other.IsUser;
+        }
+
+        public static bool operator ==(MetadataEntryKey x, MetadataEntryKey y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (((object)x == null) || ((object)y == null))
+            {
+                return false;
+            }
+
+            return x._itemId == y._itemId && x.IsUser == y.IsUser;
         }
 
         public static bool operator !=(MetadataEntryKey x, MetadataEntryKey y)
@@ -68,16 +74,6 @@ namespace DiscUtils.Vhdx
         public static MetadataEntryKey FromEntry(MetadataEntry entry)
         {
             return new MetadataEntryKey(entry.ItemId, (entry.Flags & MetadataEntryFlags.IsUser) != 0);
-        }
-
-        public bool Equals(MetadataEntryKey other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return _itemId == other._itemId && _isUser == other._isUser;
         }
 
         public override bool Equals(object other)
@@ -93,12 +89,12 @@ namespace DiscUtils.Vhdx
 
         public override int GetHashCode()
         {
-            return _itemId.GetHashCode() ^ (_isUser ? 0x3C13A5 : 0);
+            return _itemId.GetHashCode() ^ (IsUser ? 0x3C13A5 : 0);
         }
 
         public override string ToString()
         {
-            return _itemId.ToString() + (_isUser ? " - User" : " - System");
+            return _itemId + (IsUser ? " - User" : " - System");
         }
     }
 }

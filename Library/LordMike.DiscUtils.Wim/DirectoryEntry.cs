@@ -20,31 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Wim
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text;
-
     internal class DirectoryEntry
     {
-        public long Length;
+        public Dictionary<string, AlternateStreamEntry> AlternateStreams;
         public FileAttributes Attributes;
-        public uint SecurityId;
-        public long SubdirOffset;
         public long CreationTime;
+        public string FileName;
+        public uint HardLink;
+        public byte[] Hash;
         public long LastAccessTime;
         public long LastWriteTime;
-        public byte[] Hash;
+        public long Length;
         public uint ReparseTag;
-        public uint HardLink;
-        public ushort StreamCount;
+        public uint SecurityId;
         public string ShortName;
-        public string FileName;
-        public Dictionary<string, AlternateStreamEntry> AlternateStreams;
+        public ushort StreamCount;
+        public long SubdirOffset;
 
         public string SearchName
         {
@@ -54,10 +53,7 @@ namespace DiscUtils.Wim
                 {
                     return FileName + ".";
                 }
-                else
-                {
-                    return FileName;
-                }
+                return FileName;
             }
         }
 
@@ -73,7 +69,7 @@ namespace DiscUtils.Wim
 
             DirectoryEntry result = new DirectoryEntry();
             result.Length = length;
-            result.Attributes = (FileAttributes) reader.ReadUInt32();
+            result.Attributes = (FileAttributes)reader.ReadUInt32();
             result.SecurityId = reader.ReadUInt32();
             result.SubdirOffset = reader.ReadInt64();
             reader.Skip(16);
@@ -108,7 +104,7 @@ namespace DiscUtils.Wim
 
             if (startPos + length > reader.Position)
             {
-                int toRead = (int) (startPos + length - reader.Position);
+                int toRead = (int)(startPos + length - reader.Position);
                 reader.Skip(toRead);
             }
 

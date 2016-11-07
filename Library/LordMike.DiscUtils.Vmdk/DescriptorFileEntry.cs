@@ -20,38 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Globalization;
-
     internal class DescriptorFileEntry
     {
-        private string _key;
-        private string _value;
-        private DescriptorFileEntryType _type;
+        private readonly DescriptorFileEntryType _type;
 
         public DescriptorFileEntry(string key, string value, DescriptorFileEntryType type)
         {
-            _key = key;
-            _value = value;
+            Key = key;
+            Value = value;
             _type = type;
         }
 
-        public string Key
-        {
-            get { return _key; }
-        }
+        public string Key { get; }
 
-        public string Value
-        {
-            get { return _value; }
-            set { _value = value; }
-        }
+        public string Value { get; set; }
 
         public static DescriptorFileEntry Parse(string value)
         {
-            string[] parts = value.Split(new char[] {'='}, 2);
+            string[] parts = value.Split(new[] { '=' }, 2);
 
             for (int i = 0; i < parts.Length; ++i)
             {
@@ -64,15 +55,9 @@ namespace DiscUtils.Vmdk
                 {
                     return new DescriptorFileEntry(parts[0], parts[1].Trim('\"'), DescriptorFileEntryType.Quoted);
                 }
-                else
-                {
-                    return new DescriptorFileEntry(parts[0], parts[1], DescriptorFileEntryType.Plain);
-                }
+                return new DescriptorFileEntry(parts[0], parts[1], DescriptorFileEntryType.Plain);
             }
-            else
-            {
-                return new DescriptorFileEntry(parts[0], string.Empty, DescriptorFileEntryType.NoValue);
-            }
+            return new DescriptorFileEntry(parts[0], string.Empty, DescriptorFileEntryType.NoValue);
         }
 
         public override string ToString()
@@ -88,11 +73,11 @@ namespace DiscUtils.Vmdk
             switch (_type)
             {
                 case DescriptorFileEntryType.NoValue:
-                    return _key;
+                    return Key;
                 case DescriptorFileEntryType.Plain:
-                    return _key + sep + "=" + sep + _value;
+                    return Key + sep + "=" + sep + Value;
                 case DescriptorFileEntryType.Quoted:
-                    return _key + sep + "=" + sep + "\"" + _value + "\"";
+                    return Key + sep + "=" + sep + "\"" + Value + "\"";
                 default:
                     throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}",
                         _type));

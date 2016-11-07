@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     [Flags]
     internal enum FileParametersFlags : uint
     {
         None = 0x00,
         LeaveBlocksAllocated = 0x01,
-        HasParent = 0x02,
+        HasParent = 0x02
     }
 }

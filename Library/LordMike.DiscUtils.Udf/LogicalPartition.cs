@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal abstract class LogicalPartition : Partition
     {
         protected UdfContext _context;
@@ -41,7 +41,7 @@ namespace DiscUtils.Udf
         }
 
         public static LogicalPartition FromDescriptor(UdfContext context, LogicalVolumeDescriptor volumeDescriptor,
-            int index)
+                                                      int index)
         {
             PartitionMap map = volumeDescriptor.PartitionMaps[index];
 

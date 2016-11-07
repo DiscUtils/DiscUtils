@@ -20,37 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-
     internal class FileEntry : IByteArraySerializable
     {
-        public DescriptorTag DescriptorTag;
-        public InformationControlBlock InformationControlBlock;
-        public uint Uid;
-        public uint Gid;
-        public FilePermissions Permissions;
-        public ushort FileLinkCount;
-        public byte RecordFormat;
-        public byte RecordDisplayAttributes;
-        public uint RecordLength;
-        public ulong InformationLength;
-        public ulong LogicalBlocksRecorded;
         public DateTime AccessTime;
-        public DateTime ModificationTime;
+        public byte[] AllocationDescriptors;
+        public int AllocationDescriptorsLength;
         public DateTime AttributeTime;
         public uint Checkpoint;
+        public DescriptorTag DescriptorTag;
         public LongAllocationDescriptor ExtendedAttributeIcb;
-        public ImplementationEntityIdentifier ImplementationIdentifier;
-        public ulong UniqueId;
-        public int ExtendedAttributesLength;
-        public int AllocationDescriptorsLength;
         public List<ExtendedAttributeRecord> ExtendedAttributes;
-        public byte[] AllocationDescriptors;
+        public int ExtendedAttributesLength;
+        public ushort FileLinkCount;
+        public uint Gid;
+        public ImplementationEntityIdentifier ImplementationIdentifier;
+        public InformationControlBlock InformationControlBlock;
+        public ulong InformationLength;
+        public ulong LogicalBlocksRecorded;
+        public DateTime ModificationTime;
+        public FilePermissions Permissions;
+        public byte RecordDisplayAttributes;
+        public byte RecordFormat;
+        public uint RecordLength;
+        public uint Uid;
+        public ulong UniqueId;
 
         public virtual int Size
         {
@@ -63,7 +62,7 @@ namespace DiscUtils.Udf
             InformationControlBlock = Utilities.ToStruct<InformationControlBlock>(buffer, offset + 16);
             Uid = Utilities.ToUInt32LittleEndian(buffer, offset + 36);
             Gid = Utilities.ToUInt32LittleEndian(buffer, offset + 40);
-            Permissions = (FilePermissions) Utilities.ToUInt32LittleEndian(buffer, offset + 44);
+            Permissions = (FilePermissions)Utilities.ToUInt32LittleEndian(buffer, offset + 44);
             FileLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 48);
             RecordFormat = buffer[offset + 50];
             RecordDisplayAttributes = buffer[offset + 51];
@@ -85,7 +84,7 @@ namespace DiscUtils.Udf
             byte[] eaData = Utilities.ToByteArray(buffer, offset + 176, ExtendedAttributesLength);
             ExtendedAttributes = ReadExtendedAttributes(eaData);
 
-            return (int) (176 + ExtendedAttributesLength + AllocationDescriptorsLength);
+            return 176 + ExtendedAttributesLength + AllocationDescriptorsLength;
         }
 
         public virtual void WriteTo(byte[] buffer, int offset)
@@ -126,10 +125,7 @@ namespace DiscUtils.Udf
 
                 return extendedAttrs;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
     }
 }

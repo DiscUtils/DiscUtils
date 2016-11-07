@@ -27,31 +27,22 @@ namespace DiscUtils.Udf
     /// </summary>
     public sealed class ExtendedAttribute
     {
-        private string _id;
-        private byte[] _data;
-
         internal ExtendedAttribute(string id, byte[] data)
         {
-            _id = id;
-            _data = data;
-        }
-
-        /// <summary>
-        /// Gets the value of the identifier of this attribute.
-        /// </summary>
-        /// <remarks>A typical identifier is "*UDF DVD CGMS Info".</remarks>
-        public string Identifier
-        {
-            get { return _id; }
+            Identifier = id;
+            Data = data;
         }
 
         /// <summary>
         /// Gets the data contained in the attribute.
         /// </summary>
         /// <remarks>The format of the data will depend on the identifier.</remarks>
-        public byte[] Data
-        {
-            get { return _data; }
-        }
+        public byte[] Data { get; }
+
+        /// <summary>
+        /// Gets the value of the identifier of this attribute.
+        /// </summary>
+        /// <remarks>A typical identifier is "*UDF DVD CGMS Info".</remarks>
+        public string Identifier { get; }
     }
 }

@@ -20,18 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.IO;
-
     internal abstract class PartitionMap : IByteArraySerializable
     {
         public byte Type;
 
         public abstract int Size { get; }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            Type = buffer[offset];
+            return Parse(buffer, offset);
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
+        }
 
         public static PartitionMap CreateFrom(byte[] buffer, int offset)
         {
@@ -67,17 +77,6 @@ namespace DiscUtils.Udf
             }
 
             return result;
-        }
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            Type = buffer[offset];
-            return Parse(buffer, offset);
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
         }
 
         protected abstract int Parse(byte[] buffer, int offset);

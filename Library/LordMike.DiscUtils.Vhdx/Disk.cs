@@ -20,29 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-
     /// <summary>
     /// Represents a VHDX-backed disk.
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
         /// <summary>
-        /// The list of files that make up the disk.
-        /// </summary>
-        private List<Tuple<DiskImageFile, Ownership>> _files;
-
-        /// <summary>
         /// The stream representing the disk's contents.
         /// </summary>
         private SparseStream _content;
+
+        /// <summary>
+        /// The list of files that make up the disk.
+        /// </summary>
+        private List<Tuple<DiskImageFile, Ownership>> _files;
 
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
@@ -221,23 +220,7 @@ namespace DiscUtils.Vhdx
         /// </summary>
         public override int BlockSize
         {
-            get { return (int) _files[0].Item1.LogicalSectorSize; }
-        }
-
-        /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _files[0].Item1.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
+            get { return (int)_files[0].Item1.LogicalSectorSize; }
         }
 
         /// <summary>
@@ -274,17 +257,11 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Gets the layers that make up the disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get
-            {
-                foreach (var file in _files)
-                {
-                    yield return file.Item1 as VirtualDiskLayer;
-                }
-            }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -295,6 +272,28 @@ namespace DiscUtils.Vhdx
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
             get { return DiskFactory.MakeDiskTypeInfo(_files[_files.Count - 1].Item1.IsSparse ? "dynamic" : "fixed"); }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _files[0].Item1.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get
+            {
+                foreach (Tuple<DiskImageFile, Ownership> file in _files)
+                {
+                    yield return file.Item1;
+                }
+            }
         }
 
         /// <summary>
@@ -447,7 +446,7 @@ namespace DiscUtils.Vhdx
 
                     if (_files != null)
                     {
-                        foreach (var record in _files)
+                        foreach (Tuple<DiskImageFile, Ownership> record in _files)
                         {
                             if (record.Item2 == Ownership.Dispose)
                             {

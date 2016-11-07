@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal static class UdfUtilities
     {
-        private static readonly ushort[] CrcTable = new ushort[]
+        private static readonly ushort[] CrcTable =
         {
             0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
             0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
@@ -72,7 +71,7 @@ namespace DiscUtils.Udf
 
             for (int i = 0; i < length; ++i)
             {
-                result = (ushort) (CrcTable[(result >> 8 ^ buffer[offset + i]) & 0xFF] ^ (result << 8));
+                result = (ushort)(CrcTable[(result >> 8 ^ buffer[offset + i]) & 0xFF] ^ (result << 8));
             }
 
             return result;
@@ -117,7 +116,7 @@ namespace DiscUtils.Udf
 
             try
             {
-                DateTime baseTime = new DateTime(year, month, day, hour, min, sec, (10*csec) + (hmsec/10),
+                DateTime baseTime = new DateTime(year, month, day, hour, min, sec, 10 * csec + hmsec / 10,
                     DateTimeKind.Utc);
                 return baseTime - TimeSpan.FromMinutes(minutesWest);
             }
@@ -156,13 +155,13 @@ namespace DiscUtils.Udf
 
                 if (alg == 16)
                 {
-                    ch = (char) (buffer[offset + pos] << 8);
+                    ch = (char)(buffer[offset + pos] << 8);
                     pos++;
                 }
 
                 if (pos < count)
                 {
-                    ch |= (char) buffer[offset + pos];
+                    ch |= (char)buffer[offset + pos];
                     pos++;
                 }
 
@@ -175,8 +174,8 @@ namespace DiscUtils.Udf
         public static byte[] ReadExtent(UdfContext context, LongAllocationDescriptor extent)
         {
             LogicalPartition partition = context.LogicalPartitions[extent.ExtentLocation.Partition];
-            long pos = extent.ExtentLocation.LogicalBlock*partition.LogicalBlockSize;
-            return Utilities.ReadFully(partition.Content, pos, (int) extent.ExtentLength);
+            long pos = extent.ExtentLocation.LogicalBlock * partition.LogicalBlockSize;
+            return Utilities.ReadFully(partition.Content, pos, (int)extent.ExtentLength);
         }
 
         private static short ForceRange(short min, short max, short val)
@@ -185,7 +184,7 @@ namespace DiscUtils.Udf
             {
                 return min;
             }
-            else if (val > max)
+            if (val > max)
             {
                 return max;
             }
@@ -199,7 +198,7 @@ namespace DiscUtils.Udf
             {
                 return min;
             }
-            else if (val > max)
+            if (val > max)
             {
                 return max;
             }

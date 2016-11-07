@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using DiscUtils.Compression;
+
 namespace DiscUtils.Wim
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Compression;
-
     /// <summary>
     /// Converts a byte stream into a bit stream.
     /// </summary>
@@ -37,14 +37,13 @@ namespace DiscUtils.Wim
     /// reads.</para>.</remarks>
     internal sealed class LzxBitStream : BitStream
     {
-        private Stream _byteStream;
+        private uint _buffer;
+        private int _bufferAvailable;
+        private readonly Stream _byteStream;
 
         private long _position;
 
-        private uint _buffer;
-        private int _bufferAvailable;
-
-        private byte[] _readBuffer = new byte[2];
+        private readonly byte[] _readBuffer = new byte[2];
 
         public LzxBitStream(Stream byteStream)
         {
@@ -71,9 +70,9 @@ namespace DiscUtils.Wim
             _bufferAvailable -= count;
             _position += count;
 
-            uint mask = (uint) ((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
-            return (uint) ((_buffer >> _bufferAvailable) & mask);
+            return (_buffer >> _bufferAvailable) & mask;
         }
 
         public override uint Peek(int count)
@@ -83,9 +82,9 @@ namespace DiscUtils.Wim
                 Need(count);
             }
 
-            uint mask = (uint) ((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
-            return (uint) ((_buffer >> (_bufferAvailable - count)) & mask);
+            return (_buffer >> (_bufferAvailable - count)) & mask;
         }
 
         public override void Consume(int count)
@@ -102,13 +101,13 @@ namespace DiscUtils.Wim
         public void Align(int bits)
         {
             // Note: Consumes 1-16 bits, to force alignment (never 0)
-            int offset = (int) (_position%bits);
+            int offset = (int)(_position % bits);
             Consume(bits - offset);
         }
 
         public int ReadBytes(byte[] buffer, int offset, int count)
         {
-            if (_position%8 != 0)
+            if (_position % 8 != 0)
             {
                 throw new InvalidOperationException("Attempt to read bytes when not byte-aligned");
             }
@@ -119,20 +118,20 @@ namespace DiscUtils.Wim
                 int numRead = _byteStream.Read(buffer, offset + totalRead, count - totalRead);
                 if (numRead == 0)
                 {
-                    _position += totalRead*8;
+                    _position += totalRead * 8;
                     return totalRead;
                 }
 
                 totalRead += numRead;
             }
 
-            _position += totalRead*8;
+            _position += totalRead * 8;
             return totalRead;
         }
 
         public byte[] ReadBytes(int count)
         {
-            if (_position%8 != 0)
+            if (_position % 8 != 0)
             {
                 throw new InvalidOperationException("Attempt to read bytes when not byte-aligned");
             }
@@ -150,7 +149,7 @@ namespace DiscUtils.Wim
                 _readBuffer[1] = 0;
                 _byteStream.Read(_readBuffer, 0, 2);
 
-                _buffer = (uint) ((uint) (_buffer << 16) | (uint) (_readBuffer[1] << 8) | (uint) _readBuffer[0]);
+                _buffer = _buffer << 16 | (uint)(_readBuffer[1] << 8) | _readBuffer[0];
                 _bufferAvailable += 16;
             }
         }

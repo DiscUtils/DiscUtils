@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-
     internal class FileContentBuffer : IBuffer
     {
-        private UdfContext _context;
-        private Partition _partition;
-        private FileEntry _fileEntry;
-        private uint _blockSize;
+        private readonly uint _blockSize;
+        private readonly UdfContext _context;
         private List<CookedExtent> _extents;
+        private readonly FileEntry _fileEntry;
+        private readonly Partition _partition;
 
         public FileContentBuffer(UdfContext context, Partition partition, FileEntry fileEntry, uint blockSize)
         {
@@ -56,7 +55,7 @@ namespace DiscUtils.Udf
 
         public long Capacity
         {
-            get { return (long) _fileEntry.InformationLength; }
+            get { return (long)_fileEntry.InformationLength; }
         }
 
         public IEnumerable<StreamExtent> Extents
@@ -74,14 +73,11 @@ namespace DiscUtils.Udf
                     return 0;
                 }
 
-                int toCopy = (int) Math.Min(srcBuffer.Length - pos, count);
-                Array.Copy(srcBuffer, (int) pos, buffer, offset, toCopy);
+                int toCopy = (int)Math.Min(srcBuffer.Length - pos, count);
+                Array.Copy(srcBuffer, (int)pos, buffer, offset, toCopy);
                 return toCopy;
             }
-            else
-            {
-                return ReadFromExtents(pos, buffer, offset, count);
-            }
+            return ReadFromExtents(pos, buffer, offset, count);
         }
 
         public void Write(long pos, byte[] buffer, int offset, int count)
@@ -94,9 +90,7 @@ namespace DiscUtils.Udf
             throw new NotSupportedException();
         }
 
-        public void Flush()
-        {
-        }
+        public void Flush() {}
 
         public void SetCapacity(long value)
         {
@@ -137,7 +131,7 @@ namespace DiscUtils.Udf
                     {
                         FileContentOffset = filePos,
                         Partition = int.MaxValue,
-                        StartPos = sad.ExtentLocation*(long) _blockSize,
+                        StartPos = sad.ExtentLocation * (long)_blockSize,
                         Length = sad.ExtentLength
                     };
                     _extents.Add(newExtent);
@@ -167,7 +161,7 @@ namespace DiscUtils.Udf
                     {
                         FileContentOffset = filePos,
                         Partition = lad.ExtentLocation.Partition,
-                        StartPos = lad.ExtentLocation.LogicalBlock*(long) _blockSize,
+                        StartPos = lad.ExtentLocation.LogicalBlock * (long)_blockSize,
                         Length = lad.ExtentLength
                     };
                     _extents.Add(newExtent);
@@ -185,15 +179,15 @@ namespace DiscUtils.Udf
 
         private int ReadFromExtents(long pos, byte[] buffer, int offset, int count)
         {
-            int totalToRead = (int) Math.Min(Capacity - pos, count);
+            int totalToRead = (int)Math.Min(Capacity - pos, count);
             int totalRead = 0;
 
             while (totalRead < totalToRead)
             {
                 CookedExtent extent = FindExtent(pos + totalRead);
 
-                long extentOffset = (pos + totalRead) - extent.FileContentOffset;
-                int toRead = (int) Math.Min(totalToRead - totalRead, extent.Length - extentOffset);
+                long extentOffset = pos + totalRead - extent.FileContentOffset;
+                int toRead = (int)Math.Min(totalToRead - totalRead, extent.Length - extentOffset);
 
                 Partition part;
                 if (extent.Partition != int.MaxValue)
@@ -219,7 +213,7 @@ namespace DiscUtils.Udf
 
         private CookedExtent FindExtent(long pos)
         {
-            foreach (var extent in _extents)
+            foreach (CookedExtent extent in _extents)
             {
                 if (extent.FileContentOffset + extent.Length > pos)
                 {
@@ -233,9 +227,9 @@ namespace DiscUtils.Udf
         private class CookedExtent
         {
             public long FileContentOffset;
+            public long Length;
             public int Partition;
             public long StartPos;
-            public long Length;
         }
     }
 }

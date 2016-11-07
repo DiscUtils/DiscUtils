@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Creates new VMDK disks by wrapping existing streams.
     /// </summary>
@@ -36,46 +35,41 @@ namespace DiscUtils.Vmdk
     /// is simply to present a VMDK version of an existing disk.</remarks>
     public sealed class DiskBuilder : DiskImageBuilder
     {
-        private DiskCreateType _diskType;
-        private DiskAdapterType _adapterType;
-
         /// <summary>
         /// Initializes a new instance of the DiskBuilder class.
         /// </summary>
         public DiskBuilder()
         {
-            _diskType = DiskCreateType.Vmfs;
-            _adapterType = DiskAdapterType.LsiLogicScsi;
+            DiskType = DiskCreateType.Vmfs;
+            AdapterType = DiskAdapterType.LsiLogicScsi;
         }
+
+        /// <summary>
+        /// Gets or sets the specific VMware disk adapter type to embed in the VMDK.
+        /// </summary>
+        public DiskAdapterType AdapterType { get; set; }
 
         /// <summary>
         /// Gets or sets the type of VMDK disk file required.
         /// </summary>
-        public DiskCreateType DiskType
-        {
-            get { return _diskType; }
-            set { _diskType = value; }
-        }
+        public DiskCreateType DiskType { get; set; }
 
         /// <summary>
         /// Gets or sets the adaptor type for created virtual disk, setting to SCSI implies LSI logic adapter.
         /// </summary>
         public override GenericDiskAdapterType GenericAdapterType
         {
-            get
-            {
-                return AdapterType == DiskAdapterType.Ide ? GenericDiskAdapterType.Ide : GenericDiskAdapterType.Scsi;
-            }
+            get { return AdapterType == DiskAdapterType.Ide ? GenericDiskAdapterType.Ide : GenericDiskAdapterType.Scsi; }
 
             set
             {
                 if (value == GenericDiskAdapterType.Ide)
                 {
-                    _adapterType = DiskAdapterType.Ide;
+                    AdapterType = DiskAdapterType.Ide;
                 }
-                else if (_adapterType == DiskAdapterType.Ide)
+                else if (AdapterType == DiskAdapterType.Ide)
                 {
-                    _adapterType = DiskAdapterType.LsiLogicScsi;
+                    AdapterType = DiskAdapterType.LsiLogicScsi;
                 }
             }
         }
@@ -86,15 +80,6 @@ namespace DiscUtils.Vmdk
         public override bool PreservesBiosGeometry
         {
             get { return true; }
-        }
-
-        /// <summary>
-        /// Gets or sets the specific VMware disk adapter type to embed in the VMDK.
-        /// </summary>
-        public DiskAdapterType AdapterType
-        {
-            get { return _adapterType; }
-            set { _adapterType = value; }
         }
 
         /// <summary>
@@ -115,8 +100,8 @@ namespace DiscUtils.Vmdk
                 throw new InvalidOperationException("No content stream specified");
             }
 
-            if (_diskType != DiskCreateType.Vmfs && _diskType != DiskCreateType.VmfsSparse &&
-                _diskType != DiskCreateType.MonolithicSparse)
+            if (DiskType != DiskCreateType.Vmfs && DiskType != DiskCreateType.VmfsSparse &&
+                DiskType != DiskCreateType.MonolithicSparse)
             {
                 throw new NotImplementedException("Only MonolithicSparse, Vmfs and VmfsSparse disks implemented");
             }
@@ -126,12 +111,12 @@ namespace DiscUtils.Vmdk
             Geometry geometry = Geometry ?? DiskImageFile.DefaultGeometry(Content.Length);
             Geometry biosGeometry = BiosGeometry ?? Geometry.LbaAssistedBiosGeometry(Content.Length);
 
-            DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, biosGeometry, _diskType,
-                _adapterType);
+            DescriptorFile baseDescriptor = DiskImageFile.CreateSimpleDiskDescriptor(geometry, biosGeometry, DiskType,
+                AdapterType);
 
-            if (_diskType == DiskCreateType.Vmfs)
+            if (DiskType == DiskCreateType.Vmfs)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length/512,
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512,
                     ExtentType.Vmfs, baseName + "-flat.vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
 
@@ -142,9 +127,9 @@ namespace DiscUtils.Vmdk
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + "-flat.vmdk",
                     new PassthroughStreamBuilder(Content)));
             }
-            else if (_diskType == DiskCreateType.VmfsSparse)
+            else if (DiskType == DiskCreateType.VmfsSparse)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length/512,
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512,
                     ExtentType.VmfsSparse, baseName + "-sparse.vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
 
@@ -155,9 +140,9 @@ namespace DiscUtils.Vmdk
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + "-sparse.vmdk",
                     new VmfsSparseExtentBuilder(Content)));
             }
-            else if (_diskType == DiskCreateType.MonolithicSparse)
+            else if (DiskType == DiskCreateType.MonolithicSparse)
             {
-                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length/512,
+                ExtentDescriptor extent = new ExtentDescriptor(ExtentAccess.ReadWrite, Content.Length / 512,
                     ExtentType.Sparse, baseName + ".vmdk", 0);
                 baseDescriptor.Extents.Add(extent);
                 fileSpecs.Add(new DiskImageFileSpecification(baseName + ".vmdk",

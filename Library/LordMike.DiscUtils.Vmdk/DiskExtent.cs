@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.IO;
-
     internal sealed class DiskExtent : VirtualDiskExtent
     {
-        private ExtentDescriptor _descriptor;
-        private long _diskOffset;
-        private FileLocator _fileLocator;
-        private FileAccess _access;
-        private Stream _monolithicStream;
+        private readonly FileAccess _access;
+        private readonly ExtentDescriptor _descriptor;
+        private readonly long _diskOffset;
+        private readonly FileLocator _fileLocator;
+        private readonly Stream _monolithicStream;
 
         public DiskExtent(ExtentDescriptor descriptor, long diskOffset, FileLocator fileLocator, FileAccess access)
         {
@@ -50,6 +49,11 @@ namespace DiscUtils.Vmdk
             _monolithicStream = monolithicStream;
         }
 
+        public override long Capacity
+        {
+            get { return _descriptor.SizeInSectors * Sizes.Sector; }
+        }
+
         public override bool IsSparse
         {
             get
@@ -57,11 +61,6 @@ namespace DiscUtils.Vmdk
                 return _descriptor.Type == ExtentType.Sparse || _descriptor.Type == ExtentType.VmfsSparse ||
                        _descriptor.Type == ExtentType.Zero;
             }
-        }
-
-        public override long Capacity
-        {
-            get { return _descriptor.SizeInSectors*Sizes.Sector; }
         }
 
         public override long StoredSize
@@ -72,14 +71,11 @@ namespace DiscUtils.Vmdk
                 {
                     return _monolithicStream.Length;
                 }
-                else
+                using (
+                    Stream s = _fileLocator.Open(_descriptor.FileName, FileMode.Open, FileAccess.Read,
+                        FileShare.Read))
                 {
-                    using (
-                        Stream s = _fileLocator.Open(_descriptor.FileName, FileMode.Open, FileAccess.Read,
-                            FileShare.Read))
-                    {
-                        return s.Length;
-                    }
+                    return s.Length;
                 }
             }
         }
@@ -104,7 +100,7 @@ namespace DiscUtils.Vmdk
             }
             else if (parent == null)
             {
-                parent = new ZeroStream(_descriptor.SizeInSectors*Sizes.Sector);
+                parent = new ZeroStream(_descriptor.SizeInSectors * Sizes.Sector);
             }
 
             if (_monolithicStream != null)
@@ -117,38 +113,35 @@ namespace DiscUtils.Vmdk
                     parent,
                     ownsParent);
             }
-            else
+            switch (_descriptor.Type)
             {
-                switch (_descriptor.Type)
-                {
-                    case ExtentType.Flat:
-                    case ExtentType.Vmfs:
-                        return MappedStream.FromStream(
-                            _fileLocator.Open(_descriptor.FileName, FileMode.Open, access, share),
-                            Ownership.Dispose);
+                case ExtentType.Flat:
+                case ExtentType.Vmfs:
+                    return MappedStream.FromStream(
+                        _fileLocator.Open(_descriptor.FileName, FileMode.Open, access, share),
+                        Ownership.Dispose);
 
-                    case ExtentType.Zero:
-                        return new ZeroStream(_descriptor.SizeInSectors*Utilities.SectorSize);
+                case ExtentType.Zero:
+                    return new ZeroStream(_descriptor.SizeInSectors * Utilities.SectorSize);
 
-                    case ExtentType.Sparse:
-                        return new HostedSparseExtentStream(
-                            _fileLocator.Open(_descriptor.FileName, FileMode.Open, access, share),
-                            Ownership.Dispose,
-                            _diskOffset,
-                            parent,
-                            ownsParent);
+                case ExtentType.Sparse:
+                    return new HostedSparseExtentStream(
+                        _fileLocator.Open(_descriptor.FileName, FileMode.Open, access, share),
+                        Ownership.Dispose,
+                        _diskOffset,
+                        parent,
+                        ownsParent);
 
-                    case ExtentType.VmfsSparse:
-                        return new ServerSparseExtentStream(
-                            _fileLocator.Open(_descriptor.FileName, FileMode.Open, access, share),
-                            Ownership.Dispose,
-                            _diskOffset,
-                            parent,
-                            ownsParent);
+                case ExtentType.VmfsSparse:
+                    return new ServerSparseExtentStream(
+                        _fileLocator.Open(_descriptor.FileName, FileMode.Open, access, share),
+                        Ownership.Dispose,
+                        _diskOffset,
+                        parent,
+                        ownsParent);
 
-                    default:
-                        throw new NotSupportedException();
-                }
+                default:
+                    throw new NotSupportedException();
             }
         }
     }

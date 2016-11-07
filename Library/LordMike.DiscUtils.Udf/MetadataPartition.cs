@@ -20,26 +20,25 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.IO;
-
     internal class MetadataPartition : LogicalPartition
     {
+        private readonly File _metadataFile;
         private MetadataPartitionMap _partitionMap;
-        private File _metadataFile;
 
         public MetadataPartition(UdfContext context, LogicalVolumeDescriptor volumeDescriptor,
-            MetadataPartitionMap partitionMap)
+                                 MetadataPartitionMap partitionMap)
             : base(context, volumeDescriptor)
         {
             _partitionMap = partitionMap;
 
             PhysicalPartition physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
-            long fileEntryPos = partitionMap.MetadataFileLocation*(long) volumeDescriptor.LogicalBlockSize;
+            long fileEntryPos = partitionMap.MetadataFileLocation * (long)volumeDescriptor.LogicalBlockSize;
 
             byte[] entryData = Utilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
             if (!DescriptorTag.IsValid(entryData, 0))

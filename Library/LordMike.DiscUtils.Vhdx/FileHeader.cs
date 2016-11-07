@@ -20,34 +20,33 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Text;
-
     internal sealed class FileHeader : IByteArraySerializable
     {
         public const ulong VhdxSignature = 0x656C696678646876;
-
-        public ulong Signature = VhdxSignature;
         public string Creator;
 
-        public int Size
-        {
-            get { return (int) (64*Sizes.OneKiB); }
-        }
+        public ulong Signature = VhdxSignature;
 
         public bool IsValid
         {
             get { return Signature == VhdxSignature; }
         }
 
+        public int Size
+        {
+            get { return (int)(64 * Sizes.OneKiB); }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Signature = Utilities.ToUInt64LittleEndian(buffer, offset + 0);
-            Creator = Encoding.Unicode.GetString(buffer, offset + 8, 256*2).TrimEnd('\0');
+            Creator = Encoding.Unicode.GetString(buffer, offset + 8, 256 * 2).TrimEnd('\0');
 
             return Size;
         }

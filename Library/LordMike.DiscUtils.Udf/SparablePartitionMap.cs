@@ -26,12 +26,12 @@ namespace DiscUtils.Udf
 {
     internal sealed class SparablePartitionMap : PartitionMap
     {
-        public ushort VolumeSequenceNumber;
-        public ushort PartitionNumber;
-        public ushort PacketLength;
-        public byte NumSparingTables;
-        public uint SparingTableSize;
         public uint[] LocationsOfSparingTables;
+        public byte NumSparingTables;
+        public ushort PacketLength;
+        public ushort PartitionNumber;
+        public uint SparingTableSize;
+        public ushort VolumeSequenceNumber;
 
         public override int Size
         {
@@ -48,7 +48,7 @@ namespace DiscUtils.Udf
             LocationsOfSparingTables = new uint[NumSparingTables];
             for (int i = 0; i < NumSparingTables; ++i)
             {
-                LocationsOfSparingTables[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 48 + (4*i));
+                LocationsOfSparingTables[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 48 + 4 * i);
             }
 
             return 64;

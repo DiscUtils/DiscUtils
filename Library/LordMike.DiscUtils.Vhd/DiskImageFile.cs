@@ -20,20 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-
     /// <summary>
     /// Represents a single .VHD file.
     /// </summary>
     public sealed class DiskImageFile : VirtualDiskLayer
     {
+        /// <summary>
+        /// The VHD file's dynamic header (if not static).
+        /// </summary>
+        private DynamicHeader _dynamicHeader;
+
+        /// <summary>
+        /// The object that can be used to locate relative file paths.
+        /// </summary>
+        private readonly FileLocator _fileLocator;
+
+        /// <summary>
+        /// The file name of this VHD.
+        /// </summary>
+        private readonly string _fileName;
+
         /// <summary>
         /// The stream containing the VHD file.
         /// </summary>
@@ -45,24 +59,9 @@ namespace DiscUtils.Vhd
         private Footer _footer;
 
         /// <summary>
-        /// The VHD file's dynamic header (if not static).
-        /// </summary>
-        private DynamicHeader _dynamicHeader;
-
-        /// <summary>
         /// Indicates if this object controls the lifetime of the stream.
         /// </summary>
-        private Ownership _ownsStream;
-
-        /// <summary>
-        /// The object that can be used to locate relative file paths.
-        /// </summary>
-        private FileLocator _fileLocator;
-
-        /// <summary>
-        /// The file name of this VHD.
-        /// </summary>
-        private string _fileName;
+        private readonly Ownership _ownsStream;
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
@@ -98,9 +97,7 @@ namespace DiscUtils.Vhd
         /// <param name="path">The file path to open.</param>
         /// <param name="access">Controls how the file can be accessed.</param>
         public DiskImageFile(string path, FileAccess access)
-            : this(new LocalFileLocator(Path.GetDirectoryName(path)), Path.GetFileName(path), access)
-        {
-        }
+            : this(new LocalFileLocator(Path.GetDirectoryName(path)), Path.GetFileName(path), access) {}
 
         internal DiskImageFile(FileLocator locator, string path, Stream stream, Ownership ownsStream)
             : this(stream, ownsStream)
@@ -131,68 +128,9 @@ namespace DiscUtils.Vhd
             }
         }
 
-        /// <summary>
-        /// Gets the unique id of the parent disk.
-        /// </summary>
-        public Guid ParentUniqueId
+        internal override long Capacity
         {
-            get { return _dynamicHeader == null ? Guid.Empty : _dynamicHeader.ParentUniqueId; }
-        }
-
-        /// <summary>
-        /// Gets the geometry of the virtual disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _footer.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
-        /// </summary>
-        public override bool IsSparse
-        {
-            get { return _footer.DiskType != FileType.Fixed; }
-        }
-
-        /// <summary>
-        /// Gets the full path to this disk layer, or empty string.
-        /// </summary>
-        public override string FullPath
-        {
-            get
-            {
-                if (_fileLocator != null && _fileName != null)
-                {
-                    return _fileLocator.GetFullPath(_fileName);
-                }
-
-                return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Gets detailed information about the VHD file.
-        /// </summary>
-        public DiskImageFileInfo Information
-        {
-            get { return new DiskImageFileInfo(_footer, _dynamicHeader, _fileStream); }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the file is a differencing disk.
-        /// </summary>
-        public override bool NeedsParent
-        {
-            get { return _footer.DiskType == FileType.Differencing; }
-        }
-
-        /// <summary>
-        /// Gets the unique id of this file.
-        /// </summary>
-        public Guid UniqueId
-        {
-            get { return _footer.UniqueId; }
+            get { return _footer.CurrentSize; }
         }
 
         /// <summary>
@@ -216,9 +154,60 @@ namespace DiscUtils.Vhd
             }
         }
 
-        internal override long Capacity
+        /// <summary>
+        /// Gets the full path to this disk layer, or empty string.
+        /// </summary>
+        public override string FullPath
         {
-            get { return _footer.CurrentSize; }
+            get
+            {
+                if (_fileLocator != null && _fileName != null)
+                {
+                    return _fileLocator.GetFullPath(_fileName);
+                }
+
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the virtual disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _footer.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets detailed information about the VHD file.
+        /// </summary>
+        public DiskImageFileInfo Information
+        {
+            get { return new DiskImageFileInfo(_footer, _dynamicHeader, _fileStream); }
+        }
+
+        /// <summary>
+        /// Gets a value indicating if the layer only stores meaningful sectors.
+        /// </summary>
+        public override bool IsSparse
+        {
+            get { return _footer.DiskType != FileType.Fixed; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file is a differencing disk.
+        /// </summary>
+        public override bool NeedsParent
+        {
+            get { return _footer.DiskType == FileType.Differencing; }
+        }
+
+        /// <summary>
+        /// Gets the unique id of the parent disk.
+        /// </summary>
+        public Guid ParentUniqueId
+        {
+            get { return _dynamicHeader == null ? Guid.Empty : _dynamicHeader.ParentUniqueId; }
         }
 
         internal override FileLocator RelativeFileLocator
@@ -229,6 +218,14 @@ namespace DiscUtils.Vhd
         internal long StoredSize
         {
             get { return _fileStream.Length; }
+        }
+
+        /// <summary>
+        /// Gets the unique id of this file.
+        /// </summary>
+        public Guid UniqueId
+        {
+            get { return _footer.UniqueId; }
         }
 
         /// <summary>
@@ -252,7 +249,7 @@ namespace DiscUtils.Vhd
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
         /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity,
-            Geometry geometry)
+                                                    Geometry geometry)
         {
             InitializeFixedInternal(stream, capacity, geometry);
             return new DiskImageFile(stream, ownsStream);
@@ -279,7 +276,7 @@ namespace DiscUtils.Vhd
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
         /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity,
-            Geometry geometry)
+                                                      Geometry geometry)
         {
             return InitializeDynamic(stream, ownsStream, capacity, geometry, DynamicHeader.DefaultBlockSize);
         }
@@ -307,7 +304,7 @@ namespace DiscUtils.Vhd
         /// <param name="blockSize">The size of each block (unit of allocation).</param>
         /// <returns>An object that accesses the stream as a VHD file.</returns>
         public static DiskImageFile InitializeDynamic(Stream stream, Ownership ownsStream, long capacity,
-            Geometry geometry, long blockSize)
+                                                      Geometry geometry, long blockSize)
         {
             InitializeDynamicInternal(stream, capacity, geometry, blockSize);
 
@@ -391,7 +388,7 @@ namespace DiscUtils.Vhd
         }
 
         internal static DiskImageFile InitializeDynamic(FileLocator locator, string path, long capacity,
-            Geometry geometry, long blockSize)
+                                                        Geometry geometry, long blockSize)
         {
             DiskImageFile result = null;
             Stream stream = locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
@@ -436,7 +433,7 @@ namespace DiscUtils.Vhd
 
                 return new SubStream(_fileStream, 0, _fileStream.Length - 512);
             }
-            else if (_footer.DiskType == FileType.Dynamic)
+            if (_footer.DiskType == FileType.Dynamic)
             {
                 if (parent != null && ownsParent == Ownership.Dispose)
                 {
@@ -446,16 +443,13 @@ namespace DiscUtils.Vhd
                 return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize,
                     new ZeroStream(_footer.CurrentSize), Ownership.Dispose);
             }
-            else
+            if (parent == null)
             {
-                if (parent == null)
-                {
-                    parent = new ZeroStream(_footer.CurrentSize);
-                    ownsParent = Ownership.Dispose;
-                }
-
-                return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
+                parent = new ZeroStream(_footer.CurrentSize);
+                ownsParent = Ownership.Dispose;
             }
+
+            return new DynamicStream(_fileStream, _dynamicHeader, _footer.CurrentSize, parent, ownsParent);
         }
 
         /// <summary>
@@ -520,12 +514,12 @@ namespace DiscUtils.Vhd
             byte[] footerBlock = new byte[512];
             footer.ToBytes(footerBlock, 0);
 
-            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, (uint) blockSize, capacity);
+            DynamicHeader dynamicHeader = new DynamicHeader(-1, 1024 + 512, (uint)blockSize, capacity);
             dynamicHeader.UpdateChecksum();
             byte[] dynamicHeaderBlock = new byte[1024];
             dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
 
-            int batSize = (((dynamicHeader.MaxTableEntries*4) + Utilities.SectorSize - 1)/Utilities.SectorSize)*
+            int batSize = (dynamicHeader.MaxTableEntries * 4 + Utilities.SectorSize - 1) / Utilities.SectorSize *
                           Utilities.SectorSize;
             byte[] bat = new byte[batSize];
             for (int i = 0; i < bat.Length; ++i)
@@ -541,7 +535,7 @@ namespace DiscUtils.Vhd
         }
 
         private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent,
-            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+                                                           string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
             Footer footer = new Footer(parent.Geometry, parent._footer.CurrentSize, FileType.Differencing);
             footer.DataOffset = 512; // Offset of Dynamic Header
@@ -552,23 +546,23 @@ namespace DiscUtils.Vhd
 
             long tableOffset = 512 + 1024; // Footer + Header
 
-            uint blockSize = (parent._dynamicHeader == null)
+            uint blockSize = parent._dynamicHeader == null
                 ? DynamicHeader.DefaultBlockSize
                 : parent._dynamicHeader.BlockSize;
 
             DynamicHeader dynamicHeader = new DynamicHeader(-1, tableOffset, blockSize, footer.CurrentSize);
-            int batSize = (((dynamicHeader.MaxTableEntries*4) + Utilities.SectorSize - 1)/Utilities.SectorSize)*
+            int batSize = (dynamicHeader.MaxTableEntries * 4 + Utilities.SectorSize - 1) / Utilities.SectorSize *
                           Utilities.SectorSize;
             dynamicHeader.ParentUniqueId = parent.UniqueId;
             dynamicHeader.ParentTimestamp = parentModificationTimeUtc;
             dynamicHeader.ParentUnicodeName = Utilities.GetFileFromPath(parentAbsolutePath);
             dynamicHeader.ParentLocators[7].PlatformCode = ParentLocator.PlatformCodeWindowsAbsoluteUnicode;
             dynamicHeader.ParentLocators[7].PlatformDataSpace = 512;
-            dynamicHeader.ParentLocators[7].PlatformDataLength = parentAbsolutePath.Length*2;
+            dynamicHeader.ParentLocators[7].PlatformDataLength = parentAbsolutePath.Length * 2;
             dynamicHeader.ParentLocators[7].PlatformDataOffset = tableOffset + batSize;
             dynamicHeader.ParentLocators[6].PlatformCode = ParentLocator.PlatformCodeWindowsRelativeUnicode;
             dynamicHeader.ParentLocators[6].PlatformDataSpace = 512;
-            dynamicHeader.ParentLocators[6].PlatformDataLength = parentRelativePath.Length*2;
+            dynamicHeader.ParentLocators[6].PlatformDataLength = parentRelativePath.Length * 2;
             dynamicHeader.ParentLocators[6].PlatformDataOffset = tableOffset + batSize + 512;
             dynamicHeader.UpdateChecksum();
             byte[] dynamicHeaderBlock = new byte[1024];
@@ -614,7 +608,7 @@ namespace DiscUtils.Vhd
 
             List<string> absPaths = new List<string>(8);
             List<string> relPaths = new List<string>(8);
-            foreach (var pl in _dynamicHeader.ParentLocators)
+            foreach (ParentLocator pl in _dynamicHeader.ParentLocators)
             {
                 if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode
                     || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)

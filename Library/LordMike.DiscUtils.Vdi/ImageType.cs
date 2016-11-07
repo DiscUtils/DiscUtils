@@ -27,6 +27,6 @@ namespace DiscUtils.Vdi
         Dynamic = 1,
         Fixed = 2,
         Undo = 3,
-        Differencing = 4,
+        Differencing = 4
     }
 }

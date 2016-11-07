@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     [VirtualDiskFactory("VHDX", ".vhdx,.avhdx")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
         {
-            get { return new string[] {"fixed", "dynamic"}; }
+            get { return new[] { "fixed", "dynamic" }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -63,7 +62,7 @@ namespace DiscUtils.Vhdx
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters)
+                                               VirtualDiskParameters diskParameters)
         {
             switch (variant)
             {
@@ -96,14 +95,14 @@ namespace DiscUtils.Vhdx
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo(string variant)
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "VHDX",
                 Variant = variant,
                 CanBeHardDisk = true,
                 DeterministicGeometry = true,
                 PreservesBiosGeometry = false,
-                CalcGeometry = c => Geometry.FromCapacity(c),
+                CalcGeometry = c => Geometry.FromCapacity(c)
             };
         }
     }

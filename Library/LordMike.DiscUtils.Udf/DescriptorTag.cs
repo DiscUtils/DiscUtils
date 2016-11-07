@@ -20,26 +20,43 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.IO;
-
     internal class DescriptorTag : IByteArraySerializable
     {
-        public TagIdentifier TagIdentifier;
-        public ushort DescriptorVersion;
-        public byte TagChecksum;
-        public ushort TagSerialNumber;
         public ushort DescriptorCrc;
         public ushort DescriptorCrcLength;
+        public ushort DescriptorVersion;
+        public byte TagChecksum;
+        public TagIdentifier TagIdentifier;
         public uint TagLocation;
+        public ushort TagSerialNumber;
 
         public int Size
         {
             get { return 16; }
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            TagIdentifier = (TagIdentifier)Utilities.ToUInt16LittleEndian(buffer, offset);
+            DescriptorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
+            TagChecksum = buffer[offset + 4];
+            TagSerialNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
+            DescriptorCrc = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
+            DescriptorCrcLength = Utilities.ToUInt16LittleEndian(buffer, offset + 10);
+            TagLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
+
+            return 16;
+        }
+
+        public void WriteTo(byte[] buffer, int offset)
+        {
+            throw new NotImplementedException();
         }
 
         public static bool IsValid(byte[] buffer, int offset)
@@ -67,7 +84,7 @@ namespace DiscUtils.Udf
         public static bool TryFromStream(Stream stream, out DescriptorTag result)
         {
             byte[] next = Utilities.ReadFully(stream, 512);
-            if (!DescriptorTag.IsValid(next, 0))
+            if (!IsValid(next, 0))
             {
                 result = null;
                 return false;
@@ -78,24 +95,6 @@ namespace DiscUtils.Udf
 
             result = dt;
             return true;
-        }
-
-        public int ReadFrom(byte[] buffer, int offset)
-        {
-            TagIdentifier = (TagIdentifier) Utilities.ToUInt16LittleEndian(buffer, offset);
-            DescriptorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            TagChecksum = buffer[offset + 4];
-            TagSerialNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            DescriptorCrc = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
-            DescriptorCrcLength = Utilities.ToUInt16LittleEndian(buffer, offset + 10);
-            TagLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
-
-            return 16;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -20,31 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-
     internal sealed class VhdxHeader : IByteArraySerializable
     {
         public const uint VhdxHeaderSignature = 0x64616568;
-
-        public uint Signature = VhdxHeaderSignature;
+        private readonly byte[] _data = new byte[4096];
         public uint Checksum;
-        public ulong SequenceNumber;
-        public Guid FileWriteGuid;
         public Guid DataWriteGuid;
+        public Guid FileWriteGuid;
         public Guid LogGuid;
-        public ushort LogVersion;
-        public ushort Version;
         public uint LogLength;
         public ulong LogOffset;
-        private byte[] _data = new byte[4096];
+        public ushort LogVersion;
+        public ulong SequenceNumber;
 
-        public VhdxHeader()
-        {
-        }
+        public uint Signature = VhdxHeaderSignature;
+        public ushort Version;
+
+        public VhdxHeader() {}
 
         public VhdxHeader(VhdxHeader header)
         {
@@ -62,11 +59,6 @@ namespace DiscUtils.Vhdx
             LogOffset = header.LogOffset;
         }
 
-        public int Size
-        {
-            get { return (int) (4*Sizes.OneKiB); }
-        }
-
         public bool IsValid
         {
             get
@@ -78,16 +70,14 @@ namespace DiscUtils.Vhdx
 
                 byte[] checkData = new byte[4096];
                 Array.Copy(_data, checkData, 4096);
-                Utilities.WriteBytesLittleEndian((uint) 0, checkData, 4);
+                Utilities.WriteBytesLittleEndian((uint)0, checkData, 4);
                 return Checksum == Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, checkData, 0, 4096);
             }
         }
 
-        public void CalcChecksum()
+        public int Size
         {
-            Checksum = 0;
-            RefreshData();
-            Checksum = Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, _data, 0, 4096);
+            get { return (int)(4 * Sizes.OneKiB); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -112,7 +102,14 @@ namespace DiscUtils.Vhdx
         public void WriteTo(byte[] buffer, int offset)
         {
             RefreshData();
-            Array.Copy(_data, 0, buffer, offset, (int) (4*Sizes.OneKiB));
+            Array.Copy(_data, 0, buffer, offset, (int)(4 * Sizes.OneKiB));
+        }
+
+        public void CalcChecksum()
+        {
+            Checksum = 0;
+            RefreshData();
+            Checksum = Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, _data, 0, 4096);
         }
 
         private void RefreshData()

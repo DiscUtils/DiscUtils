@@ -27,9 +27,9 @@ namespace DiscUtils.Vmdk
     internal class CompressedGrainHeader
     {
         public const int Size = 12;
+        public int DataSize;
 
         public long LogicalBlockAddress;
-        public int DataSize;
 
         public void Read(byte[] buffer, int offset)
         {

@@ -20,18 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.IO;
-
     internal abstract class BaseTaggedDescriptor : IByteArraySerializable
     {
-        public DescriptorTag Tag;
-
         internal readonly TagIdentifier RequiredTagIdentifier;
+        public DescriptorTag Tag;
 
         protected BaseTaggedDescriptor(TagIdentifier id)
         {

@@ -26,23 +26,21 @@ namespace DiscUtils.Udf
 {
     internal sealed class LogicalVolumeDescriptor : TaggedDescriptor<LogicalVolumeDescriptor>
     {
-        public uint VolumeDescriptorSequenceNumber;
         public byte[] DescriptorCharset;
-        public string LogicalVolumeIdentifier;
-        public uint LogicalBlockSize;
         public EntityIdentifier DomainIdentifier;
-        public byte[] LogicalVolumeContentsUse;
-        public uint MapTableLength;
-        public uint NumPartitionMaps;
         public EntityIdentifier ImplementationIdentifier;
         public byte[] ImplementationUse;
         public ExtentDescriptor IntegritySequenceExtent;
+        public uint LogicalBlockSize;
+        public byte[] LogicalVolumeContentsUse;
+        public string LogicalVolumeIdentifier;
+        public uint MapTableLength;
+        public uint NumPartitionMaps;
         public PartitionMap[] PartitionMaps;
+        public uint VolumeDescriptorSequenceNumber;
 
         public LogicalVolumeDescriptor()
-            : base(TagIdentifier.LogicalVolumeDescriptor)
-        {
-        }
+            : base(TagIdentifier.LogicalVolumeDescriptor) {}
 
         public LongAllocationDescriptor FileSetDescriptorLocation
         {
@@ -77,7 +75,7 @@ namespace DiscUtils.Udf
                 pmOffset += PartitionMaps[i].Size;
             }
 
-            return 440 + (int) MapTableLength;
+            return 440 + (int)MapTableLength;
         }
     }
 }

@@ -30,9 +30,9 @@ namespace DiscUtils.Xva
     internal class HashStreamCore : Stream
     {
         private readonly IncrementalHash _hashAlg;
+        private readonly Ownership _ownWrapped;
 
         private long _hashPos;
-        private readonly Ownership _ownWrapped;
         private Stream _wrapped;
 
         public HashStreamCore(Stream wrapped, Ownership ownsWrapped, IncrementalHash hashAlg)

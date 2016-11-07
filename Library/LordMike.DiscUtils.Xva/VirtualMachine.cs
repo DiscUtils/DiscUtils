@@ -42,9 +42,9 @@ namespace DiscUtils.Xva
         private static readonly XPathExpression GetDiskUuid = XPathExpression.Compile("member[child::name='snapshot']/value/struct/member[child::name='uuid']/value");
         private static readonly XPathExpression GetDiskNameLabel = XPathExpression.Compile("member[child::name='snapshot']/value/struct/member[child::name='name_label']/value");
         private static readonly XPathExpression GetDiskCapacity = XPathExpression.Compile("member[child::name='snapshot']/value/struct/member[child::name='virtual_size']/value");
+        private readonly Ownership _ownership;
 
         private Stream _fileStream;
-        private readonly Ownership _ownership;
 
         /// <summary>
         /// Initializes a new instance of the VirtualMachine class.

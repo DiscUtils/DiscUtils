@@ -20,63 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a single .VHDX file.
     /// </summary>
     public sealed class DiskImageFile : VirtualDiskLayer
     {
         /// <summary>
-        /// The stream containing the VHDX file.
-        /// </summary>
-        private Stream _fileStream;
-
-        /// <summary>
-        /// Indicates if this object controls the lifetime of the stream.
-        /// </summary>
-        private Ownership _ownsStream;
-
-        /// <summary>
-        /// The stream containing the logical VHDX content and metadata allowing for log replay.
-        /// </summary>
-        private Stream _logicalStream;
-
-        /// <summary>
-        /// The object that can be used to locate relative file paths.
-        /// </summary>
-        private FileLocator _fileLocator;
-
-        /// <summary>
-        /// The file name of this VHDX.
-        /// </summary>
-        private string _fileName;
-
-        /// <summary>
-        /// Value of the active VHDX header.
-        /// </summary>
-        private VhdxHeader _header;
-
-        /// <summary>
         /// Which VHDX header is active.
         /// </summary>
         private int _activeHeader;
-
-        /// <summary>
-        /// The set of VHDX regions.
-        /// </summary>
-        private RegionTable _regionTable;
-
-        /// <summary>
-        /// VHDX metadata region content.
-        /// </summary>
-        private Metadata _metadata;
 
         /// <summary>
         /// Block Allocation Table for disk content.
@@ -84,9 +43,49 @@ namespace DiscUtils.Vhdx
         private Stream _batStream;
 
         /// <summary>
+        /// The object that can be used to locate relative file paths.
+        /// </summary>
+        private readonly FileLocator _fileLocator;
+
+        /// <summary>
+        /// The file name of this VHDX.
+        /// </summary>
+        private readonly string _fileName;
+
+        /// <summary>
+        /// The stream containing the VHDX file.
+        /// </summary>
+        private Stream _fileStream;
+
+        /// <summary>
         /// Table of all free space in the file.
         /// </summary>
         private FreeSpaceTable _freeSpace;
+
+        /// <summary>
+        /// Value of the active VHDX header.
+        /// </summary>
+        private VhdxHeader _header;
+
+        /// <summary>
+        /// The stream containing the logical VHDX content and metadata allowing for log replay.
+        /// </summary>
+        private Stream _logicalStream;
+
+        /// <summary>
+        /// VHDX metadata region content.
+        /// </summary>
+        private Metadata _metadata;
+
+        /// <summary>
+        /// Indicates if this object controls the lifetime of the stream.
+        /// </summary>
+        private readonly Ownership _ownsStream;
+
+        /// <summary>
+        /// The set of VHDX regions.
+        /// </summary>
+        private RegionTable _regionTable;
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
@@ -118,9 +117,7 @@ namespace DiscUtils.Vhdx
         /// <param name="path">The file path to open.</param>
         /// <param name="access">Controls how the file can be accessed.</param>
         public DiskImageFile(string path, FileAccess access)
-            : this(new LocalFileLocator(Path.GetDirectoryName(path)), Path.GetFileName(path), access)
-        {
-        }
+            : this(new LocalFileLocator(Path.GetDirectoryName(path)), Path.GetFileName(path), access) {}
 
         internal DiskImageFile(FileLocator locator, string path, Stream stream, Ownership ownsStream)
             : this(stream, ownsStream)
@@ -149,75 +146,22 @@ namespace DiscUtils.Vhdx
             }
         }
 
+        internal override long Capacity
+        {
+            get { return (long)_metadata.DiskSize; }
+        }
+
         /// <summary>
-        /// Gets detailed information about the VHDX file.
+        /// Gets the extent that comprises this file.
         /// </summary>
-        public DiskImageFileInfo Information
+        public override IList<VirtualDiskExtent> Extents
         {
             get
             {
-                _fileStream.Position = 0;
-                FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
-
-                _fileStream.Position = 64*Sizes.OneKiB;
-                VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
-
-                _fileStream.Position = 128*Sizes.OneKiB;
-                VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
-
-                LogSequence activeLogSequence = FindActiveLogSequence();
-
-                return new DiskImageFileInfo(fileHeader, vhdxHeader1, vhdxHeader2, _regionTable, _metadata,
-                    activeLogSequence);
+                List<VirtualDiskExtent> result = new List<VirtualDiskExtent>();
+                result.Add(new DiskExtent(this));
+                return result;
             }
-        }
-
-        /// <summary>
-        /// Gets the unique id of the parent disk.
-        /// </summary>
-        public Guid ParentUniqueId
-        {
-            get
-            {
-                if ((_metadata.FileParameters.Flags & FileParametersFlags.HasParent) == 0)
-                {
-                    return Guid.Empty;
-                }
-
-                string parentLinkage;
-                if (_metadata.ParentLocator.Entries.TryGetValue("parent_linkage", out parentLinkage))
-                {
-                    return new Guid(parentLinkage);
-                }
-                else
-                {
-                    return Guid.Empty;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the logical sector size of the virtual disk.
-        /// </summary>
-        public long LogicalSectorSize
-        {
-            get { return _metadata.LogicalSectorSize; }
-        }
-
-        /// <summary>
-        /// Gets the geometry of the virtual disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return Geometry.FromCapacity(Capacity, (int) _metadata.LogicalSectorSize); }
-        }
-
-        /// <summary>
-        /// Gets a value indicating if the layer only stores meaningful sectors.
-        /// </summary>
-        public override bool IsSparse
-        {
-            get { return true; }
         }
 
         /// <summary>
@@ -237,6 +181,53 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
+        /// Gets the geometry of the virtual disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return Geometry.FromCapacity(Capacity, (int)_metadata.LogicalSectorSize); }
+        }
+
+        /// <summary>
+        /// Gets detailed information about the VHDX file.
+        /// </summary>
+        public DiskImageFileInfo Information
+        {
+            get
+            {
+                _fileStream.Position = 0;
+                FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
+
+                _fileStream.Position = 64 * Sizes.OneKiB;
+                VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+
+                _fileStream.Position = 128 * Sizes.OneKiB;
+                VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+
+                LogSequence activeLogSequence = FindActiveLogSequence();
+
+                return new DiskImageFileInfo(fileHeader, vhdxHeader1, vhdxHeader2, _regionTable, _metadata,
+                    activeLogSequence);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating if the layer only stores meaningful sectors.
+        /// </summary>
+        public override bool IsSparse
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Gets the logical sector size of the virtual disk.
+        /// </summary>
+        public long LogicalSectorSize
+        {
+            get { return _metadata.LogicalSectorSize; }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the file is a differencing disk.
         /// </summary>
         public override bool NeedsParent
@@ -245,29 +236,24 @@ namespace DiscUtils.Vhdx
         }
 
         /// <summary>
-        /// Gets the unique id of this file.
+        /// Gets the unique id of the parent disk.
         /// </summary>
-        public Guid UniqueId
-        {
-            get { return _header.DataWriteGuid; }
-        }
-
-        /// <summary>
-        /// Gets the extent that comprises this file.
-        /// </summary>
-        public override IList<VirtualDiskExtent> Extents
+        public Guid ParentUniqueId
         {
             get
             {
-                List<VirtualDiskExtent> result = new List<VirtualDiskExtent>();
-                result.Add(new DiskExtent(this));
-                return result;
-            }
-        }
+                if ((_metadata.FileParameters.Flags & FileParametersFlags.HasParent) == 0)
+                {
+                    return Guid.Empty;
+                }
 
-        internal override long Capacity
-        {
-            get { return (long) _metadata.DiskSize; }
+                string parentLinkage;
+                if (_metadata.ParentLocator.Entries.TryGetValue("parent_linkage", out parentLinkage))
+                {
+                    return new Guid(parentLinkage);
+                }
+                return Guid.Empty;
+            }
         }
 
         internal override FileLocator RelativeFileLocator
@@ -278,6 +264,14 @@ namespace DiscUtils.Vhdx
         internal long StoredSize
         {
             get { return _fileStream.Length; }
+        }
+
+        /// <summary>
+        /// Gets the unique id of this file.
+        /// </summary>
+        public Guid UniqueId
+        {
+            get { return _header.DataWriteGuid; }
         }
 
         /// <summary>
@@ -301,7 +295,7 @@ namespace DiscUtils.Vhdx
         /// <param name="geometry">The desired geometry of the new disk, or <c>null</c> for default.</param>
         /// <returns>An object that accesses the stream as a VHDX file.</returns>
         public static DiskImageFile InitializeFixed(Stream stream, Ownership ownsStream, long capacity,
-            Geometry geometry)
+                                                    Geometry geometry)
         {
             InitializeFixedInternal(stream, capacity, geometry);
             return new DiskImageFile(stream, ownsStream);
@@ -471,7 +465,7 @@ namespace DiscUtils.Vhdx
 
             ContentStream contentStream = new ContentStream(SparseStream.FromStream(_logicalStream, Ownership.None),
                 _fileStream.CanWrite, _batStream, _freeSpace, _metadata, Capacity, theParent, theOwnership);
-            return new AligningStream(contentStream, Ownership.Dispose, (int) _metadata.LogicalSectorSize);
+            return new AligningStream(contentStream, Ownership.Dispose, (int)_metadata.LogicalSectorSize);
         }
 
         /// <summary>
@@ -513,7 +507,7 @@ namespace DiscUtils.Vhdx
 
         private static void InitializeDynamicInternal(Stream stream, long capacity, long blockSize)
         {
-            if (blockSize < Sizes.OneMiB || blockSize > Sizes.OneMiB*256 || !Utilities.IsPowerOfTwo(blockSize))
+            if (blockSize < Sizes.OneMiB || blockSize > Sizes.OneMiB * 256 || !Utilities.IsPowerOfTwo(blockSize))
             {
                 throw new ArgumentOutOfRangeException(nameof(blockSize), blockSize,
                     "BlockSize must be a power of 2 between 1MB and 256MB");
@@ -521,12 +515,12 @@ namespace DiscUtils.Vhdx
 
             int logicalSectorSize = 512;
             int physicalSectorSize = 4096;
-            long chunkRatio = (0x800000L*logicalSectorSize)/blockSize;
+            long chunkRatio = 0x800000L * logicalSectorSize / blockSize;
             long dataBlocksCount = Utilities.Ceil(capacity, blockSize);
             long sectorBitmapBlocksCount = Utilities.Ceil(dataBlocksCount, chunkRatio);
-            long totalBatEntriesDynamic = dataBlocksCount + ((dataBlocksCount - 1)/chunkRatio);
+            long totalBatEntriesDynamic = dataBlocksCount + (dataBlocksCount - 1) / chunkRatio;
 
-            FileHeader fileHeader = new FileHeader() {Creator = ".NET DiscUtils"};
+            FileHeader fileHeader = new FileHeader { Creator = ".NET DiscUtils" };
 
             long fileEnd = Sizes.OneMiB;
 
@@ -537,8 +531,8 @@ namespace DiscUtils.Vhdx
             header1.LogGuid = Guid.Empty;
             header1.LogVersion = 0;
             header1.Version = 1;
-            header1.LogLength = (uint) Sizes.OneMiB;
-            header1.LogOffset = (ulong) fileEnd;
+            header1.LogLength = (uint)Sizes.OneMiB;
+            header1.LogOffset = (ulong)fileEnd;
             header1.CalcChecksum();
 
             fileEnd += header1.LogLength;
@@ -552,7 +546,7 @@ namespace DiscUtils.Vhdx
             RegionEntry metadataRegion = new RegionEntry();
             metadataRegion.Guid = RegionEntry.MetadataRegionGuid;
             metadataRegion.FileOffset = fileEnd;
-            metadataRegion.Length = (uint) Sizes.OneMiB;
+            metadataRegion.Length = (uint)Sizes.OneMiB;
             metadataRegion.Flags = RegionFlags.Required;
             regionTable.Regions.Add(metadataRegion.Guid, metadataRegion);
 
@@ -560,8 +554,8 @@ namespace DiscUtils.Vhdx
 
             RegionEntry batRegion = new RegionEntry();
             batRegion.Guid = RegionEntry.BatGuid;
-            batRegion.FileOffset = 3*Sizes.OneMiB;
-            batRegion.Length = (uint) Utilities.RoundUp(totalBatEntriesDynamic*8, Sizes.OneMiB);
+            batRegion.FileOffset = 3 * Sizes.OneMiB;
+            batRegion.Length = (uint)Utilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
             batRegion.Flags = RegionFlags.Required;
             regionTable.Regions.Add(batRegion.Guid, batRegion);
 
@@ -570,16 +564,16 @@ namespace DiscUtils.Vhdx
             stream.Position = 0;
             Utilities.WriteStruct(stream, fileHeader);
 
-            stream.Position = 64*Sizes.OneKiB;
+            stream.Position = 64 * Sizes.OneKiB;
             Utilities.WriteStruct(stream, header1);
 
-            stream.Position = 128*Sizes.OneKiB;
+            stream.Position = 128 * Sizes.OneKiB;
             Utilities.WriteStruct(stream, header2);
 
-            stream.Position = 192*Sizes.OneKiB;
+            stream.Position = 192 * Sizes.OneKiB;
             Utilities.WriteStruct(stream, regionTable);
 
-            stream.Position = 256*Sizes.OneKiB;
+            stream.Position = 256 * Sizes.OneKiB;
             Utilities.WriteStruct(stream, regionTable);
 
             // Set stream to min size
@@ -587,20 +581,20 @@ namespace DiscUtils.Vhdx
             stream.WriteByte(0);
 
             // Metadata
-            FileParameters fileParams = new FileParameters()
+            FileParameters fileParams = new FileParameters
             {
-                BlockSize = (uint) blockSize,
+                BlockSize = (uint)blockSize,
                 Flags = FileParametersFlags.None
             };
             ParentLocator parentLocator = new ParentLocator();
 
             Stream metadataStream = new SubStream(stream, metadataRegion.FileOffset, metadataRegion.Length);
-            Metadata metadata = Metadata.Initialize(metadataStream, fileParams, (ulong) capacity,
-                (uint) logicalSectorSize, (uint) physicalSectorSize, null);
+            Metadata metadata = Metadata.Initialize(metadataStream, fileParams, (ulong)capacity,
+                (uint)logicalSectorSize, (uint)physicalSectorSize, null);
         }
 
         private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent,
-            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
+                                                           string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
             throw new NotImplementedException();
         }
@@ -638,20 +632,20 @@ namespace DiscUtils.Vhdx
         private IEnumerable<StreamExtent> BatControlledFileExtents()
         {
             _batStream.Position = 0;
-            byte[] batData = Utilities.ReadFully(_batStream, (int) _batStream.Length);
+            byte[] batData = Utilities.ReadFully(_batStream, (int)_batStream.Length);
 
             uint blockSize = _metadata.FileParameters.BlockSize;
-            long chunkSize = (1L << 23)*(long) _metadata.LogicalSectorSize;
-            int chunkRatio = (int) (chunkSize/_metadata.FileParameters.BlockSize);
+            long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
+            int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
 
             List<StreamExtent> extents = new List<StreamExtent>();
             for (int i = 0; i < batData.Length; i += 8)
             {
                 ulong entry = Utilities.ToUInt64LittleEndian(batData, i);
-                long filePos = (long) ((entry >> 20) & 0xFFFFFFFFFFF)*Sizes.OneMiB;
+                long filePos = (long)((entry >> 20) & 0xFFFFFFFFFFF) * Sizes.OneMiB;
                 if (filePos != 0)
                 {
-                    if (i%((chunkRatio + 1)*8) == chunkRatio*8)
+                    if (i % ((chunkRatio + 1) * 8) == chunkRatio * 8)
                     {
                         // This is a sector bitmap block (always 1MB in size)
                         extents.Add(new StreamExtent(filePos, Sizes.OneMiB));
@@ -676,7 +670,7 @@ namespace DiscUtils.Vhdx
 
         private void ReplayLog()
         {
-            _freeSpace.Reserve((long) _header.LogOffset, _header.LogLength);
+            _freeSpace.Reserve((long)_header.LogOffset, _header.LogLength);
 
             _logicalStream = _fileStream;
 
@@ -715,7 +709,7 @@ namespace DiscUtils.Vhdx
         {
             using (
                 Stream logStream =
-                    new CircularStream(new SubStream(_fileStream, (long) _header.LogOffset, (long) _header.LogLength),
+                    new CircularStream(new SubStream(_fileStream, (long)_header.LogOffset, _header.LogLength),
                         Ownership.Dispose))
             {
                 LogSequence candidateActiveSequence = new LogSequence();
@@ -756,7 +750,7 @@ namespace DiscUtils.Vhdx
                         currentTail = currentSequence.Head.Position + LogEntry.LogSectorSize;
                     }
 
-                    currentTail = currentTail%logStream.Length;
+                    currentTail = currentTail % logStream.Length;
                 } while (currentTail > oldTail);
 
                 return candidateActiveSequence;
@@ -765,9 +759,9 @@ namespace DiscUtils.Vhdx
 
         private void ReadRegionTable()
         {
-            _fileStream.Position = 192*Sizes.OneKiB;
+            _fileStream.Position = 192 * Sizes.OneKiB;
             _regionTable = Utilities.ReadStruct<RegionTable>(_fileStream);
-            foreach (var entry in _regionTable.Regions.Values)
+            foreach (RegionEntry entry in _regionTable.Regions.Values)
             {
                 if ((entry.Flags & RegionFlags.Required) != 0)
                 {
@@ -787,7 +781,7 @@ namespace DiscUtils.Vhdx
 
             _activeHeader = 0;
 
-            _fileStream.Position = 64*Sizes.OneKiB;
+            _fileStream.Position = 64 * Sizes.OneKiB;
             VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
             if (vhdxHeader1.IsValid)
             {
@@ -795,7 +789,7 @@ namespace DiscUtils.Vhdx
                 _activeHeader = 1;
             }
 
-            _fileStream.Position = 128*Sizes.OneKiB;
+            _fileStream.Position = 128 * Sizes.OneKiB;
             VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
             if (vhdxHeader2.IsValid && (_activeHeader == 0 || _header.SequenceNumber < vhdxHeader2.SequenceNumber))
             {
@@ -818,13 +812,13 @@ namespace DiscUtils.Vhdx
 
             if (_activeHeader == 1)
             {
-                _fileStream.Position = 128*Sizes.OneKiB;
-                otherPos = 64*Sizes.OneKiB;
+                _fileStream.Position = 128 * Sizes.OneKiB;
+                otherPos = 64 * Sizes.OneKiB;
             }
             else
             {
-                _fileStream.Position = 64*Sizes.OneKiB;
-                otherPos = 128*Sizes.OneKiB;
+                _fileStream.Position = 64 * Sizes.OneKiB;
+                otherPos = 128 * Sizes.OneKiB;
             }
 
             Utilities.WriteStruct(_fileStream, _header);

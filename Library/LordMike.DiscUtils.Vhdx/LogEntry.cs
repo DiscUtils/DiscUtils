@@ -20,28 +20,59 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class LogEntry
     {
-        public const int LogSectorSize = (int) (4*Sizes.OneKiB);
+        public const int LogSectorSize = (int)(4 * Sizes.OneKiB);
+        private readonly List<Descriptor> _descriptors = new List<Descriptor>();
 
-        private LogEntryHeader _header;
-        private List<Descriptor> _descriptors = new List<Descriptor>();
-        private long _position;
+        private readonly LogEntryHeader _header;
 
         private LogEntry(long position, LogEntryHeader header, List<Descriptor> descriptors)
         {
-            _position = position;
+            Position = position;
             _header = header;
             _descriptors = descriptors;
         }
+
+        public ulong FlushedFileOffset
+        {
+            get { return _header.FlushedFileOffset; }
+        }
+
+        public bool IsEmpty
+        {
+            get { return _descriptors.Count == 0; }
+        }
+
+        public ulong LastFileOffset
+        {
+            get { return _header.LastFileOffset; }
+        }
+
+        public Guid LogGuid
+        {
+            get { return _header.LogGuid; }
+        }
+
+        public IEnumerable<Range<ulong, ulong>> ModifiedExtents
+        {
+            get
+            {
+                foreach (Descriptor descriptor in _descriptors)
+                {
+                    yield return new Range<ulong, ulong>(descriptor.FileOffset, descriptor.FileLength);
+                }
+            }
+        }
+
+        public long Position { get; }
 
         public ulong SequenceNumber
         {
@@ -51,42 +82,6 @@ namespace DiscUtils.Vhdx
         public uint Tail
         {
             get { return _header.Tail; }
-        }
-
-        public long Position
-        {
-            get { return _position; }
-        }
-
-        public Guid LogGuid
-        {
-            get { return _header.LogGuid; }
-        }
-
-        public ulong FlushedFileOffset
-        {
-            get { return _header.FlushedFileOffset; }
-        }
-
-        public ulong LastFileOffset
-        {
-            get { return _header.LastFileOffset; }
-        }
-
-        public bool IsEmpty
-        {
-            get { return _descriptors.Count == 0; }
-        }
-
-        public IEnumerable<Range<ulong, ulong>> ModifiedExtents
-        {
-            get
-            {
-                foreach (var descriptor in _descriptors)
-                {
-                    yield return new Range<ulong, ulong>(descriptor.FileOffset, descriptor.FileLength);
-                }
-            }
         }
 
         public static bool TryRead(Stream logStream, out LogEntry entry)
@@ -117,20 +112,20 @@ namespace DiscUtils.Vhdx
 
             Utilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
 
-            Utilities.WriteBytesLittleEndian((int) 0, logEntryBuffer, 4);
+            Utilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
             if (header.Checksum !=
-                Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int) header.EntryLength))
+                Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int)header.EntryLength))
             {
                 entry = null;
                 return false;
             }
 
-            int dataPos = Utilities.RoundUp(((int) header.DescriptorCount*32) + 64, LogSectorSize);
+            int dataPos = Utilities.RoundUp((int)header.DescriptorCount * 32 + 64, LogSectorSize);
 
             List<Descriptor> descriptors = new List<Descriptor>();
             for (int i = 0; i < header.DescriptorCount; ++i)
             {
-                int offset = (i*32) + 64;
+                int offset = i * 32 + 64;
                 Descriptor descriptor;
 
                 uint descriptorSig = Utilities.ToUInt32LittleEndian(logEntryBuffer, offset);
@@ -170,12 +165,12 @@ namespace DiscUtils.Vhdx
             public ulong FileOffset;
             public ulong SequenceNumber;
 
+            public abstract ulong FileLength { get; }
+
             public int Size
             {
                 get { return 32; }
             }
-
-            public abstract ulong FileLength { get; }
 
             public abstract int ReadFrom(byte[] buffer, int offset);
 
@@ -215,11 +210,10 @@ namespace DiscUtils.Vhdx
 
         private sealed class DataDescriptor : Descriptor
         {
-            public uint TrailingBytes;
+            private readonly byte[] _data;
+            private readonly int _offset;
             public ulong LeadingBytes;
-
-            private byte[] _data;
-            private int _offset;
+            public uint TrailingBytes;
 
             public DataDescriptor(byte[] data, int offset)
             {

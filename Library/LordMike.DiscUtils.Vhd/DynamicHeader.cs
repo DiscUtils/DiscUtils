@@ -20,35 +20,32 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal class DynamicHeader
     {
         public const string HeaderCookie = "cxsparse";
         public const uint Version1 = 0x00010000;
         public const uint DefaultBlockSize = 0x00200000;
+        public uint BlockSize;
+        public uint Checksum;
 
         public string Cookie;
         public long DataOffset;
-        public long TableOffset;
         public uint HeaderVersion;
         public int MaxTableEntries;
-        public uint BlockSize;
-        public uint Checksum;
-        public Guid ParentUniqueId;
+        public ParentLocator[] ParentLocators;
         public DateTime ParentTimestamp;
         public string ParentUnicodeName;
-        public ParentLocator[] ParentLocators;
+        public Guid ParentUniqueId;
+        public long TableOffset;
 
-        public DynamicHeader()
-        {
-        }
+        public DynamicHeader() {}
 
         public DynamicHeader(long dataOffset, long tableOffset, uint blockSize, long diskSize)
         {
@@ -57,7 +54,7 @@ namespace DiscUtils.Vhd
             TableOffset = tableOffset;
             HeaderVersion = Version1;
             BlockSize = blockSize;
-            MaxTableEntries = (int) ((diskSize + blockSize - 1)/blockSize);
+            MaxTableEntries = (int)((diskSize + blockSize - 1) / blockSize);
             ParentTimestamp = Footer.EpochUtc;
             ParentUnicodeName = string.Empty;
             ParentLocators = new ParentLocator[8];
@@ -103,7 +100,7 @@ namespace DiscUtils.Vhd
             result.ParentLocators = new ParentLocator[8];
             for (int i = 0; i < 8; ++i)
             {
-                result.ParentLocators[i] = ParentLocator.FromBytes(data, offset + 576 + (i*24));
+                result.ParentLocators[i] = ParentLocator.FromBytes(data, offset + 576 + i * 24);
             }
 
             return result;
@@ -119,14 +116,14 @@ namespace DiscUtils.Vhd
             Utilities.WriteBytesBigEndian(BlockSize, data, offset + 32);
             Utilities.WriteBytesBigEndian(Checksum, data, offset + 36);
             Utilities.WriteBytesBigEndian(ParentUniqueId, data, offset + 40);
-            Utilities.WriteBytesBigEndian((uint) (ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
-            Utilities.WriteBytesBigEndian((uint) 0, data, offset + 60);
+            Utilities.WriteBytesBigEndian((uint)(ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
+            Utilities.WriteBytesBigEndian((uint)0, data, offset + 60);
             Array.Clear(data, offset + 64, 512);
             Encoding.BigEndianUnicode.GetBytes(ParentUnicodeName, 0, ParentUnicodeName.Length, data, offset + 64);
 
             for (int i = 0; i < 8; ++i)
             {
-                ParentLocators[i].ToBytes(data, offset + 576 + (i*24));
+                ParentLocators[i].ToBytes(data, offset + 576 + i * 24);
             }
 
             Array.Clear(data, offset + 1024 - 256, 256);

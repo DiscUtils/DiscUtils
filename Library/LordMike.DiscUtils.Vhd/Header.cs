@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System.IO;
-
     internal class Header
     {
         public string Cookie;

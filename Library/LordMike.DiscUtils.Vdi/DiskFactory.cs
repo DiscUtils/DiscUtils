@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vdi
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     [VirtualDiskFactory("VDI", ".vdi")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
         {
-            get { return new string[] {"fixed", "dynamic"}; }
+            get { return new[] { "fixed", "dynamic" }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -47,7 +46,7 @@ namespace DiscUtils.Vdi
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters)
+                                               VirtualDiskParameters diskParameters)
         {
             switch (variant)
             {
@@ -80,21 +79,21 @@ namespace DiscUtils.Vdi
 
         public override VirtualDiskLayer OpenDiskLayer(FileLocator locator, string path, FileAccess access)
         {
-            FileMode mode = (access == FileAccess.Read) ? FileMode.Open : FileMode.OpenOrCreate;
-            FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
+            FileMode mode = access == FileAccess.Read ? FileMode.Open : FileMode.OpenOrCreate;
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             return new DiskImageFile(locator.Open(path, mode, access, share), Ownership.Dispose);
         }
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo(string variant)
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "VDI",
                 Variant = variant,
                 CanBeHardDisk = true,
                 DeterministicGeometry = true,
                 PreservesBiosGeometry = true,
-                CalcGeometry = c => GeometryRecord.FromCapacity(c).ToGeometry(c),
+                CalcGeometry = c => GeometryRecord.FromCapacity(c).ToGeometry(c)
             };
         }
     }

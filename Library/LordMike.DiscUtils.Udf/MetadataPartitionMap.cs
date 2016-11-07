@@ -26,14 +26,14 @@ namespace DiscUtils.Udf
 {
     internal sealed class MetadataPartitionMap : PartitionMap
     {
-        public ushort VolumeSequenceNumber;
-        public ushort PartitionNumber;
+        public ushort AlignmentUnitSize;
+        public uint AllocationUnitSize;
+        public byte Flags;
+        public uint MetadataBitmapFileLocation;
         public uint MetadataFileLocation;
         public uint MetadataMirrorFileLocation;
-        public uint MetadataBitmapFileLocation;
-        public uint AllocationUnitSize;
-        public ushort AlignmentUnitSize;
-        public byte Flags;
+        public ushort PartitionNumber;
+        public ushort VolumeSequenceNumber;
 
         public override int Size
         {

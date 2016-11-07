@@ -20,28 +20,47 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class FileIdentifier : VfsDirEntry, IByteArraySerializable
     {
         public DescriptorTag DescriptorTag;
-        public ushort FileVersionNumber;
         public FileCharacteristic FileCharacteristics;
-        public byte NameLength;
         public LongAllocationDescriptor FileLocation;
-        public ushort ImplementationUseLength;
+        public ushort FileVersionNumber;
         public byte[] ImplementationUse;
+        public ushort ImplementationUseLength;
         public string Name;
+        public byte NameLength;
 
-        public int Size
+        public override DateTime CreationTimeUtc
         {
-            get { throw new NotImplementedException(); }
+            get { throw new NotSupportedException(); }
+        }
+
+        public override FileAttributes FileAttributes
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public override string FileName
+        {
+            get { return Name; }
+        }
+
+        public override bool HasVfsFileAttributes
+        {
+            get { return false; }
+        }
+
+        public override bool HasVfsTimeInfo
+        {
+            get { return false; }
         }
 
         public override bool IsDirectory
@@ -50,16 +69,6 @@ namespace DiscUtils.Udf
         }
 
         public override bool IsSymlink
-        {
-            get { return false; }
-        }
-
-        public override string FileName
-        {
-            get { return Name; }
-        }
-
-        public override bool HasVfsTimeInfo
         {
             get { return false; }
         }
@@ -74,34 +83,21 @@ namespace DiscUtils.Udf
             get { throw new NotSupportedException(); }
         }
 
-        public override DateTime CreationTimeUtc
-        {
-            get { throw new NotSupportedException(); }
-        }
-
-        public override bool HasVfsFileAttributes
-        {
-            get { return false; }
-        }
-
-        public override FileAttributes FileAttributes
-        {
-            get { throw new NotSupportedException(); }
-        }
-
         public override long UniqueCacheId
         {
-            get
-            {
-                return ((long) FileLocation.ExtentLocation.Partition) << 32 | FileLocation.ExtentLocation.LogicalBlock;
-            }
+            get { return (long)FileLocation.ExtentLocation.Partition << 32 | FileLocation.ExtentLocation.LogicalBlock; }
+        }
+
+        public int Size
+        {
+            get { throw new NotImplementedException(); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
             DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
             FileVersionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
-            FileCharacteristics = (FileCharacteristic) buffer[offset + 18];
+            FileCharacteristics = (FileCharacteristic)buffer[offset + 18];
             NameLength = buffer[offset + 19];
             FileLocation = Utilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 20);
             ImplementationUseLength = Utilities.ToUInt16LittleEndian(buffer, offset + 36);

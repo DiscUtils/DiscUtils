@@ -15,6 +15,6 @@ namespace DiscUtils.Udf
         System = 0x0200,
         Transformed = 0x0400,
         MultiVersions = 0x0800,
-        Stream = 0x1000,
+        Stream = 0x1000
     }
 }

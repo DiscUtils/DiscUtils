@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal sealed class ShortAllocationDescriptor : IByteArraySerializable
     {
         public uint ExtentLength;
@@ -43,7 +42,7 @@ namespace DiscUtils.Udf
             ExtentLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
 
             ExtentLength = len & 0x3FFFFFFF;
-            Flags = (ShortAllocationFlags) ((len >> 30) & 0x3);
+            Flags = (ShortAllocationFlags)((len >> 30) & 0x3);
 
             return 8;
         }

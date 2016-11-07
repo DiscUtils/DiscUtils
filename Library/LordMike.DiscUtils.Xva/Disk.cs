@@ -31,10 +31,10 @@ namespace DiscUtils.Xva
     public sealed class Disk : VirtualDisk
     {
         private readonly long _capacity;
-
-        private SparseStream _content;
         private readonly string _location;
         private readonly VirtualMachine _vm;
+
+        private SparseStream _content;
 
         internal Disk(VirtualMachine vm, string id, string displayname, string location, long capacity)
         {

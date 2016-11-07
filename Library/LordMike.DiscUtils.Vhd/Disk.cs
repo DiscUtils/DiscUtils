@@ -20,29 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-
     /// <summary>
     /// Represents a VHD-backed disk.
     /// </summary>
     public sealed class Disk : VirtualDisk
     {
         /// <summary>
-        /// The list of files that make up the disk.
-        /// </summary>
-        private List<Tuple<DiskImageFile, Ownership>> _files;
-
-        /// <summary>
         /// The stream representing the disk's contents.
         /// </summary>
         private SparseStream _content;
+
+        /// <summary>
+        /// The list of files that make up the disk.
+        /// </summary>
+        private List<Tuple<DiskImageFile, Ownership>> _files;
 
         /// <summary>
         /// Initializes a new instance of the Disk class.  Differencing disks are not supported.
@@ -218,30 +217,6 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _files[0].Item1.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
-        }
-
-        /// <summary>
-        /// Gets the capacity of the disk (in bytes).
-        /// </summary>
-        public override long Capacity
-        {
-            get { return _files[0].Item1.Capacity; }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the VHD footer is written every time a new block is allocated.
         /// </summary>
         /// <remarks>
@@ -272,6 +247,14 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
+        /// Gets the capacity of the disk (in bytes).
+        /// </summary>
+        public override long Capacity
+        {
+            get { return _files[0].Item1.Capacity; }
+        }
+
+        /// <summary>
         /// Gets the content of the disk as a stream.
         /// </summary>
         /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
@@ -297,17 +280,11 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets the layers that make up the disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get
-            {
-                foreach (var file in _files)
-                {
-                    yield return file.Item1 as VirtualDiskLayer;
-                }
-            }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -318,6 +295,28 @@ namespace DiscUtils.Vhd
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
             get { return DiskFactory.MakeDiskTypeInfo(_files[_files.Count - 1].Item1.IsSparse ? "dynamic" : "fixed"); }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _files[0].Item1.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get
+            {
+                foreach (Tuple<DiskImageFile, Ownership> file in _files)
+                {
+                    yield return file.Item1;
+                }
+            }
         }
 
         /// <summary>
@@ -460,7 +459,7 @@ namespace DiscUtils.Vhd
         }
 
         internal static Disk InitializeDynamic(FileLocator fileLocator, string path, long capacity, Geometry geometry,
-            long blockSize)
+                                               long blockSize)
         {
             return new Disk(DiskImageFile.InitializeDynamic(fileLocator, path, capacity, geometry, blockSize),
                 Ownership.Dispose);
@@ -485,7 +484,7 @@ namespace DiscUtils.Vhd
 
                     if (_files != null)
                     {
-                        foreach (var record in _files)
+                        foreach (Tuple<DiskImageFile, Ownership> record in _files)
                         {
                             if (record.Item2 == Ownership.Dispose)
                             {

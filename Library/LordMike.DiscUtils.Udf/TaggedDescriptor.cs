@@ -20,24 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System.Globalization;
-    using System.IO;
-
     internal abstract class TaggedDescriptor<T> : BaseTaggedDescriptor
         where T : BaseTaggedDescriptor, new()
     {
         protected TaggedDescriptor(TagIdentifier id)
-            : base(id)
-        {
-        }
+            : base(id) {}
 
         public static T FromStream(Stream stream, uint sector, uint sectorSize)
         {
-            stream.Position = sector*(long) sectorSize;
+            stream.Position = sector * (long)sectorSize;
             byte[] buffer = Utilities.ReadFully(stream, 512);
 
             T result = new T();
@@ -53,6 +50,6 @@ namespace DiscUtils.Udf
             return result;
         }
 
-        public override abstract int Parse(byte[] buffer, int offset);
+        public abstract override int Parse(byte[] buffer, int offset);
     }
 }

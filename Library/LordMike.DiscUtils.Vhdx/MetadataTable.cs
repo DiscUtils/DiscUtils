@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class MetadataTable : IByteArraySerializable
     {
-        public const int FixedSize = (int) (64*Sizes.OneKiB);
+        public const int FixedSize = (int)(64 * Sizes.OneKiB);
         public const ulong MetadataTableSignature = 0x617461646174656D;
 
         public static readonly Guid FileParametersGuid = new Guid("CAA16737-FA36-4D43-B3B6-33F0AA44E76B");
@@ -39,18 +38,13 @@ namespace DiscUtils.Vhdx
         public static readonly Guid PhysicalSectorSizeGuid = new Guid("CDA348C7-445D-4471-9CC9-E9885251C556");
         public static readonly Guid ParentLocatorGuid = new Guid("A8D35F2D-B30B-454D-ABF7-D3D84834AB0C");
 
-        public ulong Signature = MetadataTableSignature;
-        public ushort EntryCount = 0;
-        public IDictionary<MetadataEntryKey, MetadataEntry> Entries = new Dictionary<MetadataEntryKey, MetadataEntry>();
-
         private static readonly Dictionary<Guid, object> KnownMetadata = InitMetadataTable();
 
-        private byte[] _headerData = new byte[32];
+        private readonly byte[] _headerData = new byte[32];
+        public IDictionary<MetadataEntryKey, MetadataEntry> Entries = new Dictionary<MetadataEntryKey, MetadataEntry>();
+        public ushort EntryCount;
 
-        public int Size
-        {
-            get { return FixedSize; }
-        }
+        public ulong Signature = MetadataTableSignature;
 
         public bool IsValid
         {
@@ -66,7 +60,7 @@ namespace DiscUtils.Vhdx
                     return false;
                 }
 
-                foreach (var entry in Entries.Values)
+                foreach (MetadataEntry entry in Entries.Values)
                 {
                     if ((entry.Flags & MetadataEntryFlags.IsRequired) != 0)
                     {
@@ -81,6 +75,11 @@ namespace DiscUtils.Vhdx
             }
         }
 
+        public int Size
+        {
+            get { return FixedSize; }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Array.Copy(buffer, offset, _headerData, 0, 32);
@@ -93,7 +92,7 @@ namespace DiscUtils.Vhdx
             {
                 for (int i = 0; i < EntryCount; ++i)
                 {
-                    MetadataEntry entry = Utilities.ToStruct<MetadataEntry>(buffer, offset + 32 + (i*32));
+                    MetadataEntry entry = Utilities.ToStruct<MetadataEntry>(buffer, offset + 32 + i * 32);
                     Entries[MetadataEntryKey.FromEntry(entry)] = entry;
                 }
             }
@@ -103,14 +102,14 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            EntryCount = (ushort) Entries.Count;
+            EntryCount = (ushort)Entries.Count;
             Utilities.WriteBytesLittleEndian(Signature, _headerData, 0);
             Utilities.WriteBytesLittleEndian(EntryCount, _headerData, 10);
 
             Array.Copy(_headerData, 0, buffer, offset, 32);
 
             int bufferOffset = 32 + offset;
-            foreach (var entry in Entries)
+            foreach (KeyValuePair<MetadataEntryKey, MetadataEntry> entry in Entries)
             {
                 entry.Value.WriteTo(buffer, bufferOffset);
                 bufferOffset += 32;

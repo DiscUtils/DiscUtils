@@ -20,22 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class File : IVfsFile
     {
-        protected UdfContext _context;
-        protected Partition _partition;
-        protected FileEntry _fileEntry;
         protected uint _blockSize;
         protected IBuffer _content;
+        protected UdfContext _context;
+        protected FileEntry _fileEntry;
+        protected Partition _partition;
 
         public File(UdfContext context, Partition partition, FileEntry fileEntry, uint blockSize)
         {
@@ -43,6 +42,11 @@ namespace DiscUtils.Udf
             _partition = partition;
             _fileEntry = fileEntry;
             _blockSize = blockSize;
+        }
+
+        public List<ExtendedAttributeRecord> ExtendedAttributes
+        {
+            get { return _fileEntry.ExtendedAttributes; }
         }
 
         public IBuffer FileContent
@@ -80,10 +84,7 @@ namespace DiscUtils.Udf
                 {
                     return efe.CreationTime;
                 }
-                else
-                {
-                    return LastWriteTimeUtc;
-                }
+                return LastWriteTimeUtc;
             }
 
             set { throw new NotSupportedException(); }
@@ -93,7 +94,7 @@ namespace DiscUtils.Udf
         {
             get
             {
-                FileAttributes attribs = (FileAttributes) 0;
+                FileAttributes attribs = 0;
                 InformationControlBlockFlags flags = _fileEntry.InformationControlBlock.Flags;
 
                 if (_fileEntry.InformationControlBlock.FileType == FileType.Directory)
@@ -119,7 +120,7 @@ namespace DiscUtils.Udf
                     attribs |= FileAttributes.System | FileAttributes.Hidden;
                 }
 
-                if ((int) attribs == 0)
+                if ((int)attribs == 0)
                 {
                     attribs = FileAttributes.Normal;
                 }
@@ -132,12 +133,7 @@ namespace DiscUtils.Udf
 
         public long FileLength
         {
-            get { return (long) _fileEntry.InformationLength; }
-        }
-
-        public List<ExtendedAttributeRecord> ExtendedAttributes
-        {
-            get { return _fileEntry.ExtendedAttributes; }
+            get { return (long)_fileEntry.InformationLength; }
         }
 
         public static File FromDescriptor(UdfContext context, LongAllocationDescriptor icb)
@@ -154,27 +150,18 @@ namespace DiscUtils.Udf
                 {
                     return new Directory(context, partition, fileEntry);
                 }
-                else
-                {
-                    return new File(context, partition, fileEntry, (uint) partition.LogicalBlockSize);
-                }
+                return new File(context, partition, fileEntry, (uint)partition.LogicalBlockSize);
             }
-            else if (rootDirTag.TagIdentifier == TagIdentifier.FileEntry)
+            if (rootDirTag.TagIdentifier == TagIdentifier.FileEntry)
             {
                 FileEntry fileEntry = Utilities.ToStruct<FileEntry>(rootDirData, 0);
                 if (fileEntry.InformationControlBlock.FileType == FileType.Directory)
                 {
                     return new Directory(context, partition, fileEntry);
                 }
-                else
-                {
-                    return new File(context, partition, fileEntry, (uint) partition.LogicalBlockSize);
-                }
+                return new File(context, partition, fileEntry, (uint)partition.LogicalBlockSize);
             }
-            else
-            {
-                throw new NotImplementedException("Only ExtendedFileEntries implemented");
-            }
+            throw new NotImplementedException("Only ExtendedFileEntries implemented");
         }
     }
 }

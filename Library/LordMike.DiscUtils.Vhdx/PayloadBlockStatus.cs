@@ -29,6 +29,6 @@ namespace DiscUtils.Vhdx
         Zero = 2,
         Unmapped = 3,
         FullyPresent = 6,
-        PartiallyPresent = 7,
+        PartiallyPresent = 7
     }
 }

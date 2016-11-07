@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Vfs;
-
     internal class Directory : File, IVfsDirectory<FileIdentifier, File>
     {
-        private List<FileIdentifier> _entries;
+        private readonly List<FileIdentifier> _entries;
 
         public Directory(UdfContext context, LogicalPartition partition, FileEntry fileEntry)
-            : base(context, partition, fileEntry, (uint) partition.LogicalBlockSize)
+            : base(context, partition, fileEntry, (uint)partition.LogicalBlockSize)
         {
             if (FileContent.Capacity > int.MaxValue)
             {
@@ -42,7 +41,7 @@ namespace DiscUtils.Udf
 
             _entries = new List<FileIdentifier>();
 
-            byte[] contentBytes = Utilities.ReadFully(FileContent, 0, (int) FileContent.Capacity);
+            byte[] contentBytes = Utilities.ReadFully(FileContent, 0, (int)FileContent.Capacity);
 
             int pos = 0;
             while (pos < contentBytes.Length)
@@ -76,7 +75,7 @@ namespace DiscUtils.Udf
 
         public FileIdentifier GetEntryByName(string name)
         {
-            foreach (var entry in _entries)
+            foreach (FileIdentifier entry in _entries)
             {
                 if (string.Compare(entry.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                 {

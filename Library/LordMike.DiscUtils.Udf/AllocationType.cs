@@ -5,6 +5,6 @@ namespace DiscUtils.Udf
         ShortDescriptors = 0,
         LongDescriptors = 1,
         ExtendedDescriptors = 2,
-        Embedded = 3,
+        Embedded = 3
     }
 }

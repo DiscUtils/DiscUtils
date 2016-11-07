@@ -20,24 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Class representing the table of file metadata.
     /// </summary>
     public sealed class MetadataTableInfo : ICollection<MetadataInfo>
     {
-        private MetadataTable _table;
+        private readonly MetadataTable _table;
 
         internal MetadataTableInfo(MetadataTable table)
         {
             _table = table;
+        }
+
+        private IEnumerable<MetadataInfo> Entries
+        {
+            get
+            {
+                foreach (KeyValuePair<MetadataEntryKey, MetadataEntry> entry in _table.Entries)
+                {
+                    yield return new MetadataInfo(entry.Value);
+                }
+            }
         }
 
         /// <summary>
@@ -69,17 +79,6 @@ namespace DiscUtils.Vhdx
             get { return true; }
         }
 
-        private IEnumerable<MetadataInfo> Entries
-        {
-            get
-            {
-                foreach (var entry in _table.Entries)
-                {
-                    yield return new MetadataInfo(entry.Value);
-                }
-            }
-        }
-
         /// <summary>
         /// Always throws InvalidOperationException.
         /// </summary>
@@ -105,7 +104,7 @@ namespace DiscUtils.Vhdx
         /// <remarks>The comparison is based on the metadata item identity, not the value.</remarks>
         public bool Contains(MetadataInfo item)
         {
-            foreach (var entry in _table.Entries)
+            foreach (KeyValuePair<MetadataEntryKey, MetadataEntry> entry in _table.Entries)
             {
                 if (entry.Key.ItemId == item.ItemId
                     && entry.Key.IsUser == item.IsUser)
@@ -125,7 +124,7 @@ namespace DiscUtils.Vhdx
         public void CopyTo(MetadataInfo[] array, int arrayIndex)
         {
             int offset = 0;
-            foreach (var entry in _table.Entries)
+            foreach (KeyValuePair<MetadataEntryKey, MetadataEntry> entry in _table.Entries)
             {
                 array[arrayIndex + offset] = new MetadataInfo(entry.Value);
                 ++offset;

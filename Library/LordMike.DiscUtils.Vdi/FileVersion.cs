@@ -24,26 +24,21 @@ namespace DiscUtils.Vdi
 {
     internal struct FileVersion
     {
-        private uint _value;
-
         public FileVersion(uint value)
         {
-            _value = value;
+            Value = value;
         }
 
         public int Major
         {
-            get { return (int) (_value >> 16); }
+            get { return (int)(Value >> 16); }
         }
 
         public int Minor
         {
-            get { return (int) (_value & 0xFFFF); }
+            get { return (int)(Value & 0xFFFF); }
         }
 
-        public uint Value
-        {
-            get { return _value; }
-        }
+        public uint Value { get; }
     }
 }

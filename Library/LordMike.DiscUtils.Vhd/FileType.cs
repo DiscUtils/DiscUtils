@@ -25,7 +25,7 @@ namespace DiscUtils.Vhd
     /// <summary>
     /// The known types of VHD disks.
     /// </summary>
-    public enum FileType : int
+    public enum FileType
     {
         /// <summary>
         /// Unknown type.
@@ -45,6 +45,6 @@ namespace DiscUtils.Vhd
         /// <summary>
         /// Differencing disk, form of dynamic disk that stores changes relative to another disk.
         /// </summary>
-        Differencing = 4,
+        Differencing = 4
     }
 }

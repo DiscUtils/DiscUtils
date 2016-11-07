@@ -20,39 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal sealed class PrimaryVolumeDescriptor : TaggedDescriptor<PrimaryVolumeDescriptor>
     {
-        public uint VolumeDescriptorSequenceNumber;
-        public uint PrimaryVolumeDescriptorNumber;
-        public string VolumeIdentifier;
-        public ushort VolumeSequenceNumber;
-        public ushort MaxVolumeSquenceNumber;
-        public ushort InterchangeLevel;
-        public ushort MaxInterchangeLevel;
+        public EntityIdentifier ApplicationIdentifier;
         public uint CharacterSetList;
-        public uint MaxCharacterSetList;
-        public string VolumeSetIdentifier;
         public CharacterSetSpecification DescriptorCharSet;
         public CharacterSetSpecification ExplanatoryCharSet;
-        public ExtentDescriptor VolumeAbstractExtent;
-        public ExtentDescriptor VolumeCopyrightNoticeExtent;
-        public EntityIdentifier ApplicationIdentifier;
-        public DateTime RecordingTime;
+        public ushort Flags;
         public EntityIdentifier ImplementationIdentifier;
         public byte[] ImplementationUse;
+        public ushort InterchangeLevel;
+        public uint MaxCharacterSetList;
+        public ushort MaxInterchangeLevel;
+        public ushort MaxVolumeSquenceNumber;
         public uint PredecessorVolumeDescriptorSequenceLocation;
-        public ushort Flags;
+        public uint PrimaryVolumeDescriptorNumber;
+        public DateTime RecordingTime;
+        public ExtentDescriptor VolumeAbstractExtent;
+        public ExtentDescriptor VolumeCopyrightNoticeExtent;
+        public uint VolumeDescriptorSequenceNumber;
+        public string VolumeIdentifier;
+        public ushort VolumeSequenceNumber;
+        public string VolumeSetIdentifier;
 
         public PrimaryVolumeDescriptor() :
-            base(TagIdentifier.PrimaryVolumeDescriptor)
-        {
-        }
+            base(TagIdentifier.PrimaryVolumeDescriptor) {}
 
         public override int Parse(byte[] buffer, int offset)
         {

@@ -20,15 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Iso9660;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Iso9660;
-    using DiscUtils.Vfs;
-
     /// <summary>
     /// Class for accessing OSTA Universal Disk Format file systems.
     /// </summary>
@@ -39,9 +38,7 @@ namespace DiscUtils.Udf
         /// </summary>
         /// <param name="data">The stream containing the UDF file system.</param>
         public UdfReader(Stream data)
-            : base(new VfsUdfReader(data))
-        {
-        }
+            : base(new VfsUdfReader(data)) {}
 
         /// <summary>
         /// Initializes a new instance of the UdfReader class.
@@ -49,9 +46,7 @@ namespace DiscUtils.Udf
         /// <param name="data">The stream containing the UDF file system.</param>
         /// <param name="sectorSize">The sector size of the physical media.</param>
         public UdfReader(Stream data, int sectorSize)
-            : base(new VfsUdfReader(data, sectorSize))
-        {
-        }
+            : base(new VfsUdfReader(data, sectorSize)) {}
 
         /// <summary>
         /// Detects if a stream contains a valid UDF file system.
@@ -122,17 +117,17 @@ namespace DiscUtils.Udf
 
         private sealed class VfsUdfReader : VfsReadOnlyFileSystem<FileIdentifier, File, Directory, UdfContext>
         {
-            private Stream _data;
-            private uint _sectorSize;
+            private readonly Stream _data;
             private LogicalVolumeDescriptor _lvd;
             private PrimaryVolumeDescriptor _pvd;
+            private readonly uint _sectorSize;
 
             public VfsUdfReader(Stream data)
                 : base(null)
             {
                 _data = data;
 
-                if (!UdfReader.Detect(data))
+                if (!Detect(data))
                 {
                     throw new InvalidDataException("Stream is not a recognized UDF format");
                 }
@@ -166,9 +161,9 @@ namespace DiscUtils.Udf
                 : base(null)
             {
                 _data = data;
-                _sectorSize = (uint) sectorSize;
+                _sectorSize = (uint)sectorSize;
 
-                if (!UdfReader.Detect(data))
+                if (!Detect(data))
                 {
                     throw new InvalidDataException("Stream is not a recognized UDF format");
                 }
@@ -191,7 +186,7 @@ namespace DiscUtils.Udf
                 List<ExtendedAttribute> result = new List<ExtendedAttribute>();
 
                 File file = GetFile(path);
-                foreach (var record in file.ExtendedAttributes)
+                foreach (ExtendedAttributeRecord record in file.ExtendedAttributes)
                 {
                     ImplementationUseExtendedAttributeRecord implRecord =
                         record as ImplementationUseExtendedAttributeRecord;
@@ -212,11 +207,11 @@ namespace DiscUtils.Udf
 
             private void Initialize()
             {
-                Context = new UdfContext()
+                Context = new UdfContext
                 {
                     PhysicalPartitions = new Dictionary<ushort, PhysicalPartition>(),
-                    PhysicalSectorSize = (int) _sectorSize,
-                    LogicalPartitions = new List<LogicalPartition>(),
+                    PhysicalSectorSize = (int)_sectorSize,
+                    LogicalPartitions = new List<LogicalPartition>()
                 };
 
                 IBuffer dataBuffer = new StreamBuffer(_data, Ownership.None);
@@ -227,7 +222,7 @@ namespace DiscUtils.Udf
                 bool terminatorFound = false;
                 while (!terminatorFound)
                 {
-                    _data.Position = sector*(long) _sectorSize;
+                    _data.Position = sector * (long)_sectorSize;
 
                     DescriptorTag dt;
                     if (!DescriptorTag.TryFromStream(_data, out dt))
@@ -242,6 +237,7 @@ namespace DiscUtils.Udf
                             break;
 
                         case TagIdentifier.ImplementationUseVolumeDescriptor:
+
                             // Not used
                             break;
 
@@ -261,6 +257,7 @@ namespace DiscUtils.Udf
                             break;
 
                         case TagIdentifier.UnallocatedSpaceDescriptor:
+
                             // Not used for reading
                             break;
 
@@ -285,18 +282,18 @@ namespace DiscUtils.Udf
                 if (DescriptorTag.IsValid(fsdBuffer, 0))
                 {
                     FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
-                    RootDirectory = (Directory) File.FromDescriptor(Context, fsd.RootDirectoryIcb);
+                    RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);
                 }
             }
 
             private bool ProbeSectorSize(int size)
             {
-                if (_data.Length < 257*(long) size)
+                if (_data.Length < 257 * (long)size)
                 {
                     return false;
                 }
 
-                _data.Position = 256*(long) size;
+                _data.Position = 256 * (long)size;
 
                 DescriptorTag dt;
                 if (!DescriptorTag.TryFromStream(_data, out dt))

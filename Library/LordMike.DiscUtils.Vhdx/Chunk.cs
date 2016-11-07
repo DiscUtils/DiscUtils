@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhdx
 {
-    using System.IO;
-
     /// <summary>
     /// Represents a chunk of blocks in the Block Allocation Table.
     /// </summary>
@@ -37,17 +36,17 @@ namespace DiscUtils.Vhdx
     {
         private const ulong SectorBitmapPresent = 6;
 
-        private Stream _bat;
-        private SparseStream _file;
-        private FreeSpaceTable _freeSpace;
-        private FileParameters _fileParameters;
-        private int _chunk;
-        private int _blocksPerChunk;
-        private byte[] _batData;
+        private readonly Stream _bat;
+        private readonly byte[] _batData;
+        private readonly int _blocksPerChunk;
+        private readonly int _chunk;
+        private readonly SparseStream _file;
+        private readonly FileParameters _fileParameters;
+        private readonly FreeSpaceTable _freeSpace;
         private byte[] _sectorBitmap;
 
         public Chunk(Stream bat, SparseStream file, FreeSpaceTable freeSpace, FileParameters fileParameters, int chunk,
-            int blocksPerChunk)
+                     int blocksPerChunk)
         {
             _bat = bat;
             _file = file;
@@ -56,50 +55,50 @@ namespace DiscUtils.Vhdx
             _chunk = chunk;
             _blocksPerChunk = blocksPerChunk;
 
-            _bat.Position = _chunk*(_blocksPerChunk + 1)*8;
-            _batData = Utilities.ReadFully(bat, (_blocksPerChunk + 1)*8);
+            _bat.Position = _chunk * (_blocksPerChunk + 1) * 8;
+            _batData = Utilities.ReadFully(bat, (_blocksPerChunk + 1) * 8);
         }
 
         private bool HasSectorBitmap
         {
-            get { return new BatEntry(_batData, _blocksPerChunk*8).BitmapBlockPresent; }
+            get { return new BatEntry(_batData, _blocksPerChunk * 8).BitmapBlockPresent; }
         }
 
         private long SectorBitmapPos
         {
-            get { return new BatEntry(_batData, _blocksPerChunk*8).FileOffsetMB*Sizes.OneMiB; }
+            get { return new BatEntry(_batData, _blocksPerChunk * 8).FileOffsetMB * Sizes.OneMiB; }
 
             set
             {
                 BatEntry entry = new BatEntry();
                 entry.BitmapBlockPresent = value != 0;
-                entry.FileOffsetMB = value/Sizes.OneMiB;
-                entry.WriteTo(_batData, _blocksPerChunk*8);
+                entry.FileOffsetMB = value / Sizes.OneMiB;
+                entry.WriteTo(_batData, _blocksPerChunk * 8);
             }
         }
 
         public long GetBlockPosition(int block)
         {
-            return new BatEntry(_batData, block*8).FileOffsetMB*Sizes.OneMiB;
+            return new BatEntry(_batData, block * 8).FileOffsetMB * Sizes.OneMiB;
         }
 
         public PayloadBlockStatus GetBlockStatus(int block)
         {
-            return new BatEntry(_batData, block*8).PayloadBlockStatus;
+            return new BatEntry(_batData, block * 8).PayloadBlockStatus;
         }
 
         public BlockBitmap GetBlockBitmap(int block)
         {
-            int bytesPerBlock = (int) (Sizes.OneMiB/_blocksPerChunk);
-            int offset = bytesPerBlock*block;
+            int bytesPerBlock = (int)(Sizes.OneMiB / _blocksPerChunk);
+            int offset = bytesPerBlock * block;
             byte[] data = LoadSectorBitmap();
             return new BlockBitmap(data, offset, bytesPerBlock);
         }
 
         public void WriteBlockBitmap(int block)
         {
-            int bytesPerBlock = (int) (Sizes.OneMiB/_blocksPerChunk);
-            int offset = bytesPerBlock*block;
+            int bytesPerBlock = (int)(Sizes.OneMiB / _blocksPerChunk);
+            int offset = bytesPerBlock * block;
 
             _file.Position = SectorBitmapPos + offset;
             _file.Write(_sectorBitmap, offset, bytesPerBlock);
@@ -109,10 +108,10 @@ namespace DiscUtils.Vhdx
         {
             bool dataModified = false;
 
-            BatEntry blockEntry = new BatEntry(_batData, block*8);
+            BatEntry blockEntry = new BatEntry(_batData, block * 8);
             if (blockEntry.FileOffsetMB == 0)
             {
-                blockEntry.FileOffsetMB = AllocateSpace((int) _fileParameters.BlockSize, false)/Sizes.OneMiB;
+                blockEntry.FileOffsetMB = AllocateSpace((int)_fileParameters.BlockSize, false) / Sizes.OneMiB;
                 dataModified = true;
             }
 
@@ -123,7 +122,7 @@ namespace DiscUtils.Vhdx
                 {
                     if (!HasSectorBitmap)
                     {
-                        SectorBitmapPos = AllocateSpace((int) Sizes.OneMiB, true);
+                        SectorBitmapPos = AllocateSpace((int)Sizes.OneMiB, true);
                     }
 
                     blockEntry.PayloadBlockStatus = PayloadBlockStatus.PartiallyPresent;
@@ -138,10 +137,10 @@ namespace DiscUtils.Vhdx
 
             if (dataModified)
             {
-                blockEntry.WriteTo(_batData, block*8);
+                blockEntry.WriteTo(_batData, block * 8);
 
-                _bat.Position = _chunk*(_blocksPerChunk + 1)*8;
-                _bat.Write(_batData, 0, (_blocksPerChunk + 1)*8);
+                _bat.Position = _chunk * (_blocksPerChunk + 1) * 8;
+                _bat.Write(_batData, 0, (_blocksPerChunk + 1) * 8);
             }
 
             return blockEntry.PayloadBlockStatus;
@@ -152,7 +151,7 @@ namespace DiscUtils.Vhdx
             if (_sectorBitmap == null)
             {
                 _file.Position = SectorBitmapPos;
-                _sectorBitmap = Utilities.ReadFully(_file, (int) Sizes.OneMiB);
+                _sectorBitmap = Utilities.ReadFully(_file, (int)Sizes.OneMiB);
             }
 
             return _sectorBitmap;

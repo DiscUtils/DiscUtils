@@ -20,60 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vmdk
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal abstract class CommonSparseExtentStream : MappedStream
     {
         /// <summary>
-        /// Stream containing the sparse extent.
+        /// Indicator to whether end-of-stream has been reached.
         /// </summary>
-        protected Stream _fileStream;
-
-        /// <summary>
-        /// Indicates if this object controls the lifetime of _fileStream.
-        /// </summary>
-        protected Ownership _ownsFileStream;
-
-        /// <summary>
-        /// Offset of this extent within the disk.
-        /// </summary>
-        protected long _diskOffset;
-
-        /// <summary>
-        /// The stream containing the unstored bytes.
-        /// </summary>
-        protected SparseStream _parentDiskStream;
-
-        /// <summary>
-        /// Indicates if this object controls the lifetime of _parentDiskStream.
-        /// </summary>
-        protected Ownership _ownsParentDiskStream;
-
-        /// <summary>
-        /// The Global Directory for this extent.
-        /// </summary>
-        protected uint[] _globalDirectory;
-
-        /// <summary>
-        /// The Redundant Global Directory for this extent.
-        /// </summary>
-        protected uint[] _redundantGlobalDirectory;
-
-        /// <summary>
-        /// The header from the start of the extent.
-        /// </summary>
-        protected CommonSparseExtentHeader _header;
-
-        /// <summary>
-        /// The number of bytes controlled by a single grain table.
-        /// </summary>
-        protected long _gtCoverage;
+        protected bool _atEof;
 
         /// <summary>
         /// The current grain that's loaded into _grainTable.
@@ -81,9 +40,54 @@ namespace DiscUtils.Vmdk
         protected int _currentGrainTable;
 
         /// <summary>
+        /// Offset of this extent within the disk.
+        /// </summary>
+        protected long _diskOffset;
+
+        /// <summary>
+        /// Stream containing the sparse extent.
+        /// </summary>
+        protected Stream _fileStream;
+
+        /// <summary>
+        /// The Global Directory for this extent.
+        /// </summary>
+        protected uint[] _globalDirectory;
+
+        /// <summary>
         /// The data corresponding to the current grain (or null).
         /// </summary>
         protected byte[] _grainTable;
+
+        /// <summary>
+        /// Cache of recently used grain tables.
+        /// </summary>
+        private readonly ObjectCache<int, byte[]> _grainTableCache = new ObjectCache<int, byte[]>();
+
+        /// <summary>
+        /// The number of bytes controlled by a single grain table.
+        /// </summary>
+        protected long _gtCoverage;
+
+        /// <summary>
+        /// The header from the start of the extent.
+        /// </summary>
+        protected CommonSparseExtentHeader _header;
+
+        /// <summary>
+        /// Indicates if this object controls the lifetime of _fileStream.
+        /// </summary>
+        protected Ownership _ownsFileStream;
+
+        /// <summary>
+        /// Indicates if this object controls the lifetime of _parentDiskStream.
+        /// </summary>
+        protected Ownership _ownsParentDiskStream;
+
+        /// <summary>
+        /// The stream containing the unstored bytes.
+        /// </summary>
+        protected SparseStream _parentDiskStream;
 
         /// <summary>
         /// Current position in the extent.
@@ -91,14 +95,9 @@ namespace DiscUtils.Vmdk
         protected long _position;
 
         /// <summary>
-        /// Indicator to whether end-of-stream has been reached.
+        /// The Redundant Global Directory for this extent.
         /// </summary>
-        protected bool _atEof;
-
-        /// <summary>
-        /// Cache of recently used grain tables.
-        /// </summary>
-        private ObjectCache<int, byte[]> _grainTableCache = new ObjectCache<int, byte[]>();
+        protected uint[] _redundantGlobalDirectory;
 
         public override bool CanRead
         {
@@ -127,12 +126,17 @@ namespace DiscUtils.Vmdk
             }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return GetExtentsInRange(0, Length); }
+        }
+
         public override long Length
         {
             get
             {
                 CheckDisposed();
-                return _header.Capacity*Sizes.Sector;
+                return _header.Capacity * Sizes.Sector;
             }
         }
 
@@ -150,11 +154,6 @@ namespace DiscUtils.Vmdk
                 _position = value;
                 _atEof = false;
             }
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return GetExtentsInRange(0, Length); }
         }
 
         public override void Flush()
@@ -178,21 +177,18 @@ namespace DiscUtils.Vmdk
                 {
                     throw new IOException("Attempt to read beyond end of stream");
                 }
-                else
-                {
-                    _atEof = true;
-                    return 0;
-                }
+                _atEof = true;
+                return 0;
             }
 
-            int maxToRead = (int) Math.Min(count, Length - _position);
+            int maxToRead = (int)Math.Min(count, Length - _position);
             int totalRead = 0;
             int numRead;
 
             do
             {
-                int grainTable = (int) (_position/_gtCoverage);
-                int grainTableOffset = (int) (_position - (((long) grainTable)*_gtCoverage));
+                int grainTable = (int)(_position / _gtCoverage);
+                int grainTableOffset = (int)(_position - grainTable * _gtCoverage);
                 numRead = 0;
 
                 if (!LoadGrainTable(grainTable))
@@ -200,13 +196,13 @@ namespace DiscUtils.Vmdk
                     // Read from parent stream, to at most the end of grain table's coverage
                     _parentDiskStream.Position = _position + _diskOffset;
                     numRead = _parentDiskStream.Read(buffer, offset + totalRead,
-                        (int) Math.Min(maxToRead - totalRead, _gtCoverage - grainTableOffset));
+                        (int)Math.Min(maxToRead - totalRead, _gtCoverage - grainTableOffset));
                 }
                 else
                 {
-                    int grainSize = (int) (_header.GrainSize*Sizes.Sector);
-                    int grain = grainTableOffset/grainSize;
-                    int grainOffset = grainTableOffset - (grain*grainSize);
+                    int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+                    int grain = grainTableOffset / grainSize;
+                    int grainOffset = grainTableOffset - grain * grainSize;
 
                     int numToRead = Math.Min(maxToRead - totalRead, grainSize - grainOffset);
 
@@ -218,7 +214,7 @@ namespace DiscUtils.Vmdk
                     else
                     {
                         int bufferOffset = offset + totalRead;
-                        long grainStart = ((long) GetGrainTableEntry(grain))*Sizes.Sector;
+                        long grainStart = (long)GetGrainTableEntry(grain) * Sizes.Sector;
                         numRead = ReadGrain(buffer, bufferOffset, grainStart, grainOffset, numToRead);
                     }
                 }
@@ -248,7 +244,7 @@ namespace DiscUtils.Vmdk
             }
             else if (origin == SeekOrigin.End)
             {
-                effectiveOffset += _header.Capacity*Sizes.Sector;
+                effectiveOffset += _header.Capacity * Sizes.Sector;
             }
 
             _atEof = false;
@@ -257,11 +253,8 @@ namespace DiscUtils.Vmdk
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
@@ -274,11 +267,11 @@ namespace DiscUtils.Vmdk
                 return new StreamExtent[0];
             }
 
-            var parentExtents = _parentDiskStream.GetExtentsInRange(_diskOffset + start, maxCount);
+            IEnumerable<StreamExtent> parentExtents = _parentDiskStream.GetExtentsInRange(_diskOffset + start, maxCount);
             parentExtents = StreamExtent.Offset(parentExtents, -_diskOffset);
 
-            var result = StreamExtent.Union(LayerExtents(start, maxCount), parentExtents);
-            result = StreamExtent.Intersect(result, new StreamExtent[] {new StreamExtent(start, maxCount)});
+            IEnumerable<StreamExtent> result = StreamExtent.Union(LayerExtents(start, maxCount), parentExtents);
+            result = StreamExtent.Intersect(result, new[] { new StreamExtent(start, maxCount) });
             return result;
         }
 
@@ -294,20 +287,20 @@ namespace DiscUtils.Vmdk
 
                 do
                 {
-                    int grainTable = (int) (pos/_gtCoverage);
-                    int grainTableOffset = (int) (pos - (((long) grainTable)*_gtCoverage));
+                    int grainTable = (int)(pos / _gtCoverage);
+                    int grainTableOffset = (int)(pos - grainTable * _gtCoverage);
 
                     if (LoadGrainTable(grainTable))
                     {
-                        int grainSize = (int) (_header.GrainSize*Sizes.Sector);
-                        int grain = grainTableOffset/grainSize;
-                        int grainOffset = grainTableOffset - (grain*grainSize);
+                        int grainSize = (int)(_header.GrainSize * Sizes.Sector);
+                        int grain = grainTableOffset / grainSize;
+                        int grainOffset = grainTableOffset - grain * grainSize;
 
-                        int numToRead = (int) Math.Min(end - pos, grainSize - grainOffset);
+                        int numToRead = (int)Math.Min(end - pos, grainSize - grainOffset);
 
                         if (GetGrainTableEntry(grain) != 0)
                         {
-                            long grainStart = ((long) GetGrainTableEntry(grain))*Sizes.Sector;
+                            long grainStart = (long)GetGrainTableEntry(grain) * Sizes.Sector;
                             yield return MapGrain(grainStart, grainOffset, numToRead);
                         }
 
@@ -315,7 +308,7 @@ namespace DiscUtils.Vmdk
                     }
                     else
                     {
-                        pos = (grainTable + 1)*_gtCoverage;
+                        pos = (grainTable + 1) * _gtCoverage;
                     }
                 } while (pos < end);
             }
@@ -350,12 +343,12 @@ namespace DiscUtils.Vmdk
 
         protected uint GetGrainTableEntry(int grain)
         {
-            return Utilities.ToUInt32LittleEndian(_grainTable, grain*4);
+            return Utilities.ToUInt32LittleEndian(_grainTable, grain * 4);
         }
 
         protected void SetGrainTableEntry(int grain, uint value)
         {
-            Utilities.WriteBytesLittleEndian(value, _grainTable, grain*4);
+            Utilities.WriteBytesLittleEndian(value, _grainTable, grain * 4);
         }
 
         protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
@@ -371,14 +364,14 @@ namespace DiscUtils.Vmdk
 
         protected virtual void LoadGlobalDirectory()
         {
-            int numGTs = (int) Utilities.Ceil(_header.Capacity*Sizes.Sector, _gtCoverage);
+            int numGTs = (int)Utilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
 
             _globalDirectory = new uint[numGTs];
-            _fileStream.Position = _header.GdOffset*Sizes.Sector;
-            byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs*4);
+            _fileStream.Position = _header.GdOffset * Sizes.Sector;
+            byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
             for (int i = 0; i < _globalDirectory.Length; ++i)
             {
-                _globalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i*4);
+                _globalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
             }
         }
 
@@ -406,8 +399,8 @@ namespace DiscUtils.Vmdk
             }
 
             // Not cached, so read
-            _fileStream.Position = ((long) _globalDirectory[index])*Sizes.Sector;
-            byte[] newGrainTable = Utilities.ReadFully(_fileStream, (int) _header.NumGTEsPerGT*4);
+            _fileStream.Position = (long)_globalDirectory[index] * Sizes.Sector;
+            byte[] newGrainTable = Utilities.ReadFully(_fileStream, (int)_header.NumGTEsPerGT * 4);
             _currentGrainTable = index;
             _grainTable = newGrainTable;
 
@@ -427,7 +420,7 @@ namespace DiscUtils.Vmdk
         private IEnumerable<StreamExtent> LayerExtents(long start, long count)
         {
             long maxPos = start + count;
-            long pos = FindNextPresentGrain(Utilities.RoundDown(start, _header.GrainSize*Sizes.Sector), maxPos);
+            long pos = FindNextPresentGrain(Utilities.RoundDown(start, _header.GrainSize * Sizes.Sector), maxPos);
             while (pos < maxPos)
             {
                 long end = FindNextAbsentGrain(pos, maxPos);
@@ -439,12 +432,12 @@ namespace DiscUtils.Vmdk
 
         private long FindNextPresentGrain(long pos, long maxPos)
         {
-            int grainSize = (int) (_header.GrainSize*Sizes.Sector);
+            int grainSize = (int)(_header.GrainSize * Sizes.Sector);
 
             bool foundStart = false;
             while (pos < maxPos && !foundStart)
             {
-                int grainTable = (int) (pos/_gtCoverage);
+                int grainTable = (int)(pos / _gtCoverage);
 
                 if (!LoadGrainTable(grainTable))
                 {
@@ -452,9 +445,9 @@ namespace DiscUtils.Vmdk
                 }
                 else
                 {
-                    int grainTableOffset = (int) (pos - (grainTable*_gtCoverage));
+                    int grainTableOffset = (int)(pos - grainTable * _gtCoverage);
 
-                    int grain = grainTableOffset/grainSize;
+                    int grain = grainTableOffset / grainSize;
 
                     if (GetGrainTableEntry(grain) == 0)
                     {
@@ -472,12 +465,12 @@ namespace DiscUtils.Vmdk
 
         private long FindNextAbsentGrain(long pos, long maxPos)
         {
-            int grainSize = (int) (_header.GrainSize*Sizes.Sector);
+            int grainSize = (int)(_header.GrainSize * Sizes.Sector);
 
             bool foundEnd = false;
             while (pos < maxPos && !foundEnd)
             {
-                int grainTable = (int) (pos/_gtCoverage);
+                int grainTable = (int)(pos / _gtCoverage);
 
                 if (!LoadGrainTable(grainTable))
                 {
@@ -485,9 +478,9 @@ namespace DiscUtils.Vmdk
                 }
                 else
                 {
-                    int grainTableOffset = (int) (pos - (grainTable*_gtCoverage));
+                    int grainTableOffset = (int)(pos - grainTable * _gtCoverage);
 
-                    int grain = grainTableOffset/grainSize;
+                    int grain = grainTableOffset / grainSize;
 
                     if (GetGrainTableEntry(grain) == 0)
                     {

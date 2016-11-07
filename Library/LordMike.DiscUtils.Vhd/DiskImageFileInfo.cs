@@ -20,23 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vhd
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-
     /// <summary>
     /// Provides read access to detailed information about a VHD file.
     /// </summary>
     public class DiskImageFileInfo
     {
-        private Footer _footer;
-        private DynamicHeader _header;
-        private Stream _vhdStream;
+        private readonly Footer _footer;
+        private readonly DynamicHeader _header;
+        private readonly Stream _vhdStream;
 
         internal DiskImageFileInfo(Footer footer, DynamicHeader header, Stream vhdStream)
         {
@@ -51,22 +50,6 @@ namespace DiscUtils.Vhd
         public string Cookie
         {
             get { return _footer.Cookie; }
-        }
-
-        /// <summary>
-        /// Gets the Features bit field.
-        /// </summary>
-        public int Features
-        {
-            get { return (int) _footer.Features; }
-        }
-
-        /// <summary>
-        /// Gets the file format version packed as an integer.
-        /// </summary>
-        public int FileFormatVersion
-        {
-            get { return (int) _footer.FileFormatVersion; }
         }
 
         /// <summary>
@@ -86,14 +69,6 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets the version of the application used to create the file, packed as an integer.
-        /// </summary>
-        public int CreatorVersion
-        {
-            get { return (int) _footer.CreatorVersion; }
-        }
-
-        /// <summary>
         /// Gets the host operating system of the application used to create the file.
         /// </summary>
         public string CreatorHostOS
@@ -102,11 +77,11 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets the original size of the disk (in bytes).
+        /// Gets the version of the application used to create the file, packed as an integer.
         /// </summary>
-        public long OriginalSize
+        public int CreatorVersion
         {
-            get { return _footer.OriginalSize; }
+            get { return (int)_footer.CreatorVersion; }
         }
 
         /// <summary>
@@ -118,59 +93,11 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public Geometry Geometry
-        {
-            get { return _footer.Geometry; }
-        }
-
-        /// <summary>
         /// Gets the type of the disk.
         /// </summary>
         public FileType DiskType
         {
             get { return _footer.DiskType; }
-        }
-
-        /// <summary>
-        /// Gets the checksum of the file's 'footer'.
-        /// </summary>
-        public int FooterChecksum
-        {
-            get { return (int) _footer.Checksum; }
-        }
-
-        /// <summary>
-        /// Gets the unique identity of this disk.
-        /// </summary>
-        public Guid UniqueId
-        {
-            get { return _footer.UniqueId; }
-        }
-
-        /// <summary>
-        /// Gets a flag indicating if the disk has associated saved VM memory state.
-        /// </summary>
-        public byte SavedState
-        {
-            get { return _footer.SavedState; }
-        }
-
-        /// <summary>
-        /// Gets the cookie indicating a dynamic disk header (should be "cxsparse").
-        /// </summary>
-        public string DynamicCookie
-        {
-            get { return _header.Cookie; }
-        }
-
-        /// <summary>
-        /// Gets the version of the dynamic header structure, packed as an integer.
-        /// </summary>
-        public int DynamicHeaderVersion
-        {
-            get { return (int) _header.HeaderVersion; }
         }
 
         /// <summary>
@@ -194,15 +121,46 @@ namespace DiscUtils.Vhd
         /// </summary>
         public int DynamicChecksum
         {
-            get { return (int) _header.Checksum; }
+            get { return (int)_header.Checksum; }
         }
 
         /// <summary>
-        /// Gets the unique id of the parent file (for differencing disks).
+        /// Gets the cookie indicating a dynamic disk header (should be "cxsparse").
         /// </summary>
-        public Guid DynamicParentUniqueId
+        public string DynamicCookie
         {
-            get { return _header.ParentUniqueId; }
+            get { return _header.Cookie; }
+        }
+
+        /// <summary>
+        /// Gets the version of the dynamic header structure, packed as an integer.
+        /// </summary>
+        public int DynamicHeaderVersion
+        {
+            get { return (int)_header.HeaderVersion; }
+        }
+
+        /// <summary>
+        /// Gets the stored paths to the parent file (for differencing disks).
+        /// </summary>
+        public IEnumerable<string> DynamicParentLocators
+        {
+            get
+            {
+                List<string> vals = new List<string>(8);
+                foreach (ParentLocator pl in _header.ParentLocators)
+                {
+                    if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode
+                        || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
+                    {
+                        _vhdStream.Position = pl.PlatformDataOffset;
+                        byte[] buffer = Utilities.ReadFully(_vhdStream, pl.PlatformDataLength);
+                        vals.Add(Encoding.Unicode.GetString(buffer));
+                    }
+                }
+
+                return vals;
+            }
         }
 
         /// <summary>
@@ -222,26 +180,67 @@ namespace DiscUtils.Vhd
         }
 
         /// <summary>
-        /// Gets the stored paths to the parent file (for differencing disks).
+        /// Gets the unique id of the parent file (for differencing disks).
         /// </summary>
-        public IEnumerable<string> DynamicParentLocators
+        public Guid DynamicParentUniqueId
         {
-            get
-            {
-                List<string> vals = new List<string>(8);
-                foreach (var pl in _header.ParentLocators)
-                {
-                    if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode
-                        || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
-                    {
-                        _vhdStream.Position = pl.PlatformDataOffset;
-                        byte[] buffer = Utilities.ReadFully(_vhdStream, pl.PlatformDataLength);
-                        vals.Add(Encoding.Unicode.GetString(buffer));
-                    }
-                }
+            get { return _header.ParentUniqueId; }
+        }
 
-                return vals;
-            }
+        /// <summary>
+        /// Gets the Features bit field.
+        /// </summary>
+        public int Features
+        {
+            get { return (int)_footer.Features; }
+        }
+
+        /// <summary>
+        /// Gets the file format version packed as an integer.
+        /// </summary>
+        public int FileFormatVersion
+        {
+            get { return (int)_footer.FileFormatVersion; }
+        }
+
+        /// <summary>
+        /// Gets the checksum of the file's 'footer'.
+        /// </summary>
+        public int FooterChecksum
+        {
+            get { return (int)_footer.Checksum; }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public Geometry Geometry
+        {
+            get { return _footer.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the original size of the disk (in bytes).
+        /// </summary>
+        public long OriginalSize
+        {
+            get { return _footer.OriginalSize; }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating if the disk has associated saved VM memory state.
+        /// </summary>
+        public byte SavedState
+        {
+            get { return _footer.SavedState; }
+        }
+
+        /// <summary>
+        /// Gets the unique identity of this disk.
+        /// </summary>
+        public Guid UniqueId
+        {
+            get { return _footer.UniqueId; }
         }
     }
 }

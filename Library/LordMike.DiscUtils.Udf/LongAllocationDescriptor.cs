@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Udf
 {
-    using System;
-
     internal class LongAllocationDescriptor : IByteArraySerializable
     {
         public uint ExtentLength;
@@ -53,7 +52,7 @@ namespace DiscUtils.Udf
 
         public override string ToString()
         {
-            return ExtentLocation.ToString() + ":+" + ExtentLength;
+            return ExtentLocation + ":+" + ExtentLength;
         }
     }
 }

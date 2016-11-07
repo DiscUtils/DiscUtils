@@ -26,23 +26,19 @@ namespace DiscUtils.Udf
 {
     internal class PhysicalPartition : Partition
     {
-        private ushort _partitionNumber;
         private PartitionDescriptor _descriptor;
-        private IBuffer _parentBuffer;
-        private IBuffer _contentBuffer;
+        private readonly IBuffer _parentBuffer;
+        private ushort _partitionNumber;
 
         public PhysicalPartition(PartitionDescriptor descriptor, IBuffer buffer, uint sectorSize)
         {
             _partitionNumber = descriptor.PartitionNumber;
             _parentBuffer = buffer;
-            _contentBuffer = new SubBuffer(_parentBuffer, descriptor.PartitionStartingLocation*(long) sectorSize,
-                descriptor.PartitionLength*(long) sectorSize);
+            Content = new SubBuffer(_parentBuffer, descriptor.PartitionStartingLocation * (long)sectorSize,
+                descriptor.PartitionLength * (long)sectorSize);
             _descriptor = descriptor;
         }
 
-        public override IBuffer Content
-        {
-            get { return _contentBuffer; }
-        }
+        public override IBuffer Content { get; }
     }
 }
