@@ -37,7 +37,7 @@ namespace DiscUtils.Partitions
     /// the partitions to discover the next index-to-partition mapping.</remarks>
     public abstract class PartitionTable
     {
-        private static List<PartitionTableFactory> s_factories;
+        private static List<PartitionTableFactory> _factories;
 
         /// <summary>
         /// Gets the number of User partitions on the disk.
@@ -56,7 +56,7 @@ namespace DiscUtils.Partitions
         {
             get
             {
-                if (s_factories == null)
+                if (_factories == null)
                 {
                     List<PartitionTableFactory> factories = new List<PartitionTableFactory>();
 
@@ -68,10 +68,10 @@ namespace DiscUtils.Partitions
                         }
                     }
 
-                    s_factories = factories;
+                    _factories = factories;
                 }
 
-                return s_factories;
+                return _factories;
             }
         }
 

@@ -33,7 +33,7 @@ namespace DiscUtils
     /// </summary>
     public abstract class DiskImageBuilder
     {
-        private static Dictionary<string, VirtualDiskFactory> s_typeMap;
+        private static Dictionary<string, VirtualDiskFactory> _typeMap;
 
         /// <summary>
         /// Gets or sets the geometry of this disk, as reported by the BIOS, will be implied from the content stream if not set.
@@ -67,12 +67,12 @@ namespace DiscUtils
         {
             get
             {
-                if (s_typeMap == null)
+                if (_typeMap == null)
                 {
                     InitializeMaps();
                 }
 
-                return s_typeMap;
+                return _typeMap;
             }
         }
 
@@ -119,7 +119,7 @@ namespace DiscUtils
                 }
             }
 
-            s_typeMap = typeMap;
+            _typeMap = typeMap;
         }
     }
 }

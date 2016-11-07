@@ -27,15 +27,15 @@ namespace DiscUtils.Ntfs
     internal sealed class NtfsTransaction : IDisposable
     {
         [ThreadStatic]
-        private static NtfsTransaction s_instance;
+        private static NtfsTransaction _instance;
 
         private readonly bool _ownRecord;
 
         public NtfsTransaction()
         {
-            if (s_instance == null)
+            if (_instance == null)
             {
-                s_instance = this;
+                _instance = this;
                 Timestamp = DateTime.UtcNow;
                 _ownRecord = true;
             }
@@ -43,7 +43,7 @@ namespace DiscUtils.Ntfs
 
         public static NtfsTransaction Current
         {
-            get { return s_instance; }
+            get { return _instance; }
         }
 
         public DateTime Timestamp { get; }
@@ -52,7 +52,7 @@ namespace DiscUtils.Ntfs
         {
             if (_ownRecord)
             {
-                s_instance = null;
+                _instance = null;
             }
         }
     }

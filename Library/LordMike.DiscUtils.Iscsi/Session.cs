@@ -34,7 +34,7 @@ namespace DiscUtils.Iscsi
     /// </summary>
     public sealed class Session : IDisposable
     {
-        private static int s_nextInitiatorSessionId = new Random().Next();
+        private static int _nextInitiatorSessionId = new Random().Next();
 
         private readonly IList<TargetAddress> _addresses;
 
@@ -44,19 +44,14 @@ namespace DiscUtils.Iscsi
         private readonly Dictionary<string, string> _negotiatedParameters;
 
         private ushort _nextConnectionId;
-        private readonly string _password;
-
-        private readonly string _userName;
 
         internal Session(SessionType type, string targetName, params TargetAddress[] addresses)
             : this(type, targetName, null, null, addresses) {}
 
         internal Session(SessionType type, string targetName, string userName, string password, IList<TargetAddress> addresses)
         {
-            InitiatorSessionId = (uint)Interlocked.Increment(ref s_nextInitiatorSessionId);
+            InitiatorSessionId = (uint)Interlocked.Increment(ref _nextInitiatorSessionId);
             _addresses = addresses;
-            _userName = userName;
-            _password = password;
 
             SessionType = type;
             TargetName = targetName;
@@ -84,7 +79,7 @@ namespace DiscUtils.Iscsi
             }
             else
             {
-                ActiveConnection = new Connection(this, _addresses[0], new Authenticator[] { new NullAuthenticator(), new ChapAuthenticator(_userName, _password) });
+                ActiveConnection = new Connection(this, _addresses[0], new Authenticator[] { new NullAuthenticator(), new ChapAuthenticator(userName, password) });
             }
         }
 

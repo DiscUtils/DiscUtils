@@ -35,8 +35,8 @@ namespace DiscUtils.Wim
     /// contents into memory..</remarks>
     internal class LzxStream : Stream
     {
-        private static readonly uint[] s_positionSlots;
-        private static readonly uint[] s_extraBits;
+        private static readonly uint[] _positionSlots;
+        private static readonly uint[] _extraBits;
         private HuffmanTree _alignedOffsetTree;
 
         private readonly LzxBitStream _bitStream;
@@ -56,17 +56,17 @@ namespace DiscUtils.Wim
 
         static LzxStream()
         {
-            s_positionSlots = new uint[50];
-            s_extraBits = new uint[50];
+            _positionSlots = new uint[50];
+            _extraBits = new uint[50];
 
             uint numBits = 0;
-            s_positionSlots[1] = 1;
+            _positionSlots[1] = 1;
             for (int i = 2; i < 50; i += 2)
             {
-                s_extraBits[i] = numBits;
-                s_extraBits[i + 1] = numBits;
-                s_positionSlots[i] = s_positionSlots[i - 1] + (uint)(1 << (int)s_extraBits[i - 1]);
-                s_positionSlots[i + 1] = s_positionSlots[i] + (uint)(1 << (int)numBits);
+                _extraBits[i] = numBits;
+                _extraBits[i + 1] = numBits;
+                _positionSlots[i] = _positionSlots[i - 1] + (uint)(1 << (int)_extraBits[i - 1]);
+                _positionSlots[i + 1] = _positionSlots[i] + (uint)(1 << (int)numBits);
 
                 if (numBits < 17)
                 {
@@ -272,7 +272,7 @@ namespace DiscUtils.Wim
                     }
                     else
                     {
-                        int extra = (int)s_extraBits[positionSlot];
+                        int extra = (int)_extraBits[positionSlot];
 
                         uint formattedOffset;
 
@@ -291,13 +291,13 @@ namespace DiscUtils.Wim
                                 verbatimBits = _bitStream.Read(extra);
                             }
 
-                            formattedOffset = s_positionSlots[positionSlot] + verbatimBits + alignedBits;
+                            formattedOffset = _positionSlots[positionSlot] + verbatimBits + alignedBits;
                         }
                         else
                         {
                             uint verbatimBits = extra > 0 ? _bitStream.Read(extra) : 0;
 
-                            formattedOffset = s_positionSlots[positionSlot] + verbatimBits;
+                            formattedOffset = _positionSlots[positionSlot] + verbatimBits;
                         }
 
                         matchOffset = formattedOffset - 2;

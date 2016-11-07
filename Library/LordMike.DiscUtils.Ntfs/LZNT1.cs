@@ -51,7 +51,7 @@ namespace DiscUtils.Ntfs
         // we assume each block is 4KB on decode also.
         private const int FixedBlockSize = 0x1000;
 
-        private static readonly byte[] s_compressionBits = CalcCompressionBits();
+        private static readonly byte[] _compressionBits = CalcCompressionBits();
 
         public LZNT1()
         {
@@ -98,8 +98,8 @@ namespace DiscUtils.Ntfs
 
                     for (int i = 0; i < 8; i++)
                     {
-                        int lengthBits = 16 - s_compressionBits[sourcePointer - subBlock];
-                        ushort lengthMask = (ushort)((1 << s_compressionBits[sourcePointer - subBlock]) - 1);
+                        int lengthBits = 16 - _compressionBits[sourcePointer - subBlock];
+                        ushort lengthMask = (ushort)((1 << _compressionBits[sourcePointer - subBlock]) - 1);
 
                         lzDictionary.MaxMatchAmount = Math.Min(1 << lengthBits, BlockSize - 1);
 
@@ -261,7 +261,7 @@ namespace DiscUtils.Ntfs
                             }
                             else
                             {
-                                ushort lengthBits = (ushort)(16 - s_compressionBits[destIdx - destSubBlockStart]);
+                                ushort lengthBits = (ushort)(16 - _compressionBits[destIdx - destSubBlockStart]);
                                 ushort lengthMask = (ushort)((1 << lengthBits) - 1);
 
                                 ushort phraseToken = Utilities.ToUInt16LittleEndian(source, sourceOffset + sourceIdx);

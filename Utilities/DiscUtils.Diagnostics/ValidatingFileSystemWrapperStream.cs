@@ -35,7 +35,7 @@ namespace DiscUtils.Diagnostics
         private ValidatingFileSystem<Tfs, Tc>.StreamOpenFn _openFn;
         private long _replayHandle;
 
-        private static long s_nextReplayHandle;
+        private static long _nextReplayHandle;
 
         private long _shadowPosition;
         private bool _disposed;
@@ -46,7 +46,7 @@ namespace DiscUtils.Diagnostics
             _fileSystem = fileSystem;
             _openFn = openFn;
 
-            _replayHandle = Interlocked.Increment(ref s_nextReplayHandle);
+            _replayHandle = Interlocked.Increment(ref _nextReplayHandle);
         }
 
         protected override void Dispose(bool disposing)

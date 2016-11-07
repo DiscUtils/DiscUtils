@@ -30,7 +30,7 @@ namespace DiscUtils.HfsPlus
     {
         #region LowerCase Table
 
-        private static readonly ushort[] s_lowerCaseTable =
+        private static readonly ushort[] _lowerCaseTable =
         {
             /* 0 */ 0x0100, 0x0200, 0x0000, 0x0300, 0x0400, 0x0500, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -435,20 +435,20 @@ namespace DiscUtils.HfsPlus
                 while (aPos < a.Length && aChar == '\0')
                 {
                     aChar = a[aPos++];
-                    int temp = s_lowerCaseTable[(aChar >> 8) & 0xFF];
+                    int temp = _lowerCaseTable[(aChar >> 8) & 0xFF];
                     if (temp != 0)
                     {
-                        aChar = (char)s_lowerCaseTable[temp + (aChar & 0xFF)];
+                        aChar = (char)_lowerCaseTable[temp + (aChar & 0xFF)];
                     }
                 }
 
                 while (bPos < b.Length && bChar == '\0')
                 {
                     bChar = b[bPos++];
-                    int temp = s_lowerCaseTable[(bChar >> 8) & 0xFF];
+                    int temp = _lowerCaseTable[(bChar >> 8) & 0xFF];
                     if (temp != 0)
                     {
-                        bChar = (char)s_lowerCaseTable[temp + (bChar & 0xFF)];
+                        bChar = (char)_lowerCaseTable[temp + (bChar & 0xFF)];
                     }
                 }
 
