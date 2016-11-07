@@ -20,23 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-
     internal sealed class KeyNodeCell : Cell
     {
-        public RegistryKeyFlags Flags;
-        public DateTime Timestamp;
-        public int ParentIndex;
-        public int NumSubKeys;
-        public int SubKeysIndex;
-        public int NumValues;
-        public int ValueListIndex;
-        public int SecurityIndex;
         public int ClassNameIndex;
+        public int ClassNameLength;
+        public RegistryKeyFlags Flags;
+
+        public int IndexInParent;
 
         /// <summary>
         /// Number of bytes to represent largest subkey name in Unicode - no null terminator.
@@ -44,18 +39,23 @@ namespace DiscUtils.Registry
         public int MaxSubKeyNameBytes;
 
         /// <summary>
-        /// Number of bytes to represent largest value name in Unicode - no null terminator.
-        /// </summary>
-        public int MaxValNameBytes;
-
-        /// <summary>
         /// Number of bytes to represent largest value content (strings in Unicode, with null terminator - if stored).
         /// </summary>
         public int MaxValDataBytes;
 
-        public int IndexInParent;
-        public int ClassNameLength;
+        /// <summary>
+        /// Number of bytes to represent largest value name in Unicode - no null terminator.
+        /// </summary>
+        public int MaxValNameBytes;
+
         public string Name;
+        public int NumSubKeys;
+        public int NumValues;
+        public int ParentIndex;
+        public int SecurityIndex;
+        public int SubKeysIndex;
+        public DateTime Timestamp;
+        public int ValueListIndex;
 
         public KeyNodeCell(string name, int parentCellIndex)
             : this(-1)
@@ -71,9 +71,7 @@ namespace DiscUtils.Registry
         }
 
         public KeyNodeCell(int index)
-            : base(index)
-        {
-        }
+            : base(index) {}
 
         public override int Size
         {
@@ -82,7 +80,7 @@ namespace DiscUtils.Registry
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            Flags = (RegistryKeyFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
+            Flags = (RegistryKeyFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x04));
             ParentIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
             NumSubKeys = Utilities.ToInt32LittleEndian(buffer, offset + 0x14);
@@ -105,7 +103,7 @@ namespace DiscUtils.Registry
         public override void WriteTo(byte[] buffer, int offset)
         {
             Utilities.StringToBytes("nk", buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian((ushort) Flags, buffer, offset + 0x02);
+            Utilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x02);
             Utilities.WriteBytesLittleEndian(Timestamp.ToFileTimeUtc(), buffer, offset + 0x04);
             Utilities.WriteBytesLittleEndian(ParentIndex, buffer, offset + 0x10);
             Utilities.WriteBytesLittleEndian(NumSubKeys, buffer, offset + 0x14);
@@ -115,7 +113,7 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(SecurityIndex, buffer, offset + 0x2C);
             Utilities.WriteBytesLittleEndian(ClassNameIndex, buffer, offset + 0x30);
             Utilities.WriteBytesLittleEndian(IndexInParent, buffer, offset + 0x44);
-            Utilities.WriteBytesLittleEndian((ushort) Name.Length, buffer, offset + 0x48);
+            Utilities.WriteBytesLittleEndian((ushort)Name.Length, buffer, offset + 0x48);
             Utilities.WriteBytesLittleEndian(ClassNameLength, buffer, offset + 0x4A);
             Utilities.StringToBytes(Name, buffer, offset + 0x4C, Name.Length);
         }

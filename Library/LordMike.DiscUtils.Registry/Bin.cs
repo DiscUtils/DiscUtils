@@ -20,28 +20,27 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// An internal structure within registry files, bins are the major unit of allocation in a registry hive.
     /// </summary>
     /// <remarks>Bins are divided into multiple cells, that contain actual registry data.</remarks>
     internal sealed class Bin
     {
-        private RegistryHive _hive;
-        private Stream _fileStream;
-        private long _streamPos;
+        private readonly byte[] _buffer;
+        private readonly Stream _fileStream;
 
-        private BinHeader _header;
-        private byte[] _buffer;
+        private readonly List<Range<int, int>> _freeCells;
 
-        private List<Range<int, int>> _freeCells;
+        private readonly BinHeader _header;
+        private readonly RegistryHive _hive;
+        private readonly long _streamPos;
 
         public Bin(RegistryHive hive, Stream stream)
         {
@@ -177,7 +176,7 @@ namespace DiscUtils.Registry
 
         internal int AllocateCell(int size)
         {
-            if (size < 8 || size%8 != 0)
+            if (size < 8 || size % 8 != 0)
             {
                 throw new ArgumentException("Invalid cell size");
             }
@@ -201,7 +200,7 @@ namespace DiscUtils.Registry
 
                     return result;
                 }
-                else if (_freeCells[i].Count == size)
+                if (_freeCells[i].Count == size)
                 {
                     // Record the whole of the free buffer as a newly allocated cell
                     Utilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);

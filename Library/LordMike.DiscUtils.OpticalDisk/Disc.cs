@@ -39,9 +39,7 @@ namespace DiscUtils.OpticalDisk
         /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public Disc(Stream stream, Ownership ownsStream)
-            : this(stream, ownsStream, OpticalFormat.None)
-        {
-        }
+            : this(stream, ownsStream, OpticalFormat.None) {}
 
         /// <summary>
         /// Initializes a new instance of the Disc class.
@@ -71,25 +69,9 @@ namespace DiscUtils.OpticalDisk
         /// <param name="access">The access requested to the disk.</param>
         public Disc(string path, FileAccess access)
         {
-            FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             _file = new DiscImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose,
                 OpticalFormat.None);
-        }
-
-        /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _file.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.OpticalDisk; }
         }
 
         /// <summary>
@@ -120,11 +102,11 @@ namespace DiscUtils.OpticalDisk
         }
 
         /// <summary>
-        /// Gets the layers that make up the disc.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { yield return _file; }
+            get { return VirtualDiskClass.OpticalDisk; }
         }
 
         /// <summary>
@@ -135,6 +117,22 @@ namespace DiscUtils.OpticalDisk
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
             get { return DiscFactory.MakeDiskTypeInfo(); }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _file.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disc.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield return _file; }
         }
 
         /// <summary>

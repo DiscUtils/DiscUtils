@@ -20,17 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal sealed class BuilderDirectory : BuilderNode
     {
+        private readonly List<Entry> _children;
+        private readonly Dictionary<string, Entry> _index;
         private DirectoryInode _inode;
-        private List<Entry> _children;
-        private Dictionary<string, Entry> _index;
 
         public BuilderDirectory()
         {
@@ -55,7 +55,7 @@ namespace DiscUtils.SquashFs
                 throw new IOException("The directory entry '" + name + "' already exists");
             }
 
-            Entry newEntry = new Entry() {Name = name, Node = node};
+            Entry newEntry = new Entry { Name = name, Node = node };
             _children.Add(newEntry);
             _index.Add(name, newEntry);
         }
@@ -73,7 +73,7 @@ namespace DiscUtils.SquashFs
 
         public override void Reset()
         {
-            foreach (var entry in _children)
+            foreach (Entry entry in _children)
             {
                 entry.Node.Reset();
             }
@@ -90,7 +90,7 @@ namespace DiscUtils.SquashFs
 
             _children.Sort();
 
-            foreach (var entry in _children)
+            foreach (Entry entry in _children)
             {
                 entry.Node.Write(context);
             }
@@ -121,11 +121,11 @@ namespace DiscUtils.SquashFs
                     ++count;
                 }
 
-                DirectoryHeader hdr = new DirectoryHeader()
+                DirectoryHeader hdr = new DirectoryHeader
                 {
                     Count = count - 1,
                     InodeNumber = firstInode,
-                    StartBlock = (int) thisBlock
+                    StartBlock = (int)thisBlock
                 };
 
                 hdr.WriteTo(context.IoBuffer, 0);
@@ -134,10 +134,10 @@ namespace DiscUtils.SquashFs
                 for (int i = 0; i < count; ++i)
                 {
                     Entry child = _children[currentChild + i];
-                    DirectoryRecord record = new DirectoryRecord()
+                    DirectoryRecord record = new DirectoryRecord
                     {
-                        Offset = (ushort) child.Node.InodeRef.Offset,
-                        InodeNumber = (short) (child.Node.InodeNumber - firstInode),
+                        Offset = (ushort)child.Node.InodeRef.Offset,
+                        InodeNumber = (short)(child.Node.InodeNumber - firstInode),
                         Type = child.Node.Inode.Type,
                         Name = child.Name
                     };
@@ -163,9 +163,9 @@ namespace DiscUtils.SquashFs
 
             NumLinks = numDirs + 2; // +1 for self, +1 for parent
 
-            _inode.StartBlock = (uint) startPos.Block;
-            _inode.Offset = (ushort) startPos.Offset;
-            _inode.FileSize = (uint) size + 3; // For some reason, always +3
+            _inode.StartBlock = (uint)startPos.Block;
+            _inode.Offset = (ushort)startPos.Offset;
+            _inode.FileSize = (uint)size + 3; // For some reason, always +3
         }
 
         private void WriteInode(BuilderContext context)
@@ -182,8 +182,8 @@ namespace DiscUtils.SquashFs
 
         private class Entry : IComparable<Entry>
         {
-            public BuilderNode Node;
             public string Name;
+            public BuilderNode Node;
 
             public int CompareTo(Entry other)
             {

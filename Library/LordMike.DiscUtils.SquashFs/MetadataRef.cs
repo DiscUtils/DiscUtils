@@ -24,31 +24,26 @@ namespace DiscUtils.SquashFs
 {
     internal struct MetadataRef
     {
-        private long _value;
-
         public MetadataRef(long value)
         {
-            _value = value;
+            Value = value;
         }
 
         public MetadataRef(long block, int offset)
         {
-            _value = (block << 16) | (uint) (offset & 0xFFFF);
+            Value = (block << 16) | (uint)(offset & 0xFFFF);
         }
 
         public long Block
         {
-            get { return (_value >> 16) & 0xFFFFFFFFFFFF; }
+            get { return (Value >> 16) & 0xFFFFFFFFFFFF; }
         }
 
         public int Offset
         {
-            get { return (int) (_value & 0xFFFF); }
+            get { return (int)(Value & 0xFFFF); }
         }
 
-        public long Value
-        {
-            get { return _value; }
-        }
+        public long Value { get; }
     }
 }

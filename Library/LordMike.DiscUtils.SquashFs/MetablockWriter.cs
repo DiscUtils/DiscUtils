@@ -20,26 +20,25 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.IO.Compression;
+using DiscUtils.Compression;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.IO;
-    using System.IO.Compression;
-    using DiscUtils.Compression;
-
     internal sealed class MetablockWriter : IDisposable
     {
         private MemoryStream _buffer;
 
-        private byte[] _currentBlock;
+        private readonly byte[] _currentBlock;
         private int _currentBlockNum;
         private int _currentOffset;
 
         public MetablockWriter()
         {
-            _currentBlock = new byte[8*1024];
+            _currentBlock = new byte[8 * 1024];
             _buffer = new MemoryStream();
         }
 
@@ -83,12 +82,12 @@ namespace DiscUtils.SquashFs
                 NextBlock();
             }
 
-            output.Write(_buffer.ToArray(), 0, (int) _buffer.Length);
+            output.Write(_buffer.ToArray(), 0, (int)_buffer.Length);
         }
 
         internal long DistanceFrom(MetadataRef startPos)
         {
-            return ((_currentBlockNum - startPos.Block)*VfsSquashFileSystemReader.MetadataBufferSize)
+            return (_currentBlockNum - startPos.Block) * VfsSquashFileSystemReader.MetadataBufferSize
                    + (_currentOffset - startPos.Offset);
         }
 
@@ -105,12 +104,12 @@ namespace DiscUtils.SquashFs
             if (compressed.Length < _currentOffset)
             {
                 writeData = compressed.ToArray();
-                writeLen = (ushort) compressed.Length;
+                writeLen = (ushort)compressed.Length;
             }
             else
             {
                 writeData = _currentBlock;
-                writeLen = (ushort) (_currentOffset | 0x8000);
+                writeLen = (ushort)(_currentOffset | 0x8000);
             }
 
             byte[] header = new byte[2];

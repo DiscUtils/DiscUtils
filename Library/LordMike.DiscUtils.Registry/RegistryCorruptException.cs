@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Registry
 {
-    using System;
-
 #if !NETCORE
     using System.Runtime.Serialization;
 #endif
@@ -39,18 +39,14 @@ namespace DiscUtils.Registry
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
-        public RegistryCorruptException()
-        {
-        }
+        public RegistryCorruptException() {}
 
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         public RegistryCorruptException(string message)
-            : base(message)
-        {
-        }
+            : base(message) {}
 
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
@@ -58,11 +54,10 @@ namespace DiscUtils.Registry
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">The inner exception.</param>
         public RegistryCorruptException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+            : base(message, innerException) {}
 
 #if !NETCORE
+
 /// <summary>
 /// Initializes a new instance of the RegistryCorruptException class.
 /// </summary>

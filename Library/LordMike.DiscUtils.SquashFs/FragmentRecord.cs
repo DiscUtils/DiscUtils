@@ -27,9 +27,9 @@ namespace DiscUtils.SquashFs
     internal class FragmentRecord : IByteArraySerializable
     {
         public const int RecordSize = 16;
+        public int CompressedSize;
 
         public long StartBlock;
-        public int CompressedSize;
 
         public int Size
         {
@@ -47,7 +47,7 @@ namespace DiscUtils.SquashFs
         {
             Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(CompressedSize, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian((int) 0, buffer, offset + 12);
+            Utilities.WriteBytesLittleEndian(0, buffer, offset + 12);
         }
     }
 }

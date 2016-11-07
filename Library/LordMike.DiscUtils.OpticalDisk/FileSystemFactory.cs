@@ -31,9 +31,9 @@ namespace DiscUtils.OpticalDisk
     [VfsFileSystemFactory]
     internal class FileSystemFactory : VfsFileSystemFactory
     {
-        public override DiscUtils.FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
+        public override FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
         {
-            List<DiscUtils.FileSystemInfo> detected = new List<DiscUtils.FileSystemInfo>();
+            List<FileSystemInfo> detected = new List<FileSystemInfo>();
 
             if (UdfReader.Detect(stream))
             {
@@ -54,10 +54,7 @@ namespace DiscUtils.OpticalDisk
             {
                 return new UdfReader(stream, volumeInfo.PhysicalGeometry.BytesPerSector);
             }
-            else
-            {
-                return new UdfReader(stream);
-            }
+            return new UdfReader(stream);
         }
 
         private DiscFileSystem OpenIso(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)

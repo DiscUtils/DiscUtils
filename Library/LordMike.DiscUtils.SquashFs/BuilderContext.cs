@@ -20,28 +20,27 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.SquashFs
 {
-    using System.IO;
-
     internal sealed class BuilderContext
     {
-        public Stream RawStream { get; set; }
-
-        public int DataBlockSize { get; set; }
-
-        public byte[] IoBuffer { get; set; }
+        public AllocateId AllocateId { get; set; }
 
         public AllocateInode AllocateInode { get; set; }
 
-        public AllocateId AllocateId { get; set; }
+        public int DataBlockSize { get; set; }
+
+        public MetablockWriter DirectoryWriter { get; set; }
+
+        public MetablockWriter InodeWriter { get; set; }
+
+        public byte[] IoBuffer { get; set; }
+        public Stream RawStream { get; set; }
 
         public WriteDataBlock WriteDataBlock { get; set; }
 
         public WriteFragment WriteFragment { get; set; }
-
-        public MetablockWriter InodeWriter { get; set; }
-
-        public MetablockWriter DirectoryWriter { get; set; }
     }
 }

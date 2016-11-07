@@ -26,10 +26,10 @@ namespace DiscUtils.SquashFs
     {
         long FileSize { get; }
 
-        uint StartBlock { get; }
+        ushort Offset { get; }
 
         uint ParentInode { get; }
 
-        ushort Offset { get; }
+        uint StartBlock { get; }
     }
 }

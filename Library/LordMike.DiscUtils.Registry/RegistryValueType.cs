@@ -25,7 +25,7 @@ namespace DiscUtils.Registry
     /// <summary>
     /// The types of registry values.
     /// </summary>
-    public enum RegistryValueType : int
+    public enum RegistryValueType
     {
         /// <summary>
         /// Unknown type.
@@ -85,6 +85,6 @@ namespace DiscUtils.Registry
         /// <summary>
         /// A 64-bit integer.
         /// </summary>
-        QWord = 0x0B,
+        QWord = 0x0B
     }
 }

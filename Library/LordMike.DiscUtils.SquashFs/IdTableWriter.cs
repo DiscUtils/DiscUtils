@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class IdTableWriter
     {
-        private BuilderContext _context;
+        private readonly BuilderContext _context;
 
-        private List<int> _ids;
+        private readonly List<int> _ids;
 
         public IdTableWriter(BuilderContext context)
         {
@@ -55,12 +54,12 @@ namespace DiscUtils.SquashFs
             {
                 if (_ids[i] == id)
                 {
-                    return (ushort) i;
+                    return (ushort)i;
                 }
             }
 
             _ids.Add(id);
-            return (ushort) (_ids.Count - 1);
+            return (ushort)(_ids.Count - 1);
         }
 
         internal long Persist()
@@ -70,20 +69,20 @@ namespace DiscUtils.SquashFs
                 return -1;
             }
 
-            if (_ids.Count*4 > _context.DataBlockSize)
+            if (_ids.Count * 4 > _context.DataBlockSize)
             {
                 throw new NotImplementedException("Large numbers of user / group id's");
             }
 
             for (int i = 0; i < _ids.Count; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_ids[i], _context.IoBuffer, i*4);
+                Utilities.WriteBytesLittleEndian(_ids[i], _context.IoBuffer, i * 4);
             }
 
             // Persist the actual Id's
             long blockPos = _context.RawStream.Position;
             MetablockWriter writer = new MetablockWriter();
-            writer.Write(_context.IoBuffer, 0, _ids.Count*4);
+            writer.Write(_context.IoBuffer, 0, _ids.Count * 4);
             writer.Persist(_context.RawStream);
 
             // Persist the table that references the block containing the id's

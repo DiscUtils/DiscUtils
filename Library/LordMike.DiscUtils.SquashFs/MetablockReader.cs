@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal sealed class MetablockReader
     {
-        private Context _context;
-        private long _start;
+        private readonly Context _context;
 
         private long _currentBlockStart;
         private int _currentOffset;
+        private readonly long _start;
 
         public MetablockReader(Context context, long start)
         {
@@ -59,7 +58,7 @@ namespace DiscUtils.SquashFs
 
         public long DistanceFrom(long blockStart, int blockOffset)
         {
-            return ((_currentBlockStart - blockStart)*VfsSquashFileSystemReader.MetadataBufferSize)
+            return (_currentBlockStart - blockStart) * VfsSquashFileSystemReader.MetadataBufferSize
                    + (_currentOffset - blockOffset);
         }
 
@@ -118,12 +117,9 @@ namespace DiscUtils.SquashFs
                 Read(buffer, 0, 4);
                 return Utilities.ToUInt32LittleEndian(buffer, 0);
             }
-            else
-            {
-                uint result = Utilities.ToUInt32LittleEndian(block.Data, _currentOffset);
-                _currentOffset += 4;
-                return result;
-            }
+            uint result = Utilities.ToUInt32LittleEndian(block.Data, _currentOffset);
+            _currentOffset += 4;
+            return result;
         }
 
         public int ReadInt()
@@ -136,12 +132,9 @@ namespace DiscUtils.SquashFs
                 Read(buffer, 0, 4);
                 return Utilities.ToInt32LittleEndian(buffer, 0);
             }
-            else
-            {
-                int result = Utilities.ToInt32LittleEndian(block.Data, _currentOffset);
-                _currentOffset += 4;
-                return result;
-            }
+            int result = Utilities.ToInt32LittleEndian(block.Data, _currentOffset);
+            _currentOffset += 4;
+            return result;
         }
 
         public ushort ReadUShort()
@@ -154,12 +147,9 @@ namespace DiscUtils.SquashFs
                 Read(buffer, 0, 2);
                 return Utilities.ToUInt16LittleEndian(buffer, 0);
             }
-            else
-            {
-                ushort result = Utilities.ToUInt16LittleEndian(block.Data, _currentOffset);
-                _currentOffset += 2;
-                return result;
-            }
+            ushort result = Utilities.ToUInt16LittleEndian(block.Data, _currentOffset);
+            _currentOffset += 2;
+            return result;
         }
 
         public short ReadShort()
@@ -172,12 +162,9 @@ namespace DiscUtils.SquashFs
                 Read(buffer, 0, 2);
                 return Utilities.ToInt16LittleEndian(buffer, 0);
             }
-            else
-            {
-                short result = Utilities.ToInt16LittleEndian(block.Data, _currentOffset);
-                _currentOffset += 2;
-                return result;
-            }
+            short result = Utilities.ToInt16LittleEndian(block.Data, _currentOffset);
+            _currentOffset += 2;
+            return result;
         }
 
         public string ReadString(int len)
@@ -190,12 +177,9 @@ namespace DiscUtils.SquashFs
                 Read(buffer, 0, len);
                 return Utilities.BytesToString(buffer, 0, len);
             }
-            else
-            {
-                string result = Utilities.BytesToString(block.Data, _currentOffset, len);
-                _currentOffset += len;
-                return result;
-            }
+            string result = Utilities.BytesToString(block.Data, _currentOffset, len);
+            _currentOffset += len;
+            return result;
         }
     }
 }

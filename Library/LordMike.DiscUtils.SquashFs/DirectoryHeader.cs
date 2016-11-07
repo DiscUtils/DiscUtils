@@ -20,30 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class DirectoryHeader : IByteArraySerializable
     {
         public int Count;
-        public int StartBlock;
         public int InodeNumber;
+        public int StartBlock;
 
         public int Size
         {
             get { return 12; }
-        }
-
-        public static DirectoryHeader ReadFrom(MetablockReader reader)
-        {
-            DirectoryHeader result = new DirectoryHeader();
-            result.Count = reader.ReadInt();
-            result.StartBlock = reader.ReadInt();
-            result.InodeNumber = reader.ReadInt();
-            return result;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -56,6 +46,15 @@ namespace DiscUtils.SquashFs
             Utilities.WriteBytesLittleEndian(Count, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 4);
             Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 8);
+        }
+
+        public static DirectoryHeader ReadFrom(MetablockReader reader)
+        {
+            DirectoryHeader result = new DirectoryHeader();
+            result.Count = reader.ReadInt();
+            result.StartBlock = reader.ReadInt();
+            result.InodeNumber = reader.ReadInt();
+            return result;
         }
     }
 }

@@ -27,12 +27,12 @@ namespace DiscUtils.Sdi
     internal class SectionRecord
     {
         public const int RecordSize = 64;
-
-        public string SectionType;
         public ulong Attr;
         public long Offset;
-        public long Size;
         public ulong PartitionType;
+
+        public string SectionType;
+        public long Size;
 
         public void ReadFrom(byte[] buffer, int offset)
         {

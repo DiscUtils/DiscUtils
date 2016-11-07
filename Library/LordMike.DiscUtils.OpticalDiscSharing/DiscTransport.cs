@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.OpticalDiscSharing
 {
-    using System;
-    using System.IO;
-
     [VirtualDiskTransport("ods")]
     internal sealed class DiscTransport : VirtualDiskTransport
     {
+        private string _disk;
         private OpticalDiscServiceClient _odsClient;
         private OpticalDiscService _service;
-        private string _disk;
 
         public override bool IsRawDisk
         {
@@ -42,19 +41,19 @@ namespace DiscUtils.OpticalDiscSharing
         public override void Connect(Uri uri, string username, string password)
         {
             string domain = uri.Host;
-            string[] pathParts = Uri.UnescapeDataString(uri.AbsolutePath).Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] pathParts = Uri.UnescapeDataString(uri.AbsolutePath).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             string instance = pathParts[0];
             string volName = pathParts[1];
 
             _odsClient = new OpticalDiscServiceClient();
-            foreach (var service in _odsClient.LookupServices(domain))
+            foreach (OpticalDiscService service in _odsClient.LookupServices(domain))
             {
                 if (service.DisplayName == instance)
                 {
                     _service = service;
                     _service.Connect(Environment.UserName, Environment.MachineName, 30);
 
-                    foreach (var disk in _service.AdvertisedDiscs)
+                    foreach (DiscInfo disk in _service.AdvertisedDiscs)
                     {
                         if (disk.VolumeLabel == volName)
                         {

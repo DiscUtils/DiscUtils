@@ -20,40 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading;
+using DiscUtils.Net.Dns;
+
 namespace DiscUtils.OpticalDiscSharing
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Net;
-    using System.Security;
-    using System.Text;
-    using System.Threading;
-    using DiscUtils.Net.Dns;
-
     /// <summary>
     /// Represents a particular Optical Disc Sharing service (typically a Mac or PC).
     /// </summary>
     public sealed class OpticalDiscService
     {
-        private ServiceDiscoveryClient _sdClient;
-        private ServiceInstance _instance;
-        private string _userName;
         private string _askToken;
+        private ServiceInstance _instance;
+        private readonly ServiceDiscoveryClient _sdClient;
+        private string _userName;
 
         internal OpticalDiscService(ServiceInstance instance, ServiceDiscoveryClient sdClient)
         {
             _sdClient = sdClient;
             _instance = instance;
-        }
-
-        /// <summary>
-        /// Gets the display name of this service.
-        /// </summary>
-        public string DisplayName
-        {
-            get { return _instance.DisplayName; }
         }
 
         /// <summary>
@@ -63,14 +54,14 @@ namespace DiscUtils.OpticalDiscSharing
         {
             get
             {
-                foreach (var sdParam in _instance.Parameters)
+                foreach (KeyValuePair<string, byte[]> sdParam in _instance.Parameters)
                 {
                     if (sdParam.Key.StartsWith("disk"))
                     {
-                        var diskParams = GetParams(sdParam.Key);
+                        Dictionary<string, string> diskParams = GetParams(sdParam.Key);
                         string infoVal;
 
-                        DiscInfo info = new DiscInfo() { Name = sdParam.Key };
+                        DiscInfo info = new DiscInfo { Name = sdParam.Key };
 
                         if (diskParams.TryGetValue("adVN", out infoVal))
                         {
@@ -89,6 +80,14 @@ namespace DiscUtils.OpticalDiscSharing
         }
 
         /// <summary>
+        /// Gets the display name of this service.
+        /// </summary>
+        public string DisplayName
+        {
+            get { return _instance.DisplayName; }
+        }
+
+        /// <summary>
         /// Connects to the service.
         /// </summary>
         /// <param name="userName">The username to use, if the owner of the Mac / PC is prompted.</param>
@@ -96,7 +95,7 @@ namespace DiscUtils.OpticalDiscSharing
         /// <param name="maxWaitSeconds">The maximum number of seconds to wait to be granted access.</param>
         public void Connect(string userName, string computerName, int maxWaitSeconds)
         {
-            var sysParams = GetParams("sys");
+            Dictionary<string, string> sysParams = GetParams("sys");
 
             int volFlags = 0;
             string volFlagsStr;
@@ -209,14 +208,11 @@ namespace DiscUtils.OpticalDiscSharing
 
         private static int ParseInt(string volFlagsStr)
         {
-            if (volFlagsStr.StartsWith("0x", System.StringComparison.OrdinalIgnoreCase))
+            if (volFlagsStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
                 return int.Parse(volFlagsStr.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
             }
-            else
-            {
-                return int.Parse(volFlagsStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
-            }
+            return int.Parse(volFlagsStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
         }
 
         private void AskForAccess(string userName, string computerName, int maxWaitSecs)
@@ -244,7 +240,7 @@ namespace DiscUtils.OpticalDiscSharing
                 string asString = Encoding.ASCII.GetString(data);
                 string[] nvPairs = asString.Split(',');
 
-                foreach (var nvPair in nvPairs)
+                foreach (string nvPair in nvPairs)
                 {
                     string[] parts = nvPair.Split('=');
                     result[parts[0]] = parts[1];

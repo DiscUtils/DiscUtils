@@ -20,36 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.OpticalDiscSharing
 {
-    using System;
-    using System.IO;
-
     internal sealed class DiscImageFile : VirtualDiskLayer
     {
         internal const int Mode1SectorSize = 2048;
 
-        private SparseStream _content;
-
         internal DiscImageFile(Uri uri, string userName, string password)
         {
-            _content = new BufferStream(new DiscContentBuffer(uri, userName, password), FileAccess.Read);
+            Content = new BufferStream(new DiscContentBuffer(uri, userName, password), FileAccess.Read);
 
-            BlockCacheSettings cacheSettings = new BlockCacheSettings()
+            BlockCacheSettings cacheSettings = new BlockCacheSettings
             {
                 BlockSize = (int)(32 * Sizes.OneKiB),
-                OptimumReadSize = (int)(128 * Sizes.OneKiB),
+                OptimumReadSize = (int)(128 * Sizes.OneKiB)
             };
 
-            _content = new BlockCacheStream(_content, Ownership.Dispose);
+            Content = new BlockCacheStream(Content, Ownership.Dispose);
         }
 
-        public SparseStream Content
+        internal override long Capacity
         {
-            get { return _content; }
+            get { return Content.Length; }
         }
+
+        public SparseStream Content { get; }
 
         public override Geometry Geometry
         {
@@ -65,11 +64,6 @@ namespace DiscUtils.OpticalDiscSharing
         public override bool NeedsParent
         {
             get { return false; }
-        }
-
-        internal override long Capacity
-        {
-            get { return _content.Length; }
         }
 
         internal override FileLocator RelativeFileLocator

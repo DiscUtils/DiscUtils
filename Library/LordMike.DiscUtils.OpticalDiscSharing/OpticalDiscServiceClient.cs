@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using DiscUtils.Net.Dns;
+
 namespace DiscUtils.OpticalDiscSharing
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Net.Dns;
-
     /// <summary>
     /// Provides access to Optical Disc Sharing services.
     /// </summary>
@@ -71,7 +71,7 @@ namespace DiscUtils.OpticalDiscSharing
         {
             List<OpticalDiscService> services = new List<OpticalDiscService>();
 
-            foreach (var instance in _sdClient.LookupInstances("_odisk._tcp", domain, ServiceInstanceFields.All))
+            foreach (ServiceInstance instance in _sdClient.LookupInstances("_odisk._tcp", domain, ServiceInstanceFields.All))
             {
                 services.Add(new OpticalDiscService(instance, _sdClient));
             }

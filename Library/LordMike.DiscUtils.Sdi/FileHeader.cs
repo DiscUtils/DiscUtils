@@ -20,29 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Sdi
 {
-    using System;
-    using System.IO;
-
     internal class FileHeader
     {
-        public string Tag;
-        public ulong Type;
         public ulong BootCodeOffset;
         public ulong BootCodeSize;
-        public ulong VendorId;
+        public ulong Checksum;
         public ulong DeviceId;
         public Guid DeviceModel;
         public ulong DeviceRole;
         ////Reserved ulong
+        public long PageAlignment;
+        ////Reserved ulong
         public Guid RuntimeGuid;
         public ulong RuntimeOEMRev;
-        ////Reserved ulong
-        public long PageAlignment;
-        public ulong Checksum;
+        public string Tag;
+        public ulong Type;
+        public ulong VendorId;
 
         public void ReadFrom(byte[] buffer, int offset)
         {

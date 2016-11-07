@@ -20,33 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Sdi
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Class for accessing the contents of Simple Deployment Image (.sdi) files.
     /// </summary>
     /// <remarks>SDI files are primitive disk images, containing multiple blobs.</remarks>
     public sealed class SdiFile : IDisposable
     {
+        private readonly FileHeader _header;
+        private readonly Ownership _ownership;
+        private readonly List<SectionRecord> _sections;
         private Stream _stream;
-        private Ownership _ownership;
-        private FileHeader _header;
-        private List<SectionRecord> _sections;
 
         /// <summary>
         /// Initializes a new instance of the SdiFile class.
         /// </summary>
         /// <param name="stream">The stream formatted as an SDI file.</param>
         public SdiFile(Stream stream)
-            : this(stream, Ownership.None)
-        {
-        }
+            : this(stream, Ownership.None) {}
 
         /// <summary>
         /// Initializes a new instance of the SdiFile class.
@@ -63,8 +60,8 @@ namespace DiscUtils.Sdi
             _header = new FileHeader();
             _header.ReadFrom(page, 0);
 
-            _stream.Position = _header.PageAlignment*512;
-            byte[] toc = Utilities.ReadFully(_stream, (int) (_header.PageAlignment*512));
+            _stream.Position = _header.PageAlignment * 512;
+            byte[] toc = Utilities.ReadFully(_stream, (int)(_header.PageAlignment * 512));
 
             _sections = new List<SectionRecord>();
             int pos = 0;
@@ -87,7 +84,7 @@ namespace DiscUtils.Sdi
             get
             {
                 int i = 0;
-                foreach (var section in _sections)
+                foreach (SectionRecord section in _sections)
                 {
                     yield return new Section(section, i++);
                 }

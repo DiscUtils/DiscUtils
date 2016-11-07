@@ -1,4 +1,7 @@
 ﻿using DiscUtils.CoreCompat;
+using DiscUtils.Iscsi;
+using DiscUtils.Nfs;
+using DiscUtils.OpticalDisk;
 
 namespace DiscUtils.Transports
 {
@@ -6,9 +9,9 @@ namespace DiscUtils.Transports
     {
         public static void SetupTransports()
         {
-            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Iscsi.Disk)));
-            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Nfs.NfsFileSystem)));
-            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(OpticalDisk.Disc)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Disk)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(NfsFileSystem)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Disc)));
         }
     }
 }

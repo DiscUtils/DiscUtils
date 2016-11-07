@@ -20,26 +20,25 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.AccessControl;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Security.AccessControl;
-
     /// <summary>
     /// A registry hive.
     /// </summary>
     public sealed class RegistryHive : IDisposable
     {
-        private const long BinStart = 4*Sizes.OneKiB;
+        private const long BinStart = 4 * Sizes.OneKiB;
+        private readonly List<BinHeader> _bins;
 
         private Stream _fileStream;
-        private Ownership _ownsStream;
-        private HiveHeader _header;
-        private List<BinHeader> _bins;
+        private readonly HiveHeader _header;
+        private readonly Ownership _ownsStream;
 
         /// <summary>
         /// Initializes a new instance of the RegistryHive class.
@@ -49,9 +48,7 @@ namespace DiscUtils.Registry
         /// The created object does not assume ownership of the stream.
         /// </remarks>
         public RegistryHive(Stream hive)
-            : this(hive, Ownership.None)
-        {
-        }
+            : this(hive, Ownership.None) {}
 
         /// <summary>
         /// Initializes a new instance of the RegistryHive class.
@@ -92,6 +89,18 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Disposes of this instance, freeing any underlying stream (if any).
+        /// </summary>
+        public void Dispose()
+        {
+            if (_fileStream != null && _ownsStream == Ownership.Dispose)
+            {
+                _fileStream.Dispose();
+                _fileStream = null;
+            }
+        }
+
+        /// <summary>
         /// Creates a new (empty) registry hive.
         /// </summary>
         /// <param name="stream">The stream to contain the new hive.</param>
@@ -120,7 +129,7 @@ namespace DiscUtils.Registry
             // Construct a file with minimal structure - hive header, plus one (empty) bin
             BinHeader binHeader = new BinHeader();
             binHeader.FileOffset = 0;
-            binHeader.BinSize = (int) (4*Sizes.OneKiB);
+            binHeader.BinSize = (int)(4 * Sizes.OneKiB);
 
             HiveHeader hiveHeader = new HiveHeader();
             hiveHeader.Length = binHeader.BinSize;
@@ -182,18 +191,6 @@ namespace DiscUtils.Registry
             return Create(new FileStream(path, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose);
         }
 
-        /// <summary>
-        /// Disposes of this instance, freeing any underlying stream (if any).
-        /// </summary>
-        public void Dispose()
-        {
-            if (_fileStream != null && _ownsStream == Ownership.Dispose)
-            {
-                _fileStream.Dispose();
-                _fileStream = null;
-            }
-        }
-
         internal K GetCell<K>(int index)
             where K : Cell
         {
@@ -201,12 +198,9 @@ namespace DiscUtils.Registry
 
             if (bin != null)
             {
-                return (K) bin.TryGetCell(index);
+                return (K)bin.TryGetCell(index);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         internal void FreeCell(int index)
@@ -234,7 +228,7 @@ namespace DiscUtils.Registry
                 {
                     return cell.Index;
                 }
-                else if (canRelocate)
+                if (canRelocate)
                 {
                     int oldCell = cell.Index;
                     cell.Index = AllocateRawCell(cell.Size);
@@ -248,16 +242,10 @@ namespace DiscUtils.Registry
                     FreeCell(oldCell);
                     return cell.Index;
                 }
-                else
-                {
-                    throw new ArgumentException("Can't update cell, needs relocation but relocation disabled",
-                        nameof(canRelocate));
-                }
+                throw new ArgumentException("Can't update cell, needs relocation but relocation disabled",
+                    nameof(canRelocate));
             }
-            else
-            {
-                throw new RegistryCorruptException("No bin found containing index: " + cell.Index);
-            }
+            throw new RegistryCorruptException("No bin found containing index: " + cell.Index);
         }
 
         internal byte[] RawCellData(int index, int maxBytes)
@@ -268,10 +256,7 @@ namespace DiscUtils.Registry
             {
                 return bin.ReadRawCellData(index, maxBytes);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         internal bool WriteRawCellData(int index, byte[] data, int offset, int count)
@@ -282,10 +267,7 @@ namespace DiscUtils.Registry
             {
                 return bin.WriteRawCellData(index, data, offset, count);
             }
-            else
-            {
-                throw new RegistryCorruptException("No bin found containing index: " + index);
-            }
+            throw new RegistryCorruptException("No bin found containing index: " + index);
         }
 
         internal int AllocateRawCell(int capacity)
@@ -293,7 +275,7 @@ namespace DiscUtils.Registry
             int minSize = Utilities.RoundUp(capacity + 4, 8); // Allow for size header and ensure multiple of 8
 
             // Incredibly inefficient algorithm...
-            foreach (var binHeader in _bins)
+            foreach (BinHeader binHeader in _bins)
             {
                 Bin bin = LoadBin(binHeader);
                 int cellIndex = bin.AllocateCell(minSize);
@@ -344,7 +326,7 @@ namespace DiscUtils.Registry
 
             BinHeader newBinHeader = new BinHeader();
             newBinHeader.FileOffset = lastBin.FileOffset + lastBin.BinSize;
-            newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4*(int) Sizes.OneKiB);
+            newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4 * (int)Sizes.OneKiB);
 
             byte[] buffer = new byte[newBinHeader.Size];
             newBinHeader.WriteTo(buffer, 0);
@@ -376,7 +358,7 @@ namespace DiscUtils.Registry
 
         private class BinFinder : IComparer<BinHeader>
         {
-            private int _index;
+            private readonly int _index;
 
             public BinFinder(int index)
             {
@@ -391,14 +373,11 @@ namespace DiscUtils.Registry
                 {
                     return -1;
                 }
-                else if (x.FileOffset > _index)
+                if (x.FileOffset > _index)
                 {
                     return 1;
                 }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
 
             #endregion

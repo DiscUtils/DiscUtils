@@ -20,26 +20,25 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.SquashFs
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class Context : VfsContext
     {
-        public SuperBlock SuperBlock { get; set; }
+        public MetablockReader DirectoryReader { get; set; }
+
+        public MetablockReader[] FragmentTableReaders { get; set; }
+
+        public MetablockReader InodeReader { get; set; }
 
         public Stream RawStream { get; set; }
 
         public ReadBlock ReadBlock { get; set; }
 
         public ReadMetaBlock ReadMetaBlock { get; set; }
-
-        public MetablockReader InodeReader { get; set; }
-
-        public MetablockReader DirectoryReader { get; set; }
-
-        public MetablockReader[] FragmentTableReaders { get; set; }
+        public SuperBlock SuperBlock { get; set; }
 
         public MetablockReader[] UidGidTableReaders { get; set; }
     }

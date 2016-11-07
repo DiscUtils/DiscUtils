@@ -34,19 +34,16 @@ namespace DiscUtils.OpticalDisk
         internal const int Mode1SectorSize = 2048;
         internal const int Mode2SectorSize = 2352;
 
-        private IDisposable _toDispose;
+        private readonly OpticalFormat _format;
 
-        private SparseStream _content;
-        private OpticalFormat _format;
+        private IDisposable _toDispose;
 
         /// <summary>
         /// Initializes a new instance of the DiscImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret.</param>
         public DiscImageFile(Stream stream)
-            : this(stream, Ownership.None, OpticalFormat.None)
-        {
-        }
+            : this(stream, Ownership.None, OpticalFormat.None) {}
 
         /// <summary>
         /// Initializes a new instance of the DiscImageFile class.
@@ -63,11 +60,11 @@ namespace DiscUtils.OpticalDisk
 
             if (format == OpticalFormat.None)
             {
-                if ((stream.Length%Mode1SectorSize) == 0 && (stream.Length%Mode2SectorSize) != 0)
+                if (stream.Length % Mode1SectorSize == 0 && stream.Length % Mode2SectorSize != 0)
                 {
                     _format = OpticalFormat.Mode1;
                 }
-                else if ((stream.Length%Mode1SectorSize) != 0 && (stream.Length%Mode2SectorSize) == 0)
+                else if (stream.Length % Mode1SectorSize != 0 && stream.Length % Mode2SectorSize == 0)
                 {
                     _format = OpticalFormat.Mode2;
                 }
@@ -81,17 +78,38 @@ namespace DiscUtils.OpticalDisk
                 _format = format;
             }
 
-            _content = stream as SparseStream;
-            if (_content == null)
+            Content = stream as SparseStream;
+            if (Content == null)
             {
-                _content = SparseStream.FromStream(stream, Ownership.None);
+                Content = SparseStream.FromStream(stream, Ownership.None);
             }
 
             if (_format == OpticalFormat.Mode2)
             {
-                Mode2Buffer converter = new Mode2Buffer(new StreamBuffer(_content, Ownership.None));
-                _content = new BufferStream(converter, FileAccess.Read);
+                Mode2Buffer converter = new Mode2Buffer(new StreamBuffer(Content, Ownership.None));
+                Content = new BufferStream(converter, FileAccess.Read);
             }
+        }
+
+        internal override long Capacity
+        {
+            get { return Content.Length; }
+        }
+
+        internal SparseStream Content { get; private set; }
+
+        /// <summary>
+        /// Gets the Geometry of the disc.
+        /// </summary>
+        /// <remarks>
+        /// Optical discs don't fit the CHS model, so dummy CHS data provided, but
+        /// sector size is accurate.
+        /// </remarks>
+        public override Geometry Geometry
+        {
+            // Note external sector size is always 2048 - 2352 just has extra header
+            // & error-correction info
+            get { return new Geometry(1, 1, 1, Mode1SectorSize); }
         }
 
         /// <summary>
@@ -110,33 +128,9 @@ namespace DiscUtils.OpticalDisk
             get { return false; }
         }
 
-        /// <summary>
-        /// Gets the Geometry of the disc.
-        /// </summary>
-        /// <remarks>
-        /// Optical discs don't fit the CHS model, so dummy CHS data provided, but
-        /// sector size is accurate.
-        /// </remarks>
-        public override Geometry Geometry
-        {
-            // Note external sector size is always 2048 - 2352 just has extra header
-            // & error-correction info
-            get { return new Geometry(1, 1, 1, Mode1SectorSize); }
-        }
-
-        internal override long Capacity
-        {
-            get { return _content.Length; }
-        }
-
         internal override FileLocator RelativeFileLocator
         {
             get { return null; }
-        }
-
-        internal SparseStream Content
-        {
-            get { return _content; }
         }
 
         /// <summary>
@@ -181,10 +175,10 @@ namespace DiscUtils.OpticalDisk
                         _toDispose = null;
                     }
 
-                    if (_content != null)
+                    if (Content != null)
                     {
-                        _content.Dispose();
-                        _content = null;
+                        Content.Dispose();
+                        Content = null;
                     }
                 }
             }

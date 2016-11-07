@@ -20,96 +20,75 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Security.AccessControl;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.Security.AccessControl;
-
     internal sealed class SecurityCell : Cell
     {
-        private int _prevIndex;
-        private int _nextIndex;
-        private int _usageCount;
-        private RegistrySecurity _secDesc;
-
         public SecurityCell(RegistrySecurity secDesc)
             : this(-1)
         {
-            _secDesc = secDesc;
+            SecurityDescriptor = secDesc;
         }
 
         public SecurityCell(int index)
             : base(index)
         {
-            _prevIndex = -1;
-            _nextIndex = -1;
+            PreviousIndex = -1;
+            NextIndex = -1;
         }
 
-        public int PreviousIndex
-        {
-            get { return _prevIndex; }
-            set { _prevIndex = value; }
-        }
+        public int NextIndex { get; set; }
 
-        public int NextIndex
-        {
-            get { return _nextIndex; }
-            set { _nextIndex = value; }
-        }
+        public int PreviousIndex { get; set; }
 
-        public int UsageCount
-        {
-            get { return _usageCount; }
-            set { _usageCount = value; }
-        }
-
-        public RegistrySecurity SecurityDescriptor
-        {
-            get { return _secDesc; }
-        }
+        public RegistrySecurity SecurityDescriptor { get; private set; }
 
         public override int Size
         {
             get
             {
-                int sdLen = _secDesc.GetSecurityDescriptorBinaryForm().Length;
+                int sdLen = SecurityDescriptor.GetSecurityDescriptorBinaryForm().Length;
                 return 0x14 + sdLen;
             }
         }
 
+        public int UsageCount { get; set; }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            _prevIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-            _nextIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
-            _usageCount = Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
+            PreviousIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            NextIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            UsageCount = Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
             int secDescSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
 
             byte[] secDesc = new byte[secDescSize];
             Array.Copy(buffer, offset + 0x14, secDesc, 0, secDescSize);
-            _secDesc = new RegistrySecurity();
-            _secDesc.SetSecurityDescriptorBinaryForm(secDesc);
+            SecurityDescriptor = new RegistrySecurity();
+            SecurityDescriptor.SetSecurityDescriptorBinaryForm(secDesc);
 
             return 0x14 + secDescSize;
         }
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            byte[] sd = _secDesc.GetSecurityDescriptorBinaryForm();
+            byte[] sd = SecurityDescriptor.GetSecurityDescriptorBinaryForm();
 
             Utilities.StringToBytes("sk", buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian(_prevIndex, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(_nextIndex, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(_usageCount, buffer, offset + 0x0C);
+            Utilities.WriteBytesLittleEndian(PreviousIndex, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(NextIndex, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian(UsageCount, buffer, offset + 0x0C);
             Utilities.WriteBytesLittleEndian(sd.Length, buffer, offset + 0x10);
             Array.Copy(sd, 0, buffer, offset + 0x14, sd.Length);
         }
 
         public override string ToString()
         {
-            return "SecDesc:" + _secDesc.GetSecurityDescriptorSddlForm(AccessControlSections.All) + " (refCount:" +
-                   _usageCount + ")";
+            return "SecDesc:" + SecurityDescriptor.GetSecurityDescriptorSddlForm(AccessControlSections.All) + " (refCount:" +
+                   UsageCount + ")";
         }
     }
 }

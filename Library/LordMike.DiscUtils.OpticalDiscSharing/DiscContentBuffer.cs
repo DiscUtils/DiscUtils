@@ -20,23 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+
 namespace DiscUtils.OpticalDiscSharing
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net;
-    using System.Security.Cryptography;
-    using System.Text;
-
-    internal sealed class DiscContentBuffer : DiscUtils.Buffer
+    internal sealed class DiscContentBuffer : Buffer
     {
-        private Uri _uri;
-        private string _userName;
-        private string _password;
         private string _authHeader;
 
-        private long _capacity;
+        private readonly string _password;
+        private readonly Uri _uri;
+        private readonly string _userName;
 
         internal DiscContentBuffer(Uri uri, string userName, string password)
         {
@@ -45,16 +44,14 @@ namespace DiscUtils.OpticalDiscSharing
             _password = password;
 
             HttpWebResponse response = SendRequest(() =>
-                {
-                    HttpWebRequest wr = (HttpWebRequest)WebRequest.Create(uri);
-                    wr.Method = "HEAD";
-                    return wr;
-                });
+            {
+                HttpWebRequest wr = (HttpWebRequest)WebRequest.Create(uri);
+                wr.Method = "HEAD";
+                return wr;
+            });
 
-            _capacity = response.ContentLength;
+            Capacity = response.ContentLength;
         }
-
-        internal delegate HttpWebRequest WebRequestCreator();
 
         public override bool CanRead
         {
@@ -66,20 +63,17 @@ namespace DiscUtils.OpticalDiscSharing
             get { return false; }
         }
 
-        public override long Capacity
-        {
-            get { return _capacity; }
-        }
+        public override long Capacity { get; }
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
             HttpWebResponse response = SendRequest(() =>
-                {
-                    HttpWebRequest wr = (HttpWebRequest)WebRequest.Create(_uri);
-                    wr.Method = "GET";
-                    wr.AddRange((int)pos, (int)(pos + count - 1));
-                    return wr;
-                });
+            {
+                HttpWebRequest wr = (HttpWebRequest)WebRequest.Create(_uri);
+                wr.Method = "GET";
+                wr.AddRange((int)pos, (int)(pos + count - 1));
+                return wr;
+            });
 
             using (Stream s = response.GetResponseStream())
             {
@@ -107,8 +101,8 @@ namespace DiscUtils.OpticalDiscSharing
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             return StreamExtent.Intersect(
-                new StreamExtent[] { new StreamExtent(0, Capacity) },
-                new StreamExtent[] { new StreamExtent(start, count) });
+                new[] { new StreamExtent(0, Capacity) },
+                new[] { new StreamExtent(start, count) });
         }
 
         private static string ToHexString(byte[] p)
@@ -118,9 +112,9 @@ namespace DiscUtils.OpticalDiscSharing
             for (int i = 0; i < p.Length; ++i)
             {
                 int j = (p[i] >> 4) & 0xf;
-                result.Append((char)((j <= 9) ? ('0' + j) : ('a' + (j - 10))));
+                result.Append((char)(j <= 9 ? '0' + j : 'a' + (j - 10)));
                 j = p[i] & 0xf;
-                result.Append((char)((j <= 9) ? ('0' + j) : ('a' + (j - 10))));
+                result.Append((char)(j <= 9 ? '0' + j : 'a' + (j - 10)));
             }
 
             return result.ToString();
@@ -136,7 +130,7 @@ namespace DiscUtils.OpticalDiscSharing
 
             for (int i = 1; i < elements.Length; ++i)
             {
-                string[] nvPair = elements[i].Split(new char[] { '=' }, 2, StringSplitOptions.None);
+                string[] nvPair = elements[i].Split(new[] { '=' }, 2, StringSplitOptions.None);
                 result.Add(nvPair[0], nvPair[1].Trim('\"'));
             }
 
@@ -200,5 +194,7 @@ namespace DiscUtils.OpticalDiscSharing
             byte[] hash = respHas.ComputeHash(Encoding.ASCII.GetBytes(toHash));
             return ToHexString(hash);
         }
+
+        internal delegate HttpWebRequest WebRequestCreator();
     }
 }

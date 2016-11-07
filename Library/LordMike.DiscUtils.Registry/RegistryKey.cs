@@ -20,96 +20,27 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Security.AccessControl;
+using System.Text;
 using DiscUtils.Internal;
+using Microsoft.Win32;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Security.AccessControl;
-    using System.Text;
-
     /// <summary>
     /// A key within a registry hive.
     /// </summary>
     public sealed class RegistryKey
     {
-        private RegistryHive _hive;
-        private KeyNodeCell _cell;
+        private readonly KeyNodeCell _cell;
+        private readonly RegistryHive _hive;
 
         internal RegistryKey(RegistryHive hive, KeyNodeCell cell)
         {
             _hive = hive;
             _cell = cell;
-        }
-
-        /// <summary>
-        /// Gets the name of this key.
-        /// </summary>
-        public string Name
-        {
-            get
-            {
-                RegistryKey parent = Parent;
-                if (parent != null && ((parent.Flags & RegistryKeyFlags.Root) == 0))
-                {
-                    return parent.Name + @"\" + _cell.Name;
-                }
-                else
-                {
-                    return _cell.Name;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of child keys.
-        /// </summary>
-        public int SubKeyCount
-        {
-            get { return _cell.NumSubKeys; }
-        }
-
-        /// <summary>
-        /// Gets the number of values in this key.
-        /// </summary>
-        public int ValueCount
-        {
-            get { return _cell.NumValues; }
-        }
-
-        /// <summary>
-        /// Gets the time the key was last modified.
-        /// </summary>
-        public DateTime Timestamp
-        {
-            get { return _cell.Timestamp; }
-        }
-
-        /// <summary>
-        /// Gets the parent key, or <c>null</c> if this is the root key.
-        /// </summary>
-        public RegistryKey Parent
-        {
-            get
-            {
-                if ((_cell.Flags & RegistryKeyFlags.Root) == 0)
-                {
-                    return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the flags of this registry key.
-        /// </summary>
-        public RegistryKeyFlags Flags
-        {
-            get { return _cell.Flags; }
         }
 
         /// <summary>
@@ -130,6 +61,53 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
+        /// Gets the flags of this registry key.
+        /// </summary>
+        public RegistryKeyFlags Flags
+        {
+            get { return _cell.Flags; }
+        }
+
+        /// <summary>
+        /// Gets the name of this key.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                RegistryKey parent = Parent;
+                if (parent != null && ((parent.Flags & RegistryKeyFlags.Root) == 0))
+                {
+                    return parent.Name + @"\" + _cell.Name;
+                }
+                return _cell.Name;
+            }
+        }
+
+        /// <summary>
+        /// Gets the parent key, or <c>null</c> if this is the root key.
+        /// </summary>
+        public RegistryKey Parent
+        {
+            get
+            {
+                if ((_cell.Flags & RegistryKeyFlags.Root) == 0)
+                {
+                    return new RegistryKey(_hive, _hive.GetCell<KeyNodeCell>(_cell.ParentIndex));
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of child keys.
+        /// </summary>
+        public int SubKeyCount
+        {
+            get { return _cell.NumSubKeys; }
+        }
+
+        /// <summary>
         /// Gets an enumerator over all sub child keys.
         /// </summary>
         public IEnumerable<RegistryKey> SubKeys
@@ -139,12 +117,28 @@ namespace DiscUtils.Registry
                 if (_cell.NumSubKeys != 0)
                 {
                     ListCell list = _hive.GetCell<ListCell>(_cell.SubKeysIndex);
-                    foreach (var key in list.EnumerateKeys())
+                    foreach (KeyNodeCell key in list.EnumerateKeys())
                     {
                         yield return new RegistryKey(_hive, key);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the time the key was last modified.
+        /// </summary>
+        public DateTime Timestamp
+        {
+            get { return _cell.Timestamp; }
+        }
+
+        /// <summary>
+        /// Gets the number of values in this key.
+        /// </summary>
+        public int ValueCount
+        {
+            get { return _cell.NumValues; }
         }
 
         /// <summary>
@@ -156,11 +150,11 @@ namespace DiscUtils.Registry
             {
                 if (_cell.NumValues != 0)
                 {
-                    byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
+                    byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
 
                     for (int i = 0; i < _cell.NumValues; ++i)
                     {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
+                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
                         yield return new RegistryValue(_hive, _hive.GetCell<ValueCell>(valueIndex));
                     }
                 }
@@ -241,7 +235,7 @@ namespace DiscUtils.Registry
         /// </remarks>
         public object GetValue(string name)
         {
-            return GetValue(name, null, Microsoft.Win32.RegistryValueOptions.None);
+            return GetValue(name, null, RegistryValueOptions.None);
         }
 
         /// <summary>
@@ -288,7 +282,7 @@ namespace DiscUtils.Registry
         /// </remarks>
         public object GetValue(string name, object defaultValue)
         {
-            return GetValue(name, defaultValue, Microsoft.Win32.RegistryValueOptions.None);
+            return GetValue(name, defaultValue, RegistryValueOptions.None);
         }
 
         /// <summary>
@@ -334,20 +328,17 @@ namespace DiscUtils.Registry
         ///   </item>
         /// </list>
         /// </remarks>
-        public object GetValue(string name, object defaultValue, Microsoft.Win32.RegistryValueOptions options)
+        public object GetValue(string name, object defaultValue, RegistryValueOptions options)
         {
             RegistryValue regVal = GetRegistryValue(name);
             if (regVal != null)
             {
                 if (regVal.DataType == RegistryValueType.ExpandString &&
-                    (options & Microsoft.Win32.RegistryValueOptions.DoNotExpandEnvironmentNames) == 0)
+                    (options & RegistryValueOptions.DoNotExpandEnvironmentNames) == 0)
                 {
-                    return Environment.ExpandEnvironmentVariables((string) regVal.Value);
+                    return Environment.ExpandEnvironmentVariables((string)regVal.Value);
                 }
-                else
-                {
-                    return regVal.Value;
-                }
+                return regVal.Value;
             }
 
             return defaultValue;
@@ -400,12 +391,12 @@ namespace DiscUtils.Registry
 
             if (_cell.NumValues != 0)
             {
-                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
+                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
 
                 int i = 0;
                 while (i < _cell.NumValues)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
                     ValueCell valueCell = _hive.GetCell<ValueCell>(valueIndex);
                     if (string.Compare(valueCell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -424,13 +415,13 @@ namespace DiscUtils.Registry
                 {
                     while (i < _cell.NumValues)
                     {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, (i + 1)*4);
-                        Utilities.WriteBytesLittleEndian(valueIndex, valueList, i*4);
+                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, (i + 1) * 4);
+                        Utilities.WriteBytesLittleEndian(valueIndex, valueList, i * 4);
 
                         ++i;
                     }
 
-                    _hive.WriteRawCellData(_cell.ValueListIndex, valueList, 0, _cell.NumValues*4);
+                    _hive.WriteRawCellData(_cell.ValueListIndex, valueList, 0, _cell.NumValues * 4);
                 }
 
                 // TODO: Update maxbytes for value name and value content if this was the largest value for either.
@@ -466,7 +457,7 @@ namespace DiscUtils.Registry
         public string[] GetValueNames()
         {
             List<string> names = new List<string>();
-            foreach (var value in Values)
+            foreach (RegistryValue value in Values)
             {
                 names.Add(value.Name);
             }
@@ -486,7 +477,7 @@ namespace DiscUtils.Registry
                 return this;
             }
 
-            string[] split = subkey.Split(new char[] {'\\'}, 2);
+            string[] split = subkey.Split(new[] { '\\' }, 2);
             int cellIndex = FindSubKeyCell(split[0]);
 
             if (cellIndex < 0)
@@ -502,23 +493,14 @@ namespace DiscUtils.Registry
                 {
                     return new RegistryKey(_hive, newKeyCell);
                 }
-                else
-                {
-                    return new RegistryKey(_hive, newKeyCell).CreateSubKey(split[1]);
-                }
+                return new RegistryKey(_hive, newKeyCell).CreateSubKey(split[1]);
             }
-            else
+            KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(cellIndex);
+            if (split.Length == 1)
             {
-                KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(cellIndex);
-                if (split.Length == 1)
-                {
-                    return new RegistryKey(_hive, cell);
-                }
-                else
-                {
-                    return new RegistryKey(_hive, cell).CreateSubKey(split[1]);
-                }
+                return new RegistryKey(_hive, cell);
             }
+            return new RegistryKey(_hive, cell).CreateSubKey(split[1]);
         }
 
         /// <summary>
@@ -533,25 +515,19 @@ namespace DiscUtils.Registry
                 return this;
             }
 
-            string[] split = path.Split(new char[] {'\\'}, 2);
+            string[] split = path.Split(new[] { '\\' }, 2);
             int cellIndex = FindSubKeyCell(split[0]);
 
             if (cellIndex < 0)
             {
                 return null;
             }
-            else
+            KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(cellIndex);
+            if (split.Length == 1)
             {
-                KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(cellIndex);
-                if (split.Length == 1)
-                {
-                    return new RegistryKey(_hive, cell);
-                }
-                else
-                {
-                    return new RegistryKey(_hive, cell).OpenSubKey(split[1]);
-                }
+                return new RegistryKey(_hive, cell);
             }
+            return new RegistryKey(_hive, cell).OpenSubKey(split[1]);
         }
 
         /// <summary>
@@ -571,7 +547,7 @@ namespace DiscUtils.Registry
                 throw new ArgumentException("Attempt to delete root key");
             }
 
-            foreach (var child in subKeyObj.GetSubKeyNames())
+            foreach (string child in subKeyObj.GetSubKeyNames())
             {
                 subKeyObj.DeleteSubKeyTree(child);
             }
@@ -600,7 +576,7 @@ namespace DiscUtils.Registry
                 throw new ArgumentException("Invalid SubKey", nameof(subkey));
             }
 
-            string[] split = subkey.Split(new char[] {'\\'}, 2);
+            string[] split = subkey.Split(new[] { '\\' }, 2);
 
             int subkeyCellIndex = FindSubKeyCell(split[0]);
             if (subkeyCellIndex < 0)
@@ -609,10 +585,7 @@ namespace DiscUtils.Registry
                 {
                     throw new ArgumentException("No such SubKey", nameof(subkey));
                 }
-                else
-                {
-                    return;
-                }
+                return;
             }
 
             KeyNodeCell subkeyCell = _hive.GetCell<KeyNodeCell>(subkeyCellIndex);
@@ -666,11 +639,11 @@ namespace DiscUtils.Registry
 
             if (_cell.NumValues != 0)
             {
-                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
+                byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
 
                 for (int i = 0; i < _cell.NumValues; ++i)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
                     ValueCell cell = _hive.GetCell<ValueCell>(valueIndex);
                     if (string.Compare(cell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -684,7 +657,7 @@ namespace DiscUtils.Registry
 
         private RegistryValue AddRegistryValue(string name)
         {
-            byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues*4);
+            byte[] valueList = _hive.RawCellData(_cell.ValueListIndex, _cell.NumValues * 4);
             if (valueList == null)
             {
                 valueList = new byte[0];
@@ -693,7 +666,7 @@ namespace DiscUtils.Registry
             int insertIdx = 0;
             while (insertIdx < _cell.NumValues)
             {
-                int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx*4);
+                int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx * 4);
                 ValueCell cell = _hive.GetCell<ValueCell>(valueCellIndex);
                 if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
                 {
@@ -708,10 +681,10 @@ namespace DiscUtils.Registry
             _hive.UpdateCell(valueCell, true);
 
             // Update the value list, re-allocating if necessary
-            byte[] newValueList = new byte[(_cell.NumValues*4) + 4];
-            Array.Copy(valueList, 0, newValueList, 0, insertIdx*4);
-            Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx*4);
-            Array.Copy(valueList, insertIdx*4, newValueList, (insertIdx*4) + 4, (_cell.NumValues - insertIdx)*4);
+            byte[] newValueList = new byte[_cell.NumValues * 4 + 4];
+            Array.Copy(valueList, 0, newValueList, 0, insertIdx * 4);
+            Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
+            Array.Copy(valueList, insertIdx * 4, newValueList, insertIdx * 4 + 4, (_cell.NumValues - insertIdx) * 4);
             if (_cell.ValueListIndex == -1 ||
                 !_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
             {
@@ -815,11 +788,11 @@ namespace DiscUtils.Registry
         {
             if (cell.NumValues != 0 && cell.ValueListIndex != -1)
             {
-                byte[] valueList = _hive.RawCellData(cell.ValueListIndex, cell.NumValues*4);
+                byte[] valueList = _hive.RawCellData(cell.ValueListIndex, cell.NumValues * 4);
 
                 for (int i = 0; i < cell.NumValues; ++i)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i*4);
+                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
                     _hive.FreeCell(valueIndex);
                 }
 

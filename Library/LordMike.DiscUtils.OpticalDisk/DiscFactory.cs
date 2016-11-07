@@ -31,7 +31,7 @@ namespace DiscUtils.OpticalDisk
     {
         public override string[] Variants
         {
-            get { return new string[] {}; }
+            get { return new string[] { }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -45,7 +45,7 @@ namespace DiscUtils.OpticalDisk
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters)
+                                               VirtualDiskParameters diskParameters)
         {
             throw new NotSupportedException();
         }
@@ -71,14 +71,14 @@ namespace DiscUtils.OpticalDisk
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "Optical",
                 Variant = string.Empty,
                 CanBeHardDisk = false,
                 DeterministicGeometry = true,
                 PreservesBiosGeometry = false,
-                CalcGeometry = c => new Geometry(1, 1, 1, 2048),
+                CalcGeometry = c => new Geometry(1, 1, 1, 2048)
             };
         }
     }

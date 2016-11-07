@@ -20,35 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class SuperBlock : IByteArraySerializable
     {
         public const uint SquashFsMagic = 0x73717368;
+        public uint BlockSize;
+        public ushort BlockSizeLog2;
+        public long BytesUsed;
+        public ushort Compression;
+        public DateTime CreationTime;
+        public long DirectoryTableStart;
+        public long ExtendedAttrsTableStart;
+        public ushort Flags;
+        public uint FragmentsCount;
+        public long FragmentTableStart;
+        public uint InodesCount;
+        public long InodeTableStart;
+        public long LookupTableStart;
 
         public uint Magic;
-        public uint InodesCount;
-        public DateTime CreationTime;
-        public uint BlockSize;
-        public uint FragmentsCount;
-        public ushort Compression;
-        public ushort BlockSizeLog2;
-        public ushort Flags;
-        public ushort UidGidCount;
         public ushort MajorVersion;
         public ushort MinorVersion;
         public MetadataRef RootInode;
-        public long BytesUsed;
+        public ushort UidGidCount;
         public long UidGidTableStart;
-        public long ExtendedAttrsTableStart;
-        public long InodeTableStart;
-        public long DirectoryTableStart;
-        public long FragmentTableStart;
-        public long LookupTableStart;
 
         public int Size
         {

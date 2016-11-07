@@ -36,8 +36,8 @@ namespace DiscUtils.OpticalDisk
     /// </remarks>
     internal class Mode2Buffer : IBuffer
     {
-        private byte[] _iobuffer;
-        private IBuffer _wrapped;
+        private readonly byte[] _iobuffer;
+        private readonly IBuffer _wrapped;
 
         public Mode2Buffer(IBuffer toWrap)
         {
@@ -57,7 +57,7 @@ namespace DiscUtils.OpticalDisk
 
         public long Capacity
         {
-            get { return (_wrapped.Capacity/DiscImageFile.Mode2SectorSize)*DiscImageFile.Mode1SectorSize; }
+            get { return _wrapped.Capacity / DiscImageFile.Mode2SectorSize * DiscImageFile.Mode1SectorSize; }
         }
 
         public IEnumerable<StreamExtent> Extents
@@ -67,16 +67,16 @@ namespace DiscUtils.OpticalDisk
 
         public int Read(long pos, byte[] buffer, int offset, int count)
         {
-            int totalToRead = (int) Math.Min(Capacity - pos, count);
+            int totalToRead = (int)Math.Min(Capacity - pos, count);
             int totalRead = 0;
 
             while (totalRead < totalToRead)
             {
                 long thisPos = pos + totalRead;
-                long sector = thisPos/DiscImageFile.Mode1SectorSize;
-                int sectorOffset = (int) (thisPos - (sector*DiscImageFile.Mode1SectorSize));
+                long sector = thisPos / DiscImageFile.Mode1SectorSize;
+                int sectorOffset = (int)(thisPos - sector * DiscImageFile.Mode1SectorSize);
 
-                int numRead = Utilities.ReadFully(_wrapped, sector*DiscImageFile.Mode2SectorSize, _iobuffer, 0,
+                int numRead = Utilities.ReadFully(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0,
                     DiscImageFile.Mode2SectorSize);
                 if (numRead < DiscImageFile.Mode2SectorSize)
                 {

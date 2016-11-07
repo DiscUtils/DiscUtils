@@ -20,31 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.IO;
-    using System.Text;
-
     internal sealed class HiveHeader : IByteArraySerializable
     {
         public const int HeaderSize = 512;
 
+        private const uint Signature = 0x66676572;
+        public uint Checksum;
+        public Guid Guid1;
+        public Guid Guid2;
+        public int Length;
+        public int MajorVersion;
+        public int MinorVersion;
+        public string Path;
+        public int RootCell;
+
         public int Sequence1;
         public int Sequence2;
         public DateTime Timestamp;
-        public int MajorVersion;
-        public int MinorVersion;
-        public int RootCell;
-        public int Length;
-        public uint Checksum;
-        public string Path;
-        public Guid Guid1;
-        public Guid Guid2;
-
-        private const uint Signature = 0x66676572;
 
         public HiveHeader()
         {
@@ -114,13 +113,13 @@ namespace DiscUtils.Registry
             Utilities.WriteBytesLittleEndian(MajorVersion, buffer, offset + 0x0014);
             Utilities.WriteBytesLittleEndian(MinorVersion, buffer, offset + 0x0018);
 
-            Utilities.WriteBytesLittleEndian((uint) 1, buffer, offset + 0x0020); // Unknown - seems to be '1'
+            Utilities.WriteBytesLittleEndian((uint)1, buffer, offset + 0x0020); // Unknown - seems to be '1'
 
             Utilities.WriteBytesLittleEndian(RootCell, buffer, offset + 0x0024);
             Utilities.WriteBytesLittleEndian(Length, buffer, offset + 0x0028);
 
             Encoding.Unicode.GetBytes(Path, 0, Path.Length, buffer, offset + 0x0030);
-            Utilities.WriteBytesLittleEndian((ushort) 0, buffer, offset + 0x0030 + (Path.Length*2));
+            Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0030 + Path.Length * 2);
 
             Utilities.WriteBytesLittleEndian(Guid1, buffer, offset + 0x0070);
             Utilities.WriteBytesLittleEndian(Guid2, buffer, offset + 0x0094);

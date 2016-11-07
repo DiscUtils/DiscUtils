@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Registry
 {
-    using System;
-
     [Flags]
     internal enum ValueFlags : ushort
     {

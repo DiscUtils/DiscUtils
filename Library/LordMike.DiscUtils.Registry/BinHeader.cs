@@ -20,24 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System.IO;
-
     internal sealed class BinHeader : IByteArraySerializable
     {
         public const int HeaderSize = 0x20;
 
-        public int FileOffset;
+        private const uint Signature = 0x6E696268;
         public int BinSize;
 
-        private const uint Signature = 0x6E696268;
-
-        public BinHeader()
-        {
-        }
+        public int FileOffset;
 
         public int Size
         {

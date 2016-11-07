@@ -20,16 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Registry
 {
-    using System.Collections.Generic;
-
     internal abstract class ListCell : Cell
     {
         public ListCell(int index)
-            : base(index)
-        {
-        }
+            : base(index) {}
 
         /// <summary>
         /// Gets the number of subkeys in this list.

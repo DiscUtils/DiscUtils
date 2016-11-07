@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.Globalization;
-    using System.Text;
-
     /// <summary>
     /// A registry value.
     /// </summary>
     internal sealed class RegistryValue
     {
-        private RegistryHive _hive;
-        private ValueCell _cell;
+        private readonly ValueCell _cell;
+        private readonly RegistryHive _hive;
 
         internal RegistryValue(RegistryHive hive, ValueCell cell)
         {
@@ -43,19 +42,19 @@ namespace DiscUtils.Registry
         }
 
         /// <summary>
-        /// Gets the name of the value, or empty string if unnamed.
-        /// </summary>
-        public string Name
-        {
-            get { return _cell.Name ?? string.Empty; }
-        }
-
-        /// <summary>
         /// Gets the type of the value.
         /// </summary>
         public RegistryValueType DataType
         {
             get { return _cell.DataType; }
+        }
+
+        /// <summary>
+        /// Gets the name of the value, or empty string if unnamed.
+        /// </summary>
+        public string Name
+        {
+            get { return _cell.Name ?? string.Empty; }
         }
 
         /// <summary>
@@ -139,7 +138,7 @@ namespace DiscUtils.Registry
                     _hive.FreeCell(_cell.DataIndex);
                 }
 
-                _cell.DataLength = (int) ((uint) count | 0x80000000);
+                _cell.DataLength = (int)((uint)count | 0x80000000);
                 _cell.DataIndex = Utilities.ToInt32LittleEndian(data, offset);
                 _cell.DataType = valueType;
             }
@@ -245,28 +244,28 @@ namespace DiscUtils.Registry
                 case RegistryValueType.String:
                 case RegistryValueType.ExpandString:
                     string strValue = value.ToString();
-                    data = new byte[(strValue.Length*2) + 2];
+                    data = new byte[strValue.Length * 2 + 2];
                     Encoding.Unicode.GetBytes(strValue, 0, strValue.Length, data, 0);
                     break;
 
                 case RegistryValueType.Dword:
                     data = new byte[4];
-                    Utilities.WriteBytesLittleEndian((int) value, data, 0);
+                    Utilities.WriteBytesLittleEndian((int)value, data, 0);
                     break;
 
                 case RegistryValueType.DwordBigEndian:
                     data = new byte[4];
-                    Utilities.WriteBytesBigEndian((int) value, data, 0);
+                    Utilities.WriteBytesBigEndian((int)value, data, 0);
                     break;
 
                 case RegistryValueType.MultiString:
-                    string multiStrValue = string.Join("\0", (string[]) value) + "\0";
-                    data = new byte[(multiStrValue.Length*2) + 2];
+                    string multiStrValue = string.Join("\0", (string[])value) + "\0";
+                    data = new byte[multiStrValue.Length * 2 + 2];
                     Encoding.Unicode.GetBytes(multiStrValue, 0, multiStrValue.Length, data, 0);
                     break;
 
                 default:
-                    data = (byte[]) value;
+                    data = (byte[])value;
                     break;
             }
 
@@ -286,14 +285,14 @@ namespace DiscUtils.Registry
                     return ConvertToObject(GetData(), DataType).ToString();
 
                 case RegistryValueType.MultiString:
-                    return string.Join(",", (string[]) ConvertToObject(GetData(), DataType));
+                    return string.Join(",", (string[])ConvertToObject(GetData(), DataType));
 
                 default:
                     byte[] data = GetData();
                     string result = string.Empty;
                     for (int i = 0; i < Math.Min(data.Length, 8); ++i)
                     {
-                        result += string.Format(CultureInfo.InvariantCulture, "{0:X2} ", (int) data[i]);
+                        result += string.Format(CultureInfo.InvariantCulture, "{0:X2} ", (int)data[i]);
                     }
 
                     return result + string.Format(CultureInfo.InvariantCulture, " ({0} bytes)", data.Length);

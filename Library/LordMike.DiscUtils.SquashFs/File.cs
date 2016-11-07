@@ -20,46 +20,46 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class File : IVfsFile
     {
-        private Context _context;
-        private Inode _inode;
-        private MetadataRef _inodeRef;
-
         private FileContentBuffer _content;
+        private readonly MetadataRef _inodeRef;
 
         public File(Context context, Inode inode, MetadataRef inodeRef)
         {
-            _context = context;
-            _inode = inode;
+            Context = context;
+            Inode = inode;
             _inodeRef = inodeRef;
         }
 
+        protected Context Context { get; }
+
+        internal Inode Inode { get; }
+
         public DateTime LastAccessTimeUtc
         {
-            get { return _inode.ModificationTime; }
+            get { return Inode.ModificationTime; }
 
             set { throw new NotSupportedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get { return _inode.ModificationTime; }
+            get { return Inode.ModificationTime; }
 
             set { throw new NotSupportedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
-            get { return _inode.ModificationTime; }
+            get { return Inode.ModificationTime; }
 
             set { throw new NotSupportedException(); }
         }
@@ -68,7 +68,7 @@ namespace DiscUtils.SquashFs
         {
             get
             {
-                UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(_inode.Type);
+                UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(Inode.Type);
                 return Utilities.FileAttributesFromUnixFileType(fileType);
             }
 
@@ -77,7 +77,7 @@ namespace DiscUtils.SquashFs
 
         public long FileLength
         {
-            get { return _inode.FileSize; }
+            get { return Inode.FileSize; }
         }
 
         public IBuffer FileContent
@@ -86,21 +86,11 @@ namespace DiscUtils.SquashFs
             {
                 if (_content == null)
                 {
-                    _content = new FileContentBuffer(_context, (RegularInode) _inode, _inodeRef);
+                    _content = new FileContentBuffer(Context, (RegularInode)Inode, _inodeRef);
                 }
 
                 return _content;
             }
-        }
-
-        internal Inode Inode
-        {
-            get { return _inode; }
-        }
-
-        protected Context Context
-        {
-            get { return _context; }
         }
     }
 }

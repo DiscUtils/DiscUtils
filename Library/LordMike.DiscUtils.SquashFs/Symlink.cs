@@ -20,17 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using DiscUtils.Vfs;
-
     internal class Symlink : File, IVfsSymlink<DirectoryEntry, File>
     {
         public Symlink(Context context, Inode inode, MetadataRef inodeRef)
-            : base(context, inode, inodeRef)
-        {
-        }
+            : base(context, inode, inodeRef) {}
 
         public string TargetPath
         {

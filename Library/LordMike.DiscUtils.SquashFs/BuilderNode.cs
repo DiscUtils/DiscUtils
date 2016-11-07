@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal abstract class BuilderNode
     {
         protected bool _written;
@@ -33,21 +33,21 @@ namespace DiscUtils.SquashFs
             ModificationTime = DateTime.Now;
         }
 
-        public UnixFilePermissions Mode { get; set; }
-
-        public int UserId { get; set; }
-
         public int GroupId { get; set; }
 
-        public DateTime ModificationTime { get; set; }
+        public abstract Inode Inode { get; }
 
         public int InodeNumber { get; set; }
 
-        public int NumLinks { get; set; }
-
         public MetadataRef InodeRef { get; set; }
 
-        public abstract Inode Inode { get; }
+        public UnixFilePermissions Mode { get; set; }
+
+        public DateTime ModificationTime { get; set; }
+
+        public int NumLinks { get; set; }
+
+        public int UserId { get; set; }
 
         public virtual void Reset()
         {
@@ -58,12 +58,12 @@ namespace DiscUtils.SquashFs
 
         protected void FillCommonInodeData(BuilderContext context)
         {
-            Inode.Mode = (ushort) Mode;
+            Inode.Mode = (ushort)Mode;
             Inode.UidKey = context.AllocateId(UserId);
             Inode.GidKey = context.AllocateId(GroupId);
             Inode.ModificationTime = ModificationTime;
-            InodeNumber = (int) context.AllocateInode();
-            Inode.InodeNumber = (uint) InodeNumber;
+            InodeNumber = (int)context.AllocateInode();
+            Inode.InodeNumber = (uint)InodeNumber;
             Inode.NumLinks = NumLinks;
         }
     }

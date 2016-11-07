@@ -20,23 +20,56 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Vfs;
-
     internal class DirectoryEntry : VfsDirEntry
     {
-        private DirectoryHeader _header;
-        private DirectoryRecord _record;
+        private readonly DirectoryHeader _header;
+        private readonly DirectoryRecord _record;
 
         public DirectoryEntry(DirectoryHeader header, DirectoryRecord record)
         {
             _header = header;
             _record = record;
+        }
+
+        public override DateTime CreationTimeUtc
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public override FileAttributes FileAttributes
+        {
+            get
+            {
+                UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(_record.Type);
+                return Utilities.FileAttributesFromUnixFileType(fileType);
+            }
+        }
+
+        public override string FileName
+        {
+            get { return _record.Name; }
+        }
+
+        public override bool HasVfsFileAttributes
+        {
+            get { return true; }
+        }
+
+        public override bool HasVfsTimeInfo
+        {
+            get { return false; }
+        }
+
+        public MetadataRef InodeReference
+        {
+            get { return new MetadataRef(_header.StartBlock, _record.Offset); }
         }
 
         public override bool IsDirectory
@@ -49,16 +82,6 @@ namespace DiscUtils.SquashFs
             get { return _record.Type == InodeType.Symlink || _record.Type == InodeType.ExtendedSymlink; }
         }
 
-        public override string FileName
-        {
-            get { return _record.Name; }
-        }
-
-        public override bool HasVfsTimeInfo
-        {
-            get { return false; }
-        }
-
         public override DateTime LastAccessTimeUtc
         {
             get { throw new NotSupportedException(); }
@@ -69,33 +92,9 @@ namespace DiscUtils.SquashFs
             get { throw new NotSupportedException(); }
         }
 
-        public override DateTime CreationTimeUtc
-        {
-            get { throw new NotSupportedException(); }
-        }
-
-        public override bool HasVfsFileAttributes
-        {
-            get { return true; }
-        }
-
-        public override FileAttributes FileAttributes
-        {
-            get
-            {
-                UnixFileType fileType = VfsSquashFileSystemReader.FileTypeFromInodeType(_record.Type);
-                return Utilities.FileAttributesFromUnixFileType(fileType);
-            }
-        }
-
         public override long UniqueCacheId
         {
             get { return _header.InodeNumber + _record.InodeNumber; }
-        }
-
-        public MetadataRef InodeReference
-        {
-            get { return new MetadataRef(_header.StartBlock, _record.Offset); }
         }
     }
 }

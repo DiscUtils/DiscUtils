@@ -20,34 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class DirectoryRecord : IByteArraySerializable
     {
-        public ushort Offset;
         public short InodeNumber;
-        public InodeType Type;
         public string Name;
+        public ushort Offset;
+        public InodeType Type;
 
         public int Size
         {
             get { return 8 + Name.Length; }
-        }
-
-        public static DirectoryRecord ReadFrom(MetablockReader reader)
-        {
-            DirectoryRecord result = new DirectoryRecord();
-            result.Offset = reader.ReadUShort();
-            result.InodeNumber = reader.ReadShort();
-            result.Type = (InodeType) reader.ReadUShort();
-            ushort size = reader.ReadUShort();
-            result.Name = reader.ReadString(size + 1);
-
-            return result;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -59,9 +46,21 @@ namespace DiscUtils.SquashFs
         {
             Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 2);
-            Utilities.WriteBytesLittleEndian((ushort) Type, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian((ushort) (Name.Length - 1), buffer, offset + 6);
+            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian((ushort)(Name.Length - 1), buffer, offset + 6);
             Utilities.StringToBytes(Name, buffer, offset + 8, Name.Length);
+        }
+
+        public static DirectoryRecord ReadFrom(MetablockReader reader)
+        {
+            DirectoryRecord result = new DirectoryRecord();
+            result.Offset = reader.ReadUShort();
+            result.InodeNumber = reader.ReadShort();
+            result.Type = (InodeType)reader.ReadUShort();
+            ushort size = reader.ReadUShort();
+            result.Name = reader.ReadString(size + 1);
+
+            return result;
         }
     }
 }

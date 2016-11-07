@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class RegularInode : Inode
     {
-        public uint StartBlock;
+        private uint _fileSize;
         public uint FragmentKey;
         public uint FragmentOffset;
-        private uint _fileSize;
+        public uint StartBlock;
 
         public override long FileSize
         {
@@ -45,7 +44,7 @@ namespace DiscUtils.SquashFs
                         "File size greater than " + uint.MaxValue);
                 }
 
-                _fileSize = (uint) value;
+                _fileSize = (uint)value;
             }
         }
 

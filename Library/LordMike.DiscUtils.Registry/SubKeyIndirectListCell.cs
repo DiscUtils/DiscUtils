@@ -20,18 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Registry
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class SubKeyIndirectListCell : ListCell
     {
-        private RegistryHive _hive;
-        private string _listType;
-        private List<int> _listIndexes;
+        private readonly RegistryHive _hive;
 
         public SubKeyIndirectListCell(RegistryHive hive, int index)
             : base(index)
@@ -39,27 +36,14 @@ namespace DiscUtils.Registry
             _hive = hive;
         }
 
-        public string ListType
-        {
-            get { return _listType; }
-        }
-
-        public List<int> CellIndexes
-        {
-            get { return _listIndexes; }
-        }
-
-        public override int Size
-        {
-            get { return 4 + (_listIndexes.Count*4); }
-        }
+        public List<int> CellIndexes { get; private set; }
 
         internal override int Count
         {
             get
             {
                 int total = 0;
-                foreach (var cellIndex in _listIndexes)
+                foreach (int cellIndex in CellIndexes)
                 {
                     Cell cell = _hive.GetCell<Cell>(cellIndex);
                     ListCell listCell = cell as ListCell;
@@ -77,33 +61,40 @@ namespace DiscUtils.Registry
             }
         }
 
+        public string ListType { get; private set; }
+
+        public override int Size
+        {
+            get { return 4 + CellIndexes.Count * 4; }
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            _listType = Utilities.BytesToString(buffer, offset, 2);
+            ListType = Utilities.BytesToString(buffer, offset, 2);
             int numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
-            _listIndexes = new List<int>(numElements);
+            CellIndexes = new List<int>(numElements);
 
             for (int i = 0; i < numElements; ++i)
             {
-                _listIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + (i*0x4)));
+                CellIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + i * 0x4));
             }
 
-            return 4 + (_listIndexes.Count*4);
+            return 4 + CellIndexes.Count * 4;
         }
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.StringToBytes(_listType, buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian((ushort) _listIndexes.Count, buffer, offset + 2);
-            for (int i = 0; i < _listIndexes.Count; ++i)
+            Utilities.StringToBytes(ListType, buffer, offset, 2);
+            Utilities.WriteBytesLittleEndian((ushort)CellIndexes.Count, buffer, offset + 2);
+            for (int i = 0; i < CellIndexes.Count; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_listIndexes[i], buffer, offset + 4 + (i*4));
+                Utilities.WriteBytesLittleEndian(CellIndexes[i], buffer, offset + 4 + i * 4);
             }
         }
 
         internal override int FindKey(string name, out int cellIndex)
         {
-            if (_listIndexes.Count <= 0)
+            if (CellIndexes.Count <= 0)
             {
                 cellIndex = 0;
                 return -1;
@@ -116,23 +107,23 @@ namespace DiscUtils.Registry
                 return result;
             }
 
-            result = DoFindKey(name, _listIndexes.Count - 1, out cellIndex);
+            result = DoFindKey(name, CellIndexes.Count - 1, out cellIndex);
             if (result >= 0)
             {
                 return result;
             }
 
             KeyFinder finder = new KeyFinder(_hive, name);
-            int idx = _listIndexes.BinarySearch(-1, finder);
+            int idx = CellIndexes.BinarySearch(-1, finder);
             cellIndex = finder.CellIndex;
-            return (idx < 0) ? -1 : 0;
+            return idx < 0 ? -1 : 0;
         }
 
         internal override void EnumerateKeys(List<string> names)
         {
-            for (int i = 0; i < _listIndexes.Count; ++i)
+            for (int i = 0; i < CellIndexes.Count; ++i)
             {
-                Cell cell = _hive.GetCell<Cell>(_listIndexes[i]);
+                Cell cell = _hive.GetCell<Cell>(CellIndexes[i]);
                 ListCell listCell = cell as ListCell;
                 if (listCell != null)
                 {
@@ -140,27 +131,27 @@ namespace DiscUtils.Registry
                 }
                 else
                 {
-                    names.Add(((KeyNodeCell) cell).Name);
+                    names.Add(((KeyNodeCell)cell).Name);
                 }
             }
         }
 
         internal override IEnumerable<KeyNodeCell> EnumerateKeys()
         {
-            for (int i = 0; i < _listIndexes.Count; ++i)
+            for (int i = 0; i < CellIndexes.Count; ++i)
             {
-                Cell cell = _hive.GetCell<Cell>(_listIndexes[i]);
+                Cell cell = _hive.GetCell<Cell>(CellIndexes[i]);
                 ListCell listCell = cell as ListCell;
                 if (listCell != null)
                 {
-                    foreach (var keyNodeCell in listCell.EnumerateKeys())
+                    foreach (KeyNodeCell keyNodeCell in listCell.EnumerateKeys())
                     {
                         yield return keyNodeCell;
                     }
                 }
                 else
                 {
-                    yield return (KeyNodeCell) cell;
+                    yield return (KeyNodeCell)cell;
                 }
             }
         }
@@ -170,63 +161,60 @@ namespace DiscUtils.Registry
             // Look for the first sublist that has a subkey name greater than name
             if (ListType == "ri")
             {
-                if (_listIndexes.Count == 0)
+                if (CellIndexes.Count == 0)
                 {
                     throw new NotImplementedException("Empty indirect list");
                 }
 
-                for (int i = 0; i < _listIndexes.Count - 1; ++i)
+                for (int i = 0; i < CellIndexes.Count - 1; ++i)
                 {
                     int tempIndex;
-                    ListCell cell = _hive.GetCell<ListCell>(_listIndexes[i]);
+                    ListCell cell = _hive.GetCell<ListCell>(CellIndexes[i]);
                     if (cell.FindKey(name, out tempIndex) <= 0)
                     {
-                        _listIndexes[i] = cell.LinkSubKey(name, cellIndex);
+                        CellIndexes[i] = cell.LinkSubKey(name, cellIndex);
                         return _hive.UpdateCell(this, false);
                     }
                 }
 
-                ListCell lastCell = _hive.GetCell<ListCell>(_listIndexes[_listIndexes.Count - 1]);
-                _listIndexes[_listIndexes.Count - 1] = lastCell.LinkSubKey(name, cellIndex);
+                ListCell lastCell = _hive.GetCell<ListCell>(CellIndexes[CellIndexes.Count - 1]);
+                CellIndexes[CellIndexes.Count - 1] = lastCell.LinkSubKey(name, cellIndex);
                 return _hive.UpdateCell(this, false);
             }
-            else
+            for (int i = 0; i < CellIndexes.Count; ++i)
             {
-                for (int i = 0; i < _listIndexes.Count; ++i)
+                KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(CellIndexes[i]);
+                if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
                 {
-                    KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(_listIndexes[i]);
-                    if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
-                    {
-                        _listIndexes.Insert(i, cellIndex);
-                        return _hive.UpdateCell(this, true);
-                    }
+                    CellIndexes.Insert(i, cellIndex);
+                    return _hive.UpdateCell(this, true);
                 }
-
-                _listIndexes.Add(cellIndex);
-                return _hive.UpdateCell(this, true);
             }
+
+            CellIndexes.Add(cellIndex);
+            return _hive.UpdateCell(this, true);
         }
 
         internal override int UnlinkSubKey(string name)
         {
             if (ListType == "ri")
             {
-                if (_listIndexes.Count == 0)
+                if (CellIndexes.Count == 0)
                 {
                     throw new NotImplementedException("Empty indirect list");
                 }
 
-                for (int i = 0; i < _listIndexes.Count; ++i)
+                for (int i = 0; i < CellIndexes.Count; ++i)
                 {
                     int tempIndex;
-                    ListCell cell = _hive.GetCell<ListCell>(_listIndexes[i]);
+                    ListCell cell = _hive.GetCell<ListCell>(CellIndexes[i]);
                     if (cell.FindKey(name, out tempIndex) <= 0)
                     {
-                        _listIndexes[i] = cell.UnlinkSubKey(name);
+                        CellIndexes[i] = cell.UnlinkSubKey(name);
                         if (cell.Count == 0)
                         {
-                            _hive.FreeCell(_listIndexes[i]);
-                            _listIndexes.RemoveAt(i);
+                            _hive.FreeCell(CellIndexes[i]);
+                            CellIndexes.RemoveAt(i);
                         }
 
                         return _hive.UpdateCell(this, false);
@@ -235,12 +223,12 @@ namespace DiscUtils.Registry
             }
             else
             {
-                for (int i = 0; i < _listIndexes.Count; ++i)
+                for (int i = 0; i < CellIndexes.Count; ++i)
                 {
-                    KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(_listIndexes[i]);
+                    KeyNodeCell cell = _hive.GetCell<KeyNodeCell>(CellIndexes[i]);
                     if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        _listIndexes.RemoveAt(i);
+                        CellIndexes.RemoveAt(i);
                         return _hive.UpdateCell(this, true);
                     }
                 }
@@ -251,21 +239,21 @@ namespace DiscUtils.Registry
 
         private int DoFindKey(string name, int listIndex, out int cellIndex)
         {
-            Cell cell = _hive.GetCell<Cell>(_listIndexes[listIndex]);
+            Cell cell = _hive.GetCell<Cell>(CellIndexes[listIndex]);
             ListCell listCell = cell as ListCell;
             if (listCell != null)
             {
                 return listCell.FindKey(name, out cellIndex);
             }
 
-            cellIndex = _listIndexes[listIndex];
-            return string.Compare(name, ((KeyNodeCell) cell).Name, StringComparison.OrdinalIgnoreCase);
+            cellIndex = CellIndexes[listIndex];
+            return string.Compare(name, ((KeyNodeCell)cell).Name, StringComparison.OrdinalIgnoreCase);
         }
 
         private class KeyFinder : IComparer<int>
         {
-            private RegistryHive _hive;
-            private string _searchName;
+            private readonly RegistryHive _hive;
+            private readonly string _searchName;
 
             public KeyFinder(RegistryHive hive, string searchName)
             {
@@ -294,13 +282,10 @@ namespace DiscUtils.Registry
 
                     return -result;
                 }
-                else
+                result = string.Compare(((KeyNodeCell)cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
+                if (result == 0)
                 {
-                    result = string.Compare(((KeyNodeCell) cell).Name, _searchName, StringComparison.OrdinalIgnoreCase);
-                    if (result == 0)
-                    {
-                        CellIndex = x;
-                    }
+                    CellIndex = x;
                 }
 
                 return result;

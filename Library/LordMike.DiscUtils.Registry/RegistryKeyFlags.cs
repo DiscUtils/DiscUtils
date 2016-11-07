@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Registry
 {
-    using System;
-
     /// <summary>
     /// The per-key flags present on registry keys.
     /// </summary>
     [Flags]
-    public enum RegistryKeyFlags : int
+    public enum RegistryKeyFlags
     {
         /// <summary>
         /// Unknown purpose.

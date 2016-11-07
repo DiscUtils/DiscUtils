@@ -20,20 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class ExtendedDirectoryInode : Inode, IDirectoryInode
     {
-        private uint _fileSize;
-        private uint _startBlock;
-        private uint _parentInode;
-        private ushort _indexCount;
-        private ushort _offset;
         private uint _extendedAttributes;
+        private uint _fileSize;
+        private ushort _indexCount;
 
         public override int Size
         {
@@ -52,24 +48,15 @@ namespace DiscUtils.SquashFs
                         "File size greater than " + uint.MaxValue);
                 }
 
-                _fileSize = (uint) value;
+                _fileSize = (uint)value;
             }
         }
 
-        public uint StartBlock
-        {
-            get { return _startBlock; }
-        }
+        public uint StartBlock { get; private set; }
 
-        public uint ParentInode
-        {
-            get { return _parentInode; }
-        }
+        public uint ParentInode { get; private set; }
 
-        public ushort Offset
-        {
-            get { return _offset; }
-        }
+        public ushort Offset { get; private set; }
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
@@ -77,10 +64,10 @@ namespace DiscUtils.SquashFs
 
             NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 16);
             _fileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            _startBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            _parentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
+            ParentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
             _indexCount = Utilities.ToUInt16LittleEndian(buffer, offset + 32);
-            _offset = Utilities.ToUInt16LittleEndian(buffer, offset + 34);
+            Offset = Utilities.ToUInt16LittleEndian(buffer, offset + 34);
             _extendedAttributes = Utilities.ToUInt32LittleEndian(buffer, offset + 36);
 
             return 40;

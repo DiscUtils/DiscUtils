@@ -26,63 +26,44 @@ namespace DiscUtils.Registry
 {
     internal sealed class ValueCell : Cell
     {
-        private int _dataLength;
-        private int _dataIndex;
-        private RegistryValueType _type;
         private ValueFlags _flags;
-        private string _name;
 
         public ValueCell(string name)
             : this(-1)
         {
-            _name = name;
+            Name = name;
         }
 
         public ValueCell(int index)
             : base(index)
         {
-            _dataIndex = -1;
+            DataIndex = -1;
         }
 
-        public int DataLength
-        {
-            get { return _dataLength; }
-            set { _dataLength = value; }
-        }
+        public int DataIndex { get; set; }
 
-        public int DataIndex
-        {
-            get { return _dataIndex; }
-            set { _dataIndex = value; }
-        }
+        public int DataLength { get; set; }
 
-        public RegistryValueType DataType
-        {
-            get { return _type; }
-            set { _type = value; }
-        }
+        public RegistryValueType DataType { get; set; }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; private set; }
 
         public override int Size
         {
-            get { return 0x14 + (string.IsNullOrEmpty(_name) ? 0 : _name.Length); }
+            get { return 0x14 + (string.IsNullOrEmpty(Name) ? 0 : Name.Length); }
         }
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
             int nameLen = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
-            _dataLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-            _dataIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
-            _type = (RegistryValueType) Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
-            _flags = (ValueFlags) Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
+            DataLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            DataIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            DataType = (RegistryValueType)Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
+            _flags = (ValueFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
 
             if ((_flags & ValueFlags.Named) != 0)
             {
-                _name = Utilities.BytesToString(buffer, offset + 0x14, nameLen).Trim('\0');
+                Name = Utilities.BytesToString(buffer, offset + 0x14, nameLen).Trim('\0');
             }
 
             return 0x14 + nameLen;
@@ -92,7 +73,7 @@ namespace DiscUtils.Registry
         {
             int nameLen;
 
-            if (string.IsNullOrEmpty(_name))
+            if (string.IsNullOrEmpty(Name))
             {
                 _flags &= ~ValueFlags.Named;
                 nameLen = 0;
@@ -100,18 +81,18 @@ namespace DiscUtils.Registry
             else
             {
                 _flags |= ValueFlags.Named;
-                nameLen = _name.Length;
+                nameLen = Name.Length;
             }
 
             Utilities.StringToBytes("vk", buffer, offset, 2);
             Utilities.WriteBytesLittleEndian(nameLen, buffer, offset + 0x02);
-            Utilities.WriteBytesLittleEndian(_dataLength, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(_dataIndex, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian((int) _type, buffer, offset + 0x0C);
-            Utilities.WriteBytesLittleEndian((ushort) _flags, buffer, offset + 0x10);
+            Utilities.WriteBytesLittleEndian(DataLength, buffer, offset + 0x04);
+            Utilities.WriteBytesLittleEndian(DataIndex, buffer, offset + 0x08);
+            Utilities.WriteBytesLittleEndian((int)DataType, buffer, offset + 0x0C);
+            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x10);
             if (nameLen != 0)
             {
-                Utilities.StringToBytes(_name, buffer, offset + 0x14, nameLen);
+                Utilities.StringToBytes(Name, buffer, offset + 0x14, nameLen);
             }
         }
     }

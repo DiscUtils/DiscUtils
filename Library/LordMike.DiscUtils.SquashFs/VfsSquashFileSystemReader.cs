@@ -20,25 +20,24 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.IO.Compression;
+using DiscUtils.Compression;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.IO;
-    using System.IO.Compression;
-    using DiscUtils.Compression;
-    using DiscUtils.Vfs;
-
     internal class VfsSquashFileSystemReader : VfsReadOnlyFileSystem<DirectoryEntry, File, Directory, Context>,
-        IUnixFileSystem
+                                               IUnixFileSystem
     {
-        public const int MetadataBufferSize = 8*1024;
+        public const int MetadataBufferSize = 8 * 1024;
+        private readonly BlockCache<Block> _blockCache;
 
-        private Context _context;
+        private readonly Context _context;
         private byte[] _ioBuffer;
-        private BlockCache<Block> _blockCache;
-        private BlockCache<Metablock> _metablockCache;
+        private readonly BlockCache<Metablock> _metablockCache;
 
         public VfsSquashFileSystemReader(Stream stream)
             : base(new DiscFileSystemOptions())
@@ -74,7 +73,7 @@ namespace DiscUtils.SquashFs
             }
 
             // Create block caches, used to reduce the amount of I/O and decompression activity.
-            _blockCache = new BlockCache<Block>((int) _context.SuperBlock.BlockSize, 20);
+            _blockCache = new BlockCache<Block>((int)_context.SuperBlock.BlockSize, 20);
             _metablockCache = new BlockCache<Metablock>(MetadataBufferSize, 20);
             _context.ReadBlock = ReadBlock;
             _context.ReadMetaBlock = ReadMetaBlock;
@@ -86,7 +85,7 @@ namespace DiscUtils.SquashFs
             {
                 _context.FragmentTableReaders = LoadIndirectReaders(
                     _context.SuperBlock.FragmentTableStart,
-                    (int) _context.SuperBlock.FragmentsCount,
+                    (int)_context.SuperBlock.FragmentsCount,
                     FragmentRecord.RecordSize);
             }
 
@@ -100,18 +99,18 @@ namespace DiscUtils.SquashFs
 
             // Bootstrap the root directory
             _context.InodeReader.SetPosition(_context.SuperBlock.RootInode);
-            DirectoryInode dirInode = (DirectoryInode) Inode.Read(_context.InodeReader);
+            DirectoryInode dirInode = (DirectoryInode)Inode.Read(_context.InodeReader);
             RootDirectory = new Directory(_context, dirInode, _context.SuperBlock.RootInode);
-        }
-
-        public override string VolumeLabel
-        {
-            get { return string.Empty; }
         }
 
         public override string FriendlyName
         {
             get { return "SquashFs"; }
+        }
+
+        public override string VolumeLabel
+        {
+            get { return string.Empty; }
         }
 
         public UnixFileSystemInfo GetUnixFileInfo(string path)
@@ -120,15 +119,15 @@ namespace DiscUtils.SquashFs
             Inode inode = file.Inode;
             DeviceInode devInod = inode as DeviceInode;
 
-            UnixFileSystemInfo info = new UnixFileSystemInfo()
+            UnixFileSystemInfo info = new UnixFileSystemInfo
             {
                 FileType = FileTypeFromInodeType(inode.Type),
                 UserId = GetId(inode.UidKey),
                 GroupId = GetId(inode.GidKey),
-                Permissions = (UnixFilePermissions) inode.Mode,
+                Permissions = (UnixFilePermissions)inode.Mode,
                 Inode = inode.InodeNumber,
                 LinkCount = inode.NumLinks,
-                DeviceId = (devInod == null) ? 0 : devInod.DeviceId
+                DeviceId = devInod == null ? 0 : devInod.DeviceId
             };
 
             return info;
@@ -174,26 +173,23 @@ namespace DiscUtils.SquashFs
             {
                 return new Symlink(_context, inode, inodeRef);
             }
-            else if (dirEntry.IsDirectory)
+            if (dirEntry.IsDirectory)
             {
                 return new Directory(_context, inode, inodeRef);
             }
-            else
-            {
-                return new File(_context, inode, inodeRef);
-            }
+            return new File(_context, inode, inodeRef);
         }
 
         private MetablockReader[] LoadIndirectReaders(long pos, int count, int recordSize)
         {
             _context.RawStream.Position = pos;
-            int numBlocks = (int) Utilities.Ceil(count*recordSize, MetadataBufferSize);
+            int numBlocks = Utilities.Ceil(count * recordSize, MetadataBufferSize);
 
-            byte[] tableBytes = Utilities.ReadFully(_context.RawStream, numBlocks*8);
+            byte[] tableBytes = Utilities.ReadFully(_context.RawStream, numBlocks * 8);
             MetablockReader[] result = new MetablockReader[numBlocks];
             for (int i = 0; i < numBlocks; ++i)
             {
-                long block = Utilities.ToInt64LittleEndian(tableBytes, i*8);
+                long block = Utilities.ToInt64LittleEndian(tableBytes, i * 8);
                 result[i] = new MetablockReader(_context, block);
             }
 
@@ -202,12 +198,12 @@ namespace DiscUtils.SquashFs
 
         private int GetId(ushort idKey)
         {
-            int recordsPerBlock = MetadataBufferSize/4;
-            int block = idKey/recordsPerBlock;
-            int offset = idKey%recordsPerBlock;
+            int recordsPerBlock = MetadataBufferSize / 4;
+            int block = idKey / recordsPerBlock;
+            int offset = idKey % recordsPerBlock;
 
             MetablockReader reader = _context.UidGidTableReaders[block];
-            reader.SetPosition(0, offset*4);
+            reader.SetPosition(0, offset * 4);
             return reader.ReadInt();
         }
 
@@ -241,7 +237,7 @@ namespace DiscUtils.SquashFs
                     ZlibStream zlibStream = new ZlibStream(new MemoryStream(_ioBuffer, 0, readLen, false),
                         CompressionMode.Decompress, true))
                 {
-                    block.Available = Utilities.ReadFully(zlibStream, block.Data, 0, (int) _context.SuperBlock.BlockSize);
+                    block.Available = Utilities.ReadFully(zlibStream, block.Data, 0, (int)_context.SuperBlock.BlockSize);
                 }
             }
             else

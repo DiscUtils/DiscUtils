@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.SquashFs
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     /// <summary>
     /// Implementation of SquashFs file system reader.
     /// </summary>
@@ -41,8 +40,16 @@ namespace DiscUtils.SquashFs
         /// </summary>
         /// <param name="data">The stream to read the file system image from.</param>
         public SquashFileSystemReader(Stream data)
-            : base(new VfsSquashFileSystemReader(data))
+            : base(new VfsSquashFileSystemReader(data)) {}
+
+        /// <summary>
+        /// Gets Unix file information about a file or directory.
+        /// </summary>
+        /// <param name="path">Path to the file or directory.</param>
+        /// <returns>Unix information about the file or directory.</returns>
+        public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
+            return GetRealFileSystem<VfsSquashFileSystemReader>().GetUnixFileInfo(path);
         }
 
         /// <summary>
@@ -65,16 +72,6 @@ namespace DiscUtils.SquashFs
             superBlock.ReadFrom(buffer, 0);
 
             return superBlock.Magic == SuperBlock.SquashFsMagic;
-        }
-
-        /// <summary>
-        /// Gets Unix file information about a file or directory.
-        /// </summary>
-        /// <param name="path">Path to the file or directory.</param>
-        /// <returns>Unix information about the file or directory.</returns>
-        public UnixFileSystemInfo GetUnixFileInfo(string path)
-        {
-            return GetRealFileSystem<VfsSquashFileSystemReader>().GetUnixFileInfo(path);
         }
     }
 }

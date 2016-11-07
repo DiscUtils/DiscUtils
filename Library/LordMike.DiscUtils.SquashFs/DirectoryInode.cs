@@ -20,18 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-
     internal class DirectoryInode : Inode, IDirectoryInode
     {
-        private uint _startBlock;
         private ushort _fileSize;
-        private ushort _offset;
-        private uint _parentInode;
 
         public override int Size
         {
@@ -50,37 +46,25 @@ namespace DiscUtils.SquashFs
                         "File size greater than " + ushort.MaxValue);
                 }
 
-                _fileSize = (ushort) value;
+                _fileSize = (ushort)value;
             }
         }
 
-        public uint StartBlock
-        {
-            get { return _startBlock; }
-            set { _startBlock = value; }
-        }
+        public uint StartBlock { get; set; }
 
-        public uint ParentInode
-        {
-            get { return _parentInode; }
-            set { _parentInode = value; }
-        }
+        public uint ParentInode { get; set; }
 
-        public ushort Offset
-        {
-            get { return _offset; }
-            set { _offset = value; }
-        }
+        public ushort Offset { get; set; }
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
             base.ReadFrom(buffer, offset);
 
-            _startBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
+            StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 20);
             _fileSize = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
-            _offset = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
-            _parentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            Offset = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
+            ParentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
         }
@@ -89,11 +73,11 @@ namespace DiscUtils.SquashFs
         {
             base.WriteTo(buffer, offset);
 
-            Utilities.WriteBytesLittleEndian(_startBlock, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(NumLinks, buffer, offset + 20);
             Utilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 24);
-            Utilities.WriteBytesLittleEndian(_offset, buffer, offset + 26);
-            Utilities.WriteBytesLittleEndian(_parentInode, buffer, offset + 28);
+            Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 26);
+            Utilities.WriteBytesLittleEndian(ParentInode, buffer, offset + 28);
         }
     }
 }

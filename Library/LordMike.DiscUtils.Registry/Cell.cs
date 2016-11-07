@@ -29,18 +29,12 @@ namespace DiscUtils.Registry
     /// </summary>
     internal abstract class Cell : IByteArraySerializable
     {
-        private int _index;
-
         public Cell(int index)
         {
-            _index = index;
+            Index = index;
         }
 
-        public int Index
-        {
-            get { return _index; }
-            set { _index = value; }
-        }
+        public int Index { get; set; }
 
         public abstract int Size { get; }
 

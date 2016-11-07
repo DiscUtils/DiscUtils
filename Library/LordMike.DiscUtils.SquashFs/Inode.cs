@@ -20,29 +20,49 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.IO;
-
     internal abstract class Inode : IByteArraySerializable
     {
-        public InodeType Type;
-        public ushort Mode;
-        public ushort UidKey;
         public ushort GidKey;
-        public DateTime ModificationTime;
         public uint InodeNumber;
+        public ushort Mode;
+        public DateTime ModificationTime;
         public int NumLinks;
-
-        public abstract int Size { get; }
+        public InodeType Type;
+        public ushort UidKey;
 
         public virtual long FileSize
         {
             get { return 0; }
             set { throw new NotImplementedException(); }
+        }
+
+        public abstract int Size { get; }
+
+        public virtual int ReadFrom(byte[] buffer, int offset)
+        {
+            Type = (InodeType)Utilities.ToUInt16LittleEndian(buffer, offset + 0);
+            Mode = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
+            UidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
+            GidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
+            ModificationTime = Utilities.DateTimeFromUnix(Utilities.ToUInt32LittleEndian(buffer, offset + 8));
+            InodeNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
+            return 16;
+        }
+
+        public virtual void WriteTo(byte[] buffer, int offset)
+        {
+            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 0);
+            Utilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
+            Utilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
+            Utilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);
+            Utilities.WriteBytesLittleEndian(Utilities.DateTimeToUnix(ModificationTime), buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 12);
         }
 
         public static Inode Read(MetablockReader inodeReader)
@@ -53,7 +73,7 @@ namespace DiscUtils.SquashFs
                 throw new IOException("Unable to read Inode type");
             }
 
-            InodeType type = (InodeType) Utilities.ToUInt16LittleEndian(typeData, 0);
+            InodeType type = (InodeType)Utilities.ToUInt16LittleEndian(typeData, 0);
             Inode inode = InstantiateType(type);
 
             byte[] inodeData = new byte[inode.Size];
@@ -68,27 +88,6 @@ namespace DiscUtils.SquashFs
             inode.ReadFrom(inodeData, 0);
 
             return inode;
-        }
-
-        public virtual int ReadFrom(byte[] buffer, int offset)
-        {
-            Type = (InodeType) Utilities.ToUInt16LittleEndian(buffer, offset + 0);
-            Mode = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            UidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
-            GidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            ModificationTime = Utilities.DateTimeFromUnix(Utilities.ToUInt32LittleEndian(buffer, offset + 8));
-            InodeNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
-            return 16;
-        }
-
-        public virtual void WriteTo(byte[] buffer, int offset)
-        {
-            Utilities.WriteBytesLittleEndian((ushort) Type, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
-            Utilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);
-            Utilities.WriteBytesLittleEndian(Utilities.DateTimeToUnix(ModificationTime), buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 12);
         }
 
         private static Inode InstantiateType(InodeType type)

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.OpticalDiscSharing
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class Disc : VirtualDisk
     {
         private DiscImageFile _file;
@@ -32,22 +32,6 @@ namespace DiscUtils.OpticalDiscSharing
         internal Disc(Uri uri, string userName, string password)
         {
             _file = new DiscImageFile(uri, userName, password);
-        }
-
-        /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _file.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.OpticalDisk; }
         }
 
         /// <summary>
@@ -78,11 +62,11 @@ namespace DiscUtils.OpticalDiscSharing
         }
 
         /// <summary>
-        /// Gets the layers that make up the disc.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { yield return _file; }
+            get { return VirtualDiskClass.OpticalDisk; }
         }
 
         /// <summary>
@@ -94,16 +78,32 @@ namespace DiscUtils.OpticalDiscSharing
         {
             get
             {
-                return new VirtualDiskTypeInfo()
-                    {
-                        Name = "Optical",
-                        Variant = string.Empty,
-                        CanBeHardDisk = false,
-                        DeterministicGeometry = true,
-                        PreservesBiosGeometry = false,
-                        CalcGeometry = c => new Geometry(1, 1, 1, 2048),
-                    };
+                return new VirtualDiskTypeInfo
+                {
+                    Name = "Optical",
+                    Variant = string.Empty,
+                    CanBeHardDisk = false,
+                    DeterministicGeometry = true,
+                    PreservesBiosGeometry = false,
+                    CalcGeometry = c => new Geometry(1, 1, 1, 2048)
+                };
             }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _file.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disc.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield return _file; }
         }
 
         /// <summary>

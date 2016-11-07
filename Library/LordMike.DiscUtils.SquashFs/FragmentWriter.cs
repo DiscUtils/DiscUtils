@@ -20,22 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.Collections.Generic;
-
     internal sealed class FragmentWriter
     {
-        private BuilderContext _context;
+        private readonly BuilderContext _context;
 
-        private byte[] _currentBlock;
+        private readonly byte[] _currentBlock;
         private int _currentOffset;
 
-        private List<FragmentRecord> _fragmentBlocks;
-        private int _fragmentCount;
+        private readonly List<FragmentRecord> _fragmentBlocks;
 
         public FragmentWriter(BuilderContext context)
         {
@@ -46,10 +44,7 @@ namespace DiscUtils.SquashFs
             _fragmentBlocks = new List<FragmentRecord>();
         }
 
-        public int FragmentCount
-        {
-            get { return _fragmentCount; }
-        }
+        public int FragmentCount { get; private set; }
 
         public void Flush()
         {
@@ -67,13 +62,13 @@ namespace DiscUtils.SquashFs
                 _currentOffset = 0;
             }
 
-            offset = (uint) _currentOffset;
+            offset = (uint)_currentOffset;
             Array.Copy(_context.IoBuffer, 0, _currentBlock, _currentOffset, length);
             _currentOffset += length;
 
-            ++_fragmentCount;
+            ++FragmentCount;
 
-            return (uint) _fragmentBlocks.Count;
+            return (uint)_fragmentBlocks.Count;
         }
 
         internal long Persist()
@@ -83,7 +78,7 @@ namespace DiscUtils.SquashFs
                 return -1;
             }
 
-            if (_fragmentBlocks.Count*FragmentRecord.RecordSize > _context.DataBlockSize)
+            if (_fragmentBlocks.Count * FragmentRecord.RecordSize > _context.DataBlockSize)
             {
                 throw new NotImplementedException("Large numbers of fragments");
             }
@@ -91,10 +86,10 @@ namespace DiscUtils.SquashFs
             // Persist the table that references the block containing the fragment records
             long blockPos = _context.RawStream.Position;
             int recordSize = FragmentRecord.RecordSize;
-            byte[] buffer = new byte[_fragmentBlocks.Count*recordSize];
+            byte[] buffer = new byte[_fragmentBlocks.Count * recordSize];
             for (int i = 0; i < _fragmentBlocks.Count; ++i)
             {
-                _fragmentBlocks[i].WriteTo(buffer, i*recordSize);
+                _fragmentBlocks[i].WriteTo(buffer, i * recordSize);
             }
 
             MetablockWriter writer = new MetablockWriter();
@@ -114,10 +109,10 @@ namespace DiscUtils.SquashFs
             long position = _context.RawStream.Position;
 
             uint writeLen = _context.WriteDataBlock(_currentBlock, 0, _currentOffset);
-            FragmentRecord blockRecord = new FragmentRecord()
+            FragmentRecord blockRecord = new FragmentRecord
             {
                 StartBlock = position,
-                CompressedSize = (int) writeLen
+                CompressedSize = (int)writeLen
             };
 
             _fragmentBlocks.Add(blockRecord);

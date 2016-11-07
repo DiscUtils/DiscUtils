@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.SquashFs
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Vfs;
-
     internal class Directory : File, IVfsDirectory<DirectoryEntry, File>
     {
-        private IDirectoryInode _dirInode;
+        private readonly IDirectoryInode _dirInode;
 
         public Directory(Context context, Inode inode, MetadataRef inodeRef)
             : base(context, inode, inodeRef)
@@ -72,7 +72,7 @@ namespace DiscUtils.SquashFs
 
         public DirectoryEntry GetEntryByName(string name)
         {
-            foreach (var entry in AllEntries)
+            foreach (DirectoryEntry entry in AllEntries)
             {
                 if (entry.FileName == name)
                 {
