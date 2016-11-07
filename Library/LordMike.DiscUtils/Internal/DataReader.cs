@@ -36,14 +36,14 @@ namespace DiscUtils.Internal
             _stream = stream;
         }
 
-        public long Position
-        {
-            get { return _stream.Position; }
-        }
-
         public long Length
         {
             get { return _stream.Length; }
+        }
+
+        public long Position
+        {
+            get { return _stream.Position; }
         }
 
         public void Skip(int bytes)

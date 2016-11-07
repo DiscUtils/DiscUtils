@@ -24,23 +24,22 @@
 // Based on "libbzip2", Copyright (C) 1996-2007 Julian R Seward.
 //
 
+using System.IO;
+
 namespace DiscUtils.Compression
 {
-    using System.IO;
-
     /// <summary>
     /// Represents scheme used by BZip2 where multiple Huffman trees are used as a
     /// virtual Huffman tree, with a logical selector every 50 bits in the bit stream.
     /// </summary>
     internal class BZip2CombinedHuffmanTrees
     {
-        private BitStream _bitstream;
-        private byte[] _selectors;
-        private HuffmanTree[] _trees;
-
         private HuffmanTree _activeTree;
-        private int _symbolsToNextSelector;
+        private readonly BitStream _bitstream;
         private int _nextSelector;
+        private byte[] _selectors;
+        private int _symbolsToNextSelector;
+        private HuffmanTree[] _trees;
 
         public BZip2CombinedHuffmanTrees(BitStream bitstream, int maxSymbols)
         {
@@ -65,13 +64,13 @@ namespace DiscUtils.Compression
 
         private void Initialize(int maxSymbols)
         {
-            int numTrees = (int) _bitstream.Read(3);
+            int numTrees = (int)_bitstream.Read(3);
             if (numTrees < 2 || numTrees > 6)
             {
                 throw new InvalidDataException("Invalid number of tables");
             }
 
-            int numSelectors = (int) _bitstream.Read(15);
+            int numSelectors = (int)_bitstream.Read(15);
             if (numSelectors < 1)
             {
                 throw new InvalidDataException("Invalid number of selectors");
@@ -99,7 +98,7 @@ namespace DiscUtils.Compression
 
                     while (_bitstream.Read(1) != 0)
                     {
-                        len = (_bitstream.Read(1) == 0) ? len + 1 : len - 1;
+                        len = _bitstream.Read(1) == 0 ? len + 1 : len - 1;
 
                         if (len < 1 || len > 20)
                         {

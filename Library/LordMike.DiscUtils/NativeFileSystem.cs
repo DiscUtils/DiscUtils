@@ -23,18 +23,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Provides an implementation for OS-mounted file systems.
     /// </summary>
     public class NativeFileSystem : DiscFileSystem
     {
-        private string _basePath;
-        private bool _readOnly;
+        private readonly bool _readOnly;
 
         /// <summary>
         /// Initializes a new instance of the NativeFileSystem class.
@@ -42,12 +41,11 @@ namespace DiscUtils
         /// <param name="basePath">The 'root' directory of the new instance.</param>
         /// <param name="readOnly">Only permit 'read' activities.</param>
         public NativeFileSystem(string basePath, bool readOnly)
-            : base()
         {
-            _basePath = basePath;
-            if (!_basePath.EndsWith(@"\", StringComparison.OrdinalIgnoreCase))
+            BasePath = basePath;
+            if (!BasePath.EndsWith(@"\", StringComparison.OrdinalIgnoreCase))
             {
-                _basePath += @"\";
+                BasePath += @"\";
             }
 
             _readOnly = readOnly;
@@ -56,9 +54,15 @@ namespace DiscUtils
         /// <summary>
         /// Gets the base path used to create the file system.
         /// </summary>
-        public string BasePath
+        public string BasePath { get; }
+
+        /// <summary>
+        /// Indicates whether the file system is read-only or read-write.
+        /// </summary>
+        /// <returns>true if the file system is read-write.</returns>
+        public override bool CanWrite
         {
-            get { return _basePath; }
+            get { return !_readOnly; }
         }
 
         /// <summary>
@@ -70,12 +74,12 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Indicates whether the file system is read-only or read-write.
+        /// Gets a value indicating whether the file system is thread-safe.
         /// </summary>
-        /// <returns>true if the file system is read-write.</returns>
-        public override bool CanWrite
+        /// <remarks>The Native File System is thread safe.</remarks>
+        public override bool IsThreadSafe
         {
-            get { return !_readOnly; }
+            get { return true; }
         }
 
         /// <summary>
@@ -92,15 +96,6 @@ namespace DiscUtils
         public override string VolumeLabel
         {
             get { return string.Empty; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the file system is thread-safe.
-        /// </summary>
-        /// <remarks>The Native File System is thread safe.</remarks>
-        public override bool IsThreadSafe
-        {
-            get { return true; }
         }
 
         /// <summary>
@@ -136,7 +131,7 @@ namespace DiscUtils
                 destinationFile = destinationFile.Substring(1);
             }
 
-            File.Copy(Path.Combine(_basePath, sourceFile), Path.Combine(_basePath, destinationFile), true);
+            File.Copy(Path.Combine(BasePath, sourceFile), Path.Combine(BasePath, destinationFile), true);
         }
 
         /// <summary>
@@ -155,7 +150,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            Directory.CreateDirectory(Path.Combine(_basePath, path));
+            Directory.CreateDirectory(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -174,7 +169,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            Directory.Delete(Path.Combine(_basePath, path));
+            Directory.Delete(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -216,7 +211,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            File.Delete(Path.Combine(_basePath, path));
+            File.Delete(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -231,7 +226,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return Directory.Exists(Path.Combine(_basePath, path));
+            return Directory.Exists(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -246,7 +241,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return File.Exists(Path.Combine(_basePath, path));
+            return File.Exists(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -298,13 +293,13 @@ namespace DiscUtils
 
             try
             {
-                return CleanItems(Directory.GetDirectories(Path.Combine(_basePath, path), searchPattern, searchOption));
+                return CleanItems(Directory.GetDirectories(Path.Combine(BasePath, path), searchPattern, searchOption));
             }
-            catch (System.IO.IOException)
+            catch (IOException)
             {
                 return new string[0];
             }
-            catch (System.UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return new string[0];
             }
@@ -348,13 +343,13 @@ namespace DiscUtils
 
             try
             {
-                return CleanItems(Directory.GetFiles(Path.Combine(_basePath, path), searchPattern, searchOption));
+                return CleanItems(Directory.GetFiles(Path.Combine(BasePath, path), searchPattern, searchOption));
             }
-            catch (System.IO.IOException)
+            catch (IOException)
             {
                 return new string[0];
             }
-            catch (System.UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return new string[0];
             }
@@ -386,13 +381,13 @@ namespace DiscUtils
 
             try
             {
-                return CleanItems(Directory.GetFileSystemEntries(Path.Combine(_basePath, path), searchPattern));
+                return CleanItems(Directory.GetFileSystemEntries(Path.Combine(BasePath, path), searchPattern));
             }
-            catch (System.IO.IOException)
+            catch (IOException)
             {
                 return new string[0];
             }
-            catch (System.UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 return new string[0];
             }
@@ -420,8 +415,8 @@ namespace DiscUtils
                 destinationDirectoryName = destinationDirectoryName.Substring(1);
             }
 
-            Directory.Move(Path.Combine(_basePath, sourceDirectoryName),
-                Path.Combine(_basePath, destinationDirectoryName));
+            Directory.Move(Path.Combine(BasePath, sourceDirectoryName),
+                Path.Combine(BasePath, destinationDirectoryName));
         }
 
         /// <summary>
@@ -452,11 +447,11 @@ namespace DiscUtils
                 destinationName = destinationName.Substring(1);
             }
 
-            if (FileExists(Path.Combine(_basePath, destinationName)))
+            if (FileExists(Path.Combine(BasePath, destinationName)))
             {
                 if (overwrite)
                 {
-                    DeleteFile(Path.Combine(_basePath, destinationName));
+                    DeleteFile(Path.Combine(BasePath, destinationName));
                 }
                 else
                 {
@@ -469,7 +464,7 @@ namespace DiscUtils
                 sourceName = sourceName.Substring(1);
             }
 
-            File.Move(Path.Combine(_basePath, sourceName), Path.Combine(_basePath, destinationName));
+            File.Move(Path.Combine(BasePath, sourceName), Path.Combine(BasePath, destinationName));
         }
 
         /// <summary>
@@ -508,7 +503,7 @@ namespace DiscUtils
                 fileShare = FileShare.Read;
             }
 
-            return SparseStream.FromStream(File.Open(Path.Combine(_basePath, path), mode, access, fileShare),
+            return SparseStream.FromStream(File.Open(Path.Combine(BasePath, path), mode, access, fileShare),
                 Ownership.Dispose);
         }
 
@@ -524,7 +519,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return File.GetAttributes(Path.Combine(_basePath, path));
+            return File.GetAttributes(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -544,7 +539,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            File.SetAttributes(Path.Combine(_basePath, path), newValue);
+            File.SetAttributes(Path.Combine(BasePath, path), newValue);
         }
 
         /// <summary>
@@ -579,7 +574,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return File.GetCreationTimeUtc(Path.Combine(_basePath, path));
+            return File.GetCreationTimeUtc(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -599,7 +594,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            File.SetCreationTimeUtc(Path.Combine(_basePath, path), newTime);
+            File.SetCreationTimeUtc(Path.Combine(BasePath, path), newTime);
         }
 
         /// <summary>
@@ -634,7 +629,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return File.GetLastAccessTimeUtc(Path.Combine(_basePath, path));
+            return File.GetLastAccessTimeUtc(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -654,7 +649,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            File.SetLastAccessTimeUtc(Path.Combine(_basePath, path), newTime);
+            File.SetLastAccessTimeUtc(Path.Combine(BasePath, path), newTime);
         }
 
         /// <summary>
@@ -689,7 +684,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return File.GetLastWriteTimeUtc(Path.Combine(_basePath, path));
+            return File.GetLastWriteTimeUtc(Path.Combine(BasePath, path));
         }
 
         /// <summary>
@@ -709,7 +704,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            File.SetLastWriteTimeUtc(Path.Combine(_basePath, path), newTime);
+            File.SetLastWriteTimeUtc(Path.Combine(BasePath, path), newTime);
         }
 
         /// <summary>
@@ -724,7 +719,7 @@ namespace DiscUtils
                 path = path.Substring(1);
             }
 
-            return new FileInfo(Path.Combine(_basePath, path)).Length;
+            return new FileInfo(Path.Combine(BasePath, path)).Length;
         }
 
         /// <summary>
@@ -765,7 +760,7 @@ namespace DiscUtils
             string[] cleanList = new string[dirtyItems.Length];
             for (int x = 0; x < dirtyItems.Length; x++)
             {
-                cleanList[x] = dirtyItems[x].Substring(_basePath.Length - 1);
+                cleanList[x] = dirtyItems[x].Substring(BasePath.Length - 1);
             }
 
             return cleanList;

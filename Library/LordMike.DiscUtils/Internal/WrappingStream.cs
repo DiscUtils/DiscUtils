@@ -34,18 +34,13 @@ namespace DiscUtils.Internal
     /// </remarks>
     internal class WrappingStream : SparseStream
     {
+        private readonly Ownership _ownership;
         private SparseStream _wrapped;
-        private Ownership _ownership;
 
         public WrappingStream(SparseStream toWrap, Ownership ownership)
         {
             _wrapped = toWrap;
             _ownership = ownership;
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return _wrapped.Extents; }
         }
 
         public override bool CanRead
@@ -61,6 +56,11 @@ namespace DiscUtils.Internal
         public override bool CanWrite
         {
             get { return _wrapped.CanWrite; }
+        }
+
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _wrapped.Extents; }
         }
 
         public override long Length

@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// A wrapper stream that enables you to take a snapshot, pushing changes into a side buffer.
     /// </summary>
@@ -35,12 +35,7 @@ namespace DiscUtils
     {
         private Stream _baseStream;
 
-        private Ownership _baseStreamOwnership;
-
-        /// <summary>
-        /// Captures changes to the base stream (when enabled).
-        /// </summary>
-        private SparseMemoryStream _diffStream;
+        private readonly Ownership _baseStreamOwnership;
 
         /// <summary>
         /// Records which byte ranges in diffStream hold changes.
@@ -50,9 +45,9 @@ namespace DiscUtils
         private List<StreamExtent> _diffExtents;
 
         /// <summary>
-        /// The saved stream position (if the diffStream is active).
+        /// Captures changes to the base stream (when enabled).
         /// </summary>
-        private long _savedPosition;
+        private SparseMemoryStream _diffStream;
 
         /// <summary>
         /// Indicates that no writes should be permitted.
@@ -60,6 +55,11 @@ namespace DiscUtils
         private bool _frozen;
 
         private long _position;
+
+        /// <summary>
+        /// The saved stream position (if the diffStream is active).
+        /// </summary>
+        private long _savedPosition;
 
         /// <summary>
         /// Initializes a new instance of the SnapshotStream class.
@@ -97,7 +97,23 @@ namespace DiscUtils
         /// return <c>true</c>.</remarks>
         public override bool CanWrite
         {
-            get { return (_diffStream != null) ? true : _baseStream.CanWrite; }
+            get { return _diffStream != null ? true : _baseStream.CanWrite; }
+        }
+
+        /// <summary>
+        /// Returns an enumeration over the parts of the stream that contain real data.
+        /// </summary>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                SparseStream sparseBase = _baseStream as SparseStream;
+                if (sparseBase == null)
+                {
+                    return new[] { new StreamExtent(0, Length) };
+                }
+                return StreamExtent.Union(sparseBase.Extents, _diffExtents);
+            }
         }
 
         /// <summary>
@@ -111,10 +127,7 @@ namespace DiscUtils
                 {
                     return _diffStream.Length;
                 }
-                else
-                {
-                    return _baseStream.Length;
-                }
+                return _baseStream.Length;
             }
         }
 
@@ -126,25 +139,6 @@ namespace DiscUtils
             get { return _position; }
 
             set { _position = value; }
-        }
-
-        /// <summary>
-        /// Returns an enumeration over the parts of the stream that contain real data.
-        /// </summary>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                SparseStream sparseBase = _baseStream as SparseStream;
-                if (sparseBase == null)
-                {
-                    return new StreamExtent[] {new StreamExtent(0, Length)};
-                }
-                else
-                {
-                    return StreamExtent.Union(sparseBase.Extents, _diffExtents);
-                }
-            }
         }
 
         /// <summary>
@@ -209,7 +203,7 @@ namespace DiscUtils
 
             byte[] buffer = new byte[8192];
 
-            foreach (var extent in _diffExtents)
+            foreach (StreamExtent extent in _diffExtents)
             {
                 _diffStream.Position = extent.Start;
                 _baseStream.Position = extent.Start;
@@ -217,7 +211,7 @@ namespace DiscUtils
                 int totalRead = 0;
                 while (totalRead < extent.Length)
                 {
-                    int toRead = (int) Math.Min(extent.Length - totalRead, buffer.Length);
+                    int toRead = (int)Math.Min(extent.Length - totalRead, buffer.Length);
 
                     int read = _diffStream.Read(buffer, 0, toRead);
                     _baseStream.Write(buffer, 0, read);
@@ -263,13 +257,13 @@ namespace DiscUtils
                     throw new IOException("Attempt to read beyond end of file");
                 }
 
-                int toRead = (int) Math.Min(count, _diffStream.Length - _position);
+                int toRead = (int)Math.Min(count, _diffStream.Length - _position);
 
                 // If the read is within the base stream's range, then touch it first to get the
                 // (potentially) stale data.
                 if (_position < _baseStream.Length)
                 {
-                    int baseToRead = (int) Math.Min(toRead, _baseStream.Length - _position);
+                    int baseToRead = (int)Math.Min(toRead, _baseStream.Length - _position);
                     _baseStream.Position = _position;
 
                     int totalBaseRead = 0;
@@ -282,7 +276,7 @@ namespace DiscUtils
                 // Now overlay any data from the overlay stream (if any)
                 IEnumerable<StreamExtent> overlayExtents = StreamExtent.Intersect(_diffExtents,
                     new StreamExtent(_position, toRead));
-                foreach (var extent in overlayExtents)
+                foreach (StreamExtent extent in overlayExtents)
                 {
                     _diffStream.Position = extent.Start;
                     int overlayNumRead = 0;
@@ -290,8 +284,8 @@ namespace DiscUtils
                     {
                         overlayNumRead += _diffStream.Read(
                             buffer,
-                            (int) (offset + (extent.Start - _position) + overlayNumRead),
-                            (int) (extent.Length - overlayNumRead));
+                            (int)(offset + (extent.Start - _position) + overlayNumRead),
+                            (int)(extent.Length - overlayNumRead));
                     }
                 }
 
@@ -327,11 +321,8 @@ namespace DiscUtils
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         /// <summary>

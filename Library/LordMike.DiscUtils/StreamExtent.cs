@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Represents a range of bytes in a stream.
     /// </summary>
@@ -36,9 +35,6 @@ namespace DiscUtils
     /// beginning of the stream), and a byte length.</remarks>
     public sealed class StreamExtent : IEquatable<StreamExtent>, IComparable<StreamExtent>
     {
-        private long _start;
-        private long _length;
-
         /// <summary>
         /// Initializes a new instance of the StreamExtent class.
         /// </summary>
@@ -46,24 +42,52 @@ namespace DiscUtils
         /// <param name="length">The length of the extent.</param>
         public StreamExtent(long start, long length)
         {
-            _start = start;
-            _length = length;
+            Start = start;
+            Length = length;
         }
 
         /// <summary>
         /// Gets the start of the extent (in bytes).
         /// </summary>
-        public long Start
-        {
-            get { return _start; }
-        }
+        public long Length { get; }
 
         /// <summary>
         /// Gets the start of the extent (in bytes).
         /// </summary>
-        public long Length
+        public long Start { get; }
+
+        /// <summary>
+        /// Compares this stream extent to another.
+        /// </summary>
+        /// <param name="other">The extent to compare.</param>
+        /// <returns>Value greater than zero if this extent starts after
+        /// <c>other</c>, zero if they start at the same position, else
+        /// a value less than zero.</returns>
+        public int CompareTo(StreamExtent other)
         {
-            get { return _length; }
+            if (Start > other.Start)
+            {
+                return 1;
+            }
+            if (Start == other.Start)
+            {
+                return 0;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Indicates if this StreamExtent is equal to another.
+        /// </summary>
+        /// <param name="other">The extent to compare.</param>
+        /// <returns><c>true</c> if the extents are equal, else <c>false</c>.</returns>
+        public bool Equals(StreamExtent other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+            return Start == other.Start && Length == other.Length;
         }
 
         /// <summary>
@@ -247,7 +271,7 @@ namespace DiscUtils
         /// <returns>The subtraction of <c>other</c> from <c>extents</c>.</returns>
         public static IEnumerable<StreamExtent> Subtract(IEnumerable<StreamExtent> extents, StreamExtent other)
         {
-            return Subtract(extents, new StreamExtent[] {other});
+            return Subtract(extents, new[] { other });
         }
 
         /// <summary>
@@ -325,11 +349,11 @@ namespace DiscUtils
             long totalBlocks = 0;
             long lastBlock = -1;
 
-            foreach (var extent in stream)
+            foreach (StreamExtent extent in stream)
             {
                 if (extent.Length > 0)
                 {
-                    long extentStartBlock = extent.Start/blockSize;
+                    long extentStartBlock = extent.Start / blockSize;
                     long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
 
                     long extentNumBlocks = extentNextBlock - extentStartBlock;
@@ -360,17 +384,17 @@ namespace DiscUtils
             long? rangeStart = null;
             long rangeLength = 0;
 
-            foreach (var extent in stream)
+            foreach (StreamExtent extent in stream)
             {
                 if (extent.Length > 0)
                 {
-                    long extentStartBlock = extent.Start/blockSize;
+                    long extentStartBlock = extent.Start / blockSize;
                     long extentNextBlock = Utilities.Ceil(extent.Start + extent.Length, blockSize);
 
                     if (rangeStart != null && extentStartBlock > rangeStart + rangeLength)
                     {
                         // This extent is non-contiguous (in terms of blocks), so write out the last range and start new
-                        yield return new Range<long, long>((long) rangeStart, rangeLength);
+                        yield return new Range<long, long>((long)rangeStart, rangeLength);
                         rangeStart = extentStartBlock;
                     }
                     else if (rangeStart == null)
@@ -380,14 +404,14 @@ namespace DiscUtils
                     }
 
                     // Set the length of the current range, based on the end of this extent
-                    rangeLength = extentNextBlock - (long) rangeStart;
+                    rangeLength = extentNextBlock - (long)rangeStart;
                 }
             }
 
             // Final range (if any ranges at all) hasn't been returned yet, so do that now
             if (rangeStart != null)
             {
-                yield return new Range<long, long>((long) rangeStart, rangeLength);
+                yield return new Range<long, long>((long)rangeStart, rangeLength);
             }
         }
 
@@ -399,14 +423,11 @@ namespace DiscUtils
         /// <returns>Whether the two extents are equal.</returns>
         public static bool operator ==(StreamExtent a, StreamExtent b)
         {
-            if (Object.ReferenceEquals(a, null))
+            if (ReferenceEquals(a, null))
             {
-                return Object.ReferenceEquals(b, null);
+                return ReferenceEquals(b, null);
             }
-            else
-            {
-                return a.Equals(b);
-            }
+            return a.Equals(b);
         }
 
         /// <summary>
@@ -443,29 +464,12 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Indicates if this StreamExtent is equal to another.
-        /// </summary>
-        /// <param name="other">The extent to compare.</param>
-        /// <returns><c>true</c> if the extents are equal, else <c>false</c>.</returns>
-        public bool Equals(StreamExtent other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-            else
-            {
-                return _start == other._start && _length == other._length;
-            }
-        }
-
-        /// <summary>
         /// Returns a string representation of the extent as [start:+length].
         /// </summary>
         /// <returns>The string representation.</returns>
         public override string ToString()
         {
-            return "[" + _start + ":+" + _length + "]";
+            return "[" + Start + ":+" + Length + "]";
         }
 
         /// <summary>
@@ -484,30 +488,7 @@ namespace DiscUtils
         /// <returns>The extent's hash code.</returns>
         public override int GetHashCode()
         {
-            return _start.GetHashCode() ^ _length.GetHashCode();
-        }
-
-        /// <summary>
-        /// Compares this stream extent to another.
-        /// </summary>
-        /// <param name="other">The extent to compare.</param>
-        /// <returns>Value greater than zero if this extent starts after
-        /// <c>other</c>, zero if they start at the same position, else
-        /// a value less than zero.</returns>
-        public int CompareTo(StreamExtent other)
-        {
-            if (_start > other._start)
-            {
-                return 1;
-            }
-            else if (_start == other._start)
-            {
-                return 0;
-            }
-            else
-            {
-                return -1;
-            }
+            return Start.GetHashCode() ^ Length.GetHashCode();
         }
     }
 }

@@ -11,4 +11,5 @@ namespace DiscUtils.CoreCompat
         }
     }
 }
+
 #endif

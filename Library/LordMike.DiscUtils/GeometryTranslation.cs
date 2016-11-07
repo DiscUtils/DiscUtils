@@ -45,6 +45,6 @@ namespace DiscUtils
         /// <summary>
         /// Bit-shifting translation, based on the physical geometry of the disk.
         /// </summary>
-        Large = 3,
+        Large = 3
     }
 }

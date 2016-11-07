@@ -20,19 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.ApplePartitionMap
 {
     internal sealed class BlockZero : IByteArraySerializable
     {
-        public ushort Signature;
-        public ushort BlockSize;
         public uint BlockCount;
-        public ushort DeviceType;
+        public ushort BlockSize;
         public ushort DeviceId;
-        public uint DriverData;
+        public ushort DeviceType;
         public ushort DriverCount;
+        public uint DriverData;
+        public ushort Signature;
 
         public int Size
         {
@@ -54,7 +55,7 @@ namespace DiscUtils.ApplePartitionMap
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

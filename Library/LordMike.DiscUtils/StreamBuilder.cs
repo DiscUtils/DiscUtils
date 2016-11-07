@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Base class for objects that can dynamically construct a stream.
     /// </summary>
@@ -51,7 +50,7 @@ namespace DiscUtils
         {
             using (Stream src = Build())
             {
-                byte[] buffer = new byte[64*1024];
+                byte[] buffer = new byte[64 * 1024];
                 int numRead = src.Read(buffer, 0, buffer.Length);
                 while (numRead != 0)
                 {

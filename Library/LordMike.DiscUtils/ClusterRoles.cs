@@ -45,6 +45,6 @@ namespace DiscUtils
         /// <summary>
         /// Cluster is marked bad.
         /// </summary>
-        Bad = 0x20,
+        Bad = 0x20
     }
 }

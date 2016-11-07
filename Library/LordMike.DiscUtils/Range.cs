@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Represents a range of values.
     /// </summary>
@@ -34,9 +34,6 @@ namespace DiscUtils
         where TOffset : IEquatable<TOffset>
         where TCount : IEquatable<TCount>
     {
-        private TOffset _offset;
-        private TCount _count;
-
         /// <summary>
         /// Initializes a new instance of the Range class.
         /// </summary>
@@ -44,25 +41,38 @@ namespace DiscUtils
         /// <param name="count">The size of the range.</param>
         public Range(TOffset offset, TCount count)
         {
-            _offset = offset;
-            _count = count;
-        }
-
-        /// <summary>
-        /// Gets the offset (i.e. start) of the range.
-        /// </summary>
-        public TOffset Offset
-        {
-            get { return _offset; }
+            Offset = offset;
+            Count = count;
         }
 
         /// <summary>
         /// Gets the size of the range.
         /// </summary>
-        public TCount Count
+        public TCount Count { get; }
+
+        /// <summary>
+        /// Gets the offset (i.e. start) of the range.
+        /// </summary>
+        public TOffset Offset { get; }
+
+        #region IEquatable<Range<TOffset,TCount>> Members
+
+        /// <summary>
+        /// Compares this range to another.
+        /// </summary>
+        /// <param name="other">The range to compare.</param>
+        /// <returns><c>true</c> if the ranges are equivalent, else <c>false</c>.</returns>
+        public bool Equals(Range<TOffset, TCount> other)
         {
-            get { return _count; }
+            if (other == null)
+            {
+                return false;
+            }
+
+            return Offset.Equals(other.Offset) && Count.Equals(other.Count);
         }
+
+        #endregion
 
         /// <summary>
         /// Merges sets of ranges into chunks.
@@ -77,7 +87,7 @@ namespace DiscUtils
             T? chunkStart = Numbers<T>.Zero;
             T chunkLength = Numbers<T>.Zero;
 
-            foreach (var range in ranges)
+            foreach (Range<T, T> range in ranges)
             {
                 if (Numbers<T>.NotEqual(range.Count, Numbers<T>.Zero))
                 {
@@ -115,26 +125,7 @@ namespace DiscUtils
         /// <returns>The string representation.</returns>
         public override string ToString()
         {
-            return "[" + _offset + ":+" + _count + "]";
+            return "[" + Offset + ":+" + Count + "]";
         }
-
-        #region IEquatable<Range<TOffset,TCount>> Members
-
-        /// <summary>
-        /// Compares this range to another.
-        /// </summary>
-        /// <param name="other">The range to compare.</param>
-        /// <returns><c>true</c> if the ranges are equivalent, else <c>false</c>.</returns>
-        public bool Equals(Range<TOffset, TCount> other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return _offset.Equals(other.Offset) && _count.Equals(other._count);
-        }
-
-        #endregion
     }
 }

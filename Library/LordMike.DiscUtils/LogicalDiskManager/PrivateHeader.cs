@@ -20,36 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-
     internal class PrivateHeader
     {
-        public string Signature; // PRIVHEAD
         public uint Checksum; // 00 00 2f 96
-        public uint Version; // 2.12
+        public long ConfigSizeLba;
+        public long ConfigurationSizeLba; // 08 00
+        public long ConfigurationStartLba; // 03 FF F8 00
+        public long DataSizeLba; // 03 FF F7 C1
+        public long DataStartLba; // 3F
+        public string DiskGroupId; // GUID string
+        public string DiskGroupName; // MAX_COMPUTER_NAME_LENGTH?
+        public string DiskId; // GUID string
+        public string HostId; // GUID string
+        public long LogSizeLba;
+        public long NextTocLba;
+        public long NumberOfConfigs;
+        public long NumberOfLogs;
+        public string Signature; // PRIVHEAD
         public DateTime Timestamp;
+        public long TocSizeLba;
         public long Unknown2; // Active TOC? 00 .. 00 01
         public long Unknown3; // 00 .. 07 ff  // 1 sector less than 2MB
         public long Unknown4; // 00 .. 07 40
-        public string DiskId; // GUID string
-        public string HostId; // GUID string
-        public string DiskGroupId; // GUID string
-        public string DiskGroupName; // MAX_COMPUTER_NAME_LENGTH?
         public uint Unknown5; // Sector Size?
-        public long DataStartLba; // 3F
-        public long DataSizeLba; // 03 FF F7 C1
-        public long ConfigurationStartLba; // 03 FF F8 00
-        public long ConfigurationSizeLba; // 08 00
-        public long TocSizeLba;
-        public long NextTocLba;
-        public long NumberOfConfigs;
-        public long ConfigSizeLba;
-        public long NumberOfLogs;
-        public long LogSizeLba;
+        public uint Version; // 2.12
 
         public void ReadFrom(byte[] buffer, int offset)
         {
@@ -80,11 +79,12 @@ namespace DiscUtils.LogicalDiskManager
             LogSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x15B);
         }
 
-        ////private static int CalcChecksum()
-        ////{
-        ////    // Zero checksum bytes (0x08, 4)
-        ////    // Add all byte values for 512 bytes
-        ////    throw new NotImplementedException();
         ////}
+        ////    throw new NotImplementedException();
+        ////    // Add all byte values for 512 bytes
+        ////    // Zero checksum bytes (0x08, 4)
+        ////{
+
+        ////private static int CalcChecksum()
     }
 }

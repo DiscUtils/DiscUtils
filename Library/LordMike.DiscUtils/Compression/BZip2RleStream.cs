@@ -24,25 +24,21 @@
 // Based on "libbzip2", Copyright (C) 1996-2007 Julian R Seward.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Compression
 {
-    using System;
-    using System.IO;
-
     internal class BZip2RleStream : Stream
     {
-        private long _position;
         private byte[] _blockBuffer;
         private int _blockOffset;
         private int _blockRemaining;
+        private byte _lastByte;
 
         private int _numSame;
-        private byte _lastByte;
+        private long _position;
         private int _runBytesOutstanding;
-
-        public BZip2RleStream()
-        {
-        }
 
         public bool AtEof
         {

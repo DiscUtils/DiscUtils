@@ -28,14 +28,14 @@ namespace DiscUtils.Internal
 {
     internal class StripedStream : SparseStream
     {
-        private List<SparseStream> _wrapped;
-        private long _stripeSize;
-        private Ownership _ownsWrapped;
-        private bool _canRead;
-        private bool _canWrite;
-        private long _length;
+        private readonly bool _canRead;
+        private readonly bool _canWrite;
+        private readonly long _length;
+        private readonly Ownership _ownsWrapped;
 
         private long _position;
+        private readonly long _stripeSize;
+        private List<SparseStream> _wrapped;
 
         public StripedStream(long stripeSize, Ownership ownsWrapped, params SparseStream[] wrapped)
         {
@@ -47,7 +47,7 @@ namespace DiscUtils.Internal
             _canWrite = _wrapped[0].CanWrite;
             long subStreamLength = _wrapped[0].Length;
 
-            foreach (var stream in _wrapped)
+            foreach (SparseStream stream in _wrapped)
             {
                 if (stream.CanRead != _canRead || stream.CanWrite != _canWrite)
                 {
@@ -61,7 +61,7 @@ namespace DiscUtils.Internal
                 }
             }
 
-            _length = subStreamLength*wrapped.Length;
+            _length = subStreamLength * wrapped.Length;
         }
 
         public override bool CanRead
@@ -79,6 +79,16 @@ namespace DiscUtils.Internal
             get { return _canWrite; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                // Temporary, indicate there are no 'unstored' extents.
+                // Consider combining extent information from all wrapped streams in future.
+                yield return new StreamExtent(0, _length);
+            }
+        }
+
         public override long Length
         {
             get { return _length; }
@@ -91,19 +101,9 @@ namespace DiscUtils.Internal
             set { _position = value; }
         }
 
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                // Temporary, indicate there are no 'unstored' extents.
-                // Consider combining extent information from all wrapped streams in future.
-                yield return new StreamExtent(0, _length);
-            }
-        }
-
         public override void Flush()
         {
-            foreach (var stream in _wrapped)
+            foreach (SparseStream stream in _wrapped)
             {
                 stream.Flush();
             }
@@ -116,20 +116,20 @@ namespace DiscUtils.Internal
                 throw new InvalidOperationException("Attempt to read to non-readable stream");
             }
 
-            int maxToRead = (int) Math.Min(_length - _position, count);
+            int maxToRead = (int)Math.Min(_length - _position, count);
 
             int totalRead = 0;
             while (totalRead < maxToRead)
             {
-                long stripe = _position/_stripeSize;
-                long stripeOffset = _position%_stripeSize;
-                int stripeToRead = (int) Math.Min(maxToRead - totalRead, _stripeSize - stripeOffset);
+                long stripe = _position / _stripeSize;
+                long stripeOffset = _position % _stripeSize;
+                int stripeToRead = (int)Math.Min(maxToRead - totalRead, _stripeSize - stripeOffset);
 
-                int streamIdx = (int) (stripe%_wrapped.Count);
-                long streamStripe = stripe/_wrapped.Count;
+                int streamIdx = (int)(stripe % _wrapped.Count);
+                long streamStripe = stripe / _wrapped.Count;
 
                 Stream targetStream = _wrapped[streamIdx];
-                targetStream.Position = (streamStripe*_stripeSize) + stripeOffset;
+                targetStream.Position = streamStripe * _stripeSize + stripeOffset;
 
                 int numRead = targetStream.Read(buffer, offset + totalRead, stripeToRead);
                 _position += numRead;
@@ -155,11 +155,8 @@ namespace DiscUtils.Internal
             {
                 throw new IOException("Attempt to move before beginning of stream");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         public override void SetLength(long value)
@@ -185,15 +182,15 @@ namespace DiscUtils.Internal
             int totalWritten = 0;
             while (totalWritten < count)
             {
-                long stripe = _position/_stripeSize;
-                long stripeOffset = _position%_stripeSize;
-                int stripeToWrite = (int) Math.Min(count - totalWritten, _stripeSize - stripeOffset);
+                long stripe = _position / _stripeSize;
+                long stripeOffset = _position % _stripeSize;
+                int stripeToWrite = (int)Math.Min(count - totalWritten, _stripeSize - stripeOffset);
 
-                int streamIdx = (int) (stripe%_wrapped.Count);
-                long streamStripe = stripe/_wrapped.Count;
+                int streamIdx = (int)(stripe % _wrapped.Count);
+                long streamStripe = stripe / _wrapped.Count;
 
                 Stream targetStream = _wrapped[streamIdx];
-                targetStream.Position = (streamStripe*_stripeSize) + stripeOffset;
+                targetStream.Position = streamStripe * _stripeSize + stripeOffset;
                 targetStream.Write(buffer, offset + totalWritten, stripeToWrite);
 
                 _position += stripeToWrite;
@@ -207,7 +204,7 @@ namespace DiscUtils.Internal
             {
                 if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
                 {
-                    foreach (var stream in _wrapped)
+                    foreach (SparseStream stream in _wrapped)
                     {
                         stream.Dispose();
                     }

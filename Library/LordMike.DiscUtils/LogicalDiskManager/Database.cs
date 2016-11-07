@@ -20,18 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class Database
     {
-        private DatabaseHeader _vmdb;
-        private Dictionary<ulong, DatabaseRecord> _records;
+        private readonly Dictionary<ulong, DatabaseRecord> _records;
+        private readonly DatabaseHeader _vmdb;
 
         public Database(Stream stream)
         {
@@ -44,12 +43,12 @@ namespace DiscUtils.LogicalDiskManager
 
             stream.Position = dbStart + _vmdb.HeaderSize;
 
-            buffer = Utilities.ReadFully(stream, (int) (_vmdb.BlockSize*_vmdb.NumVBlks));
+            buffer = Utilities.ReadFully(stream, (int)(_vmdb.BlockSize * _vmdb.NumVBlks));
 
             _records = new Dictionary<ulong, DatabaseRecord>();
             for (int i = 0; i < _vmdb.NumVBlks; ++i)
             {
-                DatabaseRecord rec = DatabaseRecord.ReadFrom(buffer, (int) (i*_vmdb.BlockSize));
+                DatabaseRecord rec = DatabaseRecord.ReadFrom(buffer, (int)(i * _vmdb.BlockSize));
                 if (rec != null)
                 {
                     _records.Add(rec.Id, rec);
@@ -61,11 +60,11 @@ namespace DiscUtils.LogicalDiskManager
         {
             get
             {
-                foreach (var record in _records.Values)
+                foreach (DatabaseRecord record in _records.Values)
                 {
                     if (record.RecordType == RecordType.Disk)
                     {
-                        yield return (DiskRecord) record;
+                        yield return (DiskRecord)record;
                     }
                 }
             }
@@ -75,11 +74,11 @@ namespace DiscUtils.LogicalDiskManager
         {
             get
             {
-                foreach (var record in _records.Values)
+                foreach (DatabaseRecord record in _records.Values)
                 {
                     if (record.RecordType == RecordType.Volume)
                     {
-                        yield return (VolumeRecord) record;
+                        yield return (VolumeRecord)record;
                     }
                 }
             }
@@ -87,11 +86,11 @@ namespace DiscUtils.LogicalDiskManager
 
         internal DiskGroupRecord GetDiskGroup(Guid guid)
         {
-            foreach (var record in _records.Values)
+            foreach (DatabaseRecord record in _records.Values)
             {
                 if (record.RecordType == RecordType.DiskGroup)
                 {
-                    DiskGroupRecord dgRecord = (DiskGroupRecord) record;
+                    DiskGroupRecord dgRecord = (DiskGroupRecord)record;
                     if (new Guid(dgRecord.GroupGuidString) == guid || guid == Guid.Empty)
                     {
                         return dgRecord;
@@ -104,11 +103,11 @@ namespace DiscUtils.LogicalDiskManager
 
         internal IEnumerable<ComponentRecord> GetVolumeComponents(ulong volumeId)
         {
-            foreach (var record in _records.Values)
+            foreach (DatabaseRecord record in _records.Values)
             {
                 if (record.RecordType == RecordType.Component)
                 {
-                    ComponentRecord cmpntRecord = (ComponentRecord) record;
+                    ComponentRecord cmpntRecord = (ComponentRecord)record;
                     if (cmpntRecord.VolumeId == volumeId)
                     {
                         yield return cmpntRecord;
@@ -119,11 +118,11 @@ namespace DiscUtils.LogicalDiskManager
 
         internal IEnumerable<ExtentRecord> GetComponentExtents(ulong componentId)
         {
-            foreach (var record in _records.Values)
+            foreach (DatabaseRecord record in _records.Values)
             {
                 if (record.RecordType == RecordType.Extent)
                 {
-                    ExtentRecord extentRecord = (ExtentRecord) record;
+                    ExtentRecord extentRecord = (ExtentRecord)record;
                     if (extentRecord.ComponentId == componentId)
                     {
                         yield return extentRecord;
@@ -134,26 +133,26 @@ namespace DiscUtils.LogicalDiskManager
 
         internal DiskRecord GetDisk(ulong diskId)
         {
-            return (DiskRecord) _records[diskId];
+            return (DiskRecord)_records[diskId];
         }
 
         internal VolumeRecord GetVolume(ulong volumeId)
         {
-            return (VolumeRecord) _records[volumeId];
+            return (VolumeRecord)_records[volumeId];
         }
 
         internal VolumeRecord GetVolume(Guid id)
         {
-            return FindRecord<VolumeRecord>(r => (r.VolumeGuid == id), RecordType.Volume);
+            return FindRecord<VolumeRecord>(r => r.VolumeGuid == id, RecordType.Volume);
         }
 
         internal IEnumerable<VolumeRecord> GetVolumes()
         {
-            foreach (var record in _records.Values)
+            foreach (DatabaseRecord record in _records.Values)
             {
                 if (record.RecordType == RecordType.Volume)
                 {
-                    yield return (VolumeRecord) record;
+                    yield return (VolumeRecord)record;
                 }
             }
         }
@@ -161,11 +160,11 @@ namespace DiscUtils.LogicalDiskManager
         internal T FindRecord<T>(Predicate<T> pred, RecordType typeId)
             where T : DatabaseRecord
         {
-            foreach (var record in _records.Values)
+            foreach (DatabaseRecord record in _records.Values)
             {
                 if (record.RecordType == typeId)
                 {
-                    T t = (T) record;
+                    T t = (T)record;
                     if (pred(t))
                     {
                         return t;

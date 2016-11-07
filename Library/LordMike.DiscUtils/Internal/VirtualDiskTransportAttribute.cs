@@ -27,16 +27,11 @@ namespace DiscUtils.Internal
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     internal sealed class VirtualDiskTransportAttribute : Attribute
     {
-        private string _scheme;
-
         public VirtualDiskTransportAttribute(string scheme)
         {
-            _scheme = scheme;
+            Scheme = scheme;
         }
 
-        public string Scheme
-        {
-            get { return _scheme; }
-        }
+        public string Scheme { get; }
     }
 }

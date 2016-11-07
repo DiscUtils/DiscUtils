@@ -20,28 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-
     internal abstract class DatabaseRecord
     {
-        public string Signature; // VBLK
-        public uint Label;
         public uint Counter;
-        public uint Valid;
-        public uint Flags;
-        public RecordType RecordType;
         public uint DataLength;
+        public uint Flags;
 
         public ulong Id;
+        public uint Label;
         public string Name;
-
-        protected DatabaseRecord()
-        {
-        }
+        public RecordType RecordType;
+        public string Signature; // VBLK
+        public uint Valid;
 
         public static DatabaseRecord ReadFrom(byte[] buffer, int offset)
         {
@@ -49,7 +44,7 @@ namespace DiscUtils.LogicalDiskManager
 
             if (Utilities.ToInt32BigEndian(buffer, offset + 0xC) != 0)
             {
-                switch ((RecordType) (buffer[offset + 0x13] & 0xF))
+                switch ((RecordType)(buffer[offset + 0x13] & 0xF))
                 {
                     case RecordType.Volume:
                         result = new VolumeRecord();
@@ -98,7 +93,7 @@ namespace DiscUtils.LogicalDiskManager
 
         protected static long ReadVarLong(byte[] buffer, ref int offset)
         {
-            return (long) ReadVarULong(buffer, ref offset);
+            return (long)ReadVarULong(buffer, ref offset);
         }
 
         protected static string ReadVarString(byte[] buffer, ref int offset)
@@ -152,7 +147,7 @@ namespace DiscUtils.LogicalDiskManager
             Counter = Utilities.ToUInt32BigEndian(buffer, offset + 0x08);
             Valid = Utilities.ToUInt32BigEndian(buffer, offset + 0x0C);
             Flags = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
-            RecordType = (RecordType) (Flags & 0xF);
+            RecordType = (RecordType)(Flags & 0xF);
             DataLength = Utilities.ToUInt32BigEndian(buffer, 0x14);
         }
     }

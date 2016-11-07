@@ -33,10 +33,6 @@ namespace DiscUtils
         /// </summary>
         public static readonly ChsAddress First = new ChsAddress(0, 0, 1);
 
-        private int _cylinder;
-        private int _head;
-        private int _sector;
-
         /// <summary>
         /// Initializes a new instance of the ChsAddress class.
         /// </summary>
@@ -45,34 +41,25 @@ namespace DiscUtils
         /// <param name="sector">The number of sectors per track/cylinder of the disk.</param>
         public ChsAddress(int cylinder, int head, int sector)
         {
-            _cylinder = cylinder;
-            _head = head;
-            _sector = sector;
+            Cylinder = cylinder;
+            Head = head;
+            Sector = sector;
         }
 
         /// <summary>
         /// Gets the cylinder number (zero-based).
         /// </summary>
-        public int Cylinder
-        {
-            get { return _cylinder; }
-        }
+        public int Cylinder { get; }
 
         /// <summary>
         /// Gets the head (zero-based).
         /// </summary>
-        public int Head
-        {
-            get { return _head; }
-        }
+        public int Head { get; }
 
         /// <summary>
         /// Gets the sector number (one-based).
         /// </summary>
-        public int Sector
-        {
-            get { return _sector; }
-        }
+        public int Sector { get; }
 
         /// <summary>
         /// Determines if this object is equivalent to another.
@@ -86,9 +73,9 @@ namespace DiscUtils
                 return false;
             }
 
-            ChsAddress other = (ChsAddress) obj;
+            ChsAddress other = (ChsAddress)obj;
 
-            return _cylinder == other._cylinder && _head == other._head && _sector == other._sector;
+            return Cylinder == other.Cylinder && Head == other.Head && Sector == other.Sector;
         }
 
         /// <summary>
@@ -97,7 +84,7 @@ namespace DiscUtils
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return _cylinder.GetHashCode() ^ _head.GetHashCode() ^ _sector.GetHashCode();
+            return Cylinder.GetHashCode() ^ Head.GetHashCode() ^ Sector.GetHashCode();
         }
 
         /// <summary>
@@ -106,7 +93,7 @@ namespace DiscUtils
         /// <returns>The string representation.</returns>
         public override string ToString()
         {
-            return "(" + _cylinder + "/" + _head + "/" + _sector + ")";
+            return "(" + Cylinder + "/" + Head + "/" + Sector + ")";
         }
     }
 }

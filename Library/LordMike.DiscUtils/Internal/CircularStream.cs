@@ -30,15 +30,13 @@ namespace DiscUtils.Internal
     internal sealed class CircularStream : WrappingStream
     {
         public CircularStream(SparseStream toWrap, Ownership ownership)
-            : base(toWrap, ownership)
-        {
-        }
+            : base(toWrap, ownership) {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             WrapPosition();
 
-            int read = base.Read(buffer, offset, (int) Math.Min(Length - Position, count));
+            int read = base.Read(buffer, offset, (int)Math.Min(Length - Position, count));
 
             WrapPosition();
 
@@ -52,7 +50,7 @@ namespace DiscUtils.Internal
             int totalWritten = 0;
             while (totalWritten < count)
             {
-                int toWrite = (int) Math.Min(count - totalWritten, Length - Position);
+                int toWrite = (int)Math.Min(count - totalWritten, Length - Position);
 
                 base.Write(buffer, offset + totalWritten, toWrite);
 
@@ -69,7 +67,7 @@ namespace DiscUtils.Internal
 
             if (pos >= length)
             {
-                Position = pos%length;
+                Position = pos % length;
             }
         }
     }

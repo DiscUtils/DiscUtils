@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Partitions
 {
-    using System.Collections.Generic;
-    using System.IO;
-
     internal class BiosExtendedPartitionTable
     {
-        private Stream _disk;
-        private uint _firstSector;
+        private readonly Stream _disk;
+        private readonly uint _firstSector;
 
         public BiosExtendedPartitionTable(Stream disk, uint firstSector)
         {
@@ -45,7 +44,7 @@ namespace DiscUtils.Partitions
             uint partPos = _firstSector;
             while (partPos != 0)
             {
-                _disk.Position = ((long) partPos)*Utilities.SectorSize;
+                _disk.Position = (long)partPos * Utilities.SectorSize;
                 byte[] sector = Utilities.ReadFully(_disk, Utilities.SectorSize);
                 if (sector[510] != 0x55 || sector[511] != 0xAA)
                 {
@@ -87,9 +86,9 @@ namespace DiscUtils.Partitions
             uint partPos = _firstSector;
             while (partPos != 0)
             {
-                extents.Add(new StreamExtent(((long) partPos)*Utilities.SectorSize, Utilities.SectorSize));
+                extents.Add(new StreamExtent((long)partPos * Utilities.SectorSize, Utilities.SectorSize));
 
-                _disk.Position = ((long) partPos)*Utilities.SectorSize;
+                _disk.Position = (long)partPos * Utilities.SectorSize;
                 byte[] sector = Utilities.ReadFully(_disk, Utilities.SectorSize);
                 if (sector[510] != 0x55 || sector[511] != 0xAA)
                 {

@@ -20,15 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Vfs
 {
-    using System;
-
     /// <summary>
     /// Attribute identifying file system factory classes.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public sealed class VfsFileSystemFactoryAttribute : Attribute
-    {
-    }
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class VfsFileSystemFactoryAttribute : Attribute {}
 }

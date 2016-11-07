@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using DiscUtils.CoreCompat;
+using DiscUtils.Raw;
 
 namespace DiscUtils.Partitions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.IO;
-
     /// <summary>
     /// Base class for classes which represent a disk partitioning scheme.
     /// </summary>
@@ -40,22 +40,17 @@ namespace DiscUtils.Partitions
         private static List<PartitionTableFactory> s_factories;
 
         /// <summary>
-        /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
-        /// </summary>
-        public abstract Guid DiskGuid { get; }
-
-        /// <summary>
-        /// Gets the list of partitions that contain user data (i.e. non-system / empty).
-        /// </summary>
-        public abstract ReadOnlyCollection<PartitionInfo> Partitions { get; }
-
-        /// <summary>
         /// Gets the number of User partitions on the disk.
         /// </summary>
         public int Count
         {
             get { return Partitions.Count; }
         }
+
+        /// <summary>
+        /// Gets the GUID that uniquely identifies this disk, if supported (else returns <c>null</c>).
+        /// </summary>
+        public abstract Guid DiskGuid { get; }
 
         private static List<PartitionTableFactory> Factories
         {
@@ -64,8 +59,8 @@ namespace DiscUtils.Partitions
                 if (s_factories == null)
                 {
                     List<PartitionTableFactory> factories = new List<PartitionTableFactory>();
-                    
-                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
+
+                    foreach (Type type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
                     {
                         foreach (PartitionTableFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(PartitionTableFactoryAttribute), false))
                         {
@@ -91,13 +86,18 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
+        /// Gets the list of partitions that contain user data (i.e. non-system / empty).
+        /// </summary>
+        public abstract ReadOnlyCollection<PartitionInfo> Partitions { get; }
+
+        /// <summary>
         /// Determines if a disk is partitioned with a known partitioning scheme.
         /// </summary>
         /// <param name="content">The content of the disk to check.</param>
         /// <returns><c>true</c> if the disk is partitioned, else <c>false</c>.</returns>
         public static bool IsPartitioned(Stream content)
         {
-            foreach (var partTableFactory in Factories)
+            foreach (PartitionTableFactory partTableFactory in Factories)
             {
                 if (partTableFactory.DetectIsPartitioned(content))
                 {
@@ -128,7 +128,7 @@ namespace DiscUtils.Partitions
         {
             List<PartitionTable> tables = new List<PartitionTable>();
 
-            foreach (var factory in Factories)
+            foreach (PartitionTableFactory factory in Factories)
             {
                 PartitionTable table = factory.DetectPartitionTable(disk);
                 if (table != null)
@@ -148,7 +148,7 @@ namespace DiscUtils.Partitions
         /// possible.</returns>
         public static IList<PartitionTable> GetPartitionTables(Stream contentStream)
         {
-            return GetPartitionTables(new Raw.Disk(contentStream, Ownership.None));
+            return GetPartitionTables(new Disk(contentStream, Ownership.None));
         }
 
         /// <summary>

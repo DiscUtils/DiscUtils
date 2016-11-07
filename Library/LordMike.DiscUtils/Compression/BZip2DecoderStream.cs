@@ -24,32 +24,31 @@
 // Based on "libbzip2", Copyright (C) 1996-2007 Julian R Seward.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Compression
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Implementation of a BZip2 decoder.
     /// </summary>
     public sealed class BZip2DecoderStream : Stream
     {
-        private long _position;
-        private Stream _compressedStream;
-        private Ownership _ownsCompressed;
-        private BitStream _bitstream;
-        private BZip2RleStream _rleStream;
-        private BZip2BlockDecoder _blockDecoder;
-        private Crc32 _calcBlockCrc;
+        private readonly BitStream _bitstream;
 
-        private byte[] _blockBuffer;
+        private readonly byte[] _blockBuffer;
         private uint _blockCrc;
-        private uint _compoundCrc;
+        private readonly BZip2BlockDecoder _blockDecoder;
+        private Crc32 _calcBlockCrc;
         private uint _calcCompoundCrc;
+        private uint _compoundCrc;
+        private Stream _compressedStream;
 
         private bool _eof;
+        private readonly Ownership _ownsCompressed;
+        private long _position;
+        private BZip2RleStream _rleStream;
 
         /// <summary>
         /// Initializes a new instance of the BZip2DecoderStream class.
@@ -65,16 +64,16 @@ namespace DiscUtils.Compression
 
             // The Magic BZh
             byte[] magic = new byte[3];
-            magic[0] = (byte) _bitstream.Read(8);
-            magic[1] = (byte) _bitstream.Read(8);
-            magic[2] = (byte) _bitstream.Read(8);
+            magic[0] = (byte)_bitstream.Read(8);
+            magic[1] = (byte)_bitstream.Read(8);
+            magic[2] = (byte)_bitstream.Read(8);
             if (magic[0] != 0x42 || magic[1] != 0x5A || magic[2] != 0x68)
             {
                 throw new InvalidDataException("Bad magic at start of stream");
             }
 
             // The size of the decompression blocks in multiples of 100,000
-            int blockSize = (int) _bitstream.Read(8) - 0x30;
+            int blockSize = (int)_bitstream.Read(8) - 0x30;
             if (blockSize < 1 || blockSize > 9)
             {
                 throw new InvalidDataException("Unexpected block size in header: " + blockSize);
@@ -313,15 +312,12 @@ namespace DiscUtils.Compression
                 _calcBlockCrc = new Crc32BigEndian(Crc32Algorithm.Common);
                 return blockSize;
             }
-            else if (marker == 0x177245385090)
+            if (marker == 0x177245385090)
             {
                 _compoundCrc = ReadUint();
                 return 0;
             }
-            else
-            {
-                throw new InvalidDataException("Found invalid marker in stream");
-            }
+            throw new InvalidDataException("Found invalid marker in stream");
         }
 
         private uint ReadUint()

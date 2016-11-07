@@ -27,7 +27,7 @@ namespace DiscUtils.Internal
 {
     internal sealed class LocalFileLocator : FileLocator
     {
-        private string _dir;
+        private readonly string _dir;
 
         public LocalFileLocator(string dir)
         {
@@ -60,10 +60,7 @@ namespace DiscUtils.Internal
                 return Environment.CurrentDirectory;
 #endif
             }
-            else
-            {
-                return Path.GetFullPath(combinedPath);
-            }
+            return Path.GetFullPath(combinedPath);
         }
 
         public override string GetDirectoryFromPath(string path)
@@ -96,7 +93,7 @@ namespace DiscUtils.Internal
             {
                 if (otherDir[1] == ':' && _dir[1] == ':')
                 {
-                    return Char.ToUpperInvariant(otherDir[0]) == Char.ToUpperInvariant(_dir[0]);
+                    return char.ToUpperInvariant(otherDir[0]) == char.ToUpperInvariant(_dir[0]);
                 }
             }
 

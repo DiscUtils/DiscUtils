@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// A sparse in-memory buffer.
     /// </summary>
@@ -32,8 +32,7 @@ namespace DiscUtils
     /// chunks of the buffer are not stored (assumed to be zero).</remarks>
     public sealed class SparseMemoryBuffer : Buffer
     {
-        private Dictionary<int, byte[]> _buffers;
-        private int _chunkSize;
+        private readonly Dictionary<int, byte[]> _buffers;
 
         private long _capacity;
 
@@ -43,8 +42,25 @@ namespace DiscUtils
         /// <param name="chunkSize">The size of each allocation chunk.</param>
         public SparseMemoryBuffer(int chunkSize)
         {
-            _chunkSize = chunkSize;
+            ChunkSize = chunkSize;
             _buffers = new Dictionary<int, byte[]>();
+        }
+
+        /// <summary>
+        /// Gets the (sorted) list of allocated chunks, as chunk indexes.
+        /// </summary>
+        /// <returns>An enumeration of chunk indexes.</returns>
+        /// <remarks>This method returns chunks as an index rather than absolute stream position.
+        /// For example, if ChunkSize is 16KB, and the first 32KB of the buffer is actually stored,
+        /// this method will return 0 and 1.  This indicates the first and second chunks are stored.</remarks>
+        public IEnumerable<int> AllocatedChunks
+        {
+            get
+            {
+                List<int> keys = new List<int>(_buffers.Keys);
+                keys.Sort();
+                return keys;
+            }
         }
 
         /// <summary>
@@ -74,27 +90,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the size of each allocation chunk.
         /// </summary>
-        public int ChunkSize
-        {
-            get { return _chunkSize; }
-        }
-
-        /// <summary>
-        /// Gets the (sorted) list of allocated chunks, as chunk indexes.
-        /// </summary>
-        /// <returns>An enumeration of chunk indexes.</returns>
-        /// <remarks>This method returns chunks as an index rather than absolute stream position.
-        /// For example, if ChunkSize is 16KB, and the first 32KB of the buffer is actually stored,
-        /// this method will return 0 and 1.  This indicates the first and second chunks are stored.</remarks>
-        public IEnumerable<int> AllocatedChunks
-        {
-            get
-            {
-                List<int> keys = new List<int>(_buffers.Keys);
-                keys.Sort();
-                return keys;
-            }
-        }
+        public int ChunkSize { get; }
 
         /// <summary>
         /// Accesses this memory buffer as an infinite byte array.
@@ -110,10 +106,7 @@ namespace DiscUtils
                 {
                     return buffer[0];
                 }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
 
             set
@@ -138,9 +131,9 @@ namespace DiscUtils
 
             while (totalRead < count && pos < _capacity)
             {
-                int chunk = (int) (pos/_chunkSize);
-                int chunkOffset = (int) (pos%_chunkSize);
-                int numToRead = (int) Math.Min(Math.Min(_chunkSize - chunkOffset, _capacity - pos), count - totalRead);
+                int chunk = (int)(pos / ChunkSize);
+                int chunkOffset = (int)(pos % ChunkSize);
+                int numToRead = (int)Math.Min(Math.Min(ChunkSize - chunkOffset, _capacity - pos), count - totalRead);
 
                 byte[] chunkBuffer;
                 if (!_buffers.TryGetValue(chunk, out chunkBuffer))
@@ -172,14 +165,14 @@ namespace DiscUtils
 
             while (totalWritten < count)
             {
-                int chunk = (int) (pos/_chunkSize);
-                int chunkOffset = (int) (pos%_chunkSize);
-                int numToWrite = (int) Math.Min(_chunkSize - chunkOffset, count - totalWritten);
+                int chunk = (int)(pos / ChunkSize);
+                int chunkOffset = (int)(pos % ChunkSize);
+                int numToWrite = Math.Min(ChunkSize - chunkOffset, count - totalWritten);
 
                 byte[] chunkBuffer;
                 if (!_buffers.TryGetValue(chunk, out chunkBuffer))
                 {
-                    chunkBuffer = new byte[_chunkSize];
+                    chunkBuffer = new byte[ChunkSize];
                     _buffers[chunk] = chunkBuffer;
                 }
 
@@ -213,10 +206,10 @@ namespace DiscUtils
         public override IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
             long end = start + count;
-            foreach (var chunk in AllocatedChunks)
+            foreach (int chunk in AllocatedChunks)
             {
-                long chunkStart = chunk*(long) _chunkSize;
-                long chunkEnd = chunkStart + _chunkSize;
+                long chunkStart = chunk * (long)ChunkSize;
+                long chunkEnd = chunkStart + ChunkSize;
                 if (chunkEnd > start && chunkStart < end)
                 {
                     long extentStart = Math.Max(start, chunkStart);

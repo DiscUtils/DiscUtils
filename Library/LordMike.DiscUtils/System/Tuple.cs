@@ -20,7 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+
 #if NET20
+
 // ReSharper disable once CheckNamespace
 namespace System
 {
@@ -66,6 +68,7 @@ namespace System
 #endif
 
 #if NET20
+
 // ReSharper disable once CheckNamespace
 namespace System
 {

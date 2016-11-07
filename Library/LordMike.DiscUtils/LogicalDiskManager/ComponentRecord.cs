@@ -24,17 +24,17 @@ namespace DiscUtils.LogicalDiskManager
 {
     internal sealed class ComponentRecord : DatabaseRecord
     {
-        public string StatusString;
-        public ExtentMergeType MergeType; // (02 Spanned, Simple, Mirrored)  (01 on striped)
-        public uint Unknown1; // Zero
-        public ulong NumExtents; // Could be num disks
-        public uint Unknown2; // Zero
         public uint LinkId; // Identical on mirrors
-        public ulong Unknown3; // 00 .. 00
-        public ulong VolumeId;
-        public ulong Unknown4; // ??
+        public ExtentMergeType MergeType; // (02 Spanned, Simple, Mirrored)  (01 on striped)
+        public ulong NumExtents; // Could be num disks
+        public string StatusString;
         public long StripeSizeSectors;
         public long StripeStride; // aka num partitions
+        public uint Unknown1; // Zero
+        public uint Unknown2; // Zero
+        public ulong Unknown3; // 00 .. 00
+        public ulong Unknown4; // ??
+        public ulong VolumeId;
 
         protected override void DoReadFrom(byte[] buffer, int offset)
         {
@@ -45,7 +45,7 @@ namespace DiscUtils.LogicalDiskManager
             Id = ReadVarULong(buffer, ref pos);
             Name = ReadVarString(buffer, ref pos);
             StatusString = ReadVarString(buffer, ref pos);
-            MergeType = (ExtentMergeType) ReadByte(buffer, ref pos);
+            MergeType = (ExtentMergeType)ReadByte(buffer, ref pos);
             Unknown1 = ReadUInt(buffer, ref pos); // Zero
             NumExtents = ReadVarULong(buffer, ref pos);
             Unknown2 = ReadUInt(buffer, ref pos);

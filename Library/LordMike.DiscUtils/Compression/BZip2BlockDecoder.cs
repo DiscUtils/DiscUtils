@@ -24,35 +24,31 @@
 // Based on "libbzip2", Copyright (C) 1996-2007 Julian R Seward.
 //
 
+using System.IO;
+
 namespace DiscUtils.Compression
 {
-    using System.IO;
-
     internal class BZip2BlockDecoder
     {
-        private InverseBurrowsWheeler _inverseBurrowsWheeler;
-        private uint _crc;
+        private readonly InverseBurrowsWheeler _inverseBurrowsWheeler;
 
         public BZip2BlockDecoder(int blockSize)
         {
             _inverseBurrowsWheeler = new InverseBurrowsWheeler(blockSize);
         }
 
-        public uint Crc
-        {
-            get { return _crc; }
-        }
+        public uint Crc { get; private set; }
 
         public int Process(BitStream bitstream, byte[] outputBuffer, int outputBufferOffset)
         {
-            _crc = 0;
+            Crc = 0;
             for (int i = 0; i < 4; ++i)
             {
-                _crc = (_crc << 8) | bitstream.Read(8);
+                Crc = (Crc << 8) | bitstream.Read(8);
             }
 
             bool rand = bitstream.Read(1) != 0;
-            int origPtr = (int) bitstream.Read(24);
+            int origPtr = (int)bitstream.Read(24);
 
             int thisBlockSize = ReadBuffer(bitstream, outputBuffer, outputBufferOffset);
 
@@ -82,11 +78,11 @@ namespace DiscUtils.Compression
 
             for (int i = 0; i < 256; ++i)
             {
-                if (inUseGroups[i/16])
+                if (inUseGroups[i / 16])
                 {
                     if (bitstream.Read(1) != 0)
                     {
-                        moveFrontTransform.Set(numInUse, (byte) i);
+                        moveFrontTransform.Set(numInUse, (byte)i);
                         numInUse++;
                     }
                 }
@@ -126,7 +122,7 @@ namespace DiscUtils.Compression
                 if (symbol <= numInUse)
                 {
                     // Single byte
-                    byte b = moveFrontTransform.GetAndMove((int) symbol - 1);
+                    byte b = moveFrontTransform.GetAndMove((int)symbol - 1);
                     buffer[offset + readBytes] = b;
                     ++readBytes;
                 }

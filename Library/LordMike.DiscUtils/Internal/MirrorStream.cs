@@ -28,12 +28,12 @@ namespace DiscUtils.Internal
 {
     internal class MirrorStream : SparseStream
     {
+        private readonly bool _canRead;
+        private readonly bool _canSeek;
+        private readonly bool _canWrite;
+        private readonly long _length;
+        private readonly Ownership _ownsWrapped;
         private List<SparseStream> _wrapped;
-        private Ownership _ownsWrapped;
-        private bool _canRead;
-        private bool _canWrite;
-        private bool _canSeek;
-        private long _length;
 
         public MirrorStream(Ownership ownsWrapped, params SparseStream[] wrapped)
         {
@@ -45,7 +45,7 @@ namespace DiscUtils.Internal
             _canSeek = _wrapped[0].CanSeek;
             _length = _wrapped[0].Length;
 
-            foreach (var stream in _wrapped)
+            foreach (SparseStream stream in _wrapped)
             {
                 if (stream.CanRead != _canRead || stream.CanWrite != _canWrite || stream.CanSeek != _canSeek)
                 {
@@ -75,6 +75,11 @@ namespace DiscUtils.Internal
             get { return _canWrite; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _wrapped[0].Extents; }
+        }
+
         public override long Length
         {
             get { return _length; }
@@ -85,11 +90,6 @@ namespace DiscUtils.Internal
             get { return _wrapped[0].Position; }
 
             set { _wrapped[0].Position = value; }
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return _wrapped[0].Extents; }
         }
 
         public override void Flush()
@@ -124,7 +124,7 @@ namespace DiscUtils.Internal
                 throw new IOException("Attempt to clear beyond end of mirrored stream");
             }
 
-            foreach (var stream in _wrapped)
+            foreach (SparseStream stream in _wrapped)
             {
                 stream.Position = pos;
                 stream.Clear(count);
@@ -140,7 +140,7 @@ namespace DiscUtils.Internal
                 throw new IOException("Attempt to write beyond end of mirrored stream");
             }
 
-            foreach (var stream in _wrapped)
+            foreach (SparseStream stream in _wrapped)
             {
                 stream.Position = pos;
                 stream.Write(buffer, offset, count);
@@ -153,7 +153,7 @@ namespace DiscUtils.Internal
             {
                 if (disposing && _ownsWrapped == Ownership.Dispose && _wrapped != null)
                 {
-                    foreach (var stream in _wrapped)
+                    foreach (SparseStream stream in _wrapped)
                     {
                         stream.Dispose();
                     }

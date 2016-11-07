@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.ApplePartitionMap
 {
-    using System.IO;
-    using DiscUtils.Partitions;
-
     [PartitionTableFactory]
     internal sealed class PartitionMapFactory : PartitionTableFactory
     {

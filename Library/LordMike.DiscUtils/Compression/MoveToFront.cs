@@ -24,12 +24,10 @@ namespace DiscUtils.Compression
 {
     internal class MoveToFront
     {
-        private byte[] _buffer;
+        private readonly byte[] _buffer;
 
         public MoveToFront()
-            : this(256, false)
-        {
-        }
+            : this(256, false) {}
 
         public MoveToFront(int size, bool autoInit)
         {

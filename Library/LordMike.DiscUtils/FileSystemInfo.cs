@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils
 {
-    using System.IO;
-
     /// <summary>
     /// Base class holding information about a file system.
     /// </summary>
@@ -33,14 +33,14 @@ namespace DiscUtils
     public abstract class FileSystemInfo
     {
         /// <summary>
-        /// Gets the name of the file system.
-        /// </summary>
-        public abstract string Name { get; }
-
-        /// <summary>
         /// Gets a one-line description of the file system.
         /// </summary>
         public abstract string Description { get; }
+
+        /// <summary>
+        /// Gets the name of the file system.
+        /// </summary>
+        public abstract string Name { get; }
 
         /// <summary>
         /// Opens a volume using the file system.

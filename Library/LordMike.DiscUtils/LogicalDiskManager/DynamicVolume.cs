@@ -20,22 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-    using System.IO;
-
     internal class DynamicVolume
     {
-        private DynamicDiskGroup _group;
-        private Guid _volumeId;
+        private readonly DynamicDiskGroup _group;
 
         internal DynamicVolume(DynamicDiskGroup group, Guid volumeId)
         {
             _group = group;
-            _volumeId = volumeId;
+            Identity = volumeId;
         }
 
         public byte BiosType
@@ -43,24 +41,21 @@ namespace DiscUtils.LogicalDiskManager
             get { return Record.BiosType; }
         }
 
-        public Guid Identity
-        {
-            get { return _volumeId; }
-        }
+        public Guid Identity { get; }
 
         public long Length
         {
-            get { return Record.Size*Sizes.Sector; }
+            get { return Record.Size * Sizes.Sector; }
+        }
+
+        private VolumeRecord Record
+        {
+            get { return _group.GetVolume(Identity); }
         }
 
         public LogicalVolumeStatus Status
         {
             get { return _group.GetVolumeStatus(Record.Id); }
-        }
-
-        private VolumeRecord Record
-        {
-            get { return _group.GetVolume(_volumeId); }
         }
 
         public SparseStream Open()
@@ -69,10 +64,7 @@ namespace DiscUtils.LogicalDiskManager
             {
                 throw new IOException("Attempt to open 'failed' volume");
             }
-            else
-            {
-                return _group.OpenVolume(Record.Id);
-            }
+            return _group.OpenVolume(Record.Id);
         }
     }
 }

@@ -20,30 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// A stream implementing a block-oriented read cache.
     /// </summary>
     public sealed class BlockCacheStream : SparseStream
     {
-        private SparseStream _wrappedStream;
-        private Ownership _ownWrapped;
-        private BlockCacheSettings _settings;
-        private BlockCacheStatistics _stats;
+        private bool _atEof;
+        private readonly int _blocksInReadBuffer;
+
+        private readonly BlockCache<Block> _cache;
+        private readonly Ownership _ownWrapped;
 
         private long _position;
-        private bool _atEof;
-
-        private BlockCache<Block> _cache;
-        private byte[] _readBuffer;
-        private int _blocksInReadBuffer;
+        private readonly byte[] _readBuffer;
+        private readonly BlockCacheSettings _settings;
+        private readonly BlockCacheStatistics _stats;
+        private SparseStream _wrappedStream;
 
         /// <summary>
         /// Initializes a new instance of the BlockCacheStream class.
@@ -51,9 +50,7 @@ namespace DiscUtils
         /// <param name="toWrap">The stream to wrap.</param>
         /// <param name="ownership">Whether to assume ownership of <c>toWrap</c>.</param>
         public BlockCacheStream(SparseStream toWrap, Ownership ownership)
-            : this(toWrap, ownership, new BlockCacheSettings())
-        {
-        }
+            : this(toWrap, ownership, new BlockCacheSettings()) {}
 
         /// <summary>
         /// Initializes a new instance of the BlockCacheStream class.
@@ -77,33 +74,20 @@ namespace DiscUtils
             _ownWrapped = ownership;
             _settings = new BlockCacheSettings(settings);
 
-            if (_settings.OptimumReadSize%_settings.BlockSize != 0)
+            if (_settings.OptimumReadSize % _settings.BlockSize != 0)
             {
                 throw new ArgumentException("Invalid settings, OptimumReadSize must be a multiple of BlockSize",
                     nameof(settings));
             }
 
             _readBuffer = new byte[_settings.OptimumReadSize];
-            _blocksInReadBuffer = _settings.OptimumReadSize/_settings.BlockSize;
+            _blocksInReadBuffer = _settings.OptimumReadSize / _settings.BlockSize;
 
-            int totalBlocks = (int) (_settings.ReadCacheSize/_settings.BlockSize);
+            int totalBlocks = (int)(_settings.ReadCacheSize / _settings.BlockSize);
 
             _cache = new BlockCache<Block>(_settings.BlockSize, totalBlocks);
             _stats = new BlockCacheStatistics();
             _stats.FreeReadBlocks = totalBlocks;
-        }
-
-        /// <summary>
-        /// Gets the parts of the stream that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                CheckDisposed();
-                return _wrappedStream.Extents;
-            }
         }
 
         /// <summary>
@@ -128,6 +112,19 @@ namespace DiscUtils
         public override bool CanWrite
         {
             get { return _wrappedStream.CanWrite; }
+        }
+
+        /// <summary>
+        /// Gets the parts of the stream that are stored.
+        /// </summary>
+        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                CheckDisposed();
+                return _wrappedStream.Extents;
+            }
         }
 
         /// <summary>
@@ -201,11 +198,8 @@ namespace DiscUtils
                 {
                     throw new IOException("Attempt to read beyond end of stream");
                 }
-                else
-                {
-                    _atEof = true;
-                    return 0;
-                }
+                _atEof = true;
+                return 0;
             }
 
             _stats.TotalReadsIn++;
@@ -231,10 +225,10 @@ namespace DiscUtils
             bool servicedOutsideCache = false;
             int blockSize = _settings.BlockSize;
 
-            long firstBlock = _position/blockSize;
-            int offsetInNextBlock = (int) (_position%blockSize);
+            long firstBlock = _position / blockSize;
+            int offsetInNextBlock = (int)(_position % blockSize);
             long endBlock = Utilities.Ceil(Math.Min(_position + count, Length), blockSize);
-            int numBlocks = (int) (endBlock - firstBlock);
+            int numBlocks = (int)(endBlock - firstBlock);
 
             if (offsetInNextBlock != 0)
             {
@@ -275,8 +269,8 @@ namespace DiscUtils
                     }
 
                     // Allow for the end of the stream not being block-aligned
-                    long readPosition = (firstBlock + blocksRead)*(long) blockSize;
-                    int bytesToRead = (int) Math.Min(blocksToRead*(long) blockSize, Length - readPosition);
+                    long readPosition = (firstBlock + blocksRead) * blockSize;
+                    int bytesToRead = (int)Math.Min(blocksToRead * (long)blockSize, Length - readPosition);
 
                     // Do the read
                     _stats.TotalReadsOut++;
@@ -290,14 +284,14 @@ namespace DiscUtils
                     // Cache the read blocks
                     for (int i = 0; i < blocksToRead; ++i)
                     {
-                        int copyBytes = Math.Min(blockSize, bytesToRead - (i*blockSize));
+                        int copyBytes = Math.Min(blockSize, bytesToRead - i * blockSize);
                         block = _cache.GetBlock(firstBlock + blocksRead + i);
-                        Array.Copy(_readBuffer, i*blockSize, block.Data, 0, copyBytes);
+                        Array.Copy(_readBuffer, i * blockSize, block.Data, 0, copyBytes);
                         block.Available = copyBytes;
 
                         if (copyBytes < blockSize)
                         {
-                            Array.Clear(_readBuffer, (i*blockSize) + copyBytes, blockSize - copyBytes);
+                            Array.Clear(_readBuffer, i * blockSize + copyBytes, blockSize - copyBytes);
                         }
                     }
 
@@ -365,11 +359,8 @@ namespace DiscUtils
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         /// <summary>
@@ -395,9 +386,9 @@ namespace DiscUtils
             _stats.TotalWritesIn++;
 
             int blockSize = _settings.BlockSize;
-            long firstBlock = _position/blockSize;
+            long firstBlock = _position / blockSize;
             long endBlock = Utilities.Ceil(Math.Min(_position + count, Length), blockSize);
-            int numBlocks = (int) (endBlock - firstBlock);
+            int numBlocks = (int)(endBlock - firstBlock);
 
             try
             {
@@ -410,7 +401,7 @@ namespace DiscUtils
                 throw;
             }
 
-            int offsetInNextBlock = (int) (_position%blockSize);
+            int offsetInNextBlock = (int)(_position % blockSize);
             if (offsetInNextBlock != 0)
             {
                 _stats.UnalignedWritesIn++;
@@ -466,7 +457,7 @@ namespace DiscUtils
 
         private void InvalidateBlocks(long firstBlock, int numBlocks)
         {
-            for (long i = firstBlock; i < (firstBlock + numBlocks); ++i)
+            for (long i = firstBlock; i < firstBlock + numBlocks; ++i)
             {
                 _cache.ReleaseBlock(i);
             }

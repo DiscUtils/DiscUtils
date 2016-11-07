@@ -31,9 +31,9 @@ namespace DiscUtils.Internal
     /// </summary>
     internal class ZeroStream : MappedStream
     {
-        private long _length;
-        private long _position;
         private bool _atEof;
+        private readonly long _length;
+        private long _position;
 
         public ZeroStream(long length)
         {
@@ -55,6 +55,12 @@ namespace DiscUtils.Internal
             get { return false; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            // The stream is entirely sparse
+            get { return new List<StreamExtent>(0); }
+        }
+
         public override long Length
         {
             get { return _length; }
@@ -71,20 +77,12 @@ namespace DiscUtils.Internal
             }
         }
 
-        public override IEnumerable<StreamExtent> Extents
-        {
-            // The stream is entirely sparse
-            get { return new List<StreamExtent>(0); }
-        }
-
         public override IEnumerable<StreamExtent> MapContent(long start, long length)
         {
             return new StreamExtent[0];
         }
 
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -100,14 +98,11 @@ namespace DiscUtils.Internal
                 {
                     throw new IOException("Attempt to read beyond end of stream");
                 }
-                else
-                {
-                    _atEof = true;
-                    return 0;
-                }
+                _atEof = true;
+                return 0;
             }
 
-            int numToClear = (int) Math.Min(count, _length - _position);
+            int numToClear = (int)Math.Min(count, _length - _position);
             Array.Clear(buffer, offset, numToClear);
             _position += numToClear;
 
@@ -132,11 +127,8 @@ namespace DiscUtils.Internal
             {
                 throw new IOException("Attempt to move before beginning of stream");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         public override void SetLength(long value)

@@ -27,14 +27,15 @@ namespace DiscUtils.Internal
 {
     internal abstract class BuilderExtent : IDisposable
     {
-        private long _start;
-        private long _length;
-
         public BuilderExtent(long start, long length)
         {
-            _start = start;
-            _length = length;
+            Start = start;
+            Length = length;
         }
+
+        internal long Length { get; }
+
+        internal long Start { get; }
 
         /// <summary>
         /// Gets the parts of the stream that are stored.
@@ -42,17 +43,7 @@ namespace DiscUtils.Internal
         /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
         public virtual IEnumerable<StreamExtent> StreamExtents
         {
-            get { return new StreamExtent[] {new StreamExtent(Start, Length)}; }
-        }
-
-        internal long Start
-        {
-            get { return _start; }
-        }
-
-        internal long Length
-        {
-            get { return _length; }
+            get { return new[] { new StreamExtent(Start, Length) }; }
         }
 
         public abstract void Dispose();

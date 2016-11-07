@@ -27,22 +27,18 @@ namespace DiscUtils
     /// </summary>
     public sealed class DiskImageFileSpecification
     {
-        private string _name;
-        private StreamBuilder _builder;
+        private readonly StreamBuilder _builder;
 
         internal DiskImageFileSpecification(string name, StreamBuilder builder)
         {
-            _name = name;
+            Name = name;
             _builder = builder;
         }
 
         /// <summary>
         /// Gets name of the file.
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the object that provides access to the file's content.

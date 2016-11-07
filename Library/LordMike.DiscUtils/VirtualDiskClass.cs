@@ -45,6 +45,6 @@ namespace DiscUtils
         /// <summary>
         /// Floppy disk.
         /// </summary>
-        FloppyDisk = 3,
+        FloppyDisk = 3
     }
 }

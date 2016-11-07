@@ -28,18 +28,18 @@ namespace DiscUtils.Compression
 {
     internal class SizedDeflateStream : DeflateStream
     {
-        private int _length;
+        private readonly int _length;
         private int _position;
 
         public SizedDeflateStream(Stream stream, CompressionMode mode, bool leaveOpen, int length)
             : base(stream, mode, leaveOpen)
         {
-            this._length = length;
+            _length = length;
         }
 
         public override long Length
         {
-            get { return this._length; }
+            get { return _length; }
         }
 
         public override long Position
@@ -47,7 +47,7 @@ namespace DiscUtils.Compression
             get { return _position; }
             set
             {
-                if (value != this.Position)
+                if (value != Position)
                 {
                     throw new NotImplementedException();
                 }
@@ -57,7 +57,7 @@ namespace DiscUtils.Compression
         public override int Read(byte[] array, int offset, int count)
         {
             int read = base.Read(array, offset, count);
-            this._position += read;
+            _position += read;
             return read;
         }
     }

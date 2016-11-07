@@ -24,15 +24,15 @@ namespace DiscUtils.LogicalDiskManager
 {
     internal sealed class ExtentRecord : DatabaseRecord
     {
-        public uint Unknown1;
-        public uint Unknown2;
-        public uint PartitionComponentLink;
-        public long DiskOffsetLba;
-        public long OffsetInVolumeLba;
-        public long SizeLba;
         public ulong ComponentId;
         public ulong DiskId;
+        public long DiskOffsetLba;
         public ulong InterleaveOrder;
+        public long OffsetInVolumeLba;
+        public uint PartitionComponentLink;
+        public long SizeLba;
+        public uint Unknown1;
+        public uint Unknown2;
 
         protected override void DoReadFrom(byte[] buffer, int offset)
         {

@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Common interface for all file systems.
     /// </summary>
@@ -37,14 +37,14 @@ namespace DiscUtils
         bool CanWrite { get; }
 
         /// <summary>
-        /// Gets the root directory of the file system.
-        /// </summary>
-        DiscDirectoryInfo Root { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the file system is thread-safe.
         /// </summary>
         bool IsThreadSafe { get; }
+
+        /// <summary>
+        /// Gets the root directory of the file system.
+        /// </summary>
+        DiscDirectoryInfo Root { get; }
 
         /// <summary>
         /// Copies an existing file to a new file.

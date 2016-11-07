@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-
     [VirtualDiskTransport("file")]
     internal sealed class FileTransport : VirtualDiskTransport
     {
-        private string _path;
         private string _extraInfo;
+        private string _path;
 
         public override bool IsRawDisk
         {

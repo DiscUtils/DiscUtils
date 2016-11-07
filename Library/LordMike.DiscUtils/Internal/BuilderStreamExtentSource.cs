@@ -26,7 +26,7 @@ namespace DiscUtils.Internal
 {
     internal class BuilderStreamExtentSource : BuilderExtentSource
     {
-        private Stream _stream;
+        private readonly Stream _stream;
 
         public BuilderStreamExtentSource(Stream stream)
         {

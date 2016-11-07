@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a sparse stream.
     /// </summary>
@@ -131,13 +130,13 @@ namespace DiscUtils
         /// <returns>An enumeration of stream extents, indicating stored bytes.</returns>
         public virtual IEnumerable<StreamExtent> GetExtentsInRange(long start, long count)
         {
-            return StreamExtent.Intersect(Extents, new StreamExtent[] {new StreamExtent(start, count)});
+            return StreamExtent.Intersect(Extents, new[] { new StreamExtent(start, count) });
         }
 
         private class SparseReadOnlyWrapperStream : SparseStream
         {
+            private readonly Ownership _ownsWrapped;
             private SparseStream _wrapped;
-            private Ownership _ownsWrapped;
 
             public SparseReadOnlyWrapperStream(SparseStream wrapped, Ownership ownsWrapped)
             {
@@ -160,6 +159,11 @@ namespace DiscUtils
                 get { return false; }
             }
 
+            public override IEnumerable<StreamExtent> Extents
+            {
+                get { return _wrapped.Extents; }
+            }
+
             public override long Length
             {
                 get { return _wrapped.Length; }
@@ -172,14 +176,7 @@ namespace DiscUtils
                 set { _wrapped.Position = value; }
             }
 
-            public override IEnumerable<StreamExtent> Extents
-            {
-                get { return _wrapped.Extents; }
-            }
-
-            public override void Flush()
-            {
-            }
+            public override void Flush() {}
 
             public override int Read(byte[] buffer, int offset, int count)
             {
@@ -220,9 +217,9 @@ namespace DiscUtils
 
         private class SparseWrapperStream : SparseStream
         {
+            private readonly List<StreamExtent> _extents;
+            private readonly Ownership _ownsWrapped;
             private Stream _wrapped;
-            private Ownership _ownsWrapped;
-            private List<StreamExtent> _extents;
 
             public SparseWrapperStream(Stream wrapped, Ownership ownsWrapped, IEnumerable<StreamExtent> extents)
             {
@@ -249,6 +246,23 @@ namespace DiscUtils
                 get { return _wrapped.CanWrite; }
             }
 
+            public override IEnumerable<StreamExtent> Extents
+            {
+                get
+                {
+                    if (_extents != null)
+                    {
+                        return _extents;
+                    }
+                    SparseStream wrappedAsSparse = _wrapped as SparseStream;
+                    if (wrappedAsSparse != null)
+                    {
+                        return wrappedAsSparse.Extents;
+                    }
+                    return new[] { new StreamExtent(0, _wrapped.Length) };
+                }
+            }
+
             public override long Length
             {
                 get { return _wrapped.Length; }
@@ -259,29 +273,6 @@ namespace DiscUtils
                 get { return _wrapped.Position; }
 
                 set { _wrapped.Position = value; }
-            }
-
-            public override IEnumerable<StreamExtent> Extents
-            {
-                get
-                {
-                    if (_extents != null)
-                    {
-                        return _extents;
-                    }
-                    else
-                    {
-                        SparseStream wrappedAsSparse = _wrapped as SparseStream;
-                        if (wrappedAsSparse != null)
-                        {
-                            return wrappedAsSparse.Extents;
-                        }
-                        else
-                        {
-                            return new StreamExtent[] {new StreamExtent(0, _wrapped.Length)};
-                        }
-                    }
-                }
             }
 
             public override void Flush()

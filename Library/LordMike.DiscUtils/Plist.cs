@@ -20,15 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Xml;
+
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text;
-    using System.Xml;
-
     internal static class Plist
     {
         internal static Dictionary<string, object> Parse(Stream stream)
@@ -39,7 +39,7 @@ namespace DiscUtils
 #endif
             xmlDoc.Load(stream);
 
-            var root = xmlDoc.DocumentElement;
+            XmlElement root = xmlDoc.DocumentElement;
             if (root.Name != "plist")
             {
                 throw new InvalidDataException("XML document is not a plist");
@@ -108,26 +108,23 @@ namespace DiscUtils
         {
             if (obj is Dictionary<string, object>)
             {
-                return CreateDictionary(xmlDoc, (Dictionary<string, object>) obj);
+                return CreateDictionary(xmlDoc, (Dictionary<string, object>)obj);
             }
-            else if (obj is string)
+            if (obj is string)
             {
-                XmlText text = xmlDoc.CreateTextNode((string) obj);
+                XmlText text = xmlDoc.CreateTextNode((string)obj);
                 XmlElement node = xmlDoc.CreateElement("string");
                 node.AppendChild(text);
                 return node;
             }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
         }
 
         private static XmlNode CreateDictionary(XmlDocument xmlDoc, Dictionary<string, object> dict)
         {
-            XmlElement dictNode = (XmlElement) xmlDoc.CreateElement("dict");
+            XmlElement dictNode = xmlDoc.CreateElement("dict");
 
-            foreach (var entry in dict)
+            foreach (KeyValuePair<string, object> entry in dict)
             {
                 XmlText text = xmlDoc.CreateTextNode(entry.Key);
                 XmlElement keyNode = xmlDoc.CreateElement("key");

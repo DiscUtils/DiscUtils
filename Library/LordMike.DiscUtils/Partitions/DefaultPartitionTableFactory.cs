@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Partitions
 {
-    using System.IO;
-
     [PartitionTableFactory]
     internal sealed class DefaultPartitionTableFactory : PartitionTableFactory
     {
@@ -41,15 +41,9 @@ namespace DiscUtils.Partitions
                 {
                     return new GuidPartitionTable(disk);
                 }
-                else
-                {
-                    return table;
-                }
+                return table;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
     }
 }

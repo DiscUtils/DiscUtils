@@ -20,17 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.CoreCompat;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     /// <summary>
     /// Base class representing virtual hard disks.
     /// </summary>
@@ -71,10 +69,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the geometry of the disk.
         /// </summary>
-        public abstract Geometry Geometry
-        {
-            get;
-        }
+        public abstract Geometry Geometry { get; }
 
         /// <summary>
         /// Gets the geometry of the disk as it is anticipated a hypervisor BIOS will represent it.
@@ -87,18 +82,12 @@ namespace DiscUtils
         /// <summary>
         /// Gets the type of disk represented by this object.
         /// </summary>
-        public abstract VirtualDiskClass DiskClass
-        {
-            get;
-        }
+        public abstract VirtualDiskClass DiskClass { get; }
 
         /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
-        public abstract long Capacity
-        {
-            get;
-        }
+        public abstract long Capacity { get; }
 
         /// <summary>
         /// Gets the size of the disk's logical blocks (aka sector size), in bytes.
@@ -123,28 +112,19 @@ namespace DiscUtils
         /// <remarks>Note the returned stream is not guaranteed to be at any particular position.  The actual position
         /// will depend on the last partition table/file system activity, since all access to the disk contents pass
         /// through a single stream instance.  Set the stream position before accessing the stream.</remarks>
-        public abstract SparseStream Content
-        {
-            get;
-        }
+        public abstract SparseStream Content { get; }
 
         /// <summary>
         /// Gets the layers that make up the disk.
         /// </summary>
-        public abstract IEnumerable<VirtualDiskLayer> Layers
-        {
-            get;
-        }
+        public abstract IEnumerable<VirtualDiskLayer> Layers { get; }
 
         /// <summary>
         /// Gets or sets the Windows disk signature of the disk, which uniquely identifies the disk.
         /// </summary>
         public virtual int Signature
         {
-            get
-            {
-                return Utilities.ToInt32LittleEndian(GetMasterBootRecord(), 0x01B8);
-            }
+            get { return Utilities.ToInt32LittleEndian(GetMasterBootRecord(), 0x01B8); }
 
             set
             {
@@ -182,35 +162,32 @@ namespace DiscUtils
                 {
                     return null;
                 }
-                else if (tables.Count == 1)
+                if (tables.Count == 1)
                 {
                     return tables[0];
                 }
-                else
+                PartitionTable best = null;
+                int bestScore = -1;
+                for (int i = 0; i < tables.Count; ++i)
                 {
-                    PartitionTable best = null;
-                    int bestScore = -1;
-                    for (int i = 0; i < tables.Count; ++i)
+                    int newScore = 0;
+                    if (tables[i] is GuidPartitionTable)
                     {
-                        int newScore = 0;
-                        if (tables[i] is GuidPartitionTable)
-                        {
-                            newScore = 2;
-                        }
-                        else if (tables[i] is BiosPartitionTable)
-                        {
-                            newScore = 1;
-                        }
-
-                        if (newScore > bestScore)
-                        {
-                            bestScore = newScore;
-                            best = tables[i];
-                        }
+                        newScore = 2;
+                    }
+                    else if (tables[i] is BiosPartitionTable)
+                    {
+                        newScore = 1;
                     }
 
-                    return best;
+                    if (newScore > bestScore)
+                    {
+                        bestScore = newScore;
+                        best = tables[i];
+                    }
                 }
+
+                return best;
             }
         }
 
@@ -222,7 +199,7 @@ namespace DiscUtils
         {
             get
             {
-                return new VirtualDiskParameters()
+                return new VirtualDiskParameters
                 {
                     DiskType = DiskClass,
                     Capacity = Capacity,
@@ -238,10 +215,7 @@ namespace DiscUtils
         /// </summary>
         /// <remarks>This property provides access to meta-data about the disk format, for example whether the
         /// BIOS geometry is preserved in the disk file.</remarks>
-        public abstract VirtualDiskTypeInfo DiskTypeInfo
-        {
-            get;
-        }
+        public abstract VirtualDiskTypeInfo DiskTypeInfo { get; }
 
         /// <summary>
         /// Gets the set of supported variants of a type of virtual disk.
@@ -279,16 +253,16 @@ namespace DiscUtils
         {
             VirtualDiskFactory factory = VirtualDiskManager.TypeMap[type];
 
-            VirtualDiskParameters diskParams = new VirtualDiskParameters()
+            VirtualDiskParameters diskParams = new VirtualDiskParameters
             {
                 AdapterType = GenericDiskAdapterType.Scsi,
                 Capacity = capacity,
-                Geometry = geometry,
+                Geometry = geometry
             };
 
             if (parameters != null)
             {
-                foreach (var key in parameters.Keys)
+                foreach (string key in parameters.Keys)
                 {
                     diskParams.ExtendedParameters[key] = parameters[key];
                 }
@@ -326,16 +300,16 @@ namespace DiscUtils
         /// <returns>The newly created disk.</returns>
         public static VirtualDisk CreateDisk(string type, string variant, string path, long capacity, Geometry geometry, string user, string password, Dictionary<string, string> parameters)
         {
-            VirtualDiskParameters diskParams = new VirtualDiskParameters()
+            VirtualDiskParameters diskParams = new VirtualDiskParameters
             {
                 AdapterType = GenericDiskAdapterType.Scsi,
                 Capacity = capacity,
-                Geometry = geometry,
+                Geometry = geometry
             };
 
             if (parameters != null)
             {
-                foreach (var key in parameters.Keys)
+                foreach (string key in parameters.Keys)
                 {
                     diskParams.ExtendedParameters[key] = parameters[key];
                 }
@@ -564,7 +538,7 @@ namespace DiscUtils
             {
                 throw new ArgumentNullException(nameof(data));
             }
-            else if (data.Length != Sizes.Sector)
+            if (data.Length != Sizes.Sector)
             {
                 throw new ArgumentException("The Master Boot Record must be exactly 512 bytes in length", nameof(data));
             }
@@ -650,20 +624,17 @@ namespace DiscUtils
                 UriBuilder builder = new UriBuilder("file:" + path.Replace('\\', '/'));
                 return builder.Uri;
             }
-            else if (path.StartsWith("//", StringComparison.OrdinalIgnoreCase))
+            if (path.StartsWith("//", StringComparison.OrdinalIgnoreCase))
             {
                 UriBuilder builder = new UriBuilder("file:" + path);
                 return builder.Uri;
             }
-            else if (path.Length >= 2 && path[1] == ':')
+            if (path.Length >= 2 && path[1] == ':')
             {
                 UriBuilder builder = new UriBuilder("file:///" + path.Replace('\\', '/'));
                 return builder.Uri;
             }
-            else
-            {
-                return new Uri(path);
-            }
+            return new Uri(path);
         }
     }
 }

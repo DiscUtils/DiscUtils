@@ -26,13 +26,11 @@ namespace DiscUtils.Internal
 {
     internal class BuilderBufferExtent : BuilderExtent
     {
-        private bool _fixedBuffer;
         private byte[] _buffer;
+        private readonly bool _fixedBuffer;
 
         public BuilderBufferExtent(long start, long length)
-            : base(start, length)
-        {
-        }
+            : base(start, length) {}
 
         public BuilderBufferExtent(long start, byte[] buffer)
             : base(start, buffer.Length)
@@ -41,9 +39,7 @@ namespace DiscUtils.Internal
             _buffer = buffer;
         }
 
-        public override void Dispose()
-        {
-        }
+        public override void Dispose() {}
 
         internal override void PrepareForRead()
         {
@@ -55,8 +51,8 @@ namespace DiscUtils.Internal
 
         internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
-            int startOffset = (int) (diskOffset - Start);
-            int numBytes = (int) Math.Min(Length - startOffset, count);
+            int startOffset = (int)(diskOffset - Start);
+            int numBytes = (int)Math.Min(Length - startOffset, count);
             Array.Copy(_buffer, startOffset, block, offset, numBytes);
             return numBytes;
         }

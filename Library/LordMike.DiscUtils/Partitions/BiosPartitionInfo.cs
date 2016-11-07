@@ -20,46 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Partitions
 {
-    using System;
-
     /// <summary>
     /// Provides access to partition records in a BIOS (MBR) partition table.
     /// </summary>
     public sealed class BiosPartitionInfo : PartitionInfo
     {
-        private BiosPartitionRecord _record;
-        private BiosPartitionTable _table;
+        private readonly BiosPartitionRecord _record;
+        private readonly BiosPartitionTable _table;
 
         internal BiosPartitionInfo(BiosPartitionTable table, BiosPartitionRecord record)
         {
             _table = table;
             _record = record;
-        }
-
-        /// <summary>
-        /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
-        /// </summary>
-        public override long FirstSector
-        {
-            get { return _record.LBAStartAbsolute; }
-        }
-
-        /// <summary>
-        /// Gets the last sector of the partion (relative to start of disk) as a Logical Block Address (inclusive).
-        /// </summary>
-        public override long LastSector
-        {
-            get { return _record.LBAStartAbsolute + _record.LBALength - 1; }
-        }
-
-        /// <summary>
-        /// Always returns <see cref="System.Guid"/>.Empty.
-        /// </summary>
-        public override Guid GuidType
-        {
-            get { return Guid.Empty; }
         }
 
         /// <summary>
@@ -71,11 +47,27 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets the type of the partition as a string.
+        /// Gets the end (inclusive) of the partition as a CHS address.
         /// </summary>
-        public override string TypeAsString
+        public ChsAddress End
         {
-            get { return _record.FriendlyPartitionType; }
+            get { return new ChsAddress(_record.EndCylinder, _record.EndHead, _record.EndSector); }
+        }
+
+        /// <summary>
+        /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
+        /// </summary>
+        public override long FirstSector
+        {
+            get { return _record.LBAStartAbsolute; }
+        }
+
+        /// <summary>
+        /// Always returns <see cref="System.Guid"/>.Empty.
+        /// </summary>
+        public override Guid GuidType
+        {
+            get { return Guid.Empty; }
         }
 
         /// <summary>
@@ -87,19 +79,19 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets the start of the partition as a CHS address.
+        /// Gets a value indicating whether the partition is a primary (rather than extended) partition.
         /// </summary>
-        public ChsAddress Start
+        public bool IsPrimary
         {
-            get { return new ChsAddress(_record.StartCylinder, _record.StartHead, _record.StartSector); }
+            get { return PrimaryIndex >= 0; }
         }
 
         /// <summary>
-        /// Gets the end (inclusive) of the partition as a CHS address.
+        /// Gets the last sector of the partion (relative to start of disk) as a Logical Block Address (inclusive).
         /// </summary>
-        public ChsAddress End
+        public override long LastSector
         {
-            get { return new ChsAddress(_record.EndCylinder, _record.EndHead, _record.EndSector); }
+            get { return _record.LBAStartAbsolute + _record.LBALength - 1; }
         }
 
         /// <summary>
@@ -111,11 +103,19 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets a value indicating whether the partition is a primary (rather than extended) partition.
+        /// Gets the start of the partition as a CHS address.
         /// </summary>
-        public bool IsPrimary
+        public ChsAddress Start
         {
-            get { return PrimaryIndex >= 0; }
+            get { return new ChsAddress(_record.StartCylinder, _record.StartHead, _record.StartSector); }
+        }
+
+        /// <summary>
+        /// Gets the type of the partition as a string.
+        /// </summary>
+        public override string TypeAsString
+        {
+            get { return _record.FriendlyPartitionType; }
         }
 
         internal override PhysicalVolumeType VolumeType

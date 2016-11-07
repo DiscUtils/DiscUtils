@@ -30,10 +30,10 @@ namespace DiscUtils.Internal
     /// </summary>
     internal class SubBuffer : Buffer
     {
-        private long _first;
-        private long _length;
+        private readonly long _first;
+        private readonly long _length;
 
-        private IBuffer _parent;
+        private readonly IBuffer _parent;
 
         /// <summary>
         /// Initializes a new instance of the SubBuffer class.
@@ -115,7 +115,7 @@ namespace DiscUtils.Internal
             }
 
             return _parent.Read(pos + _first, buffer, offset,
-                (int) Math.Min(count, Math.Min(_length - pos, int.MaxValue)));
+                (int)Math.Min(count, Math.Min(_length - pos, int.MaxValue)));
         }
 
         /// <summary>

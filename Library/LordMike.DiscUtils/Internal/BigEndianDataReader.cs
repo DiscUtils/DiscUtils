@@ -27,9 +27,7 @@ namespace DiscUtils.Internal
     internal class BigEndianDataReader : DataReader
     {
         public BigEndianDataReader(Stream stream)
-            : base(stream)
-        {
-        }
+            : base(stream) {}
 
         public override ushort ReadUInt16()
         {

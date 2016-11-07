@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Represents the base layer, or a differencing layer of a VirtualDisk.
     /// </summary>
@@ -40,17 +40,9 @@ namespace DiscUtils
     public abstract class VirtualDiskLayer : IDisposable
     {
         /// <summary>
-        /// Finalizes an instance of the VirtualDiskLayer class.
+        /// Gets the capacity of the disk (in bytes).
         /// </summary>
-        ~VirtualDiskLayer()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// Gets the geometry of the virtual disk layer.
-        /// </summary>
-        public abstract Geometry Geometry { get; }
+        internal abstract long Capacity { get; }
 
         /// <summary>
         /// Gets and sets the logical extents that make up this layer.
@@ -59,6 +51,19 @@ namespace DiscUtils
         {
             get { return new List<VirtualDiskExtent>(); }
         }
+
+        /// <summary>
+        /// Gets the full path to this disk layer, or empty string.
+        /// </summary>
+        public virtual string FullPath
+        {
+            get { return string.Empty; }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the virtual disk layer.
+        /// </summary>
+        public abstract Geometry Geometry { get; }
 
         /// <summary>
         /// Gets a value indicating whether the layer only stores meaningful sectors.
@@ -71,25 +76,29 @@ namespace DiscUtils
         public abstract bool NeedsParent { get; }
 
         /// <summary>
-        /// Gets the full path to this disk layer, or empty string.
-        /// </summary>
-        public virtual string FullPath
-        {
-            get { return string.Empty; }
-        }
-
-        /// <summary>
-        /// Gets the capacity of the disk (in bytes).
-        /// </summary>
-        internal abstract long Capacity { get; }
-
-        /// <summary>
         /// Gets a <c>FileLocator</c> that can resolve relative paths, or <c>null</c>.
         /// </summary>
         /// <remarks>
         /// Typically used to locate parent disks.
         /// </remarks>
         internal abstract FileLocator RelativeFileLocator { get; }
+
+        /// <summary>
+        /// Disposes of this instance, freeing underlying resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the VirtualDiskLayer class.
+        /// </summary>
+        ~VirtualDiskLayer()
+        {
+            Dispose(false);
+        }
 
         /// <summary>
         /// Gets the content of this layer.
@@ -106,22 +115,11 @@ namespace DiscUtils
         public abstract string[] GetParentLocations();
 
         /// <summary>
-        /// Disposes of this instance, freeing underlying resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
         /// Disposes of underlying resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> if running inside Dispose(), indicating
         /// graceful cleanup of all managed objects should be performed, or <c>false</c>
         /// if running inside destructor.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-        }
+        protected virtual void Dispose(bool disposing) {}
     }
 }

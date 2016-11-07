@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System.IO;
-
     /// <summary>
     /// Provides a sparse equivalent to MemoryStream.
     /// </summary>
@@ -36,9 +35,7 @@ namespace DiscUtils
         /// </summary>
         /// <remarks>The created instance permits read and write access.</remarks>
         public SparseMemoryStream()
-            : base(new SparseMemoryBuffer(16*1024), FileAccess.ReadWrite)
-        {
-        }
+            : base(new SparseMemoryBuffer(16 * 1024), FileAccess.ReadWrite) {}
 
         /// <summary>
         /// Initializes a new instance of the SparseMemoryStream class.
@@ -46,8 +43,6 @@ namespace DiscUtils
         /// <param name="buffer">The buffer to use.</param>
         /// <param name="access">The access permitted to clients.</param>
         public SparseMemoryStream(SparseMemoryBuffer buffer, FileAccess access)
-            : base(buffer, access)
-        {
-        }
+            : base(buffer, access) {}
     }
 }

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Vfs
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Interface implemented by classes representing a directory.
     /// </summary>

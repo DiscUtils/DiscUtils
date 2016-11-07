@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Raw
 {
-    using System;
-    using System.IO;
-
     [VirtualDiskFactory("RAW", ".img,.ima,.vfd,.flp,.bif")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
         {
-            get { return new string[] {}; }
+            get { return new string[] { }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -46,7 +45,7 @@ namespace DiscUtils.Raw
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters)
+                                               VirtualDiskParameters diskParameters)
         {
             return Disk.Initialize(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None),
                 Ownership.Dispose, diskParameters.Capacity, diskParameters.Geometry);
@@ -70,14 +69,14 @@ namespace DiscUtils.Raw
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "RAW",
                 Variant = string.Empty,
                 CanBeHardDisk = true,
                 DeterministicGeometry = true,
                 PreservesBiosGeometry = false,
-                CalcGeometry = c => Geometry.FromCapacity(c),
+                CalcGeometry = c => Geometry.FromCapacity(c)
             };
         }
     }

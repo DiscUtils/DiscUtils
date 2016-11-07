@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using DiscUtils.CoreCompat;
+using DiscUtils.Vfs;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using DiscUtils.Vfs;
-
     /// <summary>
     /// FileSystemManager determines which file systems are present on a volume.
     /// </summary>
@@ -48,7 +47,7 @@ namespace DiscUtils
         {
             _factories = new List<VfsFileSystemFactory>();
         }
-        
+
         /// <summary>
         /// Registers new file systems with an instance of this class.
         /// </summary>
@@ -111,7 +110,7 @@ namespace DiscUtils
             BufferedStream detectStream = new BufferedStream(stream);
             List<FileSystemInfo> detected = new List<FileSystemInfo>();
 
-            foreach (var factory in _factories)
+            foreach (VfsFileSystemFactory factory in _factories)
             {
                 detected.AddRange(factory.Detect(detectStream, volume));
             }

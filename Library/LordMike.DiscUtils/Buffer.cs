@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils
 {
 #if !NETCORE
     using System;
 #endif
-
-    using System.Collections.Generic;
 
     /// <summary>
     /// Abstract base class for implementations of IBuffer.
@@ -103,9 +103,7 @@ namespace DiscUtils
         /// Flushes all data to the underlying storage.
         /// </summary>
         /// <remarks>The default behaviour, implemented by this class, is to take no action.</remarks>
-        public virtual void Flush()
-        {
-        }
+        public virtual void Flush() {}
 
         /// <summary>
         /// Sets the capacity of the buffer, truncating if appropriate.

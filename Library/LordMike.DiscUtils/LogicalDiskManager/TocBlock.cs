@@ -26,19 +26,19 @@ namespace DiscUtils.LogicalDiskManager
 {
     internal class TocBlock
     {
-        public string Signature; // TOCBLOCK
         public uint Checksum; // 00 00 08 B6
+        public long Item1Size; // Unit?
+        public long Item1Start; // Sector Offset from ConfigurationStart
+        public string Item1Str; // 'config', length 10
+        public long Item2Size; // Unit?
+        public long Item2Start; // Sector Offset from ConfigurationStart
+        public string Item2Str; // 'log', length 10
         public long SequenceNumber; // 00 .. 01
+        public string Signature; // TOCBLOCK
         public long Unknown1; // 0
         public long Unknown2; // 00
-        public string Item1Str; // 'config', length 10
-        public long Item1Start; // Sector Offset from ConfigurationStart
-        public long Item1Size; // Unit?
         public uint Unknown3; // 00 06 00 01  (may be two values?)
         public uint Unknown4; // 00 00 00 00
-        public string Item2Str; // 'log', length 10
-        public long Item2Start; // Sector Offset from ConfigurationStart
-        public long Item2Size; // Unit?
         public uint Unknown5; // 00 06 00 01  (may be two values?)
         public uint Unknown6; // 00 00 00 00
 
@@ -61,11 +61,12 @@ namespace DiscUtils.LogicalDiskManager
             Unknown6 = Utilities.ToUInt32BigEndian(buffer, offset + 0x64);
         }
 
-        ////private static int CalcChecksum()
-        ////{
-        ////    // Zero checksum bytes (0x08, 4)
-        ////    // Add all byte values for ?? bytes
-        ////    throw new NotImplementedException();
         ////}
+        ////    throw new NotImplementedException();
+        ////    // Add all byte values for ?? bytes
+        ////    // Zero checksum bytes (0x08, 4)
+        ////{
+
+        ////private static int CalcChecksum()
     }
 }

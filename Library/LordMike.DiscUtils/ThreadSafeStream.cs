@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Provides a thread-safe wrapping around a sparse stream.
     /// </summary>
@@ -50,7 +50,7 @@ namespace DiscUtils
     public class ThreadSafeStream : SparseStream
     {
         private CommonState _common;
-        private bool _ownsCommon;
+        private readonly bool _ownsCommon;
         private long _position;
 
         /// <summary>
@@ -60,9 +60,7 @@ namespace DiscUtils
         /// <remarks>Do not directly modify <c>toWrap</c> after wrapping it, unless the thread-safe views
         /// will no longer be used.</remarks>
         public ThreadSafeStream(SparseStream toWrap)
-            : this(toWrap, Ownership.None)
-        {
-        }
+            : this(toWrap, Ownership.None) {}
 
         /// <summary>
         /// Initializes a new instance of the ThreadSafeStream class.
@@ -92,21 +90,6 @@ namespace DiscUtils
             if (_common == null)
             {
                 throw new ObjectDisposedException("toClone");
-            }
-        }
-
-        /// <summary>
-        /// Gets the parts of the stream that are stored.
-        /// </summary>
-        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                lock (_common)
-                {
-                    return Wrapped.Extents;
-                }
             }
         }
 
@@ -142,6 +125,21 @@ namespace DiscUtils
                 lock (_common)
                 {
                     return Wrapped.CanWrite;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the parts of the stream that are stored.
+        /// </summary>
+        /// <remarks>This may be an empty enumeration if all bytes are zero.</remarks>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                lock (_common)
+                {
+                    return Wrapped.Extents;
                 }
             }
         }
@@ -259,11 +257,8 @@ namespace DiscUtils
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         /// <summary>

@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     internal abstract class FileLocator
     {
         public abstract bool Exists(string fileName);

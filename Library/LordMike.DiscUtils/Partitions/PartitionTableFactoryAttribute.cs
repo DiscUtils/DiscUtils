@@ -20,12 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Partitions
 {
-    using System;
-
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    internal sealed class PartitionTableFactoryAttribute : Attribute
-    {
-    }
+    internal sealed class PartitionTableFactoryAttribute : Attribute {}
 }

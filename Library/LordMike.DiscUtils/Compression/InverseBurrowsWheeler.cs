@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Compression
 {
-    using System;
-
     internal sealed class InverseBurrowsWheeler : DataBlockTransform
     {
-        private int[] _pointers;
-        private int[] _nextPos;
+        private readonly int[] _nextPos;
+        private readonly int[] _pointers;
 
         public InverseBurrowsWheeler(int bufferSize)
         {
@@ -35,12 +35,12 @@ namespace DiscUtils.Compression
             _nextPos = new int[256];
         }
 
-        public int OriginalIndex { get; set; }
-
         protected override bool BuffersMustNotOverlap
         {
             get { return true; }
         }
+
+        public int OriginalIndex { get; set; }
 
         protected override int DoProcess(byte[] input, int inputOffset, int inputCount, byte[] output, int outputOffset)
         {

@@ -20,81 +20,52 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Archives
 {
-    using System;
-    using System.IO;
-
     internal sealed class UnixBuildFileRecord
     {
-        private string _name;
-        private UnixFilePermissions _fileMode;
-        private int _ownerId;
-        private int _groupId;
-        private DateTime _modificationTime;
-        private BuilderExtentSource _source;
+        private readonly BuilderExtentSource _source;
 
         public UnixBuildFileRecord(string name, byte[] buffer)
-            : this(name, new BuilderBufferExtentSource(buffer), 0, 0, 0, Utilities.UnixEpoch)
-        {
-        }
+            : this(name, new BuilderBufferExtentSource(buffer), 0, 0, 0, Utilities.UnixEpoch) {}
 
         public UnixBuildFileRecord(string name, Stream stream)
-            : this(name, new BuilderStreamExtentSource(stream), 0, 0, 0, Utilities.UnixEpoch)
-        {
-        }
+            : this(name, new BuilderStreamExtentSource(stream), 0, 0, 0, Utilities.UnixEpoch) {}
 
         public UnixBuildFileRecord(
             string name, byte[] buffer, UnixFilePermissions fileMode, int ownerId, int groupId,
             DateTime modificationTime)
-            : this(name, new BuilderBufferExtentSource(buffer), fileMode, ownerId, groupId, modificationTime)
-        {
-        }
+            : this(name, new BuilderBufferExtentSource(buffer), fileMode, ownerId, groupId, modificationTime) {}
 
         public UnixBuildFileRecord(
             string name, Stream stream, UnixFilePermissions fileMode, int ownerId, int groupId,
             DateTime modificationTime)
-            : this(name, new BuilderStreamExtentSource(stream), fileMode, ownerId, groupId, modificationTime)
-        {
-        }
+            : this(name, new BuilderStreamExtentSource(stream), fileMode, ownerId, groupId, modificationTime) {}
 
         public UnixBuildFileRecord(string name, BuilderExtentSource fileSource, UnixFilePermissions fileMode,
-            int ownerId, int groupId, DateTime modificationTime)
+                                   int ownerId, int groupId, DateTime modificationTime)
         {
-            _name = name;
+            Name = name;
             _source = fileSource;
-            _fileMode = fileMode;
-            _ownerId = ownerId;
-            _groupId = groupId;
-            _modificationTime = modificationTime;
+            FileMode = fileMode;
+            OwnerId = ownerId;
+            GroupId = groupId;
+            ModificationTime = modificationTime;
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public UnixFilePermissions FileMode { get; }
 
-        public UnixFilePermissions FileMode
-        {
-            get { return this._fileMode; }
-        }
+        public int GroupId { get; }
 
-        public int OwnerId
-        {
-            get { return this._ownerId; }
-        }
+        public DateTime ModificationTime { get; }
 
-        public int GroupId
-        {
-            get { return this._groupId; }
-        }
+        public string Name { get; }
 
-        public DateTime ModificationTime
-        {
-            get { return this._modificationTime; }
-        }
+        public int OwnerId { get; }
 
         public BuilderExtent Fix(long pos)
         {

@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils
 {
-    using System;
-
     /// <summary>
     /// Standard Unix-style file system permissions.
     /// </summary>
@@ -108,6 +108,6 @@ namespace DiscUtils
         /// <summary>
         /// Set UID on execute.
         /// </summary>
-        SetUserId = 0x800,
+        SetUserId = 0x800
     }
 }

@@ -8,16 +8,15 @@ namespace DiscUtils
 {
     public static class VirtualDiskManager
     {
-        internal static Dictionary<string, VirtualDiskFactory> ExtensionMap { get; }
-        internal static Dictionary<string, VirtualDiskFactory> TypeMap { get; }
-        internal static Dictionary<string, Type> DiskTransports { get; }
-
         static VirtualDiskManager()
         {
             ExtensionMap = new Dictionary<string, VirtualDiskFactory>();
             TypeMap = new Dictionary<string, VirtualDiskFactory>();
             DiskTransports = new Dictionary<string, Type>();
         }
+
+        internal static Dictionary<string, Type> DiskTransports { get; }
+        internal static Dictionary<string, VirtualDiskFactory> ExtensionMap { get; }
 
         /// <summary>
         /// Gets the set of disk formats supported as an array of file extensions.
@@ -34,7 +33,9 @@ namespace DiscUtils
         {
             get { return TypeMap.Keys; }
         }
-        
+
+        internal static Dictionary<string, VirtualDiskFactory> TypeMap { get; }
+
         public static void RegisterVirtualDiskTypes(Assembly assembly)
         {
             foreach (Type type in assembly.GetTypes())

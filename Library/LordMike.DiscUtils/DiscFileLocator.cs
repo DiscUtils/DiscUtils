@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     internal sealed class DiscFileLocator : FileLocator
     {
-        private DiscFileSystem _fileSystem;
-        private string _basePath;
+        private readonly string _basePath;
+        private readonly DiscFileSystem _fileSystem;
 
         public DiscFileLocator(DiscFileSystem fileSystem, string basePath)
         {
@@ -83,7 +82,7 @@ namespace DiscUtils
             }
 
             // Common root if the same file system instance.
-            return Object.ReferenceEquals(otherDiscLocator._fileSystem, _fileSystem);
+            return ReferenceEquals(otherDiscLocator._fileSystem, _fileSystem);
         }
 
         public override string ResolveRelativePath(string path)

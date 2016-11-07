@@ -29,10 +29,10 @@ namespace DiscUtils.Internal
     internal class BuiltStream : SparseStream
     {
         private Stream _baseStream;
-        private long _length;
-        private List<BuilderExtent> _extents;
 
         private BuilderExtent _currentExtent;
+        private readonly List<BuilderExtent> _extents;
+        private readonly long _length;
         private long _position;
 
         public BuiltStream(long length, List<BuilderExtent> extents)
@@ -60,6 +60,20 @@ namespace DiscUtils.Internal
             get { return false; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                foreach (BuilderExtent extent in _extents)
+                {
+                    foreach (StreamExtent streamExtent in extent.StreamExtents)
+                    {
+                        yield return streamExtent;
+                    }
+                }
+            }
+        }
+
         public override long Length
         {
             get { return _length; }
@@ -71,24 +85,7 @@ namespace DiscUtils.Internal
             set { _position = value; }
         }
 
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                foreach (var extent in _extents)
-                {
-                    foreach (var streamExtent in extent.StreamExtents)
-                    {
-                        yield return streamExtent;
-                    }
-                }
-            }
-        }
-
-        public override void Flush()
-        {
-            return;
-        }
+        public override void Flush() {}
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -133,7 +130,7 @@ namespace DiscUtils.Internal
                     if (nextExtent != null)
                     {
                         numRead = _baseStream.Read(buffer, offset + totalRead,
-                            (int) Math.Min(count - totalRead, nextExtent.Start - _position));
+                            (int)Math.Min(count - totalRead, nextExtent.Start - _position));
                     }
                     else
                     {
@@ -208,7 +205,7 @@ namespace DiscUtils.Internal
             int min = 0;
             int max = _extents.Count - 1;
 
-            if (_extents.Count == 0 || (_extents[_extents.Count - 1].Start + _extents[_extents.Count - 1].Length) <= pos)
+            if (_extents.Count == 0 || _extents[_extents.Count - 1].Start + _extents[_extents.Count - 1].Length <= pos)
             {
                 return null;
             }
@@ -220,7 +217,7 @@ namespace DiscUtils.Internal
                     return _extents[min];
                 }
 
-                int mid = (max + min)/2;
+                int mid = (max + min) / 2;
                 if (_extents[mid].Start < pos)
                 {
                     min = mid + 1;
@@ -239,13 +236,9 @@ namespace DiscUtils.Internal
         private class SearchExtent : BuilderExtent
         {
             public SearchExtent(long pos)
-                : base(pos, 1)
-            {
-            }
+                : base(pos, 1) {}
 
-            public override void Dispose()
-            {
-            }
+            public override void Dispose() {}
 
             internal override void PrepareForRead()
             {
@@ -285,7 +278,7 @@ namespace DiscUtils.Internal
                     // x < y, with no intersection
                     return -1;
                 }
-                else if (x.Start >= y.Start + y.Length)
+                if (x.Start >= y.Start + y.Length)
                 {
                     // x > y, with no intersection
                     return 1;
@@ -315,14 +308,11 @@ namespace DiscUtils.Internal
                 {
                     return -1;
                 }
-                else if (val > 0)
+                if (val > 0)
                 {
                     return 1;
                 }
-                else
-                {
-                    return 0;
-                }
+                return 0;
             }
         }
     }

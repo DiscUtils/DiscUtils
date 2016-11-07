@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     internal class DynamicDiskGroup : IDiagnosticTraceable
     {
-        private DiskGroupRecord _record;
-        private Dictionary<Guid, DynamicDisk> _disks;
-        private Database _database;
+        private readonly Database _database;
+        private readonly Dictionary<Guid, DynamicDisk> _disks;
+        private readonly DiskGroupRecord _record;
 
         internal DynamicDiskGroup(VirtualDisk disk)
         {
@@ -44,12 +43,6 @@ namespace DiscUtils.LogicalDiskManager
             _database = dynDisk.Database;
             _disks.Add(dynDisk.Id, dynDisk);
             _record = dynDisk.Database.GetDiskGroup(dynDisk.GroupId);
-        }
-
-        public void Add(VirtualDisk disk)
-        {
-            DynamicDisk dynDisk = new DynamicDisk(disk);
-            _disks.Add(dynDisk.Id, dynDisk);
         }
 
         #region IDiagnosticTraceable Members
@@ -65,7 +58,7 @@ namespace DiscUtils.LogicalDiskManager
             writer.WriteLine();
 
             writer.WriteLine(linePrefix + "  DISKS");
-            foreach (var disk in _database.Disks)
+            foreach (DiskRecord disk in _database.Disks)
             {
                 writer.WriteLine(linePrefix + "    DISK (" + disk.Name + ")");
                 writer.WriteLine(linePrefix + "      Name: " + disk.Name);
@@ -83,7 +76,7 @@ namespace DiscUtils.LogicalDiskManager
             }
 
             writer.WriteLine(linePrefix + "  VOLUMES");
-            foreach (var vol in _database.Volumes)
+            foreach (VolumeRecord vol in _database.Volumes)
             {
                 writer.WriteLine(linePrefix + "    VOLUME (" + vol.Name + ")");
                 writer.WriteLine(linePrefix + "      Name: " + vol.Name);
@@ -100,7 +93,7 @@ namespace DiscUtils.LogicalDiskManager
                 writer.WriteLine(linePrefix + "      Link Id: " + vol.PartitionComponentLink);
 
                 writer.WriteLine(linePrefix + "      COMPONENTS");
-                foreach (var cmpnt in _database.GetVolumeComponents(vol.Id))
+                foreach (ComponentRecord cmpnt in _database.GetVolumeComponents(vol.Id))
                 {
                     writer.WriteLine(linePrefix + "        COMPONENT (" + cmpnt.Name + ")");
                     writer.WriteLine(linePrefix + "          Name: " + cmpnt.Name);
@@ -115,7 +108,7 @@ namespace DiscUtils.LogicalDiskManager
                     writer.WriteLine(linePrefix + "          Stripe Stride: " + cmpnt.StripeStride);
 
                     writer.WriteLine(linePrefix + "          EXTENTS");
-                    foreach (var extent in _database.GetComponentExtents(cmpnt.Id))
+                    foreach (ExtentRecord extent in _database.GetComponentExtents(cmpnt.Id))
                     {
                         writer.WriteLine(linePrefix + "            EXTENT (" + extent.Name + ")");
                         writer.WriteLine(linePrefix + "              Name: " + extent.Name);
@@ -138,10 +131,16 @@ namespace DiscUtils.LogicalDiskManager
 
         #endregion
 
+        public void Add(VirtualDisk disk)
+        {
+            DynamicDisk dynDisk = new DynamicDisk(disk);
+            _disks.Add(dynDisk.Id, dynDisk);
+        }
+
         internal DynamicVolume[] GetVolumes()
         {
             List<DynamicVolume> vols = new List<DynamicVolume>();
-            foreach (var record in _database.GetVolumes())
+            foreach (VolumeRecord record in _database.GetVolumes())
             {
                 vols.Add(new DynamicVolume(this, record.VolumeGuid));
             }
@@ -170,7 +169,7 @@ namespace DiscUtils.LogicalDiskManager
             {
                 return 1;
             }
-            else if (x.OffsetInVolumeLba < y.OffsetInVolumeLba)
+            if (x.OffsetInVolumeLba < y.OffsetInVolumeLba)
             {
                 return -1;
             }
@@ -184,7 +183,7 @@ namespace DiscUtils.LogicalDiskManager
             {
                 return 1;
             }
-            else if (x.InterleaveOrder < y.InterleaveOrder)
+            if (x.InterleaveOrder < y.InterleaveOrder)
             {
                 return -1;
             }
@@ -194,7 +193,7 @@ namespace DiscUtils.LogicalDiskManager
 
         private static LogicalVolumeStatus WorstOf(LogicalVolumeStatus x, LogicalVolumeStatus y)
         {
-            return (LogicalVolumeStatus) Math.Max((int) x, (int) y);
+            return (LogicalVolumeStatus)Math.Max((int)x, (int)y);
         }
 
         private LogicalVolumeStatus GetVolumeStatus(VolumeRecord volume)
@@ -202,7 +201,7 @@ namespace DiscUtils.LogicalDiskManager
             int numFailed = 0;
             ulong numOK = 0;
             LogicalVolumeStatus worst = LogicalVolumeStatus.Healthy;
-            foreach (var cmpnt in _database.GetVolumeComponents(volume.Id))
+            foreach (ComponentRecord cmpnt in _database.GetVolumeComponents(volume.Id))
             {
                 LogicalVolumeStatus cmpntStatus = GetComponentStatus(cmpnt);
                 worst = WorstOf(worst, cmpntStatus);
@@ -220,14 +219,11 @@ namespace DiscUtils.LogicalDiskManager
             {
                 return LogicalVolumeStatus.Failed;
             }
-            else if (numOK == volume.ComponentCount)
+            if (numOK == volume.ComponentCount)
             {
                 return worst;
             }
-            else
-            {
-                return LogicalVolumeStatus.FailedRedundancy;
-            }
+            return LogicalVolumeStatus.FailedRedundancy;
         }
 
         private LogicalVolumeStatus GetComponentStatus(ComponentRecord cmpnt)
@@ -235,7 +231,7 @@ namespace DiscUtils.LogicalDiskManager
             // NOTE: no support for RAID, so either valid or failed...
             LogicalVolumeStatus status = LogicalVolumeStatus.Healthy;
 
-            foreach (var extent in _database.GetComponentExtents(cmpnt.Id))
+            foreach (ExtentRecord extent in _database.GetComponentExtents(cmpnt.Id))
             {
                 DiskRecord disk = _database.GetDisk(extent.DiskId);
                 if (!_disks.ContainsKey(new Guid(disk.DiskGuidString)))
@@ -255,7 +251,7 @@ namespace DiscUtils.LogicalDiskManager
             DynamicDisk diskObj = _disks[new Guid(disk.DiskGuidString)];
 
             return new SubStream(diskObj.Content, Ownership.None,
-                (diskObj.DataOffset + extent.DiskOffsetLba)*Sizes.Sector, extent.SizeLba*Sizes.Sector);
+                (diskObj.DataOffset + extent.DiskOffsetLba) * Sizes.Sector, extent.SizeLba * Sizes.Sector);
         }
 
         private SparseStream OpenComponent(ComponentRecord component)
@@ -267,7 +263,7 @@ namespace DiscUtils.LogicalDiskManager
 
                 // Sanity Check...
                 long pos = 0;
-                foreach (var extent in extents)
+                foreach (ExtentRecord extent in extents)
                 {
                     if (extent.OffsetInVolumeLba != pos)
                     {
@@ -278,36 +274,33 @@ namespace DiscUtils.LogicalDiskManager
                 }
 
                 List<SparseStream> streams = new List<SparseStream>();
-                foreach (var extent in extents)
+                foreach (ExtentRecord extent in extents)
                 {
                     streams.Add(OpenExtent(extent));
                 }
 
                 return new ConcatStream(Ownership.Dispose, streams.ToArray());
             }
-            else if (component.MergeType == ExtentMergeType.Interleaved)
+            if (component.MergeType == ExtentMergeType.Interleaved)
             {
                 List<ExtentRecord> extents = new List<ExtentRecord>(_database.GetComponentExtents(component.Id));
                 extents.Sort(CompareExtentInterleaveOrder);
 
                 List<SparseStream> streams = new List<SparseStream>();
-                foreach (var extent in extents)
+                foreach (ExtentRecord extent in extents)
                 {
                     streams.Add(OpenExtent(extent));
                 }
 
-                return new StripedStream(component.StripeSizeSectors*Sizes.Sector, Ownership.Dispose, streams.ToArray());
+                return new StripedStream(component.StripeSizeSectors * Sizes.Sector, Ownership.Dispose, streams.ToArray());
             }
-            else
-            {
-                throw new NotImplementedException("Unknown component mode: " + component.MergeType);
-            }
+            throw new NotImplementedException("Unknown component mode: " + component.MergeType);
         }
 
         private SparseStream OpenVolume(VolumeRecord volume)
         {
             List<SparseStream> cmpntStreams = new List<SparseStream>();
-            foreach (var component in _database.GetVolumeComponents(volume.Id))
+            foreach (ComponentRecord component in _database.GetVolumeComponents(volume.Id))
             {
                 if (GetComponentStatus(component) == LogicalVolumeStatus.Healthy)
                 {
@@ -319,14 +312,11 @@ namespace DiscUtils.LogicalDiskManager
             {
                 throw new IOException("Volume with no associated or healthy components");
             }
-            else if (cmpntStreams.Count == 1)
+            if (cmpntStreams.Count == 1)
             {
                 return cmpntStreams[0];
             }
-            else
-            {
-                return new MirrorStream(Ownership.Dispose, cmpntStreams.ToArray());
-            }
+            return new MirrorStream(Ownership.Dispose, cmpntStreams.ToArray());
         }
     }
 }

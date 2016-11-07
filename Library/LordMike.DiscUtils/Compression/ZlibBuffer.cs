@@ -28,8 +28,8 @@ namespace DiscUtils.Compression
 {
     internal class ZlibBuffer : Buffer
     {
-        Stream _stream;
         private Ownership _ownership;
+        private readonly Stream _stream;
         private int position;
 
         public ZlibBuffer(Stream stream, Ownership ownership)
@@ -56,13 +56,13 @@ namespace DiscUtils.Compression
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
-            if (pos != this.position)
+            if (pos != position)
             {
                 throw new NotSupportedException();
             }
 
             int read = _stream.Read(buffer, offset, count);
-            this.position += read;
+            position += read;
             return read;
         }
 

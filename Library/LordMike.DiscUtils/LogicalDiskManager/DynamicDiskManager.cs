@@ -20,18 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
+using DiscUtils.Partitions;
+
 namespace DiscUtils.LogicalDiskManager
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     /// <summary>
     /// A class that understands Windows LDM structures, mapping physical volumes to logical volumes.
     /// </summary>
     public class DynamicDiskManager : IDiagnosticTraceable
     {
-        private Dictionary<string, DynamicDiskGroup> _groups;
+        private readonly Dictionary<string, DynamicDiskGroup> _groups;
 
         /// <summary>
         /// Initializes a new instance of the DynamicDiskManager class.
@@ -41,9 +41,23 @@ namespace DiscUtils.LogicalDiskManager
         {
             _groups = new Dictionary<string, DynamicDiskGroup>();
 
-            foreach (var disk in disks)
+            foreach (VirtualDisk disk in disks)
             {
                 Add(disk);
+            }
+        }
+
+        /// <summary>
+        /// Writes a diagnostic report about the state of the disk manager.
+        /// </summary>
+        /// <param name="writer">The writer to send the report to.</param>
+        /// <param name="linePrefix">The prefix to place at the start of each line.</param>
+        public void Dump(TextWriter writer, string linePrefix)
+        {
+            writer.WriteLine(linePrefix + "DISK GROUPS");
+            foreach (DynamicDiskGroup group in _groups.Values)
+            {
+                group.Dump(writer, linePrefix + "  ");
             }
         }
 
@@ -72,7 +86,7 @@ namespace DiscUtils.LogicalDiskManager
         {
             if (disk.IsPartitioned)
             {
-                foreach (var partition in disk.Partitions.Partitions)
+                foreach (PartitionInfo partition in disk.Partitions.Partitions)
                 {
                     if (IsLdmPartition(partition))
                     {
@@ -111,9 +125,9 @@ namespace DiscUtils.LogicalDiskManager
         public LogicalVolumeInfo[] GetLogicalVolumes()
         {
             List<LogicalVolumeInfo> result = new List<LogicalVolumeInfo>();
-            foreach (var group in _groups.Values)
+            foreach (DynamicDiskGroup group in _groups.Values)
             {
-                foreach (var volume in group.GetVolumes())
+                foreach (DynamicVolume volume in group.GetVolumes())
                 {
                     LogicalVolumeInfo lvi = new LogicalVolumeInfo(
                         volume.Identity,
@@ -127,20 +141,6 @@ namespace DiscUtils.LogicalDiskManager
             }
 
             return result.ToArray();
-        }
-
-        /// <summary>
-        /// Writes a diagnostic report about the state of the disk manager.
-        /// </summary>
-        /// <param name="writer">The writer to send the report to.</param>
-        /// <param name="linePrefix">The prefix to place at the start of each line.</param>
-        public void Dump(TextWriter writer, string linePrefix)
-        {
-            writer.WriteLine(linePrefix + "DISK GROUPS");
-            foreach (var group in _groups.Values)
-            {
-                group.Dump(writer, linePrefix + "  ");
-            }
         }
 
         private static bool IsLdmPartition(PartitionInfo partition)

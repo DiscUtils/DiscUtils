@@ -31,9 +31,9 @@ namespace DiscUtils.Internal
     /// <remarks>Uses the read-modify-write pattern to align I/O.</remarks>
     internal sealed class AligningStream : WrappingMappedStream<SparseStream>
     {
-        private int _blockSize;
+        private readonly byte[] _alignmentBuffer;
+        private readonly int _blockSize;
         private long _position;
-        private byte[] _alignmentBuffer;
 
         public AligningStream(SparseStream toWrap, Ownership ownership, int blockSize)
             : base(toWrap, ownership, null)
@@ -41,10 +41,6 @@ namespace DiscUtils.Internal
             _blockSize = blockSize;
             _alignmentBuffer = new byte[blockSize];
         }
-
-        private delegate void ModifyStream(SparseStream stream, int opOffset, int count);
-
-        private delegate void ModifyBuffer(byte[] buffer, int offset, int opOffset, int count);
 
         public override long Position
         {
@@ -100,26 +96,23 @@ namespace DiscUtils.Internal
             {
                 throw new IOException("Attempt to move before beginning of stream");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         public override void Clear(int count)
         {
             DoOperation(
-                (SparseStream s, int opOffset, int opCount) => { s.Clear(opCount); },
-                (byte[] buffer, int offset, int opOffset, int opCount) => { Array.Clear(buffer, offset, opCount); },
+                (s, opOffset, opCount) => { s.Clear(opCount); },
+                (buffer, offset, opOffset, opCount) => { Array.Clear(buffer, offset, opCount); },
                 count);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
             DoOperation(
-                (SparseStream s, int opOffset, int opCount) => { s.Write(buffer, offset + opOffset, opCount); },
-                (byte[] tempBuffer, int tempOffset, int opOffset, int opCount) => { Array.Copy(buffer, offset + opOffset, tempBuffer, tempOffset, opCount); },
+                (s, opOffset, opCount) => { s.Write(buffer, offset + opOffset, opCount); },
+                (tempBuffer, tempOffset, opOffset, opCount) => { Array.Copy(buffer, offset + opOffset, tempBuffer, tempOffset, opCount); },
                 count);
         }
 
@@ -155,7 +148,7 @@ namespace DiscUtils.Internal
                 return;
             }
 
-            int passthroughLength = (int)Utilities.RoundDown((_position + count) - alignedPos, _blockSize);
+            int passthroughLength = (int)Utilities.RoundDown(_position + count - alignedPos, _blockSize);
             if (passthroughLength > 0)
             {
                 WrappedStream.Position = alignedPos;
@@ -179,5 +172,9 @@ namespace DiscUtils.Internal
 
             _position = unalignedEnd;
         }
+
+        private delegate void ModifyStream(SparseStream stream, int opOffset, int count);
+
+        private delegate void ModifyBuffer(byte[] buffer, int offset, int opOffset, int count);
     }
 }

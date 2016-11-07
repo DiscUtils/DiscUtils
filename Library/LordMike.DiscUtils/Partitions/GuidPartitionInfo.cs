@@ -20,17 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Partitions
 {
-    using System;
-
     /// <summary>
     /// Provides access to partition records in a GUID partition table.
     /// </summary>
     public sealed class GuidPartitionInfo : PartitionInfo
     {
-        private GuidPartitionTable _table;
-        private GptEntry _entry;
+        private readonly GptEntry _entry;
+        private readonly GuidPartitionTable _table;
 
         internal GuidPartitionInfo(GuidPartitionTable table, GptEntry entry)
         {
@@ -39,27 +39,11 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
+        /// Gets the attributes of the partition.
         /// </summary>
-        public override long FirstSector
+        public long Attributes
         {
-            get { return _entry.FirstUsedLogicalBlock; }
-        }
-
-        /// <summary>
-        /// Gets the last sector of the partion (relative to start of disk) as a Logical Block Address (inclusive).
-        /// </summary>
-        public override long LastSector
-        {
-            get { return _entry.LastUsedLogicalBlock; }
-        }
-
-        /// <summary>
-        /// Gets the type of the partition, as a GUID.
-        /// </summary>
-        public override Guid GuidType
-        {
-            get { return _entry.PartitionType; }
+            get { return (long)_entry.Attributes; }
         }
 
         /// <summary>
@@ -71,11 +55,35 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets the type of the partition as a string.
+        /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
         /// </summary>
-        public override string TypeAsString
+        public override long FirstSector
         {
-            get { return _entry.FriendlyPartitionType; }
+            get { return _entry.FirstUsedLogicalBlock; }
+        }
+
+        /// <summary>
+        /// Gets the type of the partition, as a GUID.
+        /// </summary>
+        public override Guid GuidType
+        {
+            get { return _entry.PartitionType; }
+        }
+
+        /// <summary>
+        /// Gets the unique identity of this specific partition.
+        /// </summary>
+        public Guid Identity
+        {
+            get { return _entry.Identity; }
+        }
+
+        /// <summary>
+        /// Gets the last sector of the partion (relative to start of disk) as a Logical Block Address (inclusive).
+        /// </summary>
+        public override long LastSector
+        {
+            get { return _entry.LastUsedLogicalBlock; }
         }
 
         /// <summary>
@@ -87,19 +95,11 @@ namespace DiscUtils.Partitions
         }
 
         /// <summary>
-        /// Gets the attributes of the partition.
+        /// Gets the type of the partition as a string.
         /// </summary>
-        public long Attributes
+        public override string TypeAsString
         {
-            get { return (long) _entry.Attributes; }
-        }
-
-        /// <summary>
-        /// Gets the unique identity of this specific partition.
-        /// </summary>
-        public Guid Identity
-        {
-            get { return _entry.Identity; }
+            get { return _entry.FriendlyPartitionType; }
         }
 
         internal override PhysicalVolumeType VolumeType

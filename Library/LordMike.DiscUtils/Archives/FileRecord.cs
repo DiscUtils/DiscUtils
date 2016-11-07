@@ -24,9 +24,9 @@ namespace DiscUtils.Archives
 {
     internal sealed class FileRecord
     {
+        public long Length;
         public string Name;
         public long Start;
-        public long Length;
 
         public FileRecord(string name, long start, long length)
         {

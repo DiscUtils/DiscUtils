@@ -35,21 +35,15 @@ namespace DiscUtils.Internal
         }
 
         protected BuilderBytesExtent(long start, long length)
-            : base(start, length)
-        {
-        }
+            : base(start, length) {}
 
-        public override void Dispose()
-        {
-        }
+        public override void Dispose() {}
 
-        internal override void PrepareForRead()
-        {
-        }
+        internal override void PrepareForRead() {}
 
         internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
-            int start = (int) Math.Min(diskOffset - Start, _data.Length);
+            int start = (int)Math.Min(diskOffset - Start, _data.Length);
             int numRead = Math.Min(count, _data.Length - start);
 
             Array.Copy(_data, start, block, offset, numRead);
@@ -57,8 +51,6 @@ namespace DiscUtils.Internal
             return numRead;
         }
 
-        internal override void DisposeReadState()
-        {
-        }
+        internal override void DisposeReadState() {}
     }
 }

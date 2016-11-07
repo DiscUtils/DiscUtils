@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Security.AccessControl;
+
 namespace DiscUtils
 {
-    using System.Security.AccessControl;
-
     /// <summary>
     /// Provides the base class for all file systems that support Windows semantics.
     /// </summary>

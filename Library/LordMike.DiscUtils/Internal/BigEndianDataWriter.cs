@@ -27,9 +27,7 @@ namespace DiscUtils.Internal
     internal class BigEndianDataWriter : DataWriter
     {
         public BigEndianDataWriter(Stream stream)
-            : base(stream)
-        {
-        }
+            : base(stream) {}
 
         public override void Write(ushort value)
         {

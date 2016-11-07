@@ -36,18 +36,32 @@ namespace DiscUtils.Internal
     internal class WrappingMappedStream<T> : MappedStream
         where T : Stream
     {
-        private T _wrapped;
-        private Ownership _ownership;
-        private List<StreamExtent> _extents;
+        private readonly List<StreamExtent> _extents;
+        private readonly Ownership _ownership;
 
         public WrappingMappedStream(T toWrap, Ownership ownership, IEnumerable<StreamExtent> extents)
         {
-            _wrapped = toWrap;
+            WrappedStream = toWrap;
             _ownership = ownership;
             if (extents != null)
             {
                 _extents = new List<StreamExtent>(extents);
             }
+        }
+
+        public override bool CanRead
+        {
+            get { return WrappedStream.CanRead; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return WrappedStream.CanSeek; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return WrappedStream.CanWrite; }
         }
 
         public override IEnumerable<StreamExtent> Extents
@@ -58,88 +72,61 @@ namespace DiscUtils.Internal
                 {
                     return _extents;
                 }
-                else
+                SparseStream sparse = WrappedStream as SparseStream;
+                if (sparse != null)
                 {
-                    SparseStream sparse = _wrapped as SparseStream;
-                    if (sparse != null)
-                    {
-                        return sparse.Extents;
-                    }
-                    else
-                    {
-                        return new StreamExtent[] {new StreamExtent(0, _wrapped.Length)};
-                    }
+                    return sparse.Extents;
                 }
+                return new[] { new StreamExtent(0, WrappedStream.Length) };
             }
-        }
-
-        public override bool CanRead
-        {
-            get { return _wrapped.CanRead; }
-        }
-
-        public override bool CanSeek
-        {
-            get { return _wrapped.CanSeek; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return _wrapped.CanWrite; }
         }
 
         public override long Length
         {
-            get { return _wrapped.Length; }
+            get { return WrappedStream.Length; }
         }
 
         public override long Position
         {
-            get { return _wrapped.Position; }
-            set { _wrapped.Position = value; }
+            get { return WrappedStream.Position; }
+            set { WrappedStream.Position = value; }
         }
 
-        protected T WrappedStream
-        {
-            get { return _wrapped; }
-        }
+        protected T WrappedStream { get; private set; }
 
         public override IEnumerable<StreamExtent> MapContent(long start, long length)
         {
-            MappedStream mapped = _wrapped as MappedStream;
+            MappedStream mapped = WrappedStream as MappedStream;
             if (mapped != null)
             {
                 return mapped.MapContent(start, length);
             }
-            else
-            {
-                return new StreamExtent[] {new StreamExtent(start, length)};
-            }
+            return new[] { new StreamExtent(start, length) };
         }
 
         public override void Flush()
         {
-            _wrapped.Flush();
+            WrappedStream.Flush();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            return _wrapped.Read(buffer, offset, count);
+            return WrappedStream.Read(buffer, offset, count);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            return _wrapped.Seek(offset, origin);
+            return WrappedStream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            _wrapped.SetLength(value);
+            WrappedStream.SetLength(value);
         }
 
         public override void Clear(int count)
         {
-            SparseStream sparse = _wrapped as SparseStream;
+            SparseStream sparse = WrappedStream as SparseStream;
             if (sparse != null)
             {
                 sparse.Clear(count);
@@ -152,7 +139,7 @@ namespace DiscUtils.Internal
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _wrapped.Write(buffer, offset, count);
+            WrappedStream.Write(buffer, offset, count);
         }
 
         protected override void Dispose(bool disposing)
@@ -161,12 +148,12 @@ namespace DiscUtils.Internal
             {
                 if (disposing)
                 {
-                    if (_wrapped != null && _ownership == Ownership.Dispose)
+                    if (WrappedStream != null && _ownership == Ownership.Dispose)
                     {
-                        _wrapped.Dispose();
+                        WrappedStream.Dispose();
                     }
 
-                    _wrapped = null;
+                    WrappedStream = null;
                 }
             }
             finally

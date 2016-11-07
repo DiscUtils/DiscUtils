@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+
 namespace DiscUtils.Partitions
 {
-    using System;
-    using System.Globalization;
-
     /// <summary>
     /// Base class representing a disk partition.
     /// </summary>
@@ -34,9 +34,21 @@ namespace DiscUtils.Partitions
     public abstract class PartitionInfo
     {
         /// <summary>
+        /// Gets the type of the partition, in legacy BIOS form, when available.
+        /// </summary>
+        /// <remarks>Zero for GUID-style partitions.</remarks>
+        public abstract byte BiosType { get; }
+
+        /// <summary>
         /// Gets the first sector of the partion (relative to start of disk) as a Logical Block Address.
         /// </summary>
         public abstract long FirstSector { get; }
+
+        /// <summary>
+        /// Gets the type of the partition, as a GUID, when available.
+        /// </summary>
+        /// <remarks><see cref="System.Guid"/>.Empty for MBR-style partitions.</remarks>
+        public abstract Guid GuidType { get; }
 
         /// <summary>
         /// Gets the last sector of the partion (relative to start of disk) as a Logical Block Address (inclusive).
@@ -50,18 +62,6 @@ namespace DiscUtils.Partitions
         {
             get { return 1 + LastSector - FirstSector; }
         }
-
-        /// <summary>
-        /// Gets the type of the partition, as a GUID, when available.
-        /// </summary>
-        /// <remarks><see cref="System.Guid"/>.Empty for MBR-style partitions.</remarks>
-        public abstract Guid GuidType { get; }
-
-        /// <summary>
-        /// Gets the type of the partition, in legacy BIOS form, when available.
-        /// </summary>
-        /// <remarks>Zero for GUID-style partitions.</remarks>
-        public abstract byte BiosType { get; }
 
         /// <summary>
         /// Gets the partition type as a 'friendly' string.
@@ -85,7 +85,7 @@ namespace DiscUtils.Partitions
         /// <returns>A string representation of the partition information.</returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.InvariantCulture, "0x{0:X} - 0x{1:X} ({2})", FirstSector, LastSector,
+            return string.Format(CultureInfo.InvariantCulture, "0x{0:X} - 0x{1:X} ({2})", FirstSector, LastSector,
                 TypeAsString);
         }
     }

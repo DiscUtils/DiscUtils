@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Base class for streams that are essentially a mapping onto a parent stream.
     /// </summary>
@@ -46,7 +45,7 @@ namespace DiscUtils
         /// <returns>A sparse stream.</returns>
         /// <remarks>The wrapped stream is assumed to be a linear stream (such that any byte range
         /// maps directly onto the parent stream).</remarks>
-        public static new MappedStream FromStream(Stream stream, Ownership takeOwnership)
+        public new static MappedStream FromStream(Stream stream, Ownership takeOwnership)
         {
             return new WrappingMappedStream<Stream>(stream, takeOwnership, null);
         }
@@ -61,8 +60,8 @@ namespace DiscUtils
         /// <returns>A sparse stream.</returns>
         /// <remarks>The wrapped stream is assumed to be a linear stream (such that any byte range
         /// maps directly onto the parent stream).</remarks>
-        public static new MappedStream FromStream(Stream stream, Ownership takeOwnership,
-            IEnumerable<StreamExtent> extents)
+        public new static MappedStream FromStream(Stream stream, Ownership takeOwnership,
+                                                  IEnumerable<StreamExtent> extents)
         {
             return new WrappingMappedStream<Stream>(stream, takeOwnership, extents);
         }

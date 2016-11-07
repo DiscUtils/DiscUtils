@@ -24,26 +24,17 @@ using System;
 
 namespace DiscUtils.Internal
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     internal sealed class VirtualDiskFactoryAttribute : Attribute
     {
-        private string _type;
-        private string[] _fileExtensions;
-
         public VirtualDiskFactoryAttribute(string type, string fileExtensions)
         {
-            _type = type;
-            _fileExtensions = fileExtensions.Replace(".", string.Empty).Split(',');
+            Type = type;
+            FileExtensions = fileExtensions.Replace(".", string.Empty).Split(',');
         }
 
-        public string Type
-        {
-            get { return _type; }
-        }
+        public string[] FileExtensions { get; }
 
-        public string[] FileExtensions
-        {
-            get { return _fileExtensions; }
-        }
+        public string Type { get; }
     }
 }

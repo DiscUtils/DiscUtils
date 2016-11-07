@@ -20,21 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Provides the base class for both <see cref="DiscFileInfo"/> and <see cref="DiscDirectoryInfo"/> objects.
     /// </summary>
     public class DiscFileSystemInfo
     {
-        private DiscFileSystem _fileSystem;
-        private string _path;
-
         internal DiscFileSystemInfo(DiscFileSystem fileSystem, string path)
         {
             if (path == null)
@@ -42,32 +38,43 @@ namespace DiscUtils
                 throw new ArgumentNullException(nameof(path));
             }
 
-            _fileSystem = fileSystem;
-            _path = path.Trim('\\');
+            FileSystem = fileSystem;
+            Path = path.Trim('\\');
         }
 
         /// <summary>
-        /// Gets the file system the referenced file or directory exists on.
+        /// Gets or sets the <see cref="System.IO.FileAttributes"/> of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public DiscFileSystem FileSystem
+        public virtual FileAttributes Attributes
         {
-            get { return _fileSystem; }
+            get { return FileSystem.GetAttributes(Path); }
+            set { FileSystem.SetAttributes(Path, value); }
         }
 
         /// <summary>
-        /// Gets the name of the file or directory.
+        /// Gets or sets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public virtual string Name
+        public virtual DateTime CreationTime
         {
-            get { return Utilities.GetFileFromPath(_path); }
+            get { return CreationTimeUtc.ToLocalTime(); }
+            set { CreationTimeUtc = value.ToUniversalTime(); }
         }
 
         /// <summary>
-        /// Gets the full path of the file or directory.
+        /// Gets or sets the creation time (in UTC) of the current <see cref="DiscFileSystemInfo"/> object.
         /// </summary>
-        public virtual string FullName
+        public virtual DateTime CreationTimeUtc
         {
-            get { return _path; }
+            get { return FileSystem.GetCreationTimeUtc(Path); }
+            set { FileSystem.SetCreationTimeUtc(Path, value); }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file system object exists.
+        /// </summary>
+        public virtual bool Exists
+        {
+            get { return FileSystem.Exists(Path); }
         }
 
         /// <summary>
@@ -89,54 +96,16 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="System.IO.FileAttributes"/> of the current <see cref="DiscFileSystemInfo"/> object.
+        /// Gets the file system the referenced file or directory exists on.
         /// </summary>
-        public virtual FileAttributes Attributes
-        {
-            get { return FileSystem.GetAttributes(_path); }
-            set { FileSystem.SetAttributes(_path, value); }
-        }
+        public DiscFileSystem FileSystem { get; }
 
         /// <summary>
-        /// Gets the <see cref="DiscDirectoryInfo"/> of the directory containing the current <see cref="DiscFileSystemInfo"/> object.
+        /// Gets the full path of the file or directory.
         /// </summary>
-        public virtual DiscDirectoryInfo Parent
+        public virtual string FullName
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_path))
-                {
-                    return null;
-                }
-
-                return new DiscDirectoryInfo(FileSystem, Utilities.GetDirectoryFromPath(_path));
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the file system object exists.
-        /// </summary>
-        public virtual bool Exists
-        {
-            get { return FileSystem.Exists(_path); }
-        }
-
-        /// <summary>
-        /// Gets or sets the creation time (in local time) of the current <see cref="DiscFileSystemInfo"/> object.
-        /// </summary>
-        public virtual DateTime CreationTime
-        {
-            get { return CreationTimeUtc.ToLocalTime(); }
-            set { CreationTimeUtc = value.ToUniversalTime(); }
-        }
-
-        /// <summary>
-        /// Gets or sets the creation time (in UTC) of the current <see cref="DiscFileSystemInfo"/> object.
-        /// </summary>
-        public virtual DateTime CreationTimeUtc
-        {
-            get { return FileSystem.GetCreationTimeUtc(_path); }
-            set { FileSystem.SetCreationTimeUtc(_path, value); }
+            get { return Path; }
         }
 
         /// <summary>
@@ -155,8 +124,8 @@ namespace DiscUtils
         /// <remarks>Read-only file systems will never update this value, it will remain at a fixed value.</remarks>
         public virtual DateTime LastAccessTimeUtc
         {
-            get { return FileSystem.GetLastAccessTimeUtc(_path); }
-            set { FileSystem.SetLastAccessTimeUtc(_path, value); }
+            get { return FileSystem.GetLastAccessTimeUtc(Path); }
+            set { FileSystem.SetLastAccessTimeUtc(Path, value); }
         }
 
         /// <summary>
@@ -173,17 +142,38 @@ namespace DiscUtils
         /// </summary>
         public virtual DateTime LastWriteTimeUtc
         {
-            get { return FileSystem.GetLastWriteTimeUtc(_path); }
-            set { FileSystem.SetLastWriteTimeUtc(_path, value); }
+            get { return FileSystem.GetLastWriteTimeUtc(Path); }
+            set { FileSystem.SetLastWriteTimeUtc(Path, value); }
+        }
+
+        /// <summary>
+        /// Gets the name of the file or directory.
+        /// </summary>
+        public virtual string Name
+        {
+            get { return Utilities.GetFileFromPath(Path); }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="DiscDirectoryInfo"/> of the directory containing the current <see cref="DiscFileSystemInfo"/> object.
+        /// </summary>
+        public virtual DiscDirectoryInfo Parent
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Path))
+                {
+                    return null;
+                }
+
+                return new DiscDirectoryInfo(FileSystem, Utilities.GetDirectoryFromPath(Path));
+            }
         }
 
         /// <summary>
         /// Gets the path to the referenced file.
         /// </summary>
-        protected string Path
-        {
-            get { return _path; }
-        }
+        protected string Path { get; }
 
         /// <summary>
         /// Deletes a file or directory.
@@ -192,11 +182,11 @@ namespace DiscUtils
         {
             if ((Attributes & FileAttributes.Directory) != 0)
             {
-                FileSystem.DeleteDirectory(_path);
+                FileSystem.DeleteDirectory(Path);
             }
             else
             {
-                FileSystem.DeleteFile(_path);
+                FileSystem.DeleteFile(Path);
             }
         }
 
@@ -214,7 +204,7 @@ namespace DiscUtils
             }
 
             return string.Compare(Path, asInfo.Path, StringComparison.Ordinal) == 0 &&
-                   DiscFileSystem.Equals(FileSystem, asInfo.FileSystem);
+                   Equals(FileSystem, asInfo.FileSystem);
         }
 
         /// <summary>
@@ -223,7 +213,7 @@ namespace DiscUtils
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return _path.GetHashCode() ^ _fileSystem.GetHashCode();
+            return Path.GetHashCode() ^ FileSystem.GetHashCode();
         }
     }
 }

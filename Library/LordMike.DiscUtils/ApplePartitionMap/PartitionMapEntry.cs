@@ -20,38 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.ApplePartitionMap
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     internal sealed class PartitionMapEntry : PartitionInfo, IByteArraySerializable
     {
-        public ushort Signature;
-        public uint MapEntries;
-        public uint PhysicalBlockStart;
-        public uint PhysicalBlocks;
-        public string Name;
-        public string Type;
-        public uint LogicalBlockStart;
-        public uint LogicalBlocks;
-        public uint Flags;
+        private readonly Stream _diskStream;
         public uint BootBlock;
         public uint BootBytes;
-
-        private Stream _diskStream;
+        public uint Flags;
+        public uint LogicalBlocks;
+        public uint LogicalBlockStart;
+        public uint MapEntries;
+        public string Name;
+        public uint PhysicalBlocks;
+        public uint PhysicalBlockStart;
+        public ushort Signature;
+        public string Type;
 
         public PartitionMapEntry(Stream diskStream)
         {
             _diskStream = diskStream;
         }
 
-        public int Size
+        public override byte BiosType
         {
-            get { return 512; }
+            get { return 0xAF; }
         }
 
         public override long FirstSector
@@ -59,19 +57,14 @@ namespace DiscUtils.ApplePartitionMap
             get { return PhysicalBlockStart; }
         }
 
-        public override long LastSector
-        {
-            get { return PhysicalBlockStart + PhysicalBlocks - 1; }
-        }
-
         public override Guid GuidType
         {
             get { return Guid.Empty; }
         }
 
-        public override byte BiosType
+        public override long LastSector
         {
-            get { return 0xAF; }
+            get { return PhysicalBlockStart + PhysicalBlocks - 1; }
         }
 
         public override string TypeAsString
@@ -84,9 +77,9 @@ namespace DiscUtils.ApplePartitionMap
             get { return PhysicalVolumeType.ApplePartition; }
         }
 
-        public override SparseStream Open()
+        public int Size
         {
-            return new SubStream(_diskStream, PhysicalBlockStart*512, PhysicalBlocks*512);
+            get { return 512; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -109,6 +102,11 @@ namespace DiscUtils.ApplePartitionMap
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();
+        }
+
+        public override SparseStream Open()
+        {
+            return new SubStream(_diskStream, PhysicalBlockStart * 512, PhysicalBlocks * 512);
         }
     }
 }

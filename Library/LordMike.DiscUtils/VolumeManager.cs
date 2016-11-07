@@ -20,17 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
+using DiscUtils.Raw;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     /// <summary>
     /// VolumeManager interprets partitions and other on-disk structures (possibly combining multiple disks).
     /// </summary>
@@ -45,7 +45,7 @@ namespace DiscUtils
 #endif
     {
         private static List<LogicalVolumeFactory> s_logicalVolumeFactories;
-        private List<VirtualDisk> _disks;
+        private readonly List<VirtualDisk> _disks;
         private bool _needScan;
 
         private Dictionary<string, PhysicalVolumeInfo> _physicalVolumes;
@@ -89,7 +89,7 @@ namespace DiscUtils
                 {
                     List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
 
-                    foreach (var type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
+                    foreach (Type type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
                     {
                         foreach (LogicalVolumeFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
                         {
@@ -116,7 +116,7 @@ namespace DiscUtils
         /// </remarks>
         public static PhysicalVolumeInfo[] GetPhysicalVolumes(Stream diskContent)
         {
-            return GetPhysicalVolumes(new Raw.Disk(diskContent, Ownership.None));
+            return GetPhysicalVolumes(new Disk(diskContent, Ownership.None));
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace DiscUtils
         /// <returns>The GUID the volume manager will use to identify the disk.</returns>
         public string AddDisk(Stream content)
         {
-            return AddDisk(new Raw.Disk(content, Ownership.None));
+            return AddDisk(new Disk(content, Ownership.None));
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace DiscUtils
 
         private static void MapPhysicalVolumes(IEnumerable<PhysicalVolumeInfo> physicalVols, Dictionary<string, LogicalVolumeInfo> result)
         {
-            foreach (var physicalVol in physicalVols)
+            foreach (PhysicalVolumeInfo physicalVol in physicalVols)
             {
                 LogicalVolumeInfo lvi = new LogicalVolumeInfo(
                     physicalVol.PartitionIdentity,
@@ -247,7 +247,7 @@ namespace DiscUtils
             foreach (PhysicalVolumeInfo pvi in physicalVols)
             {
                 bool handled = false;
-                foreach (var volFactory in LogicalVolumeFactories)
+                foreach (LogicalVolumeFactory volFactory in LogicalVolumeFactories)
                 {
                     if (volFactory.HandlesPhysicalVolume(pvi))
                     {
@@ -264,7 +264,7 @@ namespace DiscUtils
 
             MapPhysicalVolumes(unhandledPhysical, result);
 
-            foreach (var volFactory in LogicalVolumeFactories)
+            foreach (LogicalVolumeFactory volFactory in LogicalVolumeFactories)
             {
                 volFactory.MapDisks(_disks, result);
             }
@@ -284,9 +284,9 @@ namespace DiscUtils
 
                 if (PartitionTable.IsPartitioned(disk.Content))
                 {
-                    foreach (var table in PartitionTable.GetPartitionTables(disk))
+                    foreach (PartitionTable table in PartitionTable.GetPartitionTables(disk))
                     {
-                        foreach (var part in table.Partitions)
+                        foreach (PartitionInfo part in table.Partitions)
                         {
                             PhysicalVolumeInfo pvi = new PhysicalVolumeInfo(diskId, disk, part);
                             result.Add(pvi.Identity, pvi);

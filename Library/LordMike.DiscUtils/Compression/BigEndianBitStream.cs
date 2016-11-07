@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Compression
 {
-    using System.IO;
-
     /// <summary>
     /// Converts a byte stream into a bit stream.
     /// </summary>
     internal class BigEndianBitStream : BitStream
     {
-        private Stream _byteStream;
-
         private uint _buffer;
         private int _bufferAvailable;
+        private readonly Stream _byteStream;
 
-        private byte[] _readBuffer = new byte[2];
+        private readonly byte[] _readBuffer = new byte[2];
 
         public BigEndianBitStream(Stream byteStream)
         {
@@ -58,18 +57,18 @@ namespace DiscUtils.Compression
 
             _bufferAvailable -= count;
 
-            uint mask = (uint) ((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
-            return (uint) ((_buffer >> _bufferAvailable) & mask);
+            return (_buffer >> _bufferAvailable) & mask;
         }
 
         public override uint Peek(int count)
         {
             EnsureBufferFilled();
 
-            uint mask = (uint) ((1 << count) - 1);
+            uint mask = (uint)((1 << count) - 1);
 
-            return (uint) ((_buffer >> (_bufferAvailable - count)) & mask);
+            return (_buffer >> (_bufferAvailable - count)) & mask;
         }
 
         public override void Consume(int count)
@@ -87,7 +86,7 @@ namespace DiscUtils.Compression
                 _readBuffer[1] = 0;
                 _byteStream.Read(_readBuffer, 0, 2);
 
-                _buffer = (uint) ((uint) (_buffer << 16) | (uint) (_readBuffer[0] << 8) | (uint) _readBuffer[1]);
+                _buffer = _buffer << 16 | (uint)(_readBuffer[0] << 8) | _readBuffer[1];
                 _bufferAvailable += 16;
             }
         }

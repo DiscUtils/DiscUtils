@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Vfs
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Base class for directory entries in a file system.
     /// </summary>
@@ -37,19 +37,33 @@ namespace DiscUtils.Vfs
     public abstract class VfsDirEntry
     {
         /// <summary>
-        /// Gets a value indicating whether this directory entry represents a directory (rather than a file).
+        /// Gets the creation time of the file or directory.
         /// </summary>
-        public abstract bool IsDirectory { get; }
+        /// <remarks>
+        /// May throw <c>NotSupportedException</c> if <c>HasVfsTimeInfo</c> is <c>false</c>.
+        /// </remarks>
+        public abstract DateTime CreationTimeUtc { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this directory entry represents a symlink (rather than a file or directory).
+        /// Gets the file attributes from the directory entry.
         /// </summary>
-        public abstract bool IsSymlink { get; }
+        /// <remarks>
+        /// May throw <c>NotSupportedException</c> if <c>HasVfsFileAttributes</c> is <c>false</c>.
+        /// </remarks>
+        public abstract FileAttributes FileAttributes { get; }
 
         /// <summary>
         /// Gets the name of this directory entry.
         /// </summary>
         public abstract string FileName { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this directory entry contains file attribute information.
+        /// </summary>
+        /// <remarks>
+        /// <para>Typically either always returns <c>true</c> or <c>false</c>.</para>
+        /// </remarks>
+        public abstract bool HasVfsFileAttributes { get; }
 
         /// <summary>
         /// Gets a value indicating whether this directory entry contains time information.
@@ -58,6 +72,16 @@ namespace DiscUtils.Vfs
         /// <para>Typically either always returns <c>true</c> or <c>false</c>.</para>
         /// </remarks>
         public abstract bool HasVfsTimeInfo { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this directory entry represents a directory (rather than a file).
+        /// </summary>
+        public abstract bool IsDirectory { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this directory entry represents a symlink (rather than a file or directory).
+        /// </summary>
+        public abstract bool IsSymlink { get; }
 
         /// <summary>
         /// Gets the last access time of the file or directory.
@@ -76,35 +100,6 @@ namespace DiscUtils.Vfs
         public abstract DateTime LastWriteTimeUtc { get; }
 
         /// <summary>
-        /// Gets the creation time of the file or directory.
-        /// </summary>
-        /// <remarks>
-        /// May throw <c>NotSupportedException</c> if <c>HasVfsTimeInfo</c> is <c>false</c>.
-        /// </remarks>
-        public abstract DateTime CreationTimeUtc { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether this directory entry contains file attribute information.
-        /// </summary>
-        /// <remarks>
-        /// <para>Typically either always returns <c>true</c> or <c>false</c>.</para>
-        /// </remarks>
-        public abstract bool HasVfsFileAttributes { get; }
-
-        /// <summary>
-        /// Gets the file attributes from the directory entry.
-        /// </summary>
-        /// <remarks>
-        /// May throw <c>NotSupportedException</c> if <c>HasVfsFileAttributes</c> is <c>false</c>.
-        /// </remarks>
-        public abstract FileAttributes FileAttributes { get; }
-
-        /// <summary>
-        /// Gets a unique id for the file or directory represented by this directory entry.
-        /// </summary>
-        public abstract long UniqueCacheId { get; }
-
-        /// <summary>
         /// Gets a version of FileName that can be used in wildcard matches.
         /// </summary>
         /// <remarks>
@@ -121,11 +116,13 @@ namespace DiscUtils.Vfs
                 {
                     return fileName + ".";
                 }
-                else
-                {
-                    return fileName;
-                }
+                return fileName;
             }
         }
+
+        /// <summary>
+        /// Gets a unique id for the file or directory represented by this directory entry.
+        /// </summary>
+        public abstract long UniqueCacheId { get; }
     }
 }

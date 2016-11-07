@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Provides the base class for all file systems.
     /// </summary>
@@ -34,14 +34,12 @@ namespace DiscUtils
 #endif
         IFileSystem, IDisposable
     {
-        private DiscFileSystemOptions _options;
-
         /// <summary>
         /// Initializes a new instance of the DiscFileSystem class.
         /// </summary>
         protected DiscFileSystem()
         {
-            _options = new DiscFileSystemOptions();
+            Options = new DiscFileSystemOptions();
         }
 
         /// <summary>
@@ -50,7 +48,7 @@ namespace DiscUtils
         /// <param name="defaultOptions">The options instance to use for this file system instance.</param>
         protected DiscFileSystem(DiscFileSystemOptions defaultOptions)
         {
-            _options = defaultOptions;
+            Options = defaultOptions;
         }
 
         /// <summary>
@@ -64,10 +62,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the file system options, which can be modified.
         /// </summary>
-        public virtual DiscFileSystemOptions Options
-        {
-            get { return _options; }
-        }
+        public virtual DiscFileSystemOptions Options { get; }
 
         /// <summary>
         /// Gets a friendly description of the file system type.
@@ -491,9 +486,7 @@ namespace DiscUtils
         /// Disposes of this instance.
         /// </summary>
         /// <param name="disposing">The value <c>true</c> if Disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-        }
+        protected virtual void Dispose(bool disposing) {}
 
         #endregion
     }

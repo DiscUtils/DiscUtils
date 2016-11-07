@@ -20,19 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     internal class DynamicDisk : IDiagnosticTraceable
     {
-        private VirtualDisk _disk;
-        private PrivateHeader _header;
-        private Database _database;
+        private readonly VirtualDisk _disk;
+        private readonly PrivateHeader _header;
 
         internal DynamicDisk(VirtualDisk disk)
         {
@@ -41,9 +39,9 @@ namespace DiscUtils.LogicalDiskManager
 
             TocBlock toc = GetTableOfContents();
 
-            long dbStart = (_header.ConfigurationStartLba*512) + (toc.Item1Start*512);
+            long dbStart = _header.ConfigurationStartLba * 512 + toc.Item1Start * 512;
             _disk.Content.Position = dbStart;
-            _database = new Database(_disk.Content);
+            Database = new Database(_disk.Content);
         }
 
         public SparseStream Content
@@ -51,14 +49,11 @@ namespace DiscUtils.LogicalDiskManager
             get { return _disk.Content; }
         }
 
+        public Database Database { get; }
+
         public long DataOffset
         {
             get { return _header.DataStartLba; }
-        }
-
-        public Guid Id
-        {
-            get { return new Guid(_header.DiskId); }
         }
 
         public Guid GroupId
@@ -66,9 +61,9 @@ namespace DiscUtils.LogicalDiskManager
             get { return string.IsNullOrEmpty(_header.DiskGroupId) ? Guid.Empty : new Guid(_header.DiskGroupId); }
         }
 
-        public Database Database
+        public Guid Id
         {
-            get { return _database; }
+            get { return new Guid(_header.DiskId); }
         }
 
         public void Dump(TextWriter writer, string linePrefix)
@@ -105,11 +100,11 @@ namespace DiscUtils.LogicalDiskManager
                 }
                 else
                 {
-                    foreach (var part in pt.Partitions)
+                    foreach (PartitionInfo part in pt.Partitions)
                     {
                         if (part.GuidType == GuidPartitionTypes.WindowsLdmMetadata)
                         {
-                            headerPos = part.LastSector*Sizes.Sector;
+                            headerPos = part.LastSector * Sizes.Sector;
                         }
                     }
                 }
@@ -131,8 +126,8 @@ namespace DiscUtils.LogicalDiskManager
 
         private TocBlock GetTableOfContents()
         {
-            byte[] buffer = new byte[_header.TocSizeLba*512];
-            _disk.Content.Position = (_header.ConfigurationStartLba*512) + (1*_header.TocSizeLba*512);
+            byte[] buffer = new byte[_header.TocSizeLba * 512];
+            _disk.Content.Position = _header.ConfigurationStartLba * 512 + 1 * _header.TocSizeLba * 512;
 
             _disk.Content.Read(buffer, 0, buffer.Length);
             TocBlock tocBlock = new TocBlock();

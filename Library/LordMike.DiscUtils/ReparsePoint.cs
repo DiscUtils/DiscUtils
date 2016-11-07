@@ -27,9 +27,6 @@ namespace DiscUtils
     /// </summary>
     public sealed class ReparsePoint
     {
-        private int _tag;
-        private byte[] _content;
-
         /// <summary>
         /// Initializes a new instance of the ReparsePoint class.
         /// </summary>
@@ -37,26 +34,18 @@ namespace DiscUtils
         /// <param name="content">The reparse point's content.</param>
         public ReparsePoint(int tag, byte[] content)
         {
-            _tag = tag;
-            _content = content;
-        }
-
-        /// <summary>
-        /// Gets or sets the defined reparse point tag.
-        /// </summary>
-        public int Tag
-        {
-            get { return _tag; }
-            set { _tag = value; }
+            Tag = tag;
+            Content = content;
         }
 
         /// <summary>
         /// Gets or sets the reparse point's content.
         /// </summary>
-        public byte[] Content
-        {
-            get { return _content; }
-            set { _content = value; }
-        }
+        public byte[] Content { get; set; }
+
+        /// <summary>
+        /// Gets or sets the defined reparse point tag.
+        /// </summary>
+        public int Tag { get; set; }
     }
 }

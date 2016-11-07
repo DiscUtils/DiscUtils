@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Partitions
 {
-    using System;
-    using System.Text;
-
     internal class GptEntry : IComparable<GptEntry>
     {
-        public Guid PartitionType;
-        public Guid Identity;
-        public long FirstUsedLogicalBlock;
-        public long LastUsedLogicalBlock;
         public ulong Attributes;
+        public long FirstUsedLogicalBlock;
+        public Guid Identity;
+        public long LastUsedLogicalBlock;
         public string Name;
+        public Guid PartitionType;
 
         public GptEntry()
         {
@@ -119,6 +118,11 @@ namespace DiscUtils.Partitions
             }
         }
 
+        public int CompareTo(GptEntry other)
+        {
+            return FirstUsedLogicalBlock.CompareTo(other.FirstUsedLogicalBlock);
+        }
+
         public void ReadFrom(byte[] buffer, int offset)
         {
             PartitionType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
@@ -126,7 +130,7 @@ namespace DiscUtils.Partitions
             FirstUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 32);
             LastUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 40);
             Attributes = Utilities.ToUInt64LittleEndian(buffer, offset + 48);
-            Name = Encoding.Unicode.GetString(buffer, offset + 56, 72).TrimEnd(new char[] {'\0'});
+            Name = Encoding.Unicode.GetString(buffer, offset + 56, 72).TrimEnd('\0');
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -137,11 +141,6 @@ namespace DiscUtils.Partitions
             Utilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
             Utilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
             Encoding.Unicode.GetBytes(Name + new string('\0', 36), 0, 36, buffer, offset + 56);
-        }
-
-        public int CompareTo(GptEntry other)
-        {
-            return FirstUsedLogicalBlock.CompareTo(other.FirstUsedLogicalBlock);
         }
     }
 }

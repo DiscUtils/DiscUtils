@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Partitions
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Builds a stream with the contents of a BIOS partitioned disk.
     /// </summary>
@@ -38,12 +37,11 @@ namespace DiscUtils.Partitions
     /// </remarks>
     public class BiosPartitionedDiskBuilder : StreamBuilder
     {
-        private long _capacity;
-        private BiosPartitionTable _partitionTable;
         private Geometry _biosGeometry;
-        private SparseMemoryStream _bootSectors;
+        private readonly SparseMemoryStream _bootSectors;
+        private readonly long _capacity;
 
-        private Dictionary<int, BuilderExtent> _partitionContents;
+        private readonly Dictionary<int, BuilderExtent> _partitionContents;
 
         /// <summary>
         /// Initializes a new instance of the BiosPartitionedDiskBuilder class.
@@ -57,7 +55,7 @@ namespace DiscUtils.Partitions
 
             _bootSectors = new SparseMemoryStream();
             _bootSectors.SetLength(capacity);
-            _partitionTable = BiosPartitionTable.Initialize(_bootSectors, _biosGeometry);
+            PartitionTable = BiosPartitionTable.Initialize(_bootSectors, _biosGeometry);
 
             _partitionContents = new Dictionary<int, BuilderExtent>();
         }
@@ -83,7 +81,7 @@ namespace DiscUtils.Partitions
             _bootSectors = new SparseMemoryStream();
             _bootSectors.SetLength(capacity);
             _bootSectors.Write(bootSectors, 0, bootSectors.Length);
-            _partitionTable = new BiosPartitionTable(_bootSectors, biosGeometry);
+            PartitionTable = new BiosPartitionTable(_bootSectors, biosGeometry);
 
             _partitionContents = new Dictionary<int, BuilderExtent>();
         }
@@ -106,15 +104,15 @@ namespace DiscUtils.Partitions
             _bootSectors = new SparseMemoryStream();
             _bootSectors.SetLength(_capacity);
 
-            foreach (var extent in new BiosPartitionTable(sourceDisk).GetMetadataDiskExtents())
+            foreach (StreamExtent extent in new BiosPartitionTable(sourceDisk).GetMetadataDiskExtents())
             {
                 sourceDisk.Content.Position = extent.Start;
-                byte[] buffer = Utilities.ReadFully(sourceDisk.Content, (int) extent.Length);
+                byte[] buffer = Utilities.ReadFully(sourceDisk.Content, (int)extent.Length);
                 _bootSectors.Position = extent.Start;
                 _bootSectors.Write(buffer, 0, buffer.Length);
             }
 
-            _partitionTable = new BiosPartitionTable(_bootSectors, _biosGeometry);
+            PartitionTable = new BiosPartitionTable(_bootSectors, _biosGeometry);
 
             _partitionContents = new Dictionary<int, BuilderExtent>();
         }
@@ -122,10 +120,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Gets the partition table in the disk.
         /// </summary>
-        public BiosPartitionTable PartitionTable
-        {
-            get { return _partitionTable; }
-        }
+        public BiosPartitionTable PartitionTable { get; }
 
         /// <summary>
         /// Sets a stream representing the content of a partition in the partition table.
@@ -134,7 +129,7 @@ namespace DiscUtils.Partitions
         /// <param name="stream">The stream with the contents of the partition.</param>
         public void SetPartitionContent(int index, SparseStream stream)
         {
-            _partitionContents[index] = new BuilderSparseStreamExtent(_partitionTable[index].FirstSector*Sizes.Sector,
+            _partitionContents[index] = new BuilderSparseStreamExtent(PartitionTable[index].FirstSector * Sizes.Sector,
                 stream);
         }
 
@@ -146,7 +141,7 @@ namespace DiscUtils.Partitions
         /// assumption the LBA fields are definitive.</remarks>
         public void UpdateBiosGeometry(Geometry geometry)
         {
-            _partitionTable.UpdateBiosGeometry(geometry);
+            PartitionTable.UpdateBiosGeometry(geometry);
             _biosGeometry = geometry;
         }
 
@@ -156,10 +151,10 @@ namespace DiscUtils.Partitions
 
             List<BuilderExtent> extents = new List<BuilderExtent>();
 
-            foreach (var extent in _partitionTable.GetMetadataDiskExtents())
+            foreach (StreamExtent extent in PartitionTable.GetMetadataDiskExtents())
             {
                 _bootSectors.Position = extent.Start;
-                byte[] buffer = Utilities.ReadFully(_bootSectors, (int) extent.Length);
+                byte[] buffer = Utilities.ReadFully(_bootSectors, (int)extent.Length);
 
                 extents.Add(new BuilderBufferExtent(extent.Start, buffer));
             }

@@ -48,7 +48,7 @@ namespace DiscUtils.Internal
         /// <returns>The rounded-up value.</returns>
         public static long RoundUp(long value, long unit)
         {
-            return ((value + (unit - 1))/unit)*unit;
+            return (value + (unit - 1)) / unit * unit;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace DiscUtils.Internal
         /// <returns>The rounded-up value.</returns>
         public static int RoundUp(int value, int unit)
         {
-            return ((value + (unit - 1))/unit)*unit;
+            return (value + (unit - 1)) / unit * unit;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace DiscUtils.Internal
         /// <returns>The rounded-down value.</returns>
         public static long RoundDown(long value, long unit)
         {
-            return (value/unit)*unit;
+            return value / unit * unit;
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace DiscUtils.Internal
         /// <returns>The value of CEIL(numerator/denominator).</returns>
         public static int Ceil(int numerator, int denominator)
         {
-            return (numerator + (denominator - 1))/denominator;
+            return (numerator + (denominator - 1)) / denominator;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace DiscUtils.Internal
         /// <returns>The value of CEIL(numerator/denominator).</returns>
         public static uint Ceil(uint numerator, uint denominator)
         {
-            return (numerator + (denominator - 1))/denominator;
+            return (numerator + (denominator - 1)) / denominator;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace DiscUtils.Internal
         /// <returns>The value of CEIL(numerator/denominator).</returns>
         public static long Ceil(long numerator, long denominator)
         {
-            return (numerator + (denominator - 1))/denominator;
+            return (numerator + (denominator - 1)) / denominator;
         }
 
         /// <summary>
@@ -276,10 +276,7 @@ namespace DiscUtils.Internal
             {
                 return result;
             }
-            else
-            {
-                throw new ArgumentException("Input is not a power of Two", nameof(val));
-            }
+            throw new ArgumentException("Input is not a power of Two", nameof(val));
         }
 
         public static int Log2(int val)
@@ -300,10 +297,7 @@ namespace DiscUtils.Internal
             {
                 return result;
             }
-            else
-            {
-                throw new ArgumentException("Input is not a power of Two", nameof(val));
-            }
+            throw new ArgumentException("Input is not a power of Two", nameof(val));
         }
 
         public static bool AreEqual(byte[] a, byte[] b)
@@ -326,7 +320,7 @@ namespace DiscUtils.Internal
 
         public static ushort BitSwap(ushort value)
         {
-            return (ushort) (((value & 0x00FF) << 8) | ((value & 0xFF00) >> 8));
+            return (ushort)(((value & 0x00FF) << 8) | ((value & 0xFF00) >> 8));
         }
 
         public static uint BitSwap(uint value)
@@ -337,63 +331,63 @@ namespace DiscUtils.Internal
 
         public static ulong BitSwap(ulong value)
         {
-            return (((ulong) BitSwap((uint) (value & 0xFFFFFFFF))) << 32) | BitSwap((uint) (value >> 32));
+            return ((ulong)BitSwap((uint)(value & 0xFFFFFFFF)) << 32) | BitSwap((uint)(value >> 32));
         }
 
         public static short BitSwap(short value)
         {
-            return (short) BitSwap((ushort) value);
+            return (short)BitSwap((ushort)value);
         }
 
         public static int BitSwap(int value)
         {
-            return (int) BitSwap((uint) value);
+            return (int)BitSwap((uint)value);
         }
 
         public static long BitSwap(long value)
         {
-            return (long) BitSwap((ulong) value);
+            return (long)BitSwap((ulong)value);
         }
 
         public static void WriteBytesLittleEndian(ushort val, byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) (val & 0xFF);
-            buffer[offset + 1] = (byte) ((val >> 8) & 0xFF);
+            buffer[offset] = (byte)(val & 0xFF);
+            buffer[offset + 1] = (byte)((val >> 8) & 0xFF);
         }
 
         public static void WriteBytesLittleEndian(uint val, byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) (val & 0xFF);
-            buffer[offset + 1] = (byte) ((val >> 8) & 0xFF);
-            buffer[offset + 2] = (byte) ((val >> 16) & 0xFF);
-            buffer[offset + 3] = (byte) ((val >> 24) & 0xFF);
+            buffer[offset] = (byte)(val & 0xFF);
+            buffer[offset + 1] = (byte)((val >> 8) & 0xFF);
+            buffer[offset + 2] = (byte)((val >> 16) & 0xFF);
+            buffer[offset + 3] = (byte)((val >> 24) & 0xFF);
         }
 
         public static void WriteBytesLittleEndian(ulong val, byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) (val & 0xFF);
-            buffer[offset + 1] = (byte) ((val >> 8) & 0xFF);
-            buffer[offset + 2] = (byte) ((val >> 16) & 0xFF);
-            buffer[offset + 3] = (byte) ((val >> 24) & 0xFF);
-            buffer[offset + 4] = (byte) ((val >> 32) & 0xFF);
-            buffer[offset + 5] = (byte) ((val >> 40) & 0xFF);
-            buffer[offset + 6] = (byte) ((val >> 48) & 0xFF);
-            buffer[offset + 7] = (byte) ((val >> 56) & 0xFF);
+            buffer[offset] = (byte)(val & 0xFF);
+            buffer[offset + 1] = (byte)((val >> 8) & 0xFF);
+            buffer[offset + 2] = (byte)((val >> 16) & 0xFF);
+            buffer[offset + 3] = (byte)((val >> 24) & 0xFF);
+            buffer[offset + 4] = (byte)((val >> 32) & 0xFF);
+            buffer[offset + 5] = (byte)((val >> 40) & 0xFF);
+            buffer[offset + 6] = (byte)((val >> 48) & 0xFF);
+            buffer[offset + 7] = (byte)((val >> 56) & 0xFF);
         }
 
         public static void WriteBytesLittleEndian(short val, byte[] buffer, int offset)
         {
-            WriteBytesLittleEndian((ushort) val, buffer, offset);
+            WriteBytesLittleEndian((ushort)val, buffer, offset);
         }
 
         public static void WriteBytesLittleEndian(int val, byte[] buffer, int offset)
         {
-            WriteBytesLittleEndian((uint) val, buffer, offset);
+            WriteBytesLittleEndian((uint)val, buffer, offset);
         }
 
         public static void WriteBytesLittleEndian(long val, byte[] buffer, int offset)
         {
-            WriteBytesLittleEndian((ulong) val, buffer, offset);
+            WriteBytesLittleEndian((ulong)val, buffer, offset);
         }
 
         public static void WriteBytesLittleEndian(Guid val, byte[] buffer, int offset)
@@ -404,43 +398,43 @@ namespace DiscUtils.Internal
 
         public static void WriteBytesBigEndian(ushort val, byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) (val >> 8);
-            buffer[offset + 1] = (byte) (val & 0xFF);
+            buffer[offset] = (byte)(val >> 8);
+            buffer[offset + 1] = (byte)(val & 0xFF);
         }
 
         public static void WriteBytesBigEndian(uint val, byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) ((val >> 24) & 0xFF);
-            buffer[offset + 1] = (byte) ((val >> 16) & 0xFF);
-            buffer[offset + 2] = (byte) ((val >> 8) & 0xFF);
-            buffer[offset + 3] = (byte) (val & 0xFF);
+            buffer[offset] = (byte)((val >> 24) & 0xFF);
+            buffer[offset + 1] = (byte)((val >> 16) & 0xFF);
+            buffer[offset + 2] = (byte)((val >> 8) & 0xFF);
+            buffer[offset + 3] = (byte)(val & 0xFF);
         }
 
         public static void WriteBytesBigEndian(ulong val, byte[] buffer, int offset)
         {
-            buffer[offset] = (byte) ((val >> 56) & 0xFF);
-            buffer[offset + 1] = (byte) ((val >> 48) & 0xFF);
-            buffer[offset + 2] = (byte) ((val >> 40) & 0xFF);
-            buffer[offset + 3] = (byte) ((val >> 32) & 0xFF);
-            buffer[offset + 4] = (byte) ((val >> 24) & 0xFF);
-            buffer[offset + 5] = (byte) ((val >> 16) & 0xFF);
-            buffer[offset + 6] = (byte) ((val >> 8) & 0xFF);
-            buffer[offset + 7] = (byte) (val & 0xFF);
+            buffer[offset] = (byte)((val >> 56) & 0xFF);
+            buffer[offset + 1] = (byte)((val >> 48) & 0xFF);
+            buffer[offset + 2] = (byte)((val >> 40) & 0xFF);
+            buffer[offset + 3] = (byte)((val >> 32) & 0xFF);
+            buffer[offset + 4] = (byte)((val >> 24) & 0xFF);
+            buffer[offset + 5] = (byte)((val >> 16) & 0xFF);
+            buffer[offset + 6] = (byte)((val >> 8) & 0xFF);
+            buffer[offset + 7] = (byte)(val & 0xFF);
         }
 
         public static void WriteBytesBigEndian(short val, byte[] buffer, int offset)
         {
-            WriteBytesBigEndian((ushort) val, buffer, offset);
+            WriteBytesBigEndian((ushort)val, buffer, offset);
         }
 
         public static void WriteBytesBigEndian(int val, byte[] buffer, int offset)
         {
-            WriteBytesBigEndian((uint) val, buffer, offset);
+            WriteBytesBigEndian((uint)val, buffer, offset);
         }
 
         public static void WriteBytesBigEndian(long val, byte[] buffer, int offset)
         {
-            WriteBytesBigEndian((ulong) val, buffer, offset);
+            WriteBytesBigEndian((ulong)val, buffer, offset);
         }
 
         public static void WriteBytesBigEndian(Guid val, byte[] buffer, int offset)
@@ -454,65 +448,65 @@ namespace DiscUtils.Internal
 
         public static ushort ToUInt16LittleEndian(byte[] buffer, int offset)
         {
-            return (ushort) (((buffer[offset + 1] << 8) & 0xFF00) | ((buffer[offset + 0] << 0) & 0x00FF));
+            return (ushort)(((buffer[offset + 1] << 8) & 0xFF00) | ((buffer[offset + 0] << 0) & 0x00FF));
         }
 
         public static uint ToUInt32LittleEndian(byte[] buffer, int offset)
         {
-            return (uint) (((buffer[offset + 3] << 24) & 0xFF000000U) | ((buffer[offset + 2] << 16) & 0x00FF0000U)
-                           | ((buffer[offset + 1] << 8) & 0x0000FF00U) | ((buffer[offset + 0] << 0) & 0x000000FFU));
+            return (uint)(((buffer[offset + 3] << 24) & 0xFF000000U) | ((buffer[offset + 2] << 16) & 0x00FF0000U)
+                          | ((buffer[offset + 1] << 8) & 0x0000FF00U) | ((buffer[offset + 0] << 0) & 0x000000FFU));
         }
 
         public static ulong ToUInt64LittleEndian(byte[] buffer, int offset)
         {
-            return (((ulong) ToUInt32LittleEndian(buffer, offset + 4)) << 32) | ToUInt32LittleEndian(buffer, offset + 0);
+            return ((ulong)ToUInt32LittleEndian(buffer, offset + 4) << 32) | ToUInt32LittleEndian(buffer, offset + 0);
         }
 
         public static short ToInt16LittleEndian(byte[] buffer, int offset)
         {
-            return (short) ToUInt16LittleEndian(buffer, offset);
+            return (short)ToUInt16LittleEndian(buffer, offset);
         }
 
         public static int ToInt32LittleEndian(byte[] buffer, int offset)
         {
-            return (int) ToUInt32LittleEndian(buffer, offset);
+            return (int)ToUInt32LittleEndian(buffer, offset);
         }
 
         public static long ToInt64LittleEndian(byte[] buffer, int offset)
         {
-            return (long) ToUInt64LittleEndian(buffer, offset);
+            return (long)ToUInt64LittleEndian(buffer, offset);
         }
 
         public static ushort ToUInt16BigEndian(byte[] buffer, int offset)
         {
-            return (ushort) (((buffer[offset] << 8) & 0xFF00) | ((buffer[offset + 1] << 0) & 0x00FF));
+            return (ushort)(((buffer[offset] << 8) & 0xFF00) | ((buffer[offset + 1] << 0) & 0x00FF));
         }
 
         public static uint ToUInt32BigEndian(byte[] buffer, int offset)
         {
-            uint val = (uint) (((buffer[offset + 0] << 24) & 0xFF000000U) | ((buffer[offset + 1] << 16) & 0x00FF0000U)
-                               | ((buffer[offset + 2] << 8) & 0x0000FF00U) | ((buffer[offset + 3] << 0) & 0x000000FFU));
+            uint val = (uint)(((buffer[offset + 0] << 24) & 0xFF000000U) | ((buffer[offset + 1] << 16) & 0x00FF0000U)
+                              | ((buffer[offset + 2] << 8) & 0x0000FF00U) | ((buffer[offset + 3] << 0) & 0x000000FFU));
             return val;
         }
 
         public static ulong ToUInt64BigEndian(byte[] buffer, int offset)
         {
-            return (((ulong) ToUInt32BigEndian(buffer, offset + 0)) << 32) | ToUInt32BigEndian(buffer, offset + 4);
+            return ((ulong)ToUInt32BigEndian(buffer, offset + 0) << 32) | ToUInt32BigEndian(buffer, offset + 4);
         }
 
         public static short ToInt16BigEndian(byte[] buffer, int offset)
         {
-            return (short) ToUInt16BigEndian(buffer, offset);
+            return (short)ToUInt16BigEndian(buffer, offset);
         }
 
         public static int ToInt32BigEndian(byte[] buffer, int offset)
         {
-            return (int) ToUInt32BigEndian(buffer, offset);
+            return (int)ToUInt32BigEndian(buffer, offset);
         }
 
         public static long ToInt64BigEndian(byte[] buffer, int offset)
         {
-            return (long) ToUInt64BigEndian(buffer, offset);
+            return (long)ToUInt64BigEndian(buffer, offset);
         }
 
         public static Guid ToGuidLittleEndian(byte[] buffer, int offset)
@@ -569,7 +563,7 @@ namespace DiscUtils.Internal
             int i = 0;
             while (i < chars.Length)
             {
-                dest[i + offset] = (byte) chars[i];
+                dest[i + offset] = (byte)chars[i];
                 ++i;
             }
 
@@ -595,7 +589,7 @@ namespace DiscUtils.Internal
 
             for (int i = 0; i < count; ++i)
             {
-                result[i] = (char) data[i + offset];
+                result[i] = (char)data[i + offset];
             }
 
             return new string(result);
@@ -622,7 +616,7 @@ namespace DiscUtils.Internal
                     return new string(result, 0, i);
                 }
 
-                result[i] = (char) ch;
+                result[i] = (char)ch;
             }
 
             return new string(result);
@@ -680,14 +674,11 @@ namespace DiscUtils.Internal
             {
                 return b;
             }
-            else if (string.IsNullOrEmpty(b))
+            if (string.IsNullOrEmpty(b))
             {
                 return a;
             }
-            else
-            {
-                return a.TrimEnd('\\') + '\\' + b.TrimStart('\\');
-            }
+            return a.TrimEnd('\\') + '\\' + b.TrimStart('\\');
         }
 
         /// <summary>
@@ -702,13 +693,13 @@ namespace DiscUtils.Internal
         public static string ResolveRelativePath(string basePath, string relativePath)
         {
             List<string> pathElements =
-                new List<string>(basePath.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries));
+                new List<string>(basePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
             if (!basePath.EndsWith(@"\", StringComparison.Ordinal) && pathElements.Count > 0)
             {
                 pathElements.RemoveAt(pathElements.Count - 1);
             }
 
-            pathElements.AddRange(relativePath.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries));
+            pathElements.AddRange(relativePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
 
             int pos = 1;
             while (pos < pathElements.Count)
@@ -753,18 +744,15 @@ namespace DiscUtils.Internal
             {
                 return ResolveRelativePath(basePath, path);
             }
-            else
-            {
-                return path;
-            }
+            return path;
         }
 
         public static string MakeRelativePath(string path, string basePath)
         {
             List<string> pathElements =
-                new List<string>(path.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries));
+                new List<string>(path.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
             List<string> basePathElements =
-                new List<string>(basePath.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries));
+                new List<string>(basePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
 
             if (!basePath.EndsWith("\\", StringComparison.Ordinal) && basePathElements.Count > 0)
             {
@@ -858,10 +846,7 @@ namespace DiscUtils.Internal
             {
                 return buffer;
             }
-            else
-            {
-                throw new IOException("Unable to complete read of " + count + " bytes");
-            }
+            throw new IOException("Unable to complete read of " + count + " bytes");
         }
 
         /// <summary>
@@ -905,10 +890,7 @@ namespace DiscUtils.Internal
             {
                 return result;
             }
-            else
-            {
-                throw new IOException("Unable to complete read of " + count + " bytes");
-            }
+            throw new IOException("Unable to complete read of " + count + " bytes");
         }
 
         /// <summary>
@@ -918,7 +900,7 @@ namespace DiscUtils.Internal
         /// <returns>The data read from the stream.</returns>
         public static byte[] ReadAll(IBuffer buffer)
         {
-            return ReadFully(buffer, 0, (int) buffer.Capacity);
+            return ReadFully(buffer, 0, (int)buffer.Capacity);
         }
 
         /// <summary>
@@ -941,7 +923,7 @@ namespace DiscUtils.Internal
             where T : IByteArraySerializable, new()
         {
             T result = new T();
-            byte[] buffer = Utilities.ReadFully(stream, result.Size);
+            byte[] buffer = ReadFully(stream, result.Size);
             result.ReadFrom(buffer, 0);
             return result;
         }
@@ -957,7 +939,7 @@ namespace DiscUtils.Internal
             where T : IByteArraySerializable, new()
         {
             T result = new T();
-            byte[] buffer = Utilities.ReadFully(stream, length);
+            byte[] buffer = ReadFully(stream, length);
             result.ReadFrom(buffer, 0);
             return result;
         }
@@ -984,7 +966,7 @@ namespace DiscUtils.Internal
         /// <remarks>Copying starts at the current stream positions.</remarks>
         public static void PumpStreams(Stream source, Stream dest)
         {
-            byte[] buffer = new byte[64*1024];
+            byte[] buffer = new byte[64 * 1024];
 
             int numRead = source.Read(buffer, 0, buffer.Length);
             while (numRead != 0)
@@ -1010,7 +992,7 @@ namespace DiscUtils.Internal
                 return false;
             }
 
-            string[] split = name.Split(new char[] {'.'});
+            string[] split = name.Split('.');
 
             if (split.Length > 2 || split.Length < 1)
             {
@@ -1076,13 +1058,13 @@ namespace DiscUtils.Internal
 
         public static DateTime DateTimeFromUnix(uint fileTime)
         {
-            long ticks = fileTime*(long) 10*1000*1000;
+            long ticks = fileTime * (long)10 * 1000 * 1000;
             return new DateTime(ticks + UnixEpoch.Ticks);
         }
 
         public static uint DateTimeToUnix(DateTime time)
         {
-            return (uint) ((time.Ticks - UnixEpoch.Ticks)/(10*1000*1000));
+            return (uint)((time.Ticks - UnixEpoch.Ticks) / (10 * 1000 * 1000));
         }
 
         public static FileAttributes FileAttributesFromUnixFileType(UnixFileType fileType)
@@ -1104,7 +1086,7 @@ namespace DiscUtils.Internal
                 case UnixFileType.Socket:
                     return FileAttributes.Device | FileAttributes.System;
                 default:
-                    return (FileAttributes) 0;
+                    return 0;
             }
         }
 

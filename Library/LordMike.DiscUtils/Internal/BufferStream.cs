@@ -30,8 +30,8 @@ namespace DiscUtils.Internal
     /// </summary>
     public class BufferStream : SparseStream
     {
-        private IBuffer _buffer;
-        private FileAccess _access;
+        private readonly FileAccess _access;
+        private readonly IBuffer _buffer;
 
         private long _position;
 
@@ -71,6 +71,14 @@ namespace DiscUtils.Internal
         }
 
         /// <summary>
+        /// Gets the stored extents within the sparse stream.
+        /// </summary>
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get { return _buffer.Extents; }
+        }
+
+        /// <summary>
         /// Gets the length of the stream (the capacity of the underlying buffer).
         /// </summary>
         public override long Length
@@ -88,19 +96,9 @@ namespace DiscUtils.Internal
         }
 
         /// <summary>
-        /// Gets the stored extents within the sparse stream.
-        /// </summary>
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get { return _buffer.Extents; }
-        }
-
-        /// <summary>
         /// Flushes all data to the underlying storage.
         /// </summary>
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         /// <summary>
         /// Reads a number of bytes from the stream.
@@ -145,11 +143,8 @@ namespace DiscUtils.Internal
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                _position = effectiveOffset;
-                return _position;
-            }
+            _position = effectiveOffset;
+            return _position;
         }
 
         /// <summary>

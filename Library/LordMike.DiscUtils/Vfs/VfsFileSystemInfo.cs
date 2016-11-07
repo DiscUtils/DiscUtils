@@ -20,18 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Vfs
 {
-    using System.IO;
-
     /// <summary>
     /// Class holding information about a file system.
     /// </summary>
-    public sealed class VfsFileSystemInfo : DiscUtils.FileSystemInfo
+    public sealed class VfsFileSystemInfo : FileSystemInfo
     {
-        private string _name;
-        private string _description;
-        private VfsFileSystemOpener _openDelegate;
+        private readonly VfsFileSystemOpener _openDelegate;
 
         /// <summary>
         /// Initializes a new instance of the VfsFileSystemInfo class.
@@ -41,26 +39,20 @@ namespace DiscUtils.Vfs
         /// <param name="openDelegate">A delegate that can open streams as the indicated file system.</param>
         public VfsFileSystemInfo(string name, string description, VfsFileSystemOpener openDelegate)
         {
-            _name = name;
-            _description = description;
+            Name = name;
+            Description = description;
             _openDelegate = openDelegate;
-        }
-
-        /// <summary>
-        /// Gets the name of the file system.
-        /// </summary>
-        public override string Name
-        {
-            get { return _name; }
         }
 
         /// <summary>
         /// Gets a one-line description of the file system.
         /// </summary>
-        public override string Description
-        {
-            get { return _description; }
-        }
+        public override string Description { get; }
+
+        /// <summary>
+        /// Gets the name of the file system.
+        /// </summary>
+        public override string Name { get; }
 
         /// <summary>
         /// Opens a volume using the file system.

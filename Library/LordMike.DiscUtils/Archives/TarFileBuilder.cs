@@ -20,14 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Archives
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Builder to create UNIX Tar archive files.
     /// </summary>
@@ -97,7 +96,7 @@ namespace DiscUtils.Archives
 
         internal override List<BuilderExtent> FixExtents(out long totalLength)
         {
-            List<BuilderExtent> result = new List<BuilderExtent>((_files.Count*2) + 2);
+            List<BuilderExtent> result = new List<BuilderExtent>(_files.Count * 2 + 2);
             long pos = 0;
 
             foreach (UnixBuildFileRecord file in _files)

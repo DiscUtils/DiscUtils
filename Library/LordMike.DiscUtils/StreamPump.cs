@@ -20,13 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Utility class for pumping the contents of one stream into another.
     /// </summary>
@@ -43,7 +42,7 @@ namespace DiscUtils
         public StreamPump()
         {
             SparseChunkSize = 512;
-            BufferSize = (int) (512*Sizes.OneKiB);
+            BufferSize = (int)(512 * Sizes.OneKiB);
             SparseCopy = true;
         }
 
@@ -58,18 +57,24 @@ namespace DiscUtils
             InputStream = inStream;
             OutputStream = outStream;
             SparseChunkSize = sparseChunkSize;
-            BufferSize = (int) (512*Sizes.OneKiB);
+            BufferSize = (int)(512 * Sizes.OneKiB);
             SparseCopy = true;
         }
 
         /// <summary>
-        /// Event raised periodically through the pump operation.
+        /// Gets or sets the amount of data to read at a time from <c>InputStream</c>.
         /// </summary>
-        /// <remarks>
-        /// This event is signalled synchronously, so to avoid slowing the pumping activity
-        /// implementations should return quickly.
-        /// </remarks>
-        public event EventHandler<PumpProgressEventArgs> ProgressEvent;
+        public int BufferSize { get; set; }
+
+        /// <summary>
+        /// Gets the number of bytes read from <c>InputStream</c>.
+        /// </summary>
+        public long BytesRead { get; private set; }
+
+        /// <summary>
+        /// Gets the number of bytes written to <c>OutputStream</c>.
+        /// </summary>
+        public long BytesWritten { get; private set; }
 
         /// <summary>
         /// Gets or sets the stream that will be read from.
@@ -92,24 +97,18 @@ namespace DiscUtils
         public int SparseChunkSize { get; set; }
 
         /// <summary>
-        /// Gets or sets the amount of data to read at a time from <c>InputStream</c>.
-        /// </summary>
-        public int BufferSize { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether to enable the sparse copy behaviour (default true).
         /// </summary>
         public bool SparseCopy { get; set; }
 
         /// <summary>
-        /// Gets the number of bytes read from <c>InputStream</c>.
+        /// Event raised periodically through the pump operation.
         /// </summary>
-        public long BytesRead { get; private set; }
-
-        /// <summary>
-        /// Gets the number of bytes written to <c>OutputStream</c>.
-        /// </summary>
-        public long BytesWritten { get; private set; }
+        /// <remarks>
+        /// This event is signalled synchronously, so to avoid slowing the pumping activity
+        /// implementations should return quickly.
+        /// </remarks>
+        public event EventHandler<PumpProgressEventArgs> ProgressEvent;
 
         /// <summary>
         /// Performs the pump activity, blocking until complete.
@@ -188,7 +187,7 @@ namespace DiscUtils
                 inStream = SparseStream.FromStream(InputStream, Ownership.None);
             }
 
-            if (BufferSize > SparseChunkSize && (BufferSize%SparseChunkSize) != 0)
+            if (BufferSize > SparseChunkSize && BufferSize % SparseChunkSize != 0)
             {
                 throw new InvalidOperationException("Buffer size is not a multiple of the sparse chunk size");
             }
@@ -198,14 +197,14 @@ namespace DiscUtils
             BytesRead = 0;
             BytesWritten = 0;
 
-            foreach (var extent in inStream.Extents)
+            foreach (StreamExtent extent in inStream.Extents)
             {
                 inStream.Position = extent.Start;
 
                 long extentOffset = 0;
                 while (extentOffset < extent.Length)
                 {
-                    int toRead = (int) Math.Min(copyBuffer.Length, extent.Length - extentOffset);
+                    int toRead = (int)Math.Min(copyBuffer.Length, extent.Length - extentOffset);
                     int numRead = Utilities.ReadFully(inStream, copyBuffer, 0, toRead);
                     BytesRead += numRead;
 
@@ -250,7 +249,7 @@ namespace DiscUtils
                 if (b >= 0)
                 {
                     OutputStream.Position = inStream.Length - 1;
-                    OutputStream.WriteByte((byte) b);
+                    OutputStream.WriteByte((byte)b);
                 }
             }
         }

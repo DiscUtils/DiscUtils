@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Compression
 {
-    using System;
-
     /// <summary>
     /// Implementation of the Adler-32 checksum algorithm.
     /// </summary>
@@ -45,7 +45,7 @@ namespace DiscUtils.Compression
         /// </summary>
         public int Value
         {
-            get { return (int) (_b << 16 | _a); }
+            get { return (int)(_b << 16 | _a); }
         }
 
         /// <summary>

@@ -20,18 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
+
 namespace DiscUtils.Compression
 {
-    using System;
-    using System.Globalization;
-
     internal abstract class DataBlockTransform
     {
         protected abstract bool BuffersMustNotOverlap { get; }
 
         public int Process(byte[] input, int inputOffset, int inputCount, byte[] output, int outputOffset)
         {
-            if (output.Length < outputOffset + (long) MinOutputCount(inputCount))
+            if (output.Length < outputOffset + (long)MinOutputCount(inputCount))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -46,8 +46,8 @@ namespace DiscUtils.Compression
                 int maxOut = MaxOutputCount(inputCount);
 
                 if (input == output
-                    && (inputOffset + (long) inputCount > outputOffset)
-                    && (inputOffset <= outputOffset + (long) maxOut))
+                    && (inputOffset + (long)inputCount > outputOffset)
+                    && (inputOffset <= outputOffset + (long)maxOut))
                 {
                     byte[] tempBuffer = new byte[maxOut];
 

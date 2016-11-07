@@ -20,31 +20,30 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Partitions
 {
-    using System;
-
     internal class GptHeader
     {
         public const string GptSignature = "EFI PART";
-
-        public string Signature;
-        public uint Version;
-        public int HeaderSize;
-        public uint Crc;
-        public long HeaderLba;
         public long AlternateHeaderLba;
-        public long FirstUsable;
-        public long LastUsable;
+
+        public byte[] Buffer;
+        public uint Crc;
         public Guid DiskGuid;
+        public uint EntriesCrc;
+        public long FirstUsable;
+        public long HeaderLba;
+        public int HeaderSize;
+        public long LastUsable;
         public long PartitionEntriesLba;
         public uint PartitionEntryCount;
         public int PartitionEntrySize;
-        public uint EntriesCrc;
 
-        public byte[] Buffer;
+        public string Signature;
+        public uint Version;
 
         public GptHeader(int sectorSize)
         {
@@ -113,7 +112,7 @@ namespace DiscUtils.Partitions
             Utilities.StringToBytes(Signature, buffer, offset + 0, 8);
             Utilities.WriteBytesLittleEndian(Version, buffer, offset + 8);
             Utilities.WriteBytesLittleEndian(HeaderSize, buffer, offset + 12);
-            Utilities.WriteBytesLittleEndian((uint) 0, buffer, offset + 16);
+            Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(HeaderLba, buffer, offset + 24);
             Utilities.WriteBytesLittleEndian(AlternateHeaderLba, buffer, offset + 32);
             Utilities.WriteBytesLittleEndian(FirstUsable, buffer, offset + 40);
@@ -138,7 +137,7 @@ namespace DiscUtils.Partitions
             Array.Copy(buffer, offset, temp, 0, count);
 
             // Reset CRC field
-            Utilities.WriteBytesLittleEndian((uint) 0, temp, 16);
+            Utilities.WriteBytesLittleEndian((uint)0, temp, 16);
 
             return Crc32LittleEndian.Compute(Crc32Algorithm.Common, temp, 0, count);
         }

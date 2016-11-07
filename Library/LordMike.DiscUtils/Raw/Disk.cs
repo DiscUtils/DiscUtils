@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace DiscUtils.Raw
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a raw disk image.
     /// </summary>
@@ -40,9 +40,7 @@ namespace DiscUtils.Raw
         /// <param name="stream">The stream to read.</param>
         /// <param name="ownsStream">Indicates if the new instance should control the lifetime of the stream.</param>
         public Disk(Stream stream, Ownership ownsStream)
-            : this(stream, ownsStream, null)
-        {
-        }
+            : this(stream, ownsStream, null) {}
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -72,7 +70,7 @@ namespace DiscUtils.Raw
         /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
         {
-            FileShare share = (access == FileAccess.Read) ? FileShare.Read : FileShare.None;
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
             _file = new DiskImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose, null);
         }
 
@@ -83,22 +81,6 @@ namespace DiscUtils.Raw
         private Disk(DiskImageFile file)
         {
             _file = file;
-        }
-
-        /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _file.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return _file.DiskType; }
         }
 
         /// <summary>
@@ -121,11 +103,11 @@ namespace DiscUtils.Raw
         }
 
         /// <summary>
-        /// Gets the layers that make up the disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { yield return _file; }
+            get { return _file.DiskType; }
         }
 
         /// <summary>
@@ -136,6 +118,22 @@ namespace DiscUtils.Raw
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
             get { return DiskFactory.MakeDiskTypeInfo(); }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _file.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { yield return _file; }
         }
 
         /// <summary>

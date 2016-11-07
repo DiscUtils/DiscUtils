@@ -27,7 +27,7 @@ namespace DiscUtils.Internal
 {
     internal class PassthroughStreamBuilder : StreamBuilder
     {
-        private Stream _stream;
+        private readonly Stream _stream;
 
         public PassthroughStreamBuilder(Stream stream)
         {

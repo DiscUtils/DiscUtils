@@ -24,7 +24,7 @@ namespace DiscUtils.Internal
 {
     internal class BuilderBufferExtentSource : BuilderExtentSource
     {
-        private byte[] _buffer;
+        private readonly byte[] _buffer;
 
         public BuilderBufferExtentSource(byte[] buffer)
         {

@@ -20,13 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils
 {
-    using System;
-
     internal static class Numbers<T>
         where T : struct, IComparable<T>, IEquatable<T>
     {
+        public delegate bool ComparisonFn(T a, T b);
+
+        public delegate T ConvertIntFn(int a);
+
+        public delegate T ConvertLongFn(long a);
+
+        public delegate T DualParamFn(T a, T b);
+
+        public delegate T NoParamFn();
+
         public static readonly T Zero = default(T);
         public static readonly T One = GetOne();
         public static readonly DualParamFn Add = GetAdd();
@@ -38,32 +48,6 @@ namespace DiscUtils
         public static readonly DualParamFn Ceil = GetCeil();
         public static readonly ConvertLongFn ConvertLong = GetConvertLong();
         public static readonly ConvertIntFn ConvertInt = GetConvertInt();
-
-        public delegate T NoParamFn();
-
-        public delegate T DualParamFn(T a, T b);
-
-        public delegate bool ComparisonFn(T a, T b);
-
-        public delegate T ConvertLongFn(long a);
-
-        public delegate T ConvertIntFn(int a);
-
-        private delegate long LongNoParamFn();
-
-        private delegate long LongDualParamFn(long a, long b);
-
-        private delegate long LongConvertLongFn(long x);
-
-        private delegate long LongConvertIntFn(int x);
-
-        private delegate int IntNoParamFn();
-
-        private delegate int IntDualParamFn(int a, int b);
-
-        private delegate int IntConvertLongFn(long x);
-
-        private delegate int IntConvertIntFn(int x);
 
         public static bool GreaterThan(T a, T b)
         {
@@ -99,160 +83,146 @@ namespace DiscUtils
         {
             if (typeof(T) == typeof(long))
             {
-                return ((NoParamFn) (object) new LongNoParamFn(() => { return 1; }))();
+                return ((NoParamFn)(object)new LongNoParamFn(() => { return 1; }))();
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return ((NoParamFn) (object) new IntNoParamFn(() => { return 1; }))();
+                return ((NoParamFn)(object)new IntNoParamFn(() => { return 1; }))();
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static ConvertLongFn GetConvertLong()
         {
             if (typeof(T) == typeof(long))
             {
-                return (ConvertLongFn) (object) new LongConvertLongFn((long x) => { return x; });
+                return (ConvertLongFn)(object)new LongConvertLongFn(x => { return x; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (ConvertLongFn) (object) new IntConvertLongFn((long x) => { return (int) x; });
+                return (ConvertLongFn)(object)new IntConvertLongFn(x => { return (int)x; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static ConvertIntFn GetConvertInt()
         {
             if (typeof(T) == typeof(long))
             {
-                return (ConvertIntFn) (object) new LongConvertIntFn((int x) => { return x; });
+                return (ConvertIntFn)(object)new LongConvertIntFn(x => { return x; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (ConvertIntFn) (object) new IntConvertIntFn((int x) => { return x; });
+                return (ConvertIntFn)(object)new IntConvertIntFn(x => { return x; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetAdd()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a + b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return a + b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a + b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return a + b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetSubtract()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a - b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return a - b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a - b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return a - b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetMultiply()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a*b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return a * b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a*b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return a * b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetDivide()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return a/b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return a / b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return a/b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return a / b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetRoundUp()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return ((a + b - 1)/b)*b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return (a + b - 1) / b * b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return ((a + b - 1)/b)*b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return (a + b - 1) / b * b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetRoundDown()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return (a/b)*b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return a / b * b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return (a/b)*b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return a / b * b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
 
         private static DualParamFn GetCeil()
         {
             if (typeof(T) == typeof(long))
             {
-                return (DualParamFn) (object) new LongDualParamFn((long a, long b) => { return (a + b - 1)/b; });
+                return (DualParamFn)(object)new LongDualParamFn((a, b) => { return (a + b - 1) / b; });
             }
-            else if (typeof(T) == typeof(int))
+            if (typeof(T) == typeof(int))
             {
-                return (DualParamFn) (object) new IntDualParamFn((int a, int b) => { return (a + b - 1)/b; });
+                return (DualParamFn)(object)new IntDualParamFn((a, b) => { return (a + b - 1) / b; });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            throw new NotSupportedException();
         }
+
+        private delegate long LongNoParamFn();
+
+        private delegate long LongDualParamFn(long a, long b);
+
+        private delegate long LongConvertLongFn(long x);
+
+        private delegate long LongConvertIntFn(int x);
+
+        private delegate int IntNoParamFn();
+
+        private delegate int IntDualParamFn(int a, int b);
+
+        private delegate int IntConvertLongFn(long x);
+
+        private delegate int IntConvertIntFn(int x);
     }
 }

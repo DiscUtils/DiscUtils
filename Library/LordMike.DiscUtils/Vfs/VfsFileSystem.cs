@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Vfs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// Base class for VFS file systems.
     /// </summary>
@@ -43,9 +42,7 @@ namespace DiscUtils.Vfs
         where TDirectory : class, IVfsDirectory<TDirEntry, TFile>, TFile
         where TContext : VfsContext
     {
-        private TContext _context;
-        private TDirectory _rootDir;
-        private ObjectCache<long, TFile> _fileCache;
+        private readonly ObjectCache<long, TFile> _fileCache;
 
         /// <summary>
         /// Initializes a new instance of the VfsFileSystem class.
@@ -58,34 +55,19 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Delegate for processing directory entries.
-        /// </summary>
-        /// <param name="path">Full path to the directory entry.</param>
-        /// <param name="dirEntry">The directory entry itself.</param>
-        protected delegate void DirEntryHandler(string path, TDirEntry dirEntry);
-
-        /// <summary>
-        /// Gets the volume label.
-        /// </summary>
-        public override abstract string VolumeLabel { get; }
-
-        /// <summary>
         /// Gets or sets the global shared state.
         /// </summary>
-        protected TContext Context
-        {
-            get { return _context; }
-            set { _context = value; }
-        }
+        protected TContext Context { get; set; }
 
         /// <summary>
         /// Gets or sets the object representing the root directory.
         /// </summary>
-        protected TDirectory RootDirectory
-        {
-            get { return _rootDir; }
-            set { _rootDir = value; }
-        }
+        protected TDirectory RootDirectory { get; set; }
+
+        /// <summary>
+        /// Gets the volume label.
+        /// </summary>
+        public abstract override string VolumeLabel { get; }
 
         /// <summary>
         /// Copies a file - not supported on read-only file systems.
@@ -212,8 +194,8 @@ namespace DiscUtils.Vfs
             }
 
             TDirectory parentDir = GetDirectory(fullPath);
-            return Utilities.Map<TDirEntry, string>(parentDir.AllEntries,
-                (m) => Utilities.CombinePaths(fullPath, FormatFileName(m.FileName)));
+            return Utilities.Map(parentDir.AllEntries,
+                m => Utilities.CombinePaths(fullPath, FormatFileName(m.FileName)));
         }
 
         /// <summary>
@@ -311,11 +293,8 @@ namespace DiscUtils.Vfs
                 {
                     throw new FileNotFoundException("No such file", path);
                 }
-                else
-                {
-                    TDirectory parentDir = GetDirectory(Utilities.GetDirectoryFromPath(path));
-                    entry = parentDir.CreateNewFile(Utilities.GetFileFromPath(path));
-                }
+                TDirectory parentDir = GetDirectory(Utilities.GetDirectoryFromPath(path));
+                entry = parentDir.CreateNewFile(Utilities.GetFileFromPath(path));
             }
             else if (mode == FileMode.CreateNew)
             {
@@ -331,47 +310,44 @@ namespace DiscUtils.Vfs
             {
                 throw new IOException("Attempt to open directory as a file");
             }
+            TFile file = GetFile(entry);
+
+            SparseStream stream = null;
+            if (string.IsNullOrEmpty(attributeName))
+            {
+                stream = new BufferStream(file.FileContent, access);
+            }
             else
             {
-                TFile file = GetFile(entry);
-
-                SparseStream stream = null;
-                if (string.IsNullOrEmpty(attributeName))
+                IVfsFileWithStreams fileStreams = file as IVfsFileWithStreams;
+                if (fileStreams != null)
                 {
-                    stream = new BufferStream(file.FileContent, access);
+                    stream = fileStreams.OpenExistingStream(attributeName);
+                    if (stream == null)
+                    {
+                        if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
+                        {
+                            stream = fileStreams.CreateStream(attributeName);
+                        }
+                        else
+                        {
+                            throw new FileNotFoundException("No such attribute on file", path);
+                        }
+                    }
                 }
                 else
                 {
-                    IVfsFileWithStreams fileStreams = file as IVfsFileWithStreams;
-                    if (fileStreams != null)
-                    {
-                        stream = fileStreams.OpenExistingStream(attributeName);
-                        if (stream == null)
-                        {
-                            if (mode == FileMode.Create || mode == FileMode.OpenOrCreate)
-                            {
-                                stream = fileStreams.CreateStream(attributeName);
-                            }
-                            else
-                            {
-                                throw new FileNotFoundException("No such attribute on file", path);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new NotSupportedException(
-                            "Attempt to open a file stream on a file system that doesn't support them");
-                    }
+                    throw new NotSupportedException(
+                        "Attempt to open a file stream on a file system that doesn't support them");
                 }
-
-                if (mode == FileMode.Create || mode == FileMode.Truncate)
-                {
-                    stream.SetLength(0);
-                }
-
-                return stream;
             }
+
+            if (mode == FileMode.Create || mode == FileMode.Truncate)
+            {
+                stream.SetLength(0);
+            }
+
+            return stream;
         }
 
         /// <summary>
@@ -383,7 +359,7 @@ namespace DiscUtils.Vfs
         {
             if (IsRoot(path))
             {
-                return _rootDir.FileAttributes;
+                return RootDirectory.FileAttributes;
             }
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
@@ -396,10 +372,7 @@ namespace DiscUtils.Vfs
             {
                 return dirEntry.FileAttributes;
             }
-            else
-            {
-                return GetFile(dirEntry).FileAttributes;
-            }
+            return GetFile(dirEntry).FileAttributes;
         }
 
         /// <summary>
@@ -421,7 +394,7 @@ namespace DiscUtils.Vfs
         {
             if (IsRoot(path))
             {
-                return _rootDir.CreationTimeUtc;
+                return RootDirectory.CreationTimeUtc;
             }
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
@@ -434,10 +407,7 @@ namespace DiscUtils.Vfs
             {
                 return dirEntry.CreationTimeUtc;
             }
-            else
-            {
-                return GetFile(dirEntry).CreationTimeUtc;
-            }
+            return GetFile(dirEntry).CreationTimeUtc;
         }
 
         /// <summary>
@@ -459,7 +429,7 @@ namespace DiscUtils.Vfs
         {
             if (IsRoot(path))
             {
-                return _rootDir.LastAccessTimeUtc;
+                return RootDirectory.LastAccessTimeUtc;
             }
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
@@ -472,10 +442,7 @@ namespace DiscUtils.Vfs
             {
                 return dirEntry.LastAccessTimeUtc;
             }
-            else
-            {
-                return GetFile(dirEntry).LastAccessTimeUtc;
-            }
+            return GetFile(dirEntry).LastAccessTimeUtc;
         }
 
         /// <summary>
@@ -497,7 +464,7 @@ namespace DiscUtils.Vfs
         {
             if (IsRoot(path))
             {
-                return _rootDir.LastWriteTimeUtc;
+                return RootDirectory.LastWriteTimeUtc;
             }
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
@@ -510,10 +477,7 @@ namespace DiscUtils.Vfs
             {
                 return dirEntry.LastWriteTimeUtc;
             }
-            else
-            {
-                return GetFile(dirEntry).LastWriteTimeUtc;
-            }
+            return GetFile(dirEntry).LastWriteTimeUtc;
         }
 
         /// <summary>
@@ -560,7 +524,7 @@ namespace DiscUtils.Vfs
         {
             if (IsRoot(path))
             {
-                return _rootDir;
+                return RootDirectory;
             }
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
@@ -575,12 +539,12 @@ namespace DiscUtils.Vfs
                 throw new DirectoryNotFoundException("No such directory: " + path);
             }
 
-            return (TDirectory) GetFile(dirEntry);
+            return (TDirectory)GetFile(dirEntry);
         }
 
         internal TDirEntry GetDirectoryEntry(string path)
         {
-            return GetDirectoryEntry(_rootDir, path);
+            return GetDirectoryEntry(RootDirectory, path);
         }
 
         /// <summary>
@@ -608,7 +572,7 @@ namespace DiscUtils.Vfs
 
             if (dir != null)
             {
-                foreach (var subentry in dir.AllEntries)
+                foreach (TDirEntry subentry in dir.AllEntries)
                 {
                     ForAllDirEntries(Utilities.CombinePaths(path, subentry.FileName), handler);
                 }
@@ -624,9 +588,9 @@ namespace DiscUtils.Vfs
         {
             if (IsRoot(path))
             {
-                return _rootDir;
+                return RootDirectory;
             }
-            else if (path == null)
+            if (path == null)
             {
                 return default(TFile);
             }
@@ -668,7 +632,7 @@ namespace DiscUtils.Vfs
 
         private TDirEntry GetDirectoryEntry(TDirectory dir, string path)
         {
-            string[] pathElements = path.Split(new char[] {'\\'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] pathElements = path.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             return GetDirectoryEntry(dir, pathElements, 0);
         }
 
@@ -680,30 +644,21 @@ namespace DiscUtils.Vfs
             {
                 return dir.Self;
             }
-            else
+            entry = dir.GetEntryByName(pathEntries[pathOffset]);
+            if (entry != null)
             {
-                entry = dir.GetEntryByName(pathEntries[pathOffset]);
-                if (entry != null)
+                if (pathOffset == pathEntries.Length - 1)
                 {
-                    if (pathOffset == pathEntries.Length - 1)
-                    {
-                        return entry;
-                    }
-                    else if (entry.IsDirectory)
-                    {
-                        return GetDirectoryEntry((TDirectory) ConvertDirEntryToFile(entry), pathEntries, pathOffset + 1);
-                    }
-                    else
-                    {
-                        throw new IOException(string.Format(CultureInfo.InvariantCulture,
-                            "{0} is a file, not a directory", pathEntries[pathOffset]));
-                    }
+                    return entry;
                 }
-                else
+                if (entry.IsDirectory)
                 {
-                    return null;
+                    return GetDirectoryEntry((TDirectory)ConvertDirEntryToFile(entry), pathEntries, pathOffset + 1);
                 }
+                throw new IOException(string.Format(CultureInfo.InvariantCulture,
+                    "{0} is a file, not a directory", pathEntries[pathOffset]));
             }
+            return null;
         }
 
         private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
@@ -779,5 +734,12 @@ namespace DiscUtils.Vfs
 
             return currentEntry;
         }
+
+        /// <summary>
+        /// Delegate for processing directory entries.
+        /// </summary>
+        /// <param name="path">Full path to the directory entry.</param>
+        /// <param name="dirEntry">The directory entry itself.</param>
+        protected delegate void DirEntryHandler(string path, TDirEntry dirEntry);
     }
 }

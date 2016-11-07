@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Vfs
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Base class for the public facade on a file system.
     /// </summary>
@@ -34,7 +34,7 @@ namespace DiscUtils.Vfs
     /// </remarks>
     public abstract class VfsFileSystemFacade : DiscFileSystem
     {
-        private DiscFileSystem _wrapped;
+        private readonly DiscFileSystem _wrapped;
 
         /// <summary>
         /// Initializes a new instance of the VfsFileSystemFacade class.
@@ -46,11 +46,12 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Gets the file system options, which can be modified.
+        /// Indicates whether the file system is read-only or read-write.
         /// </summary>
-        public override DiscFileSystemOptions Options
+        /// <returns>true if the file system is read-write.</returns>
+        public override bool CanWrite
         {
-            get { return _wrapped.Options; }
+            get { return _wrapped.CanWrite; }
         }
 
         /// <summary>
@@ -62,12 +63,19 @@ namespace DiscUtils.Vfs
         }
 
         /// <summary>
-        /// Indicates whether the file system is read-only or read-write.
+        /// Gets a value indicating whether the file system is thread-safe.
         /// </summary>
-        /// <returns>true if the file system is read-write.</returns>
-        public override bool CanWrite
+        public override bool IsThreadSafe
         {
-            get { return _wrapped.CanWrite; }
+            get { return _wrapped.IsThreadSafe; }
+        }
+
+        /// <summary>
+        /// Gets the file system options, which can be modified.
+        /// </summary>
+        public override DiscFileSystemOptions Options
+        {
+            get { return _wrapped.Options; }
         }
 
         /// <summary>
@@ -84,14 +92,6 @@ namespace DiscUtils.Vfs
         public override string VolumeLabel
         {
             get { return _wrapped.VolumeLabel; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the file system is thread-safe.
-        /// </summary>
-        public override bool IsThreadSafe
-        {
-            get { return _wrapped.IsThreadSafe; }
         }
 
         /// <summary>
@@ -525,7 +525,7 @@ namespace DiscUtils.Vfs
             where TDirectory : class, IVfsDirectory<TDirEntry, TFile>, TFile
             where TContext : VfsContext
         {
-            return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>) _wrapped;
+            return (VfsFileSystem<TDirEntry, TFile, TDirectory, TContext>)_wrapped;
         }
 
         /// <summary>
@@ -536,7 +536,7 @@ namespace DiscUtils.Vfs
         protected T GetRealFileSystem<T>()
             where T : DiscFileSystem
         {
-            return (T) _wrapped;
+            return (T)_wrapped;
         }
     }
 }

@@ -20,21 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// Class that identifies the role of each cluster in a file system.
     /// </summary>
     public sealed class ClusterMap
     {
-        private ClusterRoles[] _clusterToRole;
-        private object[] _clusterToFileId;
-        private Dictionary<object, string[]> _fileIdToPaths;
+        private readonly object[] _clusterToFileId;
+        private readonly ClusterRoles[] _clusterToRole;
+        private readonly Dictionary<object, string[]> _fileIdToPaths;
 
         internal ClusterMap(ClusterRoles[] clusterToRole, object[] clusterToFileId,
-            Dictionary<object, string[]> fileIdToPaths)
+                            Dictionary<object, string[]> fileIdToPaths)
         {
             _clusterToRole = clusterToRole;
             _clusterToFileId = clusterToFileId;
@@ -52,10 +52,7 @@ namespace DiscUtils
             {
                 return ClusterRoles.None;
             }
-            else
-            {
-                return _clusterToRole[cluster];
-            }
+            return _clusterToRole[cluster];
         }
 
         /// <summary>
@@ -72,10 +69,7 @@ namespace DiscUtils
                 object fileId = _clusterToFileId[cluster];
                 return _fileIdToPaths[fileId];
             }
-            else
-            {
-                return new string[0];
-            }
+            return new string[0];
         }
     }
 }

@@ -20,24 +20,21 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Globalization;
-    using DiscUtils.Partitions;
-
     /// <summary>
     /// Information about a physical disk volume, which may be a partition or an entire disk.
     /// </summary>
     public sealed class PhysicalVolumeInfo : VolumeInfo
     {
-        private string _diskId;
-        private VirtualDisk _disk;
-        private SparseStreamOpenDelegate _streamOpener;
-        private PhysicalVolumeType _type;
-        private PartitionInfo _partitionInfo;
+        private readonly VirtualDisk _disk;
+        private readonly string _diskId;
+        private readonly SparseStreamOpenDelegate _streamOpener;
 
         /// <summary>
         /// Initializes a new instance of the PhysicalVolumeInfo class.
@@ -54,8 +51,8 @@ namespace DiscUtils
             _diskId = diskId;
             _disk = disk;
             _streamOpener = partitionInfo.Open;
-            _type = partitionInfo.VolumeType;
-            _partitionInfo = partitionInfo;
+            VolumeType = partitionInfo.VolumeType;
+            Partition = partitionInfo;
         }
 
         /// <summary>
@@ -71,31 +68,15 @@ namespace DiscUtils
             _diskId = diskId;
             _disk = disk;
             _streamOpener = delegate { return new SubStream(disk.Content, Ownership.None, 0, disk.Capacity); };
-            _type = PhysicalVolumeType.EntireDisk;
+            VolumeType = PhysicalVolumeType.EntireDisk;
         }
 
         /// <summary>
-        /// Gets the type of the volume.
+        /// Gets the disk geometry of the underlying storage medium (as used in BIOS calls), may be null.
         /// </summary>
-        public PhysicalVolumeType VolumeType
+        public override Geometry BiosGeometry
         {
-            get { return _type; }
-        }
-
-        /// <summary>
-        /// Gets the signature of the disk containing the volume (only valid for partition-type volumes).
-        /// </summary>
-        public int DiskSignature
-        {
-            get { return (_type != PhysicalVolumeType.EntireDisk) ? _disk.Signature : 0; }
-        }
-
-        /// <summary>
-        /// Gets the unique identity of the disk containing the volume, if known.
-        /// </summary>
-        public Guid DiskIdentity
-        {
-            get { return (_type != PhysicalVolumeType.EntireDisk) ? _disk.Partitions.DiskGuid : Guid.Empty; }
+            get { return _disk.BiosGeometry; }
         }
 
         /// <summary>
@@ -103,15 +84,23 @@ namespace DiscUtils
         /// </summary>
         public override byte BiosType
         {
-            get { return (_partitionInfo == null) ? (byte) 0 : _partitionInfo.BiosType; }
+            get { return Partition == null ? (byte)0 : Partition.BiosType; }
         }
 
         /// <summary>
-        /// Gets the size of the volume, in bytes.
+        /// Gets the unique identity of the disk containing the volume, if known.
         /// </summary>
-        public override long Length
+        public Guid DiskIdentity
         {
-            get { return (_partitionInfo == null) ? _disk.Capacity : _partitionInfo.SectorCount*_disk.SectorSize; }
+            get { return VolumeType != PhysicalVolumeType.EntireDisk ? _disk.Partitions.DiskGuid : Guid.Empty; }
+        }
+
+        /// <summary>
+        /// Gets the signature of the disk containing the volume (only valid for partition-type volumes).
+        /// </summary>
+        public int DiskSignature
+        {
+            get { return VolumeType != PhysicalVolumeType.EntireDisk ? _disk.Signature : 0; }
         }
 
         /// <summary>
@@ -125,31 +114,58 @@ namespace DiscUtils
         {
             get
             {
-                if (_type == PhysicalVolumeType.GptPartition)
+                if (VolumeType == PhysicalVolumeType.GptPartition)
                 {
                     return "VPG" + PartitionIdentity.ToString("B");
                 }
-                else
+                string partId;
+                switch (VolumeType)
                 {
-                    string partId;
-                    switch (_type)
-                    {
-                        case PhysicalVolumeType.EntireDisk:
-                            partId = "PD";
-                            break;
-                        case PhysicalVolumeType.BiosPartition:
-                        case PhysicalVolumeType.ApplePartition:
-                            partId = "PO" +
-                                     (_partitionInfo.FirstSector*_disk.SectorSize).ToString("X",
-                                         CultureInfo.InvariantCulture);
-                            break;
-                        default:
-                            partId = "P*";
-                            break;
-                    }
-
-                    return "VPD:" + _diskId + ":" + partId;
+                    case PhysicalVolumeType.EntireDisk:
+                        partId = "PD";
+                        break;
+                    case PhysicalVolumeType.BiosPartition:
+                    case PhysicalVolumeType.ApplePartition:
+                        partId = "PO" +
+                                 (Partition.FirstSector * _disk.SectorSize).ToString("X",
+                                     CultureInfo.InvariantCulture);
+                        break;
+                    default:
+                        partId = "P*";
+                        break;
                 }
+
+                return "VPD:" + _diskId + ":" + partId;
+            }
+        }
+
+        /// <summary>
+        /// Gets the size of the volume, in bytes.
+        /// </summary>
+        public override long Length
+        {
+            get { return Partition == null ? _disk.Capacity : Partition.SectorCount * _disk.SectorSize; }
+        }
+
+        /// <summary>
+        /// Gets the underlying partition (if any).
+        /// </summary>
+        internal PartitionInfo Partition { get; }
+
+        /// <summary>
+        /// Gets the unique identity of the physical partition, if known.
+        /// </summary>
+        public Guid PartitionIdentity
+        {
+            get
+            {
+                GuidPartitionInfo gpi = Partition as GuidPartitionInfo;
+                if (gpi != null)
+                {
+                    return gpi.Identity;
+                }
+
+                return Guid.Empty;
             }
         }
 
@@ -162,45 +178,17 @@ namespace DiscUtils
         }
 
         /// <summary>
-        /// Gets the disk geometry of the underlying storage medium (as used in BIOS calls), may be null.
-        /// </summary>
-        public override Geometry BiosGeometry
-        {
-            get { return _disk.BiosGeometry; }
-        }
-
-        /// <summary>
         /// Gets the offset of this volume in the underlying storage medium, if any (may be Zero).
         /// </summary>
         public override long PhysicalStartSector
         {
-            get { return _type == PhysicalVolumeType.EntireDisk ? 0 : _partitionInfo.FirstSector; }
+            get { return VolumeType == PhysicalVolumeType.EntireDisk ? 0 : Partition.FirstSector; }
         }
 
         /// <summary>
-        /// Gets the unique identity of the physical partition, if known.
+        /// Gets the type of the volume.
         /// </summary>
-        public Guid PartitionIdentity
-        {
-            get
-            {
-                GuidPartitionInfo gpi = _partitionInfo as GuidPartitionInfo;
-                if (gpi != null)
-                {
-                    return gpi.Identity;
-                }
-
-                return Guid.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Gets the underlying partition (if any).
-        /// </summary>
-        internal PartitionInfo Partition
-        {
-            get { return _partitionInfo; }
-        }
+        public PhysicalVolumeType VolumeType { get; }
 
         /// <summary>
         /// Opens the volume, providing access to its contents.

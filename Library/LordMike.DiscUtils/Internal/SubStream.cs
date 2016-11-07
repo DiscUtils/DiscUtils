@@ -28,12 +28,12 @@ namespace DiscUtils.Internal
 {
     internal class SubStream : MappedStream
     {
-        private long _position;
-        private long _first;
-        private long _length;
+        private readonly long _first;
+        private readonly long _length;
+        private readonly Ownership _ownsParent;
 
-        private Stream _parent;
-        private Ownership _ownsParent;
+        private readonly Stream _parent;
+        private long _position;
 
         public SubStream(Stream parent, long first, long length)
         {
@@ -76,6 +76,19 @@ namespace DiscUtils.Internal
             get { return _parent.CanWrite; }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                SparseStream parentAsSparse = _parent as SparseStream;
+                if (parentAsSparse != null)
+                {
+                    return OffsetExtents(parentAsSparse.GetExtentsInRange(_first, _length));
+                }
+                return new[] { new StreamExtent(0, _length) };
+            }
+        }
+
         public override long Length
         {
             get { return _length; }
@@ -98,25 +111,9 @@ namespace DiscUtils.Internal
             }
         }
 
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                SparseStream parentAsSparse = _parent as SparseStream;
-                if (parentAsSparse != null)
-                {
-                    return OffsetExtents(parentAsSparse.GetExtentsInRange(_first, _length));
-                }
-                else
-                {
-                    return new StreamExtent[] {new StreamExtent(0, _length)};
-                }
-            }
-        }
-
         public override IEnumerable<StreamExtent> MapContent(long start, long length)
         {
-            return new StreamExtent[] {new StreamExtent(start + _first, length)};
+            return new[] { new StreamExtent(start + _first, length) };
         }
 
         public override void Flush()
@@ -138,7 +135,7 @@ namespace DiscUtils.Internal
 
             _parent.Position = _first + _position;
             int numRead = _parent.Read(buffer, offset,
-                (int) Math.Min(count, Math.Min(_length - _position, int.MaxValue)));
+                (int)Math.Min(count, Math.Min(_length - _position, int.MaxValue)));
             _position += numRead;
             return numRead;
         }

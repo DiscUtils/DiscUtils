@@ -39,9 +39,9 @@ namespace DiscUtils.Internal
         private const int MostRecentListSize = 20;
         private const int PruneGap = 500;
 
-        private Dictionary<K, WeakReference> _entries;
-        private List<KeyValuePair<K, V>> _recent;
+        private readonly Dictionary<K, WeakReference> _entries;
         private int _nextPruneCount;
+        private readonly List<KeyValuePair<K, V>> _recent;
 
         public ObjectCache()
         {
@@ -66,7 +66,7 @@ namespace DiscUtils.Internal
                 WeakReference wRef;
                 if (_entries.TryGetValue(key, out wRef))
                 {
-                    V val = (V) wRef.Target;
+                    V val = (V)wRef.Target;
                     if (val != null)
                     {
                         MakeMostRecent(key, val);
@@ -107,7 +107,7 @@ namespace DiscUtils.Internal
             if (_nextPruneCount > PruneGap)
             {
                 List<K> toPrune = new List<K>();
-                foreach (var entry in _entries)
+                foreach (KeyValuePair<K, WeakReference> entry in _entries)
                 {
                     if (!entry.Value.IsAlive)
                     {
@@ -115,7 +115,7 @@ namespace DiscUtils.Internal
                     }
                 }
 
-                foreach (var key in toPrune)
+                foreach (K key in toPrune)
                 {
                     _entries.Remove(key);
                 }

@@ -26,13 +26,11 @@ namespace DiscUtils.Internal
 {
     internal class BuilderStreamExtent : BuilderExtent
     {
+        private readonly Ownership _ownership;
         private Stream _source;
-        private Ownership _ownership;
 
         public BuilderStreamExtent(long start, Stream source)
-            : this(start, source, Ownership.None)
-        {
-        }
+            : this(start, source, Ownership.None) {}
 
         public BuilderStreamExtent(long start, Stream source, Ownership ownership)
             : base(start, source.Length)
@@ -50,9 +48,7 @@ namespace DiscUtils.Internal
             }
         }
 
-        internal override void PrepareForRead()
-        {
-        }
+        internal override void PrepareForRead() {}
 
         internal override int Read(long diskOffset, byte[] block, int offset, int count)
         {
@@ -60,8 +56,6 @@ namespace DiscUtils.Internal
             return _source.Read(block, offset, count);
         }
 
-        internal override void DisposeReadState()
-        {
-        }
+        internal override void DisposeReadState() {}
     }
 }

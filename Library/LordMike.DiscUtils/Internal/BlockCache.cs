@@ -27,14 +27,13 @@ namespace DiscUtils.Internal
     internal class BlockCache<T>
         where T : Block, new()
     {
-        private int _blockSize;
-        private Dictionary<long, T> _blocks;
-        private LinkedList<T> _lru;
-        private List<T> _freeBlocks;
+        private readonly Dictionary<long, T> _blocks;
         private int _blocksCreated;
-        private int _totalBlocks;
+        private readonly int _blockSize;
 
-        private int _freeBlockCount;
+        private readonly List<T> _freeBlocks;
+        private readonly LinkedList<T> _lru;
+        private readonly int _totalBlocks;
 
         public BlockCache(int blockSize, int blockCount)
         {
@@ -45,13 +44,10 @@ namespace DiscUtils.Internal
             _lru = new LinkedList<T>();
             _freeBlocks = new List<T>(_totalBlocks);
 
-            _freeBlockCount = _totalBlocks;
+            FreeBlockCount = _totalBlocks;
         }
 
-        public int FreeBlockCount
-        {
-            get { return _freeBlockCount; }
-        }
+        public int FreeBlockCount { get; private set; }
 
         public bool ContainsBlock(long position)
         {
@@ -95,7 +91,7 @@ namespace DiscUtils.Internal
                 _blocks.Remove(position);
                 _lru.Remove(block);
                 _freeBlocks.Add(block);
-                _freeBlockCount++;
+                FreeBlockCount++;
             }
         }
 
@@ -114,14 +110,14 @@ namespace DiscUtils.Internal
                 int idx = _freeBlocks.Count - 1;
                 block = _freeBlocks[idx];
                 _freeBlocks.RemoveAt(idx);
-                _freeBlockCount--;
+                FreeBlockCount--;
             }
             else if (_blocksCreated < _totalBlocks)
             {
                 block = new T();
                 block.Data = new byte[_blockSize];
                 _blocksCreated++;
-                _freeBlockCount--;
+                FreeBlockCount--;
             }
             else
             {

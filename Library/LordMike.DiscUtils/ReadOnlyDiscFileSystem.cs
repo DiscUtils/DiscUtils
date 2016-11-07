@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Base class for file systems that are by their nature read-only, causes NotSupportedException to be thrown
     /// from all methods that are always invalid.
@@ -34,18 +34,14 @@ namespace DiscUtils
         /// <summary>
         /// Initializes a new instance of the ReadOnlyDiscFileSystem class.
         /// </summary>
-        protected ReadOnlyDiscFileSystem()
-        {
-        }
+        protected ReadOnlyDiscFileSystem() {}
 
         /// <summary>
         /// Initializes a new instance of the ReadOnlyDiscFileSystem class.
         /// </summary>
         /// <param name="defaultOptions">The options instance to use for this file system instance.</param>
         protected ReadOnlyDiscFileSystem(DiscFileSystemOptions defaultOptions)
-            : base(defaultOptions)
-        {
-        }
+            : base(defaultOptions) {}
 
         /// <summary>
         /// Indicates whether the file system is read-only or read-write.

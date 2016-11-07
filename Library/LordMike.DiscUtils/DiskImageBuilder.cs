@@ -20,15 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-
     /// <summary>
     /// Base class for all disk image builders.
     /// </summary>
@@ -36,46 +35,25 @@ namespace DiscUtils
     {
         private static Dictionary<string, VirtualDiskFactory> s_typeMap;
 
-        private SparseStream _content;
-        private Geometry _geometry;
-        private Geometry _biosGeometry;
-        private GenericDiskAdapterType _adaptorType;
+        /// <summary>
+        /// Gets or sets the geometry of this disk, as reported by the BIOS, will be implied from the content stream if not set.
+        /// </summary>
+        public Geometry BiosGeometry { get; set; }
 
         /// <summary>
         /// Gets or sets the content for this disk, implying the size of the disk.
         /// </summary>
-        public SparseStream Content
-        {
-            get { return _content; }
-            set { _content = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the geometry of this disk, will be implied from the content stream if not set.
-        /// </summary>
-        public Geometry Geometry
-        {
-            get { return _geometry; }
-            set { _geometry = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the geometry of this disk, as reported by the BIOS, will be implied from the content stream if not set.
-        /// </summary>
-        public Geometry BiosGeometry
-        {
-            get { return _biosGeometry; }
-            set { _biosGeometry = value; }
-        }
+        public SparseStream Content { get; set; }
 
         /// <summary>
         /// Gets or sets the adapter type for created virtual disk, for file formats that encode this information.
         /// </summary>
-        public virtual GenericDiskAdapterType GenericAdapterType
-        {
-            get { return _adaptorType; }
-            set { _adaptorType = value; }
-        }
+        public virtual GenericDiskAdapterType GenericAdapterType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the geometry of this disk, will be implied from the content stream if not set.
+        /// </summary>
+        public Geometry Geometry { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this file format preserves BIOS geometry information.
@@ -130,8 +108,8 @@ namespace DiscUtils
         private static void InitializeMaps()
         {
             Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
-            
-            foreach (var type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
+
+            foreach (Type type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
             {
                 VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)ReflectionHelper.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
                 if (attr != null)

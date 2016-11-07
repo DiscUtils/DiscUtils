@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Vfs
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Base class for read-only file system implementations.
     /// </summary>
@@ -44,9 +44,7 @@ namespace DiscUtils.Vfs
         /// </summary>
         /// <param name="defaultOptions">The default file system options.</param>
         protected VfsReadOnlyFileSystem(DiscFileSystemOptions defaultOptions)
-            : base(defaultOptions)
-        {
-        }
+            : base(defaultOptions) {}
 
         /// <summary>
         /// Indicates whether the file system is read-only or read-write.

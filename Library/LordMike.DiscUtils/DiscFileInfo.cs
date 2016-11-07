@@ -20,27 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils
 {
-    using System.IO;
-
     /// <summary>
     /// Provides information about a file on a disc.
     /// </summary>
     public sealed class DiscFileInfo : DiscFileSystemInfo
     {
         internal DiscFileInfo(DiscFileSystem fileSystem, string path)
-            : base(fileSystem, path)
-        {
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the file exists.
-        /// </summary>
-        public override bool Exists
-        {
-            get { return FileSystem.FileExists(Path); }
-        }
+            : base(fileSystem, path) {}
 
         /// <summary>
         /// Gets an instance of the parent directory.
@@ -56,6 +46,14 @@ namespace DiscUtils
         public string DirectoryName
         {
             get { return Directory.FullName; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the file exists.
+        /// </summary>
+        public override bool Exists
+        {
+            get { return FileSystem.FileExists(Path); }
         }
 
         /// <summary>

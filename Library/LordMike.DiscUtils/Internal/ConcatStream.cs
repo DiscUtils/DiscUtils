@@ -32,11 +32,11 @@ namespace DiscUtils.Internal
     /// </summary>
     internal class ConcatStream : SparseStream
     {
-        private SparseStream[] _streams;
-        private Ownership _ownsStreams;
-        private bool _canWrite;
+        private readonly bool _canWrite;
+        private readonly Ownership _ownsStreams;
 
         private long _position;
+        private SparseStream[] _streams;
 
         public ConcatStream(Ownership ownsStreams, params SparseStream[] streams)
         {
@@ -45,7 +45,7 @@ namespace DiscUtils.Internal
 
             // Only allow writes if all streams can be written
             _canWrite = true;
-            foreach (var stream in streams)
+            foreach (SparseStream stream in streams)
             {
                 if (!stream.CanWrite)
                 {
@@ -81,6 +81,28 @@ namespace DiscUtils.Internal
             }
         }
 
+        public override IEnumerable<StreamExtent> Extents
+        {
+            get
+            {
+                CheckDisposed();
+                List<StreamExtent> extents = new List<StreamExtent>();
+
+                long pos = 0;
+                for (int i = 0; i < _streams.Length; ++i)
+                {
+                    foreach (StreamExtent extent in _streams[i].Extents)
+                    {
+                        extents.Add(new StreamExtent(extent.Start + pos, extent.Length));
+                    }
+
+                    pos += _streams[i].Length;
+                }
+
+                return extents;
+            }
+        }
+
         public override long Length
         {
             get
@@ -108,28 +130,6 @@ namespace DiscUtils.Internal
             {
                 CheckDisposed();
                 _position = value;
-            }
-        }
-
-        public override IEnumerable<StreamExtent> Extents
-        {
-            get
-            {
-                CheckDisposed();
-                List<StreamExtent> extents = new List<StreamExtent>();
-
-                long pos = 0;
-                for (int i = 0; i < _streams.Length; ++i)
-                {
-                    foreach (StreamExtent extent in _streams[i].Extents)
-                    {
-                        extents.Add(new StreamExtent(extent.Start + pos, extent.Length));
-                    }
-
-                    pos += _streams[i].Length;
-                }
-
-                return extents;
             }
         }
 
@@ -165,7 +165,7 @@ namespace DiscUtils.Internal
             return totalRead;
         }
 
-        public override long Seek(long offset, System.IO.SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             CheckDisposed();
 
@@ -183,11 +183,8 @@ namespace DiscUtils.Internal
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            else
-            {
-                Position = effectiveOffset;
-                return Position;
-            }
+            Position = effectiveOffset;
+            return Position;
         }
 
         public override void SetLength(long value)
@@ -229,7 +226,7 @@ namespace DiscUtils.Internal
                 }
                 else
                 {
-                    numToWrite = (int) Math.Min(count - totalWritten, _streams[streamIdx].Length - streamPos);
+                    numToWrite = (int)Math.Min(count - totalWritten, _streams[streamIdx].Length - streamPos);
                 }
 
                 _streams[streamIdx].Write(buffer, offset + totalWritten, numToWrite);
@@ -245,7 +242,7 @@ namespace DiscUtils.Internal
             {
                 if (disposing && _ownsStreams == Ownership.Dispose && _streams != null)
                 {
-                    foreach (var stream in _streams)
+                    foreach (SparseStream stream in _streams)
                     {
                         stream.Dispose();
                     }

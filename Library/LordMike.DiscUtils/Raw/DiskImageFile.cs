@@ -20,31 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.Raw
 {
-    using System;
-    using System.IO;
-    using DiscUtils.Partitions;
-
     /// <summary>
     /// Represents a single raw disk image file.
     /// </summary>
     public sealed class DiskImageFile : VirtualDiskLayer
     {
-        private SparseStream _content;
-        private Ownership _ownsContent;
-        private Geometry _geometry;
+        private readonly Ownership _ownsContent;
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
         /// </summary>
         /// <param name="stream">The stream to interpret.</param>
         public DiskImageFile(Stream stream)
-            : this(stream, Ownership.None, null)
-        {
-        }
+            : this(stream, Ownership.None, null) {}
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
@@ -54,25 +49,37 @@ namespace DiscUtils.Raw
         /// <param name="geometry">The emulated geometry of the disk.</param>
         public DiskImageFile(Stream stream, Ownership ownsStream, Geometry geometry)
         {
-            _content = stream as SparseStream;
+            Content = stream as SparseStream;
             _ownsContent = ownsStream;
 
-            if (_content == null)
+            if (Content == null)
             {
-                _content = SparseStream.FromStream(stream, ownsStream);
+                Content = SparseStream.FromStream(stream, ownsStream);
                 _ownsContent = Ownership.Dispose;
             }
 
-            _geometry = geometry ?? DetectGeometry(_content);
+            Geometry = geometry ?? DetectGeometry(Content);
+        }
+
+        internal override long Capacity
+        {
+            get { return Content.Length; }
+        }
+
+        internal SparseStream Content { get; private set; }
+
+        /// <summary>
+        /// Gets the type of disk represented by this object.
+        /// </summary>
+        public VirtualDiskClass DiskType
+        {
+            get { return DetectDiskType(Capacity); }
         }
 
         /// <summary>
         /// Gets the geometry of the file.
         /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _geometry; }
-        }
+        public override Geometry Geometry { get; }
 
         /// <summary>
         /// Gets a value indicating if the layer only stores meaningful sectors.
@@ -90,27 +97,9 @@ namespace DiscUtils.Raw
             get { return false; }
         }
 
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public VirtualDiskClass DiskType
-        {
-            get { return DetectDiskType(Capacity); }
-        }
-
-        internal override long Capacity
-        {
-            get { return _content.Length; }
-        }
-
         internal override FileLocator RelativeFileLocator
         {
             get { return null; }
-        }
-
-        internal SparseStream Content
-        {
-            get { return _content; }
         }
 
         /// <summary>
@@ -181,12 +170,12 @@ namespace DiscUtils.Raw
             {
                 if (disposing)
                 {
-                    if (_ownsContent == Ownership.Dispose && _content != null)
+                    if (_ownsContent == Ownership.Dispose && Content != null)
                     {
-                        _content.Dispose();
+                        Content.Dispose();
                     }
 
-                    _content = null;
+                    Content = null;
                 }
             }
             finally
@@ -205,15 +194,15 @@ namespace DiscUtils.Raw
             long capacity = disk.Length;
 
             // First, check for floppy disk capacities - these have well-defined geometries
-            if (capacity == Sizes.Sector*1440)
+            if (capacity == Sizes.Sector * 1440)
             {
                 return new Geometry(80, 2, 9);
             }
-            else if (capacity == Sizes.Sector*2880)
+            if (capacity == Sizes.Sector * 2880)
             {
                 return new Geometry(80, 2, 18);
             }
-            else if (capacity == Sizes.Sector*5760)
+            if (capacity == Sizes.Sector * 5760)
             {
                 return new Geometry(80, 2, 36);
             }
@@ -230,16 +219,13 @@ namespace DiscUtils.Raw
         /// <returns>The disk type.</returns>
         private static VirtualDiskClass DetectDiskType(long capacity)
         {
-            if (capacity == Sizes.Sector*1440
-                || capacity == Sizes.Sector*2880
-                || capacity == Sizes.Sector*5760)
+            if (capacity == Sizes.Sector * 1440
+                || capacity == Sizes.Sector * 2880
+                || capacity == Sizes.Sector * 5760)
             {
                 return VirtualDiskClass.FloppyDisk;
             }
-            else
-            {
-                return VirtualDiskClass.HardDisk;
-            }
+            return VirtualDiskClass.HardDisk;
         }
 
         private static long FloppyCapacity(FloppyDiskType type)
@@ -247,11 +233,11 @@ namespace DiscUtils.Raw
             switch (type)
             {
                 case FloppyDiskType.DoubleDensity:
-                    return Sizes.Sector*1440;
+                    return Sizes.Sector * 1440;
                 case FloppyDiskType.HighDensity:
-                    return Sizes.Sector*2880;
+                    return Sizes.Sector * 2880;
                 case FloppyDiskType.Extended:
-                    return Sizes.Sector*5760;
+                    return Sizes.Sector * 5760;
                 default:
                     throw new ArgumentException("Invalid floppy disk type", nameof(type));
             }

@@ -20,12 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System.Collections.Generic;
-
     [LogicalVolumeFactory]
     internal class DynamicDiskManagerFactory : LogicalVolumeFactory
     {
@@ -38,7 +37,7 @@ namespace DiscUtils.LogicalDiskManager
         {
             DynamicDiskManager mgr = new DynamicDiskManager();
 
-            foreach (var disk in disks)
+            foreach (VirtualDisk disk in disks)
             {
                 if (DynamicDiskManager.IsDynamicDisk(disk))
                 {
@@ -46,7 +45,7 @@ namespace DiscUtils.LogicalDiskManager
                 }
             }
 
-            foreach (var vol in mgr.GetLogicalVolumes())
+            foreach (LogicalVolumeInfo vol in mgr.GetLogicalVolumes())
             {
                 result.Add(vol.Identity, vol);
             }

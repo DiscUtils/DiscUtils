@@ -34,10 +34,10 @@ namespace DiscUtils
         /// </summary>
         public BlockCacheSettings()
         {
-            this.BlockSize = (int) (4*Sizes.OneKiB);
-            this.ReadCacheSize = 4*Sizes.OneMiB;
-            this.LargeReadSize = 64*Sizes.OneKiB;
-            this.OptimumReadSize = (int) (64*Sizes.OneKiB);
+            BlockSize = (int)(4 * Sizes.OneKiB);
+            ReadCacheSize = 4 * Sizes.OneMiB;
+            LargeReadSize = 64 * Sizes.OneKiB;
+            OptimumReadSize = (int)(64 * Sizes.OneKiB);
         }
 
         /// <summary>
@@ -46,21 +46,16 @@ namespace DiscUtils
         /// <param name="settings">The cache settings.</param>
         internal BlockCacheSettings(BlockCacheSettings settings)
         {
-            this.BlockSize = settings.BlockSize;
-            this.ReadCacheSize = settings.ReadCacheSize;
-            this.LargeReadSize = settings.LargeReadSize;
-            this.OptimumReadSize = settings.OptimumReadSize;
+            BlockSize = settings.BlockSize;
+            ReadCacheSize = settings.ReadCacheSize;
+            LargeReadSize = settings.LargeReadSize;
+            OptimumReadSize = settings.OptimumReadSize;
         }
 
         /// <summary>
         /// Gets or sets the size (in bytes) of each cached block.
         /// </summary>
         public int BlockSize { get; set; }
-
-        /// <summary>
-        /// Gets or sets the size (in bytes) of the read cache.
-        /// </summary>
-        public long ReadCacheSize { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum read size that will be cached.
@@ -75,5 +70,10 @@ namespace DiscUtils
         /// </summary>
         /// <remarks>This value must be a multiple of BlockSize.</remarks>
         public int OptimumReadSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the size (in bytes) of the read cache.
+        /// </summary>
+        public long ReadCacheSize { get; set; }
     }
 }

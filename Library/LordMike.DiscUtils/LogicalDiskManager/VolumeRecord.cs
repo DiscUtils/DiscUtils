@@ -20,30 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-
     internal sealed class VolumeRecord : DatabaseRecord
     {
-        public string GenString;
-        public string NumberString; // 8000000000000000 sometimes...
         public string ActiveString;
+        public byte BiosType;
+        public ulong ComponentCount;
+        public ulong DupCount; // ??Seen once after adding 'foreign disk', from broken mirror (identical links(P/V/C))
+        public string GenString;
+        public string MountHint;
+        public string NumberString; // 8000000000000000 sometimes...
+        public uint PartitionComponentLink;
+        public long Size;
+        public ulong Unknown1; // Zero
+        public uint Unknown2; // Zero
         public ulong UnknownA; // Zero
         public ulong UnknownB; // 00 .. 03
-        public ulong DupCount; // ??Seen once after adding 'foreign disk', from broken mirror (identical links(P/V/C))
         public uint UnknownC; // 00 00 00 11
-        public ulong ComponentCount;
         public uint UnknownD; // Zero
-        public uint PartitionComponentLink;
-        public ulong Unknown1; // Zero
-        public long Size;
-        public uint Unknown2; // Zero
-        public byte BiosType;
         public Guid VolumeGuid;
-        public string MountHint;
 
         protected override void DoReadFrom(byte[] buffer, int offset)
         {

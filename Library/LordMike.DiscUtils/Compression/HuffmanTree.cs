@@ -34,42 +34,38 @@ namespace DiscUtils.Compression
     /// </remarks>
     internal sealed class HuffmanTree
     {
-        private int _numBits; // Max bits per symbol
-        private int _numSymbols; // Max symbols
-        private uint[] _lengths;
-        private uint[] _buffer;
+        private readonly uint[] _buffer;
+        private readonly int _numBits; // Max bits per symbol
+        private readonly int _numSymbols; // Max symbols
 
         public HuffmanTree(uint[] lengths)
         {
-            _lengths = lengths;
+            Lengths = lengths;
             _numSymbols = lengths.Length;
 
             uint maxLength = 0;
-            for (int i = 0; i < _lengths.Length; ++i)
+            for (int i = 0; i < Lengths.Length; ++i)
             {
-                if (_lengths[i] > maxLength)
+                if (Lengths[i] > maxLength)
                 {
-                    maxLength = _lengths[i];
+                    maxLength = Lengths[i];
                 }
             }
 
-            _numBits = (int) maxLength;
+            _numBits = (int)maxLength;
             _buffer = new uint[1 << _numBits];
 
             Build();
         }
 
-        public uint[] Lengths
-        {
-            get { return _lengths; }
-        }
+        public uint[] Lengths { get; }
 
         public uint NextSymbol(BitStream bitStream)
         {
             uint symbol = _buffer[bitStream.Peek(_numBits)];
 
             // We may have over-read, reset bitstream position
-            bitStream.Consume((int) _lengths[symbol]);
+            bitStream.Consume((int)Lengths[symbol]);
 
             return symbol;
         }
@@ -84,7 +80,7 @@ namespace DiscUtils.Compression
                 // Check each symbol
                 for (uint symbol = 0; symbol < _numSymbols; ++symbol)
                 {
-                    if (_lengths[symbol] == i)
+                    if (Lengths[symbol] == i)
                     {
                         int numToFill = 1 << (_numBits - i);
                         for (int n = 0; n < numToFill; ++n)

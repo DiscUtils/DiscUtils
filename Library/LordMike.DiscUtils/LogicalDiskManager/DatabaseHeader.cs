@@ -20,25 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.LogicalDiskManager
 {
-    using System;
-
     internal class DatabaseHeader
     {
-        public string Signature; // VMDB
-        public uint NumVBlks; // 00 00 17 24
         public uint BlockSize; // 00 00 00 80
-        public uint HeaderSize; // 00 00 02 00
-        public ushort Unknown1; // 00 01
-        public ushort VersionNum; // 00 04
-        public ushort VersionDenom; // 00 0a
-        public string GroupName;
-        public string DiskGroupId;
         public long CommittedSequence; // 0xA
+        public string DiskGroupId;
+        public string GroupName;
+        public uint HeaderSize; // 00 00 02 00
+        public uint NumVBlks; // 00 00 17 24
         public long PendingSequence; // 0xA
+        public string Signature; // VMDB
+        public DateTime Timestamp;
+        public ushort Unknown1; // 00 01
         public uint Unknown2; // 1
         public uint Unknown3; // 1
         public uint Unknown4; // 3
@@ -50,7 +48,8 @@ namespace DiscUtils.LogicalDiskManager
         public uint UnknownA; // 3
         public long UnknownB; // 0
         public uint UnknownC; // 0
-        public DateTime Timestamp;
+        public ushort VersionDenom; // 00 0a
+        public ushort VersionNum; // 00 04
 
         public void ReadFrom(byte[] buffer, int offset)
         {
@@ -84,11 +83,12 @@ namespace DiscUtils.LogicalDiskManager
             Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64BigEndian(buffer, offset + 0xBD));
         }
 
-        ////private static int CalcChecksum()
-        ////{
-        ////    // Zero checksum bytes (0x08, 4)
-        ////    // Add all byte values for ?? bytes
-        ////    throw new NotImplementedException();
         ////}
+        ////    throw new NotImplementedException();
+        ////    // Add all byte values for ?? bytes
+        ////    // Zero checksum bytes (0x08, 4)
+        ////{
+
+        ////private static int CalcChecksum()
     }
 }

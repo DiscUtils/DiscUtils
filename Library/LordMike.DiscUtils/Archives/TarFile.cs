@@ -20,21 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Archives
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Minimal tar file format implementation.
     /// </summary>
     public sealed class TarFile
     {
-        private Stream _fileStream;
-        private Dictionary<string, FileRecord> _files;
+        private readonly Dictionary<string, FileRecord> _files;
+        private readonly Stream _fileStream;
 
         /// <summary>
         /// Initializes a new instance of the TarFile class.
@@ -52,7 +51,7 @@ namespace DiscUtils.Archives
             {
                 FileRecord record = new FileRecord(hdr.FileName, _fileStream.Position, hdr.FileLength);
                 _files.Add(record.Name, record);
-                _fileStream.Position += ((hdr.FileLength + 511)/512)*512;
+                _fileStream.Position += (hdr.FileLength + 511) / 512 * 512;
 
                 hdrBuf = Utilities.ReadFully(_fileStream, TarHeader.Length);
                 hdr.ReadFrom(hdrBuf, 0);
@@ -133,7 +132,7 @@ namespace DiscUtils.Archives
             searchStr = searchStr.Replace(@"\", "/");
             searchStr = searchStr.EndsWith(@"/", StringComparison.Ordinal) ? searchStr : searchStr + @"/";
 
-            foreach (var filePath in _files.Keys)
+            foreach (string filePath in _files.Keys)
             {
                 if (filePath.StartsWith(searchStr, StringComparison.Ordinal))
                 {

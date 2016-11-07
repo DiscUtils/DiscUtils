@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.IO.Compression;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Compression
 {
-    using System;
-    using System.IO;
-    using System.IO.Compression;
-
     /// <summary>
     /// Implementation of the Zlib compression algorithm.
     /// </summary>
     /// <remarks>Only decompression is currently implemented.</remarks>
     public class ZlibStream : Stream
     {
-        private Stream _stream;
-        private CompressionMode _mode;
-        private DeflateStream _deflateStream;
-        private Adler32 _adler32;
+        private readonly Adler32 _adler32;
+        private readonly DeflateStream _deflateStream;
+        private readonly CompressionMode _mode;
+        private readonly Stream _stream;
 
         /// <summary>
         /// Initializes a new instance of the ZlibStream class.
@@ -56,12 +55,12 @@ namespace DiscUtils.Compression
                 byte[] headerBuffer = Utilities.ReadFully(stream, 2);
                 ushort header = Utilities.ToUInt16BigEndian(headerBuffer, 0);
 
-                if ((header%31) != 0)
+                if (header % 31 != 0)
                 {
                     throw new IOException("Invalid Zlib header found");
                 }
 
-                if ((header & 0x0F00) != (8 << 8))
+                if ((header & 0x0F00) != 8 << 8)
                 {
                     throw new NotSupportedException("Zlib compression not using DEFLATE algorithm");
                 }
@@ -77,7 +76,7 @@ namespace DiscUtils.Compression
                     (8 << 8) // DEFLATE
                     | (7 << 12) // 32K window size
                     | 0x80; // Default algorithm
-                header |= (ushort) (31 - (header%31));
+                header |= (ushort)(31 - header % 31);
 
                 byte[] headerBuffer = new byte[2];
                 Utilities.WriteBytesBigEndian(header, headerBuffer, 0);

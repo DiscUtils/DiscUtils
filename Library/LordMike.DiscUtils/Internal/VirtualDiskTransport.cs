@@ -29,6 +29,12 @@ namespace DiscUtils.Internal
     {
         public abstract bool IsRawDisk { get; }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public abstract void Connect(Uri uri, string username, string password);
 
         public abstract VirtualDisk OpenDisk(FileAccess access);
@@ -39,14 +45,6 @@ namespace DiscUtils.Internal
 
         public abstract string GetExtraInfo();
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-        }
+        protected virtual void Dispose(bool disposing) {}
     }
 }

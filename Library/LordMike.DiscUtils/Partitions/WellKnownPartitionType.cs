@@ -50,6 +50,6 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Linux Logical Volume Manager (LVM).
         /// </summary>
-        LinuxLvm = 4,
+        LinuxLvm = 4
     }
 }

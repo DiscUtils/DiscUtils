@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils
 {
-    using System;
-
     /// <summary>
     /// Event arguments indicating progress on pumping a stream.
     /// </summary>
@@ -40,13 +40,13 @@ namespace DiscUtils
         public long BytesWritten { get; set; }
 
         /// <summary>
-        /// Gets or sets the absolute position in <c>InputStream</c>.
-        /// </summary>
-        public long SourcePosition { get; set; }
-
-        /// <summary>
         /// Gets or sets the absolute position in <c>OutputStream</c>.
         /// </summary>
         public long DestinationPosition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the absolute position in <c>InputStream</c>.
+        /// </summary>
+        public long SourcePosition { get; set; }
     }
 }

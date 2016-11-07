@@ -1,4 +1,5 @@
-﻿#if NET20
+﻿
+#if NET20
 using System.Collections.Generic;
 
 namespace System.Collections.Generic

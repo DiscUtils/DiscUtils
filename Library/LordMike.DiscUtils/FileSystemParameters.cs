@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
+
 namespace DiscUtils
 {
-    using System.Text;
-
     /// <summary>
     /// Class with generic file system parameters.
     /// </summary>

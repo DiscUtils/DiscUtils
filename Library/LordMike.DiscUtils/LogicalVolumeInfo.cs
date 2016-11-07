@@ -20,58 +20,43 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils
 {
-    using System;
-
     /// <summary>
     /// Information about a logical disk volume, which may be backed by one or more physical volumes.
     /// </summary>
     public sealed class LogicalVolumeInfo : VolumeInfo
     {
         private Guid _guid;
-        private PhysicalVolumeInfo _physicalVol;
-        private SparseStreamOpenDelegate _opener;
-        private long _length;
-        private LogicalVolumeStatus _status;
-        private byte _biosType;
+        private readonly SparseStreamOpenDelegate _opener;
+        private readonly PhysicalVolumeInfo _physicalVol;
 
         internal LogicalVolumeInfo(Guid guid, PhysicalVolumeInfo physicalVolume, SparseStreamOpenDelegate opener,
-            long length, byte biosType, LogicalVolumeStatus status)
+                                   long length, byte biosType, LogicalVolumeStatus status)
         {
             _guid = guid;
             _physicalVol = physicalVolume;
             _opener = opener;
-            _length = length;
-            _biosType = biosType;
-            _status = status;
+            Length = length;
+            BiosType = biosType;
+            Status = status;
+        }
+
+        /// <summary>
+        /// Gets the disk geometry of the underlying storage medium (as used in BIOS calls), may be null.
+        /// </summary>
+        public override Geometry BiosGeometry
+        {
+            get { return _physicalVol == null ? Geometry.Null : _physicalVol.BiosGeometry; }
         }
 
         /// <summary>
         /// Gets the one-byte BIOS type for this volume, which indicates the content.
         /// </summary>
-        public override byte BiosType
-        {
-            get { return _biosType; }
-        }
-
-        /// <summary>
-        /// Gets the status of the logical volume, indicating volume health.
-        /// </summary>
-        public LogicalVolumeStatus Status
-        {
-            get { return _status; }
-        }
-
-        /// <summary>
-        /// Gets the length of the volume (in bytes).
-        /// </summary>
-        public override long Length
-        {
-            get { return _length; }
-        }
+        public override byte BiosType { get; }
 
         /// <summary>
         /// The stable identity for this logical volume.
@@ -88,27 +73,21 @@ namespace DiscUtils
                 {
                     return "VLG" + _guid.ToString("B");
                 }
-                else
-                {
-                    return "VLP:" + _physicalVol.Identity;
-                }
+                return "VLP:" + _physicalVol.Identity;
             }
         }
+
+        /// <summary>
+        /// Gets the length of the volume (in bytes).
+        /// </summary>
+        public override long Length { get; }
 
         /// <summary>
         /// Gets the disk geometry of the underlying storage medium, if any (may be Geometry.Null).
         /// </summary>
         public override Geometry PhysicalGeometry
         {
-            get { return (_physicalVol == null) ? Geometry.Null : _physicalVol.PhysicalGeometry; }
-        }
-
-        /// <summary>
-        /// Gets the disk geometry of the underlying storage medium (as used in BIOS calls), may be null.
-        /// </summary>
-        public override Geometry BiosGeometry
-        {
-            get { return (_physicalVol == null) ? Geometry.Null : _physicalVol.BiosGeometry; }
+            get { return _physicalVol == null ? Geometry.Null : _physicalVol.PhysicalGeometry; }
         }
 
         /// <summary>
@@ -116,8 +95,13 @@ namespace DiscUtils
         /// </summary>
         public override long PhysicalStartSector
         {
-            get { return (_physicalVol == null) ? 0 : _physicalVol.PhysicalStartSector; }
+            get { return _physicalVol == null ? 0 : _physicalVol.PhysicalStartSector; }
         }
+
+        /// <summary>
+        /// Gets the status of the logical volume, indicating volume health.
+        /// </summary>
+        public LogicalVolumeStatus Status { get; }
 
         /// <summary>
         /// Opens a stream with access to the content of the logical volume.

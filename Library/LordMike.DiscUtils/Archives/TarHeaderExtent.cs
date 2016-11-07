@@ -20,23 +20,22 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Archives
 {
-    using System;
-
     internal sealed class TarHeaderExtent : BuilderBufferExtent
     {
-        private string _fileName;
-        private long _fileLength;
-        private UnixFilePermissions _mode;
-        private int _ownerId;
-        private int _groupId;
-        private DateTime _modificationTime;
+        private readonly long _fileLength;
+        private readonly string _fileName;
+        private readonly int _groupId;
+        private readonly UnixFilePermissions _mode;
+        private readonly DateTime _modificationTime;
+        private readonly int _ownerId;
 
         public TarHeaderExtent(long start, string fileName, long fileLength, UnixFilePermissions mode, int ownerId,
-            int groupId, DateTime modificationTime)
+                               int groupId, DateTime modificationTime)
             : base(start, 512)
         {
             _fileName = fileName;
@@ -48,9 +47,7 @@ namespace DiscUtils.Archives
         }
 
         public TarHeaderExtent(long start, string fileName, long fileLength)
-            : this(start, fileName, fileLength, 0, 0, 0, Utilities.UnixEpoch)
-        {
-        }
+            : this(start, fileName, fileLength, 0, 0, 0, Utilities.UnixEpoch) {}
 
         protected override byte[] GetBuffer()
         {
