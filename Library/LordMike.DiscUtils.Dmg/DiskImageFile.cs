@@ -20,20 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.IO;
-
     internal sealed class DiskImageFile : VirtualDiskLayer
     {
+        private readonly Ownership _ownsStream;
+        private readonly ResourceFork _resources;
         private Stream _stream;
-        private Ownership _ownsStream;
-        private UdifResourceFile _udifHeader;
-        private ResourceFork _resources;
-        private UdifBuffer _buffer;
+        private readonly UdifResourceFile _udifHeader;
 
         /// <summary>
         /// Initializes a new instance of the DiskImageFile class.
@@ -53,18 +52,20 @@ namespace DiscUtils.Dmg
 
             if (_udifHeader.SignatureValid)
             {
-                stream.Position = (long) _udifHeader.XmlOffset;
-                byte[] xmlData = Utilities.ReadFully(stream, (int) _udifHeader.XmlLength);
-                var plist = Plist.Parse(new MemoryStream(xmlData));
+                stream.Position = (long)_udifHeader.XmlOffset;
+                byte[] xmlData = Utilities.ReadFully(stream, (int)_udifHeader.XmlLength);
+                Dictionary<string, object> plist = Plist.Parse(new MemoryStream(xmlData));
 
                 _resources = ResourceFork.FromPlist(plist);
-                _buffer = new UdifBuffer(stream, _resources, _udifHeader.SectorCount);
+                Buffer = new UdifBuffer(stream, _resources, _udifHeader.SectorCount);
             }
         }
 
-        public UdifBuffer Buffer
+        public UdifBuffer Buffer { get; }
+
+        internal override long Capacity
         {
-            get { return _buffer; }
+            get { return Buffer == null ? _stream.Length : Buffer.Capacity; }
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace DiscUtils.Dmg
 
         public override bool IsSparse
         {
-            get { return _buffer != null; }
+            get { return Buffer != null; }
         }
 
         /// <summary>
@@ -86,11 +87,6 @@ namespace DiscUtils.Dmg
         public override bool NeedsParent
         {
             get { return false; }
-        }
-
-        internal override long Capacity
-        {
-            get { return _buffer == null ? _stream.Length : _buffer.Capacity; }
         }
 
         internal override FileLocator RelativeFileLocator
@@ -105,15 +101,12 @@ namespace DiscUtils.Dmg
                 parentStream.Dispose();
             }
 
-            if (_buffer != null)
+            if (Buffer != null)
             {
-                SparseStream rawStream = new BufferStream(_buffer, FileAccess.Read);
+                SparseStream rawStream = new BufferStream(Buffer, FileAccess.Read);
                 return new BlockCacheStream(rawStream, Ownership.Dispose);
             }
-            else
-            {
-                return SparseStream.FromStream(_stream, Ownership.None);
-            }
+            return SparseStream.FromStream(_stream, Ownership.None);
         }
 
         /// <summary>

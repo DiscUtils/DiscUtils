@@ -20,19 +20,20 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using DiscUtils.Partitions;
+
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-
     /// <summary>
     /// Represents a DMG (aka UDIF) backed disk.
     /// </summary>
     public class Disk : VirtualDisk
     {
-        private DiskImageFile _file;
         private SparseStream _content;
+        private DiskImageFile _file;
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -42,22 +43,6 @@ namespace DiscUtils.Dmg
         public Disk(Stream stream, Ownership ownsStream)
         {
             _file = new DiskImageFile(stream, ownsStream);
-        }
-
-        /// <summary>
-        /// Gets the geometry of the disk.
-        /// </summary>
-        public override Geometry Geometry
-        {
-            get { return _file.Geometry; }
-        }
-
-        /// <summary>
-        /// Gets the type of disk represented by this object.
-        /// </summary>
-        public override VirtualDiskClass DiskClass
-        {
-            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -89,17 +74,12 @@ namespace DiscUtils.Dmg
             }
         }
 
-        public override Partitions.PartitionTable Partitions
-        {
-            get { return new UdifPartitionTable(this, this._file.Buffer); }
-        }
-
         /// <summary>
-        /// Gets the layers that make up the disk.
+        /// Gets the type of disk represented by this object.
         /// </summary>
-        public override IEnumerable<VirtualDiskLayer> Layers
+        public override VirtualDiskClass DiskClass
         {
-            get { return new VirtualDiskLayer[] {_file}; }
+            get { return VirtualDiskClass.HardDisk; }
         }
 
         /// <summary>
@@ -110,6 +90,27 @@ namespace DiscUtils.Dmg
         public override VirtualDiskTypeInfo DiskTypeInfo
         {
             get { return DiskFactory.MakeDiskTypeInfo(); }
+        }
+
+        /// <summary>
+        /// Gets the geometry of the disk.
+        /// </summary>
+        public override Geometry Geometry
+        {
+            get { return _file.Geometry; }
+        }
+
+        /// <summary>
+        /// Gets the layers that make up the disk.
+        /// </summary>
+        public override IEnumerable<VirtualDiskLayer> Layers
+        {
+            get { return new VirtualDiskLayer[] { _file }; }
+        }
+
+        public override PartitionTable Partitions
+        {
+            get { return new UdifPartitionTable(this, _file.Buffer); }
         }
 
         /// <summary>

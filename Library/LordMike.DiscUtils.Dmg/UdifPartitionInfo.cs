@@ -20,16 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Partitions;
 using System;
 using DiscUtils.Internal;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.Dmg
 {
     internal class UdifPartitionInfo : PartitionInfo
     {
-        CompressedBlock _block;
-        Disk _disk;
+        private readonly CompressedBlock _block;
+        private readonly Disk _disk;
 
         public UdifPartitionInfo(Disk disk, CompressedBlock block)
         {
@@ -37,9 +37,19 @@ namespace DiscUtils.Dmg
             _disk = disk;
         }
 
+        public override byte BiosType
+        {
+            get { return 0; }
+        }
+
         public override long FirstSector
         {
             get { return _block.FirstSector; }
+        }
+
+        public override Guid GuidType
+        {
+            get { return Guid.Empty; }
         }
 
         public override long LastSector
@@ -52,29 +62,19 @@ namespace DiscUtils.Dmg
             get { return _block.SectorCount; }
         }
 
+        public override string TypeAsString
+        {
+            get { return GetType().FullName; }
+        }
+
         internal override PhysicalVolumeType VolumeType
         {
             get { return PhysicalVolumeType.ApplePartition; }
         }
 
-        public override Guid GuidType
-        {
-            get { return Guid.Empty; }
-        }
-
-        public override byte BiosType
-        {
-            get { return 0; }
-        }
-
         public override SparseStream Open()
         {
-            return new SubStream(_disk.Content, this.FirstSector*_disk.SectorSize, this.SectorCount*_disk.SectorSize);
-        }
-
-        public override string TypeAsString
-        {
-            get { return this.GetType().FullName; }
+            return new SubStream(_disk.Content, FirstSector * _disk.SectorSize, SectorCount * _disk.SectorSize);
         }
     }
 }

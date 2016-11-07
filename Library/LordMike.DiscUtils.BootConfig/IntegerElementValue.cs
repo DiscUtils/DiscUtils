@@ -20,16 +20,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
 using DiscUtils.Internal;
 
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Globalization;
-
     internal class IntegerElementValue : ElementValue
     {
-        private ulong _value;
+        private readonly ulong _value;
 
         public IntegerElementValue(byte[] value)
         {

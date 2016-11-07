@@ -20,25 +20,19 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System.Collections.Generic;
-
     internal class BlkxResource : Resource
     {
-        private CompressedBlock _block;
-
         internal BlkxResource(Dictionary<string, object> parts)
             : base("blkx", parts)
         {
-            _block = Utilities.ToStruct<CompressedBlock>(parts["Data"] as byte[], 0);
+            Block = Utilities.ToStruct<CompressedBlock>(parts["Data"] as byte[], 0);
         }
 
-        public CompressedBlock Block
-        {
-            get { return _block; }
-        }
+        public CompressedBlock Block { get; }
     }
 }

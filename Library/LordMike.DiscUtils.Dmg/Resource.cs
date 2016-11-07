@@ -20,20 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-
     internal abstract class Resource
     {
-        private string _type;
-
         protected Resource(string type, Dictionary<string, object> parts)
         {
-            _type = type;
+            Type = type;
             Name = parts["Name"] as string;
 
             string idStr = parts["ID"] as string;
@@ -68,16 +66,13 @@ namespace DiscUtils.Dmg
             }
         }
 
-        public string Type
-        {
-            get { return _type; }
-        }
-
-        public string Name { get; set; }
+        public uint Attributes { get; set; }
 
         public int Id { get; set; }
 
-        public uint Attributes { get; set; }
+        public string Name { get; set; }
+
+        public string Type { get; }
 
         internal static Resource FromPlist(string type, Dictionary<string, object> parts)
         {

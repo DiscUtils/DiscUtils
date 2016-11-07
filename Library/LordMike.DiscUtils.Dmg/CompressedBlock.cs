@@ -20,24 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.Collections.Generic;
-
     internal class CompressedBlock : IByteArraySerializable
     {
-        public uint Signature;
-        public uint InfoVersion;
-        public long FirstSector;
-        public long SectorCount;
-        public ulong DataStart;
-        public uint DecompressBufferRequested;
         public uint BlocksDescriptor;
         public UdifChecksum CheckSum;
+        public ulong DataStart;
+        public uint DecompressBufferRequested;
+        public long FirstSector;
+        public uint InfoVersion;
         public List<CompressedRun> Runs;
+        public long SectorCount;
+        public uint Signature;
 
         public int Size
         {
@@ -60,7 +59,7 @@ namespace DiscUtils.Dmg
             int numRuns = Utilities.ToInt32BigEndian(buffer, offset + 200);
             for (int i = 0; i < numRuns; ++i)
             {
-                Runs.Add(Utilities.ToStruct<CompressedRun>(buffer, offset + 204 + (i*40)));
+                Runs.Add(Utilities.ToStruct<CompressedRun>(buffer, offset + 204 + i * 40));
             }
 
             return 0;

@@ -31,7 +31,7 @@ namespace DiscUtils.BootConfig
     /// <summary>
     /// Enumeration of known BCD elements.
     /// </summary>
-    public enum WellKnownElement : int
+    public enum WellKnownElement
     {
         /// <summary>
         /// Not specified.
@@ -613,6 +613,6 @@ namespace DiscUtils.BootConfig
         /// <summary>
         /// Recovery OS flag.
         /// </summary>
-        SetupRecoveryOs = 0x46000010,
+        SetupRecoveryOs = 0x46000010
     }
 }

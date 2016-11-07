@@ -20,14 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.Collections.Generic;
-
     internal class ResourceFork
     {
-        private List<Resource> _resources;
+        private readonly List<Resource> _resources;
 
         public ResourceFork(List<Resource> resources)
         {
@@ -38,7 +38,7 @@ namespace DiscUtils.Dmg
         {
             List<Resource> results = new List<Resource>();
 
-            foreach (var res in _resources)
+            foreach (Resource res in _resources)
             {
                 if (res.Type == type)
                 {
@@ -61,10 +61,10 @@ namespace DiscUtils.Dmg
 
             List<Resource> resources = new List<Resource>();
 
-            foreach (var type in types.Keys)
+            foreach (string type in types.Keys)
             {
                 List<object> typeResources = types[type] as List<object>;
-                foreach (var typeResource in typeResources)
+                foreach (object typeResource in typeResources)
                 {
                     resources.Add(Resource.FromPlist(type, typeResource as Dictionary<string, object>));
                 }

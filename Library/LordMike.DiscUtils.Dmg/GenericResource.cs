@@ -20,10 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
+
 namespace DiscUtils.Dmg
 {
-    using System.Collections.Generic;
-
     internal class GenericResource : Resource
     {
         internal GenericResource(string type, Dictionary<string, object> parts)

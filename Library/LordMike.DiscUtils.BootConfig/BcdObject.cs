@@ -26,11 +26,11 @@
 //
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Represents a Boot Configuration Database object (application, device or inherited settings).
     /// </summary>
@@ -121,12 +121,12 @@ namespace DiscUtils.BootConfig
         /// </summary>
         public const string CurrentBootEntryId = "{FA926493-6F1C-4193-A414-58F0B2456D1E}";
 
-        private static Dictionary<string, Guid> s_nameToGuid;
-        private static Dictionary<Guid, string> s_guidToName;
-
-        private BaseStorage _storage;
+        private static readonly Dictionary<string, Guid> s_nameToGuid;
+        private static readonly Dictionary<Guid, string> s_guidToName;
         private Guid _id;
-        private int _type;
+
+        private readonly BaseStorage _storage;
+        private readonly int _type;
 
         static BcdObject()
         {
@@ -157,11 +157,33 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// Gets the identity of this object.
+        /// Gets the image type for this application.
         /// </summary>
-        public Guid Identity
+        public ApplicationImageType ApplicationImageType
         {
-            get { return _id; }
+            get { return IsApplication ? (ApplicationImageType)((_type & 0x00F00000) >> 20) : 0; }
+        }
+
+        /// <summary>
+        /// Gets the application type for this application.
+        /// </summary>
+        public ApplicationType ApplicationType
+        {
+            get { return IsApplication ? (ApplicationType)(_type & 0xFFFFF) : 0; }
+        }
+
+        /// <summary>
+        /// Gets the elements in this object.
+        /// </summary>
+        public IEnumerable<Element> Elements
+        {
+            get
+            {
+                foreach (int el in _storage.EnumerateElements(_id))
+                {
+                    yield return new Element(_storage, _id, ApplicationType, el);
+                }
+            }
         }
 
         /// <summary>
@@ -182,46 +204,24 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// Gets the object type for this object.
+        /// Gets the identity of this object.
         /// </summary>
-        public ObjectType ObjectType
+        public Guid Identity
         {
-            get { return (ObjectType) ((_type >> 28) & 0xF); }
-        }
-
-        /// <summary>
-        /// Gets the image type for this application.
-        /// </summary>
-        public ApplicationImageType ApplicationImageType
-        {
-            get { return IsApplication ? (ApplicationImageType) ((_type & 0x00F00000) >> 20) : 0; }
-        }
-
-        /// <summary>
-        /// Gets the application type for this application.
-        /// </summary>
-        public ApplicationType ApplicationType
-        {
-            get { return IsApplication ? (ApplicationType) (_type & 0xFFFFF) : 0; }
-        }
-
-        /// <summary>
-        /// Gets the elements in this object.
-        /// </summary>
-        public IEnumerable<Element> Elements
-        {
-            get
-            {
-                foreach (var el in _storage.EnumerateElements(_id))
-                {
-                    yield return new Element(_storage, _id, ApplicationType, el);
-                }
-            }
+            get { return _id; }
         }
 
         private bool IsApplication
         {
             get { return ObjectType == ObjectType.Application; }
+        }
+
+        /// <summary>
+        /// Gets the object type for this object.
+        /// </summary>
+        public ObjectType ObjectType
+        {
+            get { return (ObjectType)((_type >> 28) & 0xF); }
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace DiscUtils.BootConfig
                 return false;
             }
 
-            InheritType setting = (InheritType) ((_type & 0x00F00000) >> 20);
+            InheritType setting = (InheritType)((_type & 0x00F00000) >> 20);
 
             return setting == InheritType.AnyObject
                    || (setting == InheritType.ApplicationObjects && type == ObjectType.Application)
@@ -265,7 +265,7 @@ namespace DiscUtils.BootConfig
         /// <returns><c>true</c> if present, else <c>false</c>.</returns>
         public bool HasElement(WellKnownElement id)
         {
-            return HasElement((int) id);
+            return HasElement((int)id);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace DiscUtils.BootConfig
         /// <returns>The element object.</returns>
         public Element GetElement(WellKnownElement id)
         {
-            return GetElement((int) id);
+            return GetElement((int)id);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace DiscUtils.BootConfig
         /// <returns>The element object.</returns>
         public Element AddElement(WellKnownElement id, ElementValue initialValue)
         {
-            return AddElement((int) id, initialValue);
+            return AddElement((int)id, initialValue);
         }
 
         /// <summary>
@@ -333,7 +333,7 @@ namespace DiscUtils.BootConfig
         /// <param name="id">The element to remove.</param>
         public void RemoveElement(WellKnownElement id)
         {
-            RemoveElement((int) id);
+            RemoveElement((int)id);
         }
 
         /// <summary>
@@ -347,12 +347,12 @@ namespace DiscUtils.BootConfig
 
         internal static int MakeApplicationType(ApplicationImageType imageType, ApplicationType appType)
         {
-            return 0x10000000 | (((int) imageType << 20) & 0x00F00000) | ((int) appType & 0x0000FFFF);
+            return 0x10000000 | (((int)imageType << 20) & 0x00F00000) | ((int)appType & 0x0000FFFF);
         }
 
         internal static int MakeInheritType(InheritType inheritType)
         {
-            return 0x20000000 | (((int) inheritType << 20) & 0x00F00000);
+            return 0x20000000 | (((int)inheritType << 20) & 0x00F00000);
         }
 
         private static void AddMapping(string name, string id)

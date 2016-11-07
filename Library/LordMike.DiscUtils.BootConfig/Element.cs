@@ -26,20 +26,20 @@
 //
 //
 
+using System;
+using System.Globalization;
+
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Globalization;
-
     /// <summary>
     /// Represents an element in a Boot Configuration Database object.
     /// </summary>
     public class Element
     {
-        private BaseStorage _storage;
-        private Guid _obj;
-        private ApplicationType _appType;
-        private int _identifier;
+        private readonly ApplicationType _appType;
+        private readonly int _identifier;
+        private readonly Guid _obj;
+        private readonly BaseStorage _storage;
         private ElementValue _value;
 
         internal Element(BaseStorage storage, Guid obj, ApplicationType appType, int identifier)
@@ -51,19 +51,11 @@ namespace DiscUtils.BootConfig
         }
 
         /// <summary>
-        /// Gets the friendly name of the element, if any.
-        /// </summary>
-        public string FriendlyName
-        {
-            get { return "{" + IdentifierToName(_appType, _identifier) + "}"; }
-        }
-
-        /// <summary>
         /// Gets the class of the element.
         /// </summary>
         public ElementClass Class
         {
-            get { return (ElementClass) ((_identifier >> 28) & 0xF); }
+            get { return (ElementClass)((_identifier >> 28) & 0xF); }
         }
 
         /// <summary>
@@ -71,7 +63,15 @@ namespace DiscUtils.BootConfig
         /// </summary>
         public ElementFormat Format
         {
-            get { return (ElementFormat) ((_identifier >> 24) & 0xF); }
+            get { return (ElementFormat)((_identifier >> 24) & 0xF); }
+        }
+
+        /// <summary>
+        /// Gets the friendly name of the element, if any.
+        /// </summary>
+        public string FriendlyName
+        {
+            get { return "{" + IdentifierToName(_appType, _identifier) + "}"; }
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace DiscUtils.BootConfig
 
         private static ElementClass GetClass(int identifier)
         {
-            return (ElementClass) ((identifier >> 28) & 0xF);
+            return (ElementClass)((identifier >> 28) & 0xF);
         }
 
         private ElementValue LoadValue()
@@ -467,23 +467,23 @@ namespace DiscUtils.BootConfig
             switch (_value.Format)
             {
                 case ElementFormat.Boolean:
-                    _storage.SetBinary(_obj, _identifier, ((BooleanElementValue) _value).GetBytes());
+                    _storage.SetBinary(_obj, _identifier, ((BooleanElementValue)_value).GetBytes());
                     break;
 
                 case ElementFormat.Device:
-                    _storage.SetBinary(_obj, _identifier, ((DeviceElementValue) _value).GetBytes());
+                    _storage.SetBinary(_obj, _identifier, ((DeviceElementValue)_value).GetBytes());
                     break;
 
                 case ElementFormat.GuidList:
-                    _storage.SetMultiString(_obj, _identifier, ((GuidListElementValue) _value).GetGuidStrings());
+                    _storage.SetMultiString(_obj, _identifier, ((GuidListElementValue)_value).GetGuidStrings());
                     break;
 
                 case ElementFormat.Integer:
-                    _storage.SetBinary(_obj, _identifier, ((IntegerElementValue) _value).GetBytes());
+                    _storage.SetBinary(_obj, _identifier, ((IntegerElementValue)_value).GetBytes());
                     break;
 
                 case ElementFormat.IntegerList:
-                    _storage.SetBinary(_obj, _identifier, ((IntegerListElementValue) _value).GetBytes());
+                    _storage.SetBinary(_obj, _identifier, ((IntegerListElementValue)_value).GetBytes());
                     break;
 
                 case ElementFormat.Guid:

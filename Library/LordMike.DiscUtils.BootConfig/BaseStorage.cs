@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Base class for BCD storage repositories.
     /// </summary>

@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System;
-
     internal class UdifChecksum : IByteArraySerializable
     {
-        public uint Type;
         public uint ChecksumSize;
         public byte[] Data;
+        public uint Type;
 
         public int Size
         {

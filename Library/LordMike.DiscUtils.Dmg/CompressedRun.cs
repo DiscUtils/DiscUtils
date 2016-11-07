@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System;
-
     internal class CompressedRun : IByteArraySerializable
     {
-        public RunType Type;
-        public long SectorStart;
-        public long SectorCount;
-        public long CompOffset;
         public long CompLength;
+        public long CompOffset;
+        public long SectorCount;
+        public long SectorStart;
+        public RunType Type;
 
         public int Size
         {
@@ -41,7 +40,7 @@ namespace DiscUtils.Dmg
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Type = (RunType) Utilities.ToUInt32BigEndian(buffer, offset + 0);
+            Type = (RunType)Utilities.ToUInt32BigEndian(buffer, offset + 0);
             SectorStart = Utilities.ToInt64BigEndian(buffer, offset + 8);
             SectorCount = Utilities.ToInt64BigEndian(buffer, offset + 16);
             CompOffset = Utilities.ToInt64BigEndian(buffer, offset + 24);

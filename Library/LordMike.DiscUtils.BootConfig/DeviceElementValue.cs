@@ -20,17 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
 using DiscUtils.Internal;
 
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Globalization;
-
     internal class DeviceElementValue : ElementValue
     {
-        private Guid _parentObject;
-        private DeviceRecord _record;
+        private readonly Guid _parentObject;
+        private readonly DeviceRecord _record;
 
         public DeviceElementValue()
         {
@@ -53,7 +52,7 @@ namespace DiscUtils.BootConfig
                 record.DiskIdentity = new byte[4];
                 Utilities.WriteBytesLittleEndian(pvi.DiskSignature, record.DiskIdentity, 0);
                 record.PartitionIdentity = new byte[8];
-                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector*512, record.PartitionIdentity, 0);
+                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector * 512, record.PartitionIdentity, 0);
             }
             else if (pvi.VolumeType == PhysicalVolumeType.GptPartition)
             {
@@ -78,30 +77,27 @@ namespace DiscUtils.BootConfig
             _record = DeviceRecord.Parse(value, 0x10);
         }
 
-        public override Guid ParentObject
-        {
-            get { return _parentObject; }
-        }
-
         public override ElementFormat Format
         {
             get { return ElementFormat.Device; }
+        }
+
+        public override Guid ParentObject
+        {
+            get { return _parentObject; }
         }
 
         public override string ToString()
         {
             if (_parentObject != Guid.Empty)
             {
-                return _parentObject.ToString() + ":" + _record.ToString();
+                return _parentObject + ":" + _record;
             }
-            else if (_record != null)
+            if (_record != null)
             {
                 return _record.ToString();
             }
-            else
-            {
-                return "<unknown>";
-            }
+            return "<unknown>";
         }
 
         internal byte[] GetBytes()

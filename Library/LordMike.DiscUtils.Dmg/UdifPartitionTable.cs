@@ -20,29 +20,34 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Partitions;
 using System;
 using System.Collections.ObjectModel;
+using DiscUtils.Partitions;
 
 namespace DiscUtils.Dmg
 {
     internal class UdifPartitionTable : PartitionTable
     {
-        Collection<PartitionInfo> _partitions;
-        UdifBuffer _buffer;
-        Disk _disk;
+        private readonly UdifBuffer _buffer;
+        private readonly Disk _disk;
+        private readonly Collection<PartitionInfo> _partitions;
 
         public UdifPartitionTable(Disk disk, UdifBuffer buffer)
         {
-            this._buffer = buffer;
-            this._partitions = new Collection<PartitionInfo>();
-            this._disk = disk;
+            _buffer = buffer;
+            _partitions = new Collection<PartitionInfo>();
+            _disk = disk;
 
-            foreach (var block in _buffer.Blocks)
+            foreach (CompressedBlock block in _buffer.Blocks)
             {
                 UdifPartitionInfo partition = new UdifPartitionInfo(_disk, block);
-                this._partitions.Add(partition);
+                _partitions.Add(partition);
             }
+        }
+
+        public override Guid DiskGuid
+        {
+            get { return Guid.Empty; }
         }
 
         /// <summary>
@@ -71,11 +76,6 @@ namespace DiscUtils.Dmg
         public override int CreateAligned(WellKnownPartitionType type, bool active, int alignment)
         {
             throw new NotImplementedException();
-        }
-
-        public override Guid DiskGuid
-        {
-            get { return Guid.Empty; }
         }
 
         public override int Create(WellKnownPartitionType type, bool active)

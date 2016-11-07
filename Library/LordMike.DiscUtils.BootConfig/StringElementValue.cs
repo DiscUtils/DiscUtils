@@ -24,7 +24,7 @@ namespace DiscUtils.BootConfig
 {
     internal class StringElementValue : ElementValue
     {
-        private string _value;
+        private readonly string _value;
 
         public StringElementValue(string value)
         {

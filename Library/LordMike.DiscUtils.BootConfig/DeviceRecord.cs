@@ -20,20 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.IO;
-
     internal abstract class DeviceRecord
     {
-        public int Type { get; set; }
-
         public int Length { get; set; }
 
         public abstract int Size { get; }
+        public int Type { get; set; }
 
         public static DeviceRecord Parse(byte[] data, int offset)
         {

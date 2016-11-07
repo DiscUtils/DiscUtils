@@ -20,45 +20,43 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System;
-
     internal class UdifResourceFile : IByteArraySerializable
     {
-        public uint Signature;
-        public uint Version;
-        public uint HeaderSize;
+        public UdifChecksum DataForkChecksum;
+        public ulong DataForkLength;
+        public ulong DataForkOffset;
         public uint Flags;
+        public uint HeaderSize;
+        public uint ImageVariant;
+
+        public UdifChecksum MasterChecksum;
+        public ulong RsrcForkLength;
+        public ulong RsrcForkOffset;
 
         public ulong RunningDataForkOffset;
-        public ulong DataForkOffset;
-        public ulong DataForkLength;
-        public ulong RsrcForkOffset;
-        public ulong RsrcForkLength;
-
-        public uint SegmentNumber;
+        public long SectorCount;
         public uint SegmentCount;
         public Guid SegmentGuid;
 
-        public UdifChecksum DataForkChecksum;
-        public ulong XmlOffset;
+        public uint SegmentNumber;
+        public uint Signature;
+        public uint Version;
         public ulong XmlLength;
-
-        public UdifChecksum MasterChecksum;
-        public uint ImageVariant;
-        public long SectorCount;
-
-        public int Size
-        {
-            get { return 512; }
-        }
+        public ulong XmlOffset;
 
         public bool SignatureValid
         {
             get { return Signature == 0x6B6F6C79; }
+        }
+
+        public int Size
+        {
+            get { return 512; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)

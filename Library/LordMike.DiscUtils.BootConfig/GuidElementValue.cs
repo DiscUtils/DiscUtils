@@ -24,7 +24,7 @@ namespace DiscUtils.BootConfig
 {
     internal class GuidElementValue : ElementValue
     {
-        private string _value;
+        private readonly string _value;
 
         public GuidElementValue(string value)
         {

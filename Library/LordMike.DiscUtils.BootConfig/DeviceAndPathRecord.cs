@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
+
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Text;
-
     internal class DeviceAndPathRecord : DeviceRecord
     {
         private DeviceRecord _container;
@@ -42,14 +42,14 @@ namespace DiscUtils.BootConfig
 
         public override string ToString()
         {
-            return _container.ToString() + ":" + _path;
+            return _container + ":" + _path;
         }
 
         protected override void DoParse(byte[] data, int offset)
         {
             base.DoParse(data, offset);
 
-            _container = DeviceRecord.Parse(data, offset + 0x34);
+            _container = Parse(data, offset + 0x34);
 
             int pathStart = 0x34 + _container.Size;
             _path = Encoding.Unicode.GetString(data, offset + pathStart, Length - pathStart);

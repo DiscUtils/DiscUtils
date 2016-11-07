@@ -20,18 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using DiscUtils.Registry;
+
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Registry;
-
     /// <summary>
     /// Represents a Boot Configuration Database store (i.e. a BCD file).
     /// </summary>
     public class Store
     {
-        private BaseStorage _store;
+        private readonly BaseStorage _store;
 
         /// <summary>
         /// Initializes a new instance of the Store class.
@@ -49,7 +49,7 @@ namespace DiscUtils.BootConfig
         {
             get
             {
-                foreach (var obj in _store.EnumerateObjects())
+                foreach (Guid obj in _store.EnumerateObjects())
                 {
                     yield return new BcdObject(_store, obj);
                 }
@@ -80,10 +80,7 @@ namespace DiscUtils.BootConfig
             {
                 return new BcdObject(_store, id);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         /// <summary>

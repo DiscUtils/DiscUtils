@@ -20,19 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Dmg
 {
-    using System;
-    using System.IO;
-
     [VirtualDiskFactory("DMG", ".dmg")]
     internal sealed class DiskFactory : VirtualDiskFactory
     {
         public override string[] Variants
         {
-            get { return new string[] {}; }
+            get { return new string[] { }; }
         }
 
         public override VirtualDiskTypeInfo GetDiskTypeInformation(string variant)
@@ -46,7 +45,7 @@ namespace DiscUtils.Dmg
         }
 
         public override VirtualDisk CreateDisk(FileLocator locator, string variant, string path,
-            VirtualDiskParameters diskParameters)
+                                               VirtualDiskParameters diskParameters)
         {
             throw new NotSupportedException();
         }
@@ -70,14 +69,14 @@ namespace DiscUtils.Dmg
 
         internal static VirtualDiskTypeInfo MakeDiskTypeInfo()
         {
-            return new VirtualDiskTypeInfo()
+            return new VirtualDiskTypeInfo
             {
                 Name = "DMG",
                 Variant = string.Empty,
                 CanBeHardDisk = true,
                 DeterministicGeometry = true,
                 PreservesBiosGeometry = false,
-                CalcGeometry = c => Geometry.FromCapacity(c),
+                CalcGeometry = c => Geometry.FromCapacity(c)
             };
         }
     }

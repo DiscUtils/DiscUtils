@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using DiscUtils.Registry;
+
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using DiscUtils.Registry;
-
     internal class DiscUtilsRegistryStorage : BaseStorage
     {
         private const string ElementsPathTemplate = @"Objects\{0}\Elements";
@@ -34,7 +34,7 @@ namespace DiscUtils.BootConfig
         private const string ObjectTypePathTemplate = @"Objects\{0}\Description";
         private const string ObjectsPath = @"Objects";
 
-        private RegistryKey _rootKey;
+        private readonly RegistryKey _rootKey;
 
         public DiscUtilsRegistryStorage(RegistryKey key)
         {
@@ -74,7 +74,7 @@ namespace DiscUtils.BootConfig
         public override IEnumerable<Guid> EnumerateObjects()
         {
             RegistryKey parentKey = _rootKey.OpenSubKey("Objects");
-            foreach (var key in parentKey.GetSubKeyNames())
+            foreach (string key in parentKey.GetSubKeyNames())
             {
                 yield return new Guid(key);
             }
@@ -84,7 +84,7 @@ namespace DiscUtils.BootConfig
         {
             string path = string.Format(CultureInfo.InvariantCulture, ElementsPathTemplate, obj.ToString("B"));
             RegistryKey parentKey = _rootKey.OpenSubKey(path);
-            foreach (var key in parentKey.GetSubKeyNames())
+            foreach (string key in parentKey.GetSubKeyNames())
             {
                 yield return int.Parse(key, NumberStyles.HexNumber);
             }
@@ -97,7 +97,7 @@ namespace DiscUtils.BootConfig
             RegistryKey descKey = _rootKey.OpenSubKey(path);
 
             object val = descKey.GetValue("Type");
-            return (int) val;
+            return (int)val;
         }
 
         public override bool HasValue(Guid obj, int element)
@@ -115,7 +115,7 @@ namespace DiscUtils.BootConfig
 
         public override Guid CreateObject(Guid obj, int type)
         {
-            Guid realObj = (obj == Guid.Empty) ? Guid.NewGuid() : obj;
+            Guid realObj = obj == Guid.Empty ? Guid.NewGuid() : obj;
             string path = string.Format(CultureInfo.InvariantCulture, ObjectTypePathTemplate, realObj.ToString("B"));
 
             RegistryKey key = _rootKey.CreateSubKey(path);

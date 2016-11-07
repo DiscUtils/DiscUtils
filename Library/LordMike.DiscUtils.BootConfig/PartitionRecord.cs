@@ -20,20 +20,18 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Globalization;
 using DiscUtils.Internal;
 
 namespace DiscUtils.BootConfig
 {
-    using System;
-    using System.Globalization;
-
     internal class PartitionRecord : DeviceRecord
     {
-        public int PartitionType { get; set; }
-
         public byte[] DiskIdentity { get; set; }
 
         public byte[] PartitionIdentity { get; set; }
+        public int PartitionType { get; set; }
 
         public override int Size
         {
@@ -79,7 +77,7 @@ namespace DiscUtils.BootConfig
             {
                 return "<boot device>";
             }
-            else if (Type == 6)
+            if (Type == 6)
             {
                 if (PartitionType == 1)
                 {
@@ -92,22 +90,16 @@ namespace DiscUtils.BootConfig
                         DiskIdentity[3],
                         Utilities.ToUInt64LittleEndian(PartitionIdentity, 0));
                 }
-                else
-                {
-                    Guid diskGuid = Utilities.ToGuidLittleEndian(DiskIdentity, 0);
-                    Guid partitionGuid = Utilities.ToGuidLittleEndian(PartitionIdentity, 0);
-                    return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid,
-                        partitionGuid);
-                }
+                Guid diskGuid = Utilities.ToGuidLittleEndian(DiskIdentity, 0);
+                Guid partitionGuid = Utilities.ToGuidLittleEndian(PartitionIdentity, 0);
+                return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid,
+                    partitionGuid);
             }
-            else if (Type == 8)
+            if (Type == 8)
             {
                 return "custom:<unknown>";
             }
-            else
-            {
-                return "<unknown>";
-            }
+            return "<unknown>";
         }
 
         protected override void DoParse(byte[] data, int offset)
