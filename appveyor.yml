@@ -1,11 +1,14 @@
-version: 0.12.0.{build}-alpha
 build_script:
-- cmd: >-
-    REM Core
+- ps: >-
+    $version = (Get-Content .\Library\LordMike.DiscUtils\project.json | ConvertFrom-Json).version
+
+    Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
+- ps: >-
+    # Core
 
     dotnet restore
-
-
+- ps: >-
+    # Library
 
     dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils
 
@@ -60,10 +63,8 @@ build_script:
     dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Wim
 
     dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Xva
-
-
-
-    REM Utilities
+- ps: >-
+    # Utilities
 
     dotnet build -c Release Utilities\BCDDump
 
@@ -106,9 +107,8 @@ build_script:
     dotnet build -c Release Utilities\VirtualDiskConvert
 
     dotnet build -c Release Utilities\VolInfo
-
-
-    REM Tests
+- ps: >-
+    # Tests
 
     dotnet build -c Release Tests\LibraryTests
 test_script:
