@@ -33,7 +33,7 @@ namespace LibraryTests.Ntfs
     {
         private byte[] _uncompressedData;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Random rng = new Random(3425);
