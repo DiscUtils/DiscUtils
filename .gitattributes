@@ -1,4 +1,13 @@
+# LFS filetypes
 *.dll filter=lfs diff=lfs merge=lfs -text
 *.pdb filter=lfs diff=lfs merge=lfs -text
 *.exe filter=lfs diff=lfs merge=lfs -text
 *.snk filter=lfs diff=lfs merge=lfs -text
+
+# EOL behaviour, default:
+* text=auto
+
+# Special handling
+*.sln        text eol=crlf
+*.csproj     text eol=crlf
+*.xproj      test eol=crlf
