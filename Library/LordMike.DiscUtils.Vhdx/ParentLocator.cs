@@ -44,10 +44,13 @@ namespace DiscUtils.Vhdx
             {
                 if (Entries.Count != 0)
                 {
-                    throw new NotImplementedException();
+            //        throw new NotImplementedException();
                 }
-
-                return 20;
+                int totalbytelengthofkeyvals = 0;
+                foreach (var keyval in Entries)
+                     totalbytelengthofkeyvals += 12 //  12 for keyvaluedescriptor
+                         + 2 * (keyval.Key.Length + keyval.Value.Length); // 2* because unicode utf representation
+                return 20 + totalbytelengthofkeyvals;
             }
         }
 
@@ -83,11 +86,30 @@ namespace DiscUtils.Vhdx
         {
             if (Entries.Count != 0)
             {
-                throw new NotImplementedException();
+ //               throw new NotImplementedException();
+            }
+
+            // added for differencing
+            int curoffset = offset + 20 + Entries.Count * 12; // offset for specific entries
+            int kvOffset = offset + 20;
+
+            foreach (var keyval in Entries)
+            {
+                byte[] key = Encoding.Unicode.GetBytes(keyval.Key);
+                Array.Copy(key, 0, buffer, curoffset, key.Length);
+                Utilities.WriteBytesLittleEndian(curoffset, buffer, kvOffset + 0);
+                Utilities.WriteBytesLittleEndian((short) key.Length, buffer, kvOffset + 8);
+                curoffset += key.Length;
+
+                byte[] val = Encoding.Unicode.GetBytes(keyval.Value);
+                Array.Copy(val, 0, buffer, curoffset, val.Length);
+                Utilities.WriteBytesLittleEndian(curoffset, buffer, kvOffset + 4);
+                Utilities.WriteBytesLittleEndian((short) val.Length, buffer, kvOffset + 10);
+                curoffset += val.Length;
+                kvOffset += 12;
             }
 
             Count = (ushort)Entries.Count;
-
             Utilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(Count, buffer, offset + 18);

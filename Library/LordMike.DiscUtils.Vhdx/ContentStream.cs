@@ -290,14 +290,30 @@ namespace DiscUtils.Vhdx
 
                 int blockOffset = (int)(sectorIndex * _metadata.LogicalSectorSize);
                 int blockBytesRemaining = (int)(_fileParameters.BlockSize - blockOffset);
+                int toWrite = Math.Min(blockBytesRemaining, count - totalWritten);
 
                 PayloadBlockStatus blockStatus = chunk.GetBlockStatus(blockIndex);
+
+                // optimization - do not allocate and write blocks for zeroes unless that overwrites some other data
+                // see DiskImageFile.InitializeDynamicInternal()
+                // note that Microsoft VirtualDisk implementation actually detects reverting to zeroes
+                // which is not done here
+                if (blockStatus == PayloadBlockStatus.Zero)
+                {
+                    int index = offset + totalWritten, stopindex = offset + totalWritten + toWrite;
+                    while (index < stopindex && buffer[index] == 0) ++index;
+                    if (index == stopindex) // all zeroes
+                    {
+                        totalWritten += toWrite;
+                        continue;
+                    }
+                }
                 if (blockStatus != PayloadBlockStatus.FullyPresent && blockStatus != PayloadBlockStatus.PartiallyPresent)
                 {
                     blockStatus = chunk.AllocateSpaceForBlock(blockIndex);
                 }
 
-                int toWrite = Math.Min(blockBytesRemaining, count - totalWritten);
+//                int toWrite = Math.Min(blockBytesRemaining, count - totalWritten);
                 _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
                 _fileStream.Write(buffer, offset + totalWritten, toWrite);
 

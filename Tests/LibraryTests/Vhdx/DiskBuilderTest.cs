@@ -31,7 +31,7 @@ namespace LibraryTests.Vhdx
     {
         private SparseStream diskContent;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             SparseMemoryStream sourceStream = new SparseMemoryStream();
@@ -48,8 +48,7 @@ namespace LibraryTests.Vhdx
             diskContent = sourceStream;
         }
 
-        [Test]
-        [Ignore("Ported from DiscUtils")]
+        // [Test]
         public void BuildFixed()
         {
             DiskBuilder builder = new DiskBuilder();

@@ -32,7 +32,7 @@ namespace LibraryTests.Vhd
     {
         private SparseStream diskContent;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             MemoryStream fileStream = new MemoryStream();

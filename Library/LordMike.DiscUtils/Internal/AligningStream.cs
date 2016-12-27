@@ -44,8 +44,9 @@ namespace DiscUtils.Internal
 
         public override long Position
         {
-            get { return _position; }
-            set { _position = value; }
+            // ObjectDiposedException expected by some tests
+            get { if (WrappedStream != null) return _position; else throw new ObjectDisposedException("AligningStream");  }
+            set { if (WrappedStream != null) _position = value; else throw new ObjectDisposedException("AligningStream"); }
         }
 
         public override int Read(byte[] buffer, int offset, int count)

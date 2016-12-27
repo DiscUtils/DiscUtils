@@ -471,6 +471,11 @@ namespace DiscUtils.Vhdx
             while (file.NeedsParent)
             {
                 FileLocator fileLocator = file.RelativeFileLocator;
+                if (fileLocator == null) // added because variable not initialized
+                {
+                    fileLocator = new LocalFileLocator(file.FullPath).GetRelativeLocator(file.FullPath);
+                }
+
                 bool found = false;
                 foreach (string testPath in file.GetParentLocations())
                 {

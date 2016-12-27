@@ -23,10 +23,10 @@
 using System;
 using System.IO;
 using DiscUtils;
-using DiscUtils.Vhd;
+using DiscUtils.Vhdx;
 using NUnit.Framework;
 
-namespace LibraryTests.Vhd
+namespace LibraryTests.Vhdx
 {
     [TestFixture]
     public class DiskImageFileTest
@@ -43,10 +43,10 @@ namespace LibraryTests.Vhd
                     Assert.IsNotNull(diffFile);
                     Assert.IsTrue(diffFile.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && diffFile.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
                     Assert.IsTrue(diffFile.IsSparse);
-                    Assert.AreNotEqual(diffFile.CreationTimestamp, new DateTime(2007, 12, 31));
+                    //           Assert.AreNotEqual(diffFile.CreationTimestamp, new DateTime(2007, 12, 31)); there is no such information in header
                 }
             }
-            Assert.IsTrue(1 * 1024 * 1024 > diffStream.Length);
+            DiskTest.assertMinSize(diffStream.Length); // minimum size vhdx
         }
 
         [Test]
@@ -70,22 +70,22 @@ namespace LibraryTests.Vhd
 #pragma warning disable 618
                 string[] locations = diffFile.GetParentLocations(@"E:\FOO\");
 #pragma warning restore 618
-                Assert.AreEqual(2, locations.Length);
-                Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
-                Assert.AreEqual(@"E:\FOO\Base.vhd", locations[1]);
+                Assert.AreEqual(1, locations.Length); // writing only the relative path
+                                                      //     Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
+                Assert.AreEqual(@"E:\FOO\Base.vhd", locations[0]);
             }
 
             using (DiskImageFile diffFile = new DiskImageFile(diffStream))
             {
                 // Testing the new method - note relative path because diff file initialized without a path
                 string[] locations = diffFile.GetParentLocations();
-                Assert.AreEqual(2, locations.Length);
-                Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
-                Assert.AreEqual(@".\Base.vhd", locations[1]);
+                Assert.AreEqual(1, locations.Length); // writing only the relative path
+                                                      //      Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
+                Assert.AreEqual(@".\Base.vhd", locations[0]);
             }
         }
 
-        [Test]
+        // [Test]
         public void FooterMissing()
         {
             //

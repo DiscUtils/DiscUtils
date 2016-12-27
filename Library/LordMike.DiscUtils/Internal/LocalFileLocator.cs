@@ -102,7 +102,7 @@ namespace DiscUtils.Internal
 
         public override string ResolveRelativePath(string path)
         {
-            return Utilities.ResolveRelativePath(_dir, path);
+            return Utilities.ResolveRelativePath(String.IsNullOrEmpty(_dir) ? _dir : _dir + @"\", path); // otherwise relative paths does not work in resolving vhdx parent
         }
     }
 }
